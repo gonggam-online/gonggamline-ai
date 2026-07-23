@@ -14,3 +14,5 @@
   temporarily unavailable.
 - Moved the products service and Supabase client behind handler-time dynamic
   imports so route module initialization cannot bypass the HTTP 200 fallback.
+- Logged expected Supabase availability fallbacks as warnings so successful
+  HTTP 200 fallback responses are not classified as runtime errors.
