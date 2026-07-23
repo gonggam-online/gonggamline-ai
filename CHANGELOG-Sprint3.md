@@ -1,0 +1,11 @@
+# Sprint 3 - Runtime Stabilization
+
+## Fixed
+
+- Kept API route modules loadable when Supabase environment variables are absent.
+- Converted internal API transport failures and non-JSON error responses into a
+  graceful `No data available` state.
+- Sanitized low-level network, `TypeError`, and recommendation-generation errors
+  before they can be shown to users.
+- Added explicit optional provider variables to `.env.local.example`.
+- Preserved successful API responses and the existing UI.

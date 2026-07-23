@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { NO_DATA_MESSAGE } from "@/lib/runtime-errors";
 
 const COUPANG_HOST = "api-gateway.coupang.com";
 const COUPANG_BASE_URL = `https://${COUPANG_HOST}`;
@@ -28,7 +29,8 @@ export function getCoupangConfig(): CoupangConfig {
   ].filter(Boolean);
 
   if (missing.length > 0) {
-    throw new Error(`쿠팡 환경변수가 없습니다: ${missing.join(", ")}`);
+    console.warn(`Coupang integration is not configured: ${missing.join(", ")}`);
+    throw new Error(NO_DATA_MESSAGE);
   }
 
   return { accessKey, secretKey, vendorId } as CoupangConfig;
@@ -82,17 +84,22 @@ export async function coupangRequest<T>(options: {
   const query = options.searchParams?.toString();
   const url = `${COUPANG_BASE_URL}${options.path}${query ? `?${query}` : ""}`;
 
-  const response = await fetch(url, {
-    method: options.method,
-    headers: {
-      Authorization: authorization,
-      "Content-Type": "application/json;charset=UTF-8",
-      "X-Requested-By": config.vendorId,
-      "X-MARKET": "KR",
-    },
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
-    cache: "no-store",
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: options.method,
+      headers: {
+        Authorization: authorization,
+        "Content-Type": "application/json;charset=UTF-8",
+        "X-Requested-By": config.vendorId,
+        "X-MARKET": "KR",
+      },
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      cache: "no-store",
+    });
+  } catch {
+    throw new Error(NO_DATA_MESSAGE);
+  }
 
   const text = await response.text();
   let raw: unknown = text;
