@@ -59,7 +59,7 @@ export async function GET(request: Request) {
       products: result.products,
     });
   } catch (error) {
-    console.error("Product route unavailable:", error);
+    console.warn("Product route unavailable:", error);
     return noDataResponse();
   }
 }

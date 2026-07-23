@@ -35,7 +35,7 @@ export async function listProducts(
   try {
     ({ supabase } = await import("@/lib/supabase"));
   } catch (error) {
-    console.error("Supabase client unavailable:", error);
+    console.warn("Supabase client unavailable:", error);
     return { products: [], totalCount: 0, available: false };
   }
 
@@ -90,7 +90,7 @@ export async function listProducts(
   try {
     const { data, error, count } = await query.range(filters.start, filters.end);
     if (error) {
-      console.error("Supabase product query unavailable:", error.message);
+      console.warn("Supabase product query unavailable:", error.message);
       return { products: [], totalCount: 0, available: false };
     }
 
@@ -100,7 +100,7 @@ export async function listProducts(
       available: true,
     };
   } catch (error) {
-    console.error("Supabase product request unavailable:", error);
+    console.warn("Supabase product request unavailable:", error);
     return { products: [], totalCount: 0, available: false };
   }
 }
