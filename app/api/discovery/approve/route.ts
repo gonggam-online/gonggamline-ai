@@ -1,0 +1,3 @@
+import { NextRequest, NextResponse } from "next/server";
+import { updateDiscoveryStatus } from "../../../../services/discovery.service";
+export async function POST(request:NextRequest){try{const body=await request.json(); if(!["single","bundle"].includes(body.kind)||!Number(body.id)||!["candidate","reviewing","approved","rejected","sourcing"].includes(body.status)) return NextResponse.json({success:false,message:"요청값이 올바르지 않습니다."},{status:400}); return NextResponse.json({success:true,item:await updateDiscoveryStatus(body.kind,Number(body.id),body.status)});}catch(error){return NextResponse.json({success:false,message:error instanceof Error?error.message:"상태 변경 오류"},{status:500});}}

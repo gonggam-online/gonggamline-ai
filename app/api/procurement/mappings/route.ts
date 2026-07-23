@@ -1,0 +1,3 @@
+import { NextResponse } from "next/server";
+import { createDomesticMapping } from "@/services/procurement.service";
+export async function POST(request:Request){try{const body=await request.json();if(!body.supplierId||!body.providerProductId||!body.providerProductName)return NextResponse.json({success:false,message:"공급처와 도매 상품정보를 입력하세요."},{status:400});if(!body.discoveryRecommendationId&&!body.bundleRecommendationId)return NextResponse.json({success:false,message:"AI 추천 후보를 연결하세요."},{status:400});return NextResponse.json({success:true,mapping:await createDomesticMapping(body)});}catch(error){return NextResponse.json({success:false,message:error instanceof Error?error.message:"공급상품 연결 오류"},{status:500});}}
