@@ -88,7 +88,11 @@ export async function listProducts(
     const { data, error, count } = await query.range(filters.start, filters.end);
     if (error) {
       const { runtimeLog } = await import("@/lib/runtime-logging");
-      runtimeLog.warn("products.query_unavailable", { code: error.code, message: error.message });
+      if (/fetch failed/i.test(error.message)) {
+        runtimeLog.error("products.transport_failed", error);
+        throw new Error("Supabase product transport failed", { cause: error });
+      }
+      runtimeLog.error("products.query_failed", error);
       return { products: [], totalCount: 0, available: false };
     }
 
@@ -99,7 +103,7 @@ export async function listProducts(
     };
   } catch (error) {
     const { runtimeLog } = await import("@/lib/runtime-logging");
-    runtimeLog.warn("products.request_unavailable", { error });
-    return { products: [], totalCount: 0, available: false };
+    runtimeLog.error("products.request_failed", error);
+    throw error;
   }
 }

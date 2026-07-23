@@ -5,6 +5,7 @@
 - Optional integration configuration that is absent is an expected degraded condition. List APIs return HTTP 200 with `success: true`, `available: false`, an empty collection, and `message: "No data available"`.
 - Invalid request input returns HTTP 400. Invalid runtime state transitions return HTTP 409. Missing records return HTTP 404.
 - Unexpected application defects remain HTTP 500 and are logged at error level.
+- Network transport failures are unexpected defects. They are classified as DNS, connection, timeout, TLS, or generic fetch failures and are never downgraded to empty-data warnings.
 - Runtime logging redacts credential-like fields and truncates oversized values. Secrets, request authorization headers, and stack traces are not included in health responses.
 
 ## Root causes corrected

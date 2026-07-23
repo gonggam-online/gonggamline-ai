@@ -12,6 +12,8 @@
 
 - Product list fallback remains frontend-compatible for unavailable Supabase, while unexpected defects now return HTTP 500.
 - Discovery list fallbacks now include the standard `data` envelope and preserve their frontend-specific collection fields.
+- Supabase transport failures now retain safe DNS/connect/TLS cause codes, stay at error level, and return HTTP 500 instead of masquerading as empty product data.
+- Placeholder Supabase configuration is rejected before client initialization.
 - Runtime claims inspect attempt limits, use conditional status updates, and verify lock ownership at completion/failure.
 - Retry and cancellation endpoints validate identifiers and return HTTP 400/404/409 where appropriate.
 - Failed jobs now record terminal completion timestamps; retries clear stale locks and completion timestamps.
