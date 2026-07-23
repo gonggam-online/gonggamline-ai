@@ -9,3 +9,6 @@
   before they can be shown to users.
 - Added explicit optional provider variables to `.env.local.example`.
 - Preserved successful API responses and the existing UI.
+- Stabilized `GET /api/products` by calling the product query service directly
+  and returning HTTP 200 with an empty list when Supabase is unconfigured or
+  temporarily unavailable.
