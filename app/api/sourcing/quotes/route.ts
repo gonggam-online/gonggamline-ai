@@ -1,0 +1,3 @@
+import { NextResponse } from "next/server";
+import { createQuote } from "@/services/sourcing.service";
+export async function POST(request:Request){try{const body=await request.json();if(!body.supplierId||!String(body.productName??"").trim())return NextResponse.json({success:false,message:"공급처와 상품명을 입력하세요."},{status:400});if(!body.discoveryRecommendationId&&!body.bundleRecommendationId)return NextResponse.json({success:false,message:"승인된 단일 또는 묶음 후보를 선택하세요."},{status:400});return NextResponse.json({success:true,quote:await createQuote(body)});}catch(error){return NextResponse.json({success:false,message:error instanceof Error?error.message:"견적 저장 오류"},{status:500});}}
