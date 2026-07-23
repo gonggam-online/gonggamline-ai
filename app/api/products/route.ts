@@ -1,11 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "../../../lib/supabase";
+const NO_DATA_RESPONSE = {
+  success: true,
+  available: false,
+  products: [],
+  message: "No data available",
+} as const;
 
 function parseNumber(
   value: string | null,
   defaultValue: number,
   minimum: number,
-  maximum: number
+  maximum: number,
 ) {
   if (!value) return defaultValue;
   const parsed = Number(value);
@@ -13,102 +17,49 @@ function parseNumber(
   return Math.min(maximum, Math.max(minimum, Math.floor(parsed)));
 }
 
-export async function GET(request: NextRequest) {
-  const params = request.nextUrl.searchParams;
+function noDataResponse() {
+  return Response.json(NO_DATA_RESPONSE, { status: 200 });
+}
 
-  const keyword = params.get("keyword")?.trim() ?? "";
-  const recommendation = params.get("recommendation")?.trim() ?? "";
-  const reviewStatus = params.get("reviewStatus")?.trim() ?? "";
-  const favoriteOnly = params.get("favoriteOnly") === "true";
-  const page = parseNumber(params.get("page"), 1, 1, 100000);
-  const size = parseNumber(params.get("size"), 20, 1, 100);
-  const minimumScore = parseNumber(params.get("minimumScore"), 0, 0, 100);
-  const sort = params.get("sort") ?? "score";
-
-  const start = (page - 1) * size;
-  const end = start + size - 1;
-
+export async function GET(request: Request) {
   try {
-    let query = supabase
-      .from("products")
-      .select("*", { count: "exact" })
-      .gte("basic_score", minimumScore);
+    const params = new URL(request.url).searchParams;
+    const filters = {
+      keyword: params.get("keyword")?.trim() ?? "",
+      recommendation: params.get("recommendation")?.trim() ?? "",
+      reviewStatus: params.get("reviewStatus")?.trim() ?? "",
+      favoriteOnly: params.get("favoriteOnly") === "true",
+      minimumScore: parseNumber(params.get("minimumScore"), 0, 0, 100),
+      sort: params.get("sort") ?? "score",
+    };
+    const page = parseNumber(params.get("page"), 1, 1, 100000);
+    const size = parseNumber(params.get("size"), 20, 1, 100);
+    const start = (page - 1) * size;
+    const end = start + size - 1;
 
-    if (keyword) {
-      const safeKeyword = keyword.replace(/[,%()]/g, " ");
-      query = query.or(
-        `title.ilike.%${safeKeyword}%,keyword.ilike.%${safeKeyword}%,product_no.ilike.%${safeKeyword}%`
-      );
+    const { listProducts } = await import("@/services/products.service");
+    const result = await listProducts({ ...filters, start, end });
+    if (!result.available) {
+      return noDataResponse();
     }
 
-    if (recommendation) query = query.eq("recommendation", recommendation);
-    if (reviewStatus) query = query.eq("review_status", reviewStatus);
-    if (favoriteOnly) query = query.eq("is_favorite", true);
-
-    switch (sort) {
-      case "profit":
-        query = query
-          .order("estimated_profit", { ascending: false })
-          .order("basic_score", { ascending: false });
-        break;
-      case "margin":
-        query = query
-          .order("margin_rate", { ascending: false })
-          .order("basic_score", { ascending: false });
-        break;
-      case "recent":
-        query = query.order("updated_at", { ascending: false });
-        break;
-      case "price":
-        query = query
-          .order("supply_price", { ascending: true })
-          .order("basic_score", { ascending: false });
-        break;
-      default:
-        query = query
-          .order("is_favorite", { ascending: false })
-          .order("basic_score", { ascending: false })
-          .order("estimated_profit", { ascending: false });
-    }
-
-    const { data, error, count } = await query.range(start, end);
-    if (error) throw new Error(error.message);
-
-    const totalCount = count ?? 0;
-    const totalPages = Math.max(1, Math.ceil(totalCount / size));
-
-    return NextResponse.json({
+    const totalPages = Math.max(1, Math.ceil(result.totalCount / size));
+    return Response.json({
       success: true,
-      filters: {
-        keyword,
-        recommendation,
-        reviewStatus,
-        favoriteOnly,
-        minimumScore,
-        sort,
-      },
+      available: true,
+      filters,
       pagination: {
         page,
         size,
-        totalCount,
+        totalCount: result.totalCount,
         totalPages,
         hasPreviousPage: page > 1,
         hasNextPage: page < totalPages,
       },
-      products: data ?? [],
+      products: result.products,
     });
   } catch (error) {
-    console.error("상품 조회 오류:", error);
-
-    return NextResponse.json(
-      {
-        success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : "상품 조회 중 오류가 발생했습니다.",
-      },
-      { status: 500 }
-    );
+    console.error("Product route unavailable:", error);
+    return noDataResponse();
   }
 }
