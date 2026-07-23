@@ -10,8 +10,10 @@ type Dashboard = {
   metrics: { total: number; active: number; approved: number; highScore: number; queue: number; expectedMonthlyProfit: number };
   opportunities: RevenueOpportunity[];
   jobs: RuntimeJob[];
-  decisions: any[];
+  decisions: unknown[];
 };
+
+type RuntimeExecutionResult = { executed?: boolean };
 
 const statusLabel: Record<string, string> = {
   idea: "아이디어", candidate: "후보", evaluating: "평가 중", approved: "승인", content: "콘텐츠",
@@ -75,7 +77,8 @@ export default function RevenueCenterPage() {
       const response = await fetch("/api/revenue/runtime/execute", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ limit }) });
       const result = await response.json();
       if (!result.success) throw new Error(result.message);
-      const completed = result.results.filter((item: any) => item.executed).length;
+      const results: RuntimeExecutionResult[] = Array.isArray(result.results) ? result.results : [];
+      const completed = results.filter((item) => item.executed).length;
       setMessage(completed ? `${completed}개 Runtime Job 실행을 완료했습니다.` : "실행 가능한 Job이 없습니다.");
       await load();
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Runtime 실행 오류"); }
