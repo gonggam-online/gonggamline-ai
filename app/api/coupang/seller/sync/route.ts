@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { coupangRequest, getCoupangConfig } from "@/lib/coupang/client";
 import { storeCoupangProductSnapshots } from "@/services/coupang-seller.service";
+import { publicErrorMessage } from "@/lib/runtime-errors";
 
 export async function POST() {
   try {
@@ -13,6 +14,6 @@ export async function POST() {
     const stored = await storeCoupangProductSnapshots(products);
     return NextResponse.json({ success: true, products, ...stored });
   } catch (error) {
-    return NextResponse.json({ success: false, message: error instanceof Error ? error.message : "쿠팡 상품 동기화 실패" }, { status: 500 });
+    return NextResponse.json({ success: false, message: publicErrorMessage(error) }, { status: 500 });
   }
 }

@@ -1,19 +1,15 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const configuredUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+const configuredAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
-if (!supabaseUrl) {
-  throw new Error(
-    "NEXT_PUBLIC_SUPABASE_URL이 설정되지 않았습니다. .env.local 파일을 확인해주세요."
-  );
-}
+export const isSupabaseConfigured = Boolean(
+  configuredUrl && configuredAnonKey,
+);
 
-if (!supabaseAnonKey) {
-  throw new Error(
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY가 설정되지 않았습니다. .env.local 파일을 확인해주세요."
-  );
-}
+// Keep route modules loadable when the optional database integration is absent.
+const supabaseUrl = configuredUrl ?? "http://127.0.0.1:54321";
+const supabaseAnonKey = configuredAnonKey ?? "runtime-not-configured";
 
 export const supabase = createClient(
   supabaseUrl,
