@@ -25,19 +25,16 @@ export type ProductQueryResult = {
 export async function listProducts(
   filters: ProductQuery,
 ): Promise<ProductQueryResult> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+    || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()) {
     return { products: [], totalCount: 0, available: false };
   }
 
-  let supabase: typeof import("@/lib/supabase").supabase;
-  try {
-    ({ supabase } = await import("@/lib/supabase"));
-  } catch (error) {
-    console.warn("Supabase client unavailable:", error);
+  const { getSupabaseAvailability, getSupabaseClient } = await import("@/lib/supabase");
+  if (getSupabaseAvailability().status !== "configured") {
     return { products: [], totalCount: 0, available: false };
   }
+  const supabase = getSupabaseClient();
 
   let query = supabase
     .from("products")
@@ -90,7 +87,8 @@ export async function listProducts(
   try {
     const { data, error, count } = await query.range(filters.start, filters.end);
     if (error) {
-      console.warn("Supabase product query unavailable:", error.message);
+      const { runtimeLog } = await import("@/lib/runtime-logging");
+      runtimeLog.warn("products.query_unavailable", { code: error.code, message: error.message });
       return { products: [], totalCount: 0, available: false };
     }
 
@@ -100,7 +98,8 @@ export async function listProducts(
       available: true,
     };
   } catch (error) {
-    console.warn("Supabase product request unavailable:", error);
+    const { runtimeLog } = await import("@/lib/runtime-logging");
+    runtimeLog.warn("products.request_unavailable", { error });
     return { products: [], totalCount: 0, available: false };
   }
 }

@@ -59,7 +59,11 @@ export async function GET(request: Request) {
       products: result.products,
     });
   } catch (error) {
-    console.warn("Product route unavailable:", error);
-    return noDataResponse();
+    const { runtimeLog } = await import("@/lib/runtime-logging");
+    runtimeLog.error("products.route_failed", error);
+    return Response.json(
+      { success: false, message: "상품 데이터를 불러오지 못했습니다." },
+      { status: 500 },
+    );
   }
 }
