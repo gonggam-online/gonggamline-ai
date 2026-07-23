@@ -1,9 +1,15 @@
 import { supabase } from "@/lib/supabase";
 import { executeWorker } from "@/lib/runtime/worker-registry";
+import type { RevenueOpportunity, RuntimeJob } from "@/types/revenue";
 
 const workerId = () => `runtime-${process.pid}-${Date.now()}`;
 
-async function event(job: any, eventType: string, message: string, payload: Record<string, unknown> = {}) {
+async function event(
+  job: Pick<RuntimeJob, "id" | "opportunity_id" | "worker_code">,
+  eventType: string,
+  message: string,
+  payload: Record<string, unknown> = {}
+) {
   await supabase.from("worker_runtime_events").insert({ runtime_job_id: job.id, opportunity_id: job.opportunity_id, worker_code: job.worker_code, event_type: eventType, message, payload });
 }
 
@@ -24,7 +30,7 @@ export async function executeNextRuntimeJob() {
   const started = Date.now();
 
   try {
-    let opportunity: any = null;
+    let opportunity: RevenueOpportunity | null = null;
     if (claimed.data.opportunity_id) {
       const result = await supabase.from("revenue_opportunities").select("*").eq("id", claimed.data.opportunity_id).single();
       if (result.error) throw new Error(result.error.message);

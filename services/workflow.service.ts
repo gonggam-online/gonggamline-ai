@@ -218,7 +218,7 @@ export async function syncCandidateWorkflow(kind: "single" | "bundle", id: numbe
   });
 }
 
-async function deriveStage(workflow: Record<string, any>): Promise<WorkflowStage> {
+async function deriveStage(workflow: Record<string, unknown>): Promise<WorkflowStage> {
   const workflowId = Number(workflow.id);
   const [draftResult, orderResult, inboundResult, mappingResult, quoteResult] = await Promise.all([
     supabase.from("listing_drafts").select("id,status").eq("workflow_id", workflowId).order("updated_at", { ascending: false }).limit(1).maybeSingle(),

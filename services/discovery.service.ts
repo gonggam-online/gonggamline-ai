@@ -1,8 +1,32 @@
 import { supabase } from "../lib/supabase";
-import { scoreBundle, scoreSingle, type DiscoveryProduct } from "../lib/discovery/engine";
+import {
+  scoreBundle,
+  scoreSingle,
+  type DiscoveryMetric,
+  type DiscoveryProduct,
+} from "../lib/discovery/engine";
 import { syncCandidateWorkflow } from "@/services/workflow.service";
 
-function metricOf(value: unknown) { return Array.isArray(value) ? (value[0] ?? {}) : (value ?? {}); }
+type DiscoveryProductRow = {
+  id: number;
+  title: string;
+  category?: string | null;
+  brand?: string | null;
+  seller_name?: string | null;
+  market_product_metrics?: DiscoveryMetric | DiscoveryMetric[] | null;
+};
+
+type ExistingRecommendationRow = {
+  market_product_id: number | string;
+  status: string;
+};
+
+type BundleIdRow = { id: number | string };
+
+function metricOf(value: unknown): DiscoveryMetric {
+  const metric = Array.isArray(value) ? value[0] : value;
+  return metric && typeof metric === "object" ? metric as DiscoveryMetric : {};
+}
 
 export async function generateDiscovery(limit = 50) {
   const startedAt = new Date().toISOString();
@@ -20,12 +44,24 @@ export async function generateDiscovery(limit = 50) {
       .select("id,title,category,brand,seller_name,market_product_metrics(*)")
       .order("last_seen_at", { ascending: false }).limit(limit);
     if (error) throw error;
-    const products: DiscoveryProduct[] = (data ?? []).map((row: any) => ({ id: row.id, title: row.title, category: row.category, brand: row.brand, seller_name: row.seller_name, metric: metricOf(row.market_product_metrics) as any }));
+    const products: DiscoveryProduct[] = ((data ?? []) as DiscoveryProductRow[]).map((row) => ({
+      id: row.id,
+      title: row.title,
+      category: row.category,
+      brand: row.brand,
+      seller_name: row.seller_name,
+      metric: metricOf(row.market_product_metrics),
+    }));
     const scored = products.map((product) => ({ product, score: scoreSingle(product) })).sort((a,b)=>b.score.decisionScore-a.score.decisionScore);
     const singles = scored.slice(0, Math.min(50, scored.length));
     const existingResult = await supabase.from("ai_product_recommendations").select("market_product_id,status").eq("recommendation_type","single");
     if (existingResult.error) throw existingResult.error;
-    const existingStatus = new Map((existingResult.data ?? []).map((x:any)=>[Number(x.market_product_id), String(x.status)]));
+    const existingStatus = new Map(
+      ((existingResult.data ?? []) as ExistingRecommendationRow[]).map((row) => [
+        Number(row.market_product_id),
+        String(row.status),
+      ])
+    );
     const counts = { approve: 0, review: 0, hold: 0, reject: 0 };
 
     for (const item of singles) {
@@ -60,7 +96,8 @@ export async function generateDiscovery(limit = 50) {
 
     const candidateBundles = await supabase.from("ai_bundle_recommendations").select("id").eq("status","candidate");
     if (candidateBundles.error) throw candidateBundles.error;
-    const candidateBundleIds=(candidateBundles.data ?? []).map((x:any)=>Number(x.id));
+    const candidateBundleIds = ((candidateBundles.data ?? []) as BundleIdRow[])
+      .map((row) => Number(row.id));
     if(candidateBundleIds.length){
       const deletedItems=await supabase.from("ai_bundle_items").delete().in("bundle_id",candidateBundleIds);
       if(deletedItems.error) throw deletedItems.error;

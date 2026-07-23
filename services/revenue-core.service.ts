@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import type { OpportunityStatus, RevenueOpportunity } from "@/types/revenue";
+import type { OpportunityStatus, RevenueOpportunity, RuntimeJob } from "@/types/revenue";
 
 const clamp = (value: number) => Math.max(0, Math.min(100, Number.isFinite(value) ? value : 0));
 
@@ -40,7 +40,7 @@ export async function getRevenueDashboard() {
   if (decisions.error) throw new Error(decisions.error.message);
 
   const rows = (opportunities.data ?? []) as RevenueOpportunity[];
-  const queue = jobs.data ?? [];
+  const queue = (jobs.data ?? []) as RuntimeJob[];
   const approved = rows.filter((row) => row.status === "approved").length;
   const active = rows.filter((row) => !["rejected", "archived"].includes(row.status)).length;
   const expectedProfit = rows.reduce((sum, row) => sum + Number(row.estimated_profit || 0) * Number(row.expected_monthly_sales || 0), 0);
@@ -53,7 +53,7 @@ export async function getRevenueDashboard() {
       active,
       approved,
       highScore: rows.filter((row) => Number(row.revenue_score) >= 80).length,
-      queue: queue.filter((job: any) => ["queued", "running", "retry"].includes(job.status)).length,
+      queue: queue.filter((job) => ["queued", "running", "retry"].includes(job.status)).length,
       expectedMonthlyProfit: expectedProfit,
     },
     opportunities: rows,

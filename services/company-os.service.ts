@@ -4,6 +4,24 @@ import { engineRegistry } from "@/engines/registry";
 export type HealthStatus = "ok" | "warning" | "error" | "unknown";
 export type HealthItem = { component: string; status: HealthStatus; message: string; latencyMs?: number };
 
+type CountResult = { error: unknown; count: number | null };
+type CountQuery = PromiseLike<CountResult> & {
+  eq(column: string, value: unknown): CountQuery;
+  gte(column: string, value: unknown): CountQuery;
+  in(column: string, values: readonly unknown[]): CountQuery;
+};
+
+type RevenueSnapshot = {
+  gross_revenue?: number;
+  contribution_profit?: number;
+  order_count?: number;
+  ad_spend?: number;
+  active_product_count?: number;
+  out_of_stock_count?: number;
+  automation_rate?: number;
+  ai_execution_rate?: number;
+};
+
 const PIPELINE = [
   ["market_discovered", "상품발굴"], ["ai_recommended", "AI 검증"], ["human_approved", "승인"],
   ["supplier_mapped", "공급사"], ["quote_selected", "마진"], ["purchase_approved", "발주승인"],
@@ -18,9 +36,11 @@ async function countTable(table: string) {
   return { count: result.count ?? 0, latencyMs: Date.now() - started };
 }
 
-async function safeCount(table: string, filters?: (q: any) => any) {
+async function safeCount(table: string, filters?: (q: CountQuery) => CountQuery) {
   try {
-    let q: any = supabase.from(table).select("*", { count: "exact", head: true });
+    let q = supabase
+      .from(table)
+      .select("*", { count: "exact", head: true }) as unknown as CountQuery;
     if (filters) q = filters(q);
     const result = await q;
     return result.error ? 0 : result.count ?? 0;
@@ -67,7 +87,7 @@ export async function getCompanyOverview() {
     safeCount("workflow_transitions", q => q.gte("created_at", new Date(new Date().setHours(0,0,0,0)).toISOString())),
     safeCount("workflow_tasks", q => q.in("status", ["open", "in_progress", "blocked"])),
   ]);
-  let revenue: any = null;
+  let revenue: RevenueSnapshot | null = null;
   try { revenue = (await supabase.from("revenue_snapshots").select("*").order("snapshot_date", { ascending: false }).limit(1).maybeSingle()).data; } catch {}
   return {
     version: "11.0.0", generatedAt: new Date().toISOString(),
@@ -129,10 +149,14 @@ export async function listCommands() {
   } catch { return []; }
 }
 
-async function safeRows(table: string, orderColumn = "created_at", limit = 10) {
+async function safeRows(
+  table: string,
+  orderColumn = "created_at",
+  limit = 10
+): Promise<Record<string, unknown>[]> {
   try {
     const result = await supabase.from(table).select("*").order(orderColumn, { ascending: false }).limit(limit);
-    return result.error ? [] : result.data ?? [];
+    return result.error ? [] : (result.data ?? []) as Record<string, unknown>[];
   } catch { return []; }
 }
 
@@ -149,9 +173,9 @@ export async function getEnterpriseDashboard() {
     safeRows("suppliers", "created_at", 8),
   ]);
 
-  const connectedMarkets = marketplaces.filter((m:any) => m.status === "connected").length;
-  const unreadNotifications = notifications.filter((n:any) => !n.is_read).length;
-  const activeKnowledge = knowledge.filter((k:any) => k.status === "active").length;
+  const connectedMarkets = marketplaces.filter((marketplace) => marketplace.status === "connected").length;
+  const unreadNotifications = notifications.filter((notification) => !notification.is_read).length;
+  const activeKnowledge = knowledge.filter((asset) => asset.status === "active").length;
   const memoryCount = await safeCount("ai_memory_events");
   const productCount = base.overview?.counts?.products ?? 0;
   const workflowCount = base.overview?.counts?.workflows ?? 0;
