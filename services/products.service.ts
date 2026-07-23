@@ -30,9 +30,17 @@ export async function listProducts(
     return { products: [], totalCount: 0, available: false };
   }
 
-  const { getSupabaseAvailability, getSupabaseClient } = await import("@/lib/supabase");
-  if (getSupabaseAvailability().status !== "configured") {
+  const {
+    getSupabaseAvailability,
+    getSupabaseClient,
+    SupabaseUnavailableError,
+  } = await import("@/lib/supabase");
+  const availability = getSupabaseAvailability();
+  if (availability.status === "unconfigured") {
     return { products: [], totalCount: 0, available: false };
+  }
+  if (availability.status === "invalid") {
+    throw new SupabaseUnavailableError(availability);
   }
   const supabase = getSupabaseClient();
 
@@ -93,7 +101,7 @@ export async function listProducts(
         throw new Error("Supabase product transport failed", { cause: error });
       }
       runtimeLog.error("products.query_failed", error);
-      return { products: [], totalCount: 0, available: false };
+      throw new Error("Supabase product query failed", { cause: error });
     }
 
     return {

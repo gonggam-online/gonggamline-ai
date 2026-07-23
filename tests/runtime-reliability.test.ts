@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { getSupabaseAvailability } from "../lib/supabase.ts";
+import { SupabaseUnavailableError } from "../lib/supabase.ts";
 import {
   boundedMaxAttempts,
   canAttemptJob,
@@ -32,10 +33,13 @@ test("Supabase availability accepts a valid HTTPS configuration", () => {
 });
 
 test("Supabase availability rejects committed example placeholders", () => {
-  assert.deepEqual(getSupabaseAvailability({
+  const availability = getSupabaseAvailability({
     NEXT_PUBLIC_SUPABASE_URL: "https://YOUR_PROJECT.supabase.co",
     NEXT_PUBLIC_SUPABASE_ANON_KEY: "YOUR_SUPABASE_ANON_KEY",
-  }), { status: "invalid", reason: "placeholder_configuration" });
+  });
+  assert.deepEqual(availability, { status: "invalid", reason: "placeholder_configuration" });
+  if (availability.status !== "invalid") assert.fail("Expected invalid configuration");
+  assert.equal(new SupabaseUnavailableError(availability).message, "Supabase is invalid");
 });
 
 test("products return the documented fallback when Supabase is absent", async () => {
