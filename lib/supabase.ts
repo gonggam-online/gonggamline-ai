@@ -3,7 +3,11 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 export type SupabaseAvailability =
   | { status: "configured"; url: string; anonKey: string }
   | { status: "unconfigured"; reason: "missing_url" | "missing_anon_key" }
-  | { status: "invalid"; reason: "malformed_url" | "insecure_production_url" };
+  | { status: "invalid"; reason:
+      | "malformed_url"
+      | "insecure_production_url"
+      | "placeholder_configuration"
+      | "url_contains_credentials" };
 
 let cachedClient: SupabaseClient | null = null;
 let cachedSignature = "";
@@ -15,15 +19,21 @@ export function getSupabaseAvailability(
   const anonKey = environment.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
   if (!url) return { status: "unconfigured", reason: "missing_url" };
   if (!anonKey) return { status: "unconfigured", reason: "missing_anon_key" };
-
   let parsed: URL;
   try {
     parsed = new URL(url);
   } catch {
     return { status: "invalid", reason: "malformed_url" };
   }
+  if (/YOUR_PROJECT|placeholder/i.test(url)
+    || /YOUR_SUPABASE|placeholder/i.test(anonKey)) {
+    return { status: "invalid", reason: "placeholder_configuration" };
+  }
 
   const localHost = parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
+  if (parsed.username || parsed.password) {
+    return { status: "invalid", reason: "url_contains_credentials" };
+  }
   if (environment.NODE_ENV === "production" && (parsed.protocol !== "https:" || localHost)) {
     return { status: "invalid", reason: "insecure_production_url" };
   }

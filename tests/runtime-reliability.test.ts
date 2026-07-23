@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { getSupabaseAvailability } from "../lib/supabase.ts";
+import { SupabaseUnavailableError } from "../lib/supabase.ts";
 import {
   boundedMaxAttempts,
   canAttemptJob,
@@ -10,6 +11,7 @@ import {
 import { sanitizeRuntimeValue } from "../lib/runtime-logging.ts";
 import { listProducts } from "../services/products.service.ts";
 import { unavailableListResponse } from "../lib/api-responses.ts";
+import { classifyNetworkError, findNetworkErrorCode } from "../lib/network-errors.ts";
 
 test("Supabase availability rejects missing and malformed configuration", () => {
   assert.deepEqual(getSupabaseAvailability({}), {
@@ -26,8 +28,18 @@ test("Supabase availability accepts a valid HTTPS configuration", () => {
   assert.equal(getSupabaseAvailability({
     NODE_ENV: "production",
     NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder",
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: "test-anon-key",
   }).status, "configured");
+});
+
+test("Supabase availability rejects committed example placeholders", () => {
+  const availability = getSupabaseAvailability({
+    NEXT_PUBLIC_SUPABASE_URL: "https://YOUR_PROJECT.supabase.co",
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: "YOUR_SUPABASE_ANON_KEY",
+  });
+  assert.deepEqual(availability, { status: "invalid", reason: "placeholder_configuration" });
+  if (availability.status !== "invalid") assert.fail("Expected invalid configuration");
+  assert.equal(new SupabaseUnavailableError(availability).message, "Supabase is invalid");
 });
 
 test("products return the documented fallback when Supabase is absent", async () => {
@@ -79,4 +91,12 @@ test("runtime error and structured values redact sensitive data", () => {
     authorization: "[redacted]",
     nested: { apiKey: "[redacted]", message: "safe" },
   });
+});
+
+test("nested fetch causes retain a safe network failure classification", () => {
+  const error = new TypeError("fetch failed", {
+    cause: Object.assign(new Error("connect timed out"), { code: "UND_ERR_CONNECT_TIMEOUT" }),
+  });
+  assert.equal(findNetworkErrorCode(error), "UND_ERR_CONNECT_TIMEOUT");
+  assert.equal(classifyNetworkError(error), "connection_timeout");
 });

@@ -1,15 +1,21 @@
 import { getSupabaseAvailability } from "@/lib/supabase";
 import { runtimeLog } from "@/lib/runtime-logging";
+import { classifyNetworkError, type NetworkFailureReason } from "@/lib/network-errors";
 
 export const dynamic = "force-dynamic";
 
 async function checkSupabase(): Promise<{
   supabase: "configured" | "unconfigured" | "unreachable";
   runtimeQueue: "available" | "unavailable";
+  supabaseReason?: NetworkFailureReason | "invalid_configuration";
 }> {
   const availability = getSupabaseAvailability();
   if (availability.status !== "configured") {
-    return { supabase: "unconfigured", runtimeQueue: "unavailable" };
+    return {
+      supabase: "unconfigured",
+      runtimeQueue: "unavailable",
+      ...(availability.status === "invalid" ? { supabaseReason: "invalid_configuration" as const } : {}),
+    };
   }
   try {
     const response = await fetch(`${availability.url}/rest/v1/runtime_jobs?select=id&limit=1`, {
@@ -22,8 +28,9 @@ async function checkSupabase(): Promise<{
       runtimeQueue: response.ok ? "available" : "unavailable",
     };
   } catch (error) {
-    runtimeLog.warn("health.supabase_unreachable", { error });
-    return { supabase: "unreachable", runtimeQueue: "unavailable" };
+    const supabaseReason = classifyNetworkError(error);
+    runtimeLog.error("health.supabase_unreachable", error, { supabaseReason });
+    return { supabase: "unreachable", runtimeQueue: "unavailable", supabaseReason };
   }
 }
 
@@ -40,7 +47,13 @@ export async function GET() {
   return Response.json({
     success: true,
     status,
-    checks: { application: "ok", supabase: database.supabase, coupang, runtimeQueue: database.runtimeQueue },
+    checks: {
+      application: "ok",
+      supabase: database.supabase,
+      ...(database.supabaseReason ? { supabaseReason: database.supabaseReason } : {}),
+      coupang,
+      runtimeQueue: database.runtimeQueue,
+    },
     timestamp: new Date().toISOString(),
   });
 }

@@ -4,7 +4,13 @@ const MAX_DEPTH = 4;
 export function sanitizeRuntimeValue(value: unknown, depth = 0): unknown {
   if (depth >= MAX_DEPTH) return "[truncated]";
   if (value instanceof Error) {
-    return { name: value.name, message: value.message.slice(0, 500) };
+    return {
+      name: value.name,
+      message: value.message.slice(0, 500),
+      cause: "cause" in value
+        ? sanitizeRuntimeValue(value.cause, depth + 1)
+        : undefined,
+    };
   }
   if (Array.isArray(value)) {
     return value.slice(0, 20).map((item) => sanitizeRuntimeValue(item, depth + 1));
