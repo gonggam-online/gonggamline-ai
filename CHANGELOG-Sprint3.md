@@ -12,3 +12,5 @@
 - Stabilized `GET /api/products` by calling the product query service directly
   and returning HTTP 200 with an empty list when Supabase is unconfigured or
   temporarily unavailable.
+- Moved the products service and Supabase client behind handler-time dynamic
+  imports so route module initialization cannot bypass the HTTP 200 fallback.

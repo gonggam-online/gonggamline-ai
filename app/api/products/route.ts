@@ -1,6 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { NO_DATA_MESSAGE } from "@/lib/runtime-errors";
-import { listProducts } from "@/services/products.service";
+const NO_DATA_RESPONSE = {
+  success: true,
+  available: false,
+  products: [],
+  message: "No data available",
+} as const;
 
 function parseNumber(
   value: string | null,
@@ -14,58 +17,34 @@ function parseNumber(
   return Math.min(maximum, Math.max(minimum, Math.floor(parsed)));
 }
 
-function emptyProductsResponse(
-  filters: {
-    keyword: string;
-    recommendation: string;
-    reviewStatus: string;
-    favoriteOnly: boolean;
-    minimumScore: number;
-    sort: string;
-  },
-  page: number,
-  size: number,
-) {
-  return NextResponse.json({
-    success: true,
-    available: false,
-    message: NO_DATA_MESSAGE,
-    filters,
-    pagination: {
-      page,
-      size,
-      totalCount: 0,
-      totalPages: 1,
-      hasPreviousPage: page > 1,
-      hasNextPage: false,
-    },
-    products: [],
-  });
+function noDataResponse() {
+  return Response.json(NO_DATA_RESPONSE, { status: 200 });
 }
 
-export async function GET(request: NextRequest) {
-  const params = request.nextUrl.searchParams;
-  const filters = {
-    keyword: params.get("keyword")?.trim() ?? "",
-    recommendation: params.get("recommendation")?.trim() ?? "",
-    reviewStatus: params.get("reviewStatus")?.trim() ?? "",
-    favoriteOnly: params.get("favoriteOnly") === "true",
-    minimumScore: parseNumber(params.get("minimumScore"), 0, 0, 100),
-    sort: params.get("sort") ?? "score",
-  };
-  const page = parseNumber(params.get("page"), 1, 1, 100000);
-  const size = parseNumber(params.get("size"), 20, 1, 100);
-  const start = (page - 1) * size;
-  const end = start + size - 1;
-
+export async function GET(request: Request) {
   try {
+    const params = new URL(request.url).searchParams;
+    const filters = {
+      keyword: params.get("keyword")?.trim() ?? "",
+      recommendation: params.get("recommendation")?.trim() ?? "",
+      reviewStatus: params.get("reviewStatus")?.trim() ?? "",
+      favoriteOnly: params.get("favoriteOnly") === "true",
+      minimumScore: parseNumber(params.get("minimumScore"), 0, 0, 100),
+      sort: params.get("sort") ?? "score",
+    };
+    const page = parseNumber(params.get("page"), 1, 1, 100000);
+    const size = parseNumber(params.get("size"), 20, 1, 100);
+    const start = (page - 1) * size;
+    const end = start + size - 1;
+
+    const { listProducts } = await import("@/services/products.service");
     const result = await listProducts({ ...filters, start, end });
     if (!result.available) {
-      return emptyProductsResponse(filters, page, size);
+      return noDataResponse();
     }
 
     const totalPages = Math.max(1, Math.ceil(result.totalCount / size));
-    return NextResponse.json({
+    return Response.json({
       success: true,
       available: true,
       filters,
@@ -80,7 +59,7 @@ export async function GET(request: NextRequest) {
       products: result.products,
     });
   } catch (error) {
-    console.error("Product query unavailable:", error);
-    return emptyProductsResponse(filters, page, size);
+    console.error("Product route unavailable:", error);
+    return noDataResponse();
   }
 }

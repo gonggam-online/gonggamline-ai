@@ -1,5 +1,3 @@
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
-
 export type ProductSort =
   | "score"
   | "profit"
@@ -27,7 +25,17 @@ export type ProductQueryResult = {
 export async function listProducts(
   filters: ProductQuery,
 ): Promise<ProductQueryResult> {
-  if (!isSupabaseConfigured) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return { products: [], totalCount: 0, available: false };
+  }
+
+  let supabase: typeof import("@/lib/supabase").supabase;
+  try {
+    ({ supabase } = await import("@/lib/supabase"));
+  } catch (error) {
+    console.error("Supabase client unavailable:", error);
     return { products: [], totalCount: 0, available: false };
   }
 
@@ -79,14 +87,20 @@ export async function listProducts(
         .order("estimated_profit", { ascending: false });
   }
 
-  const { data, error, count } = await query.range(filters.start, filters.end);
-  if (error) {
-    throw new Error(error.message);
-  }
+  try {
+    const { data, error, count } = await query.range(filters.start, filters.end);
+    if (error) {
+      console.error("Supabase product query unavailable:", error.message);
+      return { products: [], totalCount: 0, available: false };
+    }
 
-  return {
-    products: (data ?? []) as Record<string, unknown>[],
-    totalCount: count ?? 0,
-    available: true,
-  };
+    return {
+      products: (data ?? []) as Record<string, unknown>[],
+      totalCount: count ?? 0,
+      available: true,
+    };
+  } catch (error) {
+    console.error("Supabase product request unavailable:", error);
+    return { products: [], totalCount: 0, available: false };
+  }
 }
