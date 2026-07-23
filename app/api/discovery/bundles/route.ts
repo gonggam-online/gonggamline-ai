@@ -1,3 +1,20 @@
 import { NextResponse } from "next/server";
-import { listBundles } from "../../../../services/discovery.service";
-export async function GET(){ try{return NextResponse.json({success:true,bundles:await listBundles()});}catch(error){return NextResponse.json({success:false,message:error instanceof Error?error.message:"묶음 조회 오류"},{status:500});}}
+import { unavailableListResponse } from "@/lib/api-responses";
+import { runtimeLog } from "@/lib/runtime-logging";
+import { getSupabaseAvailability } from "@/lib/supabase";
+import { listBundles } from "@/services/discovery.service";
+
+export async function GET() {
+  if (getSupabaseAvailability().status !== "configured") {
+    return NextResponse.json(unavailableListResponse("bundles"));
+  }
+  try {
+    return NextResponse.json({ success: true, available: true, bundles: await listBundles() });
+  } catch (error) {
+    runtimeLog.error("discovery.bundles_failed", error);
+    return NextResponse.json(
+      { success: false, message: "묶음 상품 데이터를 불러오지 못했습니다." },
+      { status: 500 },
+    );
+  }
+}
