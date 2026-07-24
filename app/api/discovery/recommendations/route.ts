@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { unavailableListResponse } from "@/lib/api-responses";
+import { resolveReadErrorResponse, unavailableListResponse } from "@/lib/api-responses";
 import { runtimeLog } from "@/lib/runtime-logging";
 import { getSupabaseAvailability } from "@/lib/supabase";
 import { listRecommendations } from "@/services/discovery.service";
@@ -14,9 +14,11 @@ export async function GET() {
     });
   } catch (error) {
     runtimeLog.error("discovery.recommendations_failed", error);
-    return NextResponse.json(
-      { success: false, message: "추천 데이터를 불러오지 못했습니다." },
-      { status: 500 },
+    const response = resolveReadErrorResponse(
+      error,
+      unavailableListResponse("recommendations"),
+      "추천 데이터를 불러오지 못했습니다.",
     );
+    return NextResponse.json(response.body, { status: response.status });
   }
 }

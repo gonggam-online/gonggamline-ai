@@ -1,0 +1,80 @@
+name: Automatic PR
+
+on:
+  push:
+    branches: ["sprint/**", "feat/**", "fix/**", "chore/**", "docs/**", "test/**"]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  create-or-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Classify change risk
+        id: risk
+        shell: bash
+        run: |
+          git fetch origin main
+          files="$(git diff --name-only origin/main...HEAD)"
+          if echo "$files" | grep -Eq '^(supabase/migrations/|.*(\.env|auth|pricing|margin|order|inventory|fulfillment|settlement|payment|coupang/register))'; then
+            echo "value=high-risk" >> "$GITHUB_OUTPUT"
+            echo "label=manual-merge-required" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=normal-risk" >> "$GITHUB_OUTPUT"
+            echo "label=normal-risk" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Create or update PR without duplicates
+        uses: actions/github-script@v7
+        env:
+          RISK: ${{ steps.risk.outputs.value }}
+          RISK_LABEL: ${{ steps.risk.outputs.label }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const head = context.ref.replace("refs/heads/", "");
+            const existing = await github.rest.pulls.list({ owner, repo, state: "open", head: `${owner}:${head}`, base: "main" });
+            const compare = await github.rest.repos.compareCommits({ owner, repo, base: "main", head });
+            const changed = compare.data.files?.map(file => `- \`${file.filename}\``).join("\n") || "- See diff";
+            const body = `## Summary
+            Automated delivery PR for \`${head}\`.
+
+            ## Revenue impact
+            Describe the direct sale, margin, capacity, or risk impact before merge.
+
+            ## Risk classification
+            ${process.env.RISK}
+
+            ## Changed components
+            ${changed}
+
+            ## Tests and browser checks
+            CI and exact-commit Preview browser checks are required.
+
+            ## Migration impact
+            Review changed files; high-risk migrations require manual merge.
+
+            ## Security impact
+            Secret scan and dependency audit run in CI.
+
+            ## Rollback
+            Revert the merge commit and redeploy the last healthy Vercel deployment.
+            `;
+            let pull;
+            if (existing.data.length) {
+              pull = (await github.rest.pulls.update({ owner, repo, pull_number: existing.data[0].number, body })).data;
+            } else {
+              pull = (await github.rest.pulls.create({ owner, repo, head, base: "main", title: `${head.replaceAll("-", " ")} delivery`, body })).data;
+            }
+            for (const label of ["normal-risk", "manual-merge-required"]) {
+              try { await github.rest.issues.removeLabel({ owner, repo, issue_number: pull.number, name: label }); } catch {}
+            }
+            try {
+              await github.rest.issues.addLabels({ owner, repo, issue_number: pull.number, labels: [process.env.RISK_LABEL] });
+            } catch (error) {
+              core.warning(`Create repository labels normal-risk and manual-merge-required: ${error.message}`);
+            }

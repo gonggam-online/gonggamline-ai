@@ -1,0 +1,98 @@
+name: Preview browser validation
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  deployments: read
+
+jobs:
+  preview-browser-e2e:
+    name: preview-browser-e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - name: Resolve exact-commit Ready Preview from GitHub Deployments
+        id: preview
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 40); do
+            deployments="$(curl --fail --silent --show-error \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${REPOSITORY}/deployments?sha=${HEAD_SHA}&environment=Preview&per_page=10")"
+            deployment_id="$(node -e 'const rows=JSON.parse(process.argv[1]); process.stdout.write(String(rows[0]?.id||""))' "$deployments")"
+            if [ -n "$deployment_id" ]; then
+              statuses="$(curl --fail --silent --show-error \
+                -H "Authorization: Bearer ${GH_TOKEN}" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/${REPOSITORY}/deployments/${deployment_id}/statuses?per_page=5")"
+              state="$(node -e 'const rows=JSON.parse(process.argv[1]); process.stdout.write(rows[0]?.state||"")' "$statuses")"
+              url="$(node -e 'const rows=JSON.parse(process.argv[1]); process.stdout.write(rows[0]?.environment_url||rows[0]?.target_url||"")' "$statuses")"
+              if [ "$state" = "success" ] && [ -n "$url" ]; then echo "url=${url}" >> "$GITHUB_OUTPUT"; exit 0; fi
+              if [ "$state" = "failure" ] || [ "$state" = "error" ] || [ "$state" = "inactive" ]; then
+                echo "Preview deployment ended in ${state}"; exit 1
+              fi
+            fi
+            sleep 15
+          done
+          echo "Timed out waiting for the exact-commit GitHub Preview deployment"; exit 1
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Validate automation bypass secret
+        shell: bash
+        run: |
+          if [ -z "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]; then
+            echo "VERCEL_AUTOMATION_BYPASS_SECRET is missing."
+            exit 1
+          fi
+          echo "Automation bypass secret detected."
+      - name: Verify Preview access
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
+        run: |
+          set -euo pipefail
+          headers=()
+          if [ -n "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]; then
+            headers=(-H "x-vercel-protection-bypass: ${VERCEL_AUTOMATION_BYPASS_SECRET}")
+          fi
+          result="$(curl --silent --show-error --location --output /dev/null \
+            --write-out '%{http_code} %{url_effective}' "${headers[@]}" "${PREVIEW_URL}/api/health/runtime")"
+          status="${result%% *}"
+          effective_url="${result#* }"
+          if [[ "$effective_url" == https://vercel.com/* ]]; then
+            echo "Vercel Deployment Protection blocked Preview automation."
+            echo "Configure VERCEL_AUTOMATION_BYPASS_SECRET in GitHub Actions secrets and rerun this check."
+            exit 1
+          fi
+          if [ "$status" -ge 400 ]; then
+            echo "Preview health preflight returned HTTP ${status}."
+            exit 1
+          fi
+      - name: Run non-destructive Preview checks
+        run: npm run test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ steps.preview.outputs.url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: preview-browser-evidence
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14

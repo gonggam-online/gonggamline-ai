@@ -18,7 +18,9 @@ export async function getCoupangSellerDashboard() {
     supabase.from("listing_drafts").select("id, workflow_id, product_name, coupang_title, status, coupang_payload, updated_at").in("status", ["approved", "registered"]).order("updated_at", { ascending: false }),
     supabase.from("coupang_registration_attempts").select("*").order("created_at", { ascending: false }).limit(100),
   ]);
-  for (const result of [jobs, drafts, attempts]) if (result.error) throw new Error(result.error.message);
+  for (const result of [jobs, drafts, attempts]) {
+    if (result.error) throw new Error(result.error.message, { cause: result.error });
+  }
   return { jobs: jobs.data ?? [], drafts: drafts.data ?? [], attempts: attempts.data ?? [] };
 }
 
