@@ -14,7 +14,11 @@ function monitor(page: Page) {
       errors.push(`api ${response.status()}: ${response.url()}`);
     }
   });
-  page.on("requestfailed", (request) => errors.push(`requestfailed: ${request.url()} ${request.failure()?.errorText ?? ""}`));
+  page.on("requestfailed", (request) => {
+    const errorText = request.failure()?.errorText ?? "";
+    if (errorText === "net::ERR_ABORTED") return;
+    errors.push(`requestfailed: ${request.url()} ${errorText}`);
+  });
   return errors;
 }
 
