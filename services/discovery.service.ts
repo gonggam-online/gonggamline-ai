@@ -1,5 +1,9 @@
 import { supabase } from "../lib/supabase";
 import {
+  DISCOVERY_BUNDLES_SELECT,
+  DISCOVERY_RECOMMENDATIONS_SELECT,
+} from "../lib/supabase-selects";
+import {
   scoreBundle,
   scoreSingle,
   type DiscoveryMetric,
@@ -135,10 +139,10 @@ export async function generateDiscovery(limit = 50) {
 }
 
 export async function listRecommendations() {
-  const { data, error } = await supabase.from("ai_product_recommendations").select("*,market_products(id,title,category,brand,seller_name,thumbnail_url,url)").order("decision_score",{ascending:false}).limit(100); if(error) throw error; return data??[];
+  const { data, error } = await supabase.from("ai_product_recommendations").select(DISCOVERY_RECOMMENDATIONS_SELECT).order("decision_score",{ascending:false}).limit(100); if(error) throw error; return data??[];
 }
 export async function listBundles() {
-  const { data, error } = await supabase.from("ai_bundle_recommendations").select("*,ai_bundle_items(*,market_products(id,title,category,brand,thumbnail_url,url))").order("decision_score",{ascending:false}).limit(50); if(error) throw error; return data??[];
+  const { data, error } = await supabase.from("ai_bundle_recommendations").select(DISCOVERY_BUNDLES_SELECT).order("decision_score",{ascending:false}).limit(50); if(error) throw error; return data??[];
 }
 export async function listDecisionRuns() {
   const { data,error }=await supabase.from("ai_decision_runs").select("*").order("started_at",{ascending:false}).limit(20); if(error) throw error; return data??[];

@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { validateCoupangProductPayload } from "@/lib/coupang/validator";
+import { COUPANG_SELLER_JOBS_SELECT } from "@/lib/supabase-selects";
 import { transitionCommerceWorkflow } from "@/services/workflow.service";
 
 export type CoupangJobStatus =
@@ -14,7 +15,7 @@ function buildJobCode() {
 
 export async function getCoupangSellerDashboard() {
   const [jobs, drafts, attempts] = await Promise.all([
-    supabase.from("coupang_registration_jobs").select("*, listing_drafts(coupang_title, product_name, status), commerce_workflows(workflow_code, workflow_name, current_stage)").order("updated_at", { ascending: false }),
+    supabase.from("coupang_registration_jobs").select(COUPANG_SELLER_JOBS_SELECT).order("updated_at", { ascending: false }),
     supabase.from("listing_drafts").select("id, workflow_id, product_name, coupang_title, status, coupang_payload, updated_at").in("status", ["approved", "registered"]).order("updated_at", { ascending: false }),
     supabase.from("coupang_registration_attempts").select("*").order("created_at", { ascending: false }).limit(100),
   ]);

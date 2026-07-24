@@ -17,6 +17,11 @@ import {
   unavailableListResponse,
 } from "../lib/api-responses.ts";
 import { classifyNetworkError, findNetworkErrorCode } from "../lib/network-errors.ts";
+import {
+  COUPANG_SELLER_JOBS_SELECT,
+  DISCOVERY_BUNDLES_SELECT,
+  DISCOVERY_RECOMMENDATIONS_SELECT,
+} from "../lib/supabase-selects.ts";
 
 test("Supabase availability rejects missing and malformed configuration", () => {
   assert.deepEqual(getSupabaseAvailability({}), {
@@ -122,6 +127,26 @@ test("unexpected read errors resolve to 500", () => {
       status: 500,
       body: { success: false, message: "failed" },
     },
+  );
+});
+
+test("discovery selects query product_url while preserving the url response key", () => {
+  assert.match(
+    DISCOVERY_RECOMMENDATIONS_SELECT,
+    /market_products\([^)]*url:product_url\)/,
+  );
+  assert.match(
+    DISCOVERY_BUNDLES_SELECT,
+    /market_products\([^)]*url:product_url\)/,
+  );
+  assert.doesNotMatch(DISCOVERY_RECOMMENDATIONS_SELECT, /[,()]url[,)]/);
+  assert.doesNotMatch(DISCOVERY_BUNDLES_SELECT, /[,()]url[,)]/);
+});
+
+test("Coupang jobs select disambiguates the workflow_id relationship", () => {
+  assert.match(
+    COUPANG_SELLER_JOBS_SELECT,
+    /commerce_workflows!workflow_id\(workflow_code, workflow_name, current_stage\)/,
   );
 });
 
