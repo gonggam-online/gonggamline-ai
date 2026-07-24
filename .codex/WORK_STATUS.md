@@ -38,7 +38,7 @@ Normal-risk: documentation, templates, static audit, and validation only. This b
 - [x] Rank technical debt and roadmap
 - [x] Plan three sprints and next actions
 - [x] Review diff and run all local gates
-- [ ] Commit, push, open/update Draft PR, and validate Preview
+- [x] Commit, push, open/update Draft PR, and validate Preview
 
 ## Root cause classification
 
@@ -57,7 +57,7 @@ Current task is capability/documentation work. Audit findings must be classified
 
 ## Current work
 
-Preparing the coherent documentation checkpoint for commit and delivery.
+Session deliverables are complete; final status checkpoint is being committed.
 
 ## Blockers
 
@@ -83,6 +83,8 @@ None currently. Vercel/GitHub owner actions will be recorded only if delivery ch
 - `npm.cmd test`
 - `npm.cmd run build`
 - `npm.cmd run test:e2e:local`
+- GitHub CI run `30084543162`
+- Preview browser run `30084543191`
 
 ## Test results
 
@@ -92,14 +94,18 @@ None currently. Vercel/GitHub owner actions will be recorded only if delivery ch
 - Unit/integration: 13 passed, 0 failed, 0 skipped; Node reported a module-type performance warning.
 - Production build: passed; Next.js generated 65 route entries.
 - Local Playwright: 24 tests executed; 7 page-health failures and command timeout. `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace` observed API 500 responses because local Supabase is explicitly unconfigured (`missing_url`). This is an external configuration condition, not a code workaround target. Failure artifacts are under `test-results/`.
+- GitHub CI: passed.
+- Exact Vercel Preview `https://gonggamline-qfctfznhb-gg-online.vercel.app`: Ready and accessible through the configured bypass secret.
+- Preview Playwright: 24 passed in 52 seconds; no reported page/console/request failures. Evidence artifact: `preview-browser-evidence` (run `30084543191`, artifact `8593186249`).
+- CI dependency install reported 3 high-severity vulnerabilities; triage is recorded in `TECH_DEBT.md` and no unsafe forced upgrade was attempted.
 
 ## Last commit
 
-`c75a7c1 fix: align Supabase read relationships` (pre-existing at session start).
+`5261ad2 docs: establish engineering operating system` (plus pre-existing `c75a7c1` in local history; current PR diff contains the documentation commit).
 
 ## Next exact action
 
-Stage the intended operating-system/audit files, commit, push, create/update the Draft PR, then inspect CI and exact Preview status.
+Begin S1-01 from `docs/planning/NEXT_ACTIONS.md` on a new clean task branch after PR #11 is manually reviewed.
 
 ## Remaining risks
 
@@ -108,3 +114,4 @@ Stage the intended operating-system/audit files, commit, push, create/update the
 - Preview automation depends on GitHub/Vercel deployment and bypass-secret configuration.
 - Static query inventory may miss dynamic SQL or external consumers; no column removal is authorized from this audit.
 - Local full-page Playwright cannot pass until a safe test Supabase URL and anon key are supplied; never commit or print them.
+- `npm ci` reports 3 high-severity dependency vulnerabilities requiring focused audit and upgrade review.

@@ -16,5 +16,6 @@
 | 12 | Collector/Coupang retry and rate-limit policies need explicit tests | High | External throttling/cost and unstable automation | Contract tests against adapters; bounded backoff and observability | M | Backlog |
 | 13 | Migration usage/dead-column analysis is manual | Normal | Schema grows without confidence | Build static query/migration inventory, then confirm against telemetry | M | Backlog |
 | 14 | Production smoke relies on a fixed public URL | Normal | Domain/deployment changes can invalidate checks | Owner-configured environment URL with verified deployment SHA | S | Follow-up |
+| 15 | `npm ci` reports 3 high-severity dependency vulnerabilities in CI | High until triaged | Supply-chain exposure can threaten operations and customer trust | Run `npm audit`, identify direct/transitive packages, assess exploitability, and upgrade without `--force` in a focused PR | S–M | Immediate follow-up |
 
 No dead code or unused database column is declared solely from static absence: runtime, SQL functions, external clients, and operational queries may consume it. Removal requires telemetry and a high-risk data review.
