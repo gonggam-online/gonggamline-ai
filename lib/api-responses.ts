@@ -13,7 +13,14 @@ export function unavailableListResponse<const K extends string>(field: K) {
   } & Record<K, unknown[]>;
 }
 
-const EXPECTED_READ_UNAVAILABLE_CODES = new Set(["42P01", "PGRST200", "PGRST205"]);
+const EXPECTED_READ_UNAVAILABLE_CODES = new Set([
+  "42P01",
+  "42703",
+  "PGRST200",
+  "PGRST201",
+  "PGRST204",
+  "PGRST205",
+]);
 const EXPECTED_NETWORK_CODES = new Set([
   "ENOTFOUND",
   "EAI_AGAIN",
@@ -47,7 +54,7 @@ export function isExpectedReadUnavailableError(error: unknown): boolean {
       return true;
     }
     if (typeof candidate.message === "string"
-      && /fetch failed|relation .+ does not exist|could not find the table|schema cache/i.test(candidate.message)) {
+      && /fetch failed|relation .+ does not exist|column .+ does not exist|could not find (?:a relationship|the table)|schema cache/i.test(candidate.message)) {
       return true;
     }
     current = candidate.cause;

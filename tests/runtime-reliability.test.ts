@@ -75,6 +75,8 @@ test("list fallbacks preserve endpoint fields and the standard data envelope", (
 
 test("expected read unavailability is limited to configuration, network, and missing schema", () => {
   assert.equal(isExpectedReadUnavailableError({ code: "PGRST205" }), true);
+  assert.equal(isExpectedReadUnavailableError({ code: "PGRST201" }), true);
+  assert.equal(isExpectedReadUnavailableError({ code: "42703" }), true);
   assert.equal(isExpectedReadUnavailableError(new TypeError("fetch failed")), true);
   assert.equal(isExpectedReadUnavailableError(new Error("unexpected application bug")), false);
 });
