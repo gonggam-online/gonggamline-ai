@@ -11,3 +11,4 @@
 ## Fixed
 
 - Preview URL resolution now uses the exact-commit GitHub Deployment record created by Vercel, removing the unnecessary hard dependency on `VERCEL_TOKEN` and `VERCEL_PROJECT_ID`.
+- Playwright now establishes the Vercel automation bypass cookie and read-only Preview APIs return empty data only for expected configuration, network, or missing-schema states.

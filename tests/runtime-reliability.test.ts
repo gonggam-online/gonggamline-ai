@@ -10,7 +10,10 @@ import {
 } from "../lib/runtime/job-policy.ts";
 import { sanitizeRuntimeValue } from "../lib/runtime-logging.ts";
 import { listProducts } from "../services/products.service.ts";
-import { unavailableListResponse } from "../lib/api-responses.ts";
+import {
+  isExpectedReadUnavailableError,
+  unavailableListResponse,
+} from "../lib/api-responses.ts";
 import { classifyNetworkError, findNetworkErrorCode } from "../lib/network-errors.ts";
 
 test("Supabase availability rejects missing and malformed configuration", () => {
@@ -68,6 +71,12 @@ test("list fallbacks preserve endpoint fields and the standard data envelope", (
     recommendations: [],
     message: "No data available",
   });
+});
+
+test("expected read unavailability is limited to configuration, network, and missing schema", () => {
+  assert.equal(isExpectedReadUnavailableError({ code: "PGRST205" }), true);
+  assert.equal(isExpectedReadUnavailableError(new TypeError("fetch failed")), true);
+  assert.equal(isExpectedReadUnavailableError(new Error("unexpected application bug")), false);
 });
 
 test("runtime job policy bounds retries and prevents duplicate running claims", () => {

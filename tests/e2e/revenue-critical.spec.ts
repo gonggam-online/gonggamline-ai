@@ -17,6 +17,12 @@ test("product filters remain safe", async ({ page }) => {
 
 test("decision controls render without executing writes", async ({ page }) => {
   await page.goto("/discovery", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /의사결정/ })).toBeVisible();
-  await expect(page.getByRole("button").first()).toBeVisible();
+  await expect(page.getByRole("heading", {
+    name: "AI 상품 의사결정 센터",
+    exact: true,
+  })).toBeVisible();
+  await expect(page.getByRole("button", {
+    name: "AI 의사결정 실행",
+    exact: true,
+  })).toBeVisible();
 });

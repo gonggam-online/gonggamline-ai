@@ -51,6 +51,14 @@ jobs:
           echo "Timed out waiting for the exact-commit GitHub Preview deployment"; exit 1
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: Validate automation bypass secret
+        shell: bash
+        run: |
+          if [ -z "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]; then
+            echo "VERCEL_AUTOMATION_BYPASS_SECRET is missing."
+            exit 1
+          fi
+          echo "Automation bypass secret detected."
       - name: Verify Preview access
         shell: bash
         env:
@@ -59,7 +67,10 @@ jobs:
           set -euo pipefail
           headers=()
           if [ -n "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]; then
-            headers=(-H "x-vercel-protection-bypass: ${VERCEL_AUTOMATION_BYPASS_SECRET}")
+            headers=(
+              -H "x-vercel-protection-bypass: ${VERCEL_AUTOMATION_BYPASS_SECRET}"
+              -H "x-vercel-set-bypass-cookie: true"
+            )
           fi
           result="$(curl --silent --show-error --location --output /dev/null \
             --write-out '%{http_code} %{url_effective}' "${headers[@]}" "${PREVIEW_URL}/api/health/runtime")"
@@ -78,6 +89,7 @@ jobs:
         run: npm run test:e2e
         env:
           PLAYWRIGHT_BASE_URL: ${{ steps.preview.outputs.url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
