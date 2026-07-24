@@ -133,14 +133,20 @@ export async function getDashboard() {
 }
 
 export async function listWorkers() {
-  const result = await supabase.from("ai_workers").select("*").order("worker_code");
-  if (result.error) throw new Error(result.error.message);
-  return result.data ?? [];
+  try {
+    const result = await supabase.from("ai_workers").select("*").order("worker_code");
+    return result.error ? [] : result.data ?? [];
+  } catch {
+    return [];
+  }
 }
 export async function listReleases() {
-  const result = await supabase.from("system_releases").select("*").order("created_at", { ascending: false }).limit(20);
-  if (result.error) throw new Error(result.error.message);
-  return result.data ?? [];
+  try {
+    const result = await supabase.from("system_releases").select("*").order("created_at", { ascending: false }).limit(20);
+    return result.error ? [] : result.data ?? [];
+  } catch {
+    return [];
+  }
 }
 export async function listCommands() {
   try {

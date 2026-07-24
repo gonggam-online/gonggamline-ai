@@ -1,0 +1,55 @@
+name: Preview browser validation
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  preview-browser-e2e:
+    name: preview-browser-e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Resolve exact-commit Ready Preview
+        id: preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$VERCEL_TOKEN" -a -n "$VERCEL_PROJECT_ID" || { echo "Configure VERCEL_TOKEN and VERCEL_PROJECT_ID"; exit 1; }
+          team_query=""
+          if [ -n "${VERCEL_TEAM_ID:-}" ]; then team_query="&teamId=${VERCEL_TEAM_ID}"; fi
+          for attempt in $(seq 1 40); do
+            json="$(curl --fail --silent --show-error -H "Authorization: Bearer ${VERCEL_TOKEN}" "https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&meta-githubCommitSha=${{ github.event.pull_request.head.sha }}&limit=5${team_query}")"
+            state="$(node -e 'const d=JSON.parse(process.argv[1]).deployments?.[0]; process.stdout.write(d?.readyState||"")' "$json")"
+            url="$(node -e 'const d=JSON.parse(process.argv[1]).deployments?.[0]; process.stdout.write(d?.url||"")' "$json")"
+            if [ "$state" = "READY" ] && [ -n "$url" ]; then echo "url=https://${url}" >> "$GITHUB_OUTPUT"; exit 0; fi
+            if [ "$state" = "ERROR" ] || [ "$state" = "CANCELED" ]; then echo "Preview deployment ended in ${state}"; exit 1; fi
+            sleep 15
+          done
+          echo "Timed out waiting for exact-commit Preview"; exit 1
+      - name: Run non-destructive Preview checks
+        run: npm run test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ steps.preview.outputs.url }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: preview-browser-evidence
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14

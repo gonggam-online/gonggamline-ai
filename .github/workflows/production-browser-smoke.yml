@@ -1,0 +1,51 @@
+name: Production browser smoke
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-browser-smoke:
+    name: production-browser-smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PLAYWRIGHT_BASE_URL: https://gonggamline-ai.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Wait for Production propagation
+        shell: bash
+        run: |
+          for attempt in $(seq 1 40); do
+            code="$(curl -L -sS -o /dev/null -w '%{http_code}' "$PLAYWRIGHT_BASE_URL/api/health/runtime" || true)"
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 15
+          done
+          echo "Production did not become healthy"; exit 1
+      - name: Run non-destructive Production checks
+        run: npm run test:e2e
+      - name: Write summary
+        if: always()
+        shell: bash
+        run: |
+          echo "## Production browser smoke" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Target: $PLAYWRIGHT_BASE_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Commit: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Evidence: production-browser-evidence artifact" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: production-browser-evidence
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 30

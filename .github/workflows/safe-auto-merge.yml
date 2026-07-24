@@ -1,0 +1,38 @@
+name: Safe native auto-merge
+
+on:
+  workflow_run:
+    workflows: ["CI", "Preview browser validation"]
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  enable:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.AUTO_MERGE_PAT }}
+          script: |
+            const { owner, repo } = context.repo;
+            const sha = context.payload.workflow_run.head_sha;
+            const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({ owner, repo, commit_sha: sha });
+            const pr = prs.data.find(item => item.base.ref === "main" && item.state === "open");
+            if (!pr || pr.head.ref === "chore/autonomous-delivery-system") return;
+            const labels = pr.labels.map(label => typeof label === "string" ? label : label.name);
+            if (labels.includes("manual-merge-required") || !labels.includes("normal-risk")) return;
+            const files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: pr.number, per_page: 100 });
+            const highRisk = files.some(file => /(^supabase\/migrations\/|(^|\/)(auth|pricing|margin|order|inventory|fulfillment|settlement|payment)|coupang\/register)/i.test(file.filename));
+            const comparison = await github.rest.repos.compareCommits({ owner, repo, base: "main", head: pr.head.ref });
+            if (highRisk || pr.mergeable === false || pr.mergeable_state === "dirty" || comparison.data.behind_by > 0) return;
+            const checks = await github.rest.checks.listForRef({ owner, repo, ref: sha });
+            const required = ["ci-lint", "ci-typecheck", "ci-tests", "ci-build", "ci-security-audit", "preview-browser-e2e"];
+            const passed = required.every(name => checks.data.check_runs.some(run => run.name === name && run.conclusion === "success"));
+            if (!passed) return;
+            await github.graphql(`mutation($id: ID!) {
+              enablePullRequestAutoMerge(input: { pullRequestId: $id, mergeMethod: SQUASH }) { pullRequest { number } }
+            }`, { id: pr.node_id });
