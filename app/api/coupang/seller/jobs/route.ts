@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isExpectedReadUnavailableError } from "@/lib/api-responses";
+import {
+  resolveReadErrorResponse,
+  unavailableCoupangDashboardResponse,
+} from "@/lib/api-responses";
 import { runtimeLog } from "@/lib/runtime-logging";
 import { getSupabaseAvailability } from "@/lib/supabase";
 import {
@@ -9,12 +12,7 @@ import {
 
 export async function GET() {
   if (getSupabaseAvailability().status !== "configured") {
-    return NextResponse.json({
-      success: true,
-      jobs: [],
-      drafts: [],
-      attempts: [],
-    });
+    return NextResponse.json(unavailableCoupangDashboardResponse());
   }
 
   try {
@@ -23,22 +21,12 @@ export async function GET() {
   } catch (error) {
     runtimeLog.error("coupang.seller_jobs_failed", error);
 
-    if (isExpectedReadUnavailableError(error)) {
-      return NextResponse.json({
-        success: true,
-        jobs: [],
-        drafts: [],
-        attempts: [],
-      });
-    }
-
-    return NextResponse.json(
-      {
-        success: false,
-        message: "쿠팡 등록 작업을 불러오지 못했습니다.",
-      },
-      { status: 500 },
+    const response = resolveReadErrorResponse(
+      error,
+      unavailableCoupangDashboardResponse(),
+      "쿠팡 등록 작업을 불러오지 못했습니다.",
     );
+    return NextResponse.json(response.body, { status: response.status });
   }
 }
 

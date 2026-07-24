@@ -12,6 +12,8 @@ import { sanitizeRuntimeValue } from "../lib/runtime-logging.ts";
 import { listProducts } from "../services/products.service.ts";
 import {
   isExpectedReadUnavailableError,
+  resolveReadErrorResponse,
+  unavailableCoupangDashboardResponse,
   unavailableListResponse,
 } from "../lib/api-responses.ts";
 import { classifyNetworkError, findNetworkErrorCode } from "../lib/network-errors.ts";
@@ -79,6 +81,48 @@ test("expected read unavailability is limited to configuration, network, and mis
   assert.equal(isExpectedReadUnavailableError({ code: "42703" }), true);
   assert.equal(isExpectedReadUnavailableError(new TypeError("fetch failed")), true);
   assert.equal(isExpectedReadUnavailableError(new Error("unexpected application bug")), false);
+});
+
+test("expected schema and network read errors resolve to 200 with empty endpoint data", () => {
+  for (const error of [
+    { code: "42P01", message: "relation does not exist" },
+    { code: "42703", message: "column does not exist" },
+    { code: "PGRST200", message: "relationship missing from schema cache" },
+    Object.assign(new Error("connection refused"), { code: "ECONNREFUSED" }),
+  ]) {
+    assert.deepEqual(
+      resolveReadErrorResponse(
+        error,
+        unavailableCoupangDashboardResponse(),
+        "failed",
+      ),
+      {
+        status: 200,
+        body: {
+          success: true,
+          available: false,
+          jobs: [],
+          drafts: [],
+          attempts: [],
+          message: "No data available",
+        },
+      },
+    );
+  }
+});
+
+test("unexpected read errors resolve to 500", () => {
+  assert.deepEqual(
+    resolveReadErrorResponse(
+      new Error("unexpected application bug"),
+      unavailableListResponse("recommendations"),
+      "failed",
+    ),
+    {
+      status: 500,
+      body: { success: false, message: "failed" },
+    },
+  );
 });
 
 test("runtime job policy bounds retries and prevents duplicate running claims", () => {

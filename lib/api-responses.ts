@@ -13,6 +13,17 @@ export function unavailableListResponse<const K extends string>(field: K) {
   } & Record<K, unknown[]>;
 }
 
+export function unavailableCoupangDashboardResponse() {
+  return {
+    success: true as const,
+    available: false as const,
+    jobs: [] as unknown[],
+    drafts: [] as unknown[],
+    attempts: [] as unknown[],
+    message: "No data available" as const,
+  };
+}
+
 const EXPECTED_READ_UNAVAILABLE_CODES = new Set([
   "42P01",
   "42703",
@@ -60,4 +71,21 @@ export function isExpectedReadUnavailableError(error: unknown): boolean {
     current = candidate.cause;
   }
   return false;
+}
+
+export function resolveReadErrorResponse<T>(
+  error: unknown,
+  unavailableBody: T,
+  message: string,
+): { status: 200; body: T } | {
+  status: 500;
+  body: { success: false; message: string };
+} {
+  if (isExpectedReadUnavailableError(error)) {
+    return { status: 200, body: unavailableBody };
+  }
+  return {
+    status: 500,
+    body: { success: false, message },
+  };
 }
