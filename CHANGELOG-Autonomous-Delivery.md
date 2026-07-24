@@ -13,3 +13,4 @@
 - Preview URL resolution now uses the exact-commit GitHub Deployment record created by Vercel, removing the unnecessary hard dependency on `VERCEL_TOKEN` and `VERCEL_PROJECT_ID`.
 - Playwright now establishes the Vercel automation bypass cookie and read-only Preview APIs return empty data only for expected configuration, network, or missing-schema states.
 - Preview read fallbacks now preserve endpoint availability metadata while unexpected application errors continue to return HTTP 500.
+- Discovery reads now target `market_products.product_url` without changing the `url` response key, and Coupang seller reads explicitly select the `workflow_id` relationship.
