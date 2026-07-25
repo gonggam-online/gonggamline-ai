@@ -2,116 +2,103 @@
 
 ## Objective
 
-Build a restartable engineering operating system, audit the application and database contracts, and prepare the next three revenue-oriented sprints without production writes or schema changes.
+Audit Product Data Readiness for the Revenue Opportunity Engine and make only
+the minimum evidence-backed changes without affecting Runtime behavior.
 
 ## Current branch
 
-`codex/chore/codex-engineering-system`
+`codex/feat/revenue-data-readiness`
 
 ## Risk level
 
-Normal-risk: documentation, templates, static audit, and validation only. This branch already contains commit `c75a7c1` (Supabase read relationship alignment) from before this session; it must be reviewed as part of the PR.
+Normal-risk. This task changes documentation only. It does not change schema,
+price/margin calculations, APIs, Competition, AI, Workflow, or Runtime.
 
-## Scope
+## Scope and non-goals
 
-- Repository operating rules and reusable task/session/review templates
-- Project map, architecture, development, deployment, testing, database, and operations guides
-- Static API/database consistency and technical-debt audit
-- Revenue roadmap, three sprint plans, backlog, and exact next actions
-- Full local verification, push, Draft PR, and Preview checks where available
+- Audit Product, Competition, Market, Supplier, and Revenue schema evidence.
+- Classify required Revenue inputs as present, missing, needed, or unnecessary.
+- Audit `/api/products` and Competition API exposure.
+- Do not add a migration without evidence from the actual database.
+- Do not change recommendation algorithms, AI logic, workflow, or Runtime.
 
-## Non-goals
+## Root-cause class
 
-- Migrations, RLS, authentication/authorization, secrets, or environment configuration
-- Production data mutation or real Coupang/order/inventory/supplier operations
-- API contract changes, broad refactors, feature deletion, test skips, or auto-merge
-
-## Progress checklist
-
-- [x] Confirm safe non-main branch and clean starting tree
-- [x] Read request, `AGENTS.md`, and all `.ai` documents
-- [x] Inventory configuration, workflows, routes, services, migrations, tests, and existing docs
-- [x] Build Codex operating documents
-- [x] Build GitHub templates
-- [x] Document repository structure and operations
-- [x] Complete API/database static audit
-- [x] Rank technical debt and roadmap
-- [x] Plan three sprints and next actions
-- [x] Review diff and run all local gates
-- [x] Commit, push, open/update Draft PR, and validate Preview
-
-## Root cause classification
-
-Current task is capability/documentation work. Audit findings must be classified external configuration → database → code before remediation.
+Database readiness/contract gap. The repository lacks the initial `products`
+DDL, so core-column nullability cannot be verified locally. Existing fields
+cover most numeric inputs, while provenance, authoritative relationships, and
+ROI semantics are not yet defined.
 
 ## Completed work
 
-- Verified branch `codex/chore/codex-engineering-system` is not `main`; starting tree was clean.
-- Read the UTF-8 request and all mandatory `.ai` documents.
-- Identified existing delivery workflows and a missing `.codex` workspace/issue-template set.
-- Enumerated App Router pages/APIs, services, migrations 003–020, and test commands.
-- Built eight reusable `.codex` controls and five GitHub contribution templates.
-- Added code-backed project/architecture/development/deployment/testing/database/operations guides.
-- Recorded the missing pre-003 schema baseline, query coupling, coverage gaps, and delivery dependencies.
-- Ranked the roadmap and prepared three revenue-oriented sprints with exact tickets and non-goals.
+- Confirmed a clean non-main branch and corrected its duplicated prefix.
+- Read the mandatory repository, risk, delivery, browser, and Next.js route
+  handler guidance.
+- Audited Product storage/read/update paths and related TypeScript consumers.
+- Audited Product, Competition, Market Intelligence, Supplier, and Revenue
+  migrations.
+- Confirmed `/api/products` already returns all stored Product and Competition
+  fields.
+- Determined that migration/API/type changes are not currently justified.
+- Added the Revenue Data Readiness report and Sprint 2 changelog.
 
 ## Current work
 
-Session deliverables are complete; final status checkpoint is being committed.
+Local verification is complete. Delivery and exact-commit Preview validation
+are pending.
 
-## Blockers
+## Blockers and owner actions
 
-None for local documentation and static audit.
+Actual `products` schema/nullability and Production data completeness require a
+read-only Supabase inspection. No Supabase connection is configured in the
+workspace, and the repository contains only an environment example.
 
-## User action required
+Owner inspection path if no automated read-only connection is available:
+Supabase Dashboard > project > Table Editor > `products` (columns/defaults/
+nullable), then SQL Editor for aggregate null/zero/freshness counts. Project
+URL and anon/service keys must remain secret and must not be pasted into the
+report or committed.
 
-None currently. Vercel/GitHub owner actions will be recorded only if delivery checks expose a configuration blocker.
+## Changed files
 
-## Files changed
+- `docs/reports/REVENUE-DATA-READINESS.md`
+- `CHANGELOG-Sprint2-Product-Data-Readiness.md`
+- `.codex/WORK_STATUS.md`
 
-`AGENTS.md`, `.ai/current-sprint.md`, `.codex/**`, `.github/**`, root guides/audit/roadmap/changelog, and `docs/planning/**`.
+## Commands and test results
 
-## Commands executed
-
-- `git branch --show-current`
-- `git status --short --branch`
-- `git diff --stat origin/main...HEAD`
-- Repository inventories with `rg`, `Get-ChildItem`, and `Get-Content`
-- `git diff --check`
-- `npm.cmd run lint`
-- `npm.cmd run typecheck`
-- `npm.cmd test`
-- `npm.cmd run build`
-- `npm.cmd run test:e2e:local`
-- GitHub CI run `30084543162`
-- Preview browser run `30084543191`
-
-## Test results
-
-- Diff check: passed.
-- Lint: passed.
-- Typecheck: passed.
-- Unit/integration: 13 passed, 0 failed, 0 skipped; Node reported a module-type performance warning.
-- Production build: passed; Next.js generated 65 route entries.
-- Local Playwright: 24 tests executed; 7 page-health failures and command timeout. `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace` observed API 500 responses because local Supabase is explicitly unconfigured (`missing_url`). This is an external configuration condition, not a code workaround target. Failure artifacts are under `test-results/`.
-- GitHub CI: passed.
-- Exact Vercel Preview `https://gonggamline-qfctfznhb-gg-online.vercel.app`: Ready and accessible through the configured bypass secret.
-- Preview Playwright: 24 passed in 52 seconds; no reported page/console/request failures. Evidence artifact: `preview-browser-evidence` (run `30084543191`, artifact `8593186249`).
-- CI dependency install reported 3 high-severity vulnerabilities; triage is recorded in `TECH_DEBT.md` and no unsafe forced upgrade was attempted.
+- Repository/schema/API/type audit: completed.
+- `git diff --check`: passed.
+- `npm.cmd run lint`: passed.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd test`: 15 passed, 0 failed.
+- `npm.cmd run build`: passed; 65 route entries generated.
+- Manual read-only browser checks: `/`, `/competition`, and `/revenue` rendered
+  meaningful headings/content; no captured browser console errors.
+- `GET /api/products`: HTTP 200 with the documented unconfigured response
+  (`available: false`, empty products).
+- `npm.cmd run test:e2e:local`: 17 passed, 7 failed. All 7 failures are the
+  existing external-configuration condition caused by absent local Supabase
+  configuration. Affected routes: `/listing`, `/market`, `/procurement`,
+  `/revenue`, `/sourcing`, `/workflow`, and `/workspace`. Revenue-critical
+  checks, Product API health, `/`, and `/competition` passed. Failure evidence
+  is under `test-results/`.
+- Preview and Production validation: pending.
 
 ## Last commit
 
-`5261ad2 docs: establish engineering operating system` (plus pre-existing `c75a7c1` in local history; current PR diff contains the documentation commit).
+Pending.
 
-## Next exact action
+## Exact next action
 
-Begin S1-01 from `docs/planning/NEXT_ACTIONS.md` on a new clean task branch after PR #11 is manually reviewed.
+Review the complete diff, commit and push the documentation-only scope, create
+the PR, and validate its exact-commit Vercel Preview.
 
 ## Remaining risks
 
-- Static analysis cannot prove the deployed Supabase schema matches migrations.
-- Existing branch commit must pass full validation and Preview checks.
-- Preview automation depends on GitHub/Vercel deployment and bypass-secret configuration.
-- Static query inventory may miss dynamic SQL or external consumers; no column removal is authorized from this audit.
-- Local full-page Playwright cannot pass until a safe test Supabase URL and anon key are supplied; never commit or print them.
-- `npm ci` reports 3 high-severity dependency vulnerabilities requiring focused audit and upgrade review.
+- Actual database nullability may differ from application assumptions.
+- Existing zero/default values may mean unknown rather than measured zero.
+- Product, market product, and supplier identities are not authoritatively
+  linked for Revenue Opportunity calculation.
+- ROI and cost provenance require business/data-contract approval before
+  implementation.
