@@ -36,6 +36,7 @@ export async function GET(request: Request) {
       params.get("includeRevenueCalculation") === "true";
     const includeRevenueScore =
       params.get("includeRevenueScore") === "true";
+    const includeRanking = params.get("includeRanking") === "true";
     const page = parseNumber(params.get("page"), 1, 1, 100000);
     const size = parseNumber(params.get("size"), 20, 1, 100);
     const start = (page - 1) * size;
@@ -60,9 +61,9 @@ export async function GET(request: Request) {
       products = attachRevenueScores(products);
     }
 
-    return Response.json({
-      success: true,
-      available: true,
+    const baseResponse = {
+      success: true as const,
+      available: true as const,
       filters,
       pagination: {
         page,
@@ -72,8 +73,26 @@ export async function GET(request: Request) {
         hasPreviousPage: page > 1,
         hasNextPage: page < totalPages,
       },
-      products,
-    });
+    };
+    if (includeRanking) {
+      const { rankProductsByRevenue } = await import("@/lib/revenue/ranking");
+      const { buildProductsApiResponse } = await import(
+        "@/lib/revenue/products-api-response"
+      );
+      return Response.json(
+        buildProductsApiResponse({
+          base: baseResponse,
+          products,
+          ranking: rankProductsByRevenue(result.products),
+        }),
+      );
+    }
+    const { buildProductsApiResponse } = await import(
+      "@/lib/revenue/products-api-response"
+    );
+    return Response.json(
+      buildProductsApiResponse({ base: baseResponse, products }),
+    );
   } catch (error) {
     const { runtimeLog } = await import("@/lib/runtime-logging");
     runtimeLog.error("products.route_failed", error);

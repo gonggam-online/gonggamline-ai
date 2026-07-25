@@ -44,3 +44,31 @@
 - Database schema, migrations, stored Product data, Production, Runtime Queue,
   Workers, marketplace behavior, and public Product API responses by default.
 - No LLM calls, AI recommendation prose, or DB persistence.
+
+# Sprint 2-4 - Revenue Ranking Engine
+
+## Added
+
+- Reusable, deterministic Revenue Ranking domain service.
+- Revenue-first ranking with competition, confidence, analysis freshness,
+  completeness, and data quality.
+- Machine-readable reason codes, recommendation levels, and ranking-factor
+  evidence.
+- Opt-in `GET /api/products?includeRanking=true` top-level ranking DTO.
+- 31 focused tests covering ties, confidence, invalid/incomplete states,
+  freshness, explanations, recommendation levels, and stable ordering.
+
+## Unchanged
+
+- Revenue Calculation and Revenue Score formulas.
+- Default Product API response and existing opt-in fields.
+- Database schema, migrations, Production data, Runtime Queue, Workers,
+  marketplace writes, Dashboard, and upload queue.
+- No LLM/OpenAI calls, recommendation prose, or ranking persistence.
+
+## Release validation
+
+- Added deterministic Product API contract assertions for the default,
+  Revenue Score, Revenue Ranking, and combined opt-in responses.
+- Confirmed that opt-in fields are additive and existing response fields remain
+  unchanged without depending on Preview data availability.
