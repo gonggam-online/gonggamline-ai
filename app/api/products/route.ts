@@ -32,6 +32,8 @@ export async function GET(request: Request) {
       minimumScore: parseNumber(params.get("minimumScore"), 0, 0, 100),
       sort: params.get("sort") ?? "score",
     };
+    const includeRevenueCalculation =
+      params.get("includeRevenueCalculation") === "true";
     const page = parseNumber(params.get("page"), 1, 1, 100000);
     const size = parseNumber(params.get("size"), 20, 1, 100);
     const start = (page - 1) * size;
@@ -44,6 +46,14 @@ export async function GET(request: Request) {
     }
 
     const totalPages = Math.max(1, Math.ceil(result.totalCount / size));
+    let products = result.products;
+    if (includeRevenueCalculation) {
+      const { attachRevenueCalculations } = await import(
+        "@/lib/revenue/calculation"
+      );
+      products = attachRevenueCalculations(products);
+    }
+
     return Response.json({
       success: true,
       available: true,
@@ -56,7 +66,7 @@ export async function GET(request: Request) {
         hasPreviousPage: page > 1,
         hasNextPage: page < totalPages,
       },
-      products: result.products,
+      products,
     });
   } catch (error) {
     const { runtimeLog } = await import("@/lib/runtime-logging");
