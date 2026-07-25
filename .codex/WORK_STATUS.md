@@ -21,9 +21,13 @@
   25 SSR rendering/accessibility/props/state/boundary tests. Reviewed the
   complete change surface and confirmed no API, service, engine, migration, DB,
   Queue, Worker, OpenAI, or commerce-write files changed.
-- Current work: commit, push, open the PR, and validate exact-commit CI/Preview.
-- Blockers/owner actions: GitHub CLI is unavailable on the current PATH. The
-  GitHub connector or an installed CLI path will be used for PR delivery.
+- Current work: delivery gates are complete; record the final Ready PR and
+  native auto-merge blocker.
+- Blockers/owner actions: GitHub native auto-merge is disabled for the
+  repository, so the validated normal-risk PR cannot enable auto-merge. An
+  owner may enable it at GitHub repository > Settings > General > Pull Requests
+  > Allow auto-merge, then enable auto-merge on PR #18. No secret value is
+  required.
 - Changed files: `components/dashboard/dashboard.tsx`,
   `components/dashboard/index.ts`, `app/globals.css`,
   `tests/dashboard-foundation.test.tsx`, `docs/dashboard-ui-architecture.md`,
@@ -35,13 +39,21 @@
   Supabase-dependent routes failed because local Supabase is unconfigured
   (`/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
   `/workspace`). Failure traces, screenshots, and video are in `test-results/`.
-- Delivery: not yet committed or pushed; no Dashboard Foundation PR yet.
-- Last commit: `4c4ac02 fix: enforce revenue dashboard contract` (pre-existing).
-- Exact next action: stage only Story files, commit, push, and create/update the
-  `main` PR.
-- Remaining risks: exact-commit CI and Preview are pending. Local full-route E2E
-  cannot pass until Supabase configuration is available; code must not
-  compensate for that external condition.
+- Delivery: implementation commit `41fcd54` is pushed. PR #18 is Ready for
+  Review, conflict-free, and targets `main`. Exact-commit CI run `30154829822`
+  passed. Exact Preview
+  `https://gonggamline-kn5ds4qi3-gg-online.vercel.app` passed all 32 browser/API
+  checks in run `30154829823`; evidence artifact `8618698857`. Native auto-merge
+  was attempted after every gate passed but GitHub rejected it because the
+  repository setting is disabled. The PR remains open and unmerged.
+- Last commit: `41fcd54 feat: add dashboard foundation`.
+- Exact next action: enable repository native auto-merge and enable it for PR
+  #18, or manually review and merge the Ready normal-risk PR.
+- Remaining risks: Production is unchanged while PR #18 remains open.
+  Foundation composition on a real page is intentionally deferred to the next
+  Revenue Dashboard Story. Local full-route E2E cannot pass until Supabase
+  configuration is available; code must not compensate for that external
+  condition.
 
 ## Previous task snapshot
 
