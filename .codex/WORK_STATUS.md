@@ -21,10 +21,14 @@
   implemented the page, local state, API-only data flow, responsive table,
   required UI states, badges, summary, filters, refresh, pagination,
   accessibility, 31 focused tests, E2E coverage, and architecture docs.
-- Current work: local validation and complete diff review passed; prepare the
-  coherent implementation commit and remote delivery.
-- Blockers/owner actions: none currently. Untracked existing Playwright reports
-  are preserved and excluded from this task.
+- Current work: implementation and delivery gates passed; record exact delivery
+  evidence and the native auto-merge blocker.
+- Blockers/owner actions: GitHub rejected native auto-merge with `Pull request
+  is in clean status`, which means the PR is immediately mergeable rather than
+  waiting behind a required gate. PR #19 remains Ready and unmerged because the
+  task authorizes native auto-merge, not an immediate manual merge. An owner can
+  merge PR #19 from GitHub > Pull requests > #19 > Merge pull request. No secret
+  value is required. Untracked Playwright reports are preserved and excluded.
 - Changed files: `app/dashboard/revenue/page.tsx`,
   `components/revenue-dashboard/revenue-dashboard.tsx`, `app/globals.css`,
   `tests/revenue-dashboard-ui.test.tsx`,
@@ -38,11 +42,17 @@
   console, API, or failed-request errors. The first Playwright invocation
   exceeded its outer command timeout during automatic server cleanup; the same
   test passed with the production server lifecycle controlled explicitly.
-- Delivery: not committed or pushed yet; no PR or Preview exists yet.
-- Last commit: `482bc73 Merge pull request #18 from
-  gonggam-online/codex/feat/dashboard-foundation`.
-- Exact next action: commit, push, create/update the PR, and validate exact
-  commit CI and Vercel Preview before making a merge recommendation.
+- Delivery: implementation commit `bc49032` is pushed. PR #19 is Ready for
+  Review, conflict-free, and targets `main`. Exact-commit CI run `30157490435`
+  passed. Exact Vercel Preview
+  `https://gonggamline-ai-git-codex-featrevenue-dashboard-ui-gg-online.vercel.app`
+  is Ready and Preview browser run `30157490442` passed; evidence artifact
+  `8619411309`. Native auto-merge was attempted only after every gate passed
+  and GitHub rejected it because the PR is already in clean/mergeable status.
+  The PR remains open and Production is unchanged.
+- Last commit: `bc49032 feat: add revenue dashboard UI`.
+- Exact next action: owner review and merge PR #19, followed by non-destructive
+  Production health/API/browser smoke validation.
 - Remaining risks: summary averages describe only the returned result page and
   are labeled accordingly. Local Supabase configuration may still block
   unrelated existing routes; code must not compensate for that external state.
