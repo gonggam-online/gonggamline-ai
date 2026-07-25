@@ -16,7 +16,8 @@
 - Completed: fast-forwarded to merged PR #13; audited readiness/schema/code and
   Next.js 16 guidance; implemented calculation, state/evidence model, mapper,
   opt-in API response, tests, contract docs, and Sprint 2 changelog.
-- Current work: commit/push/Draft PR and exact-commit Preview validation.
+- Current work: record delivery evidence and validate the resulting exact
+  status-only commit.
 - Blockers/owner actions: none. Unknown Production nullability is represented
   as `incomplete` or `invalid` rather than assumed.
 - Changed files: `lib/revenue/calculation.ts`,
@@ -27,9 +28,14 @@
   passed; production build passed. Local `/` and `/revenue` rendered meaningful
   headings with no browser console errors. Default and opt-in Product API calls
   returned HTTP 200 with the preserved unconfigured-Supabase response.
-- Last commit: no task commit yet; branch base `0f7dd37`.
-- Exact next action: stage only task files, commit, push, and create a high-risk
-  Draft PR with `manual-merge-required`.
+- Delivery: implementation commit `89bf6fa` pushed. Draft PR #14 created with
+  `manual-merge-required`; auto-merge is disabled. CI run `30142813367`
+  succeeded. Exact-commit Preview
+  `https://gonggamline-gvectt84u-gg-online.vercel.app` passed all 24 browser
+  checks in run `30142813354`; evidence artifact `8615036120`.
+- Last commit: `89bf6fa feat: add revenue calculation engine`.
+- Exact next action: commit and push this delivery evidence, then validate the
+  resulting exact status-only commit.
 - Remaining risks: stored cost provenance/freshness is absent; fee amount/rate
   precedence remains intentionally unresolved on conflict; ROI is undefined.
 
