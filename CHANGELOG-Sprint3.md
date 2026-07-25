@@ -1,5 +1,22 @@
 # Sprint 3 - Runtime Stabilization
 
+# Sprint 3 - Dashboard Foundation
+
+## Added
+
+- Shared presentation-only Dashboard layout, header, content, toolbar, section,
+  card, empty, error, loading, and pagination components.
+- Semantic landmarks, accessible live regions, native link pagination, reduced
+  motion support, and responsive desktop/tablet/mobile-safe styling.
+- Dashboard UI architecture and component rules documentation.
+- SSR rendering, props, accessibility, state, and presentation-boundary tests.
+
+## Unchanged
+
+- Revenue Dashboard pages and domain-specific Revenue table/card UI.
+- Dashboard APIs and all API response contracts.
+- Database, migrations, Queue, Workers, OpenAI, and commerce write operations.
+
 ## Fixed
 
 - Kept API route modules loadable when Supabase environment variables are absent.

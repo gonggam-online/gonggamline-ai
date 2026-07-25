@@ -2,6 +2,61 @@
 
 ## Current task snapshot
 
+- Objective: build the Sprint 3 shared Dashboard Foundation for Revenue,
+  Upload Queue, Product, and AI Recommendation dashboards.
+- Branch: `codex/feat/dashboard-foundation`.
+- Risk: normal-risk. This is presentation UI, documentation, and tests only.
+- Revenue impact: P3 enabling work. It shortens later Revenue Dashboard delivery
+  and prevents duplicate UI/state patterns across operational dashboards.
+- Root-cause class: code/capability gap. Domain engines and the read-only
+  Dashboard API exist, but reusable Dashboard presentation primitives do not.
+- Scope: layout, header, content, toolbar, section, card, empty/error/loading
+  states, pagination, shared styling, architecture docs, and at least 20 tests.
+- Non-goals: Revenue table/card/page, API calls or changes, global state,
+  Context, DB/migrations, Queue, Workers, OpenAI, and commerce writes.
+- Completed: read repository, `.ai`, Next.js 16, GitHub delivery, and browser
+  rules; confirmed the requested non-main branch; classified risk; audited the
+  current UI/style/test structure; designed and implemented presentation-only
+  Dashboard primitives, responsive styling, architecture documentation, and
+  25 SSR rendering/accessibility/props/state/boundary tests. Reviewed the
+  complete change surface and confirmed no API, service, engine, migration, DB,
+  Queue, Worker, OpenAI, or commerce-write files changed.
+- Current work: delivery gates are complete; record the final Ready PR and
+  native auto-merge blocker.
+- Blockers/owner actions: GitHub native auto-merge is disabled for the
+  repository, so the validated normal-risk PR cannot enable auto-merge. An
+  owner may enable it at GitHub repository > Settings > General > Pull Requests
+  > Allow auto-merge, then enable auto-merge on PR #18. No secret value is
+  required.
+- Changed files: `components/dashboard/dashboard.tsx`,
+  `components/dashboard/index.ts`, `app/globals.css`,
+  `tests/dashboard-foundation.test.tsx`, `docs/dashboard-ui-architecture.md`,
+  `package.json`, `package-lock.json`, `CHANGELOG-Sprint3.md`, and this file.
+- Commands/results: focused Foundation tests 25/25 passed; full unit suite
+  143/143 passed; typecheck passed; production build passed; lint passed with
+  four pre-existing Revenue-test warnings and no errors; `git diff --check`
+  passed. Local Playwright completed 32 cases: 25 passed and 7 existing
+  Supabase-dependent routes failed because local Supabase is unconfigured
+  (`/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
+  `/workspace`). Failure traces, screenshots, and video are in `test-results/`.
+- Delivery: implementation commit `41fcd54` is pushed. PR #18 is Ready for
+  Review, conflict-free, and targets `main`. Exact-commit CI run `30154829822`
+  passed. Exact Preview
+  `https://gonggamline-kn5ds4qi3-gg-online.vercel.app` passed all 32 browser/API
+  checks in run `30154829823`; evidence artifact `8618698857`. Native auto-merge
+  was attempted after every gate passed but GitHub rejected it because the
+  repository setting is disabled. The PR remains open and unmerged.
+- Last commit: `41fcd54 feat: add dashboard foundation`.
+- Exact next action: enable repository native auto-merge and enable it for PR
+  #18, or manually review and merge the Ready normal-risk PR.
+- Remaining risks: Production is unchanged while PR #18 remains open.
+  Foundation composition on a real page is intentionally deferred to the next
+  Revenue Dashboard Story. Local full-route E2E cannot pass until Supabase
+  configuration is available; code must not compensate for that external
+  condition.
+
+## Previous task snapshot
+
 - Objective: implement the Sprint 3 read-only Revenue Dashboard API.
 - Branch: `codex/feat/revenue-dashboard-api`.
 - Risk: normal-risk. The endpoint is read-only analytics and does not change
