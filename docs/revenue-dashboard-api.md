@@ -14,33 +14,18 @@ Revenue Ranking without changing their formulas or persisting results.
 | `offset` | `0` | Non-negative integer |
 | `recommendationLevel` | none | `STRONG_RECOMMEND`, `RECOMMEND`, `WATCH`, `NOT_RECOMMENDED` |
 | `status` | none | `ready`, `estimated`, `incomplete`, `invalid` |
-| `minRevenueScore` | `0` | Number from `0` to `100` |
+| `minRevenueScore` | none | Number from `0` to `100` |
 
-Unknown recommendation levels and statuses are ignored. Invalid numeric values
-use their defaults, while out-of-range numeric values are clamped.
+Invalid, fractional, empty, or out-of-range pagination values return HTTP 400.
+Unknown enum values and invalid minimum scores also return HTTP 400.
 
 ## Response
 
 ```json
 {
-  "success": true,
-  "available": true,
-  "filters": {
-    "limit": 20,
-    "offset": 0,
-    "recommendationLevel": null,
-    "status": null,
-    "minRevenueScore": 0
-  },
-  "pagination": {
-    "limit": 20,
-    "offset": 0,
-    "totalCount": 1,
-    "returnedCount": 1,
-    "hasNextPage": false
-  },
-  "products": [
+  "items": [
     {
+      "rank": 1,
       "productId": "SKU-1",
       "productName": "Example",
       "rankingScore": 82.4,
@@ -51,17 +36,55 @@ use their defaults, while out-of-range numeric values are clamped.
       "status": "ready",
       "lastAnalyzedAt": "2026-07-25T00:00:00.000Z"
     }
-  ]
+  ],
+  "pagination": {
+    "limit": 20,
+    "offset": 0,
+    "total": 1,
+    "returned": 1,
+    "hasMore": false
+  },
+  "filters": {
+    "recommendationLevel": null,
+    "status": null,
+    "minRevenueScore": null
+  },
+  "meta": {
+    "generatedAt": "2026-07-25T12:00:00.000Z",
+    "engineVersion": null,
+    "rankingVersion": null,
+    "totalProducts": 1
+  }
 }
 ```
 
-Products are sorted by `rankingScore DESC`; the Ranking Engine rank is the
-deterministic tie breaker. Filtering occurs before offset/limit pagination.
-Items with a `null` Revenue Score do not satisfy `minRevenueScore`.
+Items retain their global Ranking Engine rank across pages. Filtering uses AND
+semantics, then sorting applies `rankingScore DESC`, `revenueScore DESC`,
+`confidence DESC`, `rank ASC`, and `productId ASC` before pagination.
+Items with a `null` Revenue Score remain when `minRevenueScore` is omitted and
+do not satisfy an explicitly supplied minimum.
 
-If the Product read source is unavailable, the endpoint returns HTTP 200 with
-`available: false`, an empty Product array, and the same filter/pagination
-envelope. Unexpected failures return HTTP 500 with a sanitized message.
+`generatedAt` is the response-generation time. `lastAnalyzedAt` only uses the
+stored competition analysis timestamp. Because the existing engines do not
+publish version identifiers, `engineVersion` and `rankingVersion` remain
+`null` rather than exposing invented values.
+
+## Error contract
+
+```json
+{
+  "error": {
+    "code": "INVALID_QUERY_PARAMETER",
+    "message": "limit must be an integer from 1 to 100",
+    "details": {
+      "parameter": "limit"
+    }
+  }
+}
+```
+
+Invalid query parameters return HTTP 400. Unexpected failures return HTTP 500
+with a sanitized `REVENUE_DASHBOARD_UNAVAILABLE` error.
 
 ## Safety
 

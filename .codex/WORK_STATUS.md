@@ -10,30 +10,40 @@
   Products to Dashboard consumers without duplicating Revenue logic.
 - Root-cause class: code/capability gap. Ranking exists, but there is no
   Dashboard-specific filtering, pagination, and response contract.
-- Scope: `GET /api/dashboard/revenue`, Ranking-backed DTO, filters,
-  `rankingScore DESC` sorting, pagination, 20+ tests, contract, docs, Preview.
+- Scope: `GET /api/dashboard/revenue`, Query Service, Ranking-backed public
+  DTO, strict query validation, AND filters, deterministic multi-key sorting,
+  global-rank pagination, contract, docs, and Preview.
 - Non-goals: Ranking/Score/Calculation changes, DB/migrations, Queue, Workers,
   OpenAI/LLM, write APIs, Dashboard UI, Production mutation.
 - Completed: read binding repository/Next.js/GitHub/browser instructions;
   verified PR #16 and its Release Gate are merged into `origin/main`; created
-  the requested branch; implemented the pure Dashboard adapter, GET route,
-  focused tests, response contract, Preview API health check, and docs.
-- Current work: review the full diff, then commit and deliver.
+  the requested branch; implemented the thin GET route, Query Service, public
+  DTO mapper, strict error contract, global-rank pagination, deterministic
+  sorting, focused tests, response contract, Preview API health checks, and
+  docs. Reviewed the diff and confirmed no engine, DB, migration, Queue,
+  Worker, LLM, or write-API changes.
+- Current work: commit and deliver the strict API-contract completion.
 - Blockers/owner actions: none.
 - Changed files: `lib/revenue/dashboard.ts`,
+  `services/revenue-dashboard.service.ts`,
   `app/api/dashboard/revenue/route.ts`, `tests/revenue-dashboard.test.ts`,
-  `tests/revenue-dashboard-contract.test.ts`, E2E API health/routes,
+  `tests/revenue-dashboard-contract.test.ts`, `tests/e2e/api-health.spec.ts`,
   `ARCHITECTURE.md`, `docs/revenue-dashboard-api.md`,
   `CHANGELOG-Sprint3.md`, and this file.
-- Results: focused Dashboard suite 31/31 passed; full unit suite 114/114,
-  contract, typecheck, production build, and targeted local Preview-style E2E
-  passed; lint passed with four pre-existing warnings. The in-app browser
-  blocked the localhost URL, so the same read-only API check was completed with
-  Playwright Chromium.
-- Delivery: pending full gates, commit, push, PR, CI, and exact Preview.
-- Last commit: `b8fe7c8` merged PR #16 into `main`.
-- Exact next action: review and commit the complete diff, push, open the Draft
-  PR, and validate CI plus exact-commit Preview E2E.
+- Results: focused Dashboard suite 35/35 passed; full unit suite 118/118
+  passed, including the existing Product API contract; typecheck and production
+  build passed; lint passed with four pre-existing warnings; production-mode
+  local Playwright Dashboard API E2E passed 8/8. The first direct Playwright
+  attempt failed only because no server was listening (`ECONNREFUSED`); after
+  explicitly starting the built app and confirming health, all scenarios
+  passed.
+- Delivery: PR #17 exists as Draft. The first implementation commit
+  `c6fb782b482540a95d227e2427e6fcbc371f8e5e` is pushed and its CI/Preview
+  passed; strict contract completion is pending commit, push, exact-commit CI,
+  Ready for Review, and exact Preview validation.
+- Last commit: `c6fb782 feat: add revenue dashboard API`.
+- Exact next action: commit and push strict contract completion, then validate
+  exact-commit CI and Preview before completing the PR Release Gate.
 - Remaining risks: the read service caps one Dashboard request at 10,000 source
   Products; missing Product identity or analysis timestamps remain `null`.
 

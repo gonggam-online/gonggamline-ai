@@ -25,6 +25,10 @@
 - Ranking-backed Product DTO with score, recommendation, confidence, reasons,
   status, and source analysis timestamp.
 - Limit/offset pagination and recommendation/status/minimum-score filters.
+- Strict HTTP 400 validation and a stable invalid-query error contract.
+- Dedicated Query Service and DTO Mapper that hide Ranking internals.
+- Response metadata, global rank preservation, and deterministic multi-key
+  sorting.
 - Deterministic Dashboard API unit and response-contract coverage.
 - Preview API health coverage for the new endpoint.
 

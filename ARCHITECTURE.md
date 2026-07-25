@@ -43,15 +43,17 @@ machine-explainable ordering without persistence or LLM calls.
 ```text
 GET /api/dashboard/revenue
   -> Product read service
-  -> Revenue Dashboard query/DTO adapter
+  -> Revenue Dashboard Query Service
   -> Revenue Ranking Engine
        -> Revenue Score Engine
        -> Revenue Calculation Engine
+  -> Revenue Dashboard DTO Mapper
 ```
 
-The Dashboard API is a read-only projection. It does not persist rankings,
-create jobs, or duplicate financial calculations. The adapter filters, sorts
-by `rankingScore DESC`, paginates, and serializes the Ranking Engine result.
+The route validates HTTP input and delegates without business logic. The Query
+Service reads Products once, invokes Ranking once, filters, performs the stable
+Dashboard sort, paginates, and maps the public DTO. The Dashboard API does not
+persist rankings, create jobs, or duplicate financial calculations.
 `lastAnalyzedAt` is copied from the existing Product competition analysis
 timestamp and remains `null` when the source timestamp is unavailable.
 

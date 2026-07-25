@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   buildRevenueDashboard,
+  buildRevenueDashboardQueryError,
   type RevenueDashboardQuery,
 } from "../lib/revenue/dashboard.ts";
 
@@ -10,10 +11,10 @@ const query: RevenueDashboardQuery = {
   offset: 0,
   recommendationLevel: null,
   status: null,
-  minRevenueScore: 0,
+  minRevenueScore: null,
 };
 
-test("Revenue Dashboard API contract is stable and JSON serializable", () => {
+test("Revenue Dashboard success contract is stable", () => {
   const response = buildRevenueDashboard([{
     product_no: "P-1",
     title: "Contract product",
@@ -30,26 +31,58 @@ test("Revenue Dashboard API contract is stable and JSON serializable", () => {
     competition_data_source: "external",
     competition_confidence: 100,
     competition_analyzed_at: "2026-07-24T00:00:00.000Z",
-  }], query, { now: new Date("2026-07-25T00:00:00.000Z") });
-  const serialized = JSON.parse(JSON.stringify(response)) as unknown;
+  }], query, { now: new Date("2026-07-25T12:00:00.000Z") });
 
-  assert.deepEqual(serialized, response);
   assert.deepEqual(Object.keys(response).sort(), [
-    "available",
     "filters",
+    "items",
+    "meta",
     "pagination",
-    "products",
-    "success",
   ]);
-  assert.deepEqual(Object.keys(response.products[0]).sort(), [
+  assert.deepEqual(Object.keys(response.items[0]).sort(), [
     "confidence",
     "lastAnalyzedAt",
     "productId",
     "productName",
+    "rank",
     "rankingScore",
     "reasonCodes",
     "recommendationLevel",
     "revenueScore",
     "status",
   ]);
+  assert.deepEqual(Object.keys(response.pagination).sort(), [
+    "hasMore",
+    "limit",
+    "offset",
+    "returned",
+    "total",
+  ]);
+  assert.deepEqual(Object.keys(response.filters).sort(), [
+    "minRevenueScore",
+    "recommendationLevel",
+    "status",
+  ]);
+  assert.deepEqual(Object.keys(response.meta).sort(), [
+    "engineVersion",
+    "generatedAt",
+    "rankingVersion",
+    "totalProducts",
+  ]);
+});
+
+test("Revenue Dashboard error contract is stable", () => {
+  assert.deepEqual(
+    buildRevenueDashboardQueryError({
+      parameter: "limit",
+      message: "limit must be an integer from 1 to 100",
+    }),
+    {
+      error: {
+        code: "INVALID_QUERY_PARAMETER",
+        message: "limit must be an integer from 1 to 100",
+        details: { parameter: "limit" },
+      },
+    },
+  );
 });

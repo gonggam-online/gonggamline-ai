@@ -1,6 +1,7 @@
 import {
   rankProductsByRevenue,
   type RevenueRankingReasonCode,
+  type RevenueRankingResult,
   type RevenueRecommendationLevel,
 } from "./ranking.ts";
 import type { RevenueScoreStatus } from "./score.ts";
@@ -14,7 +15,6 @@ const RECOMMENDATION_LEVELS = new Set<RevenueRecommendationLevel>([
   "WATCH",
   "NOT_RECOMMENDED",
 ]);
-
 const REVENUE_STATUSES = new Set<RevenueScoreStatus>([
   "ready",
   "estimated",
@@ -27,10 +27,11 @@ export type RevenueDashboardQuery = {
   offset: number;
   recommendationLevel: RevenueRecommendationLevel | null;
   status: RevenueScoreStatus | null;
-  minRevenueScore: number;
+  minRevenueScore: number | null;
 };
 
-export type RevenueDashboardProduct = {
+export type RevenueDashboardDto = {
+  rank: number;
   productId: string | null;
   productName: string | null;
   rankingScore: number;
@@ -43,69 +44,162 @@ export type RevenueDashboardProduct = {
 };
 
 export type RevenueDashboardResponse = {
-  success: true;
-  available: true;
-  filters: RevenueDashboardQuery;
+  items: RevenueDashboardDto[];
   pagination: {
     limit: number;
     offset: number;
-    totalCount: number;
-    returnedCount: number;
-    hasNextPage: boolean;
+    total: number;
+    returned: number;
+    hasMore: boolean;
   };
-  products: RevenueDashboardProduct[];
+  filters: {
+    recommendationLevel: RevenueRecommendationLevel | null;
+    status: RevenueScoreStatus | null;
+    minRevenueScore: number | null;
+  };
+  meta: {
+    generatedAt: string;
+    engineVersion: null;
+    rankingVersion: null;
+    totalProducts: number;
+  };
 };
 
-function boundedInteger(
-  value: string | null,
+export type RevenueDashboardQueryError = {
+  parameter: keyof RevenueDashboardQuery;
+  message: string;
+};
+
+export type RevenueDashboardQueryParseResult =
+  | { ok: true; value: RevenueDashboardQuery }
+  | { ok: false; error: RevenueDashboardQueryError };
+
+export function buildRevenueDashboardQueryError(
+  error: RevenueDashboardQueryError,
+) {
+  return {
+    error: {
+      code: "INVALID_QUERY_PARAMETER" as const,
+      message: error.message,
+      details: { parameter: error.parameter },
+    },
+  };
+}
+
+function invalid(
+  parameter: RevenueDashboardQueryError["parameter"],
+  message: string,
+): RevenueDashboardQueryParseResult {
+  return { ok: false, error: { parameter, message } };
+}
+
+function parseInteger(
+  params: URLSearchParams,
+  parameter: "limit" | "offset",
   fallback: number,
   minimum: number,
   maximum: number,
-): number {
-  if (value === null || value.trim() === "") return fallback;
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return fallback;
-  return Math.min(maximum, Math.max(minimum, Math.floor(parsed)));
+): number | RevenueDashboardQueryParseResult {
+  const raw = params.get(parameter);
+  if (raw === null) return fallback;
+  if (raw.trim() === "") {
+    return invalid(
+      parameter,
+      `${parameter} must be an integer from ${minimum} to ${maximum}`,
+    );
+  }
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed < minimum || parsed > maximum) {
+    return invalid(
+      parameter,
+      `${parameter} must be an integer from ${minimum} to ${maximum}`,
+    );
+  }
+  return parsed;
 }
 
-function boundedScore(value: string | null): number {
-  if (value === null || value.trim() === "") return 0;
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return 0;
-  return Math.min(100, Math.max(0, parsed));
-}
-
-function recommendationFilter(
-  value: string | null,
-): RevenueRecommendationLevel | null {
-  return value !== null
-      && RECOMMENDATION_LEVELS.has(value as RevenueRecommendationLevel)
-    ? value as RevenueRecommendationLevel
-    : null;
-}
-
-function statusFilter(value: string | null): RevenueScoreStatus | null {
-  return value !== null && REVENUE_STATUSES.has(value as RevenueScoreStatus)
-    ? value as RevenueScoreStatus
-    : null;
+function parseMinimumScore(
+  params: URLSearchParams,
+): number | null | RevenueDashboardQueryParseResult {
+  const raw = params.get("minRevenueScore");
+  if (raw === null) return null;
+  if (raw.trim() === "") {
+    return invalid(
+      "minRevenueScore",
+      "minRevenueScore must be a number from 0 to 100",
+    );
+  }
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
+    return invalid(
+      "minRevenueScore",
+      "minRevenueScore must be a number from 0 to 100",
+    );
+  }
+  return parsed;
 }
 
 export function parseRevenueDashboardQuery(
   params: URLSearchParams,
-): RevenueDashboardQuery {
+): RevenueDashboardQueryParseResult {
+  const limit = parseInteger(
+    params,
+    "limit",
+    REVENUE_DASHBOARD_DEFAULT_LIMIT,
+    1,
+    REVENUE_DASHBOARD_MAX_LIMIT,
+  );
+  if (typeof limit !== "number") return limit;
+
+  const offset = parseInteger(
+    params,
+    "offset",
+    0,
+    0,
+    Number.MAX_SAFE_INTEGER,
+  );
+  if (typeof offset !== "number") return offset;
+
+  const rawRecommendation = params.get("recommendationLevel");
+  if (
+    rawRecommendation !== null
+    && !RECOMMENDATION_LEVELS.has(
+      rawRecommendation as RevenueRecommendationLevel,
+    )
+  ) {
+    return invalid(
+      "recommendationLevel",
+      "recommendationLevel is not supported",
+    );
+  }
+
+  const rawStatus = params.get("status");
+  if (
+    rawStatus !== null
+    && !REVENUE_STATUSES.has(rawStatus as RevenueScoreStatus)
+  ) {
+    return invalid("status", "status is not supported");
+  }
+
+  const minRevenueScore = parseMinimumScore(params);
+  if (
+    typeof minRevenueScore === "object"
+    && minRevenueScore !== null
+    && "ok" in minRevenueScore
+  ) {
+    return minRevenueScore;
+  }
+
   return {
-    limit: boundedInteger(
-      params.get("limit"),
-      REVENUE_DASHBOARD_DEFAULT_LIMIT,
-      1,
-      REVENUE_DASHBOARD_MAX_LIMIT,
-    ),
-    offset: boundedInteger(params.get("offset"), 0, 0, 1_000_000),
-    recommendationLevel: recommendationFilter(
-      params.get("recommendationLevel"),
-    ),
-    status: statusFilter(params.get("status")),
-    minRevenueScore: boundedScore(params.get("minRevenueScore")),
+    ok: true,
+    value: {
+      limit,
+      offset,
+      recommendationLevel:
+        rawRecommendation as RevenueRecommendationLevel | null,
+      status: rawStatus as RevenueScoreStatus | null,
+      minRevenueScore,
+    },
   };
 }
 
@@ -125,69 +219,100 @@ function analyzedAt(product: Record<string, unknown>): string | null {
   return typeof value === "string" && value.trim() !== "" ? value : null;
 }
 
+function compareNullableScore(
+  left: number | null,
+  right: number | null,
+): number {
+  return (right ?? Number.NEGATIVE_INFINITY)
+    - (left ?? Number.NEGATIVE_INFINITY);
+}
+
+export function compareRevenueDashboardRanking(
+  left: RevenueRankingResult,
+  right: RevenueRankingResult,
+): number {
+  return right.rankingScore - left.rankingScore
+    || compareNullableScore(left.revenueScore, right.revenueScore)
+    || right.confidence - left.confidence
+    || left.rank - right.rank
+    || (left.productId ?? "").localeCompare(right.productId ?? "");
+}
+
+export function mapRevenueDashboardDto(
+  ranking: RevenueRankingResult,
+  lastAnalyzedAt: string | null,
+): RevenueDashboardDto {
+  return {
+    rank: ranking.rank,
+    productId: ranking.productId,
+    productName: ranking.productName,
+    rankingScore: ranking.rankingScore,
+    revenueScore: ranking.revenueScore,
+    recommendationLevel: ranking.recommendationLevel,
+    confidence: ranking.confidence,
+    reasonCodes: [...ranking.reasonCodes],
+    status: ranking.status,
+    lastAnalyzedAt,
+  };
+}
+
 export function buildRevenueDashboard(
   products: readonly Record<string, unknown>[],
   query: RevenueDashboardQuery,
   options: { now?: Date } = {},
 ): RevenueDashboardResponse {
+  const generatedAt = options.now ?? new Date();
   const analyzedAtByProductId = new Map<string, string | null>();
   for (const product of products) {
     const id = productIdentity(product);
     if (id !== null) analyzedAtByProductId.set(id, analyzedAt(product));
   }
 
-  const filtered = rankProductsByRevenue(products, options)
-    .filter((product) =>
+  const rankings = rankProductsByRevenue(products, { now: generatedAt });
+  const filtered = rankings
+    .filter((item) =>
       query.recommendationLevel === null
-      || product.recommendationLevel === query.recommendationLevel
+      || item.recommendationLevel === query.recommendationLevel
     )
-    .filter((product) =>
-      query.status === null || product.status === query.status
+    .filter((item) => query.status === null || item.status === query.status)
+    .filter((item) =>
+      query.minRevenueScore === null
+      || (
+        item.revenueScore !== null
+        && item.revenueScore >= query.minRevenueScore
+      )
     )
-    .filter((product) =>
-      product.revenueScore !== null
-      && product.revenueScore >= query.minRevenueScore
-    )
-    .sort((left, right) =>
-      right.rankingScore - left.rankingScore || left.rank - right.rank
-    );
+    .sort(compareRevenueDashboardRanking);
 
   const page = filtered.slice(query.offset, query.offset + query.limit);
-  const dashboardProducts = page.map(
-    ({
-      productId,
-      productName,
-      rankingScore,
-      revenueScore,
-      recommendationLevel,
-      confidence,
-      reasonCodes,
-      status,
-    }): RevenueDashboardProduct => ({
-      productId,
-      productName,
-      rankingScore,
-      revenueScore,
-      recommendationLevel,
-      confidence,
-      reasonCodes,
-      status,
-      lastAnalyzedAt:
-        productId === null ? null : analyzedAtByProductId.get(productId) ?? null,
-    }),
+  const items = page.map((ranking) =>
+    mapRevenueDashboardDto(
+      ranking,
+      ranking.productId === null
+        ? null
+        : analyzedAtByProductId.get(ranking.productId) ?? null,
+    )
   );
 
   return {
-    success: true,
-    available: true,
-    filters: query,
+    items,
     pagination: {
       limit: query.limit,
       offset: query.offset,
-      totalCount: filtered.length,
-      returnedCount: dashboardProducts.length,
-      hasNextPage: query.offset + dashboardProducts.length < filtered.length,
+      total: filtered.length,
+      returned: items.length,
+      hasMore: query.offset + items.length < filtered.length,
     },
-    products: dashboardProducts,
+    filters: {
+      recommendationLevel: query.recommendationLevel,
+      status: query.status,
+      minRevenueScore: query.minRevenueScore,
+    },
+    meta: {
+      generatedAt: generatedAt.toISOString(),
+      engineVersion: null,
+      rankingVersion: null,
+      totalProducts: rankings.length,
+    },
   };
 }
