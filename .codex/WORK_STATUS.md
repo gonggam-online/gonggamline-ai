@@ -2,116 +2,104 @@
 
 ## Objective
 
-Build a restartable engineering operating system, audit the application and database contracts, and prepare the next three revenue-oriented sprints without production writes or schema changes.
+Fix the Production migration failure caused by the
+`products.competition_analysis_status` CHECK constraint without changing the
+meaning of existing competition analyses.
 
 ## Current branch
 
-`codex/chore/codex-engineering-system`
+`codex/codex/fix-competition-status-migration`
 
 ## Risk level
 
-Normal-risk: documentation, templates, static audit, and validation only. This branch already contains commit `c75a7c1` (Supabase read relationship alignment) from before this session; it must be reviewed as part of the PR.
+High-risk: `supabase/migrations/**` changes a Production database constraint.
+The PR requires `manual-merge-required` and must not use auto-merge.
 
-## Scope
+## Scope and non-goals
 
-- Repository operating rules and reusable task/session/review templates
-- Project map, architecture, development, deployment, testing, database, and operations guides
-- Static API/database consistency and technical-debt audit
-- Revenue roadmap, three sprint plans, backlog, and exact next actions
-- Full local verification, push, Draft PR, and Preview checks where available
+- Align migration `003` with the canonical states in migration `004` and current
+  application behavior.
+- Add a regression test for migration/code compatibility.
+- Do not mutate Production, apply migrations, change RLS/auth, change API
+  contracts, or rename valid analysis states.
 
-## Non-goals
+## Root-cause class
 
-- Migrations, RLS, authentication/authorization, secrets, or environment configuration
-- Production data mutation or real Coupang/order/inventory/supplier operations
-- API contract changes, broad refactors, feature deletion, test skips, or auto-merge
+Database migration ordering. Migration `003` attempts to create the older
+three-state constraint before migration `004` can expand it. Existing
+`estimated` rows therefore make `003` fail.
 
-## Progress checklist
+## Evidence
 
-- [x] Confirm safe non-main branch and clean starting tree
-- [x] Read request, `AGENTS.md`, and all `.ai` documents
-- [x] Inventory configuration, workflows, routes, services, migrations, tests, and existing docs
-- [x] Build Codex operating documents
-- [x] Build GitHub templates
-- [x] Document repository structure and operations
-- [x] Complete API/database static audit
-- [x] Rank technical debt and roadmap
-- [x] Plan three sprints and next actions
-- [x] Review diff and run all local gates
-- [x] Commit, push, open/update Draft PR, and validate Preview
-
-## Root cause classification
-
-Current task is capability/documentation work. Audit findings must be classified external configuration → database → code before remediation.
+- `features/competition/run-analysis.ts` writes `estimated` when the market-data
+  provider uses its internal estimate.
+- `app/competition/page.tsx` counts `estimated` as analyzed.
+- `README-v2.1.md` documents `estimated` as the visible fallback analysis mode.
+- Migration `004` defines the canonical states as `pending`, `analyzed`,
+  `estimated`, `needs_data`, and `failed`.
 
 ## Completed work
 
-- Verified branch `codex/chore/codex-engineering-system` is not `main`; starting tree was clean.
-- Read the UTF-8 request and all mandatory `.ai` documents.
-- Identified existing delivery workflows and a missing `.codex` workspace/issue-template set.
-- Enumerated App Router pages/APIs, services, migrations 003–020, and test commands.
-- Built eight reusable `.codex` controls and five GitHub contribution templates.
-- Added code-backed project/architecture/development/deployment/testing/database/operations guides.
-- Recorded the missing pre-003 schema baseline, query coupling, coverage gaps, and delivery dependencies.
-- Ranked the roadmap and prepared three revenue-oriented sprints with exact tickets and non-goals.
+- Confirmed a clean non-main branch and fast-forwarded it to merged PR #11.
+- Read repository, risk, development, delivery, and browser instructions.
+- Searched every code and migration reference to the status.
+- Classified `estimated` as a valid completed-analysis state, not a rename of
+  `pending`.
+- Updated migration `003` to accept the canonical five-state set.
+- Added migration/application contract regression coverage and a changelog.
 
 ## Current work
 
-Session deliverables are complete; final status checkpoint is being committed.
+Implementation and delivery validation are complete. PR #12 is awaiting manual
+review and merge.
 
-## Blockers
+## Blockers and owner actions
 
-None for local documentation and static audit.
+No implementation blocker. Migration execution against Production remains an
+owner-reviewed action after PR approval.
 
-## User action required
+## Changed files
 
-None currently. Vercel/GitHub owner actions will be recorded only if delivery checks expose a configuration blocker.
+- `supabase/migrations/003_coupang_competition_analysis.sql`
+- `tests/competition-status-migration.test.ts`
+- `CHANGELOG-Competition-Status-Migration.md`
+- `.codex/WORK_STATUS.md`
 
-## Files changed
+## Commands and test results
 
-`AGENTS.md`, `.ai/current-sprint.md`, `.codex/**`, `.github/**`, root guides/audit/roadmap/changelog, and `docs/planning/**`.
-
-## Commands executed
-
-- `git branch --show-current`
-- `git status --short --branch`
-- `git diff --stat origin/main...HEAD`
-- Repository inventories with `rg`, `Get-ChildItem`, and `Get-Content`
-- `git diff --check`
-- `npm.cmd run lint`
-- `npm.cmd run typecheck`
-- `npm.cmd test`
-- `npm.cmd run build`
-- `npm.cmd run test:e2e:local`
-- GitHub CI run `30084543162`
-- Preview browser run `30084543191`
-
-## Test results
-
-- Diff check: passed.
-- Lint: passed.
-- Typecheck: passed.
-- Unit/integration: 13 passed, 0 failed, 0 skipped; Node reported a module-type performance warning.
-- Production build: passed; Next.js generated 65 route entries.
-- Local Playwright: 24 tests executed; 7 page-health failures and command timeout. `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace` observed API 500 responses because local Supabase is explicitly unconfigured (`missing_url`). This is an external configuration condition, not a code workaround target. Failure artifacts are under `test-results/`.
-- GitHub CI: passed.
-- Exact Vercel Preview `https://gonggamline-qfctfznhb-gg-online.vercel.app`: Ready and accessible through the configured bypass secret.
-- Preview Playwright: 24 passed in 52 seconds; no reported page/console/request failures. Evidence artifact: `preview-browser-evidence` (run `30084543191`, artifact `8593186249`).
-- CI dependency install reported 3 high-severity vulnerabilities; triage is recorded in `TECH_DEBT.md` and no unsafe forced upgrade was attempted.
+- Repository searches, migration history, blame, and PR history: completed.
+- `git diff --check`: passed.
+- Focused migration contract tests: 2 passed.
+- `npm.cmd run lint`: passed.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd test`: 15 passed, 0 failed.
+- `npm.cmd run build`: passed; 65 route entries generated.
+- `npm.cmd run test:e2e:local`: 17 passed and 7 failed. `/competition`
+  and all revenue-critical checks passed. The failures are the pre-existing
+  local Supabase `missing_url` external-configuration condition affecting
+  `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
+  and `/workspace`; failure artifacts are under `test-results/`.
+- GitHub CI run `30138920955`: passed for exact commit `db5dcaa`.
+- Preview browser run `30138920962`: passed, including exact-commit Preview
+  resolution, access verification, and non-destructive browser checks.
+- Preview evidence: artifact `preview-browser-evidence`, ID `8613811782`.
+- PR: #12, Draft, mergeable, labeled `manual-merge-required`; auto-merge is
+  prohibited.
 
 ## Last commit
 
-`5261ad2 docs: establish engineering operating system` (plus pre-existing `c75a7c1` in local history; current PR diff contains the documentation commit).
+`db5dcaa fix: align competition analysis status constraint`
 
-## Next exact action
+## Exact next action
 
-Begin S1-01 from `docs/planning/NEXT_ACTIONS.md` on a new clean task branch after PR #11 is manually reviewed.
+Owner reviews PR #12 and the Production migration history, then manually merges
+and applies the approved migration through the normal Supabase deployment path.
 
 ## Remaining risks
 
-- Static analysis cannot prove the deployed Supabase schema matches migrations.
-- Existing branch commit must pass full validation and Preview checks.
-- Preview automation depends on GitHub/Vercel deployment and bypass-secret configuration.
-- Static query inventory may miss dynamic SQL or external consumers; no column removal is authorized from this audit.
-- Local full-page Playwright cannot pass until a safe test Supabase URL and anon key are supplied; never commit or print them.
-- `npm ci` reports 3 high-severity dependency vulnerabilities requiring focused audit and upgrade review.
+- Production could contain an undocumented status beyond the five states; the
+  supplied inspection found only 12 `estimated` rows causing this failure.
+- Editing an unapplied migration is safe for the reported ordering failure, but
+  manual review must confirm Production migration history before execution.
+- Full local browser validation requires a safe configured Supabase environment;
+  exact-commit Vercel Preview validation remains required.
