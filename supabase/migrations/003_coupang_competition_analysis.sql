@@ -24,7 +24,7 @@ alter table public.products
 
 alter table public.products drop constraint if exists products_competition_analysis_status_check;
 alter table public.products add constraint products_competition_analysis_status_check
-  check (competition_analysis_status in ('pending', 'analyzed', 'needs_data'));
+  check (competition_analysis_status in ('pending', 'analyzed', 'estimated', 'needs_data', 'failed'));
 
 alter table public.products drop constraint if exists products_competition_grade_check;
 alter table public.products add constraint products_competition_grade_check
