@@ -1,5 +1,46 @@
 # Work status
 
+## Current task snapshot
+
+- Objective: implement the Sprint 2 Revenue Calculation Engine from existing
+  Product data, with deterministic states, an opt-in Product API DTO, tests,
+  and documentation.
+- Branch: `codex/feat/revenue-calculation-engine`
+- Risk: high-risk because repository policy classifies pricing and margin
+  calculation changes as high-risk; `manual-merge-required`, no auto-merge.
+- Root-cause class: code/capability gap. Product inputs exist, but no shared
+  strict calculation/readiness contract existed.
+- Scope: pure calculations, Product mapper, opt-in read DTO, tests, docs.
+- Non-goals: migrations, DB writes, ROI invention, Revenue Score,
+  Competition/Discovery/Workflow/Runtime changes.
+- Completed: fast-forwarded to merged PR #13; audited readiness/schema/code and
+  Next.js 16 guidance; implemented calculation, state/evidence model, mapper,
+  opt-in API response, tests, contract docs, and Sprint 2 changelog.
+- Current work: record delivery evidence and validate the resulting exact
+  status-only commit.
+- Blockers/owner actions: none. Unknown Production nullability is represented
+  as `incomplete` or `invalid` rather than assumed.
+- Changed files: `lib/revenue/calculation.ts`,
+  `app/api/products/route.ts`, `tests/revenue-calculation.test.ts`,
+  `docs/revenue-calculation.md`, `CHANGELOG-Sprint2.md`, and this file.
+- Results: targeted Revenue tests 12 passed; typecheck passed; lint passed with
+  warnings only from pre-existing untracked Playwright output; full unit suite
+  passed; production build passed. Local `/` and `/revenue` rendered meaningful
+  headings with no browser console errors. Default and opt-in Product API calls
+  returned HTTP 200 with the preserved unconfigured-Supabase response.
+- Delivery: implementation commit `89bf6fa` pushed. Draft PR #14 created with
+  `manual-merge-required`; auto-merge is disabled. CI run `30142813367`
+  succeeded. Exact-commit Preview
+  `https://gonggamline-gvectt84u-gg-online.vercel.app` passed all 24 browser
+  checks in run `30142813354`; evidence artifact `8615036120`.
+- Last commit: `89bf6fa feat: add revenue calculation engine`.
+- Exact next action: commit and push this delivery evidence, then validate the
+  resulting exact status-only commit.
+- Remaining risks: stored cost provenance/freshness is absent; fee amount/rate
+  precedence remains intentionally unresolved on conflict; ROI is undefined.
+
+## Previous task snapshot
+
 ## Objective
 
 Audit Product Data Readiness for the Revenue Opportunity Engine and make only
