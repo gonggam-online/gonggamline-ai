@@ -2,6 +2,49 @@
 
 ## Current task snapshot
 
+- Objective: complete Story 3-5 Revenue Dashboard Release Hardening after
+  Story 3-4 Production verification.
+- Branch: `codex/chore/revenue-dashboard-release-hardening`.
+- Risk: normal-risk. Tests, browser evidence, documentation, and generated-file
+  hygiene only.
+- Revenue impact: P0/P2 release safety. Regression and rollback evidence reduce
+  deployment risk and shorten recovery while preserving operator availability.
+- Root-cause class: release assurance gap. Functionality is complete, but final
+  cross-layer invariants, limitations, rollback, architecture, and evidence
+  hygiene need explicit verification.
+- Scope: regression/contract tests, browser/network/accessibility/performance
+  review, screenshot evidence, architecture/changelog/status, limitations,
+  rollback, and generated output ignores.
+- Non-goals: new feature, API redesign, DB/migration, Revenue engine change,
+  Runtime, environment, or external write.
+- Completed: squash-merged Story 3-4 PR #21 at `54ded32`, passed Production
+  Revenue smoke 10/10 after propagation attempt 2, created the hardening branch,
+  added cross-layer release tests, screenshot evidence, architecture,
+  limitations/rollback docs, changelog, and generated-output ignores.
+- Current work: local release gates complete; prepare the release-hardening
+  commit and exact deployed validation.
+- Blockers/owner actions: none.
+- Changed files: release regression test, Revenue E2E, `.gitignore`,
+  `ARCHITECTURE.md`, release/rollback docs, Sprint 3 changelog, and status.
+- Commands/results: release-boundary tests 8/8 and full unit 191/191 passed;
+  typecheck passed; lint passed with four pre-existing warnings and no errors;
+  production build passed with 67 routes; `git diff --check` passed. Full local
+  Chromium ran 38 checks: 31 passed, including all Revenue Dashboard API/UI,
+  search, filter, pagination, refresh, retry, duplicate-network, accessibility,
+  mobile, and screenshot scenarios. Seven known external-configuration checks
+  failed because local Supabase is unconfigured: `/listing`, `/market`,
+  `/procurement`, legacy `/revenue`, `/sourcing`, `/workflow`, `/workspace`.
+  Their APIs returned HTTP 500 as designed; evidence is retained under ignored
+  `test-results/`. No code compensation is appropriate.
+- Delivery: not committed, pushed, or opened as a PR yet.
+- Last commit: `54ded32 feat: harden Revenue Dashboard operational UX (#21)`.
+- Exact next action: commit, push, open the hardening PR, and require configured
+  exact-head Preview to pass the complete browser suite before squash merge.
+- Remaining risks: full local all-route E2E may retain known external Supabase
+  configuration failures; exact Preview remains the deployed release gate.
+
+## Previous task snapshot
+
 - Objective: implement Story 3-4 Revenue Dashboard Operational UX after
   Story 3-3 Production verification.
 - Branch: `codex/feat/revenue-dashboard-operational-ux`.
