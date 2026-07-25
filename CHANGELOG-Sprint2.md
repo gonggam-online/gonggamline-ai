@@ -24,3 +24,23 @@
 - Competition, Discovery, Workflow, Runtime 알고리즘
 - 기본 `GET /api/products` 응답 계약
 - ROI 정의와 Revenue Score
+
+# Sprint 2 - Revenue Score Engine
+
+## Added
+
+- Pure, explainable `0..100` Revenue Score based on the existing Revenue
+  Calculation result, search demand, competition, optional supply stability,
+  and data quality.
+- Explicit factor weights, normalization thresholds, confidence penalties,
+  missing factors, assumptions, and score status.
+- Opt-in `GET /api/products?includeRevenueScore=true` response enrichment.
+- Revenue Score contract documentation and focused boundary, normalization,
+  weighting, missing-data, and confidence tests.
+
+## Unchanged
+
+- Revenue Calculation formulas and API option.
+- Database schema, migrations, stored Product data, Production, Runtime Queue,
+  Workers, marketplace behavior, and public Product API responses by default.
+- No LLM calls, AI recommendation prose, or DB persistence.

@@ -34,6 +34,8 @@ export async function GET(request: Request) {
     };
     const includeRevenueCalculation =
       params.get("includeRevenueCalculation") === "true";
+    const includeRevenueScore =
+      params.get("includeRevenueScore") === "true";
     const page = parseNumber(params.get("page"), 1, 1, 100000);
     const size = parseNumber(params.get("size"), 20, 1, 100);
     const start = (page - 1) * size;
@@ -52,6 +54,10 @@ export async function GET(request: Request) {
         "@/lib/revenue/calculation"
       );
       products = attachRevenueCalculations(products);
+    }
+    if (includeRevenueScore) {
+      const { attachRevenueScores } = await import("@/lib/revenue/score");
+      products = attachRevenueScores(products);
     }
 
     return Response.json({

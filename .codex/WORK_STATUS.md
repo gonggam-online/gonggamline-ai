@@ -2,6 +2,58 @@
 
 ## Current task snapshot
 
+- Objective: implement a pure, explainable Revenue Score Engine that reuses the
+  Revenue Calculation result and adds an opt-in Product API DTO.
+- Branch: `codex/feat/revenue-score-engine`
+- Risk: high-risk because the score ranks products using profit and margin;
+  `manual-merge-required`, no auto-merge.
+- Revenue impact: P1 decision support. The score makes profitable, demanded,
+  lower-competition products comparable without creating marketplace writes.
+- Root-cause class: code/capability gap. Revenue Calculation is merged and
+  reusable, but no shared explainable Product sales-priority score exists.
+- Scope: pure normalization, weighted score, confidence, missing factors,
+  assumptions, Product mapper, opt-in read DTO, tests, docs.
+- Non-goals: migrations, DB or Production writes, LLM calls, recommendation
+  prose, Runtime/Worker/Queue behavior, price or margin formula changes.
+- Completed: read binding repository/Next.js/GitHub/browser instructions;
+  confirmed the requested non-main branch; preserved pre-existing untracked
+  Playwright output; confirmed PR #14 merged; audited Revenue Calculation,
+  Product API, Product/Competition fields, migrations, and current tests;
+  implemented the typed score engine, Product mapper, opt-in API enrichment,
+  contract documentation, changelog, and 21 focused tests.
+- Current work: record final delivery evidence and validate the status-only
+  exact commit.
+- Blockers/owner actions: `gh` CLI is not installed; GitHub connector access is
+  available and will be used where possible. No validated Product supply
+  stability score exists, so that optional factor will be excluded instead of
+  inferred from `supply_available`.
+- Changed files: `lib/revenue/score.ts`, `app/api/products/route.ts`,
+  `tests/revenue-score.test.ts`, `docs/revenue-score.md`,
+  `CHANGELOG-Sprint2.md`, and this file.
+- Results: 21 focused Revenue Score tests passed; typecheck, lint, full unit
+  suite, and production build passed. Lint reported only pre-existing warnings
+  from untracked `playwright-report` generated assets. Local Browser rendered
+  `/` and `/revenue` with meaningful headings and no console errors. Default,
+  Revenue Calculation, Revenue Score, and combined Product API opt-ins all
+  preserved HTTP 200 safe unconfigured responses. Read-only revenue-critical
+  and API health Playwright E2E passed 9/9 using a separate temporary output
+  path.
+- Delivery: implementation commit `a88519d` pushed. PR #15 was created as
+  Draft with `manual-merge-required`, then changed to Ready for Review after
+  all gates passed. Auto-merge remains disabled. CI run `30143693293` passed.
+  Exact-commit Preview
+  `https://gonggamline-cl45dl4hv-gg-online.vercel.app` passed 24/24 browser
+  checks in run `30143693267`; evidence artifact `8615315331`, SHA-256
+  `4e9fcb496519599cc27175210e1e8e4913e6feb8978b4ef09a0ae1ec59f2cb44`.
+  PR Merge Recommendation is `SAFE TO MERGE`.
+- Last commit: `a88519d feat: add revenue score engine`.
+- Exact next action: commit and push this delivery evidence, then validate the
+  resulting exact status-only commit before final reporting.
+- Remaining risks: Product search/competition provenance and freshness are
+  incomplete; missing/estimated inputs must lower confidence visibly.
+
+## Previous task snapshot
+
 - Objective: implement the Sprint 2 Revenue Calculation Engine from existing
   Product data, with deterministic states, an opt-in Product API DTO, tests,
   and documentation.
@@ -39,7 +91,7 @@
 - Remaining risks: stored cost provenance/freshness is absent; fee amount/rate
   precedence remains intentionally unresolved on conflict; ROI is undefined.
 
-## Previous task snapshot
+## Earlier task snapshot
 
 ## Objective
 
