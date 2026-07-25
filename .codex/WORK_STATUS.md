@@ -2,6 +2,49 @@
 
 ## Current task snapshot
 
+- Objective: build the Sprint 3 shared Dashboard Foundation for Revenue,
+  Upload Queue, Product, and AI Recommendation dashboards.
+- Branch: `codex/feat/dashboard-foundation`.
+- Risk: normal-risk. This is presentation UI, documentation, and tests only.
+- Revenue impact: P3 enabling work. It shortens later Revenue Dashboard delivery
+  and prevents duplicate UI/state patterns across operational dashboards.
+- Root-cause class: code/capability gap. Domain engines and the read-only
+  Dashboard API exist, but reusable Dashboard presentation primitives do not.
+- Scope: layout, header, content, toolbar, section, card, empty/error/loading
+  states, pagination, shared styling, architecture docs, and at least 20 tests.
+- Non-goals: Revenue table/card/page, API calls or changes, global state,
+  Context, DB/migrations, Queue, Workers, OpenAI, and commerce writes.
+- Completed: read repository, `.ai`, Next.js 16, GitHub delivery, and browser
+  rules; confirmed the requested non-main branch; classified risk; audited the
+  current UI/style/test structure; designed and implemented presentation-only
+  Dashboard primitives, responsive styling, architecture documentation, and
+  25 SSR rendering/accessibility/props/state/boundary tests. Reviewed the
+  complete change surface and confirmed no API, service, engine, migration, DB,
+  Queue, Worker, OpenAI, or commerce-write files changed.
+- Current work: commit, push, open the PR, and validate exact-commit CI/Preview.
+- Blockers/owner actions: GitHub CLI is unavailable on the current PATH. The
+  GitHub connector or an installed CLI path will be used for PR delivery.
+- Changed files: `components/dashboard/dashboard.tsx`,
+  `components/dashboard/index.ts`, `app/globals.css`,
+  `tests/dashboard-foundation.test.tsx`, `docs/dashboard-ui-architecture.md`,
+  `package.json`, `package-lock.json`, `CHANGELOG-Sprint3.md`, and this file.
+- Commands/results: focused Foundation tests 25/25 passed; full unit suite
+  143/143 passed; typecheck passed; production build passed; lint passed with
+  four pre-existing Revenue-test warnings and no errors; `git diff --check`
+  passed. Local Playwright completed 32 cases: 25 passed and 7 existing
+  Supabase-dependent routes failed because local Supabase is unconfigured
+  (`/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
+  `/workspace`). Failure traces, screenshots, and video are in `test-results/`.
+- Delivery: not yet committed or pushed; no Dashboard Foundation PR yet.
+- Last commit: `4c4ac02 fix: enforce revenue dashboard contract` (pre-existing).
+- Exact next action: stage only Story files, commit, push, and create/update the
+  `main` PR.
+- Remaining risks: exact-commit CI and Preview are pending. Local full-route E2E
+  cannot pass until Supabase configuration is available; code must not
+  compensate for that external condition.
+
+## Previous task snapshot
+
 - Objective: implement the Sprint 3 read-only Revenue Dashboard API.
 - Branch: `codex/feat/revenue-dashboard-api`.
 - Risk: normal-risk. The endpoint is read-only analytics and does not change
