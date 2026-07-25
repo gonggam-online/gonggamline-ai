@@ -51,11 +51,23 @@ GET /api/dashboard/revenue
 ```
 
 The route validates HTTP input and delegates without business logic. The Query
-Service reads Products once, invokes Ranking once, filters, performs the stable
+Service reads Products once, applies optional Product keyword search through
+the existing read query, invokes Ranking once, filters, performs the stable
 Dashboard sort, paginates, and maps the public DTO. The Dashboard API does not
 persist rankings, create jobs, or duplicate financial calculations.
 `lastAnalyzedAt` is copied from the existing Product competition analysis
 timestamp and remains `null` when the source timestamp is unavailable.
+
+```text
+/dashboard/revenue
+  -> URL-backed local React state
+  -> GET /api/dashboard/revenue (one request per committed interaction)
+  -> summary / ranked table / loading / empty / error presentation
+```
+
+The UI never recomputes Ranking or filters only a returned page. Search,
+filters, and offset are shareable in the URL. API `generatedAt`, browser
+refresh completion, and Product `lastAnalyzedAt` are distinct timestamps.
 
 ## Reliability model
 

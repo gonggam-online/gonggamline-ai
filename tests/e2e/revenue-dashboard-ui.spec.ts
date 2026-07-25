@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type TestInfo } from "@playwright/test";
 
 const items = Array.from({ length: 21 }, (_, index) => ({
   rank: index + 1,
@@ -164,11 +164,15 @@ test("refresh suppresses duplicate clicks and retry recovers", async ({ page }) 
   await expect(page.getByText("No ranked products")).toBeVisible();
 });
 
-test("long operational content stays contained on mobile", async ({ page }) => {
+test("long operational content stays contained on mobile", async ({ page }, testInfo: TestInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/dashboard/revenue");
   await expect(page.getByRole("heading", { name: "Revenue Dashboard" })).toBeVisible();
   await expect(page.getByRole("table")).toBeVisible();
   const bodyWidth = await page.locator("body").evaluate((body) => body.scrollWidth);
   expect(bodyWidth).toBeLessThanOrEqual(390);
+  await page.screenshot({
+    path: testInfo.outputPath("revenue-dashboard-mobile.png"),
+    fullPage: true,
+  });
 });

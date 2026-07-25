@@ -1,5 +1,22 @@
 # Sprint 3 - Runtime Stabilization
 
+# Sprint 3 - Revenue Dashboard Release Hardening
+
+## Added
+
+- Cross-layer release-boundary regression tests for the single read-only API,
+  GET-only route, engine/DTO separation, local state, timestamp semantics,
+  documentation, generated evidence, and no migration/environment scope.
+- Stable mobile screenshot evidence in Revenue Dashboard browser validation.
+- Final architecture, known-limitations, and rollback documentation.
+- Playwright reports and test results are explicitly ignored.
+
+## Confirmed
+
+- No database or migration change.
+- No Ranking, Revenue Score, Revenue Calculation, Queue, Worker, OpenAI/LLM,
+  authentication, environment, marketplace, order, inventory, or payment write.
+
 # Sprint 3 - Revenue Dashboard Operational UX
 
 ## Added
