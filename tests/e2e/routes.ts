@@ -4,6 +4,7 @@ export const pageRoutes = [
   "/coupang",
   "/coupang/register",
   "/discovery",
+  "/dashboard/revenue",
   "/listing",
   "/market",
   "/os",
