@@ -12,12 +12,17 @@ Revenue Ranking without changing their formulas or persisting results.
 | --- | ---: | --- |
 | `limit` | `20` | Integer from `1` to `100` |
 | `offset` | `0` | Non-negative integer |
+| `keyword` | empty | Trimmed Product title/keyword/product-number search, at most 100 characters |
 | `recommendationLevel` | none | `STRONG_RECOMMEND`, `RECOMMEND`, `WATCH`, `NOT_RECOMMENDED` |
 | `status` | none | `ready`, `estimated`, `incomplete`, `invalid` |
 | `minRevenueScore` | none | Number from `0` to `100` |
 
 Invalid, fractional, empty, or out-of-range pagination values return HTTP 400.
 Unknown enum values and invalid minimum scores also return HTTP 400.
+
+Product keyword search reuses the existing Product query before Ranking,
+filtering, and pagination. Requests that omit `keyword` retain the original
+behavior and response DTO.
 
 ## Response
 

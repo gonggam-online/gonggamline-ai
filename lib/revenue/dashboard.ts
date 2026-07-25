@@ -25,6 +25,7 @@ const REVENUE_STATUSES = new Set<RevenueScoreStatus>([
 export type RevenueDashboardQuery = {
   limit: number;
   offset: number;
+  keyword: string;
   recommendationLevel: RevenueRecommendationLevel | null;
   status: RevenueScoreStatus | null;
   minRevenueScore: number | null;
@@ -160,6 +161,11 @@ export function parseRevenueDashboardQuery(
   );
   if (typeof offset !== "number") return offset;
 
+  const keyword = params.get("keyword")?.trim() ?? "";
+  if (keyword.length > 100) {
+    return invalid("keyword", "keyword must be at most 100 characters");
+  }
+
   const rawRecommendation = params.get("recommendationLevel");
   if (
     rawRecommendation !== null
@@ -195,6 +201,7 @@ export function parseRevenueDashboardQuery(
     value: {
       limit,
       offset,
+      keyword,
       recommendationLevel:
         rawRecommendation as RevenueRecommendationLevel | null,
       status: rawStatus as RevenueScoreStatus | null,

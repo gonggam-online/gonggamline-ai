@@ -1,5 +1,21 @@
 # Sprint 3 - Runtime Stabilization
 
+# Sprint 3 - Revenue Dashboard Search and URL State
+
+## Added
+
+- Product keyword search through the existing read-only Dashboard API and
+  Product query before Ranking pagination.
+- Shareable URL state for search, recommendation, status, minimum score, and
+  offset, including refresh and browser-history restoration.
+- Search submit/clear controls and combined search/filter/pagination E2E.
+
+## Preserved
+
+- Existing Dashboard API requests and response DTO remain compatible.
+- No client-current-page search, new calculation, DB/migration, global store,
+  engine change, or external write.
+
 # Sprint 3 - Revenue Dashboard UI v1
 
 ## Added

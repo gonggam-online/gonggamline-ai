@@ -28,14 +28,19 @@ owns only the components required by this page: summary and ranking table.
 
 ## Data flow
 
-1. Local React state holds recommendation, status, minimum score, and offset.
+1. Local React state holds submitted Product keyword, recommendation, status,
+   minimum score, and offset.
 2. The client builds a query for `/api/dashboard/revenue` with a page size of
    20 and fetches it once on entry or after an operator interaction.
 3. The API response is rendered without modifying rank, scores,
    recommendation, confidence, reason codes, status, or timestamps.
-4. Filter changes reset offset to zero. Refresh retains all filters and the
-   current page. An `AbortController` cancels superseded requests.
-5. Total Products uses `meta.totalProducts`. Strong Recommend and averages are
+4. Search submission and filter changes reset offset to zero. Refresh and
+   pagination retain all active state. The URL query string is the shareable
+   persistence boundary and is restored on initial load and browser history.
+5. Product search runs through the existing Product query before Ranking
+   pagination. The UI never filters only the returned page.
+6. An `AbortController` cancels superseded requests.
+7. Total Products uses `meta.totalProducts`. Strong Recommend and averages are
    presentation summaries of the returned result page and are visibly labeled
    `Current results`; they are not stored or treated as business metrics.
 

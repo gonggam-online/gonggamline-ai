@@ -9,6 +9,7 @@ import {
 const query: RevenueDashboardQuery = {
   limit: 20,
   offset: 0,
+  keyword: "",
   recommendationLevel: null,
   status: null,
   minRevenueScore: null,

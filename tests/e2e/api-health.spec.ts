@@ -53,6 +53,7 @@ for (const query of [
   "?recommendationLevel=RECOMMEND",
   "?status=ready",
   "?minRevenueScore=70",
+  "?keyword=Desk%20Lamp",
 ]) {
   test(`revenue dashboard contract accepts ${query || "defaults"}`, async ({
     request,
