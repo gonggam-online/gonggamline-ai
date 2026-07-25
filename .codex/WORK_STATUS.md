@@ -2,104 +2,110 @@
 
 ## Objective
 
-Fix the Production migration failure caused by the
-`products.competition_analysis_status` CHECK constraint without changing the
-meaning of existing competition analyses.
+Audit Product Data Readiness for the Revenue Opportunity Engine and make only
+the minimum evidence-backed changes without affecting Runtime behavior.
 
 ## Current branch
 
-`codex/codex/fix-competition-status-migration`
+`codex/feat/revenue-data-readiness`
 
 ## Risk level
 
-High-risk: `supabase/migrations/**` changes a Production database constraint.
-The PR requires `manual-merge-required` and must not use auto-merge.
+Normal-risk. This task changes documentation only. It does not change schema,
+price/margin calculations, APIs, Competition, AI, Workflow, or Runtime.
 
 ## Scope and non-goals
 
-- Align migration `003` with the canonical states in migration `004` and current
-  application behavior.
-- Add a regression test for migration/code compatibility.
-- Do not mutate Production, apply migrations, change RLS/auth, change API
-  contracts, or rename valid analysis states.
+- Audit Product, Competition, Market, Supplier, and Revenue schema evidence.
+- Classify required Revenue inputs as present, missing, needed, or unnecessary.
+- Audit `/api/products` and Competition API exposure.
+- Do not add a migration without evidence from the actual database.
+- Do not change recommendation algorithms, AI logic, workflow, or Runtime.
 
 ## Root-cause class
 
-Database migration ordering. Migration `003` attempts to create the older
-three-state constraint before migration `004` can expand it. Existing
-`estimated` rows therefore make `003` fail.
-
-## Evidence
-
-- `features/competition/run-analysis.ts` writes `estimated` when the market-data
-  provider uses its internal estimate.
-- `app/competition/page.tsx` counts `estimated` as analyzed.
-- `README-v2.1.md` documents `estimated` as the visible fallback analysis mode.
-- Migration `004` defines the canonical states as `pending`, `analyzed`,
-  `estimated`, `needs_data`, and `failed`.
+Database readiness/contract gap. The repository lacks the initial `products`
+DDL, so core-column nullability cannot be verified locally. Existing fields
+cover most numeric inputs, while provenance, authoritative relationships, and
+ROI semantics are not yet defined.
 
 ## Completed work
 
-- Confirmed a clean non-main branch and fast-forwarded it to merged PR #11.
-- Read repository, risk, development, delivery, and browser instructions.
-- Searched every code and migration reference to the status.
-- Classified `estimated` as a valid completed-analysis state, not a rename of
-  `pending`.
-- Updated migration `003` to accept the canonical five-state set.
-- Added migration/application contract regression coverage and a changelog.
+- Confirmed a clean non-main branch and corrected its duplicated prefix.
+- Read the mandatory repository, risk, delivery, browser, and Next.js route
+  handler guidance.
+- Audited Product storage/read/update paths and related TypeScript consumers.
+- Audited Product, Competition, Market Intelligence, Supplier, and Revenue
+  migrations.
+- Confirmed `/api/products` already returns all stored Product and Competition
+  fields.
+- Determined that migration/API/type changes are not currently justified.
+- Added the Revenue Data Readiness report and Sprint 2 changelog.
 
 ## Current work
 
-Implementation and delivery validation are complete. PR #12 is awaiting manual
-review and merge.
+Implementation, local verification, delivery, and exact-commit Preview
+validation are complete. Draft PR #13 is awaiting review.
 
 ## Blockers and owner actions
 
-No implementation blocker. Migration execution against Production remains an
-owner-reviewed action after PR approval.
+Actual `products` schema/nullability and Production data completeness require a
+read-only Supabase inspection. No Supabase connection is configured in the
+workspace, and the repository contains only an environment example.
+
+Owner inspection path if no automated read-only connection is available:
+Supabase Dashboard > project > Table Editor > `products` (columns/defaults/
+nullable), then SQL Editor for aggregate null/zero/freshness counts. Project
+URL and anon/service keys must remain secret and must not be pasted into the
+report or committed.
 
 ## Changed files
 
-- `supabase/migrations/003_coupang_competition_analysis.sql`
-- `tests/competition-status-migration.test.ts`
-- `CHANGELOG-Competition-Status-Migration.md`
+- `docs/reports/REVENUE-DATA-READINESS.md`
+- `CHANGELOG-Sprint2-Product-Data-Readiness.md`
 - `.codex/WORK_STATUS.md`
 
 ## Commands and test results
 
-- Repository searches, migration history, blame, and PR history: completed.
+- Repository/schema/API/type audit: completed.
 - `git diff --check`: passed.
-- Focused migration contract tests: 2 passed.
 - `npm.cmd run lint`: passed.
 - `npm.cmd run typecheck`: passed.
 - `npm.cmd test`: 15 passed, 0 failed.
 - `npm.cmd run build`: passed; 65 route entries generated.
-- `npm.cmd run test:e2e:local`: 17 passed and 7 failed. `/competition`
-  and all revenue-critical checks passed. The failures are the pre-existing
-  local Supabase `missing_url` external-configuration condition affecting
-  `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
-  and `/workspace`; failure artifacts are under `test-results/`.
-- GitHub CI run `30138920955`: passed for exact commit `db5dcaa`.
-- Preview browser run `30138920962`: passed, including exact-commit Preview
-  resolution, access verification, and non-destructive browser checks.
-- Preview evidence: artifact `preview-browser-evidence`, ID `8613811782`.
-- PR: #12, Draft, mergeable, labeled `manual-merge-required`; auto-merge is
-  prohibited.
+- Manual read-only browser checks: `/`, `/competition`, and `/revenue` rendered
+  meaningful headings/content; no captured browser console errors.
+- `GET /api/products`: HTTP 200 with the documented unconfigured response
+  (`available: false`, empty products).
+- `npm.cmd run test:e2e:local`: 17 passed, 7 failed. All 7 failures are the
+  existing external-configuration condition caused by absent local Supabase
+  configuration. Affected routes: `/listing`, `/market`, `/procurement`,
+  `/revenue`, `/sourcing`, `/workflow`, and `/workspace`. Revenue-critical
+  checks, Product API health, `/`, and `/competition` passed. Failure evidence
+  is under `test-results/`.
+- GitHub CI run `30140610196`: passed for exact commit `feb70ba`.
+- Exact-commit Vercel Preview:
+  `https://gonggamline-aupgdmwcl-gg-online.vercel.app`.
+- Preview browser run `30140610218`: 24 passed; no reported page, console, API,
+  or failed-request errors.
+- Preview evidence: `preview-browser-evidence`, artifact `8614330437`.
+- Production: unchanged because PR #13 is open and unmerged.
 
 ## Last commit
 
-`db5dcaa fix: align competition analysis status constraint`
+`4add6a7 docs: audit revenue product data readiness`, followed by merge commit
+`feb70ba` to incorporate the latest `origin/main` without force-pushing.
 
 ## Exact next action
 
-Owner reviews PR #12 and the Production migration history, then manually merges
-and applies the approved migration through the normal Supabase deployment path.
+Review Draft PR #13. Before a later Revenue calculation implementation,
+perform the documented read-only Supabase schema and completeness inspection.
 
 ## Remaining risks
 
-- Production could contain an undocumented status beyond the five states; the
-  supplied inspection found only 12 `estimated` rows causing this failure.
-- Editing an unapplied migration is safe for the reported ordering failure, but
-  manual review must confirm Production migration history before execution.
-- Full local browser validation requires a safe configured Supabase environment;
-  exact-commit Vercel Preview validation remains required.
+- Actual database nullability may differ from application assumptions.
+- Existing zero/default values may mean unknown rather than measured zero.
+- Product, market product, and supplier identities are not authoritatively
+  linked for Revenue Opportunity calculation.
+- ROI and cost provenance require business/data-contract approval before
+  implementation.
