@@ -22,6 +22,22 @@ App Router page
 - Infrastructure: `lib/supabase.ts`, `lib/coupang/**`, market collectors, runtime logging/error policy.
 - Persistence: ordered SQL in `supabase/migrations/**`.
 
+## Revenue decision pipeline
+
+```text
+Product rows
+  -> Revenue Calculation domain service
+  -> Revenue Score domain service
+  -> Revenue Ranking domain service
+       -> Recommendation API (future consumer)
+       -> Dashboard (future consumer)
+       -> Coupang Upload Queue (future consumer)
+```
+
+The Ranking Engine remains consumer-independent and read-only. It reuses the
+Calculation and Score contracts once per Product and exposes deterministic,
+machine-explainable ordering without persistence or LLM calls.
+
 ## Reliability model
 
 The runtime queue uses bounded attempts, explicit state transitions, locks, structured sanitized errors, and worker events. Read-only optional dashboards may expose `available: false` for known configuration/network/schema-cache unavailability. Unexpected errors remain HTTP 500. Writes must never degrade to false success.

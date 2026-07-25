@@ -36,6 +36,7 @@ export async function GET(request: Request) {
       params.get("includeRevenueCalculation") === "true";
     const includeRevenueScore =
       params.get("includeRevenueScore") === "true";
+    const includeRanking = params.get("includeRanking") === "true";
     const page = parseNumber(params.get("page"), 1, 1, 100000);
     const size = parseNumber(params.get("size"), 20, 1, 100);
     const start = (page - 1) * size;
@@ -60,7 +61,7 @@ export async function GET(request: Request) {
       products = attachRevenueScores(products);
     }
 
-    return Response.json({
+    const response = {
       success: true,
       available: true,
       filters,
@@ -73,7 +74,15 @@ export async function GET(request: Request) {
         hasNextPage: page < totalPages,
       },
       products,
-    });
+    };
+    if (includeRanking) {
+      const { rankProductsByRevenue } = await import("@/lib/revenue/ranking");
+      return Response.json({
+        ...response,
+        ranking: rankProductsByRevenue(result.products),
+      });
+    }
+    return Response.json(response);
   } catch (error) {
     const { runtimeLog } = await import("@/lib/runtime-logging");
     runtimeLog.error("products.route_failed", error);

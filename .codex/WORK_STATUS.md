@@ -2,55 +2,41 @@
 
 ## Current task snapshot
 
-- Objective: implement a pure, explainable Revenue Score Engine that reuses the
-  Revenue Calculation result and adds an opt-in Product API DTO.
-- Branch: `codex/feat/revenue-score-engine`
-- Risk: high-risk because the score ranks products using profit and margin;
-  `manual-merge-required`, no auto-merge.
-- Revenue impact: P1 decision support. The score makes profitable, demanded,
-  lower-competition products comparable without creating marketplace writes.
-- Root-cause class: code/capability gap. Revenue Calculation is merged and
-  reusable, but no shared explainable Product sales-priority score exists.
-- Scope: pure normalization, weighted score, confidence, missing factors,
-  assumptions, Product mapper, opt-in read DTO, tests, docs.
-- Non-goals: migrations, DB or Production writes, LLM calls, recommendation
-  prose, Runtime/Worker/Queue behavior, price or margin formula changes.
-- Completed: read binding repository/Next.js/GitHub/browser instructions;
-  confirmed the requested non-main branch; preserved pre-existing untracked
-  Playwright output; confirmed PR #14 merged; audited Revenue Calculation,
-  Product API, Product/Competition fields, migrations, and current tests;
-  implemented the typed score engine, Product mapper, opt-in API enrichment,
-  contract documentation, changelog, and 21 focused tests.
-- Current work: record final delivery evidence and validate the status-only
-  exact commit.
-- Blockers/owner actions: `gh` CLI is not installed; GitHub connector access is
-  available and will be used where possible. No validated Product supply
-  stability score exists, so that optional factor will be excluded instead of
-  inferred from `supply_available`.
-- Changed files: `lib/revenue/score.ts`, `app/api/products/route.ts`,
-  `tests/revenue-score.test.ts`, `docs/revenue-score.md`,
-  `CHANGELOG-Sprint2.md`, and this file.
-- Results: 21 focused Revenue Score tests passed; typecheck, lint, full unit
-  suite, and production build passed. Lint reported only pre-existing warnings
-  from untracked `playwright-report` generated assets. Local Browser rendered
-  `/` and `/revenue` with meaningful headings and no console errors. Default,
-  Revenue Calculation, Revenue Score, and combined Product API opt-ins all
-  preserved HTTP 200 safe unconfigured responses. Read-only revenue-critical
-  and API health Playwright E2E passed 9/9 using a separate temporary output
-  path.
-- Delivery: implementation commit `a88519d` pushed. PR #15 was created as
-  Draft with `manual-merge-required`, then changed to Ready for Review after
-  all gates passed. Auto-merge remains disabled. CI run `30143693293` passed.
-  Exact-commit Preview
-  `https://gonggamline-cl45dl4hv-gg-online.vercel.app` passed 24/24 browser
-  checks in run `30143693267`; evidence artifact `8615315331`, SHA-256
-  `4e9fcb496519599cc27175210e1e8e4913e6feb8978b4ef09a0ae1ec59f2cb44`.
-  PR Merge Recommendation is `SAFE TO MERGE`.
-- Last commit: `a88519d feat: add revenue score engine`.
-- Exact next action: commit and push this delivery evidence, then validate the
-  resulting exact status-only commit before final reporting.
-- Remaining risks: Product search/competition provenance and freshness are
-  incomplete; missing/estimated inputs must lower confidence visibly.
+- Objective: implement a common, explainable Revenue Ranking Engine that
+  returns Products in stable sales-priority order.
+- Branch: `codex/feat/revenue-ranking-engine`
+- Risk: normal-risk candidate. This is read-only, non-destructive analytics; it
+  does not change pricing/margin calculations or perform marketplace/DB writes.
+- Revenue impact: P1 decision support shared by future recommendations,
+  Dashboard, and Coupang upload prioritization.
+- Root-cause class: code/capability gap. Revenue Calculation and Revenue Score
+  exist, but no shared ordering policy converts scores into actionable Product
+  priority.
+- Scope: pure domain ranking, deterministic tie-breaking, status buckets,
+  explainability, recommendation levels, opt-in Product API DTO, tests, docs.
+- Non-goals: migrations, DB/Production writes, LLM/OpenAI calls,
+  recommendation prose, Dashboard, upload queue, Runtime behavior, Revenue
+  Calculation or Revenue Score formula changes.
+- Completed: read all binding repository, Next.js Route Handler, GitHub, and
+  browser instructions; confirmed requested non-main branch and preserved
+  pre-existing Playwright outputs; merged current remote main; audited Product,
+  calculation, score, competition, and freshness evidence; implemented the
+  engine and opt-in API; added architecture, contract, changelog, and 31 tests.
+- Current work: run complete local quality and browser gates.
+- Blockers/owner actions: `gh` CLI is not installed; use the connected GitHub
+  integration for PR operations. No database or external configuration change
+  is required.
+- Changed files: `lib/revenue/ranking.ts`, `app/api/products/route.ts`,
+  `tests/revenue-ranking.test.ts`, `docs/revenue-ranking.md`,
+  `ARCHITECTURE.md`, `CHANGELOG-Sprint2.md`, and this file.
+- Results: focused Ranking tests 31/31 and typecheck passed.
+- Delivery: pending complete gates, commit, push, PR, and exact Preview.
+- Last commit: `fe4df36` merged current `main` into the feature branch.
+- Exact next action: review the diff, then run lint, full unit tests, build,
+  and local browser validation.
+- Remaining risks: missing analysis timestamps intentionally receive no
+  freshness credit; Product ID can be absent because the base schema is not
+  present locally, in which case stable input order is the final tie-breaker.
 
 ## Previous task snapshot
 
