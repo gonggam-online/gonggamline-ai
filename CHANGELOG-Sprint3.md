@@ -16,3 +16,21 @@
   imports so route module initialization cannot bypass the HTTP 200 fallback.
 - Logged expected Supabase availability fallbacks as warnings so successful
   HTTP 200 fallback responses are not classified as runtime errors.
+
+# Sprint 3 - Revenue Dashboard API
+
+## Added
+
+- Read-only `GET /api/dashboard/revenue`.
+- Ranking-backed Product DTO with score, recommendation, confidence, reasons,
+  status, and source analysis timestamp.
+- Limit/offset pagination and recommendation/status/minimum-score filters.
+- Deterministic Dashboard API unit and response-contract coverage.
+- Preview API health coverage for the new endpoint.
+
+## Unchanged
+
+- Revenue Calculation, Revenue Score, and Revenue Ranking algorithms.
+- Database schema, migrations, Runtime Queue, Workers, and Production data.
+- Marketplace, pricing, order, inventory, fulfillment, and settlement writes.
+- OpenAI and LLM behavior.

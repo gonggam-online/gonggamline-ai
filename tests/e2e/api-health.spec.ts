@@ -15,3 +15,25 @@ test("products API returns a safe array", async ({ request }) => {
   expect(body).toMatchObject({ success: true, products: expect.any(Array) });
   expect(JSON.stringify(body)).not.toMatch(/stack|password|secret|token/i);
 });
+
+test("revenue dashboard API returns a safe read-only response", async ({
+  request,
+}) => {
+  const response = await request.get(
+    "/api/dashboard/revenue?limit=5&offset=0&minRevenueScore=0",
+  );
+  expect(response.status()).toBe(200);
+  const body: unknown = await response.json();
+  expect(body).toMatchObject({
+    success: true,
+    products: expect.any(Array),
+    pagination: {
+      limit: 5,
+      offset: 0,
+      totalCount: expect.any(Number),
+      returnedCount: expect.any(Number),
+      hasNextPage: expect.any(Boolean),
+    },
+  });
+  expect(JSON.stringify(body)).not.toMatch(/stack|password|secret|token/i);
+});

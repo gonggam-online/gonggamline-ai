@@ -38,6 +38,23 @@ The Ranking Engine remains consumer-independent and read-only. It reuses the
 Calculation and Score contracts once per Product and exposes deterministic,
 machine-explainable ordering without persistence or LLM calls.
 
+## Revenue Dashboard API
+
+```text
+GET /api/dashboard/revenue
+  -> Product read service
+  -> Revenue Dashboard query/DTO adapter
+  -> Revenue Ranking Engine
+       -> Revenue Score Engine
+       -> Revenue Calculation Engine
+```
+
+The Dashboard API is a read-only projection. It does not persist rankings,
+create jobs, or duplicate financial calculations. The adapter filters, sorts
+by `rankingScore DESC`, paginates, and serializes the Ranking Engine result.
+`lastAnalyzedAt` is copied from the existing Product competition analysis
+timestamp and remains `null` when the source timestamp is unavailable.
+
 ## Reliability model
 
 The runtime queue uses bounded attempts, explicit state transitions, locks, structured sanitized errors, and worker events. Read-only optional dashboards may expose `available: false` for known configuration/network/schema-cache unavailability. Unexpected errors remain HTTP 500. Writes must never degrade to false success.

@@ -2,45 +2,40 @@
 
 ## Current task snapshot
 
-- Objective: implement a common, explainable Revenue Ranking Engine that
-  returns Products in stable sales-priority order.
-- Branch: `codex/feat/revenue-ranking-engine`
-- Risk: normal-risk candidate. This is read-only, non-destructive analytics; it
-  does not change pricing/margin calculations or perform marketplace/DB writes.
-- Revenue impact: P1 decision support shared by future recommendations,
-  Dashboard, and Coupang upload prioritization.
-- Root-cause class: code/capability gap. Revenue Calculation and Revenue Score
-  exist, but no shared ordering policy converts scores into actionable Product
-  priority.
-- Scope: pure domain ranking, deterministic tie-breaking, status buckets,
-  explainability, recommendation levels, opt-in Product API DTO, tests, docs.
-- Non-goals: migrations, DB/Production writes, LLM/OpenAI calls,
-  recommendation prose, Dashboard, upload queue, Runtime behavior, Revenue
-  Calculation or Revenue Score formula changes.
-- Completed: read all binding repository, Next.js Route Handler, GitHub, and
-  browser instructions; confirmed requested non-main branch and preserved
-  pre-existing Playwright outputs; merged current remote main; audited Product,
-  calculation, score, competition, and freshness evidence; implemented the
-  engine and opt-in API; added architecture, contract, changelog, and 31 tests.
-- Current work: complete Product API contract release-gate validation and
-  revalidate PR #16.
-- Blockers/owner actions: `gh` CLI is not installed; use the connected GitHub
-  integration for PR operations. No database or external configuration change
-  is required.
-- Changed files: `lib/revenue/ranking.ts`, `app/api/products/route.ts`,
-  `tests/revenue-ranking.test.ts`, `docs/revenue-ranking.md`,
-  `ARCHITECTURE.md`, `CHANGELOG-Sprint2.md`, and this file.
-- Results: lint passed with four pre-existing test warnings; typecheck passed;
-  full unit suite 83/83 passed, including Product API contract tests 4/4;
-  production build passed.
-- Delivery: PR #16 is Ready for Review with `manual-merge-required`; contract
-  verification update is pending commit, push, CI, and exact Preview.
-- Last commit: `fe4df36` merged current `main` into the feature branch.
-- Exact next action: commit and push the contract-only diff, then validate CI
-  and the exact-commit Preview.
-- Remaining risks: missing analysis timestamps intentionally receive no
-  freshness credit; Product ID can be absent because the base schema is not
-  present locally, in which case stable input order is the final tie-breaker.
+- Objective: implement the Sprint 3 read-only Revenue Dashboard API.
+- Branch: `codex/feat/revenue-dashboard-api`.
+- Risk: normal-risk. The endpoint is read-only analytics and does not change
+  financial formulas, schema, authorization, or external writes.
+- Revenue impact: P1 decision support. The API exposes the highest-priority
+  Products to Dashboard consumers without duplicating Revenue logic.
+- Root-cause class: code/capability gap. Ranking exists, but there is no
+  Dashboard-specific filtering, pagination, and response contract.
+- Scope: `GET /api/dashboard/revenue`, Ranking-backed DTO, filters,
+  `rankingScore DESC` sorting, pagination, 20+ tests, contract, docs, Preview.
+- Non-goals: Ranking/Score/Calculation changes, DB/migrations, Queue, Workers,
+  OpenAI/LLM, write APIs, Dashboard UI, Production mutation.
+- Completed: read binding repository/Next.js/GitHub/browser instructions;
+  verified PR #16 and its Release Gate are merged into `origin/main`; created
+  the requested branch; implemented the pure Dashboard adapter, GET route,
+  focused tests, response contract, Preview API health check, and docs.
+- Current work: review the full diff, then commit and deliver.
+- Blockers/owner actions: none.
+- Changed files: `lib/revenue/dashboard.ts`,
+  `app/api/dashboard/revenue/route.ts`, `tests/revenue-dashboard.test.ts`,
+  `tests/revenue-dashboard-contract.test.ts`, E2E API health/routes,
+  `ARCHITECTURE.md`, `docs/revenue-dashboard-api.md`,
+  `CHANGELOG-Sprint3.md`, and this file.
+- Results: focused Dashboard suite 31/31 passed; full unit suite 114/114,
+  contract, typecheck, production build, and targeted local Preview-style E2E
+  passed; lint passed with four pre-existing warnings. The in-app browser
+  blocked the localhost URL, so the same read-only API check was completed with
+  Playwright Chromium.
+- Delivery: pending full gates, commit, push, PR, CI, and exact Preview.
+- Last commit: `b8fe7c8` merged PR #16 into `main`.
+- Exact next action: review and commit the complete diff, push, open the Draft
+  PR, and validate CI plus exact-commit Preview E2E.
+- Remaining risks: the read service caps one Dashboard request at 10,000 source
+  Products; missing Product identity or analysis timestamps remain `null`.
 
 ## Previous task snapshot
 

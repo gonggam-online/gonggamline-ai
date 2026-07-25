@@ -18,4 +18,8 @@ export const pageRoutes = [
 
 export const revenueCriticalRoutes = ["/", "/revenue", "/competition", "/discovery", "/os"] as const;
 
-export const apiRoutes = ["/api/health/runtime", "/api/products"] as const;
+export const apiRoutes = [
+  "/api/health/runtime",
+  "/api/products",
+  "/api/dashboard/revenue",
+] as const;
