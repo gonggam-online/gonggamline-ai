@@ -1,9 +1,11 @@
 # Current sprint
 
-One-time autonomous engineering and delivery protocol setup.
+Codex engineering operating system, repository audit, and revenue-oriented delivery planning.
 
-Status: implementation complete on `chore/autonomous-delivery-system`; delivery verification and owner configuration remain.
+Status: documentation and static audit implemented on `codex/chore/codex-engineering-system`; local and delivery verification are in progress.
 
-Scope: permanent instructions, deterministic risk classification, CI/PR delivery workflows, Playwright route/API validation, Preview and Production smoke checks, templates, and owner documentation. Initial PR is normal-risk but explicitly ineligible for auto-merge.
+Scope: restartable work controls, GitHub templates, code-backed project/architecture/operations guides, API/database consistency audit, technical-debt register, revenue roadmap, and three executable sprint plans. No migration, RLS, auth, environment, Production data, marketplace write, or API contract change is authorized.
+
+Risk: normal-risk for the new documentation and templates. The branch also includes the pre-existing normal-risk Supabase read relationship correction `c75a7c1`, which must pass full validation. Per the session request, do not enable auto-merge.
 
 This sprint follows the permanent Mandatory Codex Task Protocol in `AGENTS.md`.

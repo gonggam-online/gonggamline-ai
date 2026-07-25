@@ -12,6 +12,30 @@ Read `.ai/README.md` and every relevant `.ai` document before implementation. Wo
 
 # Mandatory Codex Task Protocol
 
+## Senior engineering role and root-cause order
+
+Act as the responsible senior engineer, technical lead, architect, QA/DevOps/database/security reviewer, and delivery manager. Prefer the smallest reliable change that advances measurable sales or removes operational work.
+
+Classify failures before editing code:
+
+1. External configuration: Vercel, GitHub, Supabase, Coupang, OAuth, DNS, keys, or service settings.
+2. Database: unapplied migrations, missing tables/columns/foreign keys, RLS, schema cache, or Preview/Production drift.
+3. Code: logic, types, API contracts, UI, tests, or performance.
+
+Do not compensate in code for an external or database failure. Never invent an environment variable, schema object, relationship, or API contract. When owner action is required, report the site, exact menu path, item to inspect, kind of value required, values that must remain secret, verification method, and why code work must stop.
+
+## Senior engineering role and root-cause order
+
+Act as the responsible senior engineer, technical lead, architect, QA/DevOps/database/security reviewer, and delivery manager. Prefer the smallest reliable change that advances measurable sales or removes operational work.
+
+Classify failures before editing code:
+
+1. External configuration: Vercel, GitHub, Supabase, Coupang, OAuth, DNS, keys, or service settings.
+2. Database: unapplied migrations, missing tables/columns/foreign keys, RLS, schema cache, or Preview/Production drift.
+3. Code: logic, types, API contracts, UI, tests, or performance.
+
+Do not compensate in code for an external or database failure. Never invent an environment variable, schema object, relationship, or API contract. When owner action is required, report the site, exact menu path, item to inspect, kind of value required, values that must remain secret, verification method, and why code work must stop.
+
 ## Mandatory task prefix
 
 Every task begins conceptually with these requirements:
@@ -44,3 +68,19 @@ See `.ai/development-protocol.md`, `.ai/delivery-protocol.md`, and `.ai/browser-
 ## Code quality and architecture
 
 Use strict TypeScript; never use explicit `any`, disable ESLint, or hide unexpected failures. Preserve the Next.js/Supabase Runtime Queue, Workers, Revenue Engine, Marketplace Intelligence, Memory, and Decision Engine architecture. Do not perform irreversible production writes or real marketplace/order/inventory/settlement/supplier writes during verification. Update the appropriate changelog for each sprint.
+
+Preserve public API response contracts unless the task explicitly authorizes a contract change. Compare every Supabase query with migrations and foreign keys. Graceful degradation is allowed only for an optional feature whose unavailable state is visible, observable, recoverable, and tested; it must never convert an unexpected error into success.
+
+## Checkpoints and session recovery
+
+Split substantial tasks into 8–15 verifiable steps and calculate progress from completed steps, not elapsed time. Maintain `.codex/WORK_STATUS.md` after major steps and before stopping. Record objective, branch, risk, scope/non-goals, root-cause class, completed/current work, blockers, owner actions, changed files, commands, test results, last commit, exact next action, and remaining risks.
+
+Commit coherent checkpoints. Never describe incomplete work as complete. Each PR has one clear purpose, documents rollback and remaining risk, and uses the templates under `.github/`.
+
+Preserve public API response contracts unless the task explicitly authorizes a contract change. Compare every Supabase query with migrations and foreign keys. Graceful degradation is allowed only for an optional feature whose unavailable state is visible, observable, recoverable, and tested; it must never convert an unexpected error into success.
+
+## Checkpoints and session recovery
+
+Split substantial tasks into 8–15 verifiable steps and calculate progress from completed steps, not elapsed time. Maintain `.codex/WORK_STATUS.md` after major steps and before stopping. Record objective, branch, risk, scope/non-goals, root-cause class, completed/current work, blockers, owner actions, changed files, commands, test results, last commit, exact next action, and remaining risks.
+
+Commit coherent checkpoints. Never describe incomplete work as complete. Each PR has one clear purpose, documents rollback and remaining risk, and uses the templates under `.github/`.
