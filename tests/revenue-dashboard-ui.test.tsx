@@ -8,11 +8,13 @@ import type {
 } from "../lib/revenue/dashboard";
 import {
   buildDashboardUrl,
+  buildDashboardPageUrl,
   formatAnalyzedAt,
   formatConfidence,
   formatScore,
   INITIAL_FILTERS,
   PAGE_SIZE,
+  parseDashboardLocation,
   RevenueDashboard,
   RevenueDashboardSummary,
   RevenueDashboardTable,
@@ -58,6 +60,7 @@ const render = (node: React.ReactNode) => renderToStaticMarkup(node);
 
 test("uses the API page-size contract", () => assert.equal(PAGE_SIZE, 20));
 test("starts with empty local filters", () => assert.deepEqual(INITIAL_FILTERS, {
+  keyword: "",
   recommendationLevel: "",
   status: "",
   minRevenueScore: "",
@@ -71,6 +74,9 @@ test("keeps the requested pagination offset", () => {
 test("serializes recommendation filter", () => {
   assert.match(buildDashboardUrl({ ...INITIAL_FILTERS, recommendationLevel: "RECOMMEND" }, 0), /recommendationLevel=RECOMMEND/);
 });
+test("serializes Product keyword search", () => {
+  assert.match(buildDashboardUrl({ ...INITIAL_FILTERS, keyword: "Desk Lamp" }, 0), /keyword=Desk\+Lamp/);
+});
 test("serializes status filter", () => {
   assert.match(buildDashboardUrl({ ...INITIAL_FILTERS, status: "estimated" }, 0), /status=estimated/);
 });
@@ -78,7 +84,33 @@ test("serializes minimum score filter", () => {
   assert.match(buildDashboardUrl({ ...INITIAL_FILTERS, minRevenueScore: "70" }, 0), /minRevenueScore=70/);
 });
 test("does not send empty optional filters", () => {
-  assert.doesNotMatch(buildDashboardUrl(INITIAL_FILTERS, 0), /recommendationLevel|status|minRevenueScore/);
+  assert.doesNotMatch(buildDashboardUrl(INITIAL_FILTERS, 0), /keyword|recommendationLevel|status|minRevenueScore/);
+});
+test("builds a shareable Dashboard page URL", () => {
+  assert.equal(
+    buildDashboardPageUrl({ ...INITIAL_FILTERS, keyword: "Desk Lamp", status: "ready" }, 20),
+    "/dashboard/revenue?limit=20&offset=20&keyword=Desk+Lamp&status=ready",
+  );
+});
+test("restores search, filters, minimum score, and offset from URL", () => {
+  assert.deepEqual(
+    parseDashboardLocation(new URLSearchParams("keyword=Desk+Lamp&recommendationLevel=RECOMMEND&status=ready&minRevenueScore=70&offset=40")),
+    {
+      filters: {
+        keyword: "Desk Lamp",
+        recommendationLevel: "RECOMMEND",
+        status: "ready",
+        minRevenueScore: "70",
+      },
+      offset: 40,
+    },
+  );
+});
+test("ignores invalid shared URL values", () => {
+  assert.deepEqual(
+    parseDashboardLocation(new URLSearchParams("recommendationLevel=bad&status=bad&minRevenueScore=200&offset=-1")),
+    { filters: INITIAL_FILTERS, offset: 0 },
+  );
 });
 test("summarizes strong recommendations from returned DTOs", () => {
   assert.equal(summarize([item]).strongRecommend, 1);

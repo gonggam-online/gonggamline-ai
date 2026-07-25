@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -23,20 +24,22 @@ import type {
 } from "@/lib/revenue/dashboard";
 import type { RevenueRecommendationLevel } from "@/lib/revenue/ranking";
 import type { RevenueScoreStatus } from "@/lib/revenue/score";
+import {
+  buildDashboardPageUrl as buildPageUrl,
+  INITIAL_FILTERS,
+  parseDashboardLocation,
+  type RevenueDashboardFilters,
+  type RevenueDashboardLocation,
+} from "@/lib/revenue/dashboard-ui-state";
+
+export {
+  INITIAL_FILTERS,
+  parseDashboardLocation,
+  type RevenueDashboardFilters,
+  type RevenueDashboardLocation,
+} from "@/lib/revenue/dashboard-ui-state";
 
 export const PAGE_SIZE = 20;
-
-export type RevenueDashboardFilters = {
-  recommendationLevel: RevenueRecommendationLevel | "";
-  status: RevenueScoreStatus | "";
-  minRevenueScore: string;
-};
-
-export const INITIAL_FILTERS: RevenueDashboardFilters = {
-  recommendationLevel: "",
-  status: "",
-  minRevenueScore: "",
-};
 
 type DashboardErrorPayload = {
   error?: { message?: string };
@@ -50,6 +53,7 @@ export function buildDashboardUrl(
     limit: String(PAGE_SIZE),
     offset: String(offset),
   });
+  if (filters.keyword) params.set("keyword", filters.keyword);
   if (filters.recommendationLevel) {
     params.set("recommendationLevel", filters.recommendationLevel);
   }
@@ -58,6 +62,13 @@ export function buildDashboardUrl(
     params.set("minRevenueScore", filters.minRevenueScore);
   }
   return `/api/dashboard/revenue?${params.toString()}`;
+}
+
+export function buildDashboardPageUrl(
+  filters: RevenueDashboardFilters,
+  offset: number,
+) {
+  return buildPageUrl(filters, offset, PAGE_SIZE);
 }
 
 export function summarize(items: readonly RevenueDashboardDto[]) {
@@ -220,13 +231,19 @@ export function RevenueDashboardTable({
   );
 }
 
-export function RevenueDashboard() {
-  const [filters, setFilters] = useState(INITIAL_FILTERS);
-  const [offset, setOffset] = useState(0);
+export function RevenueDashboard({
+  initialLocation = { filters: INITIAL_FILTERS, offset: 0 },
+}: {
+  initialLocation?: RevenueDashboardLocation;
+}) {
+  const [filters, setFilters] = useState(initialLocation.filters);
+  const [draftKeyword, setDraftKeyword] = useState(initialLocation.filters.keyword);
+  const [offset, setOffset] = useState(initialLocation.offset);
   const [data, setData] = useState<RevenueDashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshToken, setRefreshToken] = useState(0);
+  const skippedInitialUrlSync = useRef(false);
 
   const load = useCallback(async (signal: AbortSignal) => {
     setLoading(true);
@@ -258,6 +275,31 @@ export function RevenueDashboard() {
     return () => controller.abort();
   }, [load, refreshToken]);
 
+  useEffect(() => {
+    if (!skippedInitialUrlSync.current) {
+      skippedInitialUrlSync.current = true;
+      return;
+    }
+    window.history.replaceState(
+      null,
+      "",
+      buildDashboardPageUrl(filters, offset),
+    );
+  }, [filters, offset]);
+
+  useEffect(() => {
+    function restoreFromUrl() {
+      const restored = parseDashboardLocation(
+        new URLSearchParams(window.location.search),
+      );
+      setFilters(restored.filters);
+      setDraftKeyword(restored.filters.keyword);
+      setOffset(restored.offset);
+    }
+    window.addEventListener("popstate", restoreFromUrl);
+    return () => window.removeEventListener("popstate", restoreFromUrl);
+  }, []);
+
   const page = Math.floor(offset / PAGE_SIZE) + 1;
   const pageCount = data ? Math.max(1, Math.ceil(data.pagination.total / PAGE_SIZE)) : 1;
   const generatedAt = useMemo(
@@ -271,6 +313,16 @@ export function RevenueDashboard() {
   ) {
     setFilters((current) => ({ ...current, [key]: value }));
     setOffset(0);
+  }
+
+  function submitSearch(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    updateFilter("keyword", draftKeyword.trim().slice(0, 100));
+  }
+
+  function clearSearch() {
+    setDraftKeyword("");
+    updateFilter("keyword", "");
   }
 
   return (
@@ -287,6 +339,32 @@ export function RevenueDashboard() {
           label="Revenue dashboard filters"
           className="revenue-dashboard__toolbar"
         >
+          <form className="revenue-dashboard__search" role="search" onSubmit={submitSearch}>
+            <label>
+              Product Search
+              <input
+                aria-label="Search products by name"
+                type="search"
+                maxLength={100}
+                value={draftKeyword}
+                onChange={(event) => setDraftKeyword(event.target.value)}
+                placeholder="Product name"
+              />
+            </label>
+            <button className="revenue-dashboard__button" type="submit" disabled={loading}>
+              Search
+            </button>
+            {filters.keyword || draftKeyword ? (
+              <button
+                className="revenue-dashboard__button revenue-dashboard__button--secondary"
+                type="button"
+                onClick={clearSearch}
+                disabled={loading}
+              >
+                Clear search
+              </button>
+            ) : null}
+          </form>
           <label>
             Recommendation Level
             <select

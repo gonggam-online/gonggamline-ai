@@ -11,7 +11,7 @@ export async function queryRevenueDashboard(
 ): Promise<RevenueDashboardResponse> {
   const { listProducts } = await import("@/services/products.service");
   const result = await listProducts({
-    keyword: "",
+    keyword: query.keyword,
     recommendation: "",
     reviewStatus: "",
     favoriteOnly: false,

@@ -51,6 +51,7 @@ function query(
   return {
     limit: 20,
     offset: 0,
+    keyword: "",
     recommendationLevel: null,
     status: null,
     minRevenueScore: null,
@@ -120,6 +121,15 @@ test("rejects invalid limit values", () => {
 test("accepts non-negative integer offset", () => {
   assert.equal(parse("offset=0").offset, 0);
   assert.equal(parse("offset=25").offset, 25);
+});
+
+test("accepts, trims, and defaults Product keyword search", () => {
+  assert.equal(parse().keyword, "");
+  assert.equal(parse("keyword=%20Desk%20Lamp%20").keyword, "Desk Lamp");
+});
+
+test("rejects Product keywords over 100 characters", () => {
+  parseError(`keyword=${"a".repeat(101)}`, "keyword");
 });
 
 test("rejects invalid offset values", () => {
@@ -403,4 +413,13 @@ test("route is read-only and delegates to the query service", async () => {
   assert.doesNotMatch(route, /export async function (POST|PUT|PATCH|DELETE)/);
   assert.match(route, /queryRevenueDashboard\(parsed\.value\)/);
   assert.match(route, /status: 400/);
+});
+
+test("query service delegates Product keyword search without client-page filtering", async () => {
+  const service = await readFile(
+    new URL("../services/revenue-dashboard.service.ts", import.meta.url),
+    "utf8",
+  );
+  assert.match(service, /keyword: query\.keyword/);
+  assert.doesNotMatch(service, /\.filter\([^)]*productName/);
 });

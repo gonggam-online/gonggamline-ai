@@ -2,6 +2,57 @@
 
 ## Current task snapshot
 
+- Objective: implement Story 3-3 Revenue Dashboard Search and URL State after
+  verifying PR #19 merge and Production.
+- Branch: `codex/feat/revenue-dashboard-search`.
+- Risk: normal-risk. Read-only query extension, URL state, UI, tests, and docs.
+- Revenue impact: P1 operator decision speed. Searchable, shareable filtered
+  views reduce time to find and hand off a ranked Product.
+- Root-cause class: code/capability gap. The Dashboard has server pagination
+  but no Product search or restorable/shareable state.
+- Architecture decision: add an optional bounded `keyword` to the existing
+  Dashboard GET query and delegate it to the existing Product query before
+  Ranking pagination. Never filter only the current client page. Keep state in
+  local React state and the URL, using submitted search to avoid request fan-out.
+- Scope: Product search, clear action, URL synchronization/restoration,
+  combined filters and pagination, API contract tests, E2E, and docs.
+- Non-goals: DB/migration, Revenue algorithms, global store, external writes,
+  debounce, or new business calculation.
+- Completed: confirmed PR #19 merged at `1f81514`, fast-forwarded main, and
+  passed Production Revenue page/API smoke 9/9. Created the required branch,
+  implemented bounded server Product search, URL parsing/serialization,
+  refresh/history restoration, search/clear UX, and focused unit/E2E coverage.
+- Current work: local validation and browser verification passed; prepare
+  implementation commit and remote delivery.
+- Blockers/owner actions: none. The first Production readiness loop failed
+  because sandbox network access returned no response; one unrestricted request
+  returned HTTP 200 and unrestricted Production E2E passed, proving no
+  deployment defect. Existing generated Playwright artifacts remain untracked.
+- Changed files: `lib/revenue/dashboard.ts`,
+  `services/revenue-dashboard.service.ts`,
+  `app/dashboard/revenue/page.tsx`,
+  `components/revenue-dashboard/revenue-dashboard.tsx`, `app/globals.css`,
+  Revenue Dashboard unit/contract/E2E tests, Dashboard API/UI docs, changelog,
+  and this status file.
+- Commands/results: focused Dashboard/API/UI tests 72/72 passed; full unit
+  181/181 passed; typecheck passed; lint passed with four pre-existing Revenue
+  test warnings and no errors; production build passed with 67 routes; Story
+  production-mode API/UI E2E passed 11/11; `git diff --check` passed.
+  The first browser runs exposed two separate issues without weakening tests:
+  a stale local Next server served old HTML against rebuilt assets, then the
+  dynamic page returned digest `1212929221` because a Server Component called
+  a function exported from a `"use client"` module. The pure URL-state helpers
+  were moved to `lib/revenue/dashboard-ui-state.ts`; a clean server rerun passed.
+- Delivery: not committed, pushed, or opened as a PR yet.
+- Last commit: `1f81514 Merge pull request #19 from
+  gonggam-online/codex/feat/revenue-dashboard-ui`.
+- Exact next action: commit, push, open the Story PR, and validate exact-head
+  CI and Preview before squash merge.
+- Remaining risks: Product search relies on existing Supabase `ilike` behavior;
+  Preview must confirm combined search totals and pagination.
+
+## Previous task snapshot
+
 - Objective: implement Sprint 3 Revenue Dashboard UI v1 as an operator-ready
   presentation over the existing Dashboard API.
 - Branch: `codex/feat/revenue-dashboard-ui`.
