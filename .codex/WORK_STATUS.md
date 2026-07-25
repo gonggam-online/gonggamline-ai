@@ -50,8 +50,8 @@ three-state constraint before migration `004` can expand it. Existing
 
 ## Current work
 
-Local validation and diff review are complete. Commit, push, and create the
-high-risk PR, then inspect CI and exact-commit Preview results.
+Implementation and delivery validation are complete. PR #12 is awaiting manual
+review and merge.
 
 ## Blockers and owner actions
 
@@ -79,15 +79,21 @@ owner-reviewed action after PR approval.
   local Supabase `missing_url` external-configuration condition affecting
   `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
   and `/workspace`; failure artifacts are under `test-results/`.
+- GitHub CI run `30138920955`: passed for exact commit `db5dcaa`.
+- Preview browser run `30138920962`: passed, including exact-commit Preview
+  resolution, access verification, and non-destructive browser checks.
+- Preview evidence: artifact `preview-browser-evidence`, ID `8613811782`.
+- PR: #12, Draft, mergeable, labeled `manual-merge-required`; auto-merge is
+  prohibited.
 
 ## Last commit
 
-No task commit yet.
+`db5dcaa fix: align competition analysis status constraint`
 
 ## Exact next action
 
-Commit the four intended files, push the branch, and open a draft PR with
-`manual-merge-required`.
+Owner reviews PR #12 and the Production migration history, then manually merges
+and applies the approved migration through the normal Supabase deployment path.
 
 ## Remaining risks
 
