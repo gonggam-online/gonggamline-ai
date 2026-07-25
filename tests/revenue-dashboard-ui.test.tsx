@@ -9,6 +9,7 @@ import type {
 import {
   buildDashboardUrl,
   buildDashboardPageUrl,
+  describeActiveFilters,
   formatAnalyzedAt,
   formatConfidence,
   formatScore,
@@ -112,6 +113,25 @@ test("ignores invalid shared URL values", () => {
     { filters: INITIAL_FILTERS, offset: 0 },
   );
 });
+test("describes every active operational filter", () => {
+  assert.deepEqual(
+    describeActiveFilters({
+      keyword: "Desk Lamp",
+      recommendationLevel: "RECOMMEND",
+      status: "ready",
+      minRevenueScore: "70",
+    }),
+    [
+      "Search: Desk Lamp",
+      "Recommendation: Recommend",
+      "Status: Ready",
+      "Minimum score: 70",
+    ],
+  );
+});
+test("reports no active operational filters", () => {
+  assert.deepEqual(describeActiveFilters(INITIAL_FILTERS), []);
+});
 test("summarizes strong recommendations from returned DTOs", () => {
   assert.equal(summarize([item]).strongRecommend, 1);
 });
@@ -158,6 +178,7 @@ test("table renders product identity and descending rank", () => {
   assert.match(html, /#1/);
   assert.match(html, /High margin product/);
   assert.match(html, /P-1/);
+  assert.match(html, /title="High margin product"/);
 });
 test("table renders reason codes as badges", () => {
   const html = render(<RevenueDashboardTable items={[item]} />);

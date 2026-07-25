@@ -121,6 +121,21 @@ export function formatAnalyzedAt(value: string | null) {
   }).format(date);
 }
 
+export function describeActiveFilters(filters: RevenueDashboardFilters) {
+  const descriptions: string[] = [];
+  if (filters.keyword) descriptions.push(`Search: ${filters.keyword}`);
+  if (filters.recommendationLevel) {
+    descriptions.push(
+      `Recommendation: ${recommendationLabels[filters.recommendationLevel]}`,
+    );
+  }
+  if (filters.status) descriptions.push(`Status: ${statusLabels[filters.status]}`);
+  if (filters.minRevenueScore) {
+    descriptions.push(`Minimum score: ${filters.minRevenueScore}`);
+  }
+  return descriptions;
+}
+
 function Badge({
   children,
   tone,
@@ -197,7 +212,10 @@ export function RevenueDashboardTable({
             <tr key={`${item.productId ?? "unknown"}-${item.rank}`}>
               <td><strong>#{item.rank}</strong></td>
               <td>
-                <span className="revenue-dashboard__product-name">
+                <span
+                  className="revenue-dashboard__product-name"
+                  title={item.productName ?? "Unnamed product"}
+                >
                   {item.productName ?? "Unnamed product"}
                 </span>
                 {item.productId ? <small>{item.productId}</small> : null}
@@ -243,6 +261,7 @@ export function RevenueDashboard({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshToken, setRefreshToken] = useState(0);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
   const skippedInitialUrlSync = useRef(false);
 
   const load = useCallback(async (signal: AbortSignal) => {
@@ -259,6 +278,7 @@ export function RevenueDashboard({
         throw new Error(message || "Revenue dashboard data is unavailable");
       }
       setData(payload as RevenueDashboardResponse);
+      setLastRefreshedAt(new Date());
     } catch (caught) {
       if (caught instanceof DOMException && caught.name === "AbortError") return;
       setError(caught instanceof Error
@@ -306,6 +326,10 @@ export function RevenueDashboard({
     () => data ? formatAnalyzedAt(data.meta.generatedAt) : "",
     [data],
   );
+  const refreshedAt = lastRefreshedAt
+    ? new Intl.DateTimeFormat("en", { timeStyle: "medium" }).format(lastRefreshedAt)
+    : "";
+  const activeFilters = describeActiveFilters(filters);
 
   function updateFilter<Key extends keyof RevenueDashboardFilters>(
     key: Key,
@@ -325,6 +349,12 @@ export function RevenueDashboard({
     updateFilter("keyword", "");
   }
 
+  function clearAllFilters() {
+    setDraftKeyword("");
+    setFilters(INITIAL_FILTERS);
+    setOffset(0);
+  }
+
   return (
     <DashboardLayout className="revenue-dashboard">
       <DashboardHeader
@@ -332,7 +362,14 @@ export function RevenueDashboard({
         titleId="revenue-dashboard-title"
         eyebrow="Revenue operations"
         description="AI Revenue Ranking Overview"
-        actions={data ? <span className="revenue-dashboard__updated">Updated {generatedAt}</span> : null}
+        actions={data ? (
+          <div className="revenue-dashboard__timestamps">
+            <span>Data generated <time dateTime={data.meta.generatedAt}>{generatedAt}</time></span>
+            {lastRefreshedAt ? (
+              <span>Last refreshed <time dateTime={lastRefreshedAt.toISOString()}>{refreshedAt}</time></span>
+            ) : null}
+          </div>
+        ) : null}
       />
       <DashboardContent>
         <DashboardToolbar
@@ -419,6 +456,25 @@ export function RevenueDashboard({
           >
             {loading ? "Refreshing…" : "Refresh"}
           </button>
+          <button
+            className="revenue-dashboard__button revenue-dashboard__button--secondary"
+            type="button"
+            onClick={clearAllFilters}
+            disabled={loading || activeFilters.length === 0}
+          >
+            Clear all filters
+          </button>
+          <div
+            className="revenue-dashboard__active-filters"
+            role="status"
+            aria-live="polite"
+            aria-label="Active filters"
+          >
+            <strong>{activeFilters.length ? `${activeFilters.length} active` : "No active filters"}</strong>
+            {activeFilters.map((description) => (
+              <span key={description}>{description}</span>
+            ))}
+          </div>
         </DashboardToolbar>
 
         {loading && !data ? (

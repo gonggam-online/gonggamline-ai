@@ -2,6 +2,45 @@
 
 ## Current task snapshot
 
+- Objective: implement Story 3-4 Revenue Dashboard Operational UX after
+  Story 3-3 Production verification.
+- Branch: `codex/feat/revenue-dashboard-operational-ux`.
+- Risk: normal-risk. Presentation, accessibility, responsive behavior, tests,
+  and documentation only.
+- Revenue impact: P2 operational efficiency. Clear data freshness, filter
+  context, reset, retry, and readable dense rows reduce operator mistakes and
+  repeated work during long-running Dashboard use.
+- Root-cause class: code/usability gap. Search is operational, but generated
+  versus refreshed time, active filters, long content, and duplicate/retry
+  behavior need explicit presentation and coverage.
+- Scope: distinct timestamps, active-filter summary, clear-all, long Product
+  and reason containment, request-state controls, retry, mobile, live-region,
+  keyboard, E2E, and docs.
+- Non-goals: API/DTO changes, current time as analysis time, new calculation,
+  design-system expansion, DB/migration, Runtime, or external write.
+- Completed: squash-merged Story 3-3 PR #20 at `76daa84`, passed Production
+  Revenue smoke 10/10, created the required branch, and implemented the
+  operational presentation and focused coverage.
+- Current work: all local gates passed; prepare implementation commit and
+  remote delivery.
+- Blockers/owner actions: none. Generated Playwright artifacts remain untracked.
+- Changed files: Revenue Dashboard component/styles/UI tests/E2E, UI docs,
+  Sprint 3 changelog, and this status file.
+- Commands/results: focused UI tests 37/37 and full unit 183/183 passed;
+  typecheck passed; lint passed with four pre-existing warnings and no errors;
+  production build passed with 67 routes; operational Chromium E2E passed 4/4;
+  `git diff --check` passed. The first E2E run found Next's route announcer also
+  uses `role=alert`; the retry assertion was narrowed to the Dashboard error
+  state without changing production code or weakening expected error text.
+- Delivery: not committed, pushed, or opened as a PR yet.
+- Last commit: `76daa84 feat: add Revenue Dashboard search and URL state (#20)`.
+- Exact next action: commit, push, open the independent Story PR, and validate
+  exact-head CI/Preview before squash merge.
+- Remaining risks: browser timing must confirm double-click suppression and
+  retry transition; mobile containment must be visually and mechanically clean.
+
+## Previous task snapshot
+
 - Objective: implement Story 3-3 Revenue Dashboard Search and URL State after
   verifying PR #19 merge and Production.
 - Branch: `codex/feat/revenue-dashboard-search`.

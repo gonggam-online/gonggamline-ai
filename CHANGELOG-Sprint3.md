@@ -1,5 +1,19 @@
 # Sprint 3 - Runtime Stabilization
 
+# Sprint 3 - Revenue Dashboard Operational UX
+
+## Added
+
+- Distinct API data-generation and successful client-refresh timestamps.
+- Live active-filter summary and one-action filter reset.
+- Duplicate refresh suppression, tested retry recovery, long Product name
+  containment, bounded reason badges, and mobile overflow verification.
+
+## Clarified
+
+- A missing Product analysis time remains `Not analyzed`; generated and
+  refreshed times never substitute for `lastAnalyzedAt`.
+
 # Sprint 3 - Revenue Dashboard Search and URL State
 
 ## Added

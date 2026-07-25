@@ -49,10 +49,17 @@ owns only the components required by this page: summary and ranking table.
 - Loading uses a polite status region and a stable skeleton.
 - Errors use an assertive alert with a retry action.
 - Empty results provide a clear-filters action.
+- Data generation time comes from API `meta.generatedAt`; the separate last
+  refreshed time records the successful browser fetch. Neither replaces a
+  Product's nullable `lastAnalyzedAt`.
+- Active filters are announced in a polite status region and can be cleared
+  together. Refresh and clear actions are disabled while a request is active.
 - Native labels, controls, table headings, caption, time elements, focus
   outlines, and keyboard-operable buttons are used.
 - The wide operational table scrolls horizontally on narrow screens; summary
   cards collapse from four to two to one column.
+- Long Product names use a visible ellipsis with the full value in `title`;
+  reason badges wrap inside a bounded cell without widening the page.
 
 ## Runtime boundary
 
