@@ -61,9 +61,9 @@ export async function GET(request: Request) {
       products = attachRevenueScores(products);
     }
 
-    const response = {
-      success: true,
-      available: true,
+    const baseResponse = {
+      success: true as const,
+      available: true as const,
       filters,
       pagination: {
         page,
@@ -73,16 +73,26 @@ export async function GET(request: Request) {
         hasPreviousPage: page > 1,
         hasNextPage: page < totalPages,
       },
-      products,
     };
     if (includeRanking) {
       const { rankProductsByRevenue } = await import("@/lib/revenue/ranking");
-      return Response.json({
-        ...response,
-        ranking: rankProductsByRevenue(result.products),
-      });
+      const { buildProductsApiResponse } = await import(
+        "@/lib/revenue/products-api-response"
+      );
+      return Response.json(
+        buildProductsApiResponse({
+          base: baseResponse,
+          products,
+          ranking: rankProductsByRevenue(result.products),
+        }),
+      );
     }
-    return Response.json(response);
+    const { buildProductsApiResponse } = await import(
+      "@/lib/revenue/products-api-response"
+    );
+    return Response.json(
+      buildProductsApiResponse({ base: baseResponse, products }),
+    );
   } catch (error) {
     const { runtimeLog } = await import("@/lib/runtime-logging");
     runtimeLog.error("products.route_failed", error);

@@ -279,5 +279,5 @@ test("API ranking is opt-in and preserves default response construction", async 
   assert.match(route, /params\.get\("includeRanking"\) === "true"/);
   assert.match(route, /if \(includeRanking\)/);
   assert.match(route, /ranking: rankProductsByRevenue\(result\.products\)/);
-  assert.match(route, /return Response\.json\(response\)/);
+  assert.match(route, /buildProductsApiResponse\(\{ base: baseResponse, products \}\)/);
 });

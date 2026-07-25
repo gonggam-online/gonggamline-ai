@@ -65,3 +65,10 @@
 - Database schema, migrations, Production data, Runtime Queue, Workers,
   marketplace writes, Dashboard, and upload queue.
 - No LLM/OpenAI calls, recommendation prose, or ranking persistence.
+
+## Release validation
+
+- Added deterministic Product API contract assertions for the default,
+  Revenue Score, Revenue Ranking, and combined opt-in responses.
+- Confirmed that opt-in fields are additive and existing response fields remain
+  unchanged without depending on Preview data availability.

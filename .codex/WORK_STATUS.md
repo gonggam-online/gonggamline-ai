@@ -22,18 +22,22 @@
   pre-existing Playwright outputs; merged current remote main; audited Product,
   calculation, score, competition, and freshness evidence; implemented the
   engine and opt-in API; added architecture, contract, changelog, and 31 tests.
-- Current work: run complete local quality and browser gates.
+- Current work: complete Product API contract release-gate validation and
+  revalidate PR #16.
 - Blockers/owner actions: `gh` CLI is not installed; use the connected GitHub
   integration for PR operations. No database or external configuration change
   is required.
 - Changed files: `lib/revenue/ranking.ts`, `app/api/products/route.ts`,
   `tests/revenue-ranking.test.ts`, `docs/revenue-ranking.md`,
   `ARCHITECTURE.md`, `CHANGELOG-Sprint2.md`, and this file.
-- Results: focused Ranking tests 31/31 and typecheck passed.
-- Delivery: pending complete gates, commit, push, PR, and exact Preview.
+- Results: lint passed with four pre-existing test warnings; typecheck passed;
+  full unit suite 83/83 passed, including Product API contract tests 4/4;
+  production build passed.
+- Delivery: PR #16 is Ready for Review with `manual-merge-required`; contract
+  verification update is pending commit, push, CI, and exact Preview.
 - Last commit: `fe4df36` merged current `main` into the feature branch.
-- Exact next action: review the diff, then run lint, full unit tests, build,
-  and local browser validation.
+- Exact next action: commit and push the contract-only diff, then validate CI
+  and the exact-commit Preview.
 - Remaining risks: missing analysis timestamps intentionally receive no
   freshness credit; Product ID can be absent because the base schema is not
   present locally, in which case stable input order is the final tie-breaker.
