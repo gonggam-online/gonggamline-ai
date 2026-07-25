@@ -2,6 +2,53 @@
 
 ## Current task snapshot
 
+- Objective: implement Sprint 3 Revenue Dashboard UI v1 as an operator-ready
+  presentation over the existing Dashboard API.
+- Branch: `codex/feat/revenue-dashboard-ui`.
+- Risk: normal-risk. Read-only UI, documentation, and tests only.
+- Revenue impact: P1 decision support. Operators can compare Product priority,
+  Revenue Score, confidence, and recommendation evidence from one view.
+- Root-cause class: code/capability gap. The API and shared presentation
+  foundation exist, but there is no operator-facing Revenue Dashboard.
+- Scope: `/dashboard/revenue`, local filters/pagination/refresh, summary cards,
+  ranked table, loading/empty/error states, responsive/accessibility behavior,
+  at least 25 UI tests, E2E, and documentation.
+- Non-goals: API/DTO changes, Revenue Calculation/Score/Ranking changes,
+  DB/migrations, global state, Queue, Workers, OpenAI/LLM, or commerce writes.
+- Completed: read binding repository and Next.js 16 guidance; verified the
+  non-main branch, safe worktree, merged PR #17, merged Dashboard Foundation,
+  and existing Dashboard API contract; classified the story normal-risk;
+  implemented the page, local state, API-only data flow, responsive table,
+  required UI states, badges, summary, filters, refresh, pagination,
+  accessibility, 31 focused tests, E2E coverage, and architecture docs.
+- Current work: local validation and complete diff review passed; prepare the
+  coherent implementation commit and remote delivery.
+- Blockers/owner actions: none currently. Untracked existing Playwright reports
+  are preserved and excluded from this task.
+- Changed files: `app/dashboard/revenue/page.tsx`,
+  `components/revenue-dashboard/revenue-dashboard.tsx`, `app/globals.css`,
+  `tests/revenue-dashboard-ui.test.tsx`,
+  `tests/e2e/revenue-dashboard-ui.spec.ts`, `tests/e2e/routes.ts`,
+  `docs/revenue-dashboard-ui.md`, `CHANGELOG-Sprint3.md`, and this file.
+- Commands/results: focused UI tests 31/31 passed; full unit suite 174/174
+  passed; typecheck passed; production build passed with 67 routes; lint passed
+  with four pre-existing Revenue test warnings and no errors; `git diff
+  --check` passed. Mocked operator-flow Chromium E2E passed 1/1. Production-mode
+  read-only page and Dashboard API browser checks passed 9/9 with no page,
+  console, API, or failed-request errors. The first Playwright invocation
+  exceeded its outer command timeout during automatic server cleanup; the same
+  test passed with the production server lifecycle controlled explicitly.
+- Delivery: not committed or pushed yet; no PR or Preview exists yet.
+- Last commit: `482bc73 Merge pull request #18 from
+  gonggam-online/codex/feat/dashboard-foundation`.
+- Exact next action: commit, push, create/update the PR, and validate exact
+  commit CI and Vercel Preview before making a merge recommendation.
+- Remaining risks: summary averages describe only the returned result page and
+  are labeled accordingly. Local Supabase configuration may still block
+  unrelated existing routes; code must not compensate for that external state.
+
+## Previous task snapshot
+
 - Objective: build the Sprint 3 shared Dashboard Foundation for Revenue,
   Upload Queue, Product, and AI Recommendation dashboards.
 - Branch: `codex/feat/dashboard-foundation`.

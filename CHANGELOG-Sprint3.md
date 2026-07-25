@@ -1,5 +1,24 @@
 # Sprint 3 - Runtime Stabilization
 
+# Sprint 3 - Revenue Dashboard UI v1
+
+## Added
+
+- Read-only `/dashboard/revenue` operating page backed exclusively by
+  `GET /api/dashboard/revenue`.
+- Summary cards, recommendation/status/minimum-score filters, refresh,
+  ranking table, reason/status/recommendation badges, and pagination.
+- Loading, empty, retryable error, responsive, keyboard, and semantic table
+  states.
+- 31 focused UI tests and an operator-flow Playwright scenario.
+- Revenue Dashboard component and data-flow documentation.
+
+## Unchanged
+
+- Dashboard API and its response contract.
+- Revenue Calculation, Revenue Score, Revenue Ranking, Runtime Queue, Workers,
+  database, migrations, OpenAI/LLM, and all commerce write operations.
+
 # Sprint 3 - Dashboard Foundation
 
 ## Added
