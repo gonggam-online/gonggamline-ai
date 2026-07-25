@@ -44,8 +44,8 @@ ROI semantics are not yet defined.
 
 ## Current work
 
-Local verification is complete. Delivery and exact-commit Preview validation
-are pending.
+Implementation, local verification, delivery, and exact-commit Preview
+validation are complete. Draft PR #13 is awaiting review.
 
 ## Blockers and owner actions
 
@@ -83,16 +83,23 @@ report or committed.
   `/revenue`, `/sourcing`, `/workflow`, and `/workspace`. Revenue-critical
   checks, Product API health, `/`, and `/competition` passed. Failure evidence
   is under `test-results/`.
-- Preview and Production validation: pending.
+- GitHub CI run `30140610196`: passed for exact commit `feb70ba`.
+- Exact-commit Vercel Preview:
+  `https://gonggamline-aupgdmwcl-gg-online.vercel.app`.
+- Preview browser run `30140610218`: 24 passed; no reported page, console, API,
+  or failed-request errors.
+- Preview evidence: `preview-browser-evidence`, artifact `8614330437`.
+- Production: unchanged because PR #13 is open and unmerged.
 
 ## Last commit
 
-Pending.
+`4add6a7 docs: audit revenue product data readiness`, followed by merge commit
+`feb70ba` to incorporate the latest `origin/main` without force-pushing.
 
 ## Exact next action
 
-Review the complete diff, commit and push the documentation-only scope, create
-the PR, and validate its exact-commit Vercel Preview.
+Review Draft PR #13. Before a later Revenue calculation implementation,
+perform the documented read-only Supabase schema and completeness inspection.
 
 ## Remaining risks
 
