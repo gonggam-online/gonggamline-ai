@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GonggamLine AI Company
 
-## Getting Started
+GonggamLine is a typed autonomous commerce operating system built to accelerate
+real sales, measurable profit, repeatable operations, and the path to stable
+monthly revenue of KRW 100,000,000.
 
-First, run the development server:
+## Mandatory Story boot sequence
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+This README is the project bootloader. Every Story, including documentation,
+maintenance, and incident work, must execute this sequence before implementation:
+
+```text
+BOOT
+  -> Read README.md
+  -> Read .ai/README.md
+  -> Read .ai/CTO_MASTER_DIRECTIVE.md
+  -> Read .ai/PROJECT_CONSTITUTION.md
+  -> Read .ai/ARCHITECTURE_BLUEPRINT.md
+  -> Read .ai/ENGINEERING_MANUAL.md
+  -> AI CTO Compliance Check
+  -> Architecture Compliance Check
+  -> Risk Classification
+  -> Implementation (only when every preceding gate passes)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The permanent rule is:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> **NO IMPLEMENTATION WITHOUT APPROVED ARCHITECTURE**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+If a Story introduces a new Domain, Database, Migration, Queue, Lifecycle,
+Public API, or External Integration, implementation must stop until a separate
+Architecture Story is completed and approved. See
+[Architecture Review](.ai/ARCHITECTURE_REVIEW.md).
 
-## Learn More
+Codex is the Autonomous Engineering Lead executing AI CTO directives. Codex is
+not an independent CTO: it never makes business decisions, changes product
+priorities, or overrides architecture policy.
 
-To learn more about Next.js, take a look at the following resources:
+## Project operating system
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Every required governing document is indexed below:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- [Operating-system bootloader](.ai/README.md)
+- [CTO master directive](.ai/CTO_MASTER_DIRECTIVE.md)
+- [Project constitution](.ai/PROJECT_CONSTITUTION.md)
+- [Architecture blueprint](.ai/ARCHITECTURE_BLUEPRINT.md)
+- [Engineering manual](.ai/ENGINEERING_MANUAL.md)
+- [Autonomous development](.ai/AUTONOMOUS_DEVELOPMENT.md)
+- [Merge policy](.ai/MERGE_POLICY.md)
+- [Risk policy](.ai/RISK_POLICY.md)
+- [Domain guidelines](.ai/DOMAIN_GUIDELINES.md)
+- [API policy](.ai/API_POLICY.md)
+- [DTO policy](.ai/DTO_POLICY.md)
+- [Queue policy](.ai/QUEUE_POLICY.md)
+- [Database policy](.ai/DATABASE_POLICY.md)
+- [Epic roadmap](.ai/EPIC_ROADMAP.md)
+- [Sprint policy](.ai/SPRINT_POLICY.md)
+- [Story template](.ai/STORY_TEMPLATE.md)
+- [Task template](.ai/TASK_TEMPLATE.md)
+- [Architecture review](.ai/ARCHITECTURE_REVIEW.md)
+- [Decision log](.ai/DECISION_LOG.md)
 
-## Deploy on Vercel
+## Development commands
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Requires Node.js 22 or newer; CI uses Node.js 24.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm ci
+npm run dev
+npm run lint
+npm run typecheck
+npm test
+npm run build
+npm run test:e2e:local
+```
+
+Repository implementation and operational references remain available in
+[Architecture](ARCHITECTURE.md), [Project Map](PROJECT_MAP.md),
+[Development Guide](DEVELOPMENT_GUIDE.md), [Database Guide](DATABASE_GUIDE.md),
+[Testing Guide](TESTING_GUIDE.md), and [Operations Guide](OPERATIONS_GUIDE.md).
