@@ -2,6 +2,58 @@
 
 ## Current task snapshot
 
+- Objective: deliver Project Bootstrap v1.0, a permanent architecture-driven
+  repository operating system for all future Stories.
+- Branch: `codex/chore/project-bootstrap-v1`.
+- Risk: normal-risk documentation only. Existing policy makes the initial
+  automation/project bootstrap manual even though normal-risk.
+- Revenue impact: P2/P3 enabling control. Repeatable architecture and delivery
+  gates reduce rework and operational risk on the shortest revenue path.
+- Root-cause class: capability/governance gap. Existing controls were useful but
+  did not provide the requested permanent CTO/constitution/architecture boot,
+  templates, architecture stop gate, or Epic 4-9 architecture roadmap.
+- Scope: root README bootloader, 19 required `.ai` documents, integration with
+  existing controls, Decision Log, changelog, link/reference validation, and
+  full applicable delivery.
+- Non-goals: Workspace, Queue, Upload, Product feature, Revenue Engine,
+  Dashboard, API/business logic, database/schema/migration, or external writes.
+- Completed: read task and binding repository controls; confirmed the exact
+  clean non-main branch; classified risk; audited architecture, project,
+  database, testing, operations, PR, and workflow sources; designed and wrote
+  the permanent operating-system documents; passed document/link/scope checks,
+  lint, typecheck, 191 unit/integration tests, production build, and all 31
+  locally configurable browser checks.
+- Current work: local implementation and validation complete; remote delivery
+  is paused before staging because the required GitHub CLI is unavailable.
+- Blockers/owner actions: seven local browser routes depend on unavailable local
+  Supabase configuration. This is an existing external-configuration condition,
+  not a code defect; exact-commit Preview remains the deployed gate. Merge also
+  remains subject to the stricter manual-bootstrap policy. GitHub CLI `gh` is
+  not installed or available on the host PATH, so the authenticated publish
+  workflow cannot verify auth, commit/push, or create the PR.
+- Changed files: `README.md`, 19 required `.ai` documents, this status file,
+  and `CHANGELOG-Project-Bootstrap-v1.md`.
+- Commands/results: all 19 required files exist; both README indexes reference
+  every required document; all relative Markdown links resolve; documentation-
+  only scope and `git diff --check` passed. Lint passed with four pre-existing
+  warnings and no errors; typecheck passed; unit/integration tests passed
+  191/191; production build passed with 67 generated pages. Local Chromium ran
+  38 checks: 31 passed and seven existing Supabase-dependent routes failed with
+  HTTP 500 because local Supabase is unconfigured (`/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, `/workspace`). Evidence
+  is retained under ignored `test-results/`.
+- Delivery: not staged, committed, pushed, or opened as a PR. Publishing stopped
+  at the GitHub workflow prerequisite check.
+- Last commit: `f391a79 test: harden Revenue Dashboard release (#22)`.
+- Exact next action: owner installs GitHub CLI and authenticates it, then rerun
+  `gh --version` and `gh auth status`; resume with explicit staging, commit,
+  push, PR creation, and exact-head CI/Preview verification.
+- Remaining risks: remote CI/Preview configuration may block delivery and must
+  not be compensated for in code; the bootstrap requires manual merge under the
+  stricter pre-existing delivery policy.
+
+## Previous task snapshot
+
 - Objective: complete Story 3-5 Revenue Dashboard Release Hardening after
   Story 3-4 Production verification.
 - Branch: `codex/chore/revenue-dashboard-release-hardening`.
