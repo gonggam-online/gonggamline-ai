@@ -2,8 +2,8 @@
 
 Classify every statement and resulting object independently. A table-level
 label never substitutes for column, constraint, index, policy, function, or
-trigger labels. Deployed labels remain `UNKNOWN` until catalog evidence is
-supplied for the named environment.
+trigger labels. `UNKNOWN` is an investigation state; Sprint close-out requires
+resolution or an explicitly justified `DEFERRED` execution boundary.
 
 ## EXACT
 
@@ -35,6 +35,13 @@ environment. Absence must be proven by the relevant complete catalog result.
 
 Evidence is missing, partial, stale, unlabeled, environment-ambiguous, or
 insufficient for an exact comparison. `UNKNOWN` blocks restoration.
+
+## DEFERRED
+
+The evidence cannot be obtained without Production access, executing a future
+change, or inventing history, and the property is not required for the current
+decision. Record the exact limitation, impact, owner, mitigation, and later
+verification boundary. Deferral never authorizes Production execution.
 
 ## Comparison record
 

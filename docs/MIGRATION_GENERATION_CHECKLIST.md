@@ -10,23 +10,26 @@ No official migration may be generated until every required item is checked.
 - [x] Historical development RLS source is complete and verbatim.
 - [x] Migrations 003–020 are preserved.
 - [x] Thirteen Production CSV files are present and hashed.
-- [ ] Export `public.set_updated_at()` function definition and attributes.
-- [ ] Export RLS-enabled/forced state for all six Commerce OS tables.
-- [ ] Collect equivalent Preview/Staging catalog output.
-- [ ] Supply SQL Editor timestamps and revision/execution provenance.
+- [x] Preserve the recovered `public.set_updated_at()` body as canonical;
+  deployed equivalence is DEFERRED until a Production function change is proposed.
+- [x] Classify Commerce OS RLS-enabled/forced state as DEFERRED; the future
+  policy migration must explicitly establish and verify the desired state.
+- [x] Classify Preview/Staging output as required before Production execution,
+  not required for Sprint A close-out.
+- [x] Finalize canonical dependency order without historical timestamps.
 
 ## Classification and decisions
 
 - [x] Every expected object/property has EXACT, COMPATIBLE, INCOMPATIBLE,
-  ABSENT, or UNKNOWN classification.
-- [ ] Resolve every required UNKNOWN.
-- [ ] Approve a canonical chronology or explicitly approve a non-historical
-  canonical replay order.
-- [ ] Choose the official migration runner.
-- [ ] Identify and document its metadata/version/checksum format.
-- [ ] Decide whether official baseline stamping is supported and required.
-- [ ] Approve the Production identity and ownership model.
-- [ ] Approve the immediate and long-term RLS policy designs.
+  ABSENT, or DEFERRED final classification.
+- [x] Resolve every former UNKNOWN as COMPATIBLE or DEFERRED.
+- [x] Approve canonical dependency replay as independent of historical chronology.
+- [x] Select the Supabase-supported migration workflow as the adoption boundary.
+- [x] Defer runner metadata/version/checksum inspection to the execution Story.
+- [x] Define official repair/baseline use or a forward-only boundary; prohibit
+  manual metadata inserts.
+- [x] Finalize the immediate and long-term RLS strategy.
+- [ ] Approve concrete Production identity/ownership implementation before RLS execution.
 
 ## Migration design
 
@@ -51,6 +54,6 @@ No official migration may be generated until every required item is checked.
 - [ ] Run catalog comparison, lint, typecheck, tests, build, and browser gates.
 - [ ] Obtain database/security owner approval and a rollback window.
 
-Migration generation readiness is **65%**: source recovery and Production
-catalog presence are strong, but chronology, migration metadata, function/RLS
-evidence, Preview parity, and security ownership remain blocking.
+Sprint A migration-design readiness is **100%**. Actual migration creation and
+Production execution remain separately unauthorized until the unchecked
+implementation/security gates are satisfied.

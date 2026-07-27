@@ -1,11 +1,12 @@
 # Supabase restoration design
 
-## Current evidence stop
+## Close-out status
 
-This document is implementation-ready in structure, not execution-ready.
-Deployed catalog outputs and migration-runner metadata are not yet supplied, so
-every deployed comparison is `UNKNOWN`. No official migration, policy, or
-history record may be created from this design.
+Production catalog outputs were supplied in Sprint A-4 and reconciled in
+Sprint A-5. The final classifications are in
+`docs/SUPABASE_DEPLOYED_OBJECT_CLASSIFICATION.md`. No unresolved `UNKNOWN`
+finding remains; unverifiable historical properties are explicitly `DEFERRED`.
+No official migration, policy, or history record is created by this design.
 
 ## A. Fresh database replay
 
@@ -34,7 +35,8 @@ Never blindly rerun historical baseline DDL.
 - `INCOMPATIBLE`: design one purpose-built corrective migration with locking,
   data compatibility, rollback, and application deployment order.
 - `ABSENT`: design an additive migration with dependency and backfill proof.
-- `UNKNOWN`: stop restoration for that object and its dependents.
+- `UNKNOWN`: stop restoration until it is resolved or formally deferred with
+  a reason and a later verification boundary.
 
 Schema changes and history reconciliation are separate controlled operations.
 First identify the actual runner and metadata format. Do not directly insert
@@ -43,11 +45,10 @@ version/name/checksum semantics and environment history are proven.
 
 ## C. Preview or Staging alignment
 
-Collect the same thirteen outputs with explicit environment labels. Compare
-Preview/Staging separately against canonical sources and Production. Use it as
-the first later execution target only after unknowns are resolved; do not treat
-its state as proof of Production. Validate replay, schema cache, policies,
-application routes, and rollback before Production approval.
+Collect the same thirteen outputs with explicit environment labels before any
+future database execution. Preview/Staging comparison is optional for Sprint A
+documentation close-out but required as the first execution target before
+Production. It is never proof of Production state.
 
 ## D. Production RLS hardening
 

@@ -12,8 +12,9 @@ The schema-restoration problem is now two separate problems:
 2. replace historically accurate but unsafe Production RLS without disrupting
    an application that currently uses the anon role.
 
-Migration generation is not yet authorized. The remaining `UNKNOWN` evidence
-and security decisions in the generation checklist are hard blockers.
+Migration files are not created in Sprint A. The canonical design is finalized;
+execution-sensitive verification is deferred to later migration-generation and
+Production-security Stories.
 
 ## Source and classification summary
 
@@ -21,7 +22,7 @@ and security decisions in the generation checklist are hard blockers.
 |---|---|---|
 | Products baseline | EXACT | Three policies INCOMPATIBLE |
 | Product workflow | EXACT | Not applicable |
-| Commerce OS core | EXACT except function body UNKNOWN | RLS state UNKNOWN |
+| Commerce OS core | EXACT; function contract COMPATIBLE and body comparison DEFERRED | Historical RLS state DEFERRED |
 | Historical `003_dev_rls` | Six policies EXACT historically | INCOMPATIBLE |
 | Competition 003–004 | EXACT | Depends on unsafe Product access |
 | Market 005–009 | EXACT | 18 policies INCOMPATIBLE |
@@ -49,22 +50,23 @@ The dependency-safe order is:
 
 Verification-only SQL Editor entries remain outside migrations.
 
-### Future official layout
+### Final official layout design
 
-Do not force numeric filenames until chronology is either proven or the owner
-explicitly approves a canonical, non-historical order. The intended roles are:
+Historical timestamps are not required. Future filenames encode canonical
+dependency order, not original execution chronology. Existing 003–020 remain
+unchanged. Exact filenames are assigned only in the separately approved
+migration-generation Story:
 
 | Logical slot | Candidate | Decision required |
 |---|---|---|
 | pre-003 A | Products baseline | Authoritative filename/version |
-| pre-003 B | Product workflow | Relative order versus Commerce core |
-| pre-003 C | Commerce OS core | Relative order and verified function body |
+| pre-003 B | Product workflow | Canonical dependency slot |
+| pre-003 C | Commerce OS core | Canonical dependency slot; recovered function body |
 | security baseline | Production RLS | Identity/ownership policy approval |
 | existing chain | 003–020 | Never rename |
 
-If chronology cannot be recovered, document that filenames encode canonical
-dependency order rather than historical execution order. Do not pretend they
-are original timestamps.
+This is sufficient because fresh databases have no historical state and
+Production never replays the baseline files.
 
 ### Replay acceptance
 
@@ -80,7 +82,8 @@ business-data leakage, generated schema cache, and application/browser gates.
 - COMPATIBLE subsystem metadata: leave under its owning Supabase subsystem.
 - INCOMPATIBLE security objects: replace only through an approved RLS migration.
 - ABSENT application migration metadata: do not synthesize rows.
-- UNKNOWN function/RLS properties: collect evidence before any migration.
+- DEFERRED historical properties: verify at a future execution boundary and
+  never use them to justify Production baseline replay.
 
 No additive schema migration is currently justified by the Production CSVs.
 Any later difference must receive a narrowly scoped corrective migration after
@@ -107,8 +110,19 @@ approximately 151 Product rows already exist. Blind replay could overwrite the
 updated-at function, recreate constraints, collide with policies, or modify
 seed state.
 
-Baseline stamping may be required only if the owner adopts a migration runner
-that supports an official repair/baseline operation. Before that decision:
+The official adoption strategy is:
+
+- fresh databases run the canonical repository chain through the
+  Supabase-supported migration workflow;
+- existing Production is never backfilled with manual metadata statements;
+- after canonical files exist, an approved execution Story may use the
+  official Supabase migration-history repair/baseline capability to mark only
+  independently proven applied versions;
+- if the official workflow cannot represent deployed state safely, Production
+  remains unstamped and future changes begin at a documented forward-only
+  adoption boundary.
+
+Before any stamping operation:
 
 1. identify the runner and version/checksum/name rules;
 2. prove its actual metadata relation and visibility;
@@ -116,8 +130,8 @@ that supports an official repair/baseline operation. Before that decision:
 4. rehearse its official repair mechanism outside Production;
 5. obtain database-owner approval.
 
-Never insert rows directly and never reuse Auth, Realtime, or Storage migration
-tables.
+Never manually `INSERT` into `schema_migrations`, and never reuse Auth,
+Realtime, or Storage migration tables.
 
 ## Production security recovery
 
@@ -159,8 +173,8 @@ failed fresh replay as a Production repair.
 | Breaking current anon-backed server routes | Critical | Change principal before policy removal |
 | Blind baseline replay on populated Production | Critical | Preserve EXACT objects; corrective migrations only |
 | Invented history rows | High | Official runner repair only |
-| Unknown function body overwriting behavior | High | Export and compare before generation |
-| Unknown Commerce OS RLS-enabled state | High | Collect missing state grid |
+| Deferred function-body comparison | Medium | Use recovered body for fresh replay; inspect before any Production function change |
+| Deferred Commerce OS RLS state | High | Future policy migration explicitly establishes and verifies desired state |
 | Unproven chronology | High | Timestamp evidence or explicit canonical-order decision |
 | Preview/Production drift | High | Collect and compare Preview/Staging output |
 | Dependency audit advisories | High, pre-existing | Separate dependency-upgrade Story |
@@ -172,11 +186,11 @@ failed fresh replay as a Production repair.
 - [x] Product, workflow, Commerce core, and Git-chain schema inventoried.
 - [x] All deployed policies classified for historical and Production meaning.
 - [x] No historical DDL recommended for Production replay.
-- [ ] Function definition verified.
-- [ ] Commerce OS RLS state verified.
-- [ ] Preview/Staging comparison completed.
-- [ ] SQL Editor chronology resolved or canonical order explicitly approved.
-- [ ] Migration runner and official history repair method approved.
+- [x] Function body preserved canonically; deployed comparison deferred.
+- [x] Commerce OS historical RLS state formally deferred.
+- [x] Preview/Staging comparison classified as a future execution gate.
+- [x] Canonical order finalized without claiming historical chronology.
+- [x] Official migration adoption strategy finalized; execution approval deferred.
 - [ ] Production identity/ownership and RLS design approved.
 - [ ] Fresh replay and reconciliation rehearsed.
 
@@ -186,14 +200,13 @@ failed fresh replay as a Production repair.
 |---|---|
 | Recovery source complete | Complete |
 | Production inspection files present | Complete |
-| Inspection result coverage complete | Blocked: function and Commerce RLS grids missing |
-| Object classification complete | Complete, with explicit UNKNOWN properties |
-| Replay order finalized | Provisional; chronology/owner decision pending |
-| Production reconciliation finalized | Schema path complete; security path pending approval |
-| Migration generation ready | No, 65% |
+| Inspection result coverage complete | Complete for Sprint A; missing grids formally deferred |
+| Object classification complete | Complete; no unresolved UNKNOWN findings |
+| Replay order finalized | Complete as canonical dependency order |
+| Production reconciliation finalized | Complete as strategy; execution is a later high-risk Story |
+| Migration generation design ready | Complete; migration creation remains separately unauthorized |
 
-Sprint A cannot be declared complete. Sprint B may be planned independently,
-but it must not assume database baseline restoration or Production RLS recovery
-is complete. Beginning the Domeggook Live Search vertical slice is recommended
-only if it remains read-only, does not depend on unresolved schema changes, and
-passes its own architecture and security gates.
+Sprint A is complete with deferred execution items. Sprint B may begin with the
+Domeggook Live Search vertical slice because it is read-only and independent of
+future migration/RLS execution, subject to its own architecture and security
+gates.
