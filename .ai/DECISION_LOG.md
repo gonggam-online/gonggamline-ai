@@ -62,3 +62,30 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Context and evidence: See [`EPIC_ROADMAP.md`](EPIC_ROADMAP.md).
 - Follow-up / due condition: Begin each Epic with approved Architecture Stories;
   this bootstrap does not authorize feature implementation.
+
+## 2026-07-27 — Domeggook Read-only Supplier Catalog Adapter v1
+
+- Category: architecture decision
+- Story / PR: Domeggook Read-only Supplier Catalog Adapter v1 / pending
+- Status: approved by task directive; delivery pending
+- Owner / approver: AI CTO directive supplied by repository owner
+- Context and evidence: Existing Domeggook routes load credentials and call the
+  provider directly; the search route also performs financial calculations and
+  Product persistence. Production readiness audit could not distinguish
+  configuration, authentication, and provider failure.
+- Decision or issue: Introduce a read-only Domeggook Supplier Catalog Adapter
+  under Supplier/Procurement with provider DTO/domain separation, `getItem` and
+  bounded `searchItems`, a sanitized error taxonomy, 10-second overall budget,
+  bounded retry, conservative rate controls, and an explicit safe health
+  contract. The adapter is DB-independent and Queue-free.
+- Consequences and risks: A new External Integration boundary and health Public
+  API are approved only for the bounded later implementation Story. Existing
+  Product/Revenue contracts remain behavior-equivalent. Official provider quota
+  is unknown and must not be invented.
+- Follow-up / due condition: Execute only
+  [Implement Domeggook Read-only Supplier Catalog Adapter v1](../docs/architecture/DOMEGGOOK-READONLY-SUPPLIER-CATALOG-ADAPTER-V1.md#17-implementation-story-definition)
+  after this Architecture Story is merged. Any DB, Migration, Queue, bulk
+  collection, scheduler, supplier order, or Product write requires separate
+  authorization.
+- Rollback or supersession: Revert the Architecture Story PR or supersede it
+  with an explicitly approved decision before implementation diverges.

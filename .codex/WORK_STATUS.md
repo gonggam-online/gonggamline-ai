@@ -2,6 +2,53 @@
 
 ## Current task snapshot
 
+- Objective: approve and deliver the Architecture Story for Domeggook Read-only
+  Supplier Catalog Adapter v1; do not implement it.
+- Branch: `codex/docs/domeggook-readonly-adapter-architecture-v1`.
+- Risk: normal-risk, documentation-only architecture change.
+- Revenue impact: P1 first-product discovery enablement. It isolates the
+  sourcing provider boundary without starting Product, ordering, or marketplace
+  writes.
+- Root-cause class: architecture/capability gap. Existing Domeggook routes mix
+  provider transport, parsing, financial calculation, and persistence and
+  cannot provide a safe classified health signal.
+- Scope: one Architecture Story, Architecture Review approval, Decision Log,
+  minimal Epic Roadmap link, changelog, status, validation, and delivery.
+- Non-goals: adapter or route implementation, credential changes, external API
+  calls, Product collection, Revenue changes, DB/Migration, Queue, supplier
+  order, content generation, or Coupang work.
+- Completed: required boot and compliance review; clean synchronized `main`;
+  non-main branch creation; current-state evidence review; architecture
+  decisions for boundary, DTOs, operations, configuration, errors,
+  timeout/retry, rate controls, health, persistence, Queue, observability,
+  testing, rollout, rollback, and later implementation Definition of Done;
+  document/link/scope checks; duplicate-section diff correction; lint,
+  typecheck, 191 tests, build, and all 31 locally configurable browser checks.
+- Current work: prepare the architecture documentation commit and delivery.
+- Blockers/owner actions: seven existing browser routes require unavailable
+  local Supabase configuration. This external configuration condition is
+  unchanged; exact Preview remains the deployed gate.
+- Changed files: Architecture Story, `.ai/ARCHITECTURE_REVIEW.md`,
+  `.ai/DECISION_LOG.md`, `.ai/EPIC_ROADMAP.md`, changelog, and this status.
+- Commands/results: required decisions, all relative Markdown file links,
+  documentation-only scope, unique approval sections, and `git diff --check`
+  passed. Lint passed with four pre-existing warnings and no errors; typecheck
+  passed; unit/integration passed 191/191; production build passed with 67
+  generated pages. Local Chromium ran all 38 checks: 31 passed and the same
+  seven Supabase-dependent routes failed with HTTP 500 because local Supabase
+  is unconfigured (`/listing`, `/market`, `/procurement`, `/revenue`,
+  `/sourcing`, `/workflow`, `/workspace`). Ignored evidence is under
+  `test-results/`.
+- Delivery: not committed, pushed, or opened as a PR yet.
+- Last commit: `368ed196 Project Bootstrap v1.0 (#23)`.
+- Exact next action: stage only the six documentation/status files, commit,
+  push, open the PR, and require exact-head CI/Preview before squash merge.
+- Remaining risks: provider quota remains unknown and must not be guessed; the
+  later implementation must preserve existing Domeggook/Product/Revenue public
+  behavior and remain DB/Queue-free.
+
+## Previous task snapshot
+
 - Objective: deliver Project Bootstrap v1.0, a permanent architecture-driven
   repository operating system for all future Stories.
 - Branch: `codex/chore/project-bootstrap-v1`.
