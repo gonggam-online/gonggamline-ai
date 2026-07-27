@@ -1,5 +1,18 @@
 # Work status
 
+## 2026-07-27 — Domeggook Live Search API
+
+- Objective: implement the approved bounded Live Search API without
+  persistence.
+- Branch: `codex/feat/domeggook-live-search-api`, stacked on the Live Search
+  Architecture Story.
+- Risk: normal-risk; read-only provider access and no database path.
+- Completed: thin GET handler, public DTO mapper, sanitized error mapping,
+  malformed-input guard, and focused no-write contract tests.
+- Non-goals: UI, Product writes, financial calculations, recommendations,
+  legacy route changes, Queue, or bulk collection.
+- Current: focused and full validation, then stacked Draft PR delivery.
+
 ## 2026-07-27 — Domeggook Live Search architecture
 
 - Objective: authorize a standalone live supplier search with no persistence.
