@@ -89,3 +89,28 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   authorization.
 - Rollback or supersession: Revert the Architecture Story PR or supersede it
   with an explicitly approved decision before implementation diverges.
+
+
+## 2026-07-27 — Domeggook Read-only Supplier Catalog Adapter v1 implementation
+
+- Category: architecture decision
+- Story / PR: Implement Domeggook Read-only Supplier Catalog Adapter v1 /
+  pending
+- Status: implemented; delivery pending
+- Owner / approver: AI CTO directive supplied by repository owner
+- Context and evidence: The approved Architecture Story authorizes one bounded,
+  synchronous, read-only Supplier Catalog adapter and sanitized health API.
+- Decision or issue: Implement the provider-neutral port, provider DTO/parser,
+  mapper, application service, bounded Domeggook client, safe health service,
+  and default network-free health route. Preserve the existing Domeggook
+  search/test routes rather than silently changing their contracts.
+- Consequences and risks: The new adapter can safely read one item or one
+  bounded result page. Provider verification is explicit, size-one, coalesced,
+  and cached for 60 seconds. Official provider quota remains unknown, so v1
+  retains conservative ceilings.
+- Follow-up / due condition: Use this adapter only through a separately scoped
+  application Story. Any Product persistence, Revenue use, bulk collection,
+  scheduler, Queue, database cache, Migration, or supplier write needs separate
+  architecture approval.
+- Rollback or supersession: Revert the implementation PR. No data, schema,
+  Queue, credential, or provider rollback is required.

@@ -2,6 +2,49 @@
 
 ## Current task snapshot
 
+- Objective: implement the approved Domeggook Read-only Supplier Catalog
+  Adapter v1 without Product, Revenue, DB, Migration, Queue, bulk, Coupang, or
+  external-write changes.
+- Branch: `codex/feat/domeggook-readonly-adapter-v1`.
+- Risk: normal-risk. This is a read-only external adapter and sanitized health
+  API within an approved Architecture Story.
+- Revenue impact: P1 enabling work. It creates the safe supplier-catalog read
+  boundary required before first-product discovery.
+- Root-cause class: code/capability gap. Existing routes call Domeggook
+  directly and mix provider access with Product/Revenue behavior.
+- Completed: mandatory boot/compliance/risk checks; existing-contract audit;
+  provider-neutral domain port; provider DTO/parser; dedicated mapper; typed
+  error taxonomy; bounded client with timeout/retry/backoff/jitter and
+  concurrency ceiling; application service; network-free default health;
+  explicit cached size-one provider verification; unit/contract/HTTP/E2E
+  coverage.
+- Current work: local implementation and Release Gate validation are complete;
+  prepare the implementation commit and exact-head delivery.
+- Blockers/owner actions: none. No credential value was read or changed.
+- Changed files: Supplier Catalog domain contract, `lib/domeggook/**`,
+  Supplier Catalog and Domeggook health services, the new health route,
+  Domeggook unit/contract tests, safe API E2E coverage, Decision Log,
+  changelog, and this status file.
+- Commands/results: focused adapter/health suite 26/26 passed; full unit and
+  contract suite 217/217 passed; typecheck passed; lint passed with zero errors
+  and four pre-existing Revenue-test warnings; production build passed with 68
+  routes; `git diff --check` passed. Local Chromium executed all 39 tests:
+  32 passed, including the new Domeggook health contract; the same seven
+  existing Supabase-dependent routes failed because local Supabase is
+  unconfigured (`/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`,
+  `/workflow`, `/workspace`). The outer command timed out after all cases ran
+  while Playwright was finalizing.
+- Delivery: not committed, pushed, or opened as a PR yet.
+- Last commit: `3fbe117 Architecture: Domeggook Read-only Supplier Catalog
+  Adapter v1 (#24)`.
+- Exact next action: commit the reviewed change, push, open the Story PR, and
+  validate exact-head CI and configured Preview before merge.
+- Remaining risks: official Domeggook quota remains unverified. Real provider
+  authentication is optional and must be checked only through the explicit
+  read-only provider health mode when the deployment credential is configured.
+
+## Current task snapshot
+
 - Objective: approve and deliver the Architecture Story for Domeggook Read-only
   Supplier Catalog Adapter v1; do not implement it.
 - Branch: `codex/docs/domeggook-readonly-adapter-architecture-v1`.
