@@ -1,6 +1,8 @@
 # Supabase restoration decision matrix
 
-All deployed rows are preliminary `UNKNOWN` until operator output is supplied.
+This matrix defines treatment rules. Production rows were classified from the
+operator CSVs in Sprint A-4 and finalized in Sprint A-5; no active unresolved
+`UNKNOWN` finding remains.
 
 | Classification | Fresh replay treatment | Existing Production treatment | History treatment | Gate |
 |---|---|---|---|---|

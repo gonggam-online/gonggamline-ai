@@ -2,11 +2,10 @@
 
 ## Current task snapshot
 
-- Objective: classify the deployed Production schema from operator CSV evidence
-  and finalize the baseline restoration implementation plan without executing
-  SQL or changing migrations/application behavior.
-- Branch: `codex/chore/supabase-baseline-restoration`, stacked on Draft PR #28
-  because its inspection framework is not on `main`.
+- Objective: formally close Sprint A by resolving every remaining baseline
+  reconciliation finding without executing SQL or changing migrations or
+  application behavior.
+- Branch: `codex/chore/sprint-a-closeout`, stacked on Draft PR #29.
 - Risk: high-risk/manual because the documents design migration history and
   Production RLS recovery. Auto-merge is prohibited.
 - Revenue impact: P0 database and authorization reliability required before
@@ -14,20 +13,27 @@
 - Root-cause class: database provenance and Production authorization drift.
 - Source priority: Production CSV, verbatim SQL Editor sources, existing
   migrations, application code, then documentation.
-- Scope: preserve 13 Production CSVs; classify all expected objects; define
-  fresh replay, Production reconciliation, history recovery, RLS replacement,
-  rollback, verification, and generation readiness.
+- Scope: finalize former UNKNOWN findings as COMPATIBLE or DEFERRED; complete
+  canonical replay, Production, migration-history, and RLS strategies; record
+  final risks and Sprint B readiness.
 - Non-goals: execute SQL, contact Supabase, modify migrations/application code
   or recovered SQL, create migrations, insert history rows, or implement RLS.
-- Completed: read all CSVs; verified 57 tables, 883 columns, 268 constraints,
-  148 indexes, 59 policies, four triggers, and required `pgcrypto`; created
-  classification, implementation, RLS, and generation-readiness documents.
+- Completed: recovered and hashed all evidence; reconciled 57 tables, 883
+  columns, 268 constraints, 148 indexes, 59 policies, four triggers, and
+  `pgcrypto`; finalized canonical replay, forward Production reconciliation,
+  official migration adoption, and identity-first RLS strategy. No unresolved
+  UNKNOWN finding remains.
 - Current work: final diff review and Git delivery.
-- Blockers: deployed `set_updated_at()` definition, Commerce OS RLS state,
-  SQL Editor chronology, migration runner/metadata format, Preview/Staging
-  parity, and approved Production identity/ownership remain unresolved.
-- Changed files: four requested/related documents, thirteen operator CSVs,
-  task changelog, and this status file.
+- Blockers: none for Sprint A closure or the independent read-only Sprint B
+  vertical slice.
+- Deferred items: deployed `set_updated_at()` body equivalence; historical
+  Commerce OS RLS enabled/forced state; original SQL Editor timestamps;
+  runner metadata/checksum inspection; Preview/Staging parity; and concrete
+  Production identity/ownership implementation. Each has an owner, mitigation,
+  and future execution boundary in the final risk register.
+- Changed files: final risk register and completion report; reconciled
+  classification/implementation/checklist/standards; task changelog; and this
+  status file.
 - Safety: no SQL executed and no Supabase contact. No migration, application,
   recovery SQL, SQL Editor export, or CSV content has been modified. CSV hashes
   remain 13/13 exact. Protected-path diff and `git diff --check` pass. Scoped
@@ -35,10 +41,18 @@
   217/217; build passes with 68 routes. Local browser remains 32/39 with the
   same seven Supabase-unconfigured failures. Dependency audit reports 12
   existing high-severity transitive advisories; no upgrade was made.
-- Readiness: 65%; Sprint A is not complete while required UNKNOWN properties
-  and security decisions remain.
-- Exact next action: stage only the evidence and plan files, review the complete
-  diff, commit, push, and open a Draft manual PR without auto-merge.
+- Sprint status: **Sprint A Complete with Deferred Items**.
+- Upcoming milestone: Sprint B — Domeggook Live Search Vertical Slice,
+  constrained to its approved read-only architecture and independent from
+  database/RLS execution.
+- Readiness: 100% for Sprint A close-out; Production migration/RLS execution
+  remains a separate high-risk approval boundary.
+- Validation: protected paths and inspection CSVs unchanged; `git diff --check`
+  passes. Scoped lint passes with four pre-existing warnings; typecheck passes;
+  tests pass 217/217; build passes with 68 routes. Local browser remains 32/39
+  with the same seven Supabase-unconfigured failures.
+- Exact next action: stage the close-out documents/status only, review, commit,
+  push, and open a Draft manual PR without auto-merge.
 
 ## Current task snapshot
 
@@ -64,9 +78,9 @@
   and application inspection; draft package and design; initial static
   SELECT-only and protected-path checks.
 - Current work: final diff review and Git delivery.
-- Blockers/owner actions: all deployed classifications remain `UNKNOWN` pending
-  operator outputs for each environment; SQL Editor timestamps and actual
-  migration metadata runner/format remain unresolved.
+- Historical A-3 blockers: deployed classifications awaited operator output.
+  Sprint A-4/A-5 later supplied Production evidence and formally deferred
+  chronology and runner-format execution details.
 - Changed files: requested docs and deployed-inspection sources, task changelog,
   and this status file only.
 - Commands/results: no SQL executed and no Supabase contact. Thirteen SQL files

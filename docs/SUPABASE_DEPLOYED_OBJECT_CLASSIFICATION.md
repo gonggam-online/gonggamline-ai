@@ -46,9 +46,10 @@ CSV SHA-256 values:
 | Six Commerce OS tables and columns | EXACT | All six tables and their recovered columns are present |
 | Commerce OS internal FKs/checks and conditional `commerce_projects_provider_fk` | EXACT | All named definitions are present |
 | Seven Commerce OS indexes | EXACT | All recovered names and definitions are present |
-| `set_updated_at()` function | UNKNOWN | CSV 06 contains only its final trigger result grid; function definition was not exported |
+| `set_updated_at()` existence/signature | COMPATIBLE | Four enabled triggers resolve and execute `set_updated_at()`; the expected trigger contract exists |
+| `set_updated_at()` deployed body equivalence | DEFERRED | CSV 06 contains only its final trigger grid. The recovered body is complete, but deployed-body equality would require a new catalog query or database access |
 | Four Commerce OS updated-at triggers | EXACT | All four names are enabled and definitions match |
-| Commerce OS RLS-enabled state | UNKNOWN | CSV 11 proves policies, but the Commerce OS RLS-state result grid was not exported |
+| Commerce OS RLS-enabled/forced state | DEFERRED | CSV 11 proves exact policies, but the preceding RLS-state grid was not exported. Policy existence alone does not prove table RLS state |
 | Six historical Commerce OS policies | EXACT historically; INCOMPATIBLE for Production security | They match `003_dev_rls` and grant unconditional ALL to anon/authenticated |
 
 ## Existing Git chain classifications
@@ -80,8 +81,8 @@ with Production least privilege.
 | `auth.schema_migrations` | COMPATIBLE with Auth subsystem only | One `version` column; not evidence of application migration history |
 | `realtime.schema_migrations` | COMPATIBLE with Realtime subsystem only | `version` and `inserted_at`; not application history |
 | `storage.migrations` | COMPATIBLE with Storage subsystem only | Storage-owned metadata; not application history |
-| Repository migration runner/metadata format | UNKNOWN | No authoritative runner or application history relation was identified |
-| Historical execution timestamps/order | UNKNOWN | SQL Editor timestamps remain unavailable |
+| Repository migration runner/metadata format | DEFERRED | No application history relation exists. Adoption is an execution concern for the future official Supabase migration workflow |
+| Historical execution timestamps/order | DEFERRED | Timestamps remain unavailable, but chronology is not required for canonical dependency replay |
 
 ## Row-count evidence
 
@@ -89,14 +90,18 @@ CSV 09 contains catalog estimates only. `products` reports approximately 151
 rows; most newly created or unanalyzed tables report `-1`. This proves neither
 emptiness nor safe replay and must not be used for destructive decisions.
 
-## Classification blockers
+## Final reconciliation
 
-The classification is complete in that every expected object/property is
-assigned a state. Migration generation is not ready because the following
-required properties remain `UNKNOWN`:
+Every expected deployed object/property has an `EXACT`, `COMPATIBLE`,
+`INCOMPATIBLE`, `ABSENT`, or `DEFERRED` result. No unresolved `UNKNOWN` finding
+remains.
 
-1. The deployed `public.set_updated_at()` function body and attributes.
-2. RLS-enabled state for the six recovered Commerce OS tables.
-3. The application migration runner and its metadata/version format.
-4. Exact SQL Editor execution chronology and revision history.
-5. Preview/Staging equivalence to Production.
+1. The recovered function body is canonical for fresh replay; deployed-body
+   comparison is deferred because Production baseline DDL is never replayed.
+2. A future RLS migration explicitly establishes the desired table state, so
+   historical enabled/forced-state proof is not required for close-out.
+3. Canonical dependency order replaces unavailable historical chronology.
+4. Metadata adoption waits for canonical files and an approved official
+   Supabase migration execution Story.
+5. Preview/Staging comparison is required before a future Production database
+   change, not before documentation close-out.
