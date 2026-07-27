@@ -2,6 +2,60 @@
 
 ## Current task snapshot
 
+- Objective: export and reconcile the operator-provided SQL Editor baseline
+  against the Git migration chain without executing SQL or changing migrations,
+  application behavior, deployed databases, or Git history.
+- Branch: `codex/chore/sql-editor-baseline-export`.
+- Base dependency: PR #26 commit `2f557d5`; the branch is stacked because the
+  recovery sources are not yet on `main`.
+- Risk: high-risk/manual because the evidence contains schema and permissive
+  RLS DDL, although this Story changes documentation and recovery-only files.
+  Auto-merge is prohibited.
+- Revenue impact: P0/P1 database provenance. A reproducible baseline prevents
+  schema drift from blocking Product, Revenue, and Commerce OS operations.
+- Root-cause class: database provenance gap. SQL Editor history predates the
+  checked-in migration chain.
+- Scope: preserve seven named SQL Editor entries verbatim; map them to Git;
+  separate DDL candidates from checks; propose dependency replay order; record
+  missing timestamps and Production RLS risk.
+- Non-goals: execute SQL, contact Supabase, modify/rename migrations, create
+  replacement migrations, infer missing statements, change application code,
+  or rewrite Git history.
+- Completed: verified clean branch state and PR #26 dependency; read governing
+  documents and all migration/recovery evidence; confirmed complete operator
+  sources; created seven SQL Editor exports and four reconciliation documents;
+  added the task changelog.
+- Current work: local implementation and validation are complete; review and
+  deliver the exact change set.
+- Blockers/owner actions: actual restoration remains blocked by missing SQL
+  Editor timestamps, the Products baseline entry name/timestamp, deployed
+  schema and migration-history output, environment execution provenance, and a
+  Production-safe RLS design.
+- Changed files: four requested documents,
+  `supabase/recovery-sources/sql-editor-export/**`, task changelog, and this
+  status file.
+- Commands/results: no SQL executed and Supabase was not contacted. Verbatim
+  comparison passed for the recovered Core Schema, Product workflow, attached
+  development RLS, and attached verification sources; seven exports are
+  present. Protected migration/application path checks and `git diff --check`
+  passed. Standard lint was polluted by ignored generated Playwright report
+  assets; scoped lint excluding `playwright-report/**` and `test-results/**`
+  passed with four pre-existing Revenue-test warnings and no errors. Typecheck
+  passed; unit/contract tests passed 217/217; production build passed with 68
+  routes. Browser tests were not repeated because no runtime file changed; the
+  exact parent commit recorded 32/39 locally, with seven known failures from
+  unconfigured Supabase, and exact-head Preview remains required.
+- Delivery: not committed, pushed, or opened as a PR yet.
+- Last commit: `2f557d5 docs(db): add Supabase baseline recovery evidence
+  package`.
+- Exact next action: review the complete diff, then commit/push/open a draft PR
+  to `main` without auto-merge.
+- Remaining risks: exact chronology is unproven; Product baseline numbering is
+  unresolved; historical `003_dev_rls` grants unrestricted CRUD to `anon` and
+  `authenticated` and is unacceptable as a Production policy.
+
+## Current task snapshot
+
 - Objective: prepare a reviewable Supabase baseline recovery evidence package
   from complete operator-supplied SQL without executing SQL, changing deployed
   databases, or modifying the migration chain.
