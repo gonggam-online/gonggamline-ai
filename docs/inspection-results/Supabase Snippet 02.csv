@@ -1,0 +1,884 @@
+table_schema,table_name,ordinal_position,column_name,data_type,udt_schema,udt_name,character_maximum_length,numeric_precision,numeric_scale,is_nullable,column_default,is_identity,identity_generation
+public,ai_bundle_items,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,ai_bundle_items,2,bundle_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,ai_bundle_items,3,market_product_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,ai_bundle_items,4,role,text,pg_catalog,text,null,null,null,NO,'component'::text,NO,null
+public,ai_bundle_items,5,quantity,integer,pg_catalog,int4,null,32,0,NO,1,NO,null
+public,ai_bundle_items,6,item_order,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,ai_bundle_recommendations,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,ai_bundle_recommendations,2,bundle_name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,ai_bundle_recommendations,3,bundle_type,text,pg_catalog,text,null,null,null,NO,'bundle'::text,NO,null
+public,ai_bundle_recommendations,4,keyword,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_bundle_recommendations,5,category,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_bundle_recommendations,6,status,text,pg_catalog,text,null,null,null,NO,'candidate'::text,NO,null
+public,ai_bundle_recommendations,7,ai_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,ai_bundle_recommendations,8,synergy_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,ai_bundle_recommendations,9,convenience_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,ai_bundle_recommendations,10,differentiation_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,ai_bundle_recommendations,11,margin_score,numeric,pg_catalog,numeric,null,5,2,NO,50,NO,null
+public,ai_bundle_recommendations,12,confidence,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,ai_bundle_recommendations,13,target_sale_price,numeric,pg_catalog,numeric,null,14,2,YES,null,NO,null
+public,ai_bundle_recommendations,14,target_cost_price,numeric,pg_catalog,numeric,null,14,2,YES,null,NO,null
+public,ai_bundle_recommendations,15,target_margin_rate,numeric,pg_catalog,numeric,null,8,3,YES,null,NO,null
+public,ai_bundle_recommendations,16,recommendation_reason,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_bundle_recommendations,17,evidence,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,ai_bundle_recommendations,18,generated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,ai_bundle_recommendations,19,reviewed_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,ai_bundle_recommendations,20,decision_run_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,ai_bundle_recommendations,21,decision_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,ai_bundle_recommendations,22,decision_action,text,pg_catalog,text,null,null,null,NO,'review'::text,NO,null
+public,ai_bundle_recommendations,23,risk_score,numeric,pg_catalog,numeric,null,5,2,NO,50,NO,null
+public,ai_ceo_briefs,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,ai_ceo_briefs,2,brief_date,date,pg_catalog,date,null,null,null,NO,CURRENT_DATE,NO,null
+public,ai_ceo_briefs,3,headline,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,ai_ceo_briefs,4,executive_summary,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_ceo_briefs,5,priorities,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,ai_ceo_briefs,6,recommended_actions,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,ai_ceo_briefs,7,risks,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,ai_ceo_briefs,8,expected_revenue,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,ai_ceo_briefs,9,expected_profit,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,ai_ceo_briefs,10,confidence,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,ai_ceo_briefs,11,status,text,pg_catalog,text,null,null,null,NO,'draft'::text,NO,null
+public,ai_ceo_briefs,12,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,ai_ceo_briefs,13,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,ai_decision_runs,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,ai_decision_runs,2,run_type,text,pg_catalog,text,null,null,null,NO,'discovery'::text,NO,null
+public,ai_decision_runs,3,status,text,pg_catalog,text,null,null,null,NO,'queued'::text,NO,null
+public,ai_decision_runs,4,model_version,text,pg_catalog,text,null,null,null,NO,'decision-v2'::text,NO,null
+public,ai_decision_runs,5,input_limit,integer,pg_catalog,int4,null,32,0,NO,100,NO,null
+public,ai_decision_runs,6,processed_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,ai_decision_runs,7,recommendation_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,ai_decision_runs,8,bundle_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,ai_decision_runs,9,decision_summary,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,ai_decision_runs,10,error_message,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_decision_runs,11,started_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,ai_decision_runs,12,completed_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,ai_decision_runs,13,evidence,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,ai_decision_runs,14,confidence_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,ai_decision_runs,15,approval_status,text,pg_catalog,text,null,null,null,NO,'not_required'::text,NO,null
+public,ai_decision_runs,16,approved_by,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_decision_runs,17,approved_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,ai_decision_runs,18,result_summary,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,ai_decision_runs,19,learning_summary,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,ai_memory_events,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,ai_memory_events,2,memory_type,text,pg_catalog,text,null,null,null,NO,'decision'::text,NO,null
+public,ai_memory_events,3,subject_type,text,pg_catalog,text,null,null,null,NO,'system'::text,NO,null
+public,ai_memory_events,4,subject_id,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_memory_events,5,title,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,ai_memory_events,6,reason,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_memory_events,7,evidence,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,ai_memory_events,8,decision,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_memory_events,9,result,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_memory_events,10,learning,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_memory_events,11,confidence,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,ai_memory_events,12,impact_score,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,ai_memory_events,13,tags,ARRAY,pg_catalog,_text,null,null,null,NO,'{}'::text[],NO,null
+public,ai_memory_events,14,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,ai_product_recommendations,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,ai_product_recommendations,2,market_product_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,ai_product_recommendations,3,recommendation_type,text,pg_catalog,text,null,null,null,NO,'single'::text,NO,null
+public,ai_product_recommendations,4,status,text,pg_catalog,text,null,null,null,NO,'candidate'::text,NO,null
+public,ai_product_recommendations,5,ai_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,ai_product_recommendations,6,market_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,ai_product_recommendations,7,growth_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,ai_product_recommendations,8,competition_score,numeric,pg_catalog,numeric,null,5,2,NO,50,NO,null
+public,ai_product_recommendations,9,risk_score,numeric,pg_catalog,numeric,null,5,2,NO,50,NO,null
+public,ai_product_recommendations,10,profit_score,numeric,pg_catalog,numeric,null,5,2,NO,50,NO,null
+public,ai_product_recommendations,11,confidence,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,ai_product_recommendations,12,estimated_units_low,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,ai_product_recommendations,13,estimated_units_high,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,ai_product_recommendations,14,target_sale_price,numeric,pg_catalog,numeric,null,14,2,YES,null,NO,null
+public,ai_product_recommendations,15,target_cost_price,numeric,pg_catalog,numeric,null,14,2,YES,null,NO,null
+public,ai_product_recommendations,16,target_margin_rate,numeric,pg_catalog,numeric,null,8,3,YES,null,NO,null
+public,ai_product_recommendations,17,recommendation_reason,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_product_recommendations,18,evidence,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,ai_product_recommendations,19,model_version,text,pg_catalog,text,null,null,null,NO,'discovery-v1'::text,NO,null
+public,ai_product_recommendations,20,generated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,ai_product_recommendations,21,reviewed_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,ai_product_recommendations,22,decision_run_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,ai_product_recommendations,23,decision_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,ai_product_recommendations,24,decision_action,text,pg_catalog,text,null,null,null,NO,'review'::text,NO,null
+public,ai_product_recommendations,25,supply_score,numeric,pg_catalog,numeric,null,5,2,NO,50,NO,null
+public,ai_product_recommendations,26,season_score,numeric,pg_catalog,numeric,null,5,2,NO,50,NO,null
+public,ai_product_recommendations,27,risk_explanation,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_workers,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,ai_workers,2,worker_code,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,ai_workers,3,worker_name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,ai_workers,4,role,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,ai_workers,5,status,text,pg_catalog,text,null,null,null,NO,'idle'::text,NO,null
+public,ai_workers,6,current_mission,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_workers,7,current_job,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,ai_workers,8,performance_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,ai_workers,9,automation_level,integer,pg_catalog,int4,null,32,0,NO,1,NO,null
+public,ai_workers,10,last_activity_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,ai_workers,11,metadata,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,ai_workers,12,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,ai_workers,13,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,commerce_project_components,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,commerce_project_components,2,project_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,commerce_project_components,3,product_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,commerce_project_components,4,product_no,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,commerce_project_components,5,title,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,commerce_project_components,6,quantity,integer,pg_catalog,int4,null,32,0,NO,1,NO,null
+public,commerce_project_components,7,unit_supply_price,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,commerce_project_components,8,inbound_shipping_cost,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,commerce_project_components,9,supplier_id,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,commerce_project_components,10,supplier_name,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,commerce_project_components,11,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,commerce_projects,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,commerce_projects,2,name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,commerce_projects,3,product_type,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,commerce_projects,4,status,text,pg_catalog,text,null,null,null,NO,'DRAFT'::text,NO,null
+public,commerce_projects,5,target_keyword,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,commerce_projects,6,sale_price,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,commerce_projects,7,monthly_sales_units,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,commerce_projects,8,marketplace_fee_rate,numeric,pg_catalog,numeric,null,7,6,NO,0.11,NO,null
+public,commerce_projects,9,advertising_rate,numeric,pg_catalog,numeric,null,7,6,NO,0.08,NO,null
+public,commerce_projects,10,safety_stock_rate,numeric,pg_catalog,numeric,null,7,6,NO,0.20,NO,null
+public,commerce_projects,11,selected_provider_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,commerce_projects,12,business_score,numeric,pg_catalog,numeric,null,6,2,YES,null,NO,null
+public,commerce_projects,13,competition_score,numeric,pg_catalog,numeric,null,6,2,YES,null,NO,null
+public,commerce_projects,14,profitability_score,numeric,pg_catalog,numeric,null,6,2,YES,null,NO,null
+public,commerce_projects,15,fulfillment_score,numeric,pg_catalog,numeric,null,6,2,YES,null,NO,null
+public,commerce_projects,16,supply_risk_score,numeric,pg_catalog,numeric,null,6,2,YES,null,NO,null
+public,commerce_projects,17,grade,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,commerce_projects,18,analysis_result,jsonb,pg_catalog,jsonb,null,null,null,YES,null,NO,null
+public,commerce_projects,19,notes,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,commerce_projects,20,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,commerce_projects,21,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,commerce_timeline_events,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,commerce_timeline_events,2,workflow_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,commerce_timeline_events,3,stage,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,commerce_timeline_events,4,event_type,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,commerce_timeline_events,5,title,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,commerce_timeline_events,6,detail,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,commerce_timeline_events,7,actor,text,pg_catalog,text,null,null,null,NO,'system'::text,NO,null
+public,commerce_timeline_events,8,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,commerce_workflows,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,commerce_workflows,2,discovery_recommendation_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,commerce_workflows,3,bundle_recommendation_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,commerce_workflows,4,procurement_order_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,commerce_workflows,5,workflow_name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,commerce_workflows,6,current_stage,text,pg_catalog,text,null,null,null,NO,'market_discovered'::text,NO,null
+public,commerce_workflows,7,status,text,pg_catalog,text,null,null,null,NO,'active'::text,NO,null
+public,commerce_workflows,8,blocked_reason,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,commerce_workflows,9,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,commerce_workflows,10,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,commerce_workflows,11,listing_draft_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,commerce_workflows,12,workflow_code,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,commerce_workflows,13,lifecycle_type,text,pg_catalog,text,null,null,null,NO,'single'::text,NO,null
+public,commerce_workflows,14,stage_version,integer,pg_catalog,int4,null,32,0,NO,1,NO,null
+public,commerce_workflows,15,last_transition_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,commerce_workflows,16,metadata,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,commerce_workflows,17,coupang_registration_job_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,competition_analyses,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,competition_analyses,2,project_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,competition_analyses,3,demand_score,numeric,pg_catalog,numeric,null,6,2,NO,50,NO,null
+public,competition_analyses,4,competition_score,numeric,pg_catalog,numeric,null,6,2,NO,50,NO,null
+public,competition_analyses,5,differentiation_score,numeric,pg_catalog,numeric,null,6,2,NO,50,NO,null
+public,competition_analyses,6,review_barrier_score,numeric,pg_catalog,numeric,null,6,2,NO,50,NO,null
+public,competition_analyses,7,price_competitiveness_score,numeric,pg_catalog,numeric,null,6,2,NO,50,NO,null
+public,competition_analyses,8,data_confidence,numeric,pg_catalog,numeric,null,6,2,NO,30,NO,null
+public,competition_analyses,9,source_type,text,pg_catalog,text,null,null,null,NO,'MANUAL'::text,NO,null
+public,competition_analyses,10,source_collected_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,competition_analyses,11,raw_data,jsonb,pg_catalog,jsonb,null,null,null,YES,null,NO,null
+public,competition_analyses,12,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,coupang_registration_attempts,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,coupang_registration_attempts,2,job_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,coupang_registration_attempts,3,attempt_no,integer,pg_catalog,int4,null,32,0,NO,null,NO,null
+public,coupang_registration_attempts,4,action,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,coupang_registration_attempts,5,request_payload,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,coupang_registration_attempts,6,response_status,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,coupang_registration_attempts,7,response_payload,jsonb,pg_catalog,jsonb,null,null,null,YES,null,NO,null
+public,coupang_registration_attempts,8,success,boolean,pg_catalog,bool,null,null,null,NO,false,NO,null
+public,coupang_registration_attempts,9,error_message,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,coupang_registration_attempts,10,duration_ms,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,coupang_registration_attempts,11,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,coupang_registration_jobs,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,coupang_registration_jobs,2,workflow_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,coupang_registration_jobs,3,listing_draft_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,coupang_registration_jobs,4,job_code,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,coupang_registration_jobs,5,status,text,pg_catalog,text,null,null,null,NO,'queued'::text,NO,null
+public,coupang_registration_jobs,6,mode,text,pg_catalog,text,null,null,null,NO,'validate'::text,NO,null
+public,coupang_registration_jobs,7,payload_snapshot,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,coupang_registration_jobs,8,validation_issues,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,coupang_registration_jobs,9,seller_product_id,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,coupang_registration_jobs,10,vendor_item_ids,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,coupang_registration_jobs,11,coupang_status,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,coupang_registration_jobs,12,registration_response,jsonb,pg_catalog,jsonb,null,null,null,YES,null,NO,null
+public,coupang_registration_jobs,13,last_error,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,coupang_registration_jobs,14,attempt_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,coupang_registration_jobs,15,next_retry_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,coupang_registration_jobs,16,submitted_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,coupang_registration_jobs,17,registered_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,coupang_registration_jobs,18,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,coupang_registration_jobs,19,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,coupang_seller_product_snapshots,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,coupang_seller_product_snapshots,2,seller_product_id,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,coupang_seller_product_snapshots,3,seller_product_name,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,coupang_seller_product_snapshots,4,status_name,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,coupang_seller_product_snapshots,5,brand,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,coupang_seller_product_snapshots,6,registration_type,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,coupang_seller_product_snapshots,7,raw_payload,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,coupang_seller_product_snapshots,8,observed_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,domestic_supplier_products,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,domestic_supplier_products,2,supplier_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,domestic_supplier_products,3,discovery_recommendation_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,domestic_supplier_products,4,bundle_recommendation_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,domestic_supplier_products,5,provider,text,pg_catalog,text,null,null,null,NO,'domeggook'::text,NO,null
+public,domestic_supplier_products,6,provider_product_id,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,domestic_supplier_products,7,provider_product_url,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,domestic_supplier_products,8,provider_product_name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,domestic_supplier_products,9,provider_sku,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,domestic_supplier_products,10,minimum_order_quantity,integer,pg_catalog,int4,null,32,0,NO,1,NO,null
+public,domestic_supplier_products,11,current_unit_cost,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,domestic_supplier_products,12,stock_status,text,pg_catalog,text,null,null,null,NO,'unknown'::text,NO,null
+public,domestic_supplier_products,13,mapping_status,text,pg_catalog,text,null,null,null,NO,'active'::text,NO,null
+public,domestic_supplier_products,14,last_checked_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,domestic_supplier_products,15,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,domestic_supplier_products,16,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,fulfillment_providers,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,fulfillment_providers,2,name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,fulfillment_providers,3,provider_code,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,fulfillment_providers,4,website_url,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,fulfillment_providers,5,contact,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,fulfillment_providers,6,supports_kitting,boolean,pg_catalog,bool,null,null,null,NO,false,NO,null
+public,fulfillment_providers,7,supports_coupang_growth,boolean,pg_catalog,bool,null,null,null,NO,false,NO,null
+public,fulfillment_providers,8,supports_api,boolean,pg_catalog,bool,null,null,null,NO,false,NO,null
+public,fulfillment_providers,9,domeggook_partner,boolean,pg_catalog,bool,null,null,null,NO,false,NO,null
+public,fulfillment_providers,10,receiving_fee,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,fulfillment_providers,11,storage_fee_per_unit,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,fulfillment_providers,12,picking_fee,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,fulfillment_providers,13,kitting_fee,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,fulfillment_providers,14,packaging_fee,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,fulfillment_providers,15,outbound_fee,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,fulfillment_providers,16,coupang_inbound_fee,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,fulfillment_providers,17,return_handling_fee,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,fulfillment_providers,18,lead_time_days,integer,pg_catalog,int4,null,32,0,NO,1,NO,null
+public,fulfillment_providers,19,api_config,jsonb,pg_catalog,jsonb,null,null,null,YES,null,NO,null
+public,fulfillment_providers,20,notes,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,fulfillment_providers,21,is_active,boolean,pg_catalog,bool,null,null,null,NO,true,NO,null
+public,fulfillment_providers,22,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,fulfillment_providers,23,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,inbound_orders,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,inbound_orders,2,project_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,inbound_orders,3,provider_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,inbound_orders,4,status,text,pg_catalog,text,null,null,null,NO,'DRAFT'::text,NO,null
+public,inbound_orders,5,planned_quantity,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,inbound_orders,6,received_quantity,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,inbound_orders,7,defective_quantity,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,inbound_orders,8,tracking_number,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,inbound_orders,9,coupang_inbound_reference,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,inbound_orders,10,expected_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,inbound_orders,11,received_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,inbound_orders,12,shipped_to_coupang_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,inbound_orders,13,notes,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,inbound_orders,14,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,inbound_orders,15,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,inventory_balances,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,inventory_balances,2,project_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,inventory_balances,3,product_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,inventory_balances,4,provider_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,inventory_balances,5,available_quantity,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,inventory_balances,6,reserved_quantity,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,inventory_balances,7,inbound_quantity,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,inventory_balances,8,safety_stock_quantity,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,inventory_balances,9,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,knowledge_assets,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,knowledge_assets,2,asset_type,text,pg_catalog,text,null,null,null,NO,'sop'::text,NO,null
+public,knowledge_assets,3,title,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,knowledge_assets,4,summary,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,knowledge_assets,5,content,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,knowledge_assets,6,status,text,pg_catalog,text,null,null,null,NO,'active'::text,NO,null
+public,knowledge_assets,7,version,text,pg_catalog,text,null,null,null,NO,'1.0'::text,NO,null
+public,knowledge_assets,8,tags,ARRAY,pg_catalog,_text,null,null,null,NO,'{}'::text[],NO,null
+public,knowledge_assets,9,usage_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,knowledge_assets,10,success_rate,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,knowledge_assets,11,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,knowledge_assets,12,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,listing_draft_revisions,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,listing_draft_revisions,2,listing_draft_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,listing_draft_revisions,3,revision,integer,pg_catalog,int4,null,32,0,NO,null,NO,null
+public,listing_draft_revisions,4,snapshot,jsonb,pg_catalog,jsonb,null,null,null,NO,null,NO,null
+public,listing_draft_revisions,5,change_note,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,listing_draft_revisions,6,actor,text,pg_catalog,text,null,null,null,NO,'system'::text,NO,null
+public,listing_draft_revisions,7,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,listing_drafts,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,listing_drafts,2,workflow_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,listing_drafts,3,procurement_order_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,listing_drafts,4,discovery_recommendation_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,listing_drafts,5,bundle_recommendation_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,listing_drafts,6,listing_type,text,pg_catalog,text,null,null,null,NO,'single'::text,NO,null
+public,listing_drafts,7,status,text,pg_catalog,text,null,null,null,NO,'generated'::text,NO,null
+public,listing_drafts,8,product_name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,listing_drafts,9,brand_name,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,listing_drafts,10,category_name,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,listing_drafts,11,coupang_title,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,listing_drafts,12,search_keywords,ARRAY,pg_catalog,_text,null,null,null,NO,'{}'::text[],NO,null
+public,listing_drafts,13,option_structure,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,listing_drafts,14,selling_points,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,listing_drafts,15,detail_sections,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,listing_drafts,16,faq,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,listing_drafts,17,thumbnail_brief,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,listing_drafts,18,shipping_notice,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,listing_drafts,19,return_notice,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,listing_drafts,20,compliance_checklist,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,listing_drafts,21,coupang_payload,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,listing_drafts,22,generation_input,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,listing_drafts,23,model_version,text,pg_catalog,text,null,null,null,NO,'listing-rule-v1'::text,NO,null
+public,listing_drafts,24,revision,integer,pg_catalog,int4,null,32,0,NO,1,NO,null
+public,listing_drafts,25,approved_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,listing_drafts,26,registered_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,listing_drafts,27,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,listing_drafts,28,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_ai_decisions,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,market_ai_decisions,2,market_product_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,market_ai_decisions,3,decision_type,text,pg_catalog,text,null,null,null,NO,'product_entry'::text,NO,null
+public,market_ai_decisions,4,recommendation,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_ai_decisions,5,score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,market_ai_decisions,6,confidence,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_ai_decisions,7,rationale,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_ai_decisions,8,evidence,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,market_ai_decisions,9,model_version,text,pg_catalog,text,null,null,null,NO,'mie-decision-v1'::text,NO,null
+public,market_ai_decisions,10,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_analysis_runs,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,market_analysis_runs,2,status,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_analysis_runs,3,requested_products,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_analysis_runs,4,analyzed_products,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_analysis_runs,5,signals_created,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_analysis_runs,6,estimates_created,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_analysis_runs,7,model_version,text,pg_catalog,text,null,null,null,NO,'mie-heuristic-v2'::text,NO,null
+public,market_analysis_runs,8,error_message,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,market_analysis_runs,9,started_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_analysis_runs,10,finished_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,market_collection_jobs,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,market_collection_jobs,2,collector_key,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_collection_jobs,3,market_keyword_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,market_collection_jobs,4,status,text,pg_catalog,text,null,null,null,NO,'active'::text,NO,null
+public,market_collection_jobs,5,priority,integer,pg_catalog,int4,null,32,0,NO,50,NO,null
+public,market_collection_jobs,6,interval_minutes,integer,pg_catalog,int4,null,32,0,NO,720,NO,null
+public,market_collection_jobs,7,next_run_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_collection_jobs,8,last_run_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,market_collection_jobs,9,last_result,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,market_collection_jobs,10,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_collection_jobs,11,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_collection_runs,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,market_collection_runs,2,collector,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_collection_runs,3,keyword_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,market_collection_runs,4,status,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_collection_runs,5,requested_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_collection_runs,6,saved_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_collection_runs,7,http_status,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,market_collection_runs,8,failure_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_collection_runs,9,cooldown_until,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,market_collection_runs,10,robots_policy_state,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,market_collection_runs,11,terms_review_status,text,pg_catalog,text,null,null,null,NO,'pending'::text,NO,null
+public,market_collection_runs,12,error_message,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,market_collection_runs,13,started_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_collection_runs,14,finished_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,market_collectors,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,market_collectors,2,collector_key,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_collectors,3,name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_collectors,4,source_type,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_collectors,5,status,text,pg_catalog,text,null,null,null,NO,'ready'::text,NO,null
+public,market_collectors,6,supports_automatic,boolean,pg_catalog,bool,null,null,null,NO,false,NO,null
+public,market_collectors,7,configuration,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,market_collectors,8,last_run_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,market_collectors,9,last_success_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,market_collectors,10,cooldown_until,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,market_collectors,11,failure_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_collectors,12,last_error,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,market_collectors,13,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_collectors,14,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_estimates,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,market_estimates,2,market_product_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,market_estimates,3,period_start,date,pg_catalog,date,null,null,null,NO,null,NO,null
+public,market_estimates,4,period_end,date,pg_catalog,date,null,null,null,NO,null,NO,null
+public,market_estimates,5,estimated_units_low,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_estimates,6,estimated_units_base,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_estimates,7,estimated_units_high,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_estimates,8,estimated_sales_low,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,market_estimates,9,estimated_sales_base,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,market_estimates,10,estimated_sales_high,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,market_estimates,11,confidence,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_estimates,12,model_version,text,pg_catalog,text,null,null,null,NO,'mie-heuristic-v1'::text,NO,null
+public,market_estimates,13,evidence,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,market_estimates,14,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_feature_snapshots,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,market_feature_snapshots,2,market_product_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,market_feature_snapshots,3,calculated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_feature_snapshots,4,feature_version,text,pg_catalog,text,null,null,null,NO,'mie-features-v1'::text,NO,null
+public,market_feature_snapshots,5,observation_days,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_feature_snapshots,6,snapshot_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_feature_snapshots,7,review_velocity_7d,numeric,pg_catalog,numeric,null,10,3,YES,null,NO,null
+public,market_feature_snapshots,8,review_growth_30d,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,market_feature_snapshots,9,price_change_7d_pct,numeric,pg_catalog,numeric,null,10,3,YES,null,NO,null
+public,market_feature_snapshots,10,price_volatility_30d,numeric,pg_catalog,numeric,null,10,3,YES,null,NO,null
+public,market_feature_snapshots,11,rank_change_7d,numeric,pg_catalog,numeric,null,10,3,YES,null,NO,null
+public,market_feature_snapshots,12,rank_volatility_30d,numeric,pg_catalog,numeric,null,10,3,YES,null,NO,null
+public,market_feature_snapshots,13,stockout_count_30d,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,market_feature_snapshots,14,ad_ratio_30d,numeric,pg_catalog,numeric,null,8,4,YES,null,NO,null
+public,market_feature_snapshots,15,data_completeness_score,numeric,pg_catalog,numeric,null,5,2,YES,null,NO,null
+public,market_feature_snapshots,16,demand_score,numeric,pg_catalog,numeric,null,5,2,YES,null,NO,null
+public,market_feature_snapshots,17,growth_score,numeric,pg_catalog,numeric,null,5,2,YES,null,NO,null
+public,market_feature_snapshots,18,stability_score,numeric,pg_catalog,numeric,null,5,2,YES,null,NO,null
+public,market_feature_snapshots,19,competition_score,numeric,pg_catalog,numeric,null,5,2,YES,null,NO,null
+public,market_feature_snapshots,20,supply_score,numeric,pg_catalog,numeric,null,5,2,YES,null,NO,null
+public,market_feature_snapshots,21,ad_burden_score,numeric,pg_catalog,numeric,null,5,2,YES,null,NO,null
+public,market_feature_snapshots,22,entry_difficulty_score,numeric,pg_catalog,numeric,null,5,2,YES,null,NO,null
+public,market_feature_snapshots,23,opportunity_score,numeric,pg_catalog,numeric,null,5,2,YES,null,NO,null
+public,market_feature_snapshots,24,confidence,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,market_feature_snapshots,25,evidence,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,market_feedback_events,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,market_feedback_events,2,market_product_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,market_feedback_events,3,product_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,market_feedback_events,4,event_type,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_feedback_events,5,event_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_feedback_events,6,quantity,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,market_feedback_events,7,amount,numeric,pg_catalog,numeric,null,14,2,YES,null,NO,null
+public,market_feedback_events,8,metadata,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,market_feedback_events,9,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_keywords,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,market_keywords,2,keyword,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_keywords,3,category,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,market_keywords,4,priority,integer,pg_catalog,int4,null,32,0,NO,50,NO,null
+public,market_keywords,5,collection_status,text,pg_catalog,text,null,null,null,NO,'active'::text,NO,null
+public,market_keywords,6,collection_interval_minutes,integer,pg_catalog,int4,null,32,0,NO,720,NO,null
+public,market_keywords,7,last_collected_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,market_keywords,8,next_collection_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,market_keywords,9,result_count,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,market_keywords,10,demand_score,numeric,pg_catalog,numeric,null,5,2,YES,null,NO,null
+public,market_keywords,11,competition_score,numeric,pg_catalog,numeric,null,5,2,YES,null,NO,null
+public,market_keywords,12,opportunity_score,numeric,pg_catalog,numeric,null,5,2,YES,null,NO,null
+public,market_keywords,13,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_keywords,14,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_model_feedback,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,market_model_feedback,2,product_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,market_model_feedback,3,market_product_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,market_model_feedback,4,estimate_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,market_model_feedback,5,actual_units,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,market_model_feedback,6,actual_sales,numeric,pg_catalog,numeric,null,14,2,YES,null,NO,null
+public,market_model_feedback,7,actual_ad_spend,numeric,pg_catalog,numeric,null,14,2,YES,null,NO,null
+public,market_model_feedback,8,actual_returns,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,market_model_feedback,9,feedback_period_start,date,pg_catalog,date,null,null,null,NO,null,NO,null
+public,market_model_feedback,10,feedback_period_end,date,pg_catalog,date,null,null,null,NO,null,NO,null
+public,market_model_feedback,11,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_product_links,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,market_product_links,2,product_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,market_product_links,3,market_product_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,market_product_links,4,match_method,text,pg_catalog,text,null,null,null,NO,'manual'::text,NO,null
+public,market_product_links,5,match_confidence,integer,pg_catalog,int4,null,32,0,NO,100,NO,null
+public,market_product_links,6,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_product_metrics,1,market_product_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,market_product_metrics,2,snapshot_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_product_metrics,3,observation_days,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_product_metrics,4,latest_price,numeric,pg_catalog,numeric,null,14,2,YES,null,NO,null
+public,market_product_metrics,5,price_change_7d_pct,numeric,pg_catalog,numeric,null,8,2,YES,null,NO,null
+public,market_product_metrics,6,latest_review_count,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,market_product_metrics,7,review_delta_7d,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_product_metrics,8,review_delta_30d,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_product_metrics,9,average_rank_7d,numeric,pg_catalog,numeric,null,8,2,YES,null,NO,null
+public,market_product_metrics,10,rank_change_7d,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,market_product_metrics,11,stockout_count_30d,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_product_metrics,12,demand_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,market_product_metrics,13,growth_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,market_product_metrics,14,stability_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,market_product_metrics,15,competition_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,market_product_metrics,16,opportunity_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,market_product_metrics,17,confidence,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_product_metrics,18,estimated_units_low,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_product_metrics,19,estimated_units_base,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_product_metrics,20,estimated_units_high,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,market_product_metrics,21,recommendation_grade,text,pg_catalog,text,null,null,null,NO,'D'::text,NO,null
+public,market_product_metrics,22,recommendation_reason,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,market_product_metrics,23,analyzed_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_product_metrics,24,model_version,text,pg_catalog,text,null,null,null,NO,'mie-heuristic-v2'::text,NO,null
+public,market_product_metrics,25,price_volatility_30d,numeric,pg_catalog,numeric,null,8,3,YES,null,NO,null
+public,market_product_metrics,26,rank_volatility_30d,numeric,pg_catalog,numeric,null,8,3,YES,null,NO,null
+public,market_product_metrics,27,review_velocity_7d,numeric,pg_catalog,numeric,null,10,3,YES,null,NO,null
+public,market_product_metrics,28,data_completeness_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,market_product_metrics,29,supply_score,numeric,pg_catalog,numeric,null,5,2,NO,50,NO,null
+public,market_product_metrics,30,ad_burden_score,numeric,pg_catalog,numeric,null,5,2,NO,50,NO,null
+public,market_product_metrics,31,entry_difficulty_score,numeric,pg_catalog,numeric,null,5,2,NO,50,NO,null
+public,market_product_metrics,32,feature_version,text,pg_catalog,text,null,null,null,NO,'mie-features-v1'::text,NO,null
+public,market_product_metrics,33,score_explanation,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,market_products,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,market_products,2,source,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_products,3,external_product_id,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_products,4,vendor_item_id,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,market_products,5,product_url,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,market_products,6,title,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_products,7,brand,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,market_products,8,seller_name,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,market_products,9,category,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,market_products,10,thumbnail_url,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,market_products,11,first_seen_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_products,12,last_seen_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_products,13,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_products,14,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_signals,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,market_signals,2,market_product_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,market_signals,3,market_keyword_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,market_signals,4,signal_type,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_signals,5,severity,text,pg_catalog,text,null,null,null,NO,'medium'::text,NO,null
+public,market_signals,6,title,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,market_signals,7,evidence,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,market_signals,8,detected_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_signals,9,resolved_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,market_snapshots,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,market_snapshots,2,market_product_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,market_snapshots,3,market_keyword_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,market_snapshots,4,observed_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,market_snapshots,5,rank,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,market_snapshots,6,is_ad,boolean,pg_catalog,bool,null,null,null,YES,null,NO,null
+public,market_snapshots,7,price,numeric,pg_catalog,numeric,null,14,2,YES,null,NO,null
+public,market_snapshots,8,list_price,numeric,pg_catalog,numeric,null,14,2,YES,null,NO,null
+public,market_snapshots,9,rating,numeric,pg_catalog,numeric,null,3,2,YES,null,NO,null
+public,market_snapshots,10,review_count,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,market_snapshots,11,rocket_type,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,market_snapshots,12,is_sold_out,boolean,pg_catalog,bool,null,null,null,YES,null,NO,null
+public,market_snapshots,13,delivery_days,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,market_snapshots,14,option_count,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,market_snapshots,15,raw_payload,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,market_snapshots,16,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,marketplace_connections,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,marketplace_connections,2,marketplace_code,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,marketplace_connections,3,marketplace_name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,marketplace_connections,4,status,text,pg_catalog,text,null,null,null,NO,'planned'::text,NO,null
+public,marketplace_connections,5,automation_level,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,marketplace_connections,6,product_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,marketplace_connections,7,order_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,marketplace_connections,8,gross_revenue,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,marketplace_connections,9,last_sync_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,marketplace_connections,10,health_message,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,marketplace_connections,11,config,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,marketplace_connections,12,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,marketplace_connections,13,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,os_command_runs,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,os_command_runs,2,command_code,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,os_command_runs,3,command_name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,os_command_runs,4,status,text,pg_catalog,text,null,null,null,NO,'queued'::text,NO,null
+public,os_command_runs,5,requested_by,text,pg_catalog,text,null,null,null,NO,'owner'::text,NO,null
+public,os_command_runs,6,assigned_worker_code,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,os_command_runs,7,input_payload,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,os_command_runs,8,output_summary,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,os_command_runs,9,error_message,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,os_command_runs,10,progress,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,os_command_runs,11,started_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,os_command_runs,12,completed_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,os_command_runs,13,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,os_command_runs,14,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,os_notifications,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,os_notifications,2,severity,text,pg_catalog,text,null,null,null,NO,'info'::text,NO,null
+public,os_notifications,3,category,text,pg_catalog,text,null,null,null,NO,'system'::text,NO,null
+public,os_notifications,4,title,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,os_notifications,5,message,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,os_notifications,6,action_url,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,os_notifications,7,is_read,boolean,pg_catalog,bool,null,null,null,NO,false,NO,null
+public,os_notifications,8,metadata,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,os_notifications,9,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,os_notifications,10,read_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,procurement_orders,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,procurement_orders,2,order_number,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,procurement_orders,3,supplier_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,procurement_orders,4,supplier_quote_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,procurement_orders,5,supplier_product_mapping_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,procurement_orders,6,discovery_recommendation_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,procurement_orders,7,bundle_recommendation_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,procurement_orders,8,product_name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,procurement_orders,9,quantity,integer,pg_catalog,int4,null,32,0,NO,null,NO,null
+public,procurement_orders,10,unit_cost,numeric,pg_catalog,numeric,null,14,2,NO,null,NO,null
+public,procurement_orders,11,goods_amount,numeric,pg_catalog,numeric,null,14,2,NO,null,NO,null
+public,procurement_orders,12,shipping_amount,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,procurement_orders,13,packaging_amount,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,procurement_orders,14,three_pl_inbound_amount,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,procurement_orders,15,total_amount,numeric,pg_catalog,numeric,null,14,2,NO,null,NO,null
+public,procurement_orders,16,expected_inbound_date,date,pg_catalog,date,null,null,null,YES,null,NO,null
+public,procurement_orders,17,status,text,pg_catalog,text,null,null,null,NO,'draft'::text,NO,null
+public,procurement_orders,18,procurement_score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,procurement_orders,19,approval_reasons,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,procurement_orders,20,supplier_order_reference,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,procurement_orders,21,notes,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,procurement_orders,22,approved_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,procurement_orders,23,ordered_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,procurement_orders,24,received_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,procurement_orders,25,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,procurement_orders,26,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,products,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,products,2,product_no,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,products,3,keyword,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,products,4,title,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,products,5,thumbnail,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,products,6,product_url,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,products,7,supply_price,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,products,8,minimum_order_quantity,integer,pg_catalog,int4,null,32,0,NO,1,NO,null
+public,products,9,initial_purchase_amount,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,products,10,estimated_sale_price,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,products,11,marketplace_fee,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,products,12,advertising_cost,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,products,13,logistics_cost,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,products,14,return_reserve,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,products,15,estimated_profit,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,products,16,margin_rate,numeric,pg_catalog,numeric,null,6,2,NO,0,NO,null
+public,products,17,break_even_sale_price,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,products,18,basic_score,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,products,19,recommendation,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,products,20,seller_id,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,products,21,seller_name,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,products,22,available_on_domeggook,boolean,pg_catalog,bool,null,null,null,NO,false,NO,null
+public,products,23,supply_available,boolean,pg_catalog,bool,null,null,null,NO,false,NO,null
+public,products,24,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,products,25,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,products,26,is_favorite,boolean,pg_catalog,bool,null,null,null,NO,false,NO,null
+public,products,27,review_status,text,pg_catalog,text,null,null,null,NO,'unreviewed'::text,NO,null
+public,products,28,memo,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,products,29,manual_sale_price,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,products,30,risk_level,text,pg_catalog,text,null,null,null,NO,'unknown'::text,NO,null
+public,products,31,ai_analysis_status,text,pg_catalog,text,null,null,null,NO,'pending'::text,NO,null
+public,products,32,ai_score,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,products,33,ai_summary,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,products,34,excluded_reason,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,products,35,reviewed_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,products,36,competition_score,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,products,37,marketability_score,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,products,38,price_competitiveness_score,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,products,39,review_entry_score,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,products,40,rocket_competition_score,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,products,41,keyword_demand_score,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,products,42,competition_grade,text,pg_catalog,text,null,null,null,NO,'미분석'::text,NO,null
+public,products,43,competition_analysis_status,text,pg_catalog,text,null,null,null,NO,'pending'::text,NO,null
+public,products,44,competition_summary,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,products,45,coupang_market_price,numeric,pg_catalog,numeric,null,null,null,YES,null,NO,null
+public,products,46,coupang_top10_avg_price,numeric,pg_catalog,numeric,null,null,null,YES,null,NO,null
+public,products,47,coupang_result_count,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,products,48,coupang_rocket_ratio,numeric,pg_catalog,numeric,null,null,null,YES,null,NO,null
+public,products,49,coupang_avg_review_count,numeric,pg_catalog,numeric,null,null,null,YES,null,NO,null
+public,products,50,coupang_avg_rating,numeric,pg_catalog,numeric,null,null,null,YES,null,NO,null
+public,products,51,coupang_keyword_search_volume,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,products,52,estimated_monthly_units_low,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,products,53,estimated_monthly_units_high,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,products,54,estimated_monthly_sales_low,numeric,pg_catalog,numeric,null,null,null,YES,null,NO,null
+public,products,55,estimated_monthly_sales_high,numeric,pg_catalog,numeric,null,null,null,YES,null,NO,null
+public,products,56,competition_analyzed_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,products,57,coupang_analysis_keyword,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,products,58,competition_data_source,text,pg_catalog,text,null,null,null,NO,'none'::text,NO,null
+public,products,59,competition_confidence,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,products,60,competition_data_note,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,profit_snapshots,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,profit_snapshots,2,snapshot_date,date,pg_catalog,date,null,null,null,NO,CURRENT_DATE,NO,null
+public,profit_snapshots,3,gross_revenue,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,profit_snapshots,4,product_cost,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,profit_snapshots,5,marketplace_fee,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,profit_snapshots,6,fulfillment_cost,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,profit_snapshots,7,ad_spend,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,profit_snapshots,8,refund_cost,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,profit_snapshots,9,contribution_profit,numeric,pg_catalog,numeric,null,null,null,YES,null,NO,null
+public,profit_snapshots,10,margin_rate,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,profit_snapshots,11,roas,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,profit_snapshots,12,break_even_revenue,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,profit_snapshots,13,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,revenue_decisions,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,revenue_decisions,2,opportunity_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,revenue_decisions,3,decision_type,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,revenue_decisions,4,decision,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,revenue_decisions,5,reason,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,revenue_decisions,6,evidence,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,revenue_decisions,7,confidence,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,revenue_decisions,8,expected_impact,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,revenue_decisions,9,actual_impact,numeric,pg_catalog,numeric,null,null,null,YES,null,NO,null
+public,revenue_decisions,10,result,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,revenue_decisions,11,learning,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,revenue_decisions,12,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,revenue_opportunities,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,revenue_opportunities,2,opportunity_code,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,revenue_opportunities,3,keyword,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,revenue_opportunities,4,title,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,revenue_opportunities,5,source,text,pg_catalog,text,null,null,null,NO,'manual'::text,NO,null
+public,revenue_opportunities,6,source_product_id,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,revenue_opportunities,7,status,text,pg_catalog,text,null,null,null,NO,'idea'::text,NO,null
+public,revenue_opportunities,8,demand_score,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,revenue_opportunities,9,margin_score,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,revenue_opportunities,10,competition_score,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,revenue_opportunities,11,supply_score,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,revenue_opportunities,12,risk_score,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,revenue_opportunities,13,listing_score,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,revenue_opportunities,14,revenue_score,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,revenue_opportunities,15,ai_confidence,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,revenue_opportunities,16,estimated_sale_price,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,revenue_opportunities,17,estimated_cost,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,revenue_opportunities,18,estimated_profit,numeric,pg_catalog,numeric,null,null,null,NO,0,NO,null
+public,revenue_opportunities,19,expected_monthly_sales,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,revenue_opportunities,20,evidence,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,revenue_opportunities,21,reasons,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,revenue_opportunities,22,risks,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,revenue_opportunities,23,next_action,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,revenue_opportunities,24,approved_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,revenue_opportunities,25,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,revenue_opportunities,26,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,revenue_snapshots,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,revenue_snapshots,2,snapshot_date,date,pg_catalog,date,null,null,null,NO,null,NO,null
+public,revenue_snapshots,3,gross_revenue,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,revenue_snapshots,4,net_revenue,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,revenue_snapshots,5,contribution_profit,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,revenue_snapshots,6,order_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,revenue_snapshots,7,ad_spend,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,revenue_snapshots,8,active_product_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,revenue_snapshots,9,out_of_stock_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,revenue_snapshots,10,automation_rate,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,revenue_snapshots,11,ai_execution_rate,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,revenue_snapshots,12,source_detail,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,revenue_snapshots,13,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,revenue_snapshots,14,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,runtime_jobs,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,runtime_jobs,2,job_code,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,runtime_jobs,3,opportunity_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,runtime_jobs,4,worker_code,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,runtime_jobs,5,job_type,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,runtime_jobs,6,status,text,pg_catalog,text,null,null,null,NO,'queued'::text,NO,null
+public,runtime_jobs,7,priority,integer,pg_catalog,int4,null,32,0,NO,50,NO,null
+public,runtime_jobs,8,attempts,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,runtime_jobs,9,max_attempts,integer,pg_catalog,int4,null,32,0,NO,3,NO,null
+public,runtime_jobs,10,input_payload,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,runtime_jobs,11,output_payload,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,runtime_jobs,12,error_message,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,runtime_jobs,13,scheduled_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,runtime_jobs,14,started_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,runtime_jobs,15,completed_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,runtime_jobs,16,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,runtime_jobs,17,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,runtime_jobs,18,locked_by,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,runtime_jobs,19,locked_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,runtime_jobs,20,last_heartbeat_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,runtime_jobs,21,duration_ms,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,runtime_jobs,22,result_summary,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,sourcing_decisions,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,sourcing_decisions,2,supplier_quote_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,sourcing_decisions,3,target_selling_price,numeric,pg_catalog,numeric,null,14,2,NO,null,NO,null
+public,sourcing_decisions,4,landed_unit_cost,numeric,pg_catalog,numeric,null,14,2,NO,null,NO,null
+public,sourcing_decisions,5,coupang_fee_per_unit,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,sourcing_decisions,6,expected_return_cost_per_unit,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,sourcing_decisions,7,expected_profit_per_unit,numeric,pg_catalog,numeric,null,14,2,NO,null,NO,null
+public,sourcing_decisions,8,expected_margin_rate,numeric,pg_catalog,numeric,null,7,4,NO,null,NO,null
+public,sourcing_decisions,9,initial_purchase_amount,numeric,pg_catalog,numeric,null,14,2,NO,null,NO,null
+public,sourcing_decisions,10,working_capital_days,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,sourcing_decisions,11,decision,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,sourcing_decisions,12,score,numeric,pg_catalog,numeric,null,5,2,NO,0,NO,null
+public,sourcing_decisions,13,reasons,jsonb,pg_catalog,jsonb,null,null,null,NO,'[]'::jsonb,NO,null
+public,sourcing_decisions,14,calculated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,sourcing_decisions,15,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,supplier_quotes,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,supplier_quotes,2,supplier_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,supplier_quotes,3,discovery_recommendation_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,supplier_quotes,4,bundle_recommendation_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,supplier_quotes,5,product_name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,supplier_quotes,6,supplier_sku,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,supplier_quotes,7,currency,text,pg_catalog,text,null,null,null,NO,'KRW'::text,NO,null
+public,supplier_quotes,8,exchange_rate,numeric,pg_catalog,numeric,null,14,4,NO,1,NO,null
+public,supplier_quotes,9,unit_cost,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,supplier_quotes,10,moq,integer,pg_catalog,int4,null,32,0,NO,1,NO,null
+public,supplier_quotes,11,sample_cost,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,supplier_quotes,12,domestic_shipping_total,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,supplier_quotes,13,international_shipping_total,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,supplier_quotes,14,customs_total,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,supplier_quotes,15,vat_total,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,supplier_quotes,16,inspection_total,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,supplier_quotes,17,packaging_total,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,supplier_quotes,18,labeling_total,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,supplier_quotes,19,three_pl_inbound_total,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,supplier_quotes,20,three_pl_storage_per_unit,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,supplier_quotes,21,three_pl_outbound_per_unit,numeric,pg_catalog,numeric,null,14,2,NO,0,NO,null
+public,supplier_quotes,22,coupang_fee_rate,numeric,pg_catalog,numeric,null,7,4,NO,10.8,NO,null
+public,supplier_quotes,23,expected_return_rate,numeric,pg_catalog,numeric,null,7,4,NO,3,NO,null
+public,supplier_quotes,24,lead_time_days,integer,pg_catalog,int4,null,32,0,NO,7,NO,null
+public,supplier_quotes,25,valid_until,date,pg_catalog,date,null,null,null,YES,null,NO,null
+public,supplier_quotes,26,status,text,pg_catalog,text,null,null,null,NO,'draft'::text,NO,null
+public,supplier_quotes,27,notes,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,supplier_quotes,28,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,supplier_quotes,29,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,suppliers,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,suppliers,2,name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,suppliers,3,channel,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,suppliers,4,contact_name,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,suppliers,5,contact_email,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,suppliers,6,contact_phone,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,suppliers,7,website_url,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,suppliers,8,country_code,text,pg_catalog,text,null,null,null,NO,'KR'::text,NO,null
+public,suppliers,9,status,text,pg_catalog,text,null,null,null,NO,'active'::text,NO,null
+public,suppliers,10,reliability_score,numeric,pg_catalog,numeric,null,5,2,NO,50,NO,null
+public,suppliers,11,memo,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,suppliers,12,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,suppliers,13,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,system_health_checks,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,system_health_checks,2,component,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,system_health_checks,3,status,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,system_health_checks,4,latency_ms,integer,pg_catalog,int4,null,32,0,YES,null,NO,null
+public,system_health_checks,5,message,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,system_health_checks,6,detail,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,system_health_checks,7,checked_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,system_releases,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,system_releases,2,version,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,system_releases,3,release_name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,system_releases,4,status,text,pg_catalog,text,null,null,null,NO,'planned'::text,NO,null
+public,system_releases,5,migration_name,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,system_releases,6,verification_summary,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,system_releases,7,release_notes,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,system_releases,8,rollback_notes,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,system_releases,9,released_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,system_releases,10,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,system_releases,11,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,three_pl_inbound_plans,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,three_pl_inbound_plans,2,procurement_order_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,three_pl_inbound_plans,3,warehouse_name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,three_pl_inbound_plans,4,warehouse_code,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,three_pl_inbound_plans,5,inbound_reference,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,three_pl_inbound_plans,6,expected_inbound_date,date,pg_catalog,date,null,null,null,YES,null,NO,null
+public,three_pl_inbound_plans,7,expected_quantity,integer,pg_catalog,int4,null,32,0,NO,null,NO,null
+public,three_pl_inbound_plans,8,received_quantity,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,three_pl_inbound_plans,9,status,text,pg_catalog,text,null,null,null,NO,'planned'::text,NO,null
+public,three_pl_inbound_plans,10,receiving_notes,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,three_pl_inbound_plans,11,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,three_pl_inbound_plans,12,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,worker_runtime_events,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,worker_runtime_events,2,runtime_job_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,worker_runtime_events,3,opportunity_id,bigint,pg_catalog,int8,null,64,0,YES,null,NO,null
+public,worker_runtime_events,4,worker_code,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,worker_runtime_events,5,event_type,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,worker_runtime_events,6,message,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,worker_runtime_events,7,payload,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,worker_runtime_events,8,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,workflow_outbox_events,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,workflow_outbox_events,2,workflow_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,workflow_outbox_events,3,event_name,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,workflow_outbox_events,4,destination,text,pg_catalog,text,null,null,null,NO,'internal'::text,NO,null
+public,workflow_outbox_events,5,payload,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,workflow_outbox_events,6,status,text,pg_catalog,text,null,null,null,NO,'pending'::text,NO,null
+public,workflow_outbox_events,7,attempt_count,integer,pg_catalog,int4,null,32,0,NO,0,NO,null
+public,workflow_outbox_events,8,available_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,workflow_outbox_events,9,processed_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,workflow_outbox_events,10,last_error,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,workflow_outbox_events,11,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,workflow_tasks,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,workflow_tasks,2,workflow_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,workflow_tasks,3,stage,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,workflow_tasks,4,task_type,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,workflow_tasks,5,title,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,workflow_tasks,6,status,text,pg_catalog,text,null,null,null,NO,'open'::text,NO,null
+public,workflow_tasks,7,priority,integer,pg_catalog,int4,null,32,0,NO,50,NO,null
+public,workflow_tasks,8,assignee,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,workflow_tasks,9,due_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,workflow_tasks,10,blocking_reason,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,workflow_tasks,11,payload,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,workflow_tasks,12,completed_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,YES,null,NO,null
+public,workflow_tasks,13,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,workflow_tasks,14,updated_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null
+public,workflow_transitions,1,id,bigint,pg_catalog,int8,null,64,0,NO,null,YES,BY DEFAULT
+public,workflow_transitions,2,workflow_id,bigint,pg_catalog,int8,null,64,0,NO,null,NO,null
+public,workflow_transitions,3,from_stage,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,workflow_transitions,4,to_stage,text,pg_catalog,text,null,null,null,NO,null,NO,null
+public,workflow_transitions,5,trigger_type,text,pg_catalog,text,null,null,null,NO,'system'::text,NO,null
+public,workflow_transitions,6,trigger_source,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,workflow_transitions,7,idempotency_key,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,workflow_transitions,8,reason,text,pg_catalog,text,null,null,null,YES,null,NO,null
+public,workflow_transitions,9,payload,jsonb,pg_catalog,jsonb,null,null,null,NO,'{}'::jsonb,NO,null
+public,workflow_transitions,10,actor,text,pg_catalog,text,null,null,null,NO,'system'::text,NO,null
+public,workflow_transitions,11,created_at,timestamp with time zone,pg_catalog,timestamptz,null,null,null,NO,now(),NO,null

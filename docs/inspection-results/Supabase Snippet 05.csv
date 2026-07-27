@@ -1,0 +1,60 @@
+schema_name,table_name,policy_name,permissive,roles,cmd,qual,with_check
+public,ai_bundle_items,dev_ai_bundle_items_all,PERMISSIVE,{public},ALL,true,true
+public,ai_bundle_recommendations,dev_ai_bundle_recommendations_all,PERMISSIVE,{public},ALL,true,true
+public,ai_ceo_briefs,dev_ai_ceo_briefs_all,PERMISSIVE,{public},ALL,true,true
+public,ai_decision_runs,dev_ai_decision_runs_all,PERMISSIVE,{public},ALL,true,true
+public,ai_memory_events,dev_ai_memory_events_all,PERMISSIVE,{public},ALL,true,true
+public,ai_product_recommendations,dev_ai_product_recommendations_all,PERMISSIVE,{public},ALL,true,true
+public,ai_workers,dev_ai_workers_all,PERMISSIVE,{public},ALL,true,true
+public,commerce_project_components,v4_dev_all_components,PERMISSIVE,"{anon,authenticated}",ALL,true,true
+public,commerce_projects,v4_dev_all_commerce_projects,PERMISSIVE,"{anon,authenticated}",ALL,true,true
+public,commerce_timeline_events,dev commerce timeline all,PERMISSIVE,{public},ALL,true,true
+public,commerce_workflows,dev commerce workflows all,PERMISSIVE,{public},ALL,true,true
+public,competition_analyses,v4_dev_all_competition,PERMISSIVE,"{anon,authenticated}",ALL,true,true
+public,coupang_registration_attempts,dev coupang attempts all,PERMISSIVE,{public},ALL,true,true
+public,coupang_registration_jobs,dev coupang jobs all,PERMISSIVE,{public},ALL,true,true
+public,coupang_seller_product_snapshots,dev coupang snapshots all,PERMISSIVE,{public},ALL,true,true
+public,domestic_supplier_products,dev domestic supplier products all,PERMISSIVE,{public},ALL,true,true
+public,fulfillment_providers,v4_dev_all_providers,PERMISSIVE,"{anon,authenticated}",ALL,true,true
+public,inbound_orders,v4_dev_all_inbound,PERMISSIVE,"{anon,authenticated}",ALL,true,true
+public,inventory_balances,v4_dev_all_inventory,PERMISSIVE,"{anon,authenticated}",ALL,true,true
+public,knowledge_assets,dev_knowledge_assets_all,PERMISSIVE,{public},ALL,true,true
+public,listing_draft_revisions,dev listing revisions all,PERMISSIVE,{public},ALL,true,true
+public,listing_drafts,dev listing drafts all,PERMISSIVE,{public},ALL,true,true
+public,market_ai_decisions,dev_market_ai_decisions_all,PERMISSIVE,{public},ALL,true,true
+public,market_analysis_runs,dev_market_analysis_runs_all,PERMISSIVE,{public},ALL,true,true
+public,market_collection_jobs,dev_market_collection_jobs_all,PERMISSIVE,{public},ALL,true,true
+public,market_collection_runs,dev_market_collection_runs_all,PERMISSIVE,{public},ALL,true,true
+public,market_collectors,dev_market_collectors_all,PERMISSIVE,{public},ALL,true,true
+public,market_estimates,dev_market_estimates_all,PERMISSIVE,{public},ALL,true,true
+public,market_feature_snapshots,dev_market_feature_snapshots_all,PERMISSIVE,{public},ALL,true,true
+public,market_feedback_events,dev_market_feedback_events_all,PERMISSIVE,{public},ALL,true,true
+public,market_keywords,dev_market_keywords_all,PERMISSIVE,{public},ALL,true,true
+public,market_model_feedback,dev_market_model_feedback_all,PERMISSIVE,{public},ALL,true,true
+public,market_product_links,dev_market_product_links_all,PERMISSIVE,{public},ALL,true,true
+public,market_product_metrics,dev_market_product_metrics_all,PERMISSIVE,{public},ALL,true,true
+public,market_products,dev_market_products_all,PERMISSIVE,{public},ALL,true,true
+public,market_signals,dev_market_signals_all,PERMISSIVE,{public},ALL,true,true
+public,market_snapshots,dev_market_snapshots_all,PERMISSIVE,{public},ALL,true,true
+public,marketplace_connections,dev_marketplace_connections_all,PERMISSIVE,{public},ALL,true,true
+public,os_command_runs,dev_os_command_runs_all,PERMISSIVE,{public},ALL,true,true
+public,os_notifications,dev_os_notifications_all,PERMISSIVE,{public},ALL,true,true
+public,procurement_orders,dev procurement orders all,PERMISSIVE,{public},ALL,true,true
+public,products,Allow public insert products,PERMISSIVE,{anon},INSERT,null,true
+public,products,Allow public read products,PERMISSIVE,{anon},SELECT,true,null
+public,products,Allow public update products,PERMISSIVE,{anon},UPDATE,true,true
+public,profit_snapshots,dev_profit_snapshots_all,PERMISSIVE,{public},ALL,true,true
+public,revenue_decisions,dev_revenue_decisions_all,PERMISSIVE,{public},ALL,true,true
+public,revenue_opportunities,dev_revenue_opportunities_all,PERMISSIVE,{public},ALL,true,true
+public,revenue_snapshots,dev_revenue_snapshots_all,PERMISSIVE,{public},ALL,true,true
+public,runtime_jobs,dev_runtime_jobs_all,PERMISSIVE,{public},ALL,true,true
+public,sourcing_decisions,dev sourcing decisions all,PERMISSIVE,{public},ALL,true,true
+public,supplier_quotes,dev supplier quotes all,PERMISSIVE,{public},ALL,true,true
+public,suppliers,dev suppliers all,PERMISSIVE,{public},ALL,true,true
+public,system_health_checks,dev_system_health_checks_all,PERMISSIVE,{public},ALL,true,true
+public,system_releases,dev_system_releases_all,PERMISSIVE,{public},ALL,true,true
+public,three_pl_inbound_plans,dev inbound plans all,PERMISSIVE,{public},ALL,true,true
+public,worker_runtime_events,dev_worker_runtime_events_all,PERMISSIVE,{public},ALL,true,true
+public,workflow_outbox_events,dev workflow outbox all,PERMISSIVE,{public},ALL,true,true
+public,workflow_tasks,dev workflow tasks all,PERMISSIVE,{public},ALL,true,true
+public,workflow_transitions,dev workflow transitions all,PERMISSIVE,{public},ALL,true,true

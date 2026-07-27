@@ -2,6 +2,46 @@
 
 ## Current task snapshot
 
+- Objective: classify the deployed Production schema from operator CSV evidence
+  and finalize the baseline restoration implementation plan without executing
+  SQL or changing migrations/application behavior.
+- Branch: `codex/chore/supabase-baseline-restoration`, stacked on Draft PR #28
+  because its inspection framework is not on `main`.
+- Risk: high-risk/manual because the documents design migration history and
+  Production RLS recovery. Auto-merge is prohibited.
+- Revenue impact: P0 database and authorization reliability required before
+  safe continuation of revenue workflows.
+- Root-cause class: database provenance and Production authorization drift.
+- Source priority: Production CSV, verbatim SQL Editor sources, existing
+  migrations, application code, then documentation.
+- Scope: preserve 13 Production CSVs; classify all expected objects; define
+  fresh replay, Production reconciliation, history recovery, RLS replacement,
+  rollback, verification, and generation readiness.
+- Non-goals: execute SQL, contact Supabase, modify migrations/application code
+  or recovered SQL, create migrations, insert history rows, or implement RLS.
+- Completed: read all CSVs; verified 57 tables, 883 columns, 268 constraints,
+  148 indexes, 59 policies, four triggers, and required `pgcrypto`; created
+  classification, implementation, RLS, and generation-readiness documents.
+- Current work: final diff review and Git delivery.
+- Blockers: deployed `set_updated_at()` definition, Commerce OS RLS state,
+  SQL Editor chronology, migration runner/metadata format, Preview/Staging
+  parity, and approved Production identity/ownership remain unresolved.
+- Changed files: four requested/related documents, thirteen operator CSVs,
+  task changelog, and this status file.
+- Safety: no SQL executed and no Supabase contact. No migration, application,
+  recovery SQL, SQL Editor export, or CSV content has been modified. CSV hashes
+  remain 13/13 exact. Protected-path diff and `git diff --check` pass. Scoped
+  lint passes with four pre-existing warnings; typecheck passes; tests pass
+  217/217; build passes with 68 routes. Local browser remains 32/39 with the
+  same seven Supabase-unconfigured failures. Dependency audit reports 12
+  existing high-severity transitive advisories; no upgrade was made.
+- Readiness: 65%; Sprint A is not complete while required UNKNOWN properties
+  and security decisions remain.
+- Exact next action: stage only the evidence and plan files, review the complete
+  diff, commit, push, and open a Draft manual PR without auto-merge.
+
+## Current task snapshot
+
 - Objective: prepare a read-only deployed Supabase catalog inspection package
   and an implementation-ready restoration design without contacting Supabase,
   executing SQL, or changing migrations/application behavior.

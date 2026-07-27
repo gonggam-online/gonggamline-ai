@@ -1,0 +1,2 @@
+database_name,database_user,server_version,server_version_number,inspected_at,is_replica
+postgres,postgres,17.6,170006,2026-07-27 08:18:39.50263+00,false

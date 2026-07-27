@@ -1,0 +1,269 @@
+schema_name,table_name,constraint_name,constraint_type,is_deferrable,initially_deferred,is_validated,definition
+public,ai_bundle_items,ai_bundle_items_bundle_id_fkey,f,false,false,true,FOREIGN KEY (bundle_id) REFERENCES ai_bundle_recommendations(id) ON DELETE CASCADE
+public,ai_bundle_items,ai_bundle_items_bundle_id_market_product_id_key,u,false,false,true,"UNIQUE (bundle_id, market_product_id)"
+public,ai_bundle_items,ai_bundle_items_market_product_id_fkey,f,false,false,true,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+public,ai_bundle_items,ai_bundle_items_pkey,p,false,false,true,PRIMARY KEY (id)
+public,ai_bundle_items,ai_bundle_items_quantity_check,c,false,false,true,CHECK (quantity > 0)
+public,ai_bundle_items,ai_bundle_items_role_check,c,false,false,true,"CHECK (role = ANY (ARRAY['anchor'::text, 'complement'::text, 'consumable'::text, 'accessory'::text, 'component'::text]))"
+public,ai_bundle_recommendations,ai_bundle_recommendations_bundle_type_check,c,false,false,true,"CHECK (bundle_type = ANY (ARRAY['set'::text, 'bundle'::text, 'multipack'::text]))"
+public,ai_bundle_recommendations,ai_bundle_recommendations_decision_action_check,c,false,false,true,"CHECK (decision_action = ANY (ARRAY['approve'::text, 'review'::text, 'hold'::text, 'reject'::text]))"
+public,ai_bundle_recommendations,ai_bundle_recommendations_decision_run_id_fkey,f,false,false,true,FOREIGN KEY (decision_run_id) REFERENCES ai_decision_runs(id) ON DELETE SET NULL
+public,ai_bundle_recommendations,ai_bundle_recommendations_pkey,p,false,false,true,PRIMARY KEY (id)
+public,ai_bundle_recommendations,ai_bundle_recommendations_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['candidate'::text, 'reviewing'::text, 'approved'::text, 'rejected'::text, 'sourcing'::text]))"
+public,ai_ceo_briefs,ai_ceo_briefs_brief_date_key,u,false,false,true,UNIQUE (brief_date)
+public,ai_ceo_briefs,ai_ceo_briefs_confidence_check,c,false,false,true,CHECK (confidence >= 0::numeric AND confidence <= 100::numeric)
+public,ai_ceo_briefs,ai_ceo_briefs_pkey,p,false,false,true,PRIMARY KEY (id)
+public,ai_ceo_briefs,ai_ceo_briefs_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['draft'::text, 'review'::text, 'approved'::text, 'executing'::text, 'completed'::text]))"
+public,ai_decision_runs,ai_decision_runs_approval_status_check,c,false,false,true,"CHECK (approval_status = ANY (ARRAY['not_required'::text, 'pending'::text, 'approved'::text, 'rejected'::text]))"
+public,ai_decision_runs,ai_decision_runs_pkey,p,false,false,true,PRIMARY KEY (id)
+public,ai_decision_runs,ai_decision_runs_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['queued'::text, 'running'::text, 'completed'::text, 'failed'::text]))"
+public,ai_memory_events,ai_memory_events_confidence_check,c,false,false,true,CHECK (confidence >= 0::numeric AND confidence <= 100::numeric)
+public,ai_memory_events,ai_memory_events_pkey,p,false,false,true,PRIMARY KEY (id)
+public,ai_product_recommendations,ai_product_recommendations_decision_action_check,c,false,false,true,"CHECK (decision_action = ANY (ARRAY['approve'::text, 'review'::text, 'hold'::text, 'reject'::text]))"
+public,ai_product_recommendations,ai_product_recommendations_decision_run_id_fkey,f,false,false,true,FOREIGN KEY (decision_run_id) REFERENCES ai_decision_runs(id) ON DELETE SET NULL
+public,ai_product_recommendations,ai_product_recommendations_market_product_id_fkey,f,false,false,true,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+public,ai_product_recommendations,ai_product_recommendations_market_product_id_recommendation_key,u,false,false,true,"UNIQUE (market_product_id, recommendation_type)"
+public,ai_product_recommendations,ai_product_recommendations_pkey,p,false,false,true,PRIMARY KEY (id)
+public,ai_product_recommendations,ai_product_recommendations_recommendation_type_check,c,false,false,true,"CHECK (recommendation_type = ANY (ARRAY['single'::text, 'set'::text, 'bundle'::text]))"
+public,ai_product_recommendations,ai_product_recommendations_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['candidate'::text, 'reviewing'::text, 'approved'::text, 'rejected'::text, 'sourcing'::text]))"
+public,ai_workers,ai_workers_automation_level_check,c,false,false,true,CHECK (automation_level >= 0 AND automation_level <= 5)
+public,ai_workers,ai_workers_pkey,p,false,false,true,PRIMARY KEY (id)
+public,ai_workers,ai_workers_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['idle'::text, 'working'::text, 'waiting_approval'::text, 'blocked'::text, 'disabled'::text]))"
+public,ai_workers,ai_workers_worker_code_key,u,false,false,true,UNIQUE (worker_code)
+public,commerce_project_components,commerce_project_components_inbound_shipping_cost_check,c,false,false,true,CHECK (inbound_shipping_cost >= 0::numeric)
+public,commerce_project_components,commerce_project_components_pkey,p,false,false,true,PRIMARY KEY (id)
+public,commerce_project_components,commerce_project_components_project_id_fkey,f,false,false,true,FOREIGN KEY (project_id) REFERENCES commerce_projects(id) ON DELETE CASCADE
+public,commerce_project_components,commerce_project_components_quantity_check,c,false,false,true,CHECK (quantity > 0)
+public,commerce_project_components,commerce_project_components_unit_supply_price_check,c,false,false,true,CHECK (unit_supply_price >= 0::numeric)
+public,commerce_projects,commerce_projects_advertising_rate_check,c,false,false,true,CHECK (advertising_rate >= 0::numeric AND advertising_rate <= 1::numeric)
+public,commerce_projects,commerce_projects_marketplace_fee_rate_check,c,false,false,true,CHECK (marketplace_fee_rate >= 0::numeric AND marketplace_fee_rate <= 1::numeric)
+public,commerce_projects,commerce_projects_monthly_sales_units_check,c,false,false,true,CHECK (monthly_sales_units >= 0)
+public,commerce_projects,commerce_projects_pkey,p,false,false,true,PRIMARY KEY (id)
+public,commerce_projects,commerce_projects_product_type_check,c,false,false,true,"CHECK (product_type = ANY (ARRAY['SINGLE'::text, 'MULTIPACK'::text, 'BUNDLE'::text]))"
+public,commerce_projects,commerce_projects_provider_fk,f,false,false,true,FOREIGN KEY (selected_provider_id) REFERENCES fulfillment_providers(id) ON DELETE SET NULL
+public,commerce_projects,commerce_projects_safety_stock_rate_check,c,false,false,true,CHECK (safety_stock_rate >= 0::numeric AND safety_stock_rate <= 5::numeric)
+public,commerce_projects,commerce_projects_sale_price_check,c,false,false,true,CHECK (sale_price >= 0::numeric)
+public,commerce_projects,commerce_projects_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['DRAFT'::text, 'ANALYZING'::text, 'APPROVED'::text, 'INBOUND_READY'::text, 'INBOUND'::text, 'SELLING'::text, 'PAUSED'::text]))"
+public,commerce_timeline_events,commerce_timeline_events_pkey,p,false,false,true,PRIMARY KEY (id)
+public,commerce_timeline_events,commerce_timeline_events_workflow_id_fkey,f,false,false,true,FOREIGN KEY (workflow_id) REFERENCES commerce_workflows(id) ON DELETE CASCADE
+public,commerce_workflows,commerce_workflows_bundle_recommendation_id_fkey,f,false,false,true,FOREIGN KEY (bundle_recommendation_id) REFERENCES ai_bundle_recommendations(id) ON DELETE SET NULL
+public,commerce_workflows,commerce_workflows_check,c,false,false,true,CHECK (discovery_recommendation_id IS NOT NULL OR bundle_recommendation_id IS NOT NULL)
+public,commerce_workflows,commerce_workflows_coupang_registration_job_id_fkey,f,false,false,true,FOREIGN KEY (coupang_registration_job_id) REFERENCES coupang_registration_jobs(id) ON DELETE SET NULL
+public,commerce_workflows,commerce_workflows_current_stage_check,c,false,false,true,"CHECK (current_stage = ANY (ARRAY['market_discovered'::text, 'ai_recommended'::text, 'human_approved'::text, 'supplier_mapped'::text, 'quote_selected'::text, 'purchase_approved'::text, 'purchase_ordered'::text, 'three_pl_inbound'::text, 'listing_ready'::text, 'coupang_registered'::text, 'selling'::text, 'learning'::text]))"
+public,commerce_workflows,commerce_workflows_discovery_recommendation_id_fkey,f,false,false,true,FOREIGN KEY (discovery_recommendation_id) REFERENCES ai_product_recommendations(id) ON DELETE SET NULL
+public,commerce_workflows,commerce_workflows_listing_draft_id_fkey,f,false,false,true,FOREIGN KEY (listing_draft_id) REFERENCES listing_drafts(id) ON DELETE SET NULL
+public,commerce_workflows,commerce_workflows_pkey,p,false,false,true,PRIMARY KEY (id)
+public,commerce_workflows,commerce_workflows_procurement_order_id_fkey,f,false,false,true,FOREIGN KEY (procurement_order_id) REFERENCES procurement_orders(id) ON DELETE SET NULL
+public,commerce_workflows,commerce_workflows_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['active'::text, 'blocked'::text, 'completed'::text, 'cancelled'::text]))"
+public,competition_analyses,competition_analyses_competition_score_check,c,false,false,true,CHECK (competition_score >= 0::numeric AND competition_score <= 100::numeric)
+public,competition_analyses,competition_analyses_data_confidence_check,c,false,false,true,CHECK (data_confidence >= 0::numeric AND data_confidence <= 100::numeric)
+public,competition_analyses,competition_analyses_demand_score_check,c,false,false,true,CHECK (demand_score >= 0::numeric AND demand_score <= 100::numeric)
+public,competition_analyses,competition_analyses_differentiation_score_check,c,false,false,true,CHECK (differentiation_score >= 0::numeric AND differentiation_score <= 100::numeric)
+public,competition_analyses,competition_analyses_pkey,p,false,false,true,PRIMARY KEY (id)
+public,competition_analyses,competition_analyses_price_competitiveness_score_check,c,false,false,true,CHECK (price_competitiveness_score >= 0::numeric AND price_competitiveness_score <= 100::numeric)
+public,competition_analyses,competition_analyses_project_id_fkey,f,false,false,true,FOREIGN KEY (project_id) REFERENCES commerce_projects(id) ON DELETE CASCADE
+public,competition_analyses,competition_analyses_review_barrier_score_check,c,false,false,true,CHECK (review_barrier_score >= 0::numeric AND review_barrier_score <= 100::numeric)
+public,coupang_registration_attempts,coupang_registration_attempts_action_check,c,false,false,true,"CHECK (action = ANY (ARRAY['validate'::text, 'submit'::text, 'retry'::text, 'cancel'::text, 'sync'::text]))"
+public,coupang_registration_attempts,coupang_registration_attempts_job_id_attempt_no_key,u,false,false,true,"UNIQUE (job_id, attempt_no)"
+public,coupang_registration_attempts,coupang_registration_attempts_job_id_fkey,f,false,false,true,FOREIGN KEY (job_id) REFERENCES coupang_registration_jobs(id) ON DELETE CASCADE
+public,coupang_registration_attempts,coupang_registration_attempts_pkey,p,false,false,true,PRIMARY KEY (id)
+public,coupang_registration_jobs,coupang_registration_jobs_listing_draft_id_fkey,f,false,false,true,FOREIGN KEY (listing_draft_id) REFERENCES listing_drafts(id) ON DELETE CASCADE
+public,coupang_registration_jobs,coupang_registration_jobs_listing_draft_id_key,u,false,false,true,UNIQUE (listing_draft_id)
+public,coupang_registration_jobs,coupang_registration_jobs_mode_check,c,false,false,true,"CHECK (mode = ANY (ARRAY['validate'::text, 'live'::text]))"
+public,coupang_registration_jobs,coupang_registration_jobs_pkey,p,false,false,true,PRIMARY KEY (id)
+public,coupang_registration_jobs,coupang_registration_jobs_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['queued'::text, 'validating'::text, 'validation_failed'::text, 'ready'::text, 'submitting'::text, 'submitted'::text, 'registered'::text, 'failed'::text, 'cancelled'::text]))"
+public,coupang_registration_jobs,coupang_registration_jobs_workflow_id_fkey,f,false,false,true,FOREIGN KEY (workflow_id) REFERENCES commerce_workflows(id) ON DELETE CASCADE
+public,coupang_seller_product_snapshots,coupang_seller_product_snapshots_pkey,p,false,false,true,PRIMARY KEY (id)
+public,domestic_supplier_products,domestic_supplier_products_bundle_recommendation_id_fkey,f,false,false,true,FOREIGN KEY (bundle_recommendation_id) REFERENCES ai_bundle_recommendations(id) ON DELETE SET NULL
+public,domestic_supplier_products,domestic_supplier_products_check,c,false,false,true,CHECK (discovery_recommendation_id IS NOT NULL OR bundle_recommendation_id IS NOT NULL)
+public,domestic_supplier_products,domestic_supplier_products_discovery_recommendation_id_fkey,f,false,false,true,FOREIGN KEY (discovery_recommendation_id) REFERENCES ai_product_recommendations(id) ON DELETE SET NULL
+public,domestic_supplier_products,domestic_supplier_products_mapping_status_check,c,false,false,true,"CHECK (mapping_status = ANY (ARRAY['active'::text, 'paused'::text, 'rejected'::text]))"
+public,domestic_supplier_products,domestic_supplier_products_minimum_order_quantity_check,c,false,false,true,CHECK (minimum_order_quantity > 0)
+public,domestic_supplier_products,domestic_supplier_products_pkey,p,false,false,true,PRIMARY KEY (id)
+public,domestic_supplier_products,domestic_supplier_products_provider_check,c,false,false,true,"CHECK (provider = ANY (ARRAY['domeggook'::text, 'domeme'::text, 'ownerclan'::text, 'manual'::text]))"
+public,domestic_supplier_products,domestic_supplier_products_stock_status_check,c,false,false,true,"CHECK (stock_status = ANY (ARRAY['in_stock'::text, 'low_stock'::text, 'out_of_stock'::text, 'unknown'::text]))"
+public,domestic_supplier_products,domestic_supplier_products_supplier_id_fkey,f,false,false,true,FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE CASCADE
+public,fulfillment_providers,fulfillment_providers_coupang_inbound_fee_check,c,false,false,true,CHECK (coupang_inbound_fee >= 0::numeric)
+public,fulfillment_providers,fulfillment_providers_kitting_fee_check,c,false,false,true,CHECK (kitting_fee >= 0::numeric)
+public,fulfillment_providers,fulfillment_providers_lead_time_days_check,c,false,false,true,CHECK (lead_time_days >= 0)
+public,fulfillment_providers,fulfillment_providers_outbound_fee_check,c,false,false,true,CHECK (outbound_fee >= 0::numeric)
+public,fulfillment_providers,fulfillment_providers_packaging_fee_check,c,false,false,true,CHECK (packaging_fee >= 0::numeric)
+public,fulfillment_providers,fulfillment_providers_picking_fee_check,c,false,false,true,CHECK (picking_fee >= 0::numeric)
+public,fulfillment_providers,fulfillment_providers_pkey,p,false,false,true,PRIMARY KEY (id)
+public,fulfillment_providers,fulfillment_providers_provider_code_key,u,false,false,true,UNIQUE (provider_code)
+public,fulfillment_providers,fulfillment_providers_receiving_fee_check,c,false,false,true,CHECK (receiving_fee >= 0::numeric)
+public,fulfillment_providers,fulfillment_providers_return_handling_fee_check,c,false,false,true,CHECK (return_handling_fee >= 0::numeric)
+public,fulfillment_providers,fulfillment_providers_storage_fee_per_unit_check,c,false,false,true,CHECK (storage_fee_per_unit >= 0::numeric)
+public,inbound_orders,inbound_orders_defective_quantity_check,c,false,false,true,CHECK (defective_quantity >= 0)
+public,inbound_orders,inbound_orders_pkey,p,false,false,true,PRIMARY KEY (id)
+public,inbound_orders,inbound_orders_planned_quantity_check,c,false,false,true,CHECK (planned_quantity >= 0)
+public,inbound_orders,inbound_orders_project_id_fkey,f,false,false,true,FOREIGN KEY (project_id) REFERENCES commerce_projects(id) ON DELETE CASCADE
+public,inbound_orders,inbound_orders_provider_id_fkey,f,false,false,true,FOREIGN KEY (provider_id) REFERENCES fulfillment_providers(id) ON DELETE SET NULL
+public,inbound_orders,inbound_orders_received_quantity_check,c,false,false,true,CHECK (received_quantity >= 0)
+public,inbound_orders,inbound_orders_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['DRAFT'::text, 'ORDERED'::text, 'SUPPLIER_SHIPPED'::text, '3PL_RECEIVED'::text, 'INSPECTING'::text, 'KITTING'::text, 'READY_FOR_COUPANG'::text, 'COUPANG_SHIPPED'::text, 'COUPANG_RECEIVED'::text, 'CANCELLED'::text]))"
+public,inventory_balances,inventory_balances_available_quantity_check,c,false,false,true,CHECK (available_quantity >= 0)
+public,inventory_balances,inventory_balances_inbound_quantity_check,c,false,false,true,CHECK (inbound_quantity >= 0)
+public,inventory_balances,inventory_balances_pkey,p,false,false,true,PRIMARY KEY (id)
+public,inventory_balances,inventory_balances_project_id_fkey,f,false,false,true,FOREIGN KEY (project_id) REFERENCES commerce_projects(id) ON DELETE CASCADE
+public,inventory_balances,inventory_balances_project_id_product_id_provider_id_key,u,false,false,true,"UNIQUE (project_id, product_id, provider_id)"
+public,inventory_balances,inventory_balances_provider_id_fkey,f,false,false,true,FOREIGN KEY (provider_id) REFERENCES fulfillment_providers(id) ON DELETE SET NULL
+public,inventory_balances,inventory_balances_reserved_quantity_check,c,false,false,true,CHECK (reserved_quantity >= 0)
+public,inventory_balances,inventory_balances_safety_stock_quantity_check,c,false,false,true,CHECK (safety_stock_quantity >= 0)
+public,knowledge_assets,knowledge_assets_asset_type_check,c,false,false,true,"CHECK (asset_type = ANY (ARRAY['sop'::text, 'prompt'::text, 'experiment'::text, 'success_case'::text, 'failure_case'::text, 'policy'::text, 'playbook'::text]))"
+public,knowledge_assets,knowledge_assets_pkey,p,false,false,true,PRIMARY KEY (id)
+public,knowledge_assets,knowledge_assets_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['draft'::text, 'active'::text, 'archived'::text]))"
+public,listing_draft_revisions,listing_draft_revisions_listing_draft_id_fkey,f,false,false,true,FOREIGN KEY (listing_draft_id) REFERENCES listing_drafts(id) ON DELETE CASCADE
+public,listing_draft_revisions,listing_draft_revisions_listing_draft_id_revision_key,u,false,false,true,"UNIQUE (listing_draft_id, revision)"
+public,listing_draft_revisions,listing_draft_revisions_pkey,p,false,false,true,PRIMARY KEY (id)
+public,listing_drafts,listing_drafts_bundle_recommendation_id_fkey,f,false,false,true,FOREIGN KEY (bundle_recommendation_id) REFERENCES ai_bundle_recommendations(id) ON DELETE SET NULL
+public,listing_drafts,listing_drafts_discovery_recommendation_id_fkey,f,false,false,true,FOREIGN KEY (discovery_recommendation_id) REFERENCES ai_product_recommendations(id) ON DELETE SET NULL
+public,listing_drafts,listing_drafts_listing_type_check,c,false,false,true,"CHECK (listing_type = ANY (ARRAY['single'::text, 'set'::text, 'bundle'::text, 'multipack'::text]))"
+public,listing_drafts,listing_drafts_pkey,p,false,false,true,PRIMARY KEY (id)
+public,listing_drafts,listing_drafts_procurement_order_id_fkey,f,false,false,true,FOREIGN KEY (procurement_order_id) REFERENCES procurement_orders(id) ON DELETE SET NULL
+public,listing_drafts,listing_drafts_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['draft'::text, 'generated'::text, 'reviewing'::text, 'approved'::text, 'rejected'::text, 'registered'::text]))"
+public,listing_drafts,listing_drafts_workflow_id_fkey,f,false,false,true,FOREIGN KEY (workflow_id) REFERENCES commerce_workflows(id) ON DELETE CASCADE
+public,market_ai_decisions,market_ai_decisions_confidence_check,c,false,false,true,CHECK (confidence >= 0 AND confidence <= 100)
+public,market_ai_decisions,market_ai_decisions_market_product_id_fkey,f,false,false,true,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+public,market_ai_decisions,market_ai_decisions_pkey,p,false,false,true,PRIMARY KEY (id)
+public,market_ai_decisions,market_ai_decisions_recommendation_check,c,false,false,true,"CHECK (recommendation = ANY (ARRAY['strong_buy'::text, 'buy'::text, 'watch'::text, 'avoid'::text, 'insufficient_data'::text]))"
+public,market_analysis_runs,market_analysis_runs_pkey,p,false,false,true,PRIMARY KEY (id)
+public,market_analysis_runs,market_analysis_runs_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['started'::text, 'success'::text, 'partial'::text, 'failed'::text]))"
+public,market_collection_jobs,market_collection_jobs_collector_key_fkey,f,false,false,true,FOREIGN KEY (collector_key) REFERENCES market_collectors(collector_key) ON DELETE CASCADE
+public,market_collection_jobs,market_collection_jobs_collector_key_market_keyword_id_key,u,false,false,true,"UNIQUE (collector_key, market_keyword_id)"
+public,market_collection_jobs,market_collection_jobs_interval_minutes_check,c,false,false,true,CHECK (interval_minutes >= 60)
+public,market_collection_jobs,market_collection_jobs_market_keyword_id_fkey,f,false,false,true,FOREIGN KEY (market_keyword_id) REFERENCES market_keywords(id) ON DELETE CASCADE
+public,market_collection_jobs,market_collection_jobs_pkey,p,false,false,true,PRIMARY KEY (id)
+public,market_collection_jobs,market_collection_jobs_priority_check,c,false,false,true,CHECK (priority >= 0 AND priority <= 100)
+public,market_collection_jobs,market_collection_jobs_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['active'::text, 'paused'::text, 'running'::text, 'cooldown'::text, 'failed'::text]))"
+public,market_collection_runs,market_collection_runs_keyword_id_fkey,f,false,false,true,FOREIGN KEY (keyword_id) REFERENCES market_keywords(id) ON DELETE SET NULL
+public,market_collection_runs,market_collection_runs_pkey,p,false,false,true,PRIMARY KEY (id)
+public,market_collection_runs,market_collection_runs_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['started'::text, 'success'::text, 'partial'::text, 'failed'::text, 'blocked'::text, 'cooldown'::text]))"
+public,market_collectors,market_collectors_collector_key_key,u,false,false,true,UNIQUE (collector_key)
+public,market_collectors,market_collectors_pkey,p,false,false,true,PRIMARY KEY (id)
+public,market_collectors,market_collectors_source_type_check,c,false,false,true,"CHECK (source_type = ANY (ARRAY['official_api'::text, 'public_observation'::text, 'manual'::text, 'internal'::text, 'demo'::text]))"
+public,market_collectors,market_collectors_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['ready'::text, 'disabled'::text, 'cooldown'::text, 'blocked'::text, 'error'::text]))"
+public,market_estimates,market_estimates_confidence_check,c,false,false,true,CHECK (confidence >= 0 AND confidence <= 100)
+public,market_estimates,market_estimates_market_product_id_fkey,f,false,false,true,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+public,market_estimates,market_estimates_pkey,p,false,false,true,PRIMARY KEY (id)
+public,market_feature_snapshots,market_feature_snapshots_market_product_id_fkey,f,false,false,true,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+public,market_feature_snapshots,market_feature_snapshots_pkey,p,false,false,true,PRIMARY KEY (id)
+public,market_feedback_events,market_feedback_events_event_type_check,c,false,false,true,"CHECK (event_type = ANY (ARRAY['registered'::text, 'sale'::text, 'return'::text, 'ad_spend'::text, 'stockout'::text, 'manual_rating'::text]))"
+public,market_feedback_events,market_feedback_events_market_product_id_fkey,f,false,false,true,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE SET NULL
+public,market_feedback_events,market_feedback_events_pkey,p,false,false,true,PRIMARY KEY (id)
+public,market_feedback_events,market_feedback_events_product_id_fkey,f,false,false,true,FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
+public,market_keywords,market_keywords_collection_interval_minutes_check,c,false,false,true,CHECK (collection_interval_minutes >= 60)
+public,market_keywords,market_keywords_collection_status_check,c,false,false,true,"CHECK (collection_status = ANY (ARRAY['active'::text, 'paused'::text, 'cooldown'::text, 'blocked'::text]))"
+public,market_keywords,market_keywords_keyword_key,u,false,false,true,UNIQUE (keyword)
+public,market_keywords,market_keywords_pkey,p,false,false,true,PRIMARY KEY (id)
+public,market_keywords,market_keywords_priority_check,c,false,false,true,CHECK (priority >= 0 AND priority <= 100)
+public,market_model_feedback,market_model_feedback_estimate_id_fkey,f,false,false,true,FOREIGN KEY (estimate_id) REFERENCES market_estimates(id) ON DELETE SET NULL
+public,market_model_feedback,market_model_feedback_market_product_id_fkey,f,false,false,true,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE SET NULL
+public,market_model_feedback,market_model_feedback_pkey,p,false,false,true,PRIMARY KEY (id)
+public,market_model_feedback,market_model_feedback_product_id_fkey,f,false,false,true,FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
+public,market_product_links,market_product_links_market_product_id_fkey,f,false,false,true,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+public,market_product_links,market_product_links_match_confidence_check,c,false,false,true,CHECK (match_confidence >= 0 AND match_confidence <= 100)
+public,market_product_links,market_product_links_match_method_check,c,false,false,true,"CHECK (match_method = ANY (ARRAY['manual'::text, 'external_id'::text, 'title_similarity'::text, 'ai'::text]))"
+public,market_product_links,market_product_links_pkey,p,false,false,true,PRIMARY KEY (id)
+public,market_product_links,market_product_links_product_id_fkey,f,false,false,true,FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+public,market_product_links,market_product_links_product_id_market_product_id_key,u,false,false,true,"UNIQUE (product_id, market_product_id)"
+public,market_product_metrics,market_product_metrics_confidence_check,c,false,false,true,CHECK (confidence >= 0 AND confidence <= 100)
+public,market_product_metrics,market_product_metrics_market_product_id_fkey,f,false,false,true,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+public,market_product_metrics,market_product_metrics_pkey,p,false,false,true,PRIMARY KEY (market_product_id)
+public,market_product_metrics,market_product_metrics_recommendation_grade_check,c,false,false,true,"CHECK (recommendation_grade = ANY (ARRAY['S'::text, 'A'::text, 'B'::text, 'C'::text, 'D'::text]))"
+public,market_products,market_products_pkey,p,false,false,true,PRIMARY KEY (id)
+public,market_products,market_products_source_external_product_id_key,u,false,false,true,"UNIQUE (source, external_product_id)"
+public,market_signals,market_signals_market_keyword_id_fkey,f,false,false,true,FOREIGN KEY (market_keyword_id) REFERENCES market_keywords(id) ON DELETE CASCADE
+public,market_signals,market_signals_market_product_id_fkey,f,false,false,true,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+public,market_signals,market_signals_pkey,p,false,false,true,PRIMARY KEY (id)
+public,market_signals,market_signals_severity_check,c,false,false,true,"CHECK (severity = ANY (ARRAY['low'::text, 'medium'::text, 'high'::text]))"
+public,market_snapshots,market_snapshots_market_keyword_id_fkey,f,false,false,true,FOREIGN KEY (market_keyword_id) REFERENCES market_keywords(id) ON DELETE SET NULL
+public,market_snapshots,market_snapshots_market_product_id_fkey,f,false,false,true,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+public,market_snapshots,market_snapshots_pkey,p,false,false,true,PRIMARY KEY (id)
+public,marketplace_connections,marketplace_connections_automation_level_check,c,false,false,true,CHECK (automation_level >= 0 AND automation_level <= 5)
+public,marketplace_connections,marketplace_connections_marketplace_code_key,u,false,false,true,UNIQUE (marketplace_code)
+public,marketplace_connections,marketplace_connections_pkey,p,false,false,true,PRIMARY KEY (id)
+public,marketplace_connections,marketplace_connections_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['planned'::text, 'configuring'::text, 'connected'::text, 'warning'::text, 'error'::text, 'disabled'::text]))"
+public,os_command_runs,os_command_runs_assigned_worker_code_fkey,f,false,false,true,FOREIGN KEY (assigned_worker_code) REFERENCES ai_workers(worker_code) ON DELETE SET NULL
+public,os_command_runs,os_command_runs_pkey,p,false,false,true,PRIMARY KEY (id)
+public,os_command_runs,os_command_runs_progress_check,c,false,false,true,CHECK (progress >= 0 AND progress <= 100)
+public,os_command_runs,os_command_runs_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['queued'::text, 'running'::text, 'waiting_approval'::text, 'completed'::text, 'failed'::text, 'cancelled'::text]))"
+public,os_notifications,os_notifications_pkey,p,false,false,true,PRIMARY KEY (id)
+public,os_notifications,os_notifications_severity_check,c,false,false,true,"CHECK (severity = ANY (ARRAY['info'::text, 'success'::text, 'warning'::text, 'error'::text]))"
+public,procurement_orders,procurement_orders_bundle_recommendation_id_fkey,f,false,false,true,FOREIGN KEY (bundle_recommendation_id) REFERENCES ai_bundle_recommendations(id) ON DELETE SET NULL
+public,procurement_orders,procurement_orders_discovery_recommendation_id_fkey,f,false,false,true,FOREIGN KEY (discovery_recommendation_id) REFERENCES ai_product_recommendations(id) ON DELETE SET NULL
+public,procurement_orders,procurement_orders_order_number_key,u,false,false,true,UNIQUE (order_number)
+public,procurement_orders,procurement_orders_pkey,p,false,false,true,PRIMARY KEY (id)
+public,procurement_orders,procurement_orders_quantity_check,c,false,false,true,CHECK (quantity > 0)
+public,procurement_orders,procurement_orders_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['draft'::text, 'approved'::text, 'ordered'::text, 'supplier_confirmed'::text, 'inbound_planned'::text, 'in_transit'::text, 'received'::text, 'cancelled'::text]))"
+public,procurement_orders,procurement_orders_supplier_id_fkey,f,false,false,true,FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE RESTRICT
+public,procurement_orders,procurement_orders_supplier_product_mapping_id_fkey,f,false,false,true,FOREIGN KEY (supplier_product_mapping_id) REFERENCES domestic_supplier_products(id) ON DELETE SET NULL
+public,procurement_orders,procurement_orders_supplier_quote_id_fkey,f,false,false,true,FOREIGN KEY (supplier_quote_id) REFERENCES supplier_quotes(id) ON DELETE RESTRICT
+public,products,products_ai_analysis_status_check,c,false,false,true,"CHECK (ai_analysis_status = ANY (ARRAY['pending'::text, 'analyzing'::text, 'completed'::text, 'failed'::text]))"
+public,products,products_competition_analysis_status_check,c,false,false,true,"CHECK (competition_analysis_status = ANY (ARRAY['pending'::text, 'analyzed'::text, 'estimated'::text, 'needs_data'::text, 'failed'::text]))"
+public,products,products_competition_data_source_check,c,false,false,true,"CHECK (competition_data_source = ANY (ARRAY['none'::text, 'manual'::text, 'external'::text, 'estimated'::text]))"
+public,products,products_competition_grade_check,c,false,false,true,"CHECK (competition_grade = ANY (ARRAY['미분석'::text, 'S'::text, 'A'::text, 'B'::text, 'C'::text, 'D'::text]))"
+public,products,products_pkey,p,false,false,true,PRIMARY KEY (id)
+public,products,products_product_no_key,u,false,false,true,UNIQUE (product_no)
+public,products,products_review_status_check,c,false,false,true,"CHECK (review_status = ANY (ARRAY['unreviewed'::text, 'reviewing'::text, 'sample_candidate'::text, 'approved'::text, 'excluded'::text]))"
+public,products,products_risk_level_check,c,false,false,true,"CHECK (risk_level = ANY (ARRAY['unknown'::text, 'low'::text, 'medium'::text, 'high'::text]))"
+public,profit_snapshots,profit_snapshots_pkey,p,false,false,true,PRIMARY KEY (id)
+public,profit_snapshots,profit_snapshots_snapshot_date_key,u,false,false,true,UNIQUE (snapshot_date)
+public,revenue_decisions,revenue_decisions_confidence_check,c,false,false,true,CHECK (confidence >= 0::numeric AND confidence <= 100::numeric)
+public,revenue_decisions,revenue_decisions_opportunity_id_fkey,f,false,false,true,FOREIGN KEY (opportunity_id) REFERENCES revenue_opportunities(id) ON DELETE CASCADE
+public,revenue_decisions,revenue_decisions_pkey,p,false,false,true,PRIMARY KEY (id)
+public,revenue_opportunities,revenue_opportunities_ai_confidence_check,c,false,false,true,CHECK (ai_confidence >= 0::numeric AND ai_confidence <= 100::numeric)
+public,revenue_opportunities,revenue_opportunities_competition_score_check,c,false,false,true,CHECK (competition_score >= 0::numeric AND competition_score <= 100::numeric)
+public,revenue_opportunities,revenue_opportunities_demand_score_check,c,false,false,true,CHECK (demand_score >= 0::numeric AND demand_score <= 100::numeric)
+public,revenue_opportunities,revenue_opportunities_listing_score_check,c,false,false,true,CHECK (listing_score >= 0::numeric AND listing_score <= 100::numeric)
+public,revenue_opportunities,revenue_opportunities_margin_score_check,c,false,false,true,CHECK (margin_score >= 0::numeric AND margin_score <= 100::numeric)
+public,revenue_opportunities,revenue_opportunities_opportunity_code_key,u,false,false,true,UNIQUE (opportunity_code)
+public,revenue_opportunities,revenue_opportunities_pkey,p,false,false,true,PRIMARY KEY (id)
+public,revenue_opportunities,revenue_opportunities_revenue_score_check,c,false,false,true,CHECK (revenue_score >= 0::numeric AND revenue_score <= 100::numeric)
+public,revenue_opportunities,revenue_opportunities_risk_score_check,c,false,false,true,CHECK (risk_score >= 0::numeric AND risk_score <= 100::numeric)
+public,revenue_opportunities,revenue_opportunities_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['idea'::text, 'candidate'::text, 'evaluating'::text, 'approved'::text, 'content'::text, 'ready'::text, 'published'::text, 'selling'::text, 'learning'::text, 'rejected'::text, 'archived'::text]))"
+public,revenue_opportunities,revenue_opportunities_supply_score_check,c,false,false,true,CHECK (supply_score >= 0::numeric AND supply_score <= 100::numeric)
+public,revenue_snapshots,revenue_snapshots_pkey,p,false,false,true,PRIMARY KEY (id)
+public,revenue_snapshots,revenue_snapshots_snapshot_date_key,u,false,false,true,UNIQUE (snapshot_date)
+public,runtime_jobs,runtime_jobs_job_code_key,u,false,false,true,UNIQUE (job_code)
+public,runtime_jobs,runtime_jobs_opportunity_id_fkey,f,false,false,true,FOREIGN KEY (opportunity_id) REFERENCES revenue_opportunities(id) ON DELETE SET NULL
+public,runtime_jobs,runtime_jobs_pkey,p,false,false,true,PRIMARY KEY (id)
+public,runtime_jobs,runtime_jobs_priority_check,c,false,false,true,CHECK (priority >= 0 AND priority <= 100)
+public,runtime_jobs,runtime_jobs_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['queued'::text, 'running'::text, 'waiting'::text, 'completed'::text, 'failed'::text, 'retry'::text, 'archived'::text]))"
+public,sourcing_decisions,sourcing_decisions_decision_check,c,false,false,true,"CHECK (decision = ANY (ARRAY['approve'::text, 'review'::text, 'reject'::text]))"
+public,sourcing_decisions,sourcing_decisions_pkey,p,false,false,true,PRIMARY KEY (id)
+public,sourcing_decisions,sourcing_decisions_supplier_quote_id_fkey,f,false,false,true,FOREIGN KEY (supplier_quote_id) REFERENCES supplier_quotes(id) ON DELETE CASCADE
+public,supplier_quotes,supplier_quotes_bundle_recommendation_id_fkey,f,false,false,true,FOREIGN KEY (bundle_recommendation_id) REFERENCES ai_bundle_recommendations(id) ON DELETE SET NULL
+public,supplier_quotes,supplier_quotes_check,c,false,false,true,CHECK (discovery_recommendation_id IS NOT NULL OR bundle_recommendation_id IS NOT NULL)
+public,supplier_quotes,supplier_quotes_currency_check,c,false,false,true,"CHECK (currency = ANY (ARRAY['KRW'::text, 'USD'::text, 'CNY'::text]))"
+public,supplier_quotes,supplier_quotes_discovery_recommendation_id_fkey,f,false,false,true,FOREIGN KEY (discovery_recommendation_id) REFERENCES ai_product_recommendations(id) ON DELETE SET NULL
+public,supplier_quotes,supplier_quotes_moq_check,c,false,false,true,CHECK (moq > 0)
+public,supplier_quotes,supplier_quotes_pkey,p,false,false,true,PRIMARY KEY (id)
+public,supplier_quotes,supplier_quotes_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['draft'::text, 'requested'::text, 'received'::text, 'selected'::text, 'rejected'::text, 'expired'::text]))"
+public,supplier_quotes,supplier_quotes_supplier_id_fkey,f,false,false,true,FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE CASCADE
+public,suppliers,suppliers_channel_check,c,false,false,true,"CHECK (channel = ANY (ARRAY['domestic_wholesale'::text, 'consignment'::text, 'oem'::text, 'import'::text, 'manual'::text]))"
+public,suppliers,suppliers_pkey,p,false,false,true,PRIMARY KEY (id)
+public,suppliers,suppliers_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['active'::text, 'paused'::text, 'blocked'::text]))"
+public,system_health_checks,system_health_checks_pkey,p,false,false,true,PRIMARY KEY (id)
+public,system_health_checks,system_health_checks_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['ok'::text, 'warning'::text, 'error'::text, 'unknown'::text]))"
+public,system_releases,system_releases_pkey,p,false,false,true,PRIMARY KEY (id)
+public,system_releases,system_releases_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['planned'::text, 'building'::text, 'verifying'::text, 'released'::text, 'rolled_back'::text, 'failed'::text]))"
+public,system_releases,system_releases_version_key,u,false,false,true,UNIQUE (version)
+public,three_pl_inbound_plans,three_pl_inbound_plans_expected_quantity_check,c,false,false,true,CHECK (expected_quantity > 0)
+public,three_pl_inbound_plans,three_pl_inbound_plans_pkey,p,false,false,true,PRIMARY KEY (id)
+public,three_pl_inbound_plans,three_pl_inbound_plans_procurement_order_id_fkey,f,false,false,true,FOREIGN KEY (procurement_order_id) REFERENCES procurement_orders(id) ON DELETE CASCADE
+public,three_pl_inbound_plans,three_pl_inbound_plans_received_quantity_check,c,false,false,true,CHECK (received_quantity >= 0)
+public,three_pl_inbound_plans,three_pl_inbound_plans_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['planned'::text, 'booked'::text, 'in_transit'::text, 'partially_received'::text, 'received'::text, 'cancelled'::text]))"
+public,worker_runtime_events,worker_runtime_events_event_type_check,c,false,false,true,"CHECK (event_type = ANY (ARRAY['claimed'::text, 'started'::text, 'progress'::text, 'completed'::text, 'failed'::text, 'retry'::text, 'cancelled'::text]))"
+public,worker_runtime_events,worker_runtime_events_opportunity_id_fkey,f,false,false,true,FOREIGN KEY (opportunity_id) REFERENCES revenue_opportunities(id) ON DELETE SET NULL
+public,worker_runtime_events,worker_runtime_events_pkey,p,false,false,true,PRIMARY KEY (id)
+public,worker_runtime_events,worker_runtime_events_runtime_job_id_fkey,f,false,false,true,FOREIGN KEY (runtime_job_id) REFERENCES runtime_jobs(id) ON DELETE CASCADE
+public,workflow_outbox_events,workflow_outbox_events_pkey,p,false,false,true,PRIMARY KEY (id)
+public,workflow_outbox_events,workflow_outbox_events_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['pending'::text, 'processing'::text, 'sent'::text, 'failed'::text, 'cancelled'::text]))"
+public,workflow_outbox_events,workflow_outbox_events_workflow_id_fkey,f,false,false,true,FOREIGN KEY (workflow_id) REFERENCES commerce_workflows(id) ON DELETE CASCADE
+public,workflow_tasks,workflow_tasks_pkey,p,false,false,true,PRIMARY KEY (id)
+public,workflow_tasks,workflow_tasks_priority_check,c,false,false,true,CHECK (priority >= 0 AND priority <= 100)
+public,workflow_tasks,workflow_tasks_status_check,c,false,false,true,"CHECK (status = ANY (ARRAY['open'::text, 'in_progress'::text, 'done'::text, 'cancelled'::text, 'blocked'::text]))"
+public,workflow_tasks,workflow_tasks_workflow_id_fkey,f,false,false,true,FOREIGN KEY (workflow_id) REFERENCES commerce_workflows(id) ON DELETE CASCADE
+public,workflow_tasks,workflow_tasks_workflow_id_stage_task_type_key,u,false,false,true,"UNIQUE (workflow_id, stage, task_type)"
+public,workflow_transitions,workflow_transitions_pkey,p,false,false,true,PRIMARY KEY (id)
+public,workflow_transitions,workflow_transitions_workflow_id_fkey,f,false,false,true,FOREIGN KEY (workflow_id) REFERENCES commerce_workflows(id) ON DELETE CASCADE

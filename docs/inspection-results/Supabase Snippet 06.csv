@@ -1,0 +1,5 @@
+schema_name,table_name,trigger_name,enabled_state,definition
+public,commerce_projects,trg_commerce_projects_updated_at,O,CREATE TRIGGER trg_commerce_projects_updated_at BEFORE UPDATE ON commerce_projects FOR EACH ROW EXECUTE FUNCTION set_updated_at()
+public,fulfillment_providers,trg_fulfillment_providers_updated_at,O,CREATE TRIGGER trg_fulfillment_providers_updated_at BEFORE UPDATE ON fulfillment_providers FOR EACH ROW EXECUTE FUNCTION set_updated_at()
+public,inbound_orders,trg_inbound_orders_updated_at,O,CREATE TRIGGER trg_inbound_orders_updated_at BEFORE UPDATE ON inbound_orders FOR EACH ROW EXECUTE FUNCTION set_updated_at()
+public,inventory_balances,trg_inventory_balances_updated_at,O,CREATE TRIGGER trg_inventory_balances_updated_at BEFORE UPDATE ON inventory_balances FOR EACH ROW EXECUTE FUNCTION set_updated_at()
