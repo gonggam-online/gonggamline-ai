@@ -2,6 +2,50 @@
 
 ## Current task snapshot
 
+- Objective: make notebook and desktop Codex sessions apply the same permanent
+  repository operating rules for branch selection, safe delivery, Korean
+  progress, approval boundaries, and Windows notifications.
+- Branch: `codex/chore/codex-cross-pc-operating-standard`, stacked on Draft PR
+  #30 because the current repository state includes the Sprint A close-out.
+- Risk: high-risk/manual because this changes binding repository-wide Codex
+  governance and is intentionally delivered with `manual-merge-required`.
+- Revenue impact: reduces setup drift, repeated owner coordination, and
+  cross-device delivery mistakes before Sprint B-0 and Sprint B.
+- Scope: permanent cross-PC operating standard; binding `AGENTS.md` hooks;
+  Windows approval/completion notification script; onboarding/operations
+  guide; `.ai` and `.codex` indexes.
+- Non-goals: grant OS/platform permissions, bypass GitHub protections, change
+  application behavior, modify Production/database state, or guarantee sound
+  on muted/unsupported devices.
+- Completed: inspected repository governance and the local PR stack; created a
+  dedicated stacked task branch; added automatic safe branch selection,
+  normal/high-risk delivery boundaries, Korean evidence-based progress,
+  cross-PC source-of-truth rules, and local Windows notifications.
+- Current work: delivered as Draft PR #31; waiting for the dependent manual PR
+  stack and owner review.
+- Changed files: `AGENTS.md`, `.ai/CODEX_OPERATING_STANDARD.md`,
+  `.ai/README.md`, `.codex/README.md`, `.codex/notify.ps1`,
+  `docs/CODEX_CROSS_PC_OPERATIONS.md`, task changelog, and this status file.
+- Validation: both notification events execute successfully on this desktop;
+  `git diff --check` passes; scoped lint passes with four pre-existing test
+  warnings and no errors; typecheck passes; tests pass 217/217; Production
+  build passes with 68 generated routes. The first unscoped lint/build attempt
+  encountered ignored Playwright artifacts and a locked `.next/trace`; no
+  tracked file was changed, and separated validation passed after the stale
+  ignored trace was safely rotated and removed.
+- Delivery: commits `f402026` and the final status-only follow-up on this
+  branch; pushed to origin; Draft PR #31 targets
+  `codex/chore/sprint-a-closeout`, carries `manual-merge-required`, and has
+  auto-merge disabled.
+- Blockers: PR #31 is intentionally stacked on Draft PR #30. Merge/refresh the
+  stack in order before manual review of this governance PR. GitHub CLI is not
+  available on the active PATH, but authenticated Git push and the connected
+  GitHub capability completed delivery.
+- Exact next action: merge PR #29, then #30; refresh PR #31 against the updated
+  base/main, rerun gates, and manually merge it before Sprint B-0/B.
+
+## Previous task snapshot
+
 - Objective: formally close Sprint A by resolving every remaining baseline
   reconciliation finding without executing SQL or changing migrations or
   application behavior.
