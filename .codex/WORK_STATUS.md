@@ -22,11 +22,19 @@
   latest main; verified merged PR #33/#34; audited Supplier Catalog, Revenue,
   API/UI/test and schema conventions; created the task branch; wrote the
   Architecture Story and official decision records.
-- Current: local self-review and applicable gates are complete; commit, push,
-  PR, exact-head checks, and policy-governed merge remain.
-- Blockers/owner actions: none for this docs Story. Later Stories require
-  approved cost/profit thresholds, admin identity/RLS, database baseline, and
-  verified provider evidence fields.
+- Current: committed/pushed as `78c09a7`; Draft PR #35 is open with
+  `normal-risk`. Exact-head Vercel Preview is Ready, the branch is mergeable,
+  and review threads are zero. Ready/merge is withheld because exact Preview
+  browser automation cannot pass Deployment Protection.
+- Blockers/owner actions: For this docs Story, configure the existing GitHub
+  Actions secret at repository **Settings > Secrets and variables > Actions >
+  New repository secret** with name `VERCEL_AUTOMATION_BYPASS_SECRET`. Its
+  secret value must come from the matching Vercel project Deployment
+  Protection automation-bypass setting and must not be pasted into source,
+  PR comments, or chat. Then rerun the PR `Preview browser validation`
+  workflow. Later implementation Stories also require approved cost/profit
+  thresholds, admin identity/RLS, database baseline, and verified provider
+  evidence fields.
 - Changed files: `docs/architecture/ITEM-SELECTION-EVALUATION-V1.md`,
   `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`,
   `CHANGELOG-Item-Selection-Evaluation-Architecture-v1.md`, and this file.
@@ -41,9 +49,17 @@
   Supabase-dependent routes documented in earlier snapshots failed with
   `Supabase unconfigured`, while API health, revenue-critical, and Dashboard
   flows passed. This docs-only diff changes no runtime route.
-- Last commit: none for this Story.
-- Exact next action: commit and push the reviewed documentation, create the PR,
-  and inspect exact-head CI/Preview, conflicts, and review threads.
+  Exact-head Vercel deployment is Ready, but direct Preview Playwright without
+  the bypass secret reached Vercel login HTML: 6/39 passed and 33/39 were
+  blocked by Deployment Protection. The in-app browser connector also failed
+  to initialize because Windows denied AppData inspection (`EPERM`).
+- Delivery: Draft PR #35,
+  `https://github.com/gonggam-online/gonggamline-ai/pull/35`; exact-head Vercel
+  status passed; merge conflict and unresolved review thread counts are zero.
+- Last commit: `78c09a7 docs: approve item selection evaluation v1`.
+- Exact next action: owner configures the protected automation secret and
+  reruns `Preview browser validation`; after it passes, mark PR Ready and apply
+  the normal-risk merge policy.
 - Remaining risks: synchronous size-30 capacity is unmeasured; no repository
   admin auth exists; Product database baseline/RLS is unresolved; minimum
   profit/margin and cost profile have no owner-approved values; current
