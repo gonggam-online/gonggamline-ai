@@ -55,3 +55,16 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
   [Domeggook Live Search v1](../docs/architecture/DOMEGGOOK-LIVE-SEARCH-V1.md).
 - Decision record:
   [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-27--domeggook-live-search-v1).
+
+## Proposed Architecture Stories
+
+### 2026-07-27 — Sprint B-0 Database Baseline Execution v1
+
+- Status: proposed; repository-owner manual approval required.
+- Boundary: Database / Security; isolated fresh replay only.
+- Production: no access or mutation authorized.
+- Critical ordering: preserve migrations 003–020 and place the final
+  least-privilege security boundary after migration 020.
+- Implementation authorization: none until this Story is manually approved.
+- Story:
+  [Sprint B-0 Database Baseline Execution v1](../docs/architecture/SPRINT-B0-DATABASE-BASELINE-EXECUTION-V1.md).
