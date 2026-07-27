@@ -29,3 +29,17 @@ completed and approved.
 Approval means a recorded owner/AI CTO decision in
 [`DECISION_LOG.md`](DECISION_LOG.md), not merely the existence of a draft.
 Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
+
+## Approved Architecture Stories
+
+### 2026-07-27 — Domeggook Read-only Supplier Catalog Adapter v1
+
+- Status: approved by repository-owner AI CTO directive.
+- Boundary: new read-only External Integration owned by Supplier/Procurement.
+- Public API: safe Domeggook health contract approved.
+- Database / Migration / Queue: none.
+- Risk: normal-risk for this documentation-only Architecture Story.
+- Implementation authorization: limited to the Definition of Done and
+  exclusions in
+  [Domeggook Read-only Supplier Catalog Adapter v1](../docs/architecture/DOMEGGOOK-READONLY-SUPPLIER-CATALOG-ADAPTER-V1.md).
+- Decision record: [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-27--domeggook-read-only-supplier-catalog-adapter-v1).

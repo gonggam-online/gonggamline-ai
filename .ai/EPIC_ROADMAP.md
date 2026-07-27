@@ -22,3 +22,11 @@ without silently changing them.
 Each Epic begins with one or more Architecture Stories using
 [`STORY_TEMPLATE.md`](STORY_TEMPLATE.md). Business priority, acceptance
 criteria, and approval remain AI CTO/owner decisions.
+
+## Pre-Epic first-sale dependency
+
+The approved
+[Domeggook Read-only Supplier Catalog Adapter v1](../docs/architecture/DOMEGGOOK-READONLY-SUPPLIER-CATALOG-ADAPTER-V1.md)
+establishes the minimum read-only sourcing boundary before later Product
+Operations work. It adds no Epic scope and authorizes no Product feature,
+database, Queue, bulk collection, or supplier order.
