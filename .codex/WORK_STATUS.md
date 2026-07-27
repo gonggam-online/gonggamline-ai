@@ -1,5 +1,54 @@
 # Work status
 
+## 2026-07-27 — Item Selection Evaluation v1 architecture
+
+- Objective: approve an implementable, versioned evaluation/recommendation
+  vertical slice after read-only Domeggook Live Search without changing
+  Production behavior.
+- Branch: `codex/docs/item-selection-evaluation-v1`, based on `origin/main`
+  `81a2a7ab55ec3d041de895ff337650328f717cd9`.
+- Risk: normal-risk documentation-only. Later financial, auth/RLS, migration,
+  database, and Production work remains high-risk/manual.
+- Revenue impact: reduce repeated manual supplier screening while preventing
+  unknown rights, incomplete economics, or low coverage from appearing as safe
+  recommendations.
+- Scope: architecture/ruleset/API/persistence/UI/failure/security/delivery
+  contracts, decision log, status, and changelog.
+- Non-goals: runtime routes, evaluator/UI code, migrations, database or
+  environment changes, real commerce writes, bulk crawling, new SaaS.
+- Root-cause class: capability/architecture gap. External provider
+  configuration is not changed; database/auth prerequisites remain explicit.
+- Completed: read the owner directive and mandatory repository policy; fetched
+  latest main; verified merged PR #33/#34; audited Supplier Catalog, Revenue,
+  API/UI/test and schema conventions; created the task branch; wrote the
+  Architecture Story and official decision records.
+- Current: local self-review and applicable gates are complete; commit, push,
+  PR, exact-head checks, and policy-governed merge remain.
+- Blockers/owner actions: none for this docs Story. Later Stories require
+  approved cost/profit thresholds, admin identity/RLS, database baseline, and
+  verified provider evidence fields.
+- Changed files: `docs/architecture/ITEM-SELECTION-EVALUATION-V1.md`,
+  `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`,
+  `CHANGELOG-Item-Selection-Evaluation-Architecture-v1.md`, and this file.
+- Commands/results: `git fetch origin`, local Markdown link inspection,
+  duplicate/secret/runtime-diff inspection, and `git diff --check` passed.
+  Tracked-source ESLint passed with 0 errors and 4 pre-existing test warnings;
+  the unfiltered lint command failed because existing generated
+  `playwright-report/trace/assets` is in its scan scope. Typecheck and
+  Production build passed (69 routes). Unit tests stopped before discovery
+  because Node 24 returned the previously observed Windows
+  `uv_os_get_passwd ENOMEM`. Local Playwright passed 32/39; the same seven
+  Supabase-dependent routes documented in earlier snapshots failed with
+  `Supabase unconfigured`, while API health, revenue-critical, and Dashboard
+  flows passed. This docs-only diff changes no runtime route.
+- Last commit: none for this Story.
+- Exact next action: commit and push the reviewed documentation, create the PR,
+  and inspect exact-head CI/Preview, conflicts, and review threads.
+- Remaining risks: synchronous size-30 capacity is unmeasured; no repository
+  admin auth exists; Product database baseline/RLS is unresolved; minimum
+  profit/margin and cost profile have no owner-approved values; current
+  provider-normalized facts cannot pass all five hard gates.
+
 ## 2026-07-27 — Domeggook Live Search API
 
 - Objective: implement the approved bounded Live Search API without

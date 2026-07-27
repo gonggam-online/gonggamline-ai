@@ -155,3 +155,35 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   implementation PR with replay and RLS evidence.
 - Rollback or supersession: Revert the implementation PR and destroy the
   disposable database. Production is not changed.
+
+
+## 2026-07-27 — Item Selection Evaluation v1
+
+- Category: architecture decision
+- Story / PR: Item Selection Evaluation v1 / pending
+- Status: approved by repository-owner task directive; delivery pending
+- Owner / approver: Supplier / Procurement with Revenue financial ownership;
+  repository-owner directive
+- Context and evidence: PR #33 approved and PR #34 implemented bounded
+  read-only Domeggook Live Search. The normalized Supplier Catalog has no
+  evidence for resale, IP, image-use/editing, or tax-invoice gates. Existing
+  Revenue calculation is reusable, while administrator auth/RLS and the
+  authoritative fresh-replay database baseline remain unresolved.
+- Decision or issue: Introduce a separate Item Selection application use case
+  and immutable ruleset `gonggamline-item-selection-v1`. Missing evidence is
+  `UNKNOWN`; any required unknown or incomplete profitability caps the verdict
+  at `MANUAL_REVIEW`. Use explicit available-data score and coverage, preserve
+  historical snapshots, and allow writes only through the new application
+  repository after auth/database prerequisites.
+- Consequences and risks: Live Search stays no-write. This documentation-only
+  Story is normal-risk, but financial semantics, auth/RLS, migrations, and
+  Production delivery remain separate high-risk/manual Stories. Real provider
+  candidates will commonly require manual review until verified evidence and
+  owner-approved cost/profit thresholds exist.
+- Follow-up / due condition: Implement the six ordered Stories in
+  [Item Selection Evaluation v1](../docs/architecture/ITEM-SELECTION-EVALUATION-V1.md#14-implementation-stories),
+  beginning with the pure evaluator. Do not implement persistence/API before
+  Database Baseline and Auth Architecture approval.
+- Rollback or supersession: Revert this Architecture Story PR or supersede it
+  with an explicitly approved versioned decision. Stored historical ruleset
+  versions, once implemented, remain immutable.
