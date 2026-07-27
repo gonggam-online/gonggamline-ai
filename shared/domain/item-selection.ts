@@ -86,25 +86,16 @@ export type ItemSelectionScoreResult = {
   totalScore: number | null;
 };
 
-export type ProfitabilityPolicyInput =
-  | {
-      status: "CONFIRMED";
-      approvedMinimumsStatus: "APPROVED";
-      meetsApprovedMinimums: boolean;
-      contributionMarginRate: number;
-    }
-  | {
-      status: "CONFIRMED";
-      approvedMinimumsStatus: "UNAPPROVED";
-      meetsApprovedMinimums: null;
-      contributionMarginRate: number;
-    }
-  | {
-      status: "INCOMPLETE" | "NOT_EVALUATED";
-      approvedMinimumsStatus: "APPROVED" | "UNAPPROVED";
-      meetsApprovedMinimums: null;
-      contributionMarginRate: null;
-    };
+export type ProfitabilityPolicyInput = {
+  status: "CONFIRMED" | "ESTIMATED" | "INCOMPLETE" | "NOT_EVALUATED";
+  policyVersion: string | null;
+  meetsRecommendMinimums: boolean | null;
+  meetsConditionalMinimums: boolean | null;
+  contributionMarginRate: number | null;
+  estimatedFacts: readonly string[];
+  missingFacts: readonly string[];
+  nextActions: readonly string[];
+};
 
 export type EvaluateItemSelectionInput = {
   providerItemNumber: string;
@@ -264,18 +255,23 @@ function determineVerdict(
   }
   if (
     profitability.status !== "CONFIRMED" ||
-    profitability.approvedMinimumsStatus !== "APPROVED" ||
+    profitability.policyVersion === null ||
     score.totalScore === null
   ) {
     return "MANUAL_REVIEW";
   }
   if (
     score.totalScore >= 75 &&
-    profitability.meetsApprovedMinimums === true
+    profitability.meetsRecommendMinimums === true
   ) {
     return "RECOMMEND";
   }
-  if (score.totalScore >= 60) return "CONDITIONAL";
+  if (
+    score.totalScore >= 60 &&
+    profitability.meetsConditionalMinimums === true
+  ) {
+    return "CONDITIONAL";
+  }
   return "REJECT";
 }
 
@@ -302,8 +298,12 @@ function explanations(
     }),
     ...(profitability.status === "CONFIRMED"
       ? []
-      : ["profitability.requiredInputs"]),
-    ...(profitability.approvedMinimumsStatus === "APPROVED"
+      : [
+          "profitability.requiredInputs",
+          ...profitability.estimatedFacts,
+          ...profitability.missingFacts,
+        ]),
+    ...(profitability.policyVersion !== null
       ? []
       : ["profitability.approvedMinimums"]),
   ]);
@@ -319,7 +319,7 @@ function explanations(
     recommendationReasons.push(
       `필수 하드게이트를 통과했고 총점 ${score.totalScore}점으로 조건부 검토 대상입니다.`
     );
-    if (profitability.meetsApprovedMinimums === false) {
+    if (profitability.meetsRecommendMinimums === false) {
       risks.push("승인된 최소 수익성 기준을 충족하지 못했습니다.");
     }
   } else if (verdict === "MANUAL_REVIEW") {
@@ -336,8 +336,13 @@ function explanations(
     risks.push(`점수 데이터 coverage가 ${(score.scoreCoverage * 100).toFixed(0)}%입니다.`);
   }
   if (profitability.status !== "CONFIRMED") {
-    risks.push("수익성을 확정할 필수 입력이 부족합니다.");
-  } else if (profitability.approvedMinimumsStatus !== "APPROVED") {
+    risks.push(
+      profitability.status === "ESTIMATED"
+        ? "필수 비용에 추정값이 있어 추천 상한이 수동 검토입니다."
+        : "수익성을 확정할 필수 입력이 부족합니다.",
+      ...profitability.nextActions,
+    );
+  } else if (profitability.policyVersion === null) {
     risks.push("승인된 최소 수익성 기준이 없습니다.");
   }
 
