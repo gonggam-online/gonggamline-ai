@@ -115,6 +115,26 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Rollback or supersession: Revert the implementation PR. No data, schema,
   Queue, credential, or provider rollback is required.
 
+## 2026-07-27 — Domeggook Live Search v1
+
+- Category: architecture decision
+- Story / PR: Domeggook Live Search v1 / pending
+- Status: approved by task directive; delivery pending
+- Owner / approver: Supplier / Procurement; repository-owner directive
+- Context and evidence: The new adapter is read-only, but the legacy search
+  route bypasses it and combines provider access, financial decisions, and
+  Supabase persistence.
+- Decision or issue: Add a separate bounded GET endpoint and standalone UI that
+  use `SupplierCatalogService`, return a dedicated public DTO, and contain no
+  database or commerce write path.
+- Consequences and risks: The legacy route remains unchanged. AI evaluation,
+  margin, recommendation, persistence, bulk collection, and scheduling remain
+  outside this authorization.
+- Follow-up / due condition: Implement contract/no-write tests, the thin route,
+  and the standalone UI on a separately delivered branch.
+- Rollback or supersession: Revert the additive route/UI PR. No data rollback is
+  needed.
+
 ## 2026-07-27 — Sprint B-0 Database Baseline Execution v1
 
 - Category: architecture decision

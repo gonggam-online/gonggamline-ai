@@ -44,6 +44,18 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
   [Domeggook Read-only Supplier Catalog Adapter v1](../docs/architecture/DOMEGGOOK-READONLY-SUPPLIER-CATALOG-ADAPTER-V1.md).
 - Decision record: [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-27--domeggook-read-only-supplier-catalog-adapter-v1).
 
+### 2026-07-27 — Domeggook Live Search v1
+
+- Status: approved by repository-owner task directive.
+- Boundary: Supplier / Procurement read-only application and public API.
+- Database / Migration / Queue: none.
+- Risk: normal-risk.
+- Implementation authorization: limited to the no-persistence endpoint, UI,
+  and tests in
+  [Domeggook Live Search v1](../docs/architecture/DOMEGGOOK-LIVE-SEARCH-V1.md).
+- Decision record:
+  [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-27--domeggook-live-search-v1).
+
 ## Proposed Architecture Stories
 
 ### 2026-07-27 — Sprint B-0 Database Baseline Execution v1
