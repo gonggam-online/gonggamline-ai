@@ -2,6 +2,67 @@
 
 ## Current task snapshot
 
+- Objective: prepare a reviewable Supabase baseline recovery evidence package
+  from complete operator-supplied SQL without executing SQL, changing deployed
+  databases, or modifying the migration chain.
+- Branch: `codex/chore/supabase-baseline-recovery-evidence`.
+- Risk: high-risk because the evidence concerns missing database history, RLS,
+  functions, triggers, and future deployed-schema reconciliation. This PR is
+  evidence-only and must not auto-merge.
+- Revenue impact: P0/P1 reliability prerequisite. Recovering reproducible
+  schema provenance prevents database drift from blocking Product and Revenue
+  operations.
+- Root-cause class: database provenance gap. The repository starts at migration
+  003 while recovered Product and Commerce OS SQL was previously executed
+  outside the checked-in chain.
+- Scope: preserve three operator SQL sources outside `supabase/migrations`;
+  inventory statements and dependencies; document conflicts, encoding results,
+  fresh replay, and deployed-history reconciliation; provide read-only catalog
+  and migration-history inspection SQL.
+- Non-goals: execute SQL, contact Supabase, modify migrations 003-020, assign
+  restored migration numbers, change application behavior, reconstruct missing
+  SQL, or reconcile a deployed database.
+- Completed: verified the non-main branch and clean starting tree; read the
+  complete attached Commerce OS source; confirmed all three operator sources
+  are complete; preserved the recovered sources; added read-only inspection
+  queries; documented statement inventory, dependencies, replay hazards,
+  UTF-8 literal findings, separate recovery plans, and unresolved evidence.
+- Current work: local validation and complete staged-diff review are complete;
+  GitHub CLI 2.96.0 authentication is verified and delivery is in progress.
+- Blockers/owner actions: publishing has no current blocker. Actual restoration
+  remains blocked pending SQL Editor chronology, deployed schema/metadata output
+  for every environment, migration history rows/version format, and the Commerce
+  OS RLS SQL referenced by the recovered source or an explicit decision that it
+  never existed.
+- Changed files: `supabase/recovery-sources/**`,
+  `docs/SUPABASE_BASELINE_RECOVERY_PLAN.md`,
+  `CHANGELOG-Supabase-Baseline-Recovery-Evidence.md`, and this status file.
+- Commands/results: no SQL or Supabase request executed. Commerce OS attachment
+  matches the preserved file after newline normalization; no protected
+  migration or application path changed. Static source/scope validation and
+  `git diff --check` passed. Lint passed with four pre-existing Revenue-test
+  warnings and no errors; typecheck passed; unit/contract tests passed 217/217
+  when rerun outside the sandbox after two sandboxed Node `os.userInfo`
+  failures; production build passed with 68 routes. Local Chromium completed
+  39 checks: 32 passed and the same seven Supabase-dependent routes failed
+  because local Supabase is unconfigured (`/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, `/workspace`). The
+  first browser attempts were blocked by a missing browser and sandbox
+  `spawn EPERM`; the unrestricted run produced the expected final result.
+  `npm ci` reported 12 high-severity dependency advisories, increased from the
+  older technical-debt record and requiring separate triage.
+- Delivery: intended files are staged and the full staged diff was reviewed;
+  commit, push, and manual non-auto-merge PR are pending.
+- Last commit: `60d6573 Implement Domeggook Read-only Supplier Catalog Adapter
+  v1 (#25)`.
+- Exact next action: commit, push, and open a manual, non-auto-merge PR.
+- Remaining risks: historical order is unproven; deployed definitions and
+  migration history are unknown; recovered Commerce OS SQL references a
+  separate RLS file that has not been supplied; permissive Product `anon`
+  writes require security approval before restoration.
+
+## Current task snapshot
+
 - Objective: implement the approved Domeggook Read-only Supplier Catalog
   Adapter v1 without Product, Revenue, DB, Migration, Queue, bulk, Coupang, or
   external-write changes.
