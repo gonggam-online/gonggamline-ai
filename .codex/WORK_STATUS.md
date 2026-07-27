@@ -26,8 +26,8 @@
   Catalog contracts, migrations, and tests; implemented the versioned Revenue
   policy, four scenarios, trust/provenance/VAT/inclusion validation, sanitized
   provider mapper, evaluator integration, and focused tests.
-- Current: documentation complete; run full local gates and deliver a
-  high-risk/manual Draft PR.
+- Current: implementation, local gates, Draft PR, and first exact-head remote
+  gates passed; record the delivery evidence on the PR head.
 - Blockers/owner actions: no blocker for Story 2. Database Baseline and Admin
   Architecture approvals remain prerequisites for Stories 3–4.
 - Changed files: Revenue profitability policy, Item Selection evaluator,
@@ -41,9 +41,13 @@
   `tsx` selected its temp directory; an ignored local dependency file was
   temporarily adjusted only to execute tests, then restored. No repository
   dependency or runtime code contains that workaround.
+- Delivery: implementation commit
+  `58db717fa00f40522838de90c427acd921bc7a83` is pushed. Draft PR #37 has
+  `manual-merge-required`; auto-merge is disabled. Exact-head CI run
+  `30313836655` and Preview browser validation run `30313836624` passed.
 - Last commit: `04508f033892d57cab29c3430231d29424c36fa2`.
-- Exact next action: run full lint/tests/build, review the diff, commit/push,
-  create `manual-merge-required` Draft PR, and validate exact-head gates.
+- Exact next action: commit/push this delivery record, confirm the new
+  exact-head CI/Preview gates, then stop for manual review without merging.
 - Remaining risks: provider unit price freshness still depends on the bounded
   observation time; persisted replay, authenticated APIs, and UI evidence
   remain intentionally deferred.

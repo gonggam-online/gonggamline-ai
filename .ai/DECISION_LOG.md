@@ -219,8 +219,8 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 ## 2026-07-28 — Item Selection profitability policy v1 implementation
 
 - Category: architecture decision
-- Story / PR: Item Selection Evaluation Story 2 / pending
-- Status: implemented; delivery pending
+- Story / PR: Item Selection Evaluation Story 2 / #37
+- Status: implemented; Draft PR validation passed
 - Owner / approver: Revenue with Supplier / Procurement consumption;
   repository-owner Architecture directive
 - Context and evidence: Story 1 is merged. The owner approved versioned fee,
@@ -246,8 +246,8 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 ## 2026-07-28 — Item Selection profitability policy v1 implementation
 
 - Category: architecture decision
-- Story / PR: Item Selection Evaluation Story 2 / pending
-- Status: implemented; delivery pending
+- Story / PR: Item Selection Evaluation Story 2 / #37
+- Status: implemented; Draft PR validation passed
 - Owner / approver: Revenue with Supplier / Procurement consumption;
   repository-owner Architecture directive
 - Context and evidence: Story 1 is merged. The owner approved versioned fee,
