@@ -1,5 +1,19 @@
 # Work status
 
+## 2026-07-27 — Domeggook Live Search architecture
+
+- Objective: authorize a standalone live supplier search with no persistence.
+- Branch: `codex/docs/domeggook-live-search-contract`.
+- Risk: normal-risk documentation-only.
+- Root cause: the legacy search route bypasses the approved adapter and mixes
+  provider access, financial decisions, and Supabase upsert.
+- Completed: adapter/UI audit; dedicated endpoint/DTO/error/no-write contract;
+  compatibility, tests, rollout, and rollback definition.
+- Non-goals: Product writes, financial scoring, recommendations, Queue,
+  scheduler, bulk crawling, or legacy route changes.
+- Next: deliver this Story, then implement its endpoint, UI, and tests on a
+  separate branch.
+
 ## Current task snapshot
 
 - Objective: make notebook and desktop Codex sessions apply the same permanent
