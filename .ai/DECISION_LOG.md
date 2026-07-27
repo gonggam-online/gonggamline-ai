@@ -187,3 +187,31 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Rollback or supersession: Revert this Architecture Story PR or supersede it
   with an explicitly approved versioned decision. Stored historical ruleset
   versions, once implemented, remain immutable.
+
+
+## 2026-07-27 — Item Selection pure evaluator v1 implementation
+
+- Category: architecture decision
+- Story / PR: Item Selection Evaluation Story 1 / pending
+- Status: implemented; delivery pending
+- Owner / approver: Supplier / Procurement; implementation authorized by the
+  merged Item Selection Evaluation v1 Architecture Story
+- Context and evidence: The approved first Story requires typed snapshots,
+  five hard gates, six score areas, explicit coverage, verdict precedence,
+  deterministic explanations/sorting, and no provider/Revenue/DB/API/UI
+  integration.
+- Decision or issue: Implement `gonggamline-item-selection-v1` as a pure
+  Supplier/Procurement domain policy. It consumes normalized score and
+  profitability-readiness inputs but never calculates money. Missing score
+  areas cannot create `totalScore`; `FAIL` precedes `UNKNOWN`; unapproved
+  profitability minimums remain `MANUAL_REVIEW`; invalid or duplicate gate
+  contracts fail explicitly.
+- Consequences and risks: Later adapters have a strict target contract and
+  cannot silently convert absent evidence to pass or neutral scores. This
+  normal-risk Story changes no external, persistence, auth, financial, or
+  commerce-write boundary.
+- Follow-up / due condition: Deliver and merge this Story after all gates.
+  Story 2 may then add verified provider facts and the separately approved
+  high-risk Revenue adapter without changing v1 policy semantics.
+- Rollback or supersession: Revert the Story 1 PR. Any semantic policy change
+  requires a new ruleset version; do not mutate historical v1 semantics.

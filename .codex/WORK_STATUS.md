@@ -1,5 +1,55 @@
 # Work status
 
+## 2026-07-27 — Item Selection pure evaluator v1
+
+- Objective: implement Story 1 from the approved Item Selection Evaluation v1
+  Architecture Story: versioned typed policy, pure evaluator, deterministic
+  explanations/sorting, and exhaustive unit tests.
+- Branch: `codex/feat/item-selection-evaluator-v1`, based on merged `main`
+  `79b5f344643839336c45455993464f9da8b74249`.
+- Risk: normal-risk. The implementation consumes already-normalized score and
+  profitability readiness inputs; it does not calculate price, margin, fees,
+  money, or change Revenue semantics.
+- Revenue impact: make supplier screening deterministic and prevent missing
+  rights/economics or low coverage from becoming false recommendations.
+- Scope: `shared/domain` pure contracts/policy, unit tests, decision/status and
+  changelog documentation.
+- Non-goals: provider network, Revenue integration, money calculation, DB,
+  migration, API, auth, UI, LLM, Product/Coupang/supplier writes.
+- Root-cause class: code/capability gap covered by the merged Architecture
+  Story.
+- Architecture compliance: Supplier/Procurement owns the Item Selection
+  policy; dependency direction stays inward; no new boundary is introduced;
+  approved ruleset `gonggamline-item-selection-v1` is the source of truth.
+- Completed: verified PR #35 merge and Production Vercel success; verified
+  `production-browser-smoke` run `30260877134` success; fast-forwarded clean
+  local `main`; reread mandatory governance and approved architecture; created
+  the task branch; implemented typed contracts, version constants, five-gate
+  validation, weighted score/coverage, verdict precedence, deterministic Korean
+  explanations and sorting; added 16 focused unit scenarios.
+- Current: implementation and local Release Gates are complete; final diff
+  review, commit, push, Draft PR, and exact-head gates remain.
+- Blockers/owner actions: none for Story 1.
+- Changed files: `shared/domain/item-selection.ts`,
+  `tests/item-selection-evaluator.test.ts`,
+  `CHANGELOG-Item-Selection-Evaluator-v1.md`, `.ai/DECISION_LOG.md`, and this
+  file.
+- Commands/results: remote and baseline verification passed. Focused ESLint
+  passed; repository lint excluding generated Playwright artifacts passed with
+  0 errors and 4 pre-existing warnings. Focused test 16/16 and full
+  unit/integration suite 237/237 passed. Typecheck and Production build passed
+  with 69 routes. Local Playwright passed 32/39; the same seven
+  Supabase-dependent routes recorded on the baseline fail because local
+  Supabase is unconfigured, while API health, revenue-critical, and Revenue
+  Dashboard flows pass. The first focused `tsx` attempt hit the intermittent
+  Windows `uv_os_get_passwd ENOMEM`; the subsequent normal full `npm test`
+  succeeded and includes all 16 new tests.
+- Last commit: none for this Story.
+- Exact next action: complete staged-diff and secret/boundary review, then
+  commit, push, create a normal-risk Draft PR, and wait for exact-head gates.
+- Remaining risks: later provider and Revenue adapters must supply verified
+  facts without weakening `UNKNOWN`, coverage, or profitability readiness.
+
 ## 2026-07-27 — Item Selection Evaluation v1 architecture
 
 - Objective: approve an implementable, versioned evaluation/recommendation
