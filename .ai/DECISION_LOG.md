@@ -114,3 +114,24 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   architecture approval.
 - Rollback or supersession: Revert the implementation PR. No data, schema,
   Queue, credential, or provider rollback is required.
+
+## 2026-07-27 — Sprint B-0 Database Baseline Execution v1
+
+- Category: architecture decision
+- Story / PR: Sprint B-0 Database Baseline Execution v1 / pending
+- Status: proposed; repository-owner manual approval required
+- Owner / approver: Database / Security; repository owner
+- Context and evidence: Sprint A proved the deployed schema, but the official
+  chain begins at migration 003. Migrations 005–020 create permissive policies
+  after a hypothetical pre-003 security baseline.
+- Decision or issue: Promote recovered schema sources as dependency-ordered
+  pre-003 migrations, keep 003–020 unchanged, and establish the final
+  least-privilege state in a post-020 security migration. Rehearse only through
+  an official Supabase workflow in a disposable environment.
+- Consequences and risks: High-risk schema/security work. Concrete identity and
+  ownership rules must be approved before the RLS migration is generated.
+  Production replay and manual migration-metadata edits are forbidden.
+- Follow-up / due condition: Manual Story approval, then a separately delivered
+  implementation PR with replay and RLS evidence.
+- Rollback or supersession: Revert the implementation PR and destroy the
+  disposable database. Production is not changed.

@@ -1,5 +1,23 @@
 # Work status
 
+## 2026-07-27 — Sprint B-0 architecture gate
+
+- Objective: authorize deterministic isolated fresh replay without changing
+  Production.
+- Branch: `codex/docs/sprint-b0-database-baseline-architecture`.
+- Risk: high-risk/manual because the Story governs migrations and RLS.
+- Root cause: the chain starts at 003, no isolated replay harness exists, and
+  migrations 005–020 recreate permissive policies after a pre-003 baseline.
+- Completed: merged-state audit; B-0 and Live Search parallel audits; proposed
+  B-0 Story, decision record, and review index.
+- Current: validate and deliver the documentation-only approval PR.
+- Blocker: implementation is prohibited until repository-owner approval and a
+  concrete identity/ownership model are recorded.
+- Non-goals: migration creation, SQL execution, Supabase/Production contact,
+  RLS mutation, history edits, or real commerce writes.
+- Next independent work: read-only Domeggook Live Search contract on a separate
+  branch without persistence or financial decisions.
+
 ## Current task snapshot
 
 - Objective: make notebook and desktop Codex sessions apply the same permanent
