@@ -27,8 +27,8 @@
   the task branch; implemented typed contracts, version constants, five-gate
   validation, weighted score/coverage, verdict precedence, deterministic Korean
   explanations and sorting; added 16 focused unit scenarios.
-- Current: implementation and local Release Gates are complete; final diff
-  review, commit, push, Draft PR, and exact-head gates remain.
+- Current: implementation and local/remote Release Gates passed; Draft PR #36
+  is open with `normal-risk` and awaits review.
 - Blockers/owner actions: none for Story 1.
 - Changed files: `shared/domain/item-selection.ts`,
   `tests/item-selection-evaluator.test.ts`,
@@ -44,9 +44,17 @@
   Dashboard flows pass. The first focused `tsx` attempt hit the intermittent
   Windows `uv_os_get_passwd ENOMEM`; the subsequent normal full `npm test`
   succeeded and includes all 16 new tests.
-- Last commit: none for this Story.
-- Exact next action: complete staged-diff and secret/boundary review, then
-  commit, push, create a normal-risk Draft PR, and wait for exact-head gates.
+  Exact-head commit `36473ffe8d018734d9a047a7c0235fb516ef291a`
+  passed CI run `30261740078`, Vercel Preview, and Preview browser validation
+  run `30261740303`. The non-destructive browser job and all of its access,
+  Playwright, and artifact steps passed. Evidence artifact:
+  `preview-browser-evidence` id `8651198170`.
+- Delivery: Draft PR #36,
+  `https://github.com/gonggam-online/gonggamline-ai/pull/36`; normal-risk;
+  mergeable; conflicts 0; unresolved review threads 0.
+- Last commit: `36473ff feat: add item selection evaluator v1`.
+- Exact next action: review Draft PR #36. Do not begin high-risk Story 2
+  Revenue/provider integration without its required owner decisions.
 - Remaining risks: later provider and Revenue adapters must supply verified
   facts without weakening `UNKNOWN`, coverage, or profitability readiness.
 
