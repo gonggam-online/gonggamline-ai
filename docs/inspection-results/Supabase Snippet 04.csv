@@ -1,0 +1,149 @@
+schema_name,table_name,index_name,definition
+public,ai_bundle_items,ai_bundle_items_bundle_id_market_product_id_key,"CREATE UNIQUE INDEX ai_bundle_items_bundle_id_market_product_id_key ON public.ai_bundle_items USING btree (bundle_id, market_product_id)"
+public,ai_bundle_items,ai_bundle_items_bundle_idx,"CREATE INDEX ai_bundle_items_bundle_idx ON public.ai_bundle_items USING btree (bundle_id, item_order)"
+public,ai_bundle_items,ai_bundle_items_pkey,CREATE UNIQUE INDEX ai_bundle_items_pkey ON public.ai_bundle_items USING btree (id)
+public,ai_bundle_recommendations,ai_bundle_recommendations_decision_idx,"CREATE INDEX ai_bundle_recommendations_decision_idx ON public.ai_bundle_recommendations USING btree (decision_action, decision_score DESC)"
+public,ai_bundle_recommendations,ai_bundle_recommendations_pkey,CREATE UNIQUE INDEX ai_bundle_recommendations_pkey ON public.ai_bundle_recommendations USING btree (id)
+public,ai_bundle_recommendations,ai_bundle_recommendations_score_idx,"CREATE INDEX ai_bundle_recommendations_score_idx ON public.ai_bundle_recommendations USING btree (ai_score DESC, generated_at DESC)"
+public,ai_ceo_briefs,ai_ceo_briefs_brief_date_key,CREATE UNIQUE INDEX ai_ceo_briefs_brief_date_key ON public.ai_ceo_briefs USING btree (brief_date)
+public,ai_ceo_briefs,ai_ceo_briefs_date_idx,CREATE INDEX ai_ceo_briefs_date_idx ON public.ai_ceo_briefs USING btree (brief_date DESC)
+public,ai_ceo_briefs,ai_ceo_briefs_pkey,CREATE UNIQUE INDEX ai_ceo_briefs_pkey ON public.ai_ceo_briefs USING btree (id)
+public,ai_decision_runs,ai_decision_runs_pkey,CREATE UNIQUE INDEX ai_decision_runs_pkey ON public.ai_decision_runs USING btree (id)
+public,ai_decision_runs,ai_decision_runs_started_idx,CREATE INDEX ai_decision_runs_started_idx ON public.ai_decision_runs USING btree (started_at DESC)
+public,ai_memory_events,ai_memory_events_pkey,CREATE UNIQUE INDEX ai_memory_events_pkey ON public.ai_memory_events USING btree (id)
+public,ai_memory_events,ai_memory_events_subject_idx,"CREATE INDEX ai_memory_events_subject_idx ON public.ai_memory_events USING btree (subject_type, subject_id, created_at DESC)"
+public,ai_product_recommendations,ai_product_recommendations_decision_idx,"CREATE INDEX ai_product_recommendations_decision_idx ON public.ai_product_recommendations USING btree (decision_action, decision_score DESC)"
+public,ai_product_recommendations,ai_product_recommendations_market_product_id_recommendation_key,"CREATE UNIQUE INDEX ai_product_recommendations_market_product_id_recommendation_key ON public.ai_product_recommendations USING btree (market_product_id, recommendation_type)"
+public,ai_product_recommendations,ai_product_recommendations_pkey,CREATE UNIQUE INDEX ai_product_recommendations_pkey ON public.ai_product_recommendations USING btree (id)
+public,ai_product_recommendations,ai_product_recommendations_score_idx,"CREATE INDEX ai_product_recommendations_score_idx ON public.ai_product_recommendations USING btree (ai_score DESC, generated_at DESC)"
+public,ai_workers,ai_workers_pkey,CREATE UNIQUE INDEX ai_workers_pkey ON public.ai_workers USING btree (id)
+public,ai_workers,ai_workers_status_idx,"CREATE INDEX ai_workers_status_idx ON public.ai_workers USING btree (status, last_activity_at DESC)"
+public,ai_workers,ai_workers_worker_code_key,CREATE UNIQUE INDEX ai_workers_worker_code_key ON public.ai_workers USING btree (worker_code)
+public,commerce_project_components,commerce_project_components_pkey,CREATE UNIQUE INDEX commerce_project_components_pkey ON public.commerce_project_components USING btree (id)
+public,commerce_project_components,commerce_project_components_project_idx,CREATE INDEX commerce_project_components_project_idx ON public.commerce_project_components USING btree (project_id)
+public,commerce_projects,commerce_projects_pkey,CREATE UNIQUE INDEX commerce_projects_pkey ON public.commerce_projects USING btree (id)
+public,commerce_projects,commerce_projects_provider_idx,CREATE INDEX commerce_projects_provider_idx ON public.commerce_projects USING btree (selected_provider_id)
+public,commerce_projects,commerce_projects_status_idx,CREATE INDEX commerce_projects_status_idx ON public.commerce_projects USING btree (status)
+public,commerce_timeline_events,commerce_timeline_events_pkey,CREATE UNIQUE INDEX commerce_timeline_events_pkey ON public.commerce_timeline_events USING btree (id)
+public,commerce_timeline_events,idx_timeline_workflow,"CREATE INDEX idx_timeline_workflow ON public.commerce_timeline_events USING btree (workflow_id, created_at DESC)"
+public,commerce_workflows,commerce_workflows_pkey,CREATE UNIQUE INDEX commerce_workflows_pkey ON public.commerce_workflows USING btree (id)
+public,commerce_workflows,idx_commerce_workflows_code,CREATE UNIQUE INDEX idx_commerce_workflows_code ON public.commerce_workflows USING btree (workflow_code)
+public,commerce_workflows,idx_workflows_stage,"CREATE INDEX idx_workflows_stage ON public.commerce_workflows USING btree (current_stage, updated_at DESC)"
+public,competition_analyses,competition_analyses_pkey,CREATE UNIQUE INDEX competition_analyses_pkey ON public.competition_analyses USING btree (id)
+public,competition_analyses,competition_analyses_project_idx,CREATE INDEX competition_analyses_project_idx ON public.competition_analyses USING btree (project_id)
+public,coupang_registration_attempts,coupang_registration_attempts_job_id_attempt_no_key,"CREATE UNIQUE INDEX coupang_registration_attempts_job_id_attempt_no_key ON public.coupang_registration_attempts USING btree (job_id, attempt_no)"
+public,coupang_registration_attempts,coupang_registration_attempts_pkey,CREATE UNIQUE INDEX coupang_registration_attempts_pkey ON public.coupang_registration_attempts USING btree (id)
+public,coupang_registration_attempts,idx_coupang_attempts_job,"CREATE INDEX idx_coupang_attempts_job ON public.coupang_registration_attempts USING btree (job_id, created_at DESC)"
+public,coupang_registration_jobs,coupang_registration_jobs_listing_draft_id_key,CREATE UNIQUE INDEX coupang_registration_jobs_listing_draft_id_key ON public.coupang_registration_jobs USING btree (listing_draft_id)
+public,coupang_registration_jobs,coupang_registration_jobs_pkey,CREATE UNIQUE INDEX coupang_registration_jobs_pkey ON public.coupang_registration_jobs USING btree (id)
+public,coupang_registration_jobs,idx_coupang_jobs_code,CREATE UNIQUE INDEX idx_coupang_jobs_code ON public.coupang_registration_jobs USING btree (job_code)
+public,coupang_registration_jobs,idx_coupang_jobs_queue,"CREATE INDEX idx_coupang_jobs_queue ON public.coupang_registration_jobs USING btree (status, updated_at DESC)"
+public,coupang_registration_jobs,idx_coupang_jobs_workflow,"CREATE INDEX idx_coupang_jobs_workflow ON public.coupang_registration_jobs USING btree (workflow_id, updated_at DESC)"
+public,coupang_seller_product_snapshots,coupang_seller_product_snapshots_pkey,CREATE UNIQUE INDEX coupang_seller_product_snapshots_pkey ON public.coupang_seller_product_snapshots USING btree (id)
+public,coupang_seller_product_snapshots,idx_coupang_product_snapshots_product,"CREATE INDEX idx_coupang_product_snapshots_product ON public.coupang_seller_product_snapshots USING btree (seller_product_id, observed_at DESC)"
+public,domestic_supplier_products,domestic_supplier_products_pkey,CREATE UNIQUE INDEX domestic_supplier_products_pkey ON public.domestic_supplier_products USING btree (id)
+public,domestic_supplier_products,idx_domestic_supplier_products_candidate,"CREATE INDEX idx_domestic_supplier_products_candidate ON public.domestic_supplier_products USING btree (discovery_recommendation_id, bundle_recommendation_id)"
+public,fulfillment_providers,fulfillment_providers_pkey,CREATE UNIQUE INDEX fulfillment_providers_pkey ON public.fulfillment_providers USING btree (id)
+public,fulfillment_providers,fulfillment_providers_provider_code_key,CREATE UNIQUE INDEX fulfillment_providers_provider_code_key ON public.fulfillment_providers USING btree (provider_code)
+public,inbound_orders,inbound_orders_pkey,CREATE UNIQUE INDEX inbound_orders_pkey ON public.inbound_orders USING btree (id)
+public,inbound_orders,inbound_orders_project_idx,CREATE INDEX inbound_orders_project_idx ON public.inbound_orders USING btree (project_id)
+public,inbound_orders,inbound_orders_provider_idx,CREATE INDEX inbound_orders_provider_idx ON public.inbound_orders USING btree (provider_id)
+public,inventory_balances,inventory_balances_pkey,CREATE UNIQUE INDEX inventory_balances_pkey ON public.inventory_balances USING btree (id)
+public,inventory_balances,inventory_balances_project_id_product_id_provider_id_key,"CREATE UNIQUE INDEX inventory_balances_project_id_product_id_provider_id_key ON public.inventory_balances USING btree (project_id, product_id, provider_id)"
+public,inventory_balances,inventory_balances_project_idx,CREATE INDEX inventory_balances_project_idx ON public.inventory_balances USING btree (project_id)
+public,knowledge_assets,knowledge_assets_pkey,CREATE UNIQUE INDEX knowledge_assets_pkey ON public.knowledge_assets USING btree (id)
+public,knowledge_assets,knowledge_assets_type_idx,"CREATE INDEX knowledge_assets_type_idx ON public.knowledge_assets USING btree (asset_type, status, updated_at DESC)"
+public,listing_draft_revisions,idx_listing_revisions_draft,"CREATE INDEX idx_listing_revisions_draft ON public.listing_draft_revisions USING btree (listing_draft_id, revision DESC)"
+public,listing_draft_revisions,listing_draft_revisions_listing_draft_id_revision_key,"CREATE UNIQUE INDEX listing_draft_revisions_listing_draft_id_revision_key ON public.listing_draft_revisions USING btree (listing_draft_id, revision)"
+public,listing_draft_revisions,listing_draft_revisions_pkey,CREATE UNIQUE INDEX listing_draft_revisions_pkey ON public.listing_draft_revisions USING btree (id)
+public,listing_drafts,idx_listing_drafts_status,"CREATE INDEX idx_listing_drafts_status ON public.listing_drafts USING btree (status, updated_at DESC)"
+public,listing_drafts,idx_listing_drafts_workflow,"CREATE INDEX idx_listing_drafts_workflow ON public.listing_drafts USING btree (workflow_id, created_at DESC)"
+public,listing_drafts,listing_drafts_pkey,CREATE UNIQUE INDEX listing_drafts_pkey ON public.listing_drafts USING btree (id)
+public,market_ai_decisions,market_ai_decisions_pkey,CREATE UNIQUE INDEX market_ai_decisions_pkey ON public.market_ai_decisions USING btree (id)
+public,market_ai_decisions,market_ai_decisions_product_created_idx,"CREATE INDEX market_ai_decisions_product_created_idx ON public.market_ai_decisions USING btree (market_product_id, created_at DESC)"
+public,market_analysis_runs,market_analysis_runs_pkey,CREATE UNIQUE INDEX market_analysis_runs_pkey ON public.market_analysis_runs USING btree (id)
+public,market_collection_jobs,market_collection_jobs_collector_key_market_keyword_id_key,"CREATE UNIQUE INDEX market_collection_jobs_collector_key_market_keyword_id_key ON public.market_collection_jobs USING btree (collector_key, market_keyword_id)"
+public,market_collection_jobs,market_collection_jobs_due_idx,"CREATE INDEX market_collection_jobs_due_idx ON public.market_collection_jobs USING btree (status, next_run_at, priority DESC)"
+public,market_collection_jobs,market_collection_jobs_pkey,CREATE UNIQUE INDEX market_collection_jobs_pkey ON public.market_collection_jobs USING btree (id)
+public,market_collection_runs,market_collection_runs_pkey,CREATE UNIQUE INDEX market_collection_runs_pkey ON public.market_collection_runs USING btree (id)
+public,market_collectors,market_collectors_collector_key_key,CREATE UNIQUE INDEX market_collectors_collector_key_key ON public.market_collectors USING btree (collector_key)
+public,market_collectors,market_collectors_pkey,CREATE UNIQUE INDEX market_collectors_pkey ON public.market_collectors USING btree (id)
+public,market_estimates,market_estimates_pkey,CREATE UNIQUE INDEX market_estimates_pkey ON public.market_estimates USING btree (id)
+public,market_estimates,market_estimates_product_created_idx,"CREATE INDEX market_estimates_product_created_idx ON public.market_estimates USING btree (market_product_id, created_at DESC)"
+public,market_feature_snapshots,market_feature_snapshots_pkey,CREATE UNIQUE INDEX market_feature_snapshots_pkey ON public.market_feature_snapshots USING btree (id)
+public,market_feature_snapshots,market_feature_snapshots_product_time_idx,"CREATE INDEX market_feature_snapshots_product_time_idx ON public.market_feature_snapshots USING btree (market_product_id, calculated_at DESC)"
+public,market_feedback_events,market_feedback_events_pkey,CREATE UNIQUE INDEX market_feedback_events_pkey ON public.market_feedback_events USING btree (id)
+public,market_feedback_events,market_feedback_events_product_time_idx,"CREATE INDEX market_feedback_events_product_time_idx ON public.market_feedback_events USING btree (market_product_id, event_at DESC)"
+public,market_keywords,market_keywords_keyword_key,CREATE UNIQUE INDEX market_keywords_keyword_key ON public.market_keywords USING btree (keyword)
+public,market_keywords,market_keywords_pkey,CREATE UNIQUE INDEX market_keywords_pkey ON public.market_keywords USING btree (id)
+public,market_model_feedback,market_model_feedback_pkey,CREATE UNIQUE INDEX market_model_feedback_pkey ON public.market_model_feedback USING btree (id)
+public,market_product_links,market_product_links_pkey,CREATE UNIQUE INDEX market_product_links_pkey ON public.market_product_links USING btree (id)
+public,market_product_links,market_product_links_product_id_market_product_id_key,"CREATE UNIQUE INDEX market_product_links_product_id_market_product_id_key ON public.market_product_links USING btree (product_id, market_product_id)"
+public,market_product_metrics,market_product_metrics_opportunity_idx,"CREATE INDEX market_product_metrics_opportunity_idx ON public.market_product_metrics USING btree (opportunity_score DESC, confidence DESC)"
+public,market_product_metrics,market_product_metrics_pkey,CREATE UNIQUE INDEX market_product_metrics_pkey ON public.market_product_metrics USING btree (market_product_id)
+public,market_products,market_products_pkey,CREATE UNIQUE INDEX market_products_pkey ON public.market_products USING btree (id)
+public,market_products,market_products_source_external_product_id_key,"CREATE UNIQUE INDEX market_products_source_external_product_id_key ON public.market_products USING btree (source, external_product_id)"
+public,market_signals,market_signals_pkey,CREATE UNIQUE INDEX market_signals_pkey ON public.market_signals USING btree (id)
+public,market_signals,market_signals_unresolved_idx,CREATE INDEX market_signals_unresolved_idx ON public.market_signals USING btree (detected_at DESC) WHERE (resolved_at IS NULL)
+public,market_snapshots,market_snapshots_keyword_time_idx,"CREATE INDEX market_snapshots_keyword_time_idx ON public.market_snapshots USING btree (market_keyword_id, observed_at DESC)"
+public,market_snapshots,market_snapshots_pkey,CREATE UNIQUE INDEX market_snapshots_pkey ON public.market_snapshots USING btree (id)
+public,market_snapshots,market_snapshots_product_time_idx,"CREATE INDEX market_snapshots_product_time_idx ON public.market_snapshots USING btree (market_product_id, observed_at DESC)"
+public,marketplace_connections,marketplace_connections_marketplace_code_key,CREATE UNIQUE INDEX marketplace_connections_marketplace_code_key ON public.marketplace_connections USING btree (marketplace_code)
+public,marketplace_connections,marketplace_connections_pkey,CREATE UNIQUE INDEX marketplace_connections_pkey ON public.marketplace_connections USING btree (id)
+public,marketplace_connections,marketplace_connections_status_idx,"CREATE INDEX marketplace_connections_status_idx ON public.marketplace_connections USING btree (status, marketplace_code)"
+public,os_command_runs,os_command_runs_pkey,CREATE UNIQUE INDEX os_command_runs_pkey ON public.os_command_runs USING btree (id)
+public,os_command_runs,os_command_runs_queue_idx,"CREATE INDEX os_command_runs_queue_idx ON public.os_command_runs USING btree (status, created_at DESC)"
+public,os_command_runs,os_command_runs_worker_idx,"CREATE INDEX os_command_runs_worker_idx ON public.os_command_runs USING btree (assigned_worker_code, created_at DESC)"
+public,os_notifications,os_notifications_pkey,CREATE UNIQUE INDEX os_notifications_pkey ON public.os_notifications USING btree (id)
+public,os_notifications,os_notifications_unread_idx,"CREATE INDEX os_notifications_unread_idx ON public.os_notifications USING btree (is_read, created_at DESC)"
+public,procurement_orders,idx_procurement_orders_status,"CREATE INDEX idx_procurement_orders_status ON public.procurement_orders USING btree (status, created_at DESC)"
+public,procurement_orders,procurement_orders_order_number_key,CREATE UNIQUE INDEX procurement_orders_order_number_key ON public.procurement_orders USING btree (order_number)
+public,procurement_orders,procurement_orders_pkey,CREATE UNIQUE INDEX procurement_orders_pkey ON public.procurement_orders USING btree (id)
+public,products,products_ai_score_idx,CREATE INDEX products_ai_score_idx ON public.products USING btree (ai_score DESC)
+public,products,products_competition_grade_score_idx,"CREATE INDEX products_competition_grade_score_idx ON public.products USING btree (competition_grade, competition_score DESC)"
+public,products,products_competition_score_idx,CREATE INDEX products_competition_score_idx ON public.products USING btree (competition_score DESC)
+public,products,products_competition_status_idx,"CREATE INDEX products_competition_status_idx ON public.products USING btree (competition_analysis_status, updated_at DESC)"
+public,products,products_is_favorite_idx,CREATE INDEX products_is_favorite_idx ON public.products USING btree (is_favorite)
+public,products,products_pkey,CREATE UNIQUE INDEX products_pkey ON public.products USING btree (id)
+public,products,products_product_no_key,CREATE UNIQUE INDEX products_product_no_key ON public.products USING btree (product_no)
+public,products,products_review_status_idx,CREATE INDEX products_review_status_idx ON public.products USING btree (review_status)
+public,products,products_updated_at_idx,CREATE INDEX products_updated_at_idx ON public.products USING btree (updated_at DESC)
+public,profit_snapshots,profit_snapshots_pkey,CREATE UNIQUE INDEX profit_snapshots_pkey ON public.profit_snapshots USING btree (id)
+public,profit_snapshots,profit_snapshots_snapshot_date_key,CREATE UNIQUE INDEX profit_snapshots_snapshot_date_key ON public.profit_snapshots USING btree (snapshot_date)
+public,revenue_decisions,revenue_decisions_opportunity_idx,"CREATE INDEX revenue_decisions_opportunity_idx ON public.revenue_decisions USING btree (opportunity_id, created_at DESC)"
+public,revenue_decisions,revenue_decisions_pkey,CREATE UNIQUE INDEX revenue_decisions_pkey ON public.revenue_decisions USING btree (id)
+public,revenue_opportunities,revenue_opportunities_opportunity_code_key,CREATE UNIQUE INDEX revenue_opportunities_opportunity_code_key ON public.revenue_opportunities USING btree (opportunity_code)
+public,revenue_opportunities,revenue_opportunities_pkey,CREATE UNIQUE INDEX revenue_opportunities_pkey ON public.revenue_opportunities USING btree (id)
+public,revenue_opportunities,revenue_opportunities_score_idx,"CREATE INDEX revenue_opportunities_score_idx ON public.revenue_opportunities USING btree (revenue_score DESC, created_at DESC)"
+public,revenue_opportunities,revenue_opportunities_status_idx,"CREATE INDEX revenue_opportunities_status_idx ON public.revenue_opportunities USING btree (status, updated_at DESC)"
+public,revenue_snapshots,revenue_snapshots_date_idx,CREATE INDEX revenue_snapshots_date_idx ON public.revenue_snapshots USING btree (snapshot_date DESC)
+public,revenue_snapshots,revenue_snapshots_pkey,CREATE UNIQUE INDEX revenue_snapshots_pkey ON public.revenue_snapshots USING btree (id)
+public,revenue_snapshots,revenue_snapshots_snapshot_date_key,CREATE UNIQUE INDEX revenue_snapshots_snapshot_date_key ON public.revenue_snapshots USING btree (snapshot_date)
+public,runtime_jobs,runtime_jobs_job_code_key,CREATE UNIQUE INDEX runtime_jobs_job_code_key ON public.runtime_jobs USING btree (job_code)
+public,runtime_jobs,runtime_jobs_pkey,CREATE UNIQUE INDEX runtime_jobs_pkey ON public.runtime_jobs USING btree (id)
+public,runtime_jobs,runtime_jobs_queue_idx,"CREATE INDEX runtime_jobs_queue_idx ON public.runtime_jobs USING btree (status, priority DESC, scheduled_at)"
+public,sourcing_decisions,idx_sourcing_decisions_quote,"CREATE INDEX idx_sourcing_decisions_quote ON public.sourcing_decisions USING btree (supplier_quote_id, calculated_at DESC)"
+public,sourcing_decisions,sourcing_decisions_pkey,CREATE UNIQUE INDEX sourcing_decisions_pkey ON public.sourcing_decisions USING btree (id)
+public,supplier_quotes,idx_supplier_quotes_bundle,CREATE INDEX idx_supplier_quotes_bundle ON public.supplier_quotes USING btree (bundle_recommendation_id)
+public,supplier_quotes,idx_supplier_quotes_single,CREATE INDEX idx_supplier_quotes_single ON public.supplier_quotes USING btree (discovery_recommendation_id)
+public,supplier_quotes,idx_supplier_quotes_supplier,CREATE INDEX idx_supplier_quotes_supplier ON public.supplier_quotes USING btree (supplier_id)
+public,supplier_quotes,supplier_quotes_pkey,CREATE UNIQUE INDEX supplier_quotes_pkey ON public.supplier_quotes USING btree (id)
+public,suppliers,suppliers_pkey,CREATE UNIQUE INDEX suppliers_pkey ON public.suppliers USING btree (id)
+public,system_health_checks,system_health_checks_component_idx,"CREATE INDEX system_health_checks_component_idx ON public.system_health_checks USING btree (component, checked_at DESC)"
+public,system_health_checks,system_health_checks_pkey,CREATE UNIQUE INDEX system_health_checks_pkey ON public.system_health_checks USING btree (id)
+public,system_releases,system_releases_pkey,CREATE UNIQUE INDEX system_releases_pkey ON public.system_releases USING btree (id)
+public,system_releases,system_releases_status_idx,"CREATE INDEX system_releases_status_idx ON public.system_releases USING btree (status, created_at DESC)"
+public,system_releases,system_releases_version_key,CREATE UNIQUE INDEX system_releases_version_key ON public.system_releases USING btree (version)
+public,three_pl_inbound_plans,idx_inbound_plans_order,CREATE INDEX idx_inbound_plans_order ON public.three_pl_inbound_plans USING btree (procurement_order_id)
+public,three_pl_inbound_plans,three_pl_inbound_plans_pkey,CREATE UNIQUE INDEX three_pl_inbound_plans_pkey ON public.three_pl_inbound_plans USING btree (id)
+public,worker_runtime_events,worker_runtime_events_job_idx,"CREATE INDEX worker_runtime_events_job_idx ON public.worker_runtime_events USING btree (runtime_job_id, created_at DESC)"
+public,worker_runtime_events,worker_runtime_events_pkey,CREATE UNIQUE INDEX worker_runtime_events_pkey ON public.worker_runtime_events USING btree (id)
+public,worker_runtime_events,worker_runtime_events_worker_idx,"CREATE INDEX worker_runtime_events_worker_idx ON public.worker_runtime_events USING btree (worker_code, created_at DESC)"
+public,workflow_outbox_events,idx_workflow_outbox_pending,"CREATE INDEX idx_workflow_outbox_pending ON public.workflow_outbox_events USING btree (status, available_at)"
+public,workflow_outbox_events,workflow_outbox_events_pkey,CREATE UNIQUE INDEX workflow_outbox_events_pkey ON public.workflow_outbox_events USING btree (id)
+public,workflow_tasks,idx_workflow_tasks_queue,"CREATE INDEX idx_workflow_tasks_queue ON public.workflow_tasks USING btree (status, priority DESC, due_at)"
+public,workflow_tasks,workflow_tasks_pkey,CREATE UNIQUE INDEX workflow_tasks_pkey ON public.workflow_tasks USING btree (id)
+public,workflow_tasks,workflow_tasks_workflow_id_stage_task_type_key,"CREATE UNIQUE INDEX workflow_tasks_workflow_id_stage_task_type_key ON public.workflow_tasks USING btree (workflow_id, stage, task_type)"
+public,workflow_transitions,idx_workflow_transitions_idempotency,CREATE UNIQUE INDEX idx_workflow_transitions_idempotency ON public.workflow_transitions USING btree (idempotency_key) WHERE (idempotency_key IS NOT NULL)
+public,workflow_transitions,idx_workflow_transitions_workflow,"CREATE INDEX idx_workflow_transitions_workflow ON public.workflow_transitions USING btree (workflow_id, created_at DESC)"
+public,workflow_transitions,workflow_transitions_pkey,CREATE UNIQUE INDEX workflow_transitions_pkey ON public.workflow_transitions USING btree (id)

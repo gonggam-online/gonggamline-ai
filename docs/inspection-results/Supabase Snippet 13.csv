@@ -1,0 +1,1359 @@
+object_category,schema_name,parent_name,object_name,definition
+column,public,ai_bundle_items,bundle_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,ai_bundle_items,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,ai_bundle_items,item_order,6|integer|pg_catalog|int4|NO|0|NO|
+column,public,ai_bundle_items,market_product_id,3|bigint|pg_catalog|int8|NO||NO|
+column,public,ai_bundle_items,quantity,5|integer|pg_catalog|int4|NO|1|NO|
+column,public,ai_bundle_items,role,4|text|pg_catalog|text|NO|'component'::text|NO|
+column,public,ai_bundle_recommendations,ai_score,7|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_bundle_recommendations,bundle_name,2|text|pg_catalog|text|NO||NO|
+column,public,ai_bundle_recommendations,bundle_type,3|text|pg_catalog|text|NO|'bundle'::text|NO|
+column,public,ai_bundle_recommendations,category,5|text|pg_catalog|text|YES||NO|
+column,public,ai_bundle_recommendations,confidence,12|integer|pg_catalog|int4|NO|0|NO|
+column,public,ai_bundle_recommendations,convenience_score,9|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_bundle_recommendations,decision_action,22|text|pg_catalog|text|NO|'review'::text|NO|
+column,public,ai_bundle_recommendations,decision_run_id,20|bigint|pg_catalog|int8|YES||NO|
+column,public,ai_bundle_recommendations,decision_score,21|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_bundle_recommendations,differentiation_score,10|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_bundle_recommendations,evidence,17|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,ai_bundle_recommendations,generated_at,18|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,ai_bundle_recommendations,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,ai_bundle_recommendations,keyword,4|text|pg_catalog|text|YES||NO|
+column,public,ai_bundle_recommendations,margin_score,11|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,ai_bundle_recommendations,recommendation_reason,16|text|pg_catalog|text|YES||NO|
+column,public,ai_bundle_recommendations,reviewed_at,19|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,ai_bundle_recommendations,risk_score,23|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,ai_bundle_recommendations,status,6|text|pg_catalog|text|NO|'candidate'::text|NO|
+column,public,ai_bundle_recommendations,synergy_score,8|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_bundle_recommendations,target_cost_price,14|numeric|pg_catalog|numeric|YES||NO|
+column,public,ai_bundle_recommendations,target_margin_rate,15|numeric|pg_catalog|numeric|YES||NO|
+column,public,ai_bundle_recommendations,target_sale_price,13|numeric|pg_catalog|numeric|YES||NO|
+column,public,ai_ceo_briefs,brief_date,2|date|pg_catalog|date|NO|CURRENT_DATE|NO|
+column,public,ai_ceo_briefs,confidence,10|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_ceo_briefs,created_at,12|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,ai_ceo_briefs,executive_summary,4|text|pg_catalog|text|YES||NO|
+column,public,ai_ceo_briefs,expected_profit,9|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_ceo_briefs,expected_revenue,8|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_ceo_briefs,headline,3|text|pg_catalog|text|NO||NO|
+column,public,ai_ceo_briefs,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,ai_ceo_briefs,priorities,5|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,ai_ceo_briefs,recommended_actions,6|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,ai_ceo_briefs,risks,7|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,ai_ceo_briefs,status,11|text|pg_catalog|text|NO|'draft'::text|NO|
+column,public,ai_ceo_briefs,updated_at,13|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,ai_decision_runs,approval_status,15|text|pg_catalog|text|NO|'not_required'::text|NO|
+column,public,ai_decision_runs,approved_at,17|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,ai_decision_runs,approved_by,16|text|pg_catalog|text|YES||NO|
+column,public,ai_decision_runs,bundle_count,8|integer|pg_catalog|int4|NO|0|NO|
+column,public,ai_decision_runs,completed_at,12|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,ai_decision_runs,confidence_score,14|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_decision_runs,decision_summary,9|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,ai_decision_runs,error_message,10|text|pg_catalog|text|YES||NO|
+column,public,ai_decision_runs,evidence,13|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,ai_decision_runs,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,ai_decision_runs,input_limit,5|integer|pg_catalog|int4|NO|100|NO|
+column,public,ai_decision_runs,learning_summary,19|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,ai_decision_runs,model_version,4|text|pg_catalog|text|NO|'decision-v2'::text|NO|
+column,public,ai_decision_runs,processed_count,6|integer|pg_catalog|int4|NO|0|NO|
+column,public,ai_decision_runs,recommendation_count,7|integer|pg_catalog|int4|NO|0|NO|
+column,public,ai_decision_runs,result_summary,18|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,ai_decision_runs,run_type,2|text|pg_catalog|text|NO|'discovery'::text|NO|
+column,public,ai_decision_runs,started_at,11|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,ai_decision_runs,status,3|text|pg_catalog|text|NO|'queued'::text|NO|
+column,public,ai_memory_events,confidence,11|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_memory_events,created_at,14|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,ai_memory_events,decision,8|text|pg_catalog|text|YES||NO|
+column,public,ai_memory_events,evidence,7|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,ai_memory_events,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,ai_memory_events,impact_score,12|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_memory_events,learning,10|text|pg_catalog|text|YES||NO|
+column,public,ai_memory_events,memory_type,2|text|pg_catalog|text|NO|'decision'::text|NO|
+column,public,ai_memory_events,reason,6|text|pg_catalog|text|YES||NO|
+column,public,ai_memory_events,result,9|text|pg_catalog|text|YES||NO|
+column,public,ai_memory_events,subject_id,4|text|pg_catalog|text|YES||NO|
+column,public,ai_memory_events,subject_type,3|text|pg_catalog|text|NO|'system'::text|NO|
+column,public,ai_memory_events,tags,13|ARRAY|pg_catalog|_text|NO|'{}'::text[]|NO|
+column,public,ai_memory_events,title,5|text|pg_catalog|text|NO||NO|
+column,public,ai_product_recommendations,ai_score,5|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_product_recommendations,competition_score,8|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,ai_product_recommendations,confidence,11|integer|pg_catalog|int4|NO|0|NO|
+column,public,ai_product_recommendations,decision_action,24|text|pg_catalog|text|NO|'review'::text|NO|
+column,public,ai_product_recommendations,decision_run_id,22|bigint|pg_catalog|int8|YES||NO|
+column,public,ai_product_recommendations,decision_score,23|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_product_recommendations,estimated_units_high,13|integer|pg_catalog|int4|NO|0|NO|
+column,public,ai_product_recommendations,estimated_units_low,12|integer|pg_catalog|int4|NO|0|NO|
+column,public,ai_product_recommendations,evidence,18|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,ai_product_recommendations,generated_at,20|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,ai_product_recommendations,growth_score,7|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_product_recommendations,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,ai_product_recommendations,market_product_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,ai_product_recommendations,market_score,6|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_product_recommendations,model_version,19|text|pg_catalog|text|NO|'discovery-v1'::text|NO|
+column,public,ai_product_recommendations,profit_score,10|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,ai_product_recommendations,recommendation_reason,17|text|pg_catalog|text|YES||NO|
+column,public,ai_product_recommendations,recommendation_type,3|text|pg_catalog|text|NO|'single'::text|NO|
+column,public,ai_product_recommendations,reviewed_at,21|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,ai_product_recommendations,risk_explanation,27|text|pg_catalog|text|YES||NO|
+column,public,ai_product_recommendations,risk_score,9|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,ai_product_recommendations,season_score,26|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,ai_product_recommendations,status,4|text|pg_catalog|text|NO|'candidate'::text|NO|
+column,public,ai_product_recommendations,supply_score,25|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,ai_product_recommendations,target_cost_price,15|numeric|pg_catalog|numeric|YES||NO|
+column,public,ai_product_recommendations,target_margin_rate,16|numeric|pg_catalog|numeric|YES||NO|
+column,public,ai_product_recommendations,target_sale_price,14|numeric|pg_catalog|numeric|YES||NO|
+column,public,ai_workers,automation_level,9|integer|pg_catalog|int4|NO|1|NO|
+column,public,ai_workers,created_at,12|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,ai_workers,current_job,7|text|pg_catalog|text|YES||NO|
+column,public,ai_workers,current_mission,6|text|pg_catalog|text|YES||NO|
+column,public,ai_workers,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,ai_workers,last_activity_at,10|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,ai_workers,metadata,11|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,ai_workers,performance_score,8|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,ai_workers,role,4|text|pg_catalog|text|NO||NO|
+column,public,ai_workers,status,5|text|pg_catalog|text|NO|'idle'::text|NO|
+column,public,ai_workers,updated_at,13|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,ai_workers,worker_code,2|text|pg_catalog|text|NO||NO|
+column,public,ai_workers,worker_name,3|text|pg_catalog|text|NO||NO|
+column,public,commerce_project_components,created_at,11|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,commerce_project_components,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,commerce_project_components,inbound_shipping_cost,8|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,commerce_project_components,product_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,commerce_project_components,product_no,4|text|pg_catalog|text|YES||NO|
+column,public,commerce_project_components,project_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,commerce_project_components,quantity,6|integer|pg_catalog|int4|NO|1|NO|
+column,public,commerce_project_components,supplier_id,9|text|pg_catalog|text|YES||NO|
+column,public,commerce_project_components,supplier_name,10|text|pg_catalog|text|YES||NO|
+column,public,commerce_project_components,title,5|text|pg_catalog|text|NO||NO|
+column,public,commerce_project_components,unit_supply_price,7|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,commerce_projects,advertising_rate,9|numeric|pg_catalog|numeric|NO|0.08|NO|
+column,public,commerce_projects,analysis_result,18|jsonb|pg_catalog|jsonb|YES||NO|
+column,public,commerce_projects,business_score,12|numeric|pg_catalog|numeric|YES||NO|
+column,public,commerce_projects,competition_score,13|numeric|pg_catalog|numeric|YES||NO|
+column,public,commerce_projects,created_at,20|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,commerce_projects,fulfillment_score,15|numeric|pg_catalog|numeric|YES||NO|
+column,public,commerce_projects,grade,17|text|pg_catalog|text|YES||NO|
+column,public,commerce_projects,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,commerce_projects,marketplace_fee_rate,8|numeric|pg_catalog|numeric|NO|0.11|NO|
+column,public,commerce_projects,monthly_sales_units,7|integer|pg_catalog|int4|NO|0|NO|
+column,public,commerce_projects,name,2|text|pg_catalog|text|NO||NO|
+column,public,commerce_projects,notes,19|text|pg_catalog|text|YES||NO|
+column,public,commerce_projects,product_type,3|text|pg_catalog|text|NO||NO|
+column,public,commerce_projects,profitability_score,14|numeric|pg_catalog|numeric|YES||NO|
+column,public,commerce_projects,safety_stock_rate,10|numeric|pg_catalog|numeric|NO|0.20|NO|
+column,public,commerce_projects,sale_price,6|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,commerce_projects,selected_provider_id,11|bigint|pg_catalog|int8|YES||NO|
+column,public,commerce_projects,status,4|text|pg_catalog|text|NO|'DRAFT'::text|NO|
+column,public,commerce_projects,supply_risk_score,16|numeric|pg_catalog|numeric|YES||NO|
+column,public,commerce_projects,target_keyword,5|text|pg_catalog|text|YES||NO|
+column,public,commerce_projects,updated_at,21|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,commerce_timeline_events,actor,7|text|pg_catalog|text|NO|'system'::text|NO|
+column,public,commerce_timeline_events,created_at,8|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,commerce_timeline_events,detail,6|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,commerce_timeline_events,event_type,4|text|pg_catalog|text|NO||NO|
+column,public,commerce_timeline_events,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,commerce_timeline_events,stage,3|text|pg_catalog|text|NO||NO|
+column,public,commerce_timeline_events,title,5|text|pg_catalog|text|NO||NO|
+column,public,commerce_timeline_events,workflow_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,commerce_workflows,blocked_reason,8|text|pg_catalog|text|YES||NO|
+column,public,commerce_workflows,bundle_recommendation_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,commerce_workflows,coupang_registration_job_id,17|bigint|pg_catalog|int8|YES||NO|
+column,public,commerce_workflows,created_at,9|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,commerce_workflows,current_stage,6|text|pg_catalog|text|NO|'market_discovered'::text|NO|
+column,public,commerce_workflows,discovery_recommendation_id,2|bigint|pg_catalog|int8|YES||NO|
+column,public,commerce_workflows,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,commerce_workflows,last_transition_at,15|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,commerce_workflows,lifecycle_type,13|text|pg_catalog|text|NO|'single'::text|NO|
+column,public,commerce_workflows,listing_draft_id,11|bigint|pg_catalog|int8|YES||NO|
+column,public,commerce_workflows,metadata,16|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,commerce_workflows,procurement_order_id,4|bigint|pg_catalog|int8|YES||NO|
+column,public,commerce_workflows,stage_version,14|integer|pg_catalog|int4|NO|1|NO|
+column,public,commerce_workflows,status,7|text|pg_catalog|text|NO|'active'::text|NO|
+column,public,commerce_workflows,updated_at,10|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,commerce_workflows,workflow_code,12|text|pg_catalog|text|YES||NO|
+column,public,commerce_workflows,workflow_name,5|text|pg_catalog|text|NO||NO|
+column,public,competition_analyses,competition_score,4|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,competition_analyses,created_at,12|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,competition_analyses,data_confidence,8|numeric|pg_catalog|numeric|NO|30|NO|
+column,public,competition_analyses,demand_score,3|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,competition_analyses,differentiation_score,5|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,competition_analyses,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,competition_analyses,price_competitiveness_score,7|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,competition_analyses,project_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,competition_analyses,raw_data,11|jsonb|pg_catalog|jsonb|YES||NO|
+column,public,competition_analyses,review_barrier_score,6|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,competition_analyses,source_collected_at,10|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,competition_analyses,source_type,9|text|pg_catalog|text|NO|'MANUAL'::text|NO|
+column,public,coupang_registration_attempts,action,4|text|pg_catalog|text|NO||NO|
+column,public,coupang_registration_attempts,attempt_no,3|integer|pg_catalog|int4|NO||NO|
+column,public,coupang_registration_attempts,created_at,11|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,coupang_registration_attempts,duration_ms,10|integer|pg_catalog|int4|YES||NO|
+column,public,coupang_registration_attempts,error_message,9|text|pg_catalog|text|YES||NO|
+column,public,coupang_registration_attempts,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,coupang_registration_attempts,job_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,coupang_registration_attempts,request_payload,5|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,coupang_registration_attempts,response_payload,7|jsonb|pg_catalog|jsonb|YES||NO|
+column,public,coupang_registration_attempts,response_status,6|integer|pg_catalog|int4|YES||NO|
+column,public,coupang_registration_attempts,success,8|boolean|pg_catalog|bool|NO|false|NO|
+column,public,coupang_registration_jobs,attempt_count,14|integer|pg_catalog|int4|NO|0|NO|
+column,public,coupang_registration_jobs,coupang_status,11|text|pg_catalog|text|YES||NO|
+column,public,coupang_registration_jobs,created_at,18|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,coupang_registration_jobs,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,coupang_registration_jobs,job_code,4|text|pg_catalog|text|NO||NO|
+column,public,coupang_registration_jobs,last_error,13|text|pg_catalog|text|YES||NO|
+column,public,coupang_registration_jobs,listing_draft_id,3|bigint|pg_catalog|int8|NO||NO|
+column,public,coupang_registration_jobs,mode,6|text|pg_catalog|text|NO|'validate'::text|NO|
+column,public,coupang_registration_jobs,next_retry_at,15|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,coupang_registration_jobs,payload_snapshot,7|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,coupang_registration_jobs,registered_at,17|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,coupang_registration_jobs,registration_response,12|jsonb|pg_catalog|jsonb|YES||NO|
+column,public,coupang_registration_jobs,seller_product_id,9|text|pg_catalog|text|YES||NO|
+column,public,coupang_registration_jobs,status,5|text|pg_catalog|text|NO|'queued'::text|NO|
+column,public,coupang_registration_jobs,submitted_at,16|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,coupang_registration_jobs,updated_at,19|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,coupang_registration_jobs,validation_issues,8|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,coupang_registration_jobs,vendor_item_ids,10|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,coupang_registration_jobs,workflow_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,coupang_seller_product_snapshots,brand,5|text|pg_catalog|text|YES||NO|
+column,public,coupang_seller_product_snapshots,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,coupang_seller_product_snapshots,observed_at,8|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,coupang_seller_product_snapshots,raw_payload,7|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,coupang_seller_product_snapshots,registration_type,6|text|pg_catalog|text|YES||NO|
+column,public,coupang_seller_product_snapshots,seller_product_id,2|text|pg_catalog|text|NO||NO|
+column,public,coupang_seller_product_snapshots,seller_product_name,3|text|pg_catalog|text|YES||NO|
+column,public,coupang_seller_product_snapshots,status_name,4|text|pg_catalog|text|YES||NO|
+column,public,domestic_supplier_products,bundle_recommendation_id,4|bigint|pg_catalog|int8|YES||NO|
+column,public,domestic_supplier_products,created_at,15|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,domestic_supplier_products,current_unit_cost,11|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,domestic_supplier_products,discovery_recommendation_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,domestic_supplier_products,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,domestic_supplier_products,last_checked_at,14|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,domestic_supplier_products,mapping_status,13|text|pg_catalog|text|NO|'active'::text|NO|
+column,public,domestic_supplier_products,minimum_order_quantity,10|integer|pg_catalog|int4|NO|1|NO|
+column,public,domestic_supplier_products,provider,5|text|pg_catalog|text|NO|'domeggook'::text|NO|
+column,public,domestic_supplier_products,provider_product_id,6|text|pg_catalog|text|NO||NO|
+column,public,domestic_supplier_products,provider_product_name,8|text|pg_catalog|text|NO||NO|
+column,public,domestic_supplier_products,provider_product_url,7|text|pg_catalog|text|YES||NO|
+column,public,domestic_supplier_products,provider_sku,9|text|pg_catalog|text|YES||NO|
+column,public,domestic_supplier_products,stock_status,12|text|pg_catalog|text|NO|'unknown'::text|NO|
+column,public,domestic_supplier_products,supplier_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,domestic_supplier_products,updated_at,16|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,fulfillment_providers,api_config,19|jsonb|pg_catalog|jsonb|YES||NO|
+column,public,fulfillment_providers,contact,5|text|pg_catalog|text|YES||NO|
+column,public,fulfillment_providers,coupang_inbound_fee,16|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,fulfillment_providers,created_at,22|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,fulfillment_providers,domeggook_partner,9|boolean|pg_catalog|bool|NO|false|NO|
+column,public,fulfillment_providers,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,fulfillment_providers,is_active,21|boolean|pg_catalog|bool|NO|true|NO|
+column,public,fulfillment_providers,kitting_fee,13|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,fulfillment_providers,lead_time_days,18|integer|pg_catalog|int4|NO|1|NO|
+column,public,fulfillment_providers,name,2|text|pg_catalog|text|NO||NO|
+column,public,fulfillment_providers,notes,20|text|pg_catalog|text|YES||NO|
+column,public,fulfillment_providers,outbound_fee,15|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,fulfillment_providers,packaging_fee,14|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,fulfillment_providers,picking_fee,12|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,fulfillment_providers,provider_code,3|text|pg_catalog|text|NO||NO|
+column,public,fulfillment_providers,receiving_fee,10|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,fulfillment_providers,return_handling_fee,17|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,fulfillment_providers,storage_fee_per_unit,11|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,fulfillment_providers,supports_api,8|boolean|pg_catalog|bool|NO|false|NO|
+column,public,fulfillment_providers,supports_coupang_growth,7|boolean|pg_catalog|bool|NO|false|NO|
+column,public,fulfillment_providers,supports_kitting,6|boolean|pg_catalog|bool|NO|false|NO|
+column,public,fulfillment_providers,updated_at,23|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,fulfillment_providers,website_url,4|text|pg_catalog|text|YES||NO|
+column,public,inbound_orders,coupang_inbound_reference,9|text|pg_catalog|text|YES||NO|
+column,public,inbound_orders,created_at,14|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,inbound_orders,defective_quantity,7|integer|pg_catalog|int4|NO|0|NO|
+column,public,inbound_orders,expected_at,10|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,inbound_orders,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,inbound_orders,notes,13|text|pg_catalog|text|YES||NO|
+column,public,inbound_orders,planned_quantity,5|integer|pg_catalog|int4|NO|0|NO|
+column,public,inbound_orders,project_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,inbound_orders,provider_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,inbound_orders,received_at,11|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,inbound_orders,received_quantity,6|integer|pg_catalog|int4|NO|0|NO|
+column,public,inbound_orders,shipped_to_coupang_at,12|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,inbound_orders,status,4|text|pg_catalog|text|NO|'DRAFT'::text|NO|
+column,public,inbound_orders,tracking_number,8|text|pg_catalog|text|YES||NO|
+column,public,inbound_orders,updated_at,15|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,inventory_balances,available_quantity,5|integer|pg_catalog|int4|NO|0|NO|
+column,public,inventory_balances,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,inventory_balances,inbound_quantity,7|integer|pg_catalog|int4|NO|0|NO|
+column,public,inventory_balances,product_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,inventory_balances,project_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,inventory_balances,provider_id,4|bigint|pg_catalog|int8|YES||NO|
+column,public,inventory_balances,reserved_quantity,6|integer|pg_catalog|int4|NO|0|NO|
+column,public,inventory_balances,safety_stock_quantity,8|integer|pg_catalog|int4|NO|0|NO|
+column,public,inventory_balances,updated_at,9|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,knowledge_assets,asset_type,2|text|pg_catalog|text|NO|'sop'::text|NO|
+column,public,knowledge_assets,content,5|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,knowledge_assets,created_at,11|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,knowledge_assets,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,knowledge_assets,status,6|text|pg_catalog|text|NO|'active'::text|NO|
+column,public,knowledge_assets,success_rate,10|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,knowledge_assets,summary,4|text|pg_catalog|text|YES||NO|
+column,public,knowledge_assets,tags,8|ARRAY|pg_catalog|_text|NO|'{}'::text[]|NO|
+column,public,knowledge_assets,title,3|text|pg_catalog|text|NO||NO|
+column,public,knowledge_assets,updated_at,12|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,knowledge_assets,usage_count,9|integer|pg_catalog|int4|NO|0|NO|
+column,public,knowledge_assets,version,7|text|pg_catalog|text|NO|'1.0'::text|NO|
+column,public,listing_draft_revisions,actor,6|text|pg_catalog|text|NO|'system'::text|NO|
+column,public,listing_draft_revisions,change_note,5|text|pg_catalog|text|YES||NO|
+column,public,listing_draft_revisions,created_at,7|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,listing_draft_revisions,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,listing_draft_revisions,listing_draft_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,listing_draft_revisions,revision,3|integer|pg_catalog|int4|NO||NO|
+column,public,listing_draft_revisions,snapshot,4|jsonb|pg_catalog|jsonb|NO||NO|
+column,public,listing_drafts,approved_at,25|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,listing_drafts,brand_name,9|text|pg_catalog|text|YES||NO|
+column,public,listing_drafts,bundle_recommendation_id,5|bigint|pg_catalog|int8|YES||NO|
+column,public,listing_drafts,category_name,10|text|pg_catalog|text|YES||NO|
+column,public,listing_drafts,compliance_checklist,20|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,listing_drafts,coupang_payload,21|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,listing_drafts,coupang_title,11|text|pg_catalog|text|NO||NO|
+column,public,listing_drafts,created_at,27|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,listing_drafts,detail_sections,15|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,listing_drafts,discovery_recommendation_id,4|bigint|pg_catalog|int8|YES||NO|
+column,public,listing_drafts,faq,16|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,listing_drafts,generation_input,22|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,listing_drafts,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,listing_drafts,listing_type,6|text|pg_catalog|text|NO|'single'::text|NO|
+column,public,listing_drafts,model_version,23|text|pg_catalog|text|NO|'listing-rule-v1'::text|NO|
+column,public,listing_drafts,option_structure,13|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,listing_drafts,procurement_order_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,listing_drafts,product_name,8|text|pg_catalog|text|NO||NO|
+column,public,listing_drafts,registered_at,26|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,listing_drafts,return_notice,19|text|pg_catalog|text|YES||NO|
+column,public,listing_drafts,revision,24|integer|pg_catalog|int4|NO|1|NO|
+column,public,listing_drafts,search_keywords,12|ARRAY|pg_catalog|_text|NO|'{}'::text[]|NO|
+column,public,listing_drafts,selling_points,14|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,listing_drafts,shipping_notice,18|text|pg_catalog|text|YES||NO|
+column,public,listing_drafts,status,7|text|pg_catalog|text|NO|'generated'::text|NO|
+column,public,listing_drafts,thumbnail_brief,17|text|pg_catalog|text|YES||NO|
+column,public,listing_drafts,updated_at,28|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,listing_drafts,workflow_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,market_ai_decisions,confidence,6|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_ai_decisions,created_at,10|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_ai_decisions,decision_type,3|text|pg_catalog|text|NO|'product_entry'::text|NO|
+column,public,market_ai_decisions,evidence,8|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,market_ai_decisions,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,market_ai_decisions,market_product_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,market_ai_decisions,model_version,9|text|pg_catalog|text|NO|'mie-decision-v1'::text|NO|
+column,public,market_ai_decisions,rationale,7|text|pg_catalog|text|NO||NO|
+column,public,market_ai_decisions,recommendation,4|text|pg_catalog|text|NO||NO|
+column,public,market_ai_decisions,score,5|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,market_analysis_runs,analyzed_products,4|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_analysis_runs,error_message,8|text|pg_catalog|text|YES||NO|
+column,public,market_analysis_runs,estimates_created,6|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_analysis_runs,finished_at,10|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,market_analysis_runs,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,market_analysis_runs,model_version,7|text|pg_catalog|text|NO|'mie-heuristic-v2'::text|NO|
+column,public,market_analysis_runs,requested_products,3|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_analysis_runs,signals_created,5|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_analysis_runs,started_at,9|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_analysis_runs,status,2|text|pg_catalog|text|NO||NO|
+column,public,market_collection_jobs,collector_key,2|text|pg_catalog|text|NO||NO|
+column,public,market_collection_jobs,created_at,10|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_collection_jobs,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,market_collection_jobs,interval_minutes,6|integer|pg_catalog|int4|NO|720|NO|
+column,public,market_collection_jobs,last_result,9|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,market_collection_jobs,last_run_at,8|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,market_collection_jobs,market_keyword_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,market_collection_jobs,next_run_at,7|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_collection_jobs,priority,5|integer|pg_catalog|int4|NO|50|NO|
+column,public,market_collection_jobs,status,4|text|pg_catalog|text|NO|'active'::text|NO|
+column,public,market_collection_jobs,updated_at,11|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_collection_runs,collector,2|text|pg_catalog|text|NO||NO|
+column,public,market_collection_runs,cooldown_until,9|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,market_collection_runs,error_message,12|text|pg_catalog|text|YES||NO|
+column,public,market_collection_runs,failure_count,8|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_collection_runs,finished_at,14|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,market_collection_runs,http_status,7|integer|pg_catalog|int4|YES||NO|
+column,public,market_collection_runs,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,market_collection_runs,keyword_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,market_collection_runs,requested_count,5|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_collection_runs,robots_policy_state,10|text|pg_catalog|text|YES||NO|
+column,public,market_collection_runs,saved_count,6|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_collection_runs,started_at,13|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_collection_runs,status,4|text|pg_catalog|text|NO||NO|
+column,public,market_collection_runs,terms_review_status,11|text|pg_catalog|text|NO|'pending'::text|NO|
+column,public,market_collectors,collector_key,2|text|pg_catalog|text|NO||NO|
+column,public,market_collectors,configuration,7|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,market_collectors,cooldown_until,10|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,market_collectors,created_at,13|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_collectors,failure_count,11|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_collectors,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,market_collectors,last_error,12|text|pg_catalog|text|YES||NO|
+column,public,market_collectors,last_run_at,8|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,market_collectors,last_success_at,9|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,market_collectors,name,3|text|pg_catalog|text|NO||NO|
+column,public,market_collectors,source_type,4|text|pg_catalog|text|NO||NO|
+column,public,market_collectors,status,5|text|pg_catalog|text|NO|'ready'::text|NO|
+column,public,market_collectors,supports_automatic,6|boolean|pg_catalog|bool|NO|false|NO|
+column,public,market_collectors,updated_at,14|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_estimates,confidence,11|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_estimates,created_at,14|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_estimates,estimated_sales_base,9|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,market_estimates,estimated_sales_high,10|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,market_estimates,estimated_sales_low,8|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,market_estimates,estimated_units_base,6|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_estimates,estimated_units_high,7|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_estimates,estimated_units_low,5|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_estimates,evidence,13|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,market_estimates,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,market_estimates,market_product_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,market_estimates,model_version,12|text|pg_catalog|text|NO|'mie-heuristic-v1'::text|NO|
+column,public,market_estimates,period_end,4|date|pg_catalog|date|NO||NO|
+column,public,market_estimates,period_start,3|date|pg_catalog|date|NO||NO|
+column,public,market_feature_snapshots,ad_burden_score,21|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feature_snapshots,ad_ratio_30d,14|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feature_snapshots,calculated_at,3|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_feature_snapshots,competition_score,19|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feature_snapshots,confidence,24|integer|pg_catalog|int4|YES||NO|
+column,public,market_feature_snapshots,data_completeness_score,15|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feature_snapshots,demand_score,16|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feature_snapshots,entry_difficulty_score,22|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feature_snapshots,evidence,25|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,market_feature_snapshots,feature_version,4|text|pg_catalog|text|NO|'mie-features-v1'::text|NO|
+column,public,market_feature_snapshots,growth_score,17|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feature_snapshots,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,market_feature_snapshots,market_product_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,market_feature_snapshots,observation_days,5|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_feature_snapshots,opportunity_score,23|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feature_snapshots,price_change_7d_pct,9|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feature_snapshots,price_volatility_30d,10|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feature_snapshots,rank_change_7d,11|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feature_snapshots,rank_volatility_30d,12|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feature_snapshots,review_growth_30d,8|integer|pg_catalog|int4|YES||NO|
+column,public,market_feature_snapshots,review_velocity_7d,7|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feature_snapshots,snapshot_count,6|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_feature_snapshots,stability_score,18|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feature_snapshots,stockout_count_30d,13|integer|pg_catalog|int4|YES||NO|
+column,public,market_feature_snapshots,supply_score,20|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feedback_events,amount,7|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_feedback_events,created_at,9|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_feedback_events,event_at,5|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_feedback_events,event_type,4|text|pg_catalog|text|NO||NO|
+column,public,market_feedback_events,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,market_feedback_events,market_product_id,2|bigint|pg_catalog|int8|YES||NO|
+column,public,market_feedback_events,metadata,8|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,market_feedback_events,product_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,market_feedback_events,quantity,6|integer|pg_catalog|int4|YES||NO|
+column,public,market_keywords,category,3|text|pg_catalog|text|YES||NO|
+column,public,market_keywords,collection_interval_minutes,6|integer|pg_catalog|int4|NO|720|NO|
+column,public,market_keywords,collection_status,5|text|pg_catalog|text|NO|'active'::text|NO|
+column,public,market_keywords,competition_score,11|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_keywords,created_at,13|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_keywords,demand_score,10|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_keywords,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,market_keywords,keyword,2|text|pg_catalog|text|NO||NO|
+column,public,market_keywords,last_collected_at,7|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,market_keywords,next_collection_at,8|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,market_keywords,opportunity_score,12|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_keywords,priority,4|integer|pg_catalog|int4|NO|50|NO|
+column,public,market_keywords,result_count,9|integer|pg_catalog|int4|YES||NO|
+column,public,market_keywords,updated_at,14|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_model_feedback,actual_ad_spend,7|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_model_feedback,actual_returns,8|integer|pg_catalog|int4|YES||NO|
+column,public,market_model_feedback,actual_sales,6|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_model_feedback,actual_units,5|integer|pg_catalog|int4|YES||NO|
+column,public,market_model_feedback,created_at,11|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_model_feedback,estimate_id,4|bigint|pg_catalog|int8|YES||NO|
+column,public,market_model_feedback,feedback_period_end,10|date|pg_catalog|date|NO||NO|
+column,public,market_model_feedback,feedback_period_start,9|date|pg_catalog|date|NO||NO|
+column,public,market_model_feedback,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,market_model_feedback,market_product_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,market_model_feedback,product_id,2|bigint|pg_catalog|int8|YES||NO|
+column,public,market_product_links,created_at,6|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_product_links,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,market_product_links,market_product_id,3|bigint|pg_catalog|int8|NO||NO|
+column,public,market_product_links,match_confidence,5|integer|pg_catalog|int4|NO|100|NO|
+column,public,market_product_links,match_method,4|text|pg_catalog|text|NO|'manual'::text|NO|
+column,public,market_product_links,product_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,market_product_metrics,ad_burden_score,30|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,market_product_metrics,analyzed_at,23|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_product_metrics,average_rank_7d,9|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_product_metrics,competition_score,15|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,market_product_metrics,confidence,17|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_product_metrics,data_completeness_score,28|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,market_product_metrics,demand_score,12|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,market_product_metrics,entry_difficulty_score,31|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,market_product_metrics,estimated_units_base,19|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_product_metrics,estimated_units_high,20|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_product_metrics,estimated_units_low,18|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_product_metrics,feature_version,32|text|pg_catalog|text|NO|'mie-features-v1'::text|NO|
+column,public,market_product_metrics,growth_score,13|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,market_product_metrics,latest_price,4|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_product_metrics,latest_review_count,6|integer|pg_catalog|int4|YES||NO|
+column,public,market_product_metrics,market_product_id,1|bigint|pg_catalog|int8|NO||NO|
+column,public,market_product_metrics,model_version,24|text|pg_catalog|text|NO|'mie-heuristic-v2'::text|NO|
+column,public,market_product_metrics,observation_days,3|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_product_metrics,opportunity_score,16|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,market_product_metrics,price_change_7d_pct,5|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_product_metrics,price_volatility_30d,25|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_product_metrics,rank_change_7d,10|integer|pg_catalog|int4|YES||NO|
+column,public,market_product_metrics,rank_volatility_30d,26|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_product_metrics,recommendation_grade,21|text|pg_catalog|text|NO|'D'::text|NO|
+column,public,market_product_metrics,recommendation_reason,22|text|pg_catalog|text|YES||NO|
+column,public,market_product_metrics,review_delta_30d,8|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_product_metrics,review_delta_7d,7|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_product_metrics,review_velocity_7d,27|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_product_metrics,score_explanation,33|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,market_product_metrics,snapshot_count,2|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_product_metrics,stability_score,14|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,market_product_metrics,stockout_count_30d,11|integer|pg_catalog|int4|NO|0|NO|
+column,public,market_product_metrics,supply_score,29|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,market_products,brand,7|text|pg_catalog|text|YES||NO|
+column,public,market_products,category,9|text|pg_catalog|text|YES||NO|
+column,public,market_products,created_at,13|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_products,external_product_id,3|text|pg_catalog|text|NO||NO|
+column,public,market_products,first_seen_at,11|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_products,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,market_products,last_seen_at,12|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_products,product_url,5|text|pg_catalog|text|YES||NO|
+column,public,market_products,seller_name,8|text|pg_catalog|text|YES||NO|
+column,public,market_products,source,2|text|pg_catalog|text|NO||NO|
+column,public,market_products,thumbnail_url,10|text|pg_catalog|text|YES||NO|
+column,public,market_products,title,6|text|pg_catalog|text|NO||NO|
+column,public,market_products,updated_at,14|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_products,vendor_item_id,4|text|pg_catalog|text|YES||NO|
+column,public,market_signals,detected_at,8|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_signals,evidence,7|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,market_signals,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,market_signals,market_keyword_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,market_signals,market_product_id,2|bigint|pg_catalog|int8|YES||NO|
+column,public,market_signals,resolved_at,9|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,market_signals,severity,5|text|pg_catalog|text|NO|'medium'::text|NO|
+column,public,market_signals,signal_type,4|text|pg_catalog|text|NO||NO|
+column,public,market_signals,title,6|text|pg_catalog|text|NO||NO|
+column,public,market_snapshots,created_at,16|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_snapshots,delivery_days,13|integer|pg_catalog|int4|YES||NO|
+column,public,market_snapshots,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,market_snapshots,is_ad,6|boolean|pg_catalog|bool|YES||NO|
+column,public,market_snapshots,is_sold_out,12|boolean|pg_catalog|bool|YES||NO|
+column,public,market_snapshots,list_price,8|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_snapshots,market_keyword_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,market_snapshots,market_product_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,market_snapshots,observed_at,4|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,market_snapshots,option_count,14|integer|pg_catalog|int4|YES||NO|
+column,public,market_snapshots,price,7|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_snapshots,rank,5|integer|pg_catalog|int4|YES||NO|
+column,public,market_snapshots,rating,9|numeric|pg_catalog|numeric|YES||NO|
+column,public,market_snapshots,raw_payload,15|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,market_snapshots,review_count,10|integer|pg_catalog|int4|YES||NO|
+column,public,market_snapshots,rocket_type,11|text|pg_catalog|text|YES||NO|
+column,public,marketplace_connections,automation_level,5|integer|pg_catalog|int4|NO|0|NO|
+column,public,marketplace_connections,config,11|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,marketplace_connections,created_at,12|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,marketplace_connections,gross_revenue,8|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,marketplace_connections,health_message,10|text|pg_catalog|text|YES||NO|
+column,public,marketplace_connections,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,marketplace_connections,last_sync_at,9|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,marketplace_connections,marketplace_code,2|text|pg_catalog|text|NO||NO|
+column,public,marketplace_connections,marketplace_name,3|text|pg_catalog|text|NO||NO|
+column,public,marketplace_connections,order_count,7|integer|pg_catalog|int4|NO|0|NO|
+column,public,marketplace_connections,product_count,6|integer|pg_catalog|int4|NO|0|NO|
+column,public,marketplace_connections,status,4|text|pg_catalog|text|NO|'planned'::text|NO|
+column,public,marketplace_connections,updated_at,13|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,os_command_runs,assigned_worker_code,6|text|pg_catalog|text|YES||NO|
+column,public,os_command_runs,command_code,2|text|pg_catalog|text|NO||NO|
+column,public,os_command_runs,command_name,3|text|pg_catalog|text|NO||NO|
+column,public,os_command_runs,completed_at,12|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,os_command_runs,created_at,13|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,os_command_runs,error_message,9|text|pg_catalog|text|YES||NO|
+column,public,os_command_runs,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,os_command_runs,input_payload,7|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,os_command_runs,output_summary,8|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,os_command_runs,progress,10|integer|pg_catalog|int4|NO|0|NO|
+column,public,os_command_runs,requested_by,5|text|pg_catalog|text|NO|'owner'::text|NO|
+column,public,os_command_runs,started_at,11|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,os_command_runs,status,4|text|pg_catalog|text|NO|'queued'::text|NO|
+column,public,os_command_runs,updated_at,14|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,os_notifications,action_url,6|text|pg_catalog|text|YES||NO|
+column,public,os_notifications,category,3|text|pg_catalog|text|NO|'system'::text|NO|
+column,public,os_notifications,created_at,9|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,os_notifications,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,os_notifications,is_read,7|boolean|pg_catalog|bool|NO|false|NO|
+column,public,os_notifications,message,5|text|pg_catalog|text|YES||NO|
+column,public,os_notifications,metadata,8|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,os_notifications,read_at,10|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,os_notifications,severity,2|text|pg_catalog|text|NO|'info'::text|NO|
+column,public,os_notifications,title,4|text|pg_catalog|text|NO||NO|
+column,public,procurement_orders,approval_reasons,19|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,procurement_orders,approved_at,22|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,procurement_orders,bundle_recommendation_id,7|bigint|pg_catalog|int8|YES||NO|
+column,public,procurement_orders,created_at,25|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,procurement_orders,discovery_recommendation_id,6|bigint|pg_catalog|int8|YES||NO|
+column,public,procurement_orders,expected_inbound_date,16|date|pg_catalog|date|YES||NO|
+column,public,procurement_orders,goods_amount,11|numeric|pg_catalog|numeric|NO||NO|
+column,public,procurement_orders,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,procurement_orders,notes,21|text|pg_catalog|text|YES||NO|
+column,public,procurement_orders,order_number,2|text|pg_catalog|text|NO||NO|
+column,public,procurement_orders,ordered_at,23|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,procurement_orders,packaging_amount,13|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,procurement_orders,procurement_score,18|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,procurement_orders,product_name,8|text|pg_catalog|text|NO||NO|
+column,public,procurement_orders,quantity,9|integer|pg_catalog|int4|NO||NO|
+column,public,procurement_orders,received_at,24|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,procurement_orders,shipping_amount,12|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,procurement_orders,status,17|text|pg_catalog|text|NO|'draft'::text|NO|
+column,public,procurement_orders,supplier_id,3|bigint|pg_catalog|int8|NO||NO|
+column,public,procurement_orders,supplier_order_reference,20|text|pg_catalog|text|YES||NO|
+column,public,procurement_orders,supplier_product_mapping_id,5|bigint|pg_catalog|int8|YES||NO|
+column,public,procurement_orders,supplier_quote_id,4|bigint|pg_catalog|int8|NO||NO|
+column,public,procurement_orders,three_pl_inbound_amount,14|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,procurement_orders,total_amount,15|numeric|pg_catalog|numeric|NO||NO|
+column,public,procurement_orders,unit_cost,10|numeric|pg_catalog|numeric|NO||NO|
+column,public,procurement_orders,updated_at,26|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,products,advertising_cost,12|integer|pg_catalog|int4|NO|0|NO|
+column,public,products,ai_analysis_status,31|text|pg_catalog|text|NO|'pending'::text|NO|
+column,public,products,ai_score,32|integer|pg_catalog|int4|YES||NO|
+column,public,products,ai_summary,33|text|pg_catalog|text|YES||NO|
+column,public,products,available_on_domeggook,22|boolean|pg_catalog|bool|NO|false|NO|
+column,public,products,basic_score,18|integer|pg_catalog|int4|NO|0|NO|
+column,public,products,break_even_sale_price,17|integer|pg_catalog|int4|NO|0|NO|
+column,public,products,competition_analysis_status,43|text|pg_catalog|text|NO|'pending'::text|NO|
+column,public,products,competition_analyzed_at,56|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,products,competition_confidence,59|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,products,competition_data_note,60|text|pg_catalog|text|YES||NO|
+column,public,products,competition_data_source,58|text|pg_catalog|text|NO|'none'::text|NO|
+column,public,products,competition_grade,42|text|pg_catalog|text|NO|'미분석'::text|NO|
+column,public,products,competition_score,36|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,products,competition_summary,44|text|pg_catalog|text|YES||NO|
+column,public,products,coupang_analysis_keyword,57|text|pg_catalog|text|YES||NO|
+column,public,products,coupang_avg_rating,50|numeric|pg_catalog|numeric|YES||NO|
+column,public,products,coupang_avg_review_count,49|numeric|pg_catalog|numeric|YES||NO|
+column,public,products,coupang_keyword_search_volume,51|integer|pg_catalog|int4|YES||NO|
+column,public,products,coupang_market_price,45|numeric|pg_catalog|numeric|YES||NO|
+column,public,products,coupang_result_count,47|integer|pg_catalog|int4|YES||NO|
+column,public,products,coupang_rocket_ratio,48|numeric|pg_catalog|numeric|YES||NO|
+column,public,products,coupang_top10_avg_price,46|numeric|pg_catalog|numeric|YES||NO|
+column,public,products,created_at,24|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,products,estimated_monthly_sales_high,55|numeric|pg_catalog|numeric|YES||NO|
+column,public,products,estimated_monthly_sales_low,54|numeric|pg_catalog|numeric|YES||NO|
+column,public,products,estimated_monthly_units_high,53|integer|pg_catalog|int4|YES||NO|
+column,public,products,estimated_monthly_units_low,52|integer|pg_catalog|int4|YES||NO|
+column,public,products,estimated_profit,15|integer|pg_catalog|int4|NO|0|NO|
+column,public,products,estimated_sale_price,10|integer|pg_catalog|int4|NO|0|NO|
+column,public,products,excluded_reason,34|text|pg_catalog|text|YES||NO|
+column,public,products,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,products,initial_purchase_amount,9|integer|pg_catalog|int4|NO|0|NO|
+column,public,products,is_favorite,26|boolean|pg_catalog|bool|NO|false|NO|
+column,public,products,keyword,3|text|pg_catalog|text|YES||NO|
+column,public,products,keyword_demand_score,41|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,products,logistics_cost,13|integer|pg_catalog|int4|NO|0|NO|
+column,public,products,manual_sale_price,29|integer|pg_catalog|int4|YES||NO|
+column,public,products,margin_rate,16|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,products,marketability_score,37|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,products,marketplace_fee,11|integer|pg_catalog|int4|NO|0|NO|
+column,public,products,memo,28|text|pg_catalog|text|YES||NO|
+column,public,products,minimum_order_quantity,8|integer|pg_catalog|int4|NO|1|NO|
+column,public,products,price_competitiveness_score,38|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,products,product_no,2|text|pg_catalog|text|NO||NO|
+column,public,products,product_url,6|text|pg_catalog|text|YES||NO|
+column,public,products,recommendation,19|text|pg_catalog|text|YES||NO|
+column,public,products,return_reserve,14|integer|pg_catalog|int4|NO|0|NO|
+column,public,products,review_entry_score,39|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,products,review_status,27|text|pg_catalog|text|NO|'unreviewed'::text|NO|
+column,public,products,reviewed_at,35|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,products,risk_level,30|text|pg_catalog|text|NO|'unknown'::text|NO|
+column,public,products,rocket_competition_score,40|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,products,seller_id,20|text|pg_catalog|text|YES||NO|
+column,public,products,seller_name,21|text|pg_catalog|text|YES||NO|
+column,public,products,supply_available,23|boolean|pg_catalog|bool|NO|false|NO|
+column,public,products,supply_price,7|integer|pg_catalog|int4|NO|0|NO|
+column,public,products,thumbnail,5|text|pg_catalog|text|YES||NO|
+column,public,products,title,4|text|pg_catalog|text|NO||NO|
+column,public,products,updated_at,25|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,profit_snapshots,ad_spend,7|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,profit_snapshots,break_even_revenue,12|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,profit_snapshots,contribution_profit,9|numeric|pg_catalog|numeric|YES||NO|
+column,public,profit_snapshots,created_at,13|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,profit_snapshots,fulfillment_cost,6|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,profit_snapshots,gross_revenue,3|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,profit_snapshots,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,profit_snapshots,margin_rate,10|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,profit_snapshots,marketplace_fee,5|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,profit_snapshots,product_cost,4|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,profit_snapshots,refund_cost,8|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,profit_snapshots,roas,11|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,profit_snapshots,snapshot_date,2|date|pg_catalog|date|NO|CURRENT_DATE|NO|
+column,public,revenue_decisions,actual_impact,9|numeric|pg_catalog|numeric|YES||NO|
+column,public,revenue_decisions,confidence,7|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_decisions,created_at,12|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,revenue_decisions,decision,4|text|pg_catalog|text|NO||NO|
+column,public,revenue_decisions,decision_type,3|text|pg_catalog|text|NO||NO|
+column,public,revenue_decisions,evidence,6|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,revenue_decisions,expected_impact,8|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_decisions,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,revenue_decisions,learning,11|text|pg_catalog|text|YES||NO|
+column,public,revenue_decisions,opportunity_id,2|bigint|pg_catalog|int8|YES||NO|
+column,public,revenue_decisions,reason,5|text|pg_catalog|text|YES||NO|
+column,public,revenue_decisions,result,10|text|pg_catalog|text|YES||NO|
+column,public,revenue_opportunities,ai_confidence,15|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_opportunities,approved_at,24|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,revenue_opportunities,competition_score,10|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_opportunities,created_at,25|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,revenue_opportunities,demand_score,8|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_opportunities,estimated_cost,17|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_opportunities,estimated_profit,18|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_opportunities,estimated_sale_price,16|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_opportunities,evidence,20|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,revenue_opportunities,expected_monthly_sales,19|integer|pg_catalog|int4|NO|0|NO|
+column,public,revenue_opportunities,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,revenue_opportunities,keyword,3|text|pg_catalog|text|NO||NO|
+column,public,revenue_opportunities,listing_score,13|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_opportunities,margin_score,9|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_opportunities,next_action,23|text|pg_catalog|text|YES||NO|
+column,public,revenue_opportunities,opportunity_code,2|text|pg_catalog|text|NO||NO|
+column,public,revenue_opportunities,reasons,21|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,revenue_opportunities,revenue_score,14|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_opportunities,risk_score,12|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_opportunities,risks,22|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,revenue_opportunities,source,5|text|pg_catalog|text|NO|'manual'::text|NO|
+column,public,revenue_opportunities,source_product_id,6|text|pg_catalog|text|YES||NO|
+column,public,revenue_opportunities,status,7|text|pg_catalog|text|NO|'idea'::text|NO|
+column,public,revenue_opportunities,supply_score,11|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_opportunities,title,4|text|pg_catalog|text|NO||NO|
+column,public,revenue_opportunities,updated_at,26|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,revenue_snapshots,active_product_count,8|integer|pg_catalog|int4|NO|0|NO|
+column,public,revenue_snapshots,ad_spend,7|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_snapshots,ai_execution_rate,11|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_snapshots,automation_rate,10|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_snapshots,contribution_profit,5|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_snapshots,created_at,13|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,revenue_snapshots,gross_revenue,3|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_snapshots,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,revenue_snapshots,net_revenue,4|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,revenue_snapshots,order_count,6|integer|pg_catalog|int4|NO|0|NO|
+column,public,revenue_snapshots,out_of_stock_count,9|integer|pg_catalog|int4|NO|0|NO|
+column,public,revenue_snapshots,snapshot_date,2|date|pg_catalog|date|NO||NO|
+column,public,revenue_snapshots,source_detail,12|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,revenue_snapshots,updated_at,14|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,runtime_jobs,attempts,8|integer|pg_catalog|int4|NO|0|NO|
+column,public,runtime_jobs,completed_at,15|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,runtime_jobs,created_at,16|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,runtime_jobs,duration_ms,21|integer|pg_catalog|int4|YES||NO|
+column,public,runtime_jobs,error_message,12|text|pg_catalog|text|YES||NO|
+column,public,runtime_jobs,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,runtime_jobs,input_payload,10|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,runtime_jobs,job_code,2|text|pg_catalog|text|NO||NO|
+column,public,runtime_jobs,job_type,5|text|pg_catalog|text|NO||NO|
+column,public,runtime_jobs,last_heartbeat_at,20|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,runtime_jobs,locked_at,19|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,runtime_jobs,locked_by,18|text|pg_catalog|text|YES||NO|
+column,public,runtime_jobs,max_attempts,9|integer|pg_catalog|int4|NO|3|NO|
+column,public,runtime_jobs,opportunity_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,runtime_jobs,output_payload,11|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,runtime_jobs,priority,7|integer|pg_catalog|int4|NO|50|NO|
+column,public,runtime_jobs,result_summary,22|text|pg_catalog|text|YES||NO|
+column,public,runtime_jobs,scheduled_at,13|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,runtime_jobs,started_at,14|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,runtime_jobs,status,6|text|pg_catalog|text|NO|'queued'::text|NO|
+column,public,runtime_jobs,updated_at,17|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,runtime_jobs,worker_code,4|text|pg_catalog|text|NO||NO|
+column,public,sourcing_decisions,calculated_at,14|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,sourcing_decisions,coupang_fee_per_unit,5|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,sourcing_decisions,created_at,15|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,sourcing_decisions,decision,11|text|pg_catalog|text|NO||NO|
+column,public,sourcing_decisions,expected_margin_rate,8|numeric|pg_catalog|numeric|NO||NO|
+column,public,sourcing_decisions,expected_profit_per_unit,7|numeric|pg_catalog|numeric|NO||NO|
+column,public,sourcing_decisions,expected_return_cost_per_unit,6|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,sourcing_decisions,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,sourcing_decisions,initial_purchase_amount,9|numeric|pg_catalog|numeric|NO||NO|
+column,public,sourcing_decisions,landed_unit_cost,4|numeric|pg_catalog|numeric|NO||NO|
+column,public,sourcing_decisions,reasons,13|jsonb|pg_catalog|jsonb|NO|'[]'::jsonb|NO|
+column,public,sourcing_decisions,score,12|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,sourcing_decisions,supplier_quote_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,sourcing_decisions,target_selling_price,3|numeric|pg_catalog|numeric|NO||NO|
+column,public,sourcing_decisions,working_capital_days,10|integer|pg_catalog|int4|NO|0|NO|
+column,public,supplier_quotes,bundle_recommendation_id,4|bigint|pg_catalog|int8|YES||NO|
+column,public,supplier_quotes,coupang_fee_rate,22|numeric|pg_catalog|numeric|NO|10.8|NO|
+column,public,supplier_quotes,created_at,28|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,supplier_quotes,currency,7|text|pg_catalog|text|NO|'KRW'::text|NO|
+column,public,supplier_quotes,customs_total,14|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,supplier_quotes,discovery_recommendation_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,supplier_quotes,domestic_shipping_total,12|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,supplier_quotes,exchange_rate,8|numeric|pg_catalog|numeric|NO|1|NO|
+column,public,supplier_quotes,expected_return_rate,23|numeric|pg_catalog|numeric|NO|3|NO|
+column,public,supplier_quotes,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,supplier_quotes,inspection_total,16|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,supplier_quotes,international_shipping_total,13|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,supplier_quotes,labeling_total,18|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,supplier_quotes,lead_time_days,24|integer|pg_catalog|int4|NO|7|NO|
+column,public,supplier_quotes,moq,10|integer|pg_catalog|int4|NO|1|NO|
+column,public,supplier_quotes,notes,27|text|pg_catalog|text|YES||NO|
+column,public,supplier_quotes,packaging_total,17|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,supplier_quotes,product_name,5|text|pg_catalog|text|NO||NO|
+column,public,supplier_quotes,sample_cost,11|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,supplier_quotes,status,26|text|pg_catalog|text|NO|'draft'::text|NO|
+column,public,supplier_quotes,supplier_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,supplier_quotes,supplier_sku,6|text|pg_catalog|text|YES||NO|
+column,public,supplier_quotes,three_pl_inbound_total,19|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,supplier_quotes,three_pl_outbound_per_unit,21|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,supplier_quotes,three_pl_storage_per_unit,20|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,supplier_quotes,unit_cost,9|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,supplier_quotes,updated_at,29|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,supplier_quotes,valid_until,25|date|pg_catalog|date|YES||NO|
+column,public,supplier_quotes,vat_total,15|numeric|pg_catalog|numeric|NO|0|NO|
+column,public,suppliers,channel,3|text|pg_catalog|text|NO||NO|
+column,public,suppliers,contact_email,5|text|pg_catalog|text|YES||NO|
+column,public,suppliers,contact_name,4|text|pg_catalog|text|YES||NO|
+column,public,suppliers,contact_phone,6|text|pg_catalog|text|YES||NO|
+column,public,suppliers,country_code,8|text|pg_catalog|text|NO|'KR'::text|NO|
+column,public,suppliers,created_at,12|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,suppliers,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,suppliers,memo,11|text|pg_catalog|text|YES||NO|
+column,public,suppliers,name,2|text|pg_catalog|text|NO||NO|
+column,public,suppliers,reliability_score,10|numeric|pg_catalog|numeric|NO|50|NO|
+column,public,suppliers,status,9|text|pg_catalog|text|NO|'active'::text|NO|
+column,public,suppliers,updated_at,13|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,suppliers,website_url,7|text|pg_catalog|text|YES||NO|
+column,public,system_health_checks,checked_at,7|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,system_health_checks,component,2|text|pg_catalog|text|NO||NO|
+column,public,system_health_checks,detail,6|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,system_health_checks,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,system_health_checks,latency_ms,4|integer|pg_catalog|int4|YES||NO|
+column,public,system_health_checks,message,5|text|pg_catalog|text|YES||NO|
+column,public,system_health_checks,status,3|text|pg_catalog|text|NO||NO|
+column,public,system_releases,created_at,10|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,system_releases,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,system_releases,migration_name,5|text|pg_catalog|text|YES||NO|
+column,public,system_releases,release_name,3|text|pg_catalog|text|NO||NO|
+column,public,system_releases,release_notes,7|text|pg_catalog|text|YES||NO|
+column,public,system_releases,released_at,9|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,system_releases,rollback_notes,8|text|pg_catalog|text|YES||NO|
+column,public,system_releases,status,4|text|pg_catalog|text|NO|'planned'::text|NO|
+column,public,system_releases,updated_at,11|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,system_releases,verification_summary,6|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,system_releases,version,2|text|pg_catalog|text|NO||NO|
+column,public,three_pl_inbound_plans,created_at,11|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,three_pl_inbound_plans,expected_inbound_date,6|date|pg_catalog|date|YES||NO|
+column,public,three_pl_inbound_plans,expected_quantity,7|integer|pg_catalog|int4|NO||NO|
+column,public,three_pl_inbound_plans,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,three_pl_inbound_plans,inbound_reference,5|text|pg_catalog|text|YES||NO|
+column,public,three_pl_inbound_plans,procurement_order_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,three_pl_inbound_plans,received_quantity,8|integer|pg_catalog|int4|NO|0|NO|
+column,public,three_pl_inbound_plans,receiving_notes,10|text|pg_catalog|text|YES||NO|
+column,public,three_pl_inbound_plans,status,9|text|pg_catalog|text|NO|'planned'::text|NO|
+column,public,three_pl_inbound_plans,updated_at,12|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,three_pl_inbound_plans,warehouse_code,4|text|pg_catalog|text|YES||NO|
+column,public,three_pl_inbound_plans,warehouse_name,3|text|pg_catalog|text|NO||NO|
+column,public,worker_runtime_events,created_at,8|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,worker_runtime_events,event_type,5|text|pg_catalog|text|NO||NO|
+column,public,worker_runtime_events,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,worker_runtime_events,message,6|text|pg_catalog|text|YES||NO|
+column,public,worker_runtime_events,opportunity_id,3|bigint|pg_catalog|int8|YES||NO|
+column,public,worker_runtime_events,payload,7|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,worker_runtime_events,runtime_job_id,2|bigint|pg_catalog|int8|YES||NO|
+column,public,worker_runtime_events,worker_code,4|text|pg_catalog|text|NO||NO|
+column,public,workflow_outbox_events,attempt_count,7|integer|pg_catalog|int4|NO|0|NO|
+column,public,workflow_outbox_events,available_at,8|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,workflow_outbox_events,created_at,11|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,workflow_outbox_events,destination,4|text|pg_catalog|text|NO|'internal'::text|NO|
+column,public,workflow_outbox_events,event_name,3|text|pg_catalog|text|NO||NO|
+column,public,workflow_outbox_events,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,workflow_outbox_events,last_error,10|text|pg_catalog|text|YES||NO|
+column,public,workflow_outbox_events,payload,5|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,workflow_outbox_events,processed_at,9|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,workflow_outbox_events,status,6|text|pg_catalog|text|NO|'pending'::text|NO|
+column,public,workflow_outbox_events,workflow_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,workflow_tasks,assignee,8|text|pg_catalog|text|YES||NO|
+column,public,workflow_tasks,blocking_reason,10|text|pg_catalog|text|YES||NO|
+column,public,workflow_tasks,completed_at,12|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,workflow_tasks,created_at,13|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,workflow_tasks,due_at,9|timestamp with time zone|pg_catalog|timestamptz|YES||NO|
+column,public,workflow_tasks,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,workflow_tasks,payload,11|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,workflow_tasks,priority,7|integer|pg_catalog|int4|NO|50|NO|
+column,public,workflow_tasks,stage,3|text|pg_catalog|text|NO||NO|
+column,public,workflow_tasks,status,6|text|pg_catalog|text|NO|'open'::text|NO|
+column,public,workflow_tasks,task_type,4|text|pg_catalog|text|NO||NO|
+column,public,workflow_tasks,title,5|text|pg_catalog|text|NO||NO|
+column,public,workflow_tasks,updated_at,14|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,workflow_tasks,workflow_id,2|bigint|pg_catalog|int8|NO||NO|
+column,public,workflow_transitions,actor,10|text|pg_catalog|text|NO|'system'::text|NO|
+column,public,workflow_transitions,created_at,11|timestamp with time zone|pg_catalog|timestamptz|NO|now()|NO|
+column,public,workflow_transitions,from_stage,3|text|pg_catalog|text|YES||NO|
+column,public,workflow_transitions,id,1|bigint|pg_catalog|int8|NO||YES|BY DEFAULT
+column,public,workflow_transitions,idempotency_key,7|text|pg_catalog|text|YES||NO|
+column,public,workflow_transitions,payload,9|jsonb|pg_catalog|jsonb|NO|'{}'::jsonb|NO|
+column,public,workflow_transitions,reason,8|text|pg_catalog|text|YES||NO|
+column,public,workflow_transitions,to_stage,4|text|pg_catalog|text|NO||NO|
+column,public,workflow_transitions,trigger_source,6|text|pg_catalog|text|YES||NO|
+column,public,workflow_transitions,trigger_type,5|text|pg_catalog|text|NO|'system'::text|NO|
+column,public,workflow_transitions,workflow_id,2|bigint|pg_catalog|int8|NO||NO|
+constraint,public,ai_bundle_items,ai_bundle_items_bundle_id_fkey,FOREIGN KEY (bundle_id) REFERENCES ai_bundle_recommendations(id) ON DELETE CASCADE
+constraint,public,ai_bundle_items,ai_bundle_items_bundle_id_market_product_id_key,"UNIQUE (bundle_id, market_product_id)"
+constraint,public,ai_bundle_items,ai_bundle_items_market_product_id_fkey,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+constraint,public,ai_bundle_items,ai_bundle_items_pkey,PRIMARY KEY (id)
+constraint,public,ai_bundle_items,ai_bundle_items_quantity_check,CHECK (quantity > 0)
+constraint,public,ai_bundle_items,ai_bundle_items_role_check,"CHECK (role = ANY (ARRAY['anchor'::text, 'complement'::text, 'consumable'::text, 'accessory'::text, 'component'::text]))"
+constraint,public,ai_bundle_recommendations,ai_bundle_recommendations_bundle_type_check,"CHECK (bundle_type = ANY (ARRAY['set'::text, 'bundle'::text, 'multipack'::text]))"
+constraint,public,ai_bundle_recommendations,ai_bundle_recommendations_decision_action_check,"CHECK (decision_action = ANY (ARRAY['approve'::text, 'review'::text, 'hold'::text, 'reject'::text]))"
+constraint,public,ai_bundle_recommendations,ai_bundle_recommendations_decision_run_id_fkey,FOREIGN KEY (decision_run_id) REFERENCES ai_decision_runs(id) ON DELETE SET NULL
+constraint,public,ai_bundle_recommendations,ai_bundle_recommendations_pkey,PRIMARY KEY (id)
+constraint,public,ai_bundle_recommendations,ai_bundle_recommendations_status_check,"CHECK (status = ANY (ARRAY['candidate'::text, 'reviewing'::text, 'approved'::text, 'rejected'::text, 'sourcing'::text]))"
+constraint,public,ai_ceo_briefs,ai_ceo_briefs_brief_date_key,UNIQUE (brief_date)
+constraint,public,ai_ceo_briefs,ai_ceo_briefs_confidence_check,CHECK (confidence >= 0::numeric AND confidence <= 100::numeric)
+constraint,public,ai_ceo_briefs,ai_ceo_briefs_pkey,PRIMARY KEY (id)
+constraint,public,ai_ceo_briefs,ai_ceo_briefs_status_check,"CHECK (status = ANY (ARRAY['draft'::text, 'review'::text, 'approved'::text, 'executing'::text, 'completed'::text]))"
+constraint,public,ai_decision_runs,ai_decision_runs_approval_status_check,"CHECK (approval_status = ANY (ARRAY['not_required'::text, 'pending'::text, 'approved'::text, 'rejected'::text]))"
+constraint,public,ai_decision_runs,ai_decision_runs_pkey,PRIMARY KEY (id)
+constraint,public,ai_decision_runs,ai_decision_runs_status_check,"CHECK (status = ANY (ARRAY['queued'::text, 'running'::text, 'completed'::text, 'failed'::text]))"
+constraint,public,ai_memory_events,ai_memory_events_confidence_check,CHECK (confidence >= 0::numeric AND confidence <= 100::numeric)
+constraint,public,ai_memory_events,ai_memory_events_pkey,PRIMARY KEY (id)
+constraint,public,ai_product_recommendations,ai_product_recommendations_decision_action_check,"CHECK (decision_action = ANY (ARRAY['approve'::text, 'review'::text, 'hold'::text, 'reject'::text]))"
+constraint,public,ai_product_recommendations,ai_product_recommendations_decision_run_id_fkey,FOREIGN KEY (decision_run_id) REFERENCES ai_decision_runs(id) ON DELETE SET NULL
+constraint,public,ai_product_recommendations,ai_product_recommendations_market_product_id_fkey,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+constraint,public,ai_product_recommendations,ai_product_recommendations_market_product_id_recommendation_key,"UNIQUE (market_product_id, recommendation_type)"
+constraint,public,ai_product_recommendations,ai_product_recommendations_pkey,PRIMARY KEY (id)
+constraint,public,ai_product_recommendations,ai_product_recommendations_recommendation_type_check,"CHECK (recommendation_type = ANY (ARRAY['single'::text, 'set'::text, 'bundle'::text]))"
+constraint,public,ai_product_recommendations,ai_product_recommendations_status_check,"CHECK (status = ANY (ARRAY['candidate'::text, 'reviewing'::text, 'approved'::text, 'rejected'::text, 'sourcing'::text]))"
+constraint,public,ai_workers,ai_workers_automation_level_check,CHECK (automation_level >= 0 AND automation_level <= 5)
+constraint,public,ai_workers,ai_workers_pkey,PRIMARY KEY (id)
+constraint,public,ai_workers,ai_workers_status_check,"CHECK (status = ANY (ARRAY['idle'::text, 'working'::text, 'waiting_approval'::text, 'blocked'::text, 'disabled'::text]))"
+constraint,public,ai_workers,ai_workers_worker_code_key,UNIQUE (worker_code)
+constraint,public,commerce_project_components,commerce_project_components_inbound_shipping_cost_check,CHECK (inbound_shipping_cost >= 0::numeric)
+constraint,public,commerce_project_components,commerce_project_components_pkey,PRIMARY KEY (id)
+constraint,public,commerce_project_components,commerce_project_components_project_id_fkey,FOREIGN KEY (project_id) REFERENCES commerce_projects(id) ON DELETE CASCADE
+constraint,public,commerce_project_components,commerce_project_components_quantity_check,CHECK (quantity > 0)
+constraint,public,commerce_project_components,commerce_project_components_unit_supply_price_check,CHECK (unit_supply_price >= 0::numeric)
+constraint,public,commerce_projects,commerce_projects_advertising_rate_check,CHECK (advertising_rate >= 0::numeric AND advertising_rate <= 1::numeric)
+constraint,public,commerce_projects,commerce_projects_marketplace_fee_rate_check,CHECK (marketplace_fee_rate >= 0::numeric AND marketplace_fee_rate <= 1::numeric)
+constraint,public,commerce_projects,commerce_projects_monthly_sales_units_check,CHECK (monthly_sales_units >= 0)
+constraint,public,commerce_projects,commerce_projects_pkey,PRIMARY KEY (id)
+constraint,public,commerce_projects,commerce_projects_product_type_check,"CHECK (product_type = ANY (ARRAY['SINGLE'::text, 'MULTIPACK'::text, 'BUNDLE'::text]))"
+constraint,public,commerce_projects,commerce_projects_provider_fk,FOREIGN KEY (selected_provider_id) REFERENCES fulfillment_providers(id) ON DELETE SET NULL
+constraint,public,commerce_projects,commerce_projects_safety_stock_rate_check,CHECK (safety_stock_rate >= 0::numeric AND safety_stock_rate <= 5::numeric)
+constraint,public,commerce_projects,commerce_projects_sale_price_check,CHECK (sale_price >= 0::numeric)
+constraint,public,commerce_projects,commerce_projects_status_check,"CHECK (status = ANY (ARRAY['DRAFT'::text, 'ANALYZING'::text, 'APPROVED'::text, 'INBOUND_READY'::text, 'INBOUND'::text, 'SELLING'::text, 'PAUSED'::text]))"
+constraint,public,commerce_timeline_events,commerce_timeline_events_pkey,PRIMARY KEY (id)
+constraint,public,commerce_timeline_events,commerce_timeline_events_workflow_id_fkey,FOREIGN KEY (workflow_id) REFERENCES commerce_workflows(id) ON DELETE CASCADE
+constraint,public,commerce_workflows,commerce_workflows_bundle_recommendation_id_fkey,FOREIGN KEY (bundle_recommendation_id) REFERENCES ai_bundle_recommendations(id) ON DELETE SET NULL
+constraint,public,commerce_workflows,commerce_workflows_check,CHECK (discovery_recommendation_id IS NOT NULL OR bundle_recommendation_id IS NOT NULL)
+constraint,public,commerce_workflows,commerce_workflows_coupang_registration_job_id_fkey,FOREIGN KEY (coupang_registration_job_id) REFERENCES coupang_registration_jobs(id) ON DELETE SET NULL
+constraint,public,commerce_workflows,commerce_workflows_current_stage_check,"CHECK (current_stage = ANY (ARRAY['market_discovered'::text, 'ai_recommended'::text, 'human_approved'::text, 'supplier_mapped'::text, 'quote_selected'::text, 'purchase_approved'::text, 'purchase_ordered'::text, 'three_pl_inbound'::text, 'listing_ready'::text, 'coupang_registered'::text, 'selling'::text, 'learning'::text]))"
+constraint,public,commerce_workflows,commerce_workflows_discovery_recommendation_id_fkey,FOREIGN KEY (discovery_recommendation_id) REFERENCES ai_product_recommendations(id) ON DELETE SET NULL
+constraint,public,commerce_workflows,commerce_workflows_listing_draft_id_fkey,FOREIGN KEY (listing_draft_id) REFERENCES listing_drafts(id) ON DELETE SET NULL
+constraint,public,commerce_workflows,commerce_workflows_pkey,PRIMARY KEY (id)
+constraint,public,commerce_workflows,commerce_workflows_procurement_order_id_fkey,FOREIGN KEY (procurement_order_id) REFERENCES procurement_orders(id) ON DELETE SET NULL
+constraint,public,commerce_workflows,commerce_workflows_status_check,"CHECK (status = ANY (ARRAY['active'::text, 'blocked'::text, 'completed'::text, 'cancelled'::text]))"
+constraint,public,competition_analyses,competition_analyses_competition_score_check,CHECK (competition_score >= 0::numeric AND competition_score <= 100::numeric)
+constraint,public,competition_analyses,competition_analyses_data_confidence_check,CHECK (data_confidence >= 0::numeric AND data_confidence <= 100::numeric)
+constraint,public,competition_analyses,competition_analyses_demand_score_check,CHECK (demand_score >= 0::numeric AND demand_score <= 100::numeric)
+constraint,public,competition_analyses,competition_analyses_differentiation_score_check,CHECK (differentiation_score >= 0::numeric AND differentiation_score <= 100::numeric)
+constraint,public,competition_analyses,competition_analyses_pkey,PRIMARY KEY (id)
+constraint,public,competition_analyses,competition_analyses_price_competitiveness_score_check,CHECK (price_competitiveness_score >= 0::numeric AND price_competitiveness_score <= 100::numeric)
+constraint,public,competition_analyses,competition_analyses_project_id_fkey,FOREIGN KEY (project_id) REFERENCES commerce_projects(id) ON DELETE CASCADE
+constraint,public,competition_analyses,competition_analyses_review_barrier_score_check,CHECK (review_barrier_score >= 0::numeric AND review_barrier_score <= 100::numeric)
+constraint,public,coupang_registration_attempts,coupang_registration_attempts_action_check,"CHECK (action = ANY (ARRAY['validate'::text, 'submit'::text, 'retry'::text, 'cancel'::text, 'sync'::text]))"
+constraint,public,coupang_registration_attempts,coupang_registration_attempts_job_id_attempt_no_key,"UNIQUE (job_id, attempt_no)"
+constraint,public,coupang_registration_attempts,coupang_registration_attempts_job_id_fkey,FOREIGN KEY (job_id) REFERENCES coupang_registration_jobs(id) ON DELETE CASCADE
+constraint,public,coupang_registration_attempts,coupang_registration_attempts_pkey,PRIMARY KEY (id)
+constraint,public,coupang_registration_jobs,coupang_registration_jobs_listing_draft_id_fkey,FOREIGN KEY (listing_draft_id) REFERENCES listing_drafts(id) ON DELETE CASCADE
+constraint,public,coupang_registration_jobs,coupang_registration_jobs_listing_draft_id_key,UNIQUE (listing_draft_id)
+constraint,public,coupang_registration_jobs,coupang_registration_jobs_mode_check,"CHECK (mode = ANY (ARRAY['validate'::text, 'live'::text]))"
+constraint,public,coupang_registration_jobs,coupang_registration_jobs_pkey,PRIMARY KEY (id)
+constraint,public,coupang_registration_jobs,coupang_registration_jobs_status_check,"CHECK (status = ANY (ARRAY['queued'::text, 'validating'::text, 'validation_failed'::text, 'ready'::text, 'submitting'::text, 'submitted'::text, 'registered'::text, 'failed'::text, 'cancelled'::text]))"
+constraint,public,coupang_registration_jobs,coupang_registration_jobs_workflow_id_fkey,FOREIGN KEY (workflow_id) REFERENCES commerce_workflows(id) ON DELETE CASCADE
+constraint,public,coupang_seller_product_snapshots,coupang_seller_product_snapshots_pkey,PRIMARY KEY (id)
+constraint,public,domestic_supplier_products,domestic_supplier_products_bundle_recommendation_id_fkey,FOREIGN KEY (bundle_recommendation_id) REFERENCES ai_bundle_recommendations(id) ON DELETE SET NULL
+constraint,public,domestic_supplier_products,domestic_supplier_products_check,CHECK (discovery_recommendation_id IS NOT NULL OR bundle_recommendation_id IS NOT NULL)
+constraint,public,domestic_supplier_products,domestic_supplier_products_discovery_recommendation_id_fkey,FOREIGN KEY (discovery_recommendation_id) REFERENCES ai_product_recommendations(id) ON DELETE SET NULL
+constraint,public,domestic_supplier_products,domestic_supplier_products_mapping_status_check,"CHECK (mapping_status = ANY (ARRAY['active'::text, 'paused'::text, 'rejected'::text]))"
+constraint,public,domestic_supplier_products,domestic_supplier_products_minimum_order_quantity_check,CHECK (minimum_order_quantity > 0)
+constraint,public,domestic_supplier_products,domestic_supplier_products_pkey,PRIMARY KEY (id)
+constraint,public,domestic_supplier_products,domestic_supplier_products_provider_check,"CHECK (provider = ANY (ARRAY['domeggook'::text, 'domeme'::text, 'ownerclan'::text, 'manual'::text]))"
+constraint,public,domestic_supplier_products,domestic_supplier_products_stock_status_check,"CHECK (stock_status = ANY (ARRAY['in_stock'::text, 'low_stock'::text, 'out_of_stock'::text, 'unknown'::text]))"
+constraint,public,domestic_supplier_products,domestic_supplier_products_supplier_id_fkey,FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE CASCADE
+constraint,public,fulfillment_providers,fulfillment_providers_coupang_inbound_fee_check,CHECK (coupang_inbound_fee >= 0::numeric)
+constraint,public,fulfillment_providers,fulfillment_providers_kitting_fee_check,CHECK (kitting_fee >= 0::numeric)
+constraint,public,fulfillment_providers,fulfillment_providers_lead_time_days_check,CHECK (lead_time_days >= 0)
+constraint,public,fulfillment_providers,fulfillment_providers_outbound_fee_check,CHECK (outbound_fee >= 0::numeric)
+constraint,public,fulfillment_providers,fulfillment_providers_packaging_fee_check,CHECK (packaging_fee >= 0::numeric)
+constraint,public,fulfillment_providers,fulfillment_providers_picking_fee_check,CHECK (picking_fee >= 0::numeric)
+constraint,public,fulfillment_providers,fulfillment_providers_pkey,PRIMARY KEY (id)
+constraint,public,fulfillment_providers,fulfillment_providers_provider_code_key,UNIQUE (provider_code)
+constraint,public,fulfillment_providers,fulfillment_providers_receiving_fee_check,CHECK (receiving_fee >= 0::numeric)
+constraint,public,fulfillment_providers,fulfillment_providers_return_handling_fee_check,CHECK (return_handling_fee >= 0::numeric)
+constraint,public,fulfillment_providers,fulfillment_providers_storage_fee_per_unit_check,CHECK (storage_fee_per_unit >= 0::numeric)
+constraint,public,inbound_orders,inbound_orders_defective_quantity_check,CHECK (defective_quantity >= 0)
+constraint,public,inbound_orders,inbound_orders_pkey,PRIMARY KEY (id)
+constraint,public,inbound_orders,inbound_orders_planned_quantity_check,CHECK (planned_quantity >= 0)
+constraint,public,inbound_orders,inbound_orders_project_id_fkey,FOREIGN KEY (project_id) REFERENCES commerce_projects(id) ON DELETE CASCADE
+constraint,public,inbound_orders,inbound_orders_provider_id_fkey,FOREIGN KEY (provider_id) REFERENCES fulfillment_providers(id) ON DELETE SET NULL
+constraint,public,inbound_orders,inbound_orders_received_quantity_check,CHECK (received_quantity >= 0)
+constraint,public,inbound_orders,inbound_orders_status_check,"CHECK (status = ANY (ARRAY['DRAFT'::text, 'ORDERED'::text, 'SUPPLIER_SHIPPED'::text, '3PL_RECEIVED'::text, 'INSPECTING'::text, 'KITTING'::text, 'READY_FOR_COUPANG'::text, 'COUPANG_SHIPPED'::text, 'COUPANG_RECEIVED'::text, 'CANCELLED'::text]))"
+constraint,public,inventory_balances,inventory_balances_available_quantity_check,CHECK (available_quantity >= 0)
+constraint,public,inventory_balances,inventory_balances_inbound_quantity_check,CHECK (inbound_quantity >= 0)
+constraint,public,inventory_balances,inventory_balances_pkey,PRIMARY KEY (id)
+constraint,public,inventory_balances,inventory_balances_project_id_fkey,FOREIGN KEY (project_id) REFERENCES commerce_projects(id) ON DELETE CASCADE
+constraint,public,inventory_balances,inventory_balances_project_id_product_id_provider_id_key,"UNIQUE (project_id, product_id, provider_id)"
+constraint,public,inventory_balances,inventory_balances_provider_id_fkey,FOREIGN KEY (provider_id) REFERENCES fulfillment_providers(id) ON DELETE SET NULL
+constraint,public,inventory_balances,inventory_balances_reserved_quantity_check,CHECK (reserved_quantity >= 0)
+constraint,public,inventory_balances,inventory_balances_safety_stock_quantity_check,CHECK (safety_stock_quantity >= 0)
+constraint,public,knowledge_assets,knowledge_assets_asset_type_check,"CHECK (asset_type = ANY (ARRAY['sop'::text, 'prompt'::text, 'experiment'::text, 'success_case'::text, 'failure_case'::text, 'policy'::text, 'playbook'::text]))"
+constraint,public,knowledge_assets,knowledge_assets_pkey,PRIMARY KEY (id)
+constraint,public,knowledge_assets,knowledge_assets_status_check,"CHECK (status = ANY (ARRAY['draft'::text, 'active'::text, 'archived'::text]))"
+constraint,public,listing_draft_revisions,listing_draft_revisions_listing_draft_id_fkey,FOREIGN KEY (listing_draft_id) REFERENCES listing_drafts(id) ON DELETE CASCADE
+constraint,public,listing_draft_revisions,listing_draft_revisions_listing_draft_id_revision_key,"UNIQUE (listing_draft_id, revision)"
+constraint,public,listing_draft_revisions,listing_draft_revisions_pkey,PRIMARY KEY (id)
+constraint,public,listing_drafts,listing_drafts_bundle_recommendation_id_fkey,FOREIGN KEY (bundle_recommendation_id) REFERENCES ai_bundle_recommendations(id) ON DELETE SET NULL
+constraint,public,listing_drafts,listing_drafts_discovery_recommendation_id_fkey,FOREIGN KEY (discovery_recommendation_id) REFERENCES ai_product_recommendations(id) ON DELETE SET NULL
+constraint,public,listing_drafts,listing_drafts_listing_type_check,"CHECK (listing_type = ANY (ARRAY['single'::text, 'set'::text, 'bundle'::text, 'multipack'::text]))"
+constraint,public,listing_drafts,listing_drafts_pkey,PRIMARY KEY (id)
+constraint,public,listing_drafts,listing_drafts_procurement_order_id_fkey,FOREIGN KEY (procurement_order_id) REFERENCES procurement_orders(id) ON DELETE SET NULL
+constraint,public,listing_drafts,listing_drafts_status_check,"CHECK (status = ANY (ARRAY['draft'::text, 'generated'::text, 'reviewing'::text, 'approved'::text, 'rejected'::text, 'registered'::text]))"
+constraint,public,listing_drafts,listing_drafts_workflow_id_fkey,FOREIGN KEY (workflow_id) REFERENCES commerce_workflows(id) ON DELETE CASCADE
+constraint,public,market_ai_decisions,market_ai_decisions_confidence_check,CHECK (confidence >= 0 AND confidence <= 100)
+constraint,public,market_ai_decisions,market_ai_decisions_market_product_id_fkey,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+constraint,public,market_ai_decisions,market_ai_decisions_pkey,PRIMARY KEY (id)
+constraint,public,market_ai_decisions,market_ai_decisions_recommendation_check,"CHECK (recommendation = ANY (ARRAY['strong_buy'::text, 'buy'::text, 'watch'::text, 'avoid'::text, 'insufficient_data'::text]))"
+constraint,public,market_analysis_runs,market_analysis_runs_pkey,PRIMARY KEY (id)
+constraint,public,market_analysis_runs,market_analysis_runs_status_check,"CHECK (status = ANY (ARRAY['started'::text, 'success'::text, 'partial'::text, 'failed'::text]))"
+constraint,public,market_collection_jobs,market_collection_jobs_collector_key_fkey,FOREIGN KEY (collector_key) REFERENCES market_collectors(collector_key) ON DELETE CASCADE
+constraint,public,market_collection_jobs,market_collection_jobs_collector_key_market_keyword_id_key,"UNIQUE (collector_key, market_keyword_id)"
+constraint,public,market_collection_jobs,market_collection_jobs_interval_minutes_check,CHECK (interval_minutes >= 60)
+constraint,public,market_collection_jobs,market_collection_jobs_market_keyword_id_fkey,FOREIGN KEY (market_keyword_id) REFERENCES market_keywords(id) ON DELETE CASCADE
+constraint,public,market_collection_jobs,market_collection_jobs_pkey,PRIMARY KEY (id)
+constraint,public,market_collection_jobs,market_collection_jobs_priority_check,CHECK (priority >= 0 AND priority <= 100)
+constraint,public,market_collection_jobs,market_collection_jobs_status_check,"CHECK (status = ANY (ARRAY['active'::text, 'paused'::text, 'running'::text, 'cooldown'::text, 'failed'::text]))"
+constraint,public,market_collection_runs,market_collection_runs_keyword_id_fkey,FOREIGN KEY (keyword_id) REFERENCES market_keywords(id) ON DELETE SET NULL
+constraint,public,market_collection_runs,market_collection_runs_pkey,PRIMARY KEY (id)
+constraint,public,market_collection_runs,market_collection_runs_status_check,"CHECK (status = ANY (ARRAY['started'::text, 'success'::text, 'partial'::text, 'failed'::text, 'blocked'::text, 'cooldown'::text]))"
+constraint,public,market_collectors,market_collectors_collector_key_key,UNIQUE (collector_key)
+constraint,public,market_collectors,market_collectors_pkey,PRIMARY KEY (id)
+constraint,public,market_collectors,market_collectors_source_type_check,"CHECK (source_type = ANY (ARRAY['official_api'::text, 'public_observation'::text, 'manual'::text, 'internal'::text, 'demo'::text]))"
+constraint,public,market_collectors,market_collectors_status_check,"CHECK (status = ANY (ARRAY['ready'::text, 'disabled'::text, 'cooldown'::text, 'blocked'::text, 'error'::text]))"
+constraint,public,market_estimates,market_estimates_confidence_check,CHECK (confidence >= 0 AND confidence <= 100)
+constraint,public,market_estimates,market_estimates_market_product_id_fkey,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+constraint,public,market_estimates,market_estimates_pkey,PRIMARY KEY (id)
+constraint,public,market_feature_snapshots,market_feature_snapshots_market_product_id_fkey,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+constraint,public,market_feature_snapshots,market_feature_snapshots_pkey,PRIMARY KEY (id)
+constraint,public,market_feedback_events,market_feedback_events_event_type_check,"CHECK (event_type = ANY (ARRAY['registered'::text, 'sale'::text, 'return'::text, 'ad_spend'::text, 'stockout'::text, 'manual_rating'::text]))"
+constraint,public,market_feedback_events,market_feedback_events_market_product_id_fkey,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE SET NULL
+constraint,public,market_feedback_events,market_feedback_events_pkey,PRIMARY KEY (id)
+constraint,public,market_feedback_events,market_feedback_events_product_id_fkey,FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
+constraint,public,market_keywords,market_keywords_collection_interval_minutes_check,CHECK (collection_interval_minutes >= 60)
+constraint,public,market_keywords,market_keywords_collection_status_check,"CHECK (collection_status = ANY (ARRAY['active'::text, 'paused'::text, 'cooldown'::text, 'blocked'::text]))"
+constraint,public,market_keywords,market_keywords_keyword_key,UNIQUE (keyword)
+constraint,public,market_keywords,market_keywords_pkey,PRIMARY KEY (id)
+constraint,public,market_keywords,market_keywords_priority_check,CHECK (priority >= 0 AND priority <= 100)
+constraint,public,market_model_feedback,market_model_feedback_estimate_id_fkey,FOREIGN KEY (estimate_id) REFERENCES market_estimates(id) ON DELETE SET NULL
+constraint,public,market_model_feedback,market_model_feedback_market_product_id_fkey,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE SET NULL
+constraint,public,market_model_feedback,market_model_feedback_pkey,PRIMARY KEY (id)
+constraint,public,market_model_feedback,market_model_feedback_product_id_fkey,FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
+constraint,public,market_product_links,market_product_links_market_product_id_fkey,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+constraint,public,market_product_links,market_product_links_match_confidence_check,CHECK (match_confidence >= 0 AND match_confidence <= 100)
+constraint,public,market_product_links,market_product_links_match_method_check,"CHECK (match_method = ANY (ARRAY['manual'::text, 'external_id'::text, 'title_similarity'::text, 'ai'::text]))"
+constraint,public,market_product_links,market_product_links_pkey,PRIMARY KEY (id)
+constraint,public,market_product_links,market_product_links_product_id_fkey,FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+constraint,public,market_product_links,market_product_links_product_id_market_product_id_key,"UNIQUE (product_id, market_product_id)"
+constraint,public,market_product_metrics,market_product_metrics_confidence_check,CHECK (confidence >= 0 AND confidence <= 100)
+constraint,public,market_product_metrics,market_product_metrics_market_product_id_fkey,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+constraint,public,market_product_metrics,market_product_metrics_pkey,PRIMARY KEY (market_product_id)
+constraint,public,market_product_metrics,market_product_metrics_recommendation_grade_check,"CHECK (recommendation_grade = ANY (ARRAY['S'::text, 'A'::text, 'B'::text, 'C'::text, 'D'::text]))"
+constraint,public,market_products,market_products_pkey,PRIMARY KEY (id)
+constraint,public,market_products,market_products_source_external_product_id_key,"UNIQUE (source, external_product_id)"
+constraint,public,market_signals,market_signals_market_keyword_id_fkey,FOREIGN KEY (market_keyword_id) REFERENCES market_keywords(id) ON DELETE CASCADE
+constraint,public,market_signals,market_signals_market_product_id_fkey,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+constraint,public,market_signals,market_signals_pkey,PRIMARY KEY (id)
+constraint,public,market_signals,market_signals_severity_check,"CHECK (severity = ANY (ARRAY['low'::text, 'medium'::text, 'high'::text]))"
+constraint,public,market_snapshots,market_snapshots_market_keyword_id_fkey,FOREIGN KEY (market_keyword_id) REFERENCES market_keywords(id) ON DELETE SET NULL
+constraint,public,market_snapshots,market_snapshots_market_product_id_fkey,FOREIGN KEY (market_product_id) REFERENCES market_products(id) ON DELETE CASCADE
+constraint,public,market_snapshots,market_snapshots_pkey,PRIMARY KEY (id)
+constraint,public,marketplace_connections,marketplace_connections_automation_level_check,CHECK (automation_level >= 0 AND automation_level <= 5)
+constraint,public,marketplace_connections,marketplace_connections_marketplace_code_key,UNIQUE (marketplace_code)
+constraint,public,marketplace_connections,marketplace_connections_pkey,PRIMARY KEY (id)
+constraint,public,marketplace_connections,marketplace_connections_status_check,"CHECK (status = ANY (ARRAY['planned'::text, 'configuring'::text, 'connected'::text, 'warning'::text, 'error'::text, 'disabled'::text]))"
+constraint,public,os_command_runs,os_command_runs_assigned_worker_code_fkey,FOREIGN KEY (assigned_worker_code) REFERENCES ai_workers(worker_code) ON DELETE SET NULL
+constraint,public,os_command_runs,os_command_runs_pkey,PRIMARY KEY (id)
+constraint,public,os_command_runs,os_command_runs_progress_check,CHECK (progress >= 0 AND progress <= 100)
+constraint,public,os_command_runs,os_command_runs_status_check,"CHECK (status = ANY (ARRAY['queued'::text, 'running'::text, 'waiting_approval'::text, 'completed'::text, 'failed'::text, 'cancelled'::text]))"
+constraint,public,os_notifications,os_notifications_pkey,PRIMARY KEY (id)
+constraint,public,os_notifications,os_notifications_severity_check,"CHECK (severity = ANY (ARRAY['info'::text, 'success'::text, 'warning'::text, 'error'::text]))"
+constraint,public,procurement_orders,procurement_orders_bundle_recommendation_id_fkey,FOREIGN KEY (bundle_recommendation_id) REFERENCES ai_bundle_recommendations(id) ON DELETE SET NULL
+constraint,public,procurement_orders,procurement_orders_discovery_recommendation_id_fkey,FOREIGN KEY (discovery_recommendation_id) REFERENCES ai_product_recommendations(id) ON DELETE SET NULL
+constraint,public,procurement_orders,procurement_orders_order_number_key,UNIQUE (order_number)
+constraint,public,procurement_orders,procurement_orders_pkey,PRIMARY KEY (id)
+constraint,public,procurement_orders,procurement_orders_quantity_check,CHECK (quantity > 0)
+constraint,public,procurement_orders,procurement_orders_status_check,"CHECK (status = ANY (ARRAY['draft'::text, 'approved'::text, 'ordered'::text, 'supplier_confirmed'::text, 'inbound_planned'::text, 'in_transit'::text, 'received'::text, 'cancelled'::text]))"
+constraint,public,procurement_orders,procurement_orders_supplier_id_fkey,FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE RESTRICT
+constraint,public,procurement_orders,procurement_orders_supplier_product_mapping_id_fkey,FOREIGN KEY (supplier_product_mapping_id) REFERENCES domestic_supplier_products(id) ON DELETE SET NULL
+constraint,public,procurement_orders,procurement_orders_supplier_quote_id_fkey,FOREIGN KEY (supplier_quote_id) REFERENCES supplier_quotes(id) ON DELETE RESTRICT
+constraint,public,products,products_ai_analysis_status_check,"CHECK (ai_analysis_status = ANY (ARRAY['pending'::text, 'analyzing'::text, 'completed'::text, 'failed'::text]))"
+constraint,public,products,products_competition_analysis_status_check,"CHECK (competition_analysis_status = ANY (ARRAY['pending'::text, 'analyzed'::text, 'estimated'::text, 'needs_data'::text, 'failed'::text]))"
+constraint,public,products,products_competition_data_source_check,"CHECK (competition_data_source = ANY (ARRAY['none'::text, 'manual'::text, 'external'::text, 'estimated'::text]))"
+constraint,public,products,products_competition_grade_check,"CHECK (competition_grade = ANY (ARRAY['미분석'::text, 'S'::text, 'A'::text, 'B'::text, 'C'::text, 'D'::text]))"
+constraint,public,products,products_pkey,PRIMARY KEY (id)
+constraint,public,products,products_product_no_key,UNIQUE (product_no)
+constraint,public,products,products_review_status_check,"CHECK (review_status = ANY (ARRAY['unreviewed'::text, 'reviewing'::text, 'sample_candidate'::text, 'approved'::text, 'excluded'::text]))"
+constraint,public,products,products_risk_level_check,"CHECK (risk_level = ANY (ARRAY['unknown'::text, 'low'::text, 'medium'::text, 'high'::text]))"
+constraint,public,profit_snapshots,profit_snapshots_pkey,PRIMARY KEY (id)
+constraint,public,profit_snapshots,profit_snapshots_snapshot_date_key,UNIQUE (snapshot_date)
+constraint,public,revenue_decisions,revenue_decisions_confidence_check,CHECK (confidence >= 0::numeric AND confidence <= 100::numeric)
+constraint,public,revenue_decisions,revenue_decisions_opportunity_id_fkey,FOREIGN KEY (opportunity_id) REFERENCES revenue_opportunities(id) ON DELETE CASCADE
+constraint,public,revenue_decisions,revenue_decisions_pkey,PRIMARY KEY (id)
+constraint,public,revenue_opportunities,revenue_opportunities_ai_confidence_check,CHECK (ai_confidence >= 0::numeric AND ai_confidence <= 100::numeric)
+constraint,public,revenue_opportunities,revenue_opportunities_competition_score_check,CHECK (competition_score >= 0::numeric AND competition_score <= 100::numeric)
+constraint,public,revenue_opportunities,revenue_opportunities_demand_score_check,CHECK (demand_score >= 0::numeric AND demand_score <= 100::numeric)
+constraint,public,revenue_opportunities,revenue_opportunities_listing_score_check,CHECK (listing_score >= 0::numeric AND listing_score <= 100::numeric)
+constraint,public,revenue_opportunities,revenue_opportunities_margin_score_check,CHECK (margin_score >= 0::numeric AND margin_score <= 100::numeric)
+constraint,public,revenue_opportunities,revenue_opportunities_opportunity_code_key,UNIQUE (opportunity_code)
+constraint,public,revenue_opportunities,revenue_opportunities_pkey,PRIMARY KEY (id)
+constraint,public,revenue_opportunities,revenue_opportunities_revenue_score_check,CHECK (revenue_score >= 0::numeric AND revenue_score <= 100::numeric)
+constraint,public,revenue_opportunities,revenue_opportunities_risk_score_check,CHECK (risk_score >= 0::numeric AND risk_score <= 100::numeric)
+constraint,public,revenue_opportunities,revenue_opportunities_status_check,"CHECK (status = ANY (ARRAY['idea'::text, 'candidate'::text, 'evaluating'::text, 'approved'::text, 'content'::text, 'ready'::text, 'published'::text, 'selling'::text, 'learning'::text, 'rejected'::text, 'archived'::text]))"
+constraint,public,revenue_opportunities,revenue_opportunities_supply_score_check,CHECK (supply_score >= 0::numeric AND supply_score <= 100::numeric)
+constraint,public,revenue_snapshots,revenue_snapshots_pkey,PRIMARY KEY (id)
+constraint,public,revenue_snapshots,revenue_snapshots_snapshot_date_key,UNIQUE (snapshot_date)
+constraint,public,runtime_jobs,runtime_jobs_job_code_key,UNIQUE (job_code)
+constraint,public,runtime_jobs,runtime_jobs_opportunity_id_fkey,FOREIGN KEY (opportunity_id) REFERENCES revenue_opportunities(id) ON DELETE SET NULL
+constraint,public,runtime_jobs,runtime_jobs_pkey,PRIMARY KEY (id)
+constraint,public,runtime_jobs,runtime_jobs_priority_check,CHECK (priority >= 0 AND priority <= 100)
+constraint,public,runtime_jobs,runtime_jobs_status_check,"CHECK (status = ANY (ARRAY['queued'::text, 'running'::text, 'waiting'::text, 'completed'::text, 'failed'::text, 'retry'::text, 'archived'::text]))"
+constraint,public,sourcing_decisions,sourcing_decisions_decision_check,"CHECK (decision = ANY (ARRAY['approve'::text, 'review'::text, 'reject'::text]))"
+constraint,public,sourcing_decisions,sourcing_decisions_pkey,PRIMARY KEY (id)
+constraint,public,sourcing_decisions,sourcing_decisions_supplier_quote_id_fkey,FOREIGN KEY (supplier_quote_id) REFERENCES supplier_quotes(id) ON DELETE CASCADE
+constraint,public,supplier_quotes,supplier_quotes_bundle_recommendation_id_fkey,FOREIGN KEY (bundle_recommendation_id) REFERENCES ai_bundle_recommendations(id) ON DELETE SET NULL
+constraint,public,supplier_quotes,supplier_quotes_check,CHECK (discovery_recommendation_id IS NOT NULL OR bundle_recommendation_id IS NOT NULL)
+constraint,public,supplier_quotes,supplier_quotes_currency_check,"CHECK (currency = ANY (ARRAY['KRW'::text, 'USD'::text, 'CNY'::text]))"
+constraint,public,supplier_quotes,supplier_quotes_discovery_recommendation_id_fkey,FOREIGN KEY (discovery_recommendation_id) REFERENCES ai_product_recommendations(id) ON DELETE SET NULL
+constraint,public,supplier_quotes,supplier_quotes_moq_check,CHECK (moq > 0)
+constraint,public,supplier_quotes,supplier_quotes_pkey,PRIMARY KEY (id)
+constraint,public,supplier_quotes,supplier_quotes_status_check,"CHECK (status = ANY (ARRAY['draft'::text, 'requested'::text, 'received'::text, 'selected'::text, 'rejected'::text, 'expired'::text]))"
+constraint,public,supplier_quotes,supplier_quotes_supplier_id_fkey,FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE CASCADE
+constraint,public,suppliers,suppliers_channel_check,"CHECK (channel = ANY (ARRAY['domestic_wholesale'::text, 'consignment'::text, 'oem'::text, 'import'::text, 'manual'::text]))"
+constraint,public,suppliers,suppliers_pkey,PRIMARY KEY (id)
+constraint,public,suppliers,suppliers_status_check,"CHECK (status = ANY (ARRAY['active'::text, 'paused'::text, 'blocked'::text]))"
+constraint,public,system_health_checks,system_health_checks_pkey,PRIMARY KEY (id)
+constraint,public,system_health_checks,system_health_checks_status_check,"CHECK (status = ANY (ARRAY['ok'::text, 'warning'::text, 'error'::text, 'unknown'::text]))"
+constraint,public,system_releases,system_releases_pkey,PRIMARY KEY (id)
+constraint,public,system_releases,system_releases_status_check,"CHECK (status = ANY (ARRAY['planned'::text, 'building'::text, 'verifying'::text, 'released'::text, 'rolled_back'::text, 'failed'::text]))"
+constraint,public,system_releases,system_releases_version_key,UNIQUE (version)
+constraint,public,three_pl_inbound_plans,three_pl_inbound_plans_expected_quantity_check,CHECK (expected_quantity > 0)
+constraint,public,three_pl_inbound_plans,three_pl_inbound_plans_pkey,PRIMARY KEY (id)
+constraint,public,three_pl_inbound_plans,three_pl_inbound_plans_procurement_order_id_fkey,FOREIGN KEY (procurement_order_id) REFERENCES procurement_orders(id) ON DELETE CASCADE
+constraint,public,three_pl_inbound_plans,three_pl_inbound_plans_received_quantity_check,CHECK (received_quantity >= 0)
+constraint,public,three_pl_inbound_plans,three_pl_inbound_plans_status_check,"CHECK (status = ANY (ARRAY['planned'::text, 'booked'::text, 'in_transit'::text, 'partially_received'::text, 'received'::text, 'cancelled'::text]))"
+constraint,public,worker_runtime_events,worker_runtime_events_event_type_check,"CHECK (event_type = ANY (ARRAY['claimed'::text, 'started'::text, 'progress'::text, 'completed'::text, 'failed'::text, 'retry'::text, 'cancelled'::text]))"
+constraint,public,worker_runtime_events,worker_runtime_events_opportunity_id_fkey,FOREIGN KEY (opportunity_id) REFERENCES revenue_opportunities(id) ON DELETE SET NULL
+constraint,public,worker_runtime_events,worker_runtime_events_pkey,PRIMARY KEY (id)
+constraint,public,worker_runtime_events,worker_runtime_events_runtime_job_id_fkey,FOREIGN KEY (runtime_job_id) REFERENCES runtime_jobs(id) ON DELETE CASCADE
+constraint,public,workflow_outbox_events,workflow_outbox_events_pkey,PRIMARY KEY (id)
+constraint,public,workflow_outbox_events,workflow_outbox_events_status_check,"CHECK (status = ANY (ARRAY['pending'::text, 'processing'::text, 'sent'::text, 'failed'::text, 'cancelled'::text]))"
+constraint,public,workflow_outbox_events,workflow_outbox_events_workflow_id_fkey,FOREIGN KEY (workflow_id) REFERENCES commerce_workflows(id) ON DELETE CASCADE
+constraint,public,workflow_tasks,workflow_tasks_pkey,PRIMARY KEY (id)
+constraint,public,workflow_tasks,workflow_tasks_priority_check,CHECK (priority >= 0 AND priority <= 100)
+constraint,public,workflow_tasks,workflow_tasks_status_check,"CHECK (status = ANY (ARRAY['open'::text, 'in_progress'::text, 'done'::text, 'cancelled'::text, 'blocked'::text]))"
+constraint,public,workflow_tasks,workflow_tasks_workflow_id_fkey,FOREIGN KEY (workflow_id) REFERENCES commerce_workflows(id) ON DELETE CASCADE
+constraint,public,workflow_tasks,workflow_tasks_workflow_id_stage_task_type_key,"UNIQUE (workflow_id, stage, task_type)"
+constraint,public,workflow_transitions,workflow_transitions_pkey,PRIMARY KEY (id)
+constraint,public,workflow_transitions,workflow_transitions_workflow_id_fkey,FOREIGN KEY (workflow_id) REFERENCES commerce_workflows(id) ON DELETE CASCADE
+index,public,ai_bundle_items,ai_bundle_items_bundle_id_market_product_id_key,"CREATE UNIQUE INDEX ai_bundle_items_bundle_id_market_product_id_key ON public.ai_bundle_items USING btree (bundle_id, market_product_id)"
+index,public,ai_bundle_items,ai_bundle_items_bundle_idx,"CREATE INDEX ai_bundle_items_bundle_idx ON public.ai_bundle_items USING btree (bundle_id, item_order)"
+index,public,ai_bundle_items,ai_bundle_items_pkey,CREATE UNIQUE INDEX ai_bundle_items_pkey ON public.ai_bundle_items USING btree (id)
+index,public,ai_bundle_recommendations,ai_bundle_recommendations_decision_idx,"CREATE INDEX ai_bundle_recommendations_decision_idx ON public.ai_bundle_recommendations USING btree (decision_action, decision_score DESC)"
+index,public,ai_bundle_recommendations,ai_bundle_recommendations_pkey,CREATE UNIQUE INDEX ai_bundle_recommendations_pkey ON public.ai_bundle_recommendations USING btree (id)
+index,public,ai_bundle_recommendations,ai_bundle_recommendations_score_idx,"CREATE INDEX ai_bundle_recommendations_score_idx ON public.ai_bundle_recommendations USING btree (ai_score DESC, generated_at DESC)"
+index,public,ai_ceo_briefs,ai_ceo_briefs_brief_date_key,CREATE UNIQUE INDEX ai_ceo_briefs_brief_date_key ON public.ai_ceo_briefs USING btree (brief_date)
+index,public,ai_ceo_briefs,ai_ceo_briefs_date_idx,CREATE INDEX ai_ceo_briefs_date_idx ON public.ai_ceo_briefs USING btree (brief_date DESC)
+index,public,ai_ceo_briefs,ai_ceo_briefs_pkey,CREATE UNIQUE INDEX ai_ceo_briefs_pkey ON public.ai_ceo_briefs USING btree (id)
+index,public,ai_decision_runs,ai_decision_runs_pkey,CREATE UNIQUE INDEX ai_decision_runs_pkey ON public.ai_decision_runs USING btree (id)
+index,public,ai_decision_runs,ai_decision_runs_started_idx,CREATE INDEX ai_decision_runs_started_idx ON public.ai_decision_runs USING btree (started_at DESC)
+index,public,ai_memory_events,ai_memory_events_pkey,CREATE UNIQUE INDEX ai_memory_events_pkey ON public.ai_memory_events USING btree (id)
+index,public,ai_memory_events,ai_memory_events_subject_idx,"CREATE INDEX ai_memory_events_subject_idx ON public.ai_memory_events USING btree (subject_type, subject_id, created_at DESC)"
+index,public,ai_product_recommendations,ai_product_recommendations_decision_idx,"CREATE INDEX ai_product_recommendations_decision_idx ON public.ai_product_recommendations USING btree (decision_action, decision_score DESC)"
+index,public,ai_product_recommendations,ai_product_recommendations_market_product_id_recommendation_key,"CREATE UNIQUE INDEX ai_product_recommendations_market_product_id_recommendation_key ON public.ai_product_recommendations USING btree (market_product_id, recommendation_type)"
+index,public,ai_product_recommendations,ai_product_recommendations_pkey,CREATE UNIQUE INDEX ai_product_recommendations_pkey ON public.ai_product_recommendations USING btree (id)
+index,public,ai_product_recommendations,ai_product_recommendations_score_idx,"CREATE INDEX ai_product_recommendations_score_idx ON public.ai_product_recommendations USING btree (ai_score DESC, generated_at DESC)"
+index,public,ai_workers,ai_workers_pkey,CREATE UNIQUE INDEX ai_workers_pkey ON public.ai_workers USING btree (id)
+index,public,ai_workers,ai_workers_status_idx,"CREATE INDEX ai_workers_status_idx ON public.ai_workers USING btree (status, last_activity_at DESC)"
+index,public,ai_workers,ai_workers_worker_code_key,CREATE UNIQUE INDEX ai_workers_worker_code_key ON public.ai_workers USING btree (worker_code)
+index,public,commerce_project_components,commerce_project_components_pkey,CREATE UNIQUE INDEX commerce_project_components_pkey ON public.commerce_project_components USING btree (id)
+index,public,commerce_project_components,commerce_project_components_project_idx,CREATE INDEX commerce_project_components_project_idx ON public.commerce_project_components USING btree (project_id)
+index,public,commerce_projects,commerce_projects_pkey,CREATE UNIQUE INDEX commerce_projects_pkey ON public.commerce_projects USING btree (id)
+index,public,commerce_projects,commerce_projects_provider_idx,CREATE INDEX commerce_projects_provider_idx ON public.commerce_projects USING btree (selected_provider_id)
+index,public,commerce_projects,commerce_projects_status_idx,CREATE INDEX commerce_projects_status_idx ON public.commerce_projects USING btree (status)
+index,public,commerce_timeline_events,commerce_timeline_events_pkey,CREATE UNIQUE INDEX commerce_timeline_events_pkey ON public.commerce_timeline_events USING btree (id)
+index,public,commerce_timeline_events,idx_timeline_workflow,"CREATE INDEX idx_timeline_workflow ON public.commerce_timeline_events USING btree (workflow_id, created_at DESC)"
+index,public,commerce_workflows,commerce_workflows_pkey,CREATE UNIQUE INDEX commerce_workflows_pkey ON public.commerce_workflows USING btree (id)
+index,public,commerce_workflows,idx_commerce_workflows_code,CREATE UNIQUE INDEX idx_commerce_workflows_code ON public.commerce_workflows USING btree (workflow_code)
+index,public,commerce_workflows,idx_workflows_stage,"CREATE INDEX idx_workflows_stage ON public.commerce_workflows USING btree (current_stage, updated_at DESC)"
+index,public,competition_analyses,competition_analyses_pkey,CREATE UNIQUE INDEX competition_analyses_pkey ON public.competition_analyses USING btree (id)
+index,public,competition_analyses,competition_analyses_project_idx,CREATE INDEX competition_analyses_project_idx ON public.competition_analyses USING btree (project_id)
+index,public,coupang_registration_attempts,coupang_registration_attempts_job_id_attempt_no_key,"CREATE UNIQUE INDEX coupang_registration_attempts_job_id_attempt_no_key ON public.coupang_registration_attempts USING btree (job_id, attempt_no)"
+index,public,coupang_registration_attempts,coupang_registration_attempts_pkey,CREATE UNIQUE INDEX coupang_registration_attempts_pkey ON public.coupang_registration_attempts USING btree (id)
+index,public,coupang_registration_attempts,idx_coupang_attempts_job,"CREATE INDEX idx_coupang_attempts_job ON public.coupang_registration_attempts USING btree (job_id, created_at DESC)"
+index,public,coupang_registration_jobs,coupang_registration_jobs_listing_draft_id_key,CREATE UNIQUE INDEX coupang_registration_jobs_listing_draft_id_key ON public.coupang_registration_jobs USING btree (listing_draft_id)
+index,public,coupang_registration_jobs,coupang_registration_jobs_pkey,CREATE UNIQUE INDEX coupang_registration_jobs_pkey ON public.coupang_registration_jobs USING btree (id)
+index,public,coupang_registration_jobs,idx_coupang_jobs_code,CREATE UNIQUE INDEX idx_coupang_jobs_code ON public.coupang_registration_jobs USING btree (job_code)
+index,public,coupang_registration_jobs,idx_coupang_jobs_queue,"CREATE INDEX idx_coupang_jobs_queue ON public.coupang_registration_jobs USING btree (status, updated_at DESC)"
+index,public,coupang_registration_jobs,idx_coupang_jobs_workflow,"CREATE INDEX idx_coupang_jobs_workflow ON public.coupang_registration_jobs USING btree (workflow_id, updated_at DESC)"
+index,public,coupang_seller_product_snapshots,coupang_seller_product_snapshots_pkey,CREATE UNIQUE INDEX coupang_seller_product_snapshots_pkey ON public.coupang_seller_product_snapshots USING btree (id)
+index,public,coupang_seller_product_snapshots,idx_coupang_product_snapshots_product,"CREATE INDEX idx_coupang_product_snapshots_product ON public.coupang_seller_product_snapshots USING btree (seller_product_id, observed_at DESC)"
+index,public,domestic_supplier_products,domestic_supplier_products_pkey,CREATE UNIQUE INDEX domestic_supplier_products_pkey ON public.domestic_supplier_products USING btree (id)
+index,public,domestic_supplier_products,idx_domestic_supplier_products_candidate,"CREATE INDEX idx_domestic_supplier_products_candidate ON public.domestic_supplier_products USING btree (discovery_recommendation_id, bundle_recommendation_id)"
+index,public,fulfillment_providers,fulfillment_providers_pkey,CREATE UNIQUE INDEX fulfillment_providers_pkey ON public.fulfillment_providers USING btree (id)
+index,public,fulfillment_providers,fulfillment_providers_provider_code_key,CREATE UNIQUE INDEX fulfillment_providers_provider_code_key ON public.fulfillment_providers USING btree (provider_code)
+index,public,inbound_orders,inbound_orders_pkey,CREATE UNIQUE INDEX inbound_orders_pkey ON public.inbound_orders USING btree (id)
+index,public,inbound_orders,inbound_orders_project_idx,CREATE INDEX inbound_orders_project_idx ON public.inbound_orders USING btree (project_id)
+index,public,inbound_orders,inbound_orders_provider_idx,CREATE INDEX inbound_orders_provider_idx ON public.inbound_orders USING btree (provider_id)
+index,public,inventory_balances,inventory_balances_pkey,CREATE UNIQUE INDEX inventory_balances_pkey ON public.inventory_balances USING btree (id)
+index,public,inventory_balances,inventory_balances_project_id_product_id_provider_id_key,"CREATE UNIQUE INDEX inventory_balances_project_id_product_id_provider_id_key ON public.inventory_balances USING btree (project_id, product_id, provider_id)"
+index,public,inventory_balances,inventory_balances_project_idx,CREATE INDEX inventory_balances_project_idx ON public.inventory_balances USING btree (project_id)
+index,public,knowledge_assets,knowledge_assets_pkey,CREATE UNIQUE INDEX knowledge_assets_pkey ON public.knowledge_assets USING btree (id)
+index,public,knowledge_assets,knowledge_assets_type_idx,"CREATE INDEX knowledge_assets_type_idx ON public.knowledge_assets USING btree (asset_type, status, updated_at DESC)"
+index,public,listing_draft_revisions,idx_listing_revisions_draft,"CREATE INDEX idx_listing_revisions_draft ON public.listing_draft_revisions USING btree (listing_draft_id, revision DESC)"
+index,public,listing_draft_revisions,listing_draft_revisions_listing_draft_id_revision_key,"CREATE UNIQUE INDEX listing_draft_revisions_listing_draft_id_revision_key ON public.listing_draft_revisions USING btree (listing_draft_id, revision)"
+index,public,listing_draft_revisions,listing_draft_revisions_pkey,CREATE UNIQUE INDEX listing_draft_revisions_pkey ON public.listing_draft_revisions USING btree (id)
+index,public,listing_drafts,idx_listing_drafts_status,"CREATE INDEX idx_listing_drafts_status ON public.listing_drafts USING btree (status, updated_at DESC)"
+index,public,listing_drafts,idx_listing_drafts_workflow,"CREATE INDEX idx_listing_drafts_workflow ON public.listing_drafts USING btree (workflow_id, created_at DESC)"
+index,public,listing_drafts,listing_drafts_pkey,CREATE UNIQUE INDEX listing_drafts_pkey ON public.listing_drafts USING btree (id)
+index,public,market_ai_decisions,market_ai_decisions_pkey,CREATE UNIQUE INDEX market_ai_decisions_pkey ON public.market_ai_decisions USING btree (id)
+index,public,market_ai_decisions,market_ai_decisions_product_created_idx,"CREATE INDEX market_ai_decisions_product_created_idx ON public.market_ai_decisions USING btree (market_product_id, created_at DESC)"
+index,public,market_analysis_runs,market_analysis_runs_pkey,CREATE UNIQUE INDEX market_analysis_runs_pkey ON public.market_analysis_runs USING btree (id)
+index,public,market_collection_jobs,market_collection_jobs_collector_key_market_keyword_id_key,"CREATE UNIQUE INDEX market_collection_jobs_collector_key_market_keyword_id_key ON public.market_collection_jobs USING btree (collector_key, market_keyword_id)"
+index,public,market_collection_jobs,market_collection_jobs_due_idx,"CREATE INDEX market_collection_jobs_due_idx ON public.market_collection_jobs USING btree (status, next_run_at, priority DESC)"
+index,public,market_collection_jobs,market_collection_jobs_pkey,CREATE UNIQUE INDEX market_collection_jobs_pkey ON public.market_collection_jobs USING btree (id)
+index,public,market_collection_runs,market_collection_runs_pkey,CREATE UNIQUE INDEX market_collection_runs_pkey ON public.market_collection_runs USING btree (id)
+index,public,market_collectors,market_collectors_collector_key_key,CREATE UNIQUE INDEX market_collectors_collector_key_key ON public.market_collectors USING btree (collector_key)
+index,public,market_collectors,market_collectors_pkey,CREATE UNIQUE INDEX market_collectors_pkey ON public.market_collectors USING btree (id)
+index,public,market_estimates,market_estimates_pkey,CREATE UNIQUE INDEX market_estimates_pkey ON public.market_estimates USING btree (id)
+index,public,market_estimates,market_estimates_product_created_idx,"CREATE INDEX market_estimates_product_created_idx ON public.market_estimates USING btree (market_product_id, created_at DESC)"
+index,public,market_feature_snapshots,market_feature_snapshots_pkey,CREATE UNIQUE INDEX market_feature_snapshots_pkey ON public.market_feature_snapshots USING btree (id)
+index,public,market_feature_snapshots,market_feature_snapshots_product_time_idx,"CREATE INDEX market_feature_snapshots_product_time_idx ON public.market_feature_snapshots USING btree (market_product_id, calculated_at DESC)"
+index,public,market_feedback_events,market_feedback_events_pkey,CREATE UNIQUE INDEX market_feedback_events_pkey ON public.market_feedback_events USING btree (id)
+index,public,market_feedback_events,market_feedback_events_product_time_idx,"CREATE INDEX market_feedback_events_product_time_idx ON public.market_feedback_events USING btree (market_product_id, event_at DESC)"
+index,public,market_keywords,market_keywords_keyword_key,CREATE UNIQUE INDEX market_keywords_keyword_key ON public.market_keywords USING btree (keyword)
+index,public,market_keywords,market_keywords_pkey,CREATE UNIQUE INDEX market_keywords_pkey ON public.market_keywords USING btree (id)
+index,public,market_model_feedback,market_model_feedback_pkey,CREATE UNIQUE INDEX market_model_feedback_pkey ON public.market_model_feedback USING btree (id)
+index,public,market_product_links,market_product_links_pkey,CREATE UNIQUE INDEX market_product_links_pkey ON public.market_product_links USING btree (id)
+index,public,market_product_links,market_product_links_product_id_market_product_id_key,"CREATE UNIQUE INDEX market_product_links_product_id_market_product_id_key ON public.market_product_links USING btree (product_id, market_product_id)"
+index,public,market_product_metrics,market_product_metrics_opportunity_idx,"CREATE INDEX market_product_metrics_opportunity_idx ON public.market_product_metrics USING btree (opportunity_score DESC, confidence DESC)"
+index,public,market_product_metrics,market_product_metrics_pkey,CREATE UNIQUE INDEX market_product_metrics_pkey ON public.market_product_metrics USING btree (market_product_id)
+index,public,market_products,market_products_pkey,CREATE UNIQUE INDEX market_products_pkey ON public.market_products USING btree (id)
+index,public,market_products,market_products_source_external_product_id_key,"CREATE UNIQUE INDEX market_products_source_external_product_id_key ON public.market_products USING btree (source, external_product_id)"
+index,public,market_signals,market_signals_pkey,CREATE UNIQUE INDEX market_signals_pkey ON public.market_signals USING btree (id)
+index,public,market_signals,market_signals_unresolved_idx,CREATE INDEX market_signals_unresolved_idx ON public.market_signals USING btree (detected_at DESC) WHERE (resolved_at IS NULL)
+index,public,market_snapshots,market_snapshots_keyword_time_idx,"CREATE INDEX market_snapshots_keyword_time_idx ON public.market_snapshots USING btree (market_keyword_id, observed_at DESC)"
+index,public,market_snapshots,market_snapshots_pkey,CREATE UNIQUE INDEX market_snapshots_pkey ON public.market_snapshots USING btree (id)
+index,public,market_snapshots,market_snapshots_product_time_idx,"CREATE INDEX market_snapshots_product_time_idx ON public.market_snapshots USING btree (market_product_id, observed_at DESC)"
+index,public,marketplace_connections,marketplace_connections_marketplace_code_key,CREATE UNIQUE INDEX marketplace_connections_marketplace_code_key ON public.marketplace_connections USING btree (marketplace_code)
+index,public,marketplace_connections,marketplace_connections_pkey,CREATE UNIQUE INDEX marketplace_connections_pkey ON public.marketplace_connections USING btree (id)
+index,public,marketplace_connections,marketplace_connections_status_idx,"CREATE INDEX marketplace_connections_status_idx ON public.marketplace_connections USING btree (status, marketplace_code)"
+index,public,os_command_runs,os_command_runs_pkey,CREATE UNIQUE INDEX os_command_runs_pkey ON public.os_command_runs USING btree (id)
+index,public,os_command_runs,os_command_runs_queue_idx,"CREATE INDEX os_command_runs_queue_idx ON public.os_command_runs USING btree (status, created_at DESC)"
+index,public,os_command_runs,os_command_runs_worker_idx,"CREATE INDEX os_command_runs_worker_idx ON public.os_command_runs USING btree (assigned_worker_code, created_at DESC)"
+index,public,os_notifications,os_notifications_pkey,CREATE UNIQUE INDEX os_notifications_pkey ON public.os_notifications USING btree (id)
+index,public,os_notifications,os_notifications_unread_idx,"CREATE INDEX os_notifications_unread_idx ON public.os_notifications USING btree (is_read, created_at DESC)"
+index,public,procurement_orders,idx_procurement_orders_status,"CREATE INDEX idx_procurement_orders_status ON public.procurement_orders USING btree (status, created_at DESC)"
+index,public,procurement_orders,procurement_orders_order_number_key,CREATE UNIQUE INDEX procurement_orders_order_number_key ON public.procurement_orders USING btree (order_number)
+index,public,procurement_orders,procurement_orders_pkey,CREATE UNIQUE INDEX procurement_orders_pkey ON public.procurement_orders USING btree (id)
+index,public,products,products_ai_score_idx,CREATE INDEX products_ai_score_idx ON public.products USING btree (ai_score DESC)
+index,public,products,products_competition_grade_score_idx,"CREATE INDEX products_competition_grade_score_idx ON public.products USING btree (competition_grade, competition_score DESC)"
+index,public,products,products_competition_score_idx,CREATE INDEX products_competition_score_idx ON public.products USING btree (competition_score DESC)
+index,public,products,products_competition_status_idx,"CREATE INDEX products_competition_status_idx ON public.products USING btree (competition_analysis_status, updated_at DESC)"
+index,public,products,products_is_favorite_idx,CREATE INDEX products_is_favorite_idx ON public.products USING btree (is_favorite)
+index,public,products,products_pkey,CREATE UNIQUE INDEX products_pkey ON public.products USING btree (id)
+index,public,products,products_product_no_key,CREATE UNIQUE INDEX products_product_no_key ON public.products USING btree (product_no)
+index,public,products,products_review_status_idx,CREATE INDEX products_review_status_idx ON public.products USING btree (review_status)
+index,public,products,products_updated_at_idx,CREATE INDEX products_updated_at_idx ON public.products USING btree (updated_at DESC)
+index,public,profit_snapshots,profit_snapshots_pkey,CREATE UNIQUE INDEX profit_snapshots_pkey ON public.profit_snapshots USING btree (id)
+index,public,profit_snapshots,profit_snapshots_snapshot_date_key,CREATE UNIQUE INDEX profit_snapshots_snapshot_date_key ON public.profit_snapshots USING btree (snapshot_date)
+index,public,revenue_decisions,revenue_decisions_opportunity_idx,"CREATE INDEX revenue_decisions_opportunity_idx ON public.revenue_decisions USING btree (opportunity_id, created_at DESC)"
+index,public,revenue_decisions,revenue_decisions_pkey,CREATE UNIQUE INDEX revenue_decisions_pkey ON public.revenue_decisions USING btree (id)
+index,public,revenue_opportunities,revenue_opportunities_opportunity_code_key,CREATE UNIQUE INDEX revenue_opportunities_opportunity_code_key ON public.revenue_opportunities USING btree (opportunity_code)
+index,public,revenue_opportunities,revenue_opportunities_pkey,CREATE UNIQUE INDEX revenue_opportunities_pkey ON public.revenue_opportunities USING btree (id)
+index,public,revenue_opportunities,revenue_opportunities_score_idx,"CREATE INDEX revenue_opportunities_score_idx ON public.revenue_opportunities USING btree (revenue_score DESC, created_at DESC)"
+index,public,revenue_opportunities,revenue_opportunities_status_idx,"CREATE INDEX revenue_opportunities_status_idx ON public.revenue_opportunities USING btree (status, updated_at DESC)"
+index,public,revenue_snapshots,revenue_snapshots_date_idx,CREATE INDEX revenue_snapshots_date_idx ON public.revenue_snapshots USING btree (snapshot_date DESC)
+index,public,revenue_snapshots,revenue_snapshots_pkey,CREATE UNIQUE INDEX revenue_snapshots_pkey ON public.revenue_snapshots USING btree (id)
+index,public,revenue_snapshots,revenue_snapshots_snapshot_date_key,CREATE UNIQUE INDEX revenue_snapshots_snapshot_date_key ON public.revenue_snapshots USING btree (snapshot_date)
+index,public,runtime_jobs,runtime_jobs_job_code_key,CREATE UNIQUE INDEX runtime_jobs_job_code_key ON public.runtime_jobs USING btree (job_code)
+index,public,runtime_jobs,runtime_jobs_pkey,CREATE UNIQUE INDEX runtime_jobs_pkey ON public.runtime_jobs USING btree (id)
+index,public,runtime_jobs,runtime_jobs_queue_idx,"CREATE INDEX runtime_jobs_queue_idx ON public.runtime_jobs USING btree (status, priority DESC, scheduled_at)"
+index,public,sourcing_decisions,idx_sourcing_decisions_quote,"CREATE INDEX idx_sourcing_decisions_quote ON public.sourcing_decisions USING btree (supplier_quote_id, calculated_at DESC)"
+index,public,sourcing_decisions,sourcing_decisions_pkey,CREATE UNIQUE INDEX sourcing_decisions_pkey ON public.sourcing_decisions USING btree (id)
+index,public,supplier_quotes,idx_supplier_quotes_bundle,CREATE INDEX idx_supplier_quotes_bundle ON public.supplier_quotes USING btree (bundle_recommendation_id)
+index,public,supplier_quotes,idx_supplier_quotes_single,CREATE INDEX idx_supplier_quotes_single ON public.supplier_quotes USING btree (discovery_recommendation_id)
+index,public,supplier_quotes,idx_supplier_quotes_supplier,CREATE INDEX idx_supplier_quotes_supplier ON public.supplier_quotes USING btree (supplier_id)
+index,public,supplier_quotes,supplier_quotes_pkey,CREATE UNIQUE INDEX supplier_quotes_pkey ON public.supplier_quotes USING btree (id)
+index,public,suppliers,suppliers_pkey,CREATE UNIQUE INDEX suppliers_pkey ON public.suppliers USING btree (id)
+index,public,system_health_checks,system_health_checks_component_idx,"CREATE INDEX system_health_checks_component_idx ON public.system_health_checks USING btree (component, checked_at DESC)"
+index,public,system_health_checks,system_health_checks_pkey,CREATE UNIQUE INDEX system_health_checks_pkey ON public.system_health_checks USING btree (id)
+index,public,system_releases,system_releases_pkey,CREATE UNIQUE INDEX system_releases_pkey ON public.system_releases USING btree (id)
+index,public,system_releases,system_releases_status_idx,"CREATE INDEX system_releases_status_idx ON public.system_releases USING btree (status, created_at DESC)"
+index,public,system_releases,system_releases_version_key,CREATE UNIQUE INDEX system_releases_version_key ON public.system_releases USING btree (version)
+index,public,three_pl_inbound_plans,idx_inbound_plans_order,CREATE INDEX idx_inbound_plans_order ON public.three_pl_inbound_plans USING btree (procurement_order_id)
+index,public,three_pl_inbound_plans,three_pl_inbound_plans_pkey,CREATE UNIQUE INDEX three_pl_inbound_plans_pkey ON public.three_pl_inbound_plans USING btree (id)
+index,public,worker_runtime_events,worker_runtime_events_job_idx,"CREATE INDEX worker_runtime_events_job_idx ON public.worker_runtime_events USING btree (runtime_job_id, created_at DESC)"
+index,public,worker_runtime_events,worker_runtime_events_pkey,CREATE UNIQUE INDEX worker_runtime_events_pkey ON public.worker_runtime_events USING btree (id)
+index,public,worker_runtime_events,worker_runtime_events_worker_idx,"CREATE INDEX worker_runtime_events_worker_idx ON public.worker_runtime_events USING btree (worker_code, created_at DESC)"
+index,public,workflow_outbox_events,idx_workflow_outbox_pending,"CREATE INDEX idx_workflow_outbox_pending ON public.workflow_outbox_events USING btree (status, available_at)"
+index,public,workflow_outbox_events,workflow_outbox_events_pkey,CREATE UNIQUE INDEX workflow_outbox_events_pkey ON public.workflow_outbox_events USING btree (id)
+index,public,workflow_tasks,idx_workflow_tasks_queue,"CREATE INDEX idx_workflow_tasks_queue ON public.workflow_tasks USING btree (status, priority DESC, due_at)"
+index,public,workflow_tasks,workflow_tasks_pkey,CREATE UNIQUE INDEX workflow_tasks_pkey ON public.workflow_tasks USING btree (id)
+index,public,workflow_tasks,workflow_tasks_workflow_id_stage_task_type_key,"CREATE UNIQUE INDEX workflow_tasks_workflow_id_stage_task_type_key ON public.workflow_tasks USING btree (workflow_id, stage, task_type)"
+index,public,workflow_transitions,idx_workflow_transitions_idempotency,CREATE UNIQUE INDEX idx_workflow_transitions_idempotency ON public.workflow_transitions USING btree (idempotency_key) WHERE (idempotency_key IS NOT NULL)
+index,public,workflow_transitions,idx_workflow_transitions_workflow,"CREATE INDEX idx_workflow_transitions_workflow ON public.workflow_transitions USING btree (workflow_id, created_at DESC)"
+index,public,workflow_transitions,workflow_transitions_pkey,CREATE UNIQUE INDEX workflow_transitions_pkey ON public.workflow_transitions USING btree (id)
+policy,public,ai_bundle_items,dev_ai_bundle_items_all,PERMISSIVE|public|ALL|true|true
+policy,public,ai_bundle_recommendations,dev_ai_bundle_recommendations_all,PERMISSIVE|public|ALL|true|true
+policy,public,ai_ceo_briefs,dev_ai_ceo_briefs_all,PERMISSIVE|public|ALL|true|true
+policy,public,ai_decision_runs,dev_ai_decision_runs_all,PERMISSIVE|public|ALL|true|true
+policy,public,ai_memory_events,dev_ai_memory_events_all,PERMISSIVE|public|ALL|true|true
+policy,public,ai_product_recommendations,dev_ai_product_recommendations_all,PERMISSIVE|public|ALL|true|true
+policy,public,ai_workers,dev_ai_workers_all,PERMISSIVE|public|ALL|true|true
+policy,public,commerce_project_components,v4_dev_all_components,"PERMISSIVE|anon,authenticated|ALL|true|true"
+policy,public,commerce_projects,v4_dev_all_commerce_projects,"PERMISSIVE|anon,authenticated|ALL|true|true"
+policy,public,commerce_timeline_events,dev commerce timeline all,PERMISSIVE|public|ALL|true|true
+policy,public,commerce_workflows,dev commerce workflows all,PERMISSIVE|public|ALL|true|true
+policy,public,competition_analyses,v4_dev_all_competition,"PERMISSIVE|anon,authenticated|ALL|true|true"
+policy,public,coupang_registration_attempts,dev coupang attempts all,PERMISSIVE|public|ALL|true|true
+policy,public,coupang_registration_jobs,dev coupang jobs all,PERMISSIVE|public|ALL|true|true
+policy,public,coupang_seller_product_snapshots,dev coupang snapshots all,PERMISSIVE|public|ALL|true|true
+policy,public,domestic_supplier_products,dev domestic supplier products all,PERMISSIVE|public|ALL|true|true
+policy,public,fulfillment_providers,v4_dev_all_providers,"PERMISSIVE|anon,authenticated|ALL|true|true"
+policy,public,inbound_orders,v4_dev_all_inbound,"PERMISSIVE|anon,authenticated|ALL|true|true"
+policy,public,inventory_balances,v4_dev_all_inventory,"PERMISSIVE|anon,authenticated|ALL|true|true"
+policy,public,knowledge_assets,dev_knowledge_assets_all,PERMISSIVE|public|ALL|true|true
+policy,public,listing_draft_revisions,dev listing revisions all,PERMISSIVE|public|ALL|true|true
+policy,public,listing_drafts,dev listing drafts all,PERMISSIVE|public|ALL|true|true
+policy,public,market_ai_decisions,dev_market_ai_decisions_all,PERMISSIVE|public|ALL|true|true
+policy,public,market_analysis_runs,dev_market_analysis_runs_all,PERMISSIVE|public|ALL|true|true
+policy,public,market_collection_jobs,dev_market_collection_jobs_all,PERMISSIVE|public|ALL|true|true
+policy,public,market_collection_runs,dev_market_collection_runs_all,PERMISSIVE|public|ALL|true|true
+policy,public,market_collectors,dev_market_collectors_all,PERMISSIVE|public|ALL|true|true
+policy,public,market_estimates,dev_market_estimates_all,PERMISSIVE|public|ALL|true|true
+policy,public,market_feature_snapshots,dev_market_feature_snapshots_all,PERMISSIVE|public|ALL|true|true
+policy,public,market_feedback_events,dev_market_feedback_events_all,PERMISSIVE|public|ALL|true|true
+policy,public,market_keywords,dev_market_keywords_all,PERMISSIVE|public|ALL|true|true
+policy,public,market_model_feedback,dev_market_model_feedback_all,PERMISSIVE|public|ALL|true|true
+policy,public,market_product_links,dev_market_product_links_all,PERMISSIVE|public|ALL|true|true
+policy,public,market_product_metrics,dev_market_product_metrics_all,PERMISSIVE|public|ALL|true|true
+policy,public,market_products,dev_market_products_all,PERMISSIVE|public|ALL|true|true
+policy,public,market_signals,dev_market_signals_all,PERMISSIVE|public|ALL|true|true
+policy,public,market_snapshots,dev_market_snapshots_all,PERMISSIVE|public|ALL|true|true
+policy,public,marketplace_connections,dev_marketplace_connections_all,PERMISSIVE|public|ALL|true|true
+policy,public,os_command_runs,dev_os_command_runs_all,PERMISSIVE|public|ALL|true|true
+policy,public,os_notifications,dev_os_notifications_all,PERMISSIVE|public|ALL|true|true
+policy,public,procurement_orders,dev procurement orders all,PERMISSIVE|public|ALL|true|true
+policy,public,products,Allow public insert products,PERMISSIVE|anon|INSERT||true
+policy,public,products,Allow public read products,PERMISSIVE|anon|SELECT|true|
+policy,public,products,Allow public update products,PERMISSIVE|anon|UPDATE|true|true
+policy,public,profit_snapshots,dev_profit_snapshots_all,PERMISSIVE|public|ALL|true|true
+policy,public,revenue_decisions,dev_revenue_decisions_all,PERMISSIVE|public|ALL|true|true
+policy,public,revenue_opportunities,dev_revenue_opportunities_all,PERMISSIVE|public|ALL|true|true
+policy,public,revenue_snapshots,dev_revenue_snapshots_all,PERMISSIVE|public|ALL|true|true
+policy,public,runtime_jobs,dev_runtime_jobs_all,PERMISSIVE|public|ALL|true|true
+policy,public,sourcing_decisions,dev sourcing decisions all,PERMISSIVE|public|ALL|true|true
+policy,public,supplier_quotes,dev supplier quotes all,PERMISSIVE|public|ALL|true|true
+policy,public,suppliers,dev suppliers all,PERMISSIVE|public|ALL|true|true
+policy,public,system_health_checks,dev_system_health_checks_all,PERMISSIVE|public|ALL|true|true
+policy,public,system_releases,dev_system_releases_all,PERMISSIVE|public|ALL|true|true
+policy,public,three_pl_inbound_plans,dev inbound plans all,PERMISSIVE|public|ALL|true|true
+policy,public,worker_runtime_events,dev_worker_runtime_events_all,PERMISSIVE|public|ALL|true|true
+policy,public,workflow_outbox_events,dev workflow outbox all,PERMISSIVE|public|ALL|true|true
+policy,public,workflow_tasks,dev workflow tasks all,PERMISSIVE|public|ALL|true|true
+policy,public,workflow_transitions,dev workflow transitions all,PERMISSIVE|public|ALL|true|true

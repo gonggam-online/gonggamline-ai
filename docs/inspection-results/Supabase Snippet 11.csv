@@ -1,0 +1,7 @@
+table_name,policy_name,permissive,roles,cmd,qual,with_check
+commerce_project_components,v4_dev_all_components,PERMISSIVE,"{anon,authenticated}",ALL,true,true
+commerce_projects,v4_dev_all_commerce_projects,PERMISSIVE,"{anon,authenticated}",ALL,true,true
+competition_analyses,v4_dev_all_competition,PERMISSIVE,"{anon,authenticated}",ALL,true,true
+fulfillment_providers,v4_dev_all_providers,PERMISSIVE,"{anon,authenticated}",ALL,true,true
+inbound_orders,v4_dev_all_inbound,PERMISSIVE,"{anon,authenticated}",ALL,true,true
+inventory_balances,v4_dev_all_inventory,PERMISSIVE,"{anon,authenticated}",ALL,true,true

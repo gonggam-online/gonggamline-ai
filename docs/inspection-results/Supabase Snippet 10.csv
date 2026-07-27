@@ -1,0 +1,4 @@
+policy_name,permissive,roles,cmd,qual,with_check
+Allow public insert products,PERMISSIVE,{anon},INSERT,null,true
+Allow public read products,PERMISSIVE,{anon},SELECT,true,null
+Allow public update products,PERMISSIVE,{anon},UPDATE,true,true
