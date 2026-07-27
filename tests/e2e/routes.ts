@@ -21,6 +21,7 @@ export const revenueCriticalRoutes = ["/", "/revenue", "/competition", "/discove
 
 export const apiRoutes = [
   "/api/health/runtime",
+  "/api/integrations/domeggook/health",
   "/api/products",
   "/api/dashboard/revenue",
 ] as const;

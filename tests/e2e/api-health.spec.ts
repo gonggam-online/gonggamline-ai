@@ -8,6 +8,25 @@ test("runtime health is operational", async ({ request }) => {
   expect(JSON.stringify(body)).not.toMatch(/stack|password|secret|token/i);
 });
 
+test("Domeggook health is sanitized and network-free by default", async ({
+  request,
+}) => {
+  const response = await request.get("/api/integrations/domeggook/health");
+  expect([200, 503]).toContain(response.status());
+  const body: unknown = await response.json();
+  expect(body).toMatchObject({
+    ok: expect.any(Boolean),
+    provider: "domeggook",
+    configuration: expect.stringMatching(/^(configured|missing)$/),
+    authentication: "cannot_verify",
+    reachable: "cannot_verify",
+    checkedAt: expect.any(String),
+  });
+  expect(JSON.stringify(body)).not.toMatch(
+    /api[_-]?key|stack|password|secret|token|query/i,
+  );
+});
+
 test("products API returns a safe array", async ({ request }) => {
   const response = await request.get("/api/products");
   expect(response.status()).toBe(200);
