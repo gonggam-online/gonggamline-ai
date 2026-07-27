@@ -2,6 +2,52 @@
 
 ## Current task snapshot
 
+- Objective: prepare a read-only deployed Supabase catalog inspection package
+  and an implementation-ready restoration design without contacting Supabase,
+  executing SQL, or changing migrations/application behavior.
+- Branch: `codex/chore/supabase-deployed-schema-inspection`.
+- Prerequisites: PR #26 and PR #27 are merged; local `main` was confirmed equal
+  to `origin/main` before branch creation.
+- Risk: high-risk/manual because the design covers schema, migration history,
+  and RLS. The diff is evidence-only; `manual-merge-required` and no auto-merge
+  are mandatory.
+- Revenue impact: P0 database/security provenance. Verified deployed state is
+  required before safely restoring the schema that supports sales workflows.
+- Root-cause class: database evidence gap.
+- Scope: thirteen SELECT-only inspections, operator runbook/intake template,
+  classification/decision framework, expected-object inventory, restoration
+  paths, and application access map.
+- Non-goals: execute SQL, contact Supabase, read business rows, modify or create
+  official migrations, change application behavior, insert migration history,
+  or deploy historical development RLS.
+- Completed: prerequisite/branch verification; governance, baseline, migration,
+  and application inspection; draft package and design; initial static
+  SELECT-only and protected-path checks.
+- Current work: final diff review and Git delivery.
+- Blockers/owner actions: all deployed classifications remain `UNKNOWN` pending
+  operator outputs for each environment; SQL Editor timestamps and actual
+  migration metadata runner/format remain unresolved.
+- Changed files: requested docs and deployed-inspection sources, task changelog,
+  and this status file only.
+- Commands/results: no SQL executed and no Supabase contact. Thirteen SQL files
+  contain 25 SELECT statements, no non-SELECT statement, and none of the
+  forbidden mutating keywords after comments are removed. Protected migration
+  and application diff is empty; `git diff --check` passes. Standard lint is
+  polluted by ignored generated Playwright assets; scoped lint passes with four
+  pre-existing warnings. Typecheck passes; tests pass 217/217; build passes
+  with 68 routes. Local Playwright is unchanged at 32/39 with seven known
+  Supabase-unconfigured route failures. Dependency audit reports 12 existing
+  high-severity transitive advisories; suggested fixes are breaking and were
+  not applied.
+- Delivery: commit, push, draft PR, label, and Preview remain pending.
+- Exact next action: review the complete diff, commit, push, and open the draft
+  high-risk PR without auto-merge.
+- Remaining risks: deployed state and chronology are unproven; all application
+  database access uses the public anon client; historical and Git development
+  policies are not accepted as Production least privilege.
+
+## Current task snapshot
+
 - Objective: export and reconcile the operator-provided SQL Editor baseline
   against the Git migration chain without executing SQL or changing migrations,
   application behavior, deployed databases, or Git history.
