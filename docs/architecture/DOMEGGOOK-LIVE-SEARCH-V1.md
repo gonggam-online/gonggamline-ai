@@ -101,4 +101,3 @@ compatibility Story.
 Roll out additively behind its own route and page. Rollback removes the new
 route/page/tests; the existing adapter, health endpoint, and legacy flow remain
 untouched. No data or provider rollback is required.
-
