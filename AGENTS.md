@@ -8,7 +8,13 @@ This version has breaking changes. Read the relevant guide in `node_modules/next
 
 Build the smallest reliable autonomous AI commerce system that accelerates real sales, measurable profit, operational automation, and the path to KRW 100,000,000 stable monthly revenue. System completion is a means, not the objective.
 
-Read `.ai/README.md` and every relevant `.ai` document before implementation. Work only in this repository and on the current non-`main` branch. Never clone, create a temporary workspace, force-push, delete branches, reset hard, expose secrets, or overwrite user work.
+Read `.ai/README.md` and every relevant `.ai` document before implementation.
+Apply `.ai/CODEX_OPERATING_STANDARD.md` on every PC and in every Codex session.
+Work only in this repository and on a task-appropriate non-`main` branch. When
+the user does not name a branch, safely continue a matching branch or create a
+new `codex/<type>/<task-slug>` branch. Never clone, create a temporary
+workspace, force-push, delete branches, reset hard, expose secrets, or overwrite
+user work.
 
 # Mandatory Codex Task Protocol
 
@@ -41,7 +47,8 @@ Do not compensate in code for an external or database failure. Never invent an e
 Every task begins conceptually with these requirements:
 
 - Work only in the current repository; read this file and relevant `.ai` documents first.
-- Confirm the current branch is not `main` and the working tree is safe.
+- Confirm the working tree is safe, then select or create the task branch under
+  `.ai/CODEX_OPERATING_STANDARD.md`; never implement on `main`.
 - Never create a temporary workspace, clone the repository, or modify/push `main` directly.
 - Preserve functionality and never expose or commit secrets.
 - Prioritize work that accelerates actual sales and profit; avoid over-engineering.
@@ -62,6 +69,23 @@ Every task ends with all applicable steps:
 7. Wait for the exact Vercel Preview, validate pages/APIs/console/page errors/failed requests with Playwright, and upload failure evidence.
 8. After merge, wait for Production and run health/API/browser smoke checks.
 9. Report branch, commits, push/PR/merge status, risk, lint/typecheck/tests/build, Preview and Production results, routes, console errors, failed requests, artifacts, blockers, revenue impact, and next highest-value tasks.
+
+Routine normal-risk delivery does not require a separate owner prompt: commit,
+push, create/update the PR, and enable native auto-merge when every binding gate
+passes. High-risk, Production, database, RLS/auth, secret/configuration,
+commerce-write, paid, or destructive work always retains the applicable manual
+approval boundary.
+
+Give user-facing progress updates and final summaries in Korean unless the user
+requests another language. Show progress as completed verifiable steps divided
+by total planned steps; never estimate it from elapsed time. Keep code,
+identifiers, commands, logs, and external API text in their required language.
+
+In a local Windows Codex session, run
+`.codex/notify.ps1 -Event approval` immediately before a blocking owner-approval
+request and `.codex/notify.ps1 -Event complete` after the task reaches its real
+terminal state. Notification failure is non-blocking and must be reported
+briefly.
 
 See `.ai/development-protocol.md`, `.ai/delivery-protocol.md`, and `.ai/browser-validation.md` for binding details.
 
