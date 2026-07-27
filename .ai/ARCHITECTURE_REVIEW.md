@@ -56,6 +56,23 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 - Decision record:
   [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-27--domeggook-live-search-v1).
 
+### 2026-07-27 — Item Selection Evaluation v1
+
+- Status: approved by repository-owner task directive.
+- Boundary: Supplier / Procurement Item Selection application use case, with
+  Revenue remaining the financial-rule owner.
+- Public API / Database / Lifecycle: contracts approved for later ordered
+  implementation; no runtime route, migration, or Production change is
+  authorized by this documentation PR.
+- Existing Live Search: remains bounded, read-only, and persistence-free.
+- Risk: normal-risk for this documentation-only Architecture Story. Later
+  financial, auth/RLS, migration, and Production Stories are high-risk/manual.
+- Implementation authorization: limited to the ordered Stories and
+  prerequisites in
+  [Item Selection Evaluation v1](../docs/architecture/ITEM-SELECTION-EVALUATION-V1.md#14-implementation-stories).
+- Decision record:
+  [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-27--item-selection-evaluation-v1).
+
 ## Proposed Architecture Stories
 
 ### 2026-07-27 — Sprint B-0 Database Baseline Execution v1
