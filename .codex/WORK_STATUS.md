@@ -54,8 +54,16 @@
   268/268; Production build passes with 69 routes. Local Playwright again
   reaches all 39 tests, with the same 32 passes and seven `missing_url`
   external-configuration failures before the command timeout.
-- Current work: commit and push the reconciliation, correct the PR body, and
-  verify the final exact head.
+- Reconciliation delivery: merge commit
+  `305b3c57ffb3a77717dcf79c66edbbc5d4caa088` is pushed without force. PR #41
+  is mergeable, Draft, and labeled only `manual-merge-required`; its body now
+  records high-risk/manual. Exact-head CI `30349872267` and Preview browser
+  validation `30349871278` pass, Vercel Preview is Ready, and evidence artifact
+  `8684461640` has digest
+  `sha256:c57984165723c20e84e4be54f4067ce40a0cccbb7420bf0f5bf25fe065d10aa8`.
+  Unresolved review threads: 0.
+- Current work: record this final delivery checkpoint and verify the resulting
+  status-only exact head.
 - Blockers/owner actions: none for design/delivery. Implementation requires
   Architecture acceptance plus the explicit decisions in the roadmap.
 - Changed files: `docs/orchestrator/**`, `.ai/DECISION_LOG.md`, this file, and
