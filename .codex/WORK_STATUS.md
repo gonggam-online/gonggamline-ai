@@ -1,5 +1,51 @@
 # Work status
 
+## 2026-07-28 — Item Selection Database Baseline Architecture v1
+
+- Objective: define the database contract required to persist and reproduce
+  Item Selection engine decisions so only engine-selected products can advance
+  toward a first sale.
+- Branch: `codex/docs/item-selection-database-architecture-v1`, based on merged
+  Story 2 squash `7491b239f5935643778330a08ed4b070511c4c7a`.
+- Risk: normal-risk documentation PR; every later migration, RLS, or Production
+  execution remains high-risk/manual.
+- Revenue impact: P1. This is the shortest approved prerequisite to turn the
+  merged evaluator into an auditable operator workflow.
+- Scope: DB/runtime selection, migration baseline, immutable snapshots,
+  provider evidence, exact money/VAT/rate/rounding storage, reproducibility,
+  transaction/idempotency, environment separation, rollback, migration
+  verification, and Story 3 handoff.
+- Non-goals: migration, schema execution, persistence code, API, UI, auth/RLS,
+  CSRF, Production access, Product creation, listing, price, purchasing, order,
+  inventory, fulfillment, or any marketplace write.
+- Root-cause class: database/Architecture prerequisite. Direct operational
+  integration is stopped by the approved Story 3–5 ordering.
+- Completed: verified Story 2 merge and Production smoke; synchronized clean
+  `main`; reread governance and approved Item Selection Architecture; confirmed
+  the evaluator/profitability engine has no approved operating persistence/API
+  path; inspected the baseline gap, recovery plan, migrations, Supabase access,
+  and existing numeric conventions; drafted the Database Architecture.
+- Current: documentation and local gates passed; commit, push, and submit a
+  Draft PR for repository-owner review.
+- Blockers/owner actions: owner acceptance is required. Admin Identity /
+  Authorization / RLS / CSRF Architecture and accepted Sprint B-0 remain
+  prerequisites for Story 3.
+- Changed files: Database Architecture document, Architecture Review index,
+  Decision Log proposal, and this status.
+- Commands/results: initial branch was clean and exactly based on
+  `7491b239f5935643778330a08ed4b070511c4c7a`; no runtime or migration file is
+  changed. `git diff --check`, lint (0 errors, 4 pre-existing test warnings),
+  typecheck, 261/261 unit/integration tests, and Production build passed. The
+  recurring Windows `uv_os_get_passwd ENOMEM` affected the first test launch;
+  ignored `tsx` dependency files were temporarily adjusted, tests passed, and
+  those files were restored without staging.
+- Last commit: `7491b239f5935643778330a08ed4b070511c4c7a`.
+- Exact next action: validate documentation and submit a Draft PR; do not
+  approve, mark Ready, merge, or enable auto-merge.
+- Remaining risks: owner may revise numeric scale, retention, backup, principal,
+  or migration sequencing; no Item Selection persistence can start before the
+  required Architecture acceptances.
+
 ## 2026-07-28 — Item Selection profitability policy v1
 
 - Objective: implement owner-approved profitability policy

@@ -75,6 +75,19 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 
 ## Proposed Architecture Stories
 
+### 2026-07-28 — Item Selection Database Baseline Architecture v1
+
+- Status: Draft; repository-owner review and explicit acceptance required.
+- Boundary: Database / Security contract for immutable Item Selection
+  evaluation history.
+- Decision proposed: retain Supabase Postgres and use exact scaled integers,
+  versioned canonical JSON snapshots, hashes, append-only evaluations, and
+  transactional idempotent finalization.
+- Implementation authorization: none. No migration, database connection,
+  runtime code, API, UI, auth, RLS, or Production execution is authorized.
+- Story:
+  [Item Selection Database Baseline Architecture v1](../docs/architecture/ITEM-SELECTION-DATABASE-BASELINE-V1.md).
+
 ### 2026-07-27 — Sprint B-0 Database Baseline Execution v1
 
 - Status: proposed; repository-owner manual approval required.

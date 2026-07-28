@@ -243,3 +243,26 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Rollback or supersession: revert the Story 2 commit. A future policy must use
   a new version; historical v1 inputs/results must remain reproducible once
   persistence is approved.
+
+
+## 2026-07-28 — Item Selection Database Baseline Architecture v1
+
+- Category: architecture proposal
+- Story / PR: Item Selection Database Baseline Architecture v1 / pending
+- Status: Draft; repository-owner review and explicit acceptance required
+- Owner / approver: Database / Security; repository owner
+- Context and evidence: Item Selection Stories 1–2 are merged, but durable
+  evaluation history is blocked by the pre-003 database baseline gap and the
+  absence of accepted admin identity/RLS contracts.
+- Decision or issue: Propose Supabase Postgres as the existing Vercel-compatible
+  database, with append-only canonical evaluation snapshots, SHA-256 evidence,
+  exact micro-won and parts-per-million integer units, and transactional
+  idempotent run finalization.
+- Consequences and risks: This is documentation only and authorizes no schema
+  or Production action. Later migration/RLS/Production work is high-risk,
+  manual, and depends on accepted Sprint B-0 and Admin Architecture.
+- Follow-up / due condition: Repository owner reviews database suitability,
+  replay completeness, numeric/VAT/rounding safety, migration protection, and
+  Story 3 readiness. Codex must not approve or merge this proposal.
+- Rollback or supersession: Revert the documentation PR or replace it with an
+  explicitly accepted version. No runtime or data rollback is required.
