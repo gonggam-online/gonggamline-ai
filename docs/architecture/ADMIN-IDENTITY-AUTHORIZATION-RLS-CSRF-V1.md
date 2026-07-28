@@ -214,12 +214,12 @@ Administrator lifecycle is fixed as follows:
 
 | Transition | Actor | Required assurance | Preconditions | Result | Session action | Version | Audit / failure |
 |---|---|---|---|---|---|---|---|
-| absent -> `invited` | repository owner through the environment-specific bootstrap runbook, or an active AAL2 admin after bootstrap | owner out-of-band approval or AAL2 | invitation-only Auth user exists; exact environment and `sub` verified | `invited` | revoke any pre-existing sessions | initialize at 1 | `ADMIN_INVITED`; conflict is 409 |
+| absent -> `invited` | repository owner through the environment-specific bootstrap runbook, or an active AAL2 admin after bootstrap | owner out-of-band approval or AAL2 | exact environment/email approved; Admin invitation returns a new exact `sub`; an existing confirmed user conflicts | `invited` | registry starts non-active; no pre-existing-session claim | initialize at 1 | `ADMIN_INVITED`; conflict is 409 |
 | `invited` -> `pending_mfa` | invited subject | AAL1 | invitation accepted and verified `sub` matches | `pending_mfa` | retain only the enrollment session | increment | `ADMIN_INVITE_ACCEPTED`; invalid invitation is 401 |
 | `pending_mfa` -> `active` | same subject | freshly verified AAL2 | TOTP factor enrolled and challenged successfully | `active` | rotate/refresh the session and CSRF token | increment | `ADMIN_ACTIVATED`; missing AAL2 is 403 `MFA_REQUIRED` |
-| `active` -> `suspended` | another active AAL2 admin, or repository-owner break-glass runbook | AAL2 or owner out-of-band | target is not the last active admin | `suspended` | revoke all target sessions and CSRF tokens | increment | `ADMIN_SUSPENDED`; last-admin attempt is 409 |
-| `suspended` -> `invited` | active AAL2 admin or repository owner | AAL2 or owner out-of-band | recovery/re-invitation approved | `invited` | revoke all target sessions and factors | increment | `ADMIN_REINVITED`; invalid state is 409 |
-| non-tombstoned -> `tombstoned` | another active AAL2 admin or repository owner | AAL2 or owner out-of-band | target suspended; not last active admin; retention check passed | `tombstoned` | revoke all sessions/factors | increment | `ADMIN_TOMBSTONED`; invalid state is 409 |
+| `active` -> `suspended` | another active AAL2 admin, or repository-owner break-glass runbook | AAL2 or owner out-of-band | target is not the last active admin | `suspended` | immediately deny old JWT through registry/version, invalidate application CSRF, apply Auth ban; no unsupported sub-only session-delete claim | increment | `ADMIN_SUSPENDED`; last-admin attempt is 409 |
+| `suspended` -> `invited` | active AAL2 admin or repository owner | AAL2 or owner out-of-band | recovery/re-invitation approved | `invited` | delete exact factors through supported Admin MFA API, verify session termination, then unban/re-invite by runbook | increment | `ADMIN_REINVITED`; invalid state is 409 |
+| non-tombstoned -> `tombstoned` | another active AAL2 admin or repository owner | AAL2 or owner out-of-band | target suspended; not last active admin; retention check passed | `tombstoned` | delete exact factors then soft-delete Auth user; old access JWT remains application-denied | increment | `ADMIN_TOMBSTONED`; invalid state is 409 |
 
 An administrator cannot activate, suspend, tombstone, or reset the factor of
 another administrator solely through UI state. Every transition is a reviewed
@@ -230,15 +230,16 @@ forbidden. Email changes do not change the principal because `sub` is the only
 identity key.
 
 The `pending_mfa` activation bootstrap is the single exception to the normal
-active-administrator function precondition. The dedicated
-`private.activate_pending_admin_v1()` `SECURITY DEFINER` RPC:
+active-administrator function precondition. The dedicated internal
+`private.activate_pending_admin_v1()` `SECURITY DEFINER` function, reached
+only through the exposed wrapper `api.activate_pending_admin_v1()`:
 
 - accepts no target subject, role, status, or arbitrary payload; the target is
   always the verified `auth.uid()` of the caller;
-- has EXECUTE granted to `authenticated` only, with EXECUTE revoked from
-  `PUBLIC`, `anon`, `service_role`, and every other login role; its dedicated
-  owner is `NOLOGIN`, is not a runtime principal, and retains no membership
-  grant to an application role;
+- exposes EXECUTE only on the `api` wrapper to `authenticated`; the `private`
+  function has EXECUTE revoked from `PUBLIC`, `anon`, `authenticated`,
+  `service_role`, and every login role. Its dedicated owner is `NOLOGIN`, is
+  not a runtime principal, and retains no application-role membership;
 - requires the registry row for that same subject to be exactly
   `pending_mfa`, locks it, and rejects every other state;
 - requires a freshly issued, cryptographically verified AAL2 JWT with the same
@@ -264,8 +265,11 @@ TOTP and recovery contract:
    is AAL2 before activation.
 2. A normal factor unenroll/re-enroll is allowed only for the same active
    administrator already at AAL2. It increments `authz_version`, revokes all
-   existing access/refresh sessions and CSRF tokens, downgrades the registry to
-   `pending_mfa`, and requires a fresh TOTP challenge before mutation resumes.
+   application authority and CSRF tokens, downgrades the registry to
+   `pending_mfa`, then uses that subject's own JWT with global sign-out to
+   destroy refresh sessions. Issued access JWTs remain cryptographically valid
+   until expiry but fail registry/version checks. A fresh TOTP challenge is
+   required before mutation resumes.
 3. Resetting another administrator's factor is allowed only to another active
    AAL2 administrator, never to the target alone, and produces the same
    suspension, version increment, session/factor revocation, and re-invitation
@@ -275,9 +279,10 @@ TOTP and recovery contract:
 5. Single-administrator lockout uses no application endpoint. The repository
    owner executes an approved environment-specific break-glass runbook that
    records approver, command identifier, target project, and exact `sub`;
-   revokes all factors and sessions; increments `authz_version`; places the
-   subject in `pending_mfa`; and blocks mutation until a new TOTP factor and
-   AAL2 JWT are verified. Preview and Production runbooks and subjects are
+   deletes all exact factors through the supported Admin MFA API and verifies
+   its documented session-termination behavior; increments `authz_version`;
+   places the subject in `pending_mfa`; and blocks mutation until a new TOTP
+   factor and AAL2 JWT are verified. Preview and Production runbooks and subjects are
    separate. Personal email possession alone is insufficient.
 6. Every invite, activation, suspension, tombstone, factor change, failed
    recovery, and break-glass operation emits a sanitized audit event and
@@ -350,9 +355,10 @@ Authorization change and refresh order is normative:
 1. Lock and change the registry status/version first.
 2. Central authorization and `private.is_active_admin()` immediately reject
    every old JWT as `AUTHZ_STALE` or `ADMIN_REVOKED`, even before JWT expiry.
-3. Revoke the affected Supabase refresh sessions/factors as required. Failure
-   to clean them up never restores authorization because the registry mismatch
-   remains authoritative and fail-closed.
+3. Apply only the supported section 11.1 Auth operation: target-JWT global
+   sign-out, verified-factor deletion, Auth ban, or soft-delete. Failure or the
+   absence of a sub-only sign-out never restores application authorization
+   because the registry mismatch remains authoritative and fail-closed.
 4. A legitimate role/status change requiring a new claim performs one explicit
    refresh or reauthentication; background refresh loops are forbidden.
 5. Verify the new JWT issuer, audience, signature, subject, session, assurance,
@@ -468,8 +474,8 @@ Assurance:
 | public static | assets, public landing | none | none | none |
 | public auth bootstrap | sign-in, callback, CSRF bootstrap | pre-auth/state validation | sign-in/logout mutation yes | Auth only |
 | public health | allowlisted sanitized health endpoints | none | none | no row data; separately reviewed safe probe only |
-| admin read | business GET pages/APIs | admin AAL1 | no mutation token | user JWT + admin SELECT RLS |
-| admin mutation | Item Selection, Product/workflow/runtime writes | admin AAL2 | required | user JWT + admin INSERT/UPDATE/RPC |
+| admin read | business GET pages/APIs | admin AAL1 | no mutation token | user JWT + bounded `api` read RPC; internal SELECT RLS |
+| admin mutation | Item Selection, Product/workflow/runtime writes | admin AAL2 | required | user JWT + named `api` mutation RPC |
 | live commerce | Coupang/listing/purchasing external writes | admin AAL2 plus existing domain confirmation | required | separate high-risk contract |
 | webhook/service | any non-browser caller | unsupported in v1 | n/a | denied |
 
@@ -497,8 +503,8 @@ Production target state:
 
 - RLS is enabled and forced where compatible on application-owned tables;
 - `anon` has no table DML on company data;
-- `authenticated` receives SELECT only where listed below and no direct
-  INSERT, UPDATE, or DELETE on protected tables;
+- `authenticated` receives no direct protected-table privilege; bounded read
+  and mutation access is through individually granted `api` wrappers;
 - every company-data policy uses `private.is_active_admin()`;
 - active AAL1 administrators are read-only;
 - every mutation is performed only through a named AAL2-verifying
@@ -534,8 +540,8 @@ Principal matrix for every protected object:
 | `anon` | deny | deny | deny | none |
 | authenticated non-admin | deny | deny | only `activate_pending_admin_v1` when the caller's own row is `pending_mfa`; otherwise deny | exact section 6 bootstrap predicate, never general mutation |
 | revoked/stale admin | deny | deny | deny | status/version mismatch fails |
-| active AAL1 admin | allow only for object rows listed as readable | deny | read-only RPC only | verified admin/version; AAL1 |
-| active AAL2 admin | allow only for object rows listed as readable | deny | only named mutation RPCs | verified admin/version/session; AAL2 |
+| active AAL1 admin | no direct table SELECT | deny | only named read wrappers | verified admin/version; AAL1 |
+| active AAL2 admin | no direct table SELECT | deny | only named read/mutation wrappers | verified admin/version/session; AAL2 |
 | `service_role` | no application data access | prohibited in normal/data paths | no database RPC; server-only Auth Admin API allowlist in section 11.1 only | secret absent from browser, Story 3, SSR, and general data runtime |
 | background worker/service principal | deny | deny | deny | unsupported in v1 |
 
@@ -544,11 +550,11 @@ Protected-object matrix:
 | Object | Direct SELECT | Direct DML | Allowed AAL2 RPC | `USING` / `WITH CHECK` and immutability |
 |---|---|---|---|---|
 | `private.admin_principals` | none through Data API | none | `activate_pending_admin_v1` bootstrap plus individually reviewed invite, suspend, factor-reset, tombstone functions | private schema; bootstrap is self-only; other RPCs require active AAL2; locks rows and protects last active admin |
-| `item_selection_runs` | active admin AAL1/AAL2 | none | `create_item_selection_run_v1`, `finalize_item_selection_run_v1` | SELECT `USING private.is_active_admin()`; no INSERT/UPDATE/DELETE policy; terminal rows immutable; retry creates a new run |
-| `item_selection_evaluations` | active admin AAL1/AAL2 | none | inserted only inside `finalize_item_selection_run_v1` | SELECT `USING private.is_active_admin()`; no INSERT/UPDATE/DELETE policy; finalized rows append-only |
-| run retry/lineage fields | through authorized run SELECT | none | set only by run-create RPC | remains run-level metadata; cannot alter candidate hashes |
-| canonical snapshot/evidence text and JSONB projections | through authorized evaluation SELECT with DTO redaction | none | inserted only by finalization RPC | columns of immutable evaluations, not separate mutable resources; PR #38 authority unchanged |
-| decision result, stage/decision hashes, run/persistence envelope | through authorized run/evaluation SELECT | none | inserted/finalized only by finalization RPC | UPDATE/DELETE denied; PR #38 hash boundaries unchanged |
+| `item_selection_runs` | none through Data API; bounded read wrapper only | none | `read/create/finalize_item_selection_run_v1` wrappers | internal SELECT enforces `private.is_active_admin()`; terminal rows immutable; retry creates a new run |
+| `item_selection_evaluations` | none through Data API; bounded read wrapper only | none | read wrapper plus insert only inside finalization | internal SELECT enforces active admin; finalized rows append-only |
+| run retry/lineage fields | through bounded run-read DTO | none | set only by run-create RPC | remains run-level metadata; cannot alter candidate hashes |
+| canonical snapshot/evidence text and JSONB projections | through bounded evaluation-read DTO with redaction | none | inserted only by finalization RPC | columns of immutable evaluations, not separate mutable resources; PR #38 authority unchanged |
+| decision result, stage/decision hashes, run/persistence envelope | through bounded read DTO | none | inserted/finalized only by finalization RPC | UPDATE/DELETE denied; PR #38 hash boundaries unchanged |
 | `private.security_audit_events` | no direct table SELECT | none | narrow `read_security_audit_v1` for active AAL2 admin; internal append functions only | append-only; direct INSERT/UPDATE/DELETE denied |
 | `private.security_rate_limits` | none | none | internal consume/check function only | no browser-visible rows; bounded atomic updates only inside function |
 
@@ -564,6 +570,65 @@ tables have no INSERT/UPDATE/DELETE grants or policies, so no permissive-policy
 combination can create a mutation path. If a later Architecture permits direct
 UPDATE, it must add a restrictive AAL2 policy plus both `USING` and
 `WITH CHECK`, and the required SELECT policy; v1 does not permit that path.
+
+### 10.1 Exact PostgREST RPC exposure
+
+The Data API exposes a dedicated `api` schema as the protected RPC surface.
+`private` is absent from Dashboard **Integrations -> Data API -> Exposed
+schemas**, `pgrst.db_schemas`, and PostgREST extra search path. It contains all
+tables, authoritative mutation functions, authorization helpers, audit
+objects, and the telemetry write gate. No `private` object is directly
+addressable through `/rest/v1`, `supabase.schema(...)`, or GraphQL.
+
+The `api` schema contains no table, view, sequence, helper, dynamic dispatcher,
+or generic mutation function. It contains only individually named, thin
+wrapper functions such as:
+
+- `api.activate_pending_admin_v1()` ->
+  `private.activate_pending_admin_v1()`;
+- `api.create_item_selection_run_v1(...)` ->
+  `private.create_item_selection_run_v1(...)`;
+- `api.finalize_item_selection_run_v1(...)` ->
+  `private.finalize_item_selection_run_v1(...)`;
+- exact lifecycle and bounded audit-read wrappers accepted by their
+  implementation Stories.
+
+Each wrapper is `SECURITY DEFINER`, owned by a dedicated
+`api_rpc_owner NOLOGIN` role without `SUPERUSER` or `BYPASSRLS`, uses
+`SET search_path = ''`, schema-qualifies its single internal call, accepts and
+returns only the exact typed DTO, and contains no authorization shortcut or
+dynamic SQL. Only `api_rpc_owner` receives `USAGE` on `private` and EXECUTE on
+the exact internal function it wraps; it receives no table privileges and
+cannot call any sibling internal function.
+
+Grant contract:
+
+```sql
+revoke all on schema api from public, anon, authenticated, service_role;
+grant usage on schema api to authenticated;
+revoke execute on all functions in schema api
+  from public, anon, authenticated, service_role;
+grant execute on function api.activate_pending_admin_v1()
+  to authenticated;
+-- grant each other exact signature separately; never ALL ROUTINES.
+
+revoke all on schema private
+  from public, anon, authenticated, service_role;
+revoke execute on all functions in schema private
+  from public, anon, authenticated, service_role;
+grant usage on schema private to api_rpc_owner;
+grant execute on function private.activate_pending_admin_v1()
+  to api_rpc_owner;
+```
+
+Default privileges revoke function EXECUTE from `PUBLIC`, `anon`,
+`authenticated`, and `service_role` in both schemas; migrations re-grant only
+reviewed wrapper signatures. User-JWT clients call
+`supabase.schema("api").rpc("<exact wrapper>")`. Tests prove a permitted
+user-JWT wrapper call reaches the internal predicate, while `anon`,
+`service_role`, wrong-role, and missing/stale/AAL1 claims fail; direct
+`private` schema/function/table calls return schema-not-exposed or permission
+denied. Schema-cache inspection must show only approved `api` signatures.
 
 ## 11. Database functions and service-role boundary
 
@@ -617,12 +682,13 @@ The service-role key:
 ### 11.1 Privileged Supabase Auth control plane
 
 V1 selects option B: a separate server-only Auth control plane is permitted
-because Auth invitations, global session revocation, cross-user factor
+because Auth invitations, supported session invalidation, cross-user factor
 administration, break-glass recovery, and Auth-user disable/delete cannot use
 user-JWT database RLS. Its allowlist is exhaustive:
 
 1. invite an additional administrator Auth user;
-2. revoke every session/refresh token for an exact target subject;
+2. apply a supported session-invalidating lifecycle operation for an exact
+   target subject;
 3. remove/reset another administrator's MFA factors;
 4. execute repository-owner break-glass recovery;
 5. disable or delete an exact Auth user after registry tombstoning approval.
@@ -659,6 +725,47 @@ operation, target, or environment conflicts. Invitation creates the registry
 `invited` intent before sending Auth invitation; delivery failure leaves a
 non-active retryable record. Disable/delete requires pre-existing
 suspended/tombstoned state and never deletes registry or audit history.
+
+The pinned `@supabase/supabase-js@2.110.7` operation map is exact:
+
+| Intent | Exact supported API | Required proof and result |
+|---|---|---|
+| invite | `auth.admin.inviteUserByEmail(email, { redirectTo })` | server secret only; returned `user.id` becomes exact `sub`; wrong redirect/environment fails |
+| enumerate/remove another user's factors | `auth.admin.mfa.listFactors({ userId: sub })`, then `auth.admin.mfa.deleteFactor({ userId: sub, id: factorId })` for each exact factor | pinned API is experimental and must be contract-tested; deleting a verified factor is expected to terminate that user's active sessions |
+| disable/suspend Auth login and refresh | `auth.admin.updateUserById(sub, { ban_duration: "876000h" })` | exact returned user ID must match; a dedicated integration test must prove new sign-in and refresh fail before Production use |
+| soft-delete Auth user | `auth.admin.deleteUser(sub, true)` | only after registry tombstone; exact returned identity/status verified; registry/audit retained |
+| global sign-out when a target JWT is available | `auth.admin.signOut(targetAccessJwt, "global")` | requires that target's valid logged-in JWT; destroys refresh sessions but does not cryptographically revoke issued access JWTs |
+
+The pinned SDK has no supported `sub`-only global session-revoke method:
+`auth.admin.signOut` requires the target access JWT. The application does not
+collect, store, mint, or retrieve another administrator's JWT, so a generic
+“revoke all sessions by target sub” operation is not claimed. A standalone
+session-only revoke is repository-owner runbook-only and may run
+`auth.admin.signOut(jwt, "global")` only when the target voluntarily supplies a
+currently valid JWT through an approved non-logging channel. Without such a
+JWT, the runbook selects a supported lifecycle alternative: registry
+suspension plus Auth ban, verified-factor deletion, or soft-delete. It never
+edits `auth.sessions`/`auth.refresh_tokens` directly or calls undocumented
+endpoints.
+
+Access-JWT denial and refresh-session destruction are separate:
+
+- registry status/version changes immediately block every protected wrapper
+  and internal function even though an issued access JWT remains
+  cryptographically valid until `exp`;
+- global `signOut` destroys refresh sessions but cannot invalidate an issued
+  access JWT before `exp`;
+- verified-factor deletion is the supported factor-reset path that also
+  terminates sessions, subject to pinned integration proof;
+- ban blocks subsequent sign-in/refresh only after its contract test proves
+  that behavior; it is not described as deleting refresh-session rows;
+- soft-delete prevents future Auth use but never substitutes for
+  registry-first application denial.
+
+If any pinned-SDK proof differs in the exact target Supabase project,
+Production activation remains frozen and the operation falls back to the
+repository-owner runbook or a superseding Architecture. No undocumented Auth
+schema write is an allowed fallback.
 
 ## 12. CSRF, origin, CORS, and content contract
 
@@ -909,6 +1016,74 @@ freeze, recovery/backlog replay, seven-year Production retention, backup and
 restore, and Preview/Production separation. A configured but unproven sink is
 not Ready.
 
+### 14.2 Database-enforced telemetry readiness lease
+
+Application flags and Route Handler checks are defense in depth, not the
+authoritative freeze. Each environment database has exactly one private row:
+
+```text
+private.security_write_gate_v1
+  environment             text primary key
+  state                   READY | FROZEN
+  generation              bigint
+  heartbeat_at            timestamptz
+  lease_expires_at        timestamptz
+  provider_receipt_digest text
+  frozen_reason_code      text null
+  recovered_by            uuid null
+  recovered_at            timestamptz null
+```
+
+The row is not in an exposed schema and has no privileges for `PUBLIC`, `anon`,
+`authenticated`, `service_role`, application owners, or `api_rpc_owner`.
+Preview and Production have different rows, databases, provider receipts, and
+writer credentials; `environment` must equal the immutable database setting
+for the target deployment.
+
+The accepted telemetry provider's monitor owns a dedicated per-environment
+`telemetry_gate_writer LOGIN` database credential stored only in its secret
+store. It has no role membership, Data API key, table privilege, or application
+function access. It receives only `USAGE` on `private` plus EXECUTE on the two
+exact signatures below. Through a direct TLS Postgres connection it may
+execute only:
+
+- `private.freeze_security_write_gate_v1(reason_code, generation)` to set
+  `FROZEN` immediately and invalidate the lease;
+- `private.heartbeat_security_write_gate_v1(environment, generation,
+  provider_receipt_digest)` to extend a READY lease only after a durable sink
+  canary receipt, healthy writer authentication, and backlog age <=60 seconds.
+
+Both functions are owned by a separate `telemetry_gate_owner NOLOGIN`, use an
+empty search path, accept bounded allowlisted inputs, and have EXECUTE revoked
+from every other role. The monitor heartbeats every 10 seconds. A heartbeat can
+set `lease_expires_at` to at most database `clock_timestamp() + 30 seconds`;
+caller timestamps are forbidden. Wrong environment, non-monotonic generation,
+missing/invalid provider receipt, or an already frozen generation fails closed.
+
+Recovery never changes FROZEN directly to READY from a heartbeat. After the
+section 14.1 recovery checks and backlog drain succeed, a repository-owner
+runbook records a new monotonically increasing generation through the separate
+`private.recover_security_write_gate_v1(...)` operation, scoped to the exact
+environment and writer identity. Two consecutive healthy 10-second heartbeats
+for that generation are required before the second heartbeat sets READY.
+Recovery, freeze, and heartbeat changes are append-only audited.
+
+`private.assert_security_write_ready_v1()` is called inside every authoritative
+activation, administrator lifecycle, Auth-control-plane registry intent,
+Item Selection create/finalize, and future protected mutation function. It
+locks the exact environment gate row `FOR SHARE` and requires `state=READY`,
+the current generation, non-null receipt digest, `heartbeat_at` within 20
+seconds, and database time strictly before `lease_expires_at`. The assertion
+runs before the first write and again immediately before the final audit/write
+statement; mutation transactions have a five-second statement timeout. Any
+failure raises the same sanitized `SECURITY_WRITE_FROZEN` error and rolls back.
+
+The external monitor writes FROZEN immediately on sink failure. If monitor-to-
+database connectivity also fails, the non-renewable database lease closes the
+direct-RPC path within at most 30 seconds. No application caller, user JWT,
+service role, wrapper owner, or internal mutation owner can renew or bypass the
+lease. A direct PostgREST wrapper call therefore cannot evade telemetry freeze.
+
 ## 15. Error and recovery contract
 
 HTTP behavior:
@@ -932,7 +1107,8 @@ session cookies and requires reauthentication; it does not fall back to anon.
 Revocation procedure:
 
 1. set registry status to `suspended` and increment `authz_version`;
-2. revoke Supabase Auth sessions through the approved owner runbook;
+2. apply Auth ban and, when available, the supported target-JWT global sign-out
+   or verified-factor deletion; never claim a sub-only session API;
 3. verify the old access token fails the active-registry/RLS check;
 4. record the security event;
 5. rotate credentials only if compromise evidence requires it.
@@ -1061,7 +1237,8 @@ Authorization/RLS:
 
 - no-session, anon, authenticated-non-admin, missing-role, wrong-role, revoked,
   stale-version, and malformed-claim denials;
-- positive admin SELECT/INSERT/UPDATE/RPC cases only where mapped;
+- positive admin read/mutation wrapper RPC cases only where mapped; direct
+  protected-table SELECT/INSERT/UPDATE/DELETE remains denied;
 - DELETE denied;
 - direct Data API attempts with the public key denied;
 - every broad development policy removed/superseded in the final state;
@@ -1085,11 +1262,23 @@ Authorization/RLS:
   post-activation claim/CSRF refresh; failure, concurrent activation, replay,
   and attempted activation of another subject are denied;
 - lifecycle bootstrap cannot call or grant general protected-data mutations;
+- only the exposed `api` schema is selectable for protected user-JWT RPCs;
+  `private` remains absent from exposed/extra-search schemas. Exact
+  schema-USAGE, wrapper EXECUTE, private-function revoke, default privilege,
+  `api_rpc_owner`, schema-cache, and user-JWT positive/negative calls match
+  section 10.1;
 - each of the five Auth control-plane operations proves exact caller, target,
   environment, CSRF, rate, idempotency, registry-first revocation, audit, and
   partial-failure behavior; arbitrary Auth Admin API calls, browser imports,
   general-admin break-glass, and service-role use by Story 3/general data paths
   are denied;
+- pinned-project integration proves exact
+  `inviteUserByEmail`, `mfa.listFactors/deleteFactor`,
+  `updateUserById(...ban_duration)`, `deleteUser(..., true)`, and
+  `admin.signOut(targetJwt, "global")` behavior. It proves no target-sub-only
+  global sign-out exists, never stores another user's JWT, distinguishes
+  registry access-JWT denial from refresh-session destruction, and rejects
+  undocumented Auth-schema/API fallback;
 - direct public Auth API factor unenroll followed by an old AAL2 JWT direct RPC
   is denied after the normative 60-second JWT-age boundary; the test records
   maximum exposure and the owner acceptance decision.
@@ -1133,6 +1322,13 @@ Operations:
   automatic protected-write freeze, retention/backup/restore, and strict
   Preview/Production separation; missing or unhealthy sink blocks activation
   and all Production mutations;
+- every activation/lifecycle/Auth-intent/Story 3 mutation succeeds only with a
+  READY, environment-matched, current-generation database lease. Tests cover
+  missing row, FROZEN state, wrong environment, stale heartbeat, expired lease,
+  forged/old generation, direct user-JWT wrapper RPC, service role, wrapper/
+  function owner, monitor disconnection, immediate freeze, two-heartbeat
+  recovery, backlog-not-drained recovery denial, and the maximum 30-second
+  lease-failure boundary;
 - maintenance cutover failure at every step leaves writes frozen, never
   restores broad policies, handles Auth Hook failure, and proves emergency
   write freeze and break-glass;
@@ -1187,6 +1383,10 @@ approve:
 11. the explicit maximum 60-second exposure after direct public MFA unenroll;
 12. the separate exact-provider Security Telemetry Sink Operations
     prerequisite and Production-write freeze until it is accepted and healthy.
+13. exposed `api` wrapper-only PostgREST RPCs with all `private` objects hidden;
+14. supported Auth API limits, including no target-sub-only global sign-out;
+15. database-enforced telemetry lease with at most 30 seconds to freeze when
+    the monitor cannot reach the database.
 
 ## 22. Authoritative references
 
@@ -1194,6 +1394,18 @@ approve:
   https://supabase.com/docs/guides/auth/server-side/creating-a-client
 - Supabase SSR cookie/HttpOnly limitation:
   https://supabase.com/docs/guides/troubleshooting/how-do-i-make-the-cookies-httponly-vwweFx
+- Supabase dedicated API schemas and explicit grants:
+  https://supabase.com/docs/guides/api/securing-your-api
+- Supabase database function privileges:
+  https://supabase.com/docs/guides/database/functions
+- Supabase Auth Admin sign-out (requires target JWT):
+  https://supabase.com/docs/reference/javascript/auth-admin-signout
+- Supabase sign-out/session semantics:
+  https://supabase.com/docs/guides/auth/signout
+- Supabase Auth Admin invitation, update/ban, and deletion:
+  https://supabase.com/docs/reference/javascript/auth-admin-inviteuserbyemail
+  https://supabase.com/docs/reference/javascript/auth-admin-updateuserbyid
+  https://supabase.com/docs/reference/javascript/auth-admin-deleteuser
 - Supabase Custom Claims and RBAC:
   https://supabase.com/docs/guides/api/custom-claims-and-role-based-access-control-rbac
 - Supabase Row Level Security:

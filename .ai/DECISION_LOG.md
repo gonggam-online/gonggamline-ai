@@ -295,7 +295,11 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   isolated Auth control-plane operations, adds a self-only pending-MFA
   activation RPC, bounds direct-MFA-unenroll old-JWT exposure to 60 seconds,
   and blocks Production mutations until an exact telemetry provider/runbook is
-  separately accepted and healthy.
+  separately accepted and healthy. A further proposed refinement limits
+  PostgREST to individually granted `api` wrapper RPCs, maps each Auth lifecycle
+  operation to a supported pinned-SDK API (with no claimed sub-only global
+  logout), and requires every internal mutation to validate a database-visible
+  telemetry readiness lease that expires within 30 seconds.
 - Consequences and risks: This documentation is high-risk/manual because it
   defines future auth, authorization, RLS, secrets, and Production access.
   It authorizes no implementation, configuration, user enrollment, migration,

@@ -125,6 +125,12 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
   pinned SSR/supabase-js session cleanup contract. The revised exact head still
   requires independent review and explicit owner acceptance of the remaining
   60-second MFA-unenroll exposure.
+- Third review follow-up: protected PostgREST mutations now expose only minimal
+  `api` wrappers while all `private` objects remain hidden; Auth control-plane
+  operations map to exact pinned-SDK APIs and explicitly reject a fictional
+  target-sub-only global sign-out; and a 30-second maximum database-visible
+  telemetry lease makes direct RPCs fail closed independently of application
+  flags. The new exact head remains Proposed and requires independent review.
 - Current-state finding: application routes have no accepted administrator
   session or CSRF boundary and rely on anonymous Supabase access with broad
   development policies.

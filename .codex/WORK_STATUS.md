@@ -36,7 +36,10 @@
   four remaining approval blockers plus an SSR correction, now addressed by a
   pending-MFA bootstrap RPC, isolated Auth control plane, bounded direct-factor
   unenroll exposure, mandatory telemetry-sink prerequisite, and pinned
-  SSR/supabase-js cleanup/session contracts.
+  SSR/supabase-js cleanup/session contracts. A third independent review found
+  three high blockers, now addressed in the Draft by exposed `api` wrappers
+  over hidden `private` functions, exact pinned-SDK Auth operation limits, and
+  an environment-specific database telemetry readiness lease/write gate.
 - Current work: validate and deliver the blocker-remediated documentation on
   the same Draft PR #39. Keep Architecture Proposed; do not mark Accepted or
   Ready, enable auto-merge, or merge.
@@ -63,8 +66,9 @@
 - Remaining risks: the Production administrator UUID, secrets, exact project
   settings, telemetry provider, and cutover approval remain unknown by design.
   The repository owner must explicitly accept or supersede the maximum
-  60-second direct-MFA-unenroll exposure. All runtime/schema work stays blocked
-  until Architecture acceptance and separate high-risk Stories.
+  60-second direct-MFA-unenroll exposure and the maximum 30-second
+  monitor-to-database lease failure boundary. All runtime/schema work stays
+  blocked until Architecture acceptance and separate high-risk Stories.
 
 ## 2026-07-28 — Item Selection Database Baseline Architecture v1
 
