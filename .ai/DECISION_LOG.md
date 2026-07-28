@@ -276,38 +276,13 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 ## 2026-07-28 — Admin Identity, Authorization, RLS, and CSRF Architecture v1
 
 - Category: architecture decision
-- Story / PR: Admin Identity, Authorization, RLS, and CSRF Architecture v1 /
-  PR #39
+- Story / PR: Admin Identity, Authorization, RLS, and CSRF Architecture v1 / PR #39
 - Status: proposed; repository-owner manual approval required
-- Owner / approver: Database / Security and Application Security; repository
-  owner
-- Context and evidence: PR #38 is merged and accepts the Item Selection database
-  baseline, but Story 3 remains blocked. Current Next.js Route Handlers have no
-  administrator identity, role, session, AAL, CSRF, or exact-origin gate.
-  Server services use the public anonymous Supabase key, while recovered and
-  Git migrations contain broad development policies.
-- Decision or issue: Propose invitation-only Supabase Auth, verified subjects,
-  a versioned active-admin registry, user-JWT default-deny RLS, TOTP assurance,
-  session-bound same-origin CSRF, append-only security audit, and a
-  database-visible protected-mutation telemetry gate. Ledgers R–T in the
-  Architecture document are the sole normative contract. They partition every
-  function into one actor class, bind every owner/caller/grant and lock mode,
-  define every state and numeric operations value, and connect acceptance tests
-  to exact rows. Initial/additional provisioning remains one manual
-  repository-owner boundary; software never reissues an ambiguous call.
-  Soft-delete is a distinct tombstone-first manual retry and does not
-  generalize to other Auth lifecycle operations.
-- Consequences and risks: This documentation is high-risk/manual because it
-  defines future auth, authorization, RLS, secrets, and Production access.
-  It authorizes no implementation, configuration, user enrollment, migration,
-  secret, Preview, or Production change. Broad anonymous policies must not
-  coexist with claims of protected Production writes.
-- Follow-up / due condition: independent review of the normalized exact head,
-  including explicit owner disposition of Ledger D residual risks,
-  followed by owner Architecture review and acceptance at that SHA, then
-  separate manual Sprint B-0, Auth Foundation, Security Telemetry Sink,
-  Authorization Foundation, Route Security Migration, and Item Selection Story
-  3 PRs in the approved order.
-- Rollback or supersession: revert the documentation PR or supersede with an
-  explicitly accepted version before implementation. No runtime or data
-  rollback is required for this Draft.
+- Owner / approver: Database / Security and Application Security; repository owner
+- Root cause: the prior documentation-first enterprise control plane could not be proven without implementation. Each attempt to make its ledgers complete added new roles, functions, states, locks, and provider assumptions, so independent review kept finding new platform or execution conflicts.
+- Decision: supersede that design with the smallest v1 boundary: manual Supabase Dashboard provisioning/disablement; server-only `GONGGAMLINE_ADMIN_USER_IDS`; `getUser()` on every protected Route Handler request; AAL2 protected mutations; exact-origin JSON CSRF; default-deny protected Data API access; one operationally contained service-role module; and transactional application audit.
+- Explicit removals: custom Auth Hook, invitation automation/reconciliation, database admin-lifecycle state machines, direct `auth.sessions` access, automatic MFA/break-glass/soft-delete, per-function owner-role proliferation, and telemetry lease/freeze/recovery.
+- Evidence rule: exact SDK, SQL, grant, lock, and rollback behavior is accepted from disposable implementation tests, not from an expanding hypothetical contract ledger.
+- Consequences and risks: service-role retains full data access/BYPASSRLS and access JWTs are not instantly revoked. Server-only containment, 15-minute tokens, live Auth-server checks, no direct protected Data API grants, environment isolation, and negative tests bound those risks.
+- Follow-up / due condition: independent review of the reduced exact head, explicit repository-owner acceptance, then one separate high-risk vertical-slice implementation PR. Enterprise lifecycle automation and external telemetry are follow-up work only when an operating need exists.
+- Rollback or supersession: revert or supersede this documentation PR. No runtime or data rollback is required.
