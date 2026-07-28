@@ -93,6 +93,31 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 - Decision record:
   [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-28--item-selection-database-baseline-architecture-v1).
 
+### 2026-07-28 — Admin Identity, Authorization, RLS, and CSRF Architecture v1
+
+- Status: Accepted by repository owner on 2026-07-28.
+- Approved head SHA:
+  `0d68585400eb6ce279c40e93560fea1d69d94a92`.
+- Boundary: smallest single-company administrator server boundary.
+- Decision: use manual Supabase Dashboard provisioning, a server-only UUID
+  allowlist, per-request Auth-server access-JWT/user validation, AAL2
+  mutations, exact-origin JSON CSRF, default-deny protected Data API access,
+  and one isolated service-role module.
+- Accepted residual session boundary: sign-out prevents refresh but does not
+  immediately invalidate an issued access JWT; protected reads retain a
+  maximum 15-minute token-lifetime boundary and mutations additionally require
+  AAL2 freshness of no more than 60 seconds.
+- Exclusions remain binding: custom Auth Hook, application administrator
+  lifecycle automation, direct `auth.sessions` access, separate revocation
+  ledger, per-function owner-role proliferation, and telemetry state machines.
+- Implementation authorization: none from this documentation acceptance
+  alone. PR #39 remains Draft and high-risk/manual. Sprint B-0 requires its
+  separate repository-owner approval and implementation PR.
+- Story:
+  [Admin Identity, Authorization, RLS, and CSRF Architecture v1](../docs/architecture/ADMIN-IDENTITY-AUTHORIZATION-RLS-CSRF-V1.md).
+- Decision record:
+  [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-28--admin-identity-authorization-rls-and-csrf-architecture-v1).
+
 ## Proposed Architecture Stories
 
 ### 2026-07-27 — Sprint B-0 Database Baseline Execution v1

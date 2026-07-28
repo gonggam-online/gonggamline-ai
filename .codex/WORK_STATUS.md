@@ -1,5 +1,32 @@
 # Work status
 
+
+## 2026-07-28 — Admin Security Architecture v1 Accepted
+
+- Objective: remove the actual administrator-security prerequisite without delaying Item Selection persistence through an unimplemented enterprise control plane.
+- Branch: `codex/docs/admin-auth-rls-csrf-architecture-v1`, based on PR #38 squash commit `cd4bae71ac77d74751ae3575a8574d7c174a6748`.
+- Risk: high-risk/manual; documentation only.
+- Root cause: repeated correction was caused by attempting to prove 31 principals, 25 functions, 17 states, custom Auth/provider behavior, Auth-schema locks, and telemetry recovery entirely in documentation. Each normalization enlarged the validation surface.
+- Corrective decision: replace the canonical-ledger design with a minimal server boundary using manual Dashboard provisioning, a server-only UUID allowlist, per-request `getUser()` validation of the access JWT and user, AAL2 mutation assurance, exact-origin JSON CSRF, default-deny protected Data API access, one contained service-role module, and atomic database audit.
+- Repository-owner session decision: sign-out prevents refresh but does not immediately invalidate an issued access JWT. V1 accepts the configured maximum 15-minute protected-read boundary and the separate maximum 60-second AAL2 mutation-freshness boundary; `auth.sessions` validation and a separate immediate-revocation system remain excluded.
+- Removed from v1: Auth Hook, software invitation/retirement/soft-delete, `auth.sessions` access, automatic MFA/break-glass lifecycle, per-function owner roles, and telemetry lease/freeze/recovery.
+- Validation model: official platform facts plus executable A01-A12 tests in a fresh disposable Supabase environment. Existing unit/lint/build success is not represented as proof of unimplemented security.
+- Approval: repository owner accepted the Architecture on 2026-07-28
+  against exact head `0d68585400eb6ce279c40e93560fea1d69d94a92`.
+- Current work: record the Accepted Architecture status and prepare only the
+  next Sprint B-0 implementation work instruction. PR #39 remains Draft and
+  `manual-merge-required`; do not mark Ready, merge, or implement.
+- Blockers/owner actions: Sprint B-0 Architecture and its high-risk execution
+  still require separate repository-owner approval. Production remains a
+  separate manual boundary.
+- Changed files: `docs/architecture/ADMIN-IDENTITY-AUTHORIZATION-RLS-CSRF-V1.md`,
+  `docs/tasks/SPRINT-B0-DATABASE-BASELINE-IMPLEMENTATION-INSTRUCTION.md`,
+  `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`, and this file.
+- Exact next action: validate and push the approval/status documentation on
+  Draft PR #39, then await review/merge direction. Do not start Sprint B-0
+  until its separate approval is recorded.
+- Remaining risks: service-role full access, the accepted maximum 15-minute logged-out access-JWT read boundary and maximum 60-second AAL2 mutation-freshness boundary, exact environment UUIDs/secrets, broad development policy removal, and disposable security-test implementation remain explicit.
+
 ## 2026-07-28 — Item Selection Database Baseline Architecture v1
 
 - Objective: define the database contract required to persist and reproduce
