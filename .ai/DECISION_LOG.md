@@ -340,3 +340,51 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   approval.
 - Rollback: close the unmerged Phase 0 PR and remove its documentation/evidence
   commit. No runtime or data rollback is required.
+
+## 2026-07-28 — Orchestrator Phase 1 separately authorized
+
+- Category: bounded implementation authorization
+- Dependency: PR #42 merged as
+  `75d48dba3da9cb36bdecbd34de5604346379e601`
+- Owner / approver: repository owner
+- Decision: authorize only Phase 1 local ledger, policy, router, budget, and
+  recovery primitives on `codex/feat/orchestrator-phase-1` and a separate
+  Draft PR.
+- Architecture compliance: Engineering Orchestration owns the lifecycle;
+  accepted PR #41 defines the state, contract, identity, SQLite, routing,
+  approval, audit, and recovery boundaries. No new Architecture boundary is
+  introduced.
+- Risk: `manual-merge-required` initial automation implementation; no
+  auto-merge.
+- Required Phase 0 findings: controller-enforced token budgets, canonical
+  ResultContract post-validation, App Server interrupt first, and correlated
+  fail-closed Windows process recovery.
+- Non-goals: Codex execution, worktree mutation, commit/push/PR automation,
+  CI/Preview polling, planner/reviewer, cloud worker, Supabase, Production,
+  external commerce write, paid API, secret, or Phase 2+ implementation.
+- Rollback: revert the Phase 1 implementation PR. Product runtime and external
+  state are unchanged.
+
+## 2026-07-28 — Orchestrator Phase 1 separately authorized
+
+- Category: bounded implementation authorization
+- Dependency: PR #42 merged as
+  `75d48dba3da9cb36bdecbd34de5604346379e601`
+- Owner / approver: repository owner
+- Decision: authorize only Phase 1 local ledger, policy, router, budget, and
+  recovery primitives on `codex/feat/orchestrator-phase-1` and a separate
+  Draft PR.
+- Architecture compliance: Engineering Orchestration owns the lifecycle;
+  accepted PR #41 defines the state, contract, identity, SQLite, routing,
+  approval, audit, and recovery boundaries. No new Architecture boundary is
+  introduced.
+- Risk: `manual-merge-required` initial automation implementation; no
+  auto-merge.
+- Required Phase 0 findings: controller-enforced token budgets, canonical
+  ResultContract post-validation, App Server interrupt first, and correlated
+  fail-closed Windows process recovery.
+- Non-goals: Codex execution, worktree mutation, commit/push/PR automation,
+  CI/Preview polling, planner/reviewer, cloud worker, Supabase, Production,
+  external commerce write, paid API, secret, or Phase 2+ implementation.
+- Rollback: revert the Phase 1 implementation PR. Product runtime and external
+  state are unchanged.

@@ -40,6 +40,10 @@ manual. Approval: no paid/API credential creation.
 
 ## Phase 1 — local ledger, policy, and router
 
+Status: implemented locally on `codex/feat/orchestrator-phase-1`; see
+[the Phase 1 implementation report](reports/phase-1-local-controller.md).
+Delivery remains a separate `manual-merge-required` Draft PR.
+
 Purpose: deterministic identity, states, budgets, leases, routing, and recovery.
 
 Scope:
