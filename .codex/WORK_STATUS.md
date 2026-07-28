@@ -19,18 +19,24 @@
 - Explicit non-goals: Auth, new RLS or policy implementation, Story 3
   persistence, API, UI, Production access, and commerce writes. Recovered
   permissive Products policies are not promoted.
-- Current work: implementation and local static validation. The current host
-  lacks Docker/PostgreSQL, so local database replay fails closed at preflight;
-  exact-head GitHub CI must execute the disposable replay.
+- Current work: implementation and delivery validation are complete. The
+  current host lacks Docker/PostgreSQL, so local database replay fails closed
+  at preflight; the complete chain replayed successfully in the disposable
+  GitHub CI Supabase stack.
 - Changed files: pre-003 migrations, Supabase config/manifest, replay script,
   database-baseline tests/report, CI workflow, and this status file.
-- Exact next action: complete local test/lint/typecheck/build validation,
-  review the full diff, push one Draft `manual-merge-required` PR, and require
-  exact-head disposable replay plus Preview validation. Do not mark Ready or
-  merge.
-- Remaining risks: actual SQL replay is pending CI; existing development
-  policies in migrations 005 through 020 remain unchanged because RLS is
-  explicitly outside this approval.
+- Validation: 268/268 unit/integration tests, lint with zero errors and four
+  pre-existing warnings, typecheck, Production build, preserved migration
+  hashes, disposable full-chain replay, exact-head CI, Vercel Preview, and
+  Preview browser validation passed.
+- Delivery: Draft PR #40 is open with `manual-merge-required`; Ready,
+  auto-merge, merge, Production migration, and Production smoke were not
+  performed.
+- Exact next action: repository-owner review of Draft PR #40. Do not mark
+  Ready or merge without the next explicit approval.
+- Remaining risks: existing development policies in migrations 005 through 020
+  remain unchanged because RLS is explicitly outside this approval. Production
+  migration behavior remains untested and unauthorized.
 
 
 ## 2026-07-28 — Admin Security Architecture v1 Accepted
