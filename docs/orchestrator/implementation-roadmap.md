@@ -19,6 +19,11 @@ One supervised Windows process on N:
 
 ## Phase 0 — contract and protocol spike
 
+Status: completed locally on
+`codex/chore/orchestrator-protocol-spike`; see
+[the protocol spike report](reports/protocol-spike.md). Delivery remains a
+separate `manual-merge-required` Draft PR.
+
 Purpose: prove task/result schemas, installed Codex capabilities, and safe
 read-only execution without modifying product runtime.
 

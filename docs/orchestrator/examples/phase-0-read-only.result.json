@@ -1,0 +1,160 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectId": "gonggamline-orchestrator",
+  "taskId": "orchestrator-phase-0-protocol-spike",
+  "attempt": 1,
+  "startedAt": "2026-07-28T11:07:00Z",
+  "finishedAt": "2026-07-28T11:09:35Z",
+  "state": "FAILED",
+  "reviewOutcome": "BLOCKED",
+  "summary": "The structured read-only repository assessment produced canonical output without changing the pre-existing Phase 0 diff, but exceeded the 20,000-token task budget.",
+  "repository": {
+    "canonicalOrigin": "https://github.com/gonggam-online/gonggamline-ai.git",
+    "baseBranch": "main",
+    "baseSha": "a6894fce05480d9b599dcb9a03f9100c607b3fe6",
+    "workBranch": "codex/chore/orchestrator-protocol-spike",
+    "worktreePath": "C:\\Users\\HaKwanghee\\.codex\\worktrees\\fa1e\\gonggamline-ai-git",
+    "statusClean": false,
+    "headSha": "a6894fce05480d9b599dcb9a03f9100c607b3fe6",
+    "codexThreadId": "019fa868-92f1-7262-aca1-93c9a1b69f7d",
+    "reviewResponseId": null,
+    "pcId": "N"
+  },
+  "changes": {
+    "files": [
+      ".ai/DECISION_LOG.md",
+      ".codex/WORK_STATUS.md",
+      "docs/orchestrator/examples/phase-0-protocol-spike.task.json"
+    ],
+    "diffSummary": "The intended Phase 0 documentation diff was pre-existing; the probe made no repository changes.",
+    "diffHash": null,
+    "allowedPathCheck": "PASSED"
+  },
+  "verification": {
+    "overall": "FAILED",
+    "checks": [
+      {
+        "name": "structured-read-only-exec",
+        "status": "FAILED",
+        "startedAt": "2026-07-28T11:07:00Z",
+        "finishedAt": "2026-07-28T11:09:35Z",
+        "exitCode": 0,
+        "summary": "Structured output completed and the Git diff hash was identical, but measured input tokens exceeded task.budget.tokenLimit.",
+        "evidenceIds": [
+          "exec-jsonl-events"
+        ]
+      }
+    ]
+  },
+  "delivery": {
+    "commit": {
+      "status": "NOT_REQUIRED",
+      "sha": null
+    },
+    "push": {
+      "status": "NOT_REQUIRED",
+      "sha": null
+    },
+    "pullRequest": {
+      "status": "NOT_REQUIRED",
+      "number": null,
+      "url": null,
+      "draft": null,
+      "headSha": null,
+      "baseSha": null
+    },
+    "ci": {
+      "status": "NOT_REQUIRED",
+      "exactSha": null,
+      "references": [],
+      "summary": null
+    },
+    "preview": {
+      "status": "NOT_REQUIRED",
+      "exactSha": null,
+      "references": [],
+      "summary": null
+    },
+    "production": {
+      "status": "NOT_REQUIRED",
+      "exactSha": null,
+      "references": [],
+      "summary": null
+    },
+    "supabase": {
+      "status": "NOT_REQUIRED",
+      "exactSha": null,
+      "references": [],
+      "summary": null
+    }
+  },
+  "failure": {
+    "present": true,
+    "class": "BUDGET",
+    "code": "TOKEN_LIMIT_EXCEEDED",
+    "message": "Measured input tokens exceeded the TaskContract tokenLimit; the CLI did not enforce the task budget.",
+    "normalizedSignature": "budget:token_limit_exceeded",
+    "retryable": false
+  },
+  "retry": {
+    "recommended": true,
+    "mode": "REPLAN",
+    "notBefore": null,
+    "remainingAttempts": 2
+  },
+  "humanAction": {
+    "required": true,
+    "approvalAction": "RETRY_BUDGET_OVERRIDE",
+    "request": "Approve a replanned context pack and explicit token budget before retry.",
+    "sitePath": "Orchestrator approval queue",
+    "impact": "A retry may consume substantially more tokens than the original contract allowed.",
+    "cost": "Usage-based model cost within the newly approved ceiling.",
+    "secretHandling": "No secret values may enter the context pack or approval record.",
+    "verification": "Confirm the controller rejects or interrupts execution at the approved ceiling.",
+    "rollback": "Cancel the retry and retain this read-only evidence without repository changes.",
+    "expiresAt": "2026-08-04T12:00:00+09:00"
+  },
+  "nextContext": {
+    "verifiedFacts": [
+      "Codex CLI 0.145.0 produced JSONL thread and usage events.",
+      "The compatible output schema produced a canonical-valid ResultContract candidate.",
+      "The repository diff hash was unchanged by the read-only execution."
+    ],
+    "assumptions": [],
+    "unconfirmed": [
+      "ChatGPT-authenticated token usage has no exposed per-run KRW cost.",
+      "The CLI does not enforce TaskContract budgets by itself."
+    ],
+    "userDecisions": [
+      "Phase 0 was explicitly authorized on a dedicated branch and PR.",
+      "Final merge remains manual."
+    ],
+    "recommendedNextObjective": "Replan the context pack and implement controller-enforced token interruption before approving a Phase 1 execution task."
+  },
+  "evidence": [
+    {
+      "id": "exec-jsonl-events",
+      "kind": "sanitized-jsonl-summary",
+      "source": "codex exec --json --output-schema",
+      "observedAt": "2026-07-28T11:09:35Z",
+      "sha256": "ab4cd2d8c788b96d99d20d1e79775ecb8d487f69fa903b771b4f8914bfcea15e",
+      "uri": null,
+      "sanitized": true
+    }
+  ],
+  "usage": {
+    "wallTimeSeconds": 155,
+    "inputTokens": 489921,
+    "cachedInputTokens": 424192,
+    "outputTokens": 5689,
+    "reasoningTokens": 1478,
+    "estimatedCostKrw": 0
+  },
+  "businessImpact": {
+    "hypothesis": "Measured contract compatibility reduces adapter-selection risk before revenue-supporting automation begins.",
+    "operatorMinutesSavedEstimate": null,
+    "revenueImpactEstimateKrw": null,
+    "actualEvidenceAvailable": false,
+    "actualEvidenceIds": []
+  }
+}

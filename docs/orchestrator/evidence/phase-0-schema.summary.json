@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "codexCliVersion": "0.145.0",
+  "generatedWithExperimentalFields": true,
+  "generatedFileCount": 347,
+  "generatedTotalBytes": 3303877,
+  "generatedManifestSha256": "0dedfab552185dd2dd2e227d1725f68e473902f8542470ba97ed4b751a123ed2",
+  "v1BundleSha256": "1f66700d1cc3de4a5004e5614a6098878b405c7e7c5f8c9be97fc900d0ad6c68",
+  "v2BundleSha256": "73b1c05d6657e01d6b9a641d87549e8fb73e110a10554843ccc56c14e4f7a6f9",
+  "canonicalTaskSchemaSha256": "b9ec11ea5160e4bcda143b82329e57786ecf6243f7e7a864a3c6f79155a43214",
+  "canonicalResultSchemaSha256": "74286a8faba4b2f1b0fd9b81d279cc48fe523faca35bf1aeeb41f4356f60e26a",
+  "taskExampleSha256": "055331886ef2d7439ece6f530c2c522d89651b6cbf6ed9423af11c56fb22a163",
+  "resultExampleSha256": "a1ab7c4b15309eb8d1012d7b78352464840552c381a622275f248c06f92a4029",
+  "ajvVersion": "8",
+  "ajvDraft": "2020-12",
+  "strictCompilation": true,
+  "taskExampleValid": true,
+  "resultExampleValid": true,
+  "rawGeneratedBundleCommitted": false,
+  "sanitized": true
+}

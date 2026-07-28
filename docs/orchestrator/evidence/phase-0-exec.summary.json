@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0.0",
+  "codexCliVersion": "0.145.0",
+  "sandbox": "read-only",
+  "ephemeral": true,
+  "ignoreUserConfig": true,
+  "structuredOutputSucceeded": true,
+  "threadId": "019fa868-92f1-7262-aca1-93c9a1b69f7d",
+  "eventTypeCounts": {
+    "item.completed": 19,
+    "item.started": 16,
+    "thread.started": 1,
+    "turn.completed": 1,
+    "turn.started": 1
+  },
+  "usage": {
+    "inputTokens": 489921,
+    "cachedInputTokens": 424192,
+    "cacheWriteInputTokens": 0,
+    "outputTokens": 5689,
+    "reasoningOutputTokens": 1478
+  },
+  "taskTokenLimit": 20000,
+  "taskBudgetVerdict": "FAILED",
+  "budgetObservation": "codex exec did not enforce the TaskContract tokenLimit; controller-side enforcement is required",
+  "outputSchemaCompatibility": {
+    "canonicalSchemaAcceptedDirectly": false,
+    "rejectedKeywords": [
+      "oneOf",
+      "const without type",
+      "optional object properties",
+      "uniqueItems",
+      "format uri"
+    ],
+    "adapterTransform": [
+      "oneOf to anyOf",
+      "add type for const-only nodes",
+      "require every declared object property",
+      "remove uniqueItems",
+      "remove format before generation",
+      "validate generated result against the canonical schema afterward"
+    ],
+    "adapterSchemaSha256": "f39f21f137d2cff65d02fde717f67de99f7853dda671bbca70937800f3173d90"
+  },
+  "preProbeDiffHash": "72087e26fc36f7d22d2d153cd01fa2dac8f71556",
+  "postProbeDiffHash": "72087e26fc36f7d22d2d153cd01fa2dac8f71556",
+  "eventsSha256": "ab4cd2d8c788b96d99d20d1e79775ecb8d487f69fa903b771b4f8914bfcea15e",
+  "lastMessageSha256": "f8e99981926714b0b6113b1e0d070252752ab4d49215349e05f60a4341a316ed",
+  "rawLogCommitted": false,
+  "sanitized": true
+}
