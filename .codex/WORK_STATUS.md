@@ -26,14 +26,15 @@
   the evaluator/profitability engine has no approved operating persistence/API
   path; inspected the baseline gap, recovery plan, migrations, Supabase access,
   and existing numeric conventions; drafted the Database Architecture.
-- Current: Draft PR #38 remains under repository-owner Architecture review.
-  Retry lineage is separated from candidate decision identity; this follow-up
-  is being validated and delivered without changing Draft/manual state.
-- Blockers/owner actions: owner acceptance is required. Admin Identity /
-  Authorization / RLS / CSRF Architecture and accepted Sprint B-0 remain
-  prerequisites for Story 3.
+- Current: repository owner accepted the PR #38 Database Baseline Architecture
+  on 2026-07-28 for head
+  `8b1e6ab589491e77dfa7ac5d71c99b40db03030a`. The acceptance record is being
+  delivered on the same manual PR without changing application/runtime code.
+- Blockers/owner actions: Database Baseline Architecture approval is complete.
+  Accepted Admin Identity / Authorization / RLS / CSRF Architecture and
+  accepted Sprint B-0 remain prerequisites for Story 3.
 - Changed files: Database Architecture document, Architecture Review index,
-  Decision Log proposal, and this status.
+  Decision Log acceptance record, and this status.
 - Commands/results: initial branch was clean and exactly based on
   `7491b239f5935643778330a08ed4b070511c4c7a`; no runtime or migration file is
   changed. `git diff --check`, lint (0 errors, 4 pre-existing test warnings),
@@ -47,15 +48,16 @@
   passed the same document checks, 261/261 tests, lint, typecheck, and build.
   Retry lineage separation from candidate decision identity passed document
   consistency, `git diff --check`, 261/261 tests, lint (0 errors, 4 existing
-  warnings), typecheck, and Production build.
-- Last commit: current PR #38 branch `HEAD`; Git/GitHub is the authoritative
-  mutable SHA source and this status intentionally does not create a follow-up
-  commit merely to record its own SHA.
-- Exact next action: repository owner reviews Draft PR #38. Do not mark the
-  Architecture Accepted or Ready, enable auto-merge, or merge it.
-- Remaining risks: owner may revise numeric scale, retention, backup, principal,
-  or migration sequencing; no Item Selection persistence can start before the
-  required Architecture acceptances.
+  warnings), typecheck, and Production build. The owner acceptance record passed
+  the same document consistency, diff, test, lint, typecheck, and build gates.
+- Last commit: approval-record commit on the current PR #38 branch `HEAD`;
+  Git/GitHub remains the authoritative mutable SHA source.
+- Exact next action: after PR #38 is manually squash-merged, draft the separate
+  Admin Identity / Authorization / RLS / CSRF Architecture PR. Do not begin
+  migration, persistence, API, UI, auth, RLS, CSRF runtime, or Story 3 work.
+- Remaining risks: principal, authorization, RLS, CSRF, and Sprint B-0 execution
+  contracts remain unaccepted; no Item Selection persistence can start before
+  those required Architecture acceptances.
 
 ## 2026-07-28 — Item Selection profitability policy v1
 

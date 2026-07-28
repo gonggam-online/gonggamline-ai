@@ -2,7 +2,8 @@
 
 ## Status and authority
 
-- Status: Draft; repository-owner review and explicit acceptance required.
+- Status: Accepted by repository owner on 2026-07-28 for PR #38 head
+  `8b1e6ab589491e77dfa7ac5d71c99b40db03030a`.
 - Story: Item Selection prerequisite Architecture / Database Baseline.
 - Owner: Database / Security.
 - Consumers: Supplier / Procurement Item Selection, Revenue, and later Admin
@@ -11,7 +12,7 @@
   execution Story.
 - This PR authorizes no migration, database connection, Production access,
   runtime code, API, UI, authentication, or RLS implementation.
-- Codex must not approve, mark this document accepted, merge its PR, or enable
+- This acceptance does not authorize Codex to merge the PR or enable
   auto-merge.
 
 ## 1. Business objective
@@ -700,7 +701,7 @@ Required acceptance evidence:
 
 ## 18. Owner review checklist
 
-The repository owner accepts or rejects this Draft after verifying:
+The repository owner accepted this Architecture after verifying:
 
 1. Supabase Postgres is appropriate for the current Next.js/Vercel runtime.
 2. Stored inputs, evidence, versions, integer units, and hashes can reproduce
@@ -711,5 +712,6 @@ The repository owner accepts or rejects this Draft after verifying:
    protection are sufficient.
 5. Story 3 can be implemented without unresolved database design questions.
 
-Acceptance must be recorded in `.ai/DECISION_LOG.md` with approver and date.
-Draft publication or PR merge alone is not Architecture acceptance.
+Acceptance is recorded in `.ai/DECISION_LOG.md` with approver, date, and the
+approved PR head SHA. This acceptance does not authorize implementation or
+waive the separately stated prerequisites.
