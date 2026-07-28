@@ -48,6 +48,12 @@
   Draft now specifies exact column grants and permission proofs, a server-only
   completion identity with an atomic one-time capability, read-held session
   locks through result materialization, and wrapper-specific NOLOGIN owners.
+  A sixth independent review found prepare-crypto provenance, completion
+  capability retry, and cookie/orphan-session blockers; the Draft now uses a
+  server-only prepare identity, explicit pre-call/Auth-created/finalization
+  transitions with safe capability reissue and terminal recovery, and
+  Supabase-aligned long-lived cookies with separated loss/logout/cleanup/
+  timeout tests.
 - Current work: validate and deliver the blocker-remediated documentation on
   the same Draft PR #39. Keep Architecture Proposed; do not mark Accepted or
   Ready, enable auto-merge, or merge.

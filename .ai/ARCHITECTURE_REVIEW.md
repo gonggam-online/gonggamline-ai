@@ -145,6 +145,13 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
   so logout cannot return first; and wrapper functions use separate NOLOGIN
   owners with no sibling EXECUTE grant. The new exact head remains Proposed
   and requires independent review.
+- Sixth review follow-up: invitation prepare is now a non-PostgREST,
+  server-only crypto boundary with exact identity and database
+  actor/session/rate/idempotency checks; the invitation state machine separates
+  pre-call, Auth-called, Auth-created, capability reissue, and exact terminal
+  recovery; and Auth cookies follow Supabase's long-lived storage guidance
+  without claiming cookie loss revokes an unidentified server session. The new
+  exact head remains Proposed and requires independent review.
 - Current-state finding: application routes have no accepted administrator
   session or CSRF boundary and rely on anonymous Supabase access with broad
   development policies.

@@ -309,6 +309,11 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   server-only with atomic intent/sub/environment/generation/expiry/nonce
   provenance, and replaces the shared wrapper owner with one NOLOGIN owner per
   wrapper.
+  The next proposed refinement moves invitation prepare behind a dedicated
+  server-only crypto identity, completes the nonce/capability retry state
+  machine across Auth and database ambiguity, and adopts long-lived Supabase
+  Auth cookies while separating cookie loss, explicit logout, chunk cleanup,
+  and Auth timeout behavior.
 - Consequences and risks: This documentation is high-risk/manual because it
   defines future auth, authorization, RLS, secrets, and Production access.
   It authorizes no implementation, configuration, user enrollment, migration,

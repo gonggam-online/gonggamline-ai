@@ -468,15 +468,19 @@ Cookies:
   not read or log them.
 - Supabase Auth is configured for a 30-minute inactivity timeout and a 12-hour
   absolute session time box. Access-token expiry is 15 minutes; refresh-token
-  rotation and reuse detection are enabled. Auth cookies omit
-  `Max-Age`/`Expires` and remain browser session cookies; cookie persistence is
-  storage behavior, not an authorization or server-session lifetime. Supabase
-  Auth's server-side session record,
-  inactivity/absolute limits, verification, and revocation are authoritative.
-  A server session orphaned after local-cookie loss cannot authenticate without
-  its tokens and expires by those server limits; if its session/subject is
-  known, logout/account recovery explicitly revokes it. It cannot be
-  reconstructed from unverified client state.
+  rotation and reuse detection are enabled. Following Supabase's SSR guidance,
+  Auth cookies use a far-future `Max-Age=34560000` (400 days) and matching
+  `Expires`; browser implementation caps are accepted. These attributes only
+  preserve token storage and never extend authorization. Supabase Auth's
+  server-side session record, 30-minute inactivity limit, 12-hour absolute
+  limit, verification, and explicit revocation remain authoritative.
+  Cookie deletion/loss is not logout and does not revoke a server session.
+  Without the tokens that browser cannot authenticate, but another retained
+  token copy can remain usable until explicit revocation or at most the
+  configured 12-hour absolute time box plus enforcement at refresh/access-JWT
+  expiry. The Auth Foundation must verify the exact configured timeout
+  behavior; it must not claim that an unidentified lost cookie can trigger
+  server-side revocation.
 - Login, PKCE callback, TOTP enrollment/challenge, refresh, chunk replacement,
   and logout use the browser/server clients exactly as supported by
   `@supabase/ssr@0.12.3` with `@supabase/supabase-js@2.110.7`. Proxy performs refresh/cookie propagation only; it is
@@ -629,9 +633,8 @@ wrapper functions such as:
   `private.activate_pending_admin_v1()`;
 - `api.accept_admin_invitation_v1()` ->
   `private.accept_admin_invitation_v1()`;
-- `api.prepare_admin_invitation_v1(...)` and
-  the server-only `private.complete_admin_invitation_v1(...)` control-plane
-  function; completion has no `api` wrapper;
+- invitation prepare/record/reissue/completion are server-only `private`
+  control-plane functions and have no `api` wrapper;
 - `api.create_item_selection_run_v1(...)` ->
   `private.create_item_selection_run_v1(...)`;
 - `api.finalize_item_selection_run_v1(...)` ->
@@ -763,7 +766,7 @@ repository-owner out-of-band only.
 Invitation is the only operation whose target has no Auth `sub` before the
 call. It cannot create a registry row or pretend a subject exists before Auth
 succeeds. The AAL2 control-plane Route Handler first creates an idempotent
-pre-sub intent through `api.prepare_admin_invitation_v1(...)`.
+pre-sub intent through the server-only prepare boundary below.
 `private.admin_auth_control_intents_v1` stores:
 
 - opaque intent UUID, exact environment, operation `ADMIN_INVITE`, creator
@@ -785,28 +788,94 @@ years.
 The unique idempotency contract is `(environment, operation,
 idempotency_key_digest)`. Reuse with the same email HMAC returns the stored
 intent/result; reuse with another email/environment conflicts. A second open
-intent for the same environment/email HMAC conflicts. The prepare wrapper
-requires active AAL2, current live session, CSRF/rate checks at the route,
-telemetry readiness inside the function, and atomically audits only the opaque
-intent ID.
+intent for the same environment/email HMAC conflicts.
+
+Prepare is not exposed through PostgREST and accepts no user-JWT RPC. After
+verifying exact Origin/CSRF, rate limit, idempotency key, active AAL2 principal,
+current `authz_version`, live session, JWT age, and environment, the isolated
+Auth module generates the ciphertext, HMAC, IV/tag, and key versions itself.
+It then connects with the per-environment direct-Postgres
+`auth_invitation_prepare LOGIN` identity. That role has no membership, Data API
+key, table privilege, service-role capability, or browser import and receives
+only `USAGE` on `private` plus EXECUTE on the exact
+`private.prepare_admin_invitation_v1(uuid, uuid, bigint, text, text, bytea,
+bytea, bytea, text, integer, integer)` and
+`private.reissue_admin_invitation_auth_response_capability_v1(uuid, uuid,
+bigint, text, text)` signatures. The prepare functions are SECURITY DEFINER
+and owned by `auth_invitation_prepare_owner NOLOGIN`. Their arguments are,
+respectively, actor subject/session/version, environment, idempotency digest,
+ciphertext/IV/tag, email HMAC, encryption/HMAC key versions; and intent,
+actor session, actor version, environment, idempotency digest.
+
+The prepare function verifies `session_user`, immutable database environment,
+actor subject/session/current registry version, a live locked session row,
+telemetry lease, database rate bucket, idempotency digest, supported key
+versions, and bounded cryptographic fields. It never accepts plaintext email.
+CSRF remains a Route Handler property; direct-RPC bypass is prevented by the
+absence of an exposed wrapper and exact server-identity grants, while the
+database independently enforces actor/session/rate/idempotency state. It
+atomically stores the intent and audits only its opaque ID. `PUBLIC`, `anon`,
+`authenticated`, `service_role`, every wrapper owner, and the completion
+identity have no EXECUTE grant, so a user JWT cannot supply forged ciphertext
+or HMAC.
 
 Invitation completion is not exposed through PostgREST and accepts no user JWT.
 The server-only Auth module holds a separate per-environment direct-Postgres
 credential for `auth_invitation_completion LOGIN`. That role has no role
 membership, Data API key, table privilege, or service-role capability; it has
-only `USAGE` on `private` and EXECUTE on the exact
-`private.complete_admin_invitation_v1(uuid, uuid, text, bigint, text)`
-signature. The function is `SECURITY DEFINER`, owned by
-`auth_invitation_completion_owner NOLOGIN`, and its owner has only the
-control-intent/registry/audit/telemetry privileges required to complete an
-invitation.
+only `USAGE` on `private` and EXECUTE on the exact call-marker, record,
+capability-reissue, and completion functions below. Each is SECURITY DEFINER, owned by
+`auth_invitation_completion_owner NOLOGIN`; the owner has only the
+control-intent/registry/audit/telemetry privileges needed for these
+transitions.
 
-Prepare generates a cryptographically random 256-bit completion nonce, stores
-only its SHA-256 digest with the intent generation and a database-issued
-five-minute expiry, and returns the plaintext once to the server-only Route
-Handler response context; it never reaches the browser, logs, audit, or
-telemetry. The direct completion transaction locks the intent and atomically
-verifies:
+The exact completion-role signatures are:
+
+```text
+private.mark_admin_invitation_auth_call_started_v1(
+  uuid, text, bigint, bigint, text
+)
+private.record_admin_invitation_auth_created_v1(
+  uuid, uuid, text, bigint, bigint, text
+)
+private.reissue_admin_invitation_completion_capability_v1(
+  uuid, uuid, text, bigint
+)
+private.complete_admin_invitation_v1(
+  uuid, uuid, text, bigint, bigint, text
+)
+```
+
+They bind, in order, the intent, returned/stored sub where applicable,
+environment, intent generation, capability version where applicable, and
+capability plaintext. The reissue function has no old-capability argument
+because it requires the already stored `AUTH_CREATED` sub and rotates only
+under the trusted completion identity.
+
+Prepare generates a random 256-bit Auth-response capability, stores only its
+SHA-256 digest with intent generation, capability version, and a
+database-issued five-minute expiry, and returns the plaintext once to the
+server-only Route Handler context. It never reaches the browser, logs, audit,
+or telemetry. After `inviteUserByEmail` returns an exact sub, the completion
+identity calls `private.record_admin_invitation_auth_created_v1(...)`. That
+transaction locks the intent, verifies and consumes the Auth-response
+capability, stores the exact sub, and transitions only `AUTH_CALL_STARTED` or
+`AUTH_OUTCOME_UNKNOWN` to durable `AUTH_CREATED`. This function, or the
+owner-approved reconciler invoking it after exact Auth-user proof, is the sole
+writer of `AUTH_CREATED`.
+
+Immediately before the external Auth call, the completion identity invokes
+`private.mark_admin_invitation_auth_call_started_v1(...)`. It consumes the
+current `PREPARED` capability, increments the attempt count, records
+`auth_call_started_at`, and transitions to `AUTH_CALL_STARTED`. Only after that
+commit may the module call Auth. Consequently `PREPARED` with no
+`auth_call_started_at` proves that Auth was never called; every crash or timeout
+after the marker is ambiguous and must reconcile rather than re-invite.
+
+Recording `AUTH_CREATED` returns a new random 256-bit completion capability
+once, stored only as a digest with its own version and five-minute database
+expiry. `private.complete_admin_invitation_v1(...)` locks the intent and
+atomically verifies:
 
 - `session_user = auth_invitation_completion` (the caller identity remains
   observable even though SECURITY DEFINER changes `current_user` to the
@@ -815,25 +884,30 @@ verifies:
 - exact returned Auth sub UUID;
 - immutable database environment equals the request environment;
 - exact current intent generation;
+- exact current capability version;
 - database time is before the completion expiry;
-- constant-time nonce-digest equality and nonce not previously consumed;
+- constant-time nonce-digest equality; an exact terminal binding returns its
+  stored result, while every nonterminal path requires the capability to be
+  unconsumed;
 - healthy telemetry lease and no existing conflicting registry subject.
 
-It consumes the nonce, records the Auth sub, creates the registry row, advances
-intent state, and audits in the same transaction. No `authenticated`,
-`service_role`, wrapper owner, or other control-plane role can execute it.
+It requires durable `AUTH_CREATED`, consumes the capability, creates the
+registry row, advances to `REGISTRY_COMMITTED`, and audits in the same
+transaction. No `authenticated`, `service_role`, wrapper owner, prepare
+identity, or other control-plane role can execute these functions.
 
 Invitation ordering is normative:
 
-1. commit intent state `PREPARED`; no registry row exists;
-2. decrypt only in the secret module and call
+1. server-only prepare commits `PREPARED` and an Auth-response capability; no
+   registry row exists;
+2. atomically commit `AUTH_CALL_STARTED`, then decrypt only in the secret
+   module and call
    `auth.admin.inviteUserByEmail(email, { redirectTo })`;
-3. on success, validate returned `user.id` UUID/project and use the dedicated
-   direct-DB identity to call `private.complete_admin_invitation_v1` with exact
-   intent, returned sub, environment, generation, and one-time nonce;
-4. that function locks the intent, requires `PREPARED` or `AUTH_CREATED`,
-   records the sub, creates exactly one registry `invited` row at version 1,
-   and commits `REGISTRY_COMMITTED` atomically with audit;
+3. on success, validate returned `user.id` UUID/project and record exact
+   intent/sub/environment/generation/capability version with the Auth-response
+   capability, durably transitioning to `AUTH_CREATED`;
+4. use the returned completion capability to create exactly one registry
+   `invited` row at version 1 and commit `REGISTRY_COMMITTED`;
 5. every later operation uses only that registry `sub`.
 
 Failure and retry rules:
@@ -847,9 +921,33 @@ Failure and retry rules:
   retry after the Auth email cooldown; one matching unconfirmed user adopts
   that sub; multiple, confirmed, older, or environment-mismatched users require
   manual conflict resolution;
-- Auth success followed by registry/DB failure is reconciled and then replays
-  `complete_admin_invitation_v1` with the same intent/sub. A different sub
-  conflicts; an identical existing registry row returns the stored result;
+- Auth success followed by failure before `AUTH_CREATED` commits leaves
+  `PREPARED` or, when writable, `AUTH_OUTCOME_UNKNOWN`; reconciliation must
+  prove the exact Auth user before the record function stores the sub and
+  transitions to `AUTH_CREATED`. A different sub conflicts;
+- if the five-minute Auth-response capability expires while the intent is
+  still `PREPARED` with no call marker and zero attempts, the prepare identity
+  may call `private.reissue_admin_invitation_auth_response_capability_v1(...)`
+  to atomically rotate it under the original
+  actor/session/idempotency/rate checks. Once `AUTH_CALL_STARTED` exists, no
+  caller assertion can renew it;
+  reconciliation must first prove the exact Auth outcome and commit
+  `AUTH_CREATED`;
+- `private.reissue_admin_invitation_completion_capability_v1(...)` may issue a
+  replacement completion capability only for locked `AUTH_CREATED`, the exact
+  stored sub/environment/generation, healthy telemetry, an unexpired intent,
+  and a bounded database rate/attempt counter. It increments capability
+  version and invalidates every older digest without changing intent
+  generation;
+- if `AUTH_CREATED` committed but its response was lost, retrying the consumed
+  Auth-response capability returns only the stored `AUTH_CREATED` status and
+  exact stored sub binding, never capability plaintext; the server then uses
+  the reissue function. If `REGISTRY_COMMITTED` committed but its response was
+  lost, retrying the exact consumed completion capability and exact
+  intent/sub/environment/generation/version returns the stored terminal result.
+  Thus consumed-capability replay is rejected in every nonterminal,
+  cross-binding, or stale-version case, while exact terminal-result recovery is
+  explicitly idempotent rather than contradictory;
 - successful API delivery remains `DELIVERY_UNCONFIRMED` until invitation
   acceptance. Bounce/expiry never creates another registry row. Owner-approved
   retry first soft-deletes the exact unconfirmed Auth user, tombstones the old
@@ -1430,10 +1528,12 @@ Identity/session:
 - `getSession()` data cannot authorize;
 - refresh, chunked cookie, expiry, callback state/PKCE, logout, and no-store
   behavior;
-- cookie expiry cannot authorize or extend a server session; lost/expired
-  cookies with an orphaned server session trigger server-side revocation;
-  logout removes every current and obsolete chunk suffix and repeated logout
-  is safe;
+- cookie persistence cannot authorize or extend a server session. Cookie-loss
+  tests prove only local unauthenticated behavior and explicitly prove no
+  automatic server revocation claim; logout tests separately prove Auth
+  session-row deletion; chunk-cleanup tests separately remove every current
+  and obsolete suffix and make repeated cleanup safe; Auth-timeout tests
+  separately prove the configured inactivity and absolute time-box behavior;
 - open-redirect rejection;
 - AAL1 read and AAL2 mutation behavior;
 - revoked subject and authz-version mismatch denied before JWT expiry.
@@ -1492,6 +1592,13 @@ Authorization/RLS:
   another environment, and concurrent completion. The success case proves
   atomic nonce consumption, exact returned-sub binding, registry creation,
   intent transition, and audit;
+- invitation prepare has no exposed `api` wrapper. Tests prove that user JWT,
+  `authenticated`, `service_role`, every wrapper owner, completion identity,
+  and direct PostgREST calls cannot insert an intent or supply
+  ciphertext/HMAC; only the environment-specific prepare identity succeeds
+  after Route Origin/CSRF and database actor/session/rate/idempotency checks.
+  Forged actor/session/version/environment/key-version fields, duplicate-key
+  conflicts, rate bypass, and missing telemetry fail closed;
 - lifecycle bootstrap cannot call or grant general protected-data mutations;
 - only the exposed `api` schema is selectable for protected user-JWT RPCs;
   `private` remains absent from exposed/extra-search schemas. Exact
@@ -1553,9 +1660,13 @@ Operations:
   duplicate open intent, no registry row before Auth success, verified returned
   sub, Auth deterministic failure, transport ambiguity, zero/one/multiple-user
   reconciliation, API-success/DB-failure replay, different-sub conflict,
-  delivery bounce/expiry generation retry, concurrent completion, crash at
-  every boundary, bounded attempts, and raw-email absence from registry,
-  audit, telemetry, logs, traces, errors, and artifacts;
+  delivery bounce/expiry generation retry, concurrent completion, and crash at
+  every boundary. State-machine tests cover pre-call capability expiry and
+  safe rotation, `AUTH_CALL_STARTED`, Auth-success/pre-record DB failure,
+  `AUTH_CREATED` commit/response loss, completion expiry/reissue, completion
+  commit/response loss, exact terminal-result recovery, consumed nonce replay,
+  stale capability version, bounded attempts, and raw-email absence from
+  registry, audit, telemetry, logs, traces, errors, and artifacts;
 - invite -> `pending_mfa` -> verified AAL2 -> active lifecycle, pending-MFA
   mutation denial, additional-admin authority, last-active-admin protection,
   factor reset/unenroll downgrade, reauthentication, session/factor/CSRF
@@ -1645,6 +1756,10 @@ approve:
   https://supabase.com/docs/guides/auth/server-side/creating-a-client
 - Supabase SSR cookie/HttpOnly limitation:
   https://supabase.com/docs/guides/troubleshooting/how-do-i-make-the-cookies-httponly-vwweFx
+- Supabase SSR advanced cookie lifetime guidance:
+  https://supabase.com/docs/guides/auth/server-side/advanced-guide
+- Supabase SSR advanced cookie lifetime guidance:
+  https://supabase.com/docs/guides/auth/server-side/advanced-guide
 - Supabase dedicated API schemas and explicit grants:
   https://supabase.com/docs/guides/api/securing-your-api
 - Supabase database function privileges:
