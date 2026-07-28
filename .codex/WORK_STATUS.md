@@ -1,5 +1,55 @@
 # Work status
 
+
+## 2026-07-28 — Admin Security Architecture v1 Draft
+
+- Objective: remove the security-Architecture blocker before Item Selection
+  persistence by defining one trusted administrator, authorization, RLS, CSRF,
+  audit, and rollout contract.
+- Branch: `codex/docs/admin-auth-rls-csrf-architecture-v1`, based exactly on
+  PR #38 squash commit `cd4bae71ac77d74751ae3575a8574d7c174a6748`.
+- Risk: high-risk/manual because this Architecture governs authentication,
+  authorization, RLS, secrets, and Production access. Documentation only; no
+  implementation is authorized.
+- Revenue impact: P1 prerequisite for Story 3 and the shortest safe path from
+  approved evaluation engines to an operator-controlled persistence workflow.
+- Scope: current-state security evidence, Supabase Auth principal/session,
+  administrator claim and registry, AAL, route classes, default-deny RLS,
+  service-role boundary, signed CSRF, exact origins, CORS, rate limits, audit,
+  recovery, deployment order, rollback, and acceptance tests.
+- Non-goals: packages, runtime/API/UI code, migrations, RLS execution, Supabase
+  configuration, user creation, secrets, Preview/Production changes, Story 3,
+  or any commerce write.
+- Root-cause class: security Architecture prerequisite. Current routes have no
+  accepted admin/session/CSRF boundary and use anon database access with broad
+  development policies.
+- Completed: confirmed PR #38 is squash-merged; read binding governance and
+  Database/Security policies; audited current Supabase client, access map,
+  permissive RLS evidence, representative unauthenticated mutation routes, and
+  installed dependencies; compared current official Supabase, Next.js, and
+  OWASP guidance; created and indexed the proposed Architecture and decision
+  record.
+- Current work: validate the documentation diff and open a Draft manual PR for
+  repository-owner Architecture review. Do not mark Accepted or Ready.
+- Blockers/owner actions: Architecture acceptance is intentionally pending.
+  Sprint B-0, Auth Foundation, Authorization Foundation, Route Security
+  Migration, and Item Selection Story 3 remain blocked.
+- Changed files:
+  `docs/architecture/ADMIN-IDENTITY-AUTHORIZATION-RLS-CSRF-V1.md`,
+  `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`, and this file.
+- Validation: remote content consistency and diff checks are pending. Runtime
+  code is unchanged; full CI/build and Preview evidence will be collected for
+  the exact PR head.
+- Last commit: remote branch documentation commits; GitHub is the authoritative
+  current SHA source.
+- Exact next action: inspect the complete remote diff, verify Proposed-only
+  status and source links, open a Draft PR with `manual-merge-required`, then
+  wait for exact-head CI/Preview before owner review.
+- Remaining risks: cookie behavior must be proven with the pinned Supabase SSR
+  version; the Production administrator UUID and secrets remain unknown by
+  design; existing broad policies remain unchanged until separately approved
+  high-risk implementation.
+
 ## 2026-07-28 — Item Selection Database Baseline Architecture v1
 
 - Objective: define the database contract required to persist and reproduce
