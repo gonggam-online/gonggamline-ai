@@ -388,9 +388,11 @@ boundary. This slice adds no `auth.sessions` access or revocation ledger.
 ### 8.3 Origin, JSON, and CSRF
 
 Mutation routes require exactly one `Origin` header whose scheme, host, and
-port exactly equal the configured request origin. Missing, `null`, malformed,
-comma/multi-valued, or scheme/host/port-mismatched Origin is 403. Same-site
-fetch metadata is also required.
+port exactly equal the absolute origin in
+`GONGGAMLINE_ADMIN_ALLOWED_ORIGIN`. Missing, empty, malformed, credentialed, or
+non-origin configuration fails fast. Missing, `null`, malformed,
+comma/multi-valued, or scheme/host/port-mismatched request Origin is 403.
+Same-site fetch metadata is also required.
 
 Mutation routes accept only `Content-Type: application/json`; missing or other
 media types are 415 before body parsing or repository access.
@@ -405,8 +407,9 @@ media types are 415 before body parsing or repository access.
   `?purpose=item-selection-finalize` return the same signed token in an
   allowlisted JSON response for in-memory client use and set the HttpOnly
   cookie;
-- MAC input binds exact purpose, administrator UUID, verified JWT session
-  identity, expiry, and nonce;
+- MAC input uses `GONGGAMLINE_ADMIN_CSRF_SECRET` and binds exact purpose,
+  administrator UUID, the verified access JWT `session_id` claim, expiry, and
+  nonce;
 - expiry is at most 15 minutes;
 - mutation requires exact cookie/header equality and constant-time MAC
   comparison;
@@ -437,7 +440,8 @@ Only `lib/supabase/service-role.server.ts` constructs the secret/service-role
 client. It:
 
 - imports `server-only`;
-- reads the environment-scoped server secret only at call time;
+- reads `NEXT_PUBLIC_SUPABASE_URL` and the environment-scoped
+  `SUPABASE_SERVICE_ROLE_KEY` only at call time;
 - never exports the secret or an unguarded singleton;
 - accepts a valid same-request guard context before returning a scoped client;
 - emits no secret-bearing error or log.
@@ -459,7 +463,8 @@ neither module. `services/item-selection-run.repository.ts` exposes only:
 
 Static import-graph tests fail any additional importer. Production build
 artifact and browser-chunk scans must prove that the service-role environment
-identifier and supplied synthetic secret value are absent.
+identifier `SUPABASE_SERVICE_ROLE_KEY` and the supplied synthetic secret value
+are absent.
 
 ## 10. A01–A12 executable acceptance matrix
 
