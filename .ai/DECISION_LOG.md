@@ -272,3 +272,34 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   Do not begin Story 3 until both prerequisites are accepted.
 - Rollback or supersession: Revert the documentation PR or replace it with an
   explicitly accepted version. No runtime or data rollback is required.
+
+## 2026-07-28 — Admin Identity, Authorization, RLS, and CSRF Architecture v1
+
+- Category: architecture decision
+- Story / PR: Admin Identity, Authorization, RLS, and CSRF Architecture v1 /
+  pending
+- Status: proposed; repository-owner manual approval required
+- Owner / approver: Database / Security and Application Security; repository
+  owner
+- Context and evidence: PR #38 is merged and accepts the Item Selection database
+  baseline, but Story 3 remains blocked. Current Next.js Route Handlers have no
+  administrator identity, role, session, AAL, CSRF, or exact-origin gate.
+  Server services use the public anonymous Supabase key, while recovered and
+  Git migrations contain broad development policies.
+- Decision or issue: Propose invitation-only Supabase Auth with verified
+  `sub` UUID, `user_role=admin`, versioned active-admin registry,
+  AAL1 reads, TOTP/AAL2 mutations, user-JWT default-deny RLS, no normal
+  service-role path, signed same-origin CSRF, bounded mutation rates, and
+  append-only sanitized security audit events.
+- Consequences and risks: This documentation is high-risk/manual because it
+  defines future auth, authorization, RLS, secrets, and Production access.
+  It authorizes no implementation, configuration, user enrollment, migration,
+  secret, Preview, or Production change. Broad anonymous policies must not
+  coexist with claims of protected Production writes.
+- Follow-up / due condition: owner Architecture review and acceptance at an
+  exact head SHA, then separate manual Sprint B-0, Auth Foundation,
+  Authorization Foundation, Route Security Migration, and Item Selection Story
+  3 PRs in the approved order.
+- Rollback or supersession: revert the documentation PR or supersede with an
+  explicitly accepted version before implementation. No runtime or data
+  rollback is required for this Draft.
