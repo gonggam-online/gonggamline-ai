@@ -17,12 +17,14 @@
   Queue patterns are reusable, but there is no durable cross-PC task/thread/
   worktree ledger or evidence-normalizing verifier.
 - Current evidence: clean independent worktree; expected GitHub origin; latest
-  base is PR #39 merge `eea7adf`; open Draft PR #40 changes Sprint B-0 database
-  files and this status file but not `docs/orchestrator/**`.
+  original base was PR #39 merge `eea7adf`. PR #40 later merged as
+  `cca761a1a49a39265a75a3a03bb15e81c004def8`; that latest `origin/main` is
+  being incorporated through a normal merge without force-push.
 - Reclassification: Sprint A recovered pre-003 sources and inspected
   Production; Database and Admin Security Architectures are accepted. Sprint
-  B-0 is implemented only on unmerged Draft PR #40. Deployed Admin Auth/RLS,
-  Item Selection persistence, and Production adoption remain unconfirmed.
+  B-0 is merged on `main`, including disposable replay evidence. Deployed Admin
+  Auth/RLS, Item Selection persistence, and Production adoption remain
+  unconfirmed.
 - Completed: repository/PR/worktree safety checks; mandatory governance boot;
   current system/workflow/runtime/external-boundary audit; official Codex
   interface review; architecture, workflow, approval, roadmap, and Task/Result
@@ -42,16 +44,66 @@
   exact-commit status is success; Preview evidence artifact `8682105417`
   (`sha256:a8c454f9174f95c722b7812f9e6bc16152dfd40a9a4b8ac819d13f92fc6d2f8f`)
   is retained through 2026-08-11.
-- Current work: record this delivery checkpoint and verify the resulting final
-  status-only commit.
+- Main reconciliation: merged `origin/main`
+  `cca761a1a49a39265a75a3a03bb15e81c004def8` normally without force-push.
+  Preserved both this record and the merged PR #40 Sprint B-0 record. Fixed the
+  newly merged provenance test to normalize CRLF before finding its header/body
+  separator; migration bytes and manifest contracts are unchanged.
+- Reconciliation validation: lint passes with 0 errors and 4 pre-existing
+  warnings; typecheck passes; focused Sprint B-0 tests pass 7/7; full tests pass
+  268/268; Production build passes with 69 routes. Local Playwright again
+  reaches all 39 tests, with the same 32 passes and seven `missing_url`
+  external-configuration failures before the command timeout.
+- Current work: commit and push the reconciliation, correct the PR body, and
+  verify the final exact head.
 - Blockers/owner actions: none for design/delivery. Implementation requires
   Architecture acceptance plus the explicit decisions in the roadmap.
-- Changed files: `docs/orchestrator/**`, `.ai/DECISION_LOG.md`, and this file.
-- Exact next action: after final status-only exact-head checks pass, stop for
-  repository-owner Architecture review. Do not merge or start implementation.
+- Changed files: `docs/orchestrator/**`, `.ai/DECISION_LOG.md`, this file, and
+  the Windows line-ending normalization in
+  `tests/sprint-b0-database-baseline.test.ts`.
+- Exact next action: after final exact-head checks pass, stop for
+  repository-owner Architecture re-review. Do not merge or start implementation.
 - Remaining risks: unapproved automation auth/budgets, N availability and
   backup, polling/webhook choice, Codex protocol version, shared status-file
   conflict with PR #40, and absent actual sales-learning data.
+
+## 2026-07-28 — Sprint B-0 Database Baseline implementation
+
+- Objective: make the pre-003 schema baseline reproducible so later
+  engine-selected Item Selection persistence can be implemented without
+  Production schema guessing.
+- Branch: `codex/feat/sprint-b0-database-baseline-v1`, based on PR #39 squash
+  commit `eea7adf927498bd200cfe51e67cb1e37373e58bf`.
+- Risk: high-risk/manual because the diff adds migration history and disposable
+  database tooling.
+- Revenue impact: prerequisite for auditable persistence of products selected
+  by the merged Item Selection engine.
+- Root-cause class: database baseline gap; the migration chain began at 003
+  while authoritative pre-003 sources remained recovery evidence only.
+- Scope: promote the three recovery sources into migrations 000 through 002,
+  preserve 003 through 020 by hash, add a pinned disposable Supabase replay
+  runner and CI job, and add structural/provenance tests.
+- Explicit non-goals: Auth, new RLS or policy implementation, Story 3
+  persistence, API, UI, Production access, and commerce writes. Recovered
+  permissive Products policies are not promoted.
+- Current work: implementation and delivery validation are complete. The
+  current host lacks Docker/PostgreSQL, so local database replay fails closed
+  at preflight; the complete chain replayed successfully in the disposable
+  GitHub CI Supabase stack.
+- Changed files: pre-003 migrations, Supabase config/manifest, replay script,
+  database-baseline tests/report, CI workflow, and this status file.
+- Validation: 268/268 unit/integration tests, lint with zero errors and four
+  pre-existing warnings, typecheck, Production build, preserved migration
+  hashes, disposable full-chain replay, exact-head CI, Vercel Preview, and
+  Preview browser validation passed.
+- Delivery: Draft PR #40 is open with `manual-merge-required`; Ready,
+  auto-merge, merge, Production migration, and Production smoke were not
+  performed.
+- Exact next action: repository-owner review of Draft PR #40. Do not mark
+  Ready or merge without the next explicit approval.
+- Remaining risks: existing development policies in migrations 005 through 020
+  remain unchanged because RLS is explicitly outside this approval. Production
+  migration behavior remains untested and unauthorized.
 
 
 ## 2026-07-28 — Admin Security Architecture v1 Accepted
