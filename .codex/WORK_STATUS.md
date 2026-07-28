@@ -1,5 +1,80 @@
 # Work status
 
+## 2026-07-28 — Revenue-first automation orchestrator design
+
+- Objective: design an implementable GPT review -> task routing -> Codex
+  execution -> evidence verification -> next-task/approval loop that advances
+  real sales, net profit, and operator-time reduction.
+- Branch: `docs/automation-orchestrator-design`, based on `origin/main`
+  `eea7adf927498bd200cfe51e67cb1e37373e58bf`.
+- Risk: high-risk/manual bootstrap by `.ai/risk-classification.md`;
+  documentation only; no implementation, external configuration, database,
+  Production, or commerce write.
+- Scope/non-goals: six files under `docs/orchestrator/**` plus the minimum
+  Decision Log and Work Status records. Product code, API, migration, CI,
+  Vercel/Supabase state, and Coupang remain unchanged.
+- Root-cause class: capability/Architecture gap. Existing CI/Preview and Runtime
+  Queue patterns are reusable, but there is no durable cross-PC task/thread/
+  worktree ledger or evidence-normalizing verifier.
+- Current evidence: clean independent worktree; expected GitHub origin; latest
+  original base was PR #39 merge `eea7adf`. PR #40 later merged as
+  `cca761a1a49a39265a75a3a03bb15e81c004def8`; that latest `origin/main` is
+  being incorporated through a normal merge without force-push.
+- Reclassification: Sprint A recovered pre-003 sources and inspected
+  Production; Database and Admin Security Architectures are accepted. Sprint
+  B-0 is merged on `main`, including disposable replay evidence. Deployed Admin
+  Auth/RLS, Item Selection persistence, and Production adoption remain
+  unconfirmed.
+- Completed: repository/PR/worktree safety checks; mandatory governance boot;
+  current system/workflow/runtime/external-boundary audit; official Codex
+  interface review; architecture, workflow, approval, roadmap, and Task/Result
+  schemas drafted.
+- Validation: both Draft 2020-12 JSON Schemas compile with AJV; Markdown links,
+  state/outcome coverage, secret/path scans, and `git diff --check` pass. Lint
+  passes with 0 errors and 4 pre-existing test warnings; typecheck passes;
+  261/261 unit/integration tests pass; Production build passes with 69 routes.
+  Local Playwright reached all 39 tests but the command timed out after the
+  known seven Supabase-dependent page failures (`missing_url`); the other 32
+  tests, including read-only health, revenue-critical, and Dashboard flows,
+  passed. This documentation diff changes no runtime path.
+- Delivery: design commit
+  `6fbbee22bb44e2f45f377b3ce71eefb986071d98` is pushed. Draft PR #41 is open
+  with `manual-merge-required`; auto-merge and merge remain disabled. Exact-head
+  CI run `30343769928` and Preview browser run `30343769935` passed. Vercel
+  exact-commit status is success; Preview evidence artifact `8682105417`
+  (`sha256:a8c454f9174f95c722b7812f9e6bc16152dfd40a9a4b8ac819d13f92fc6d2f8f`)
+  is retained through 2026-08-11.
+- Main reconciliation: merged `origin/main`
+  `cca761a1a49a39265a75a3a03bb15e81c004def8` normally without force-push.
+  Preserved both this record and the merged PR #40 Sprint B-0 record. Fixed the
+  newly merged provenance test to normalize CRLF before finding its header/body
+  separator; migration bytes and manifest contracts are unchanged.
+- Reconciliation validation: lint passes with 0 errors and 4 pre-existing
+  warnings; typecheck passes; focused Sprint B-0 tests pass 7/7; full tests pass
+  268/268; Production build passes with 69 routes. Local Playwright again
+  reaches all 39 tests, with the same 32 passes and seven `missing_url`
+  external-configuration failures before the command timeout.
+- Reconciliation delivery: merge commit
+  `305b3c57ffb3a77717dcf79c66edbbc5d4caa088` is pushed without force. PR #41
+  is mergeable, Draft, and labeled only `manual-merge-required`; its body now
+  records high-risk/manual. Exact-head CI `30349872267` and Preview browser
+  validation `30349871278` pass, Vercel Preview is Ready, and evidence artifact
+  `8684461640` has digest
+  `sha256:c57984165723c20e84e4be54f4067ce40a0cccbb7420bf0f5bf25fe065d10aa8`.
+  Unresolved review threads: 0.
+- Current work: record this final delivery checkpoint and verify the resulting
+  status-only exact head.
+- Blockers/owner actions: none for design/delivery. Implementation requires
+  Architecture acceptance plus the explicit decisions in the roadmap.
+- Changed files: `docs/orchestrator/**`, `.ai/DECISION_LOG.md`, this file, and
+  the Windows line-ending normalization in
+  `tests/sprint-b0-database-baseline.test.ts`.
+- Exact next action: after final exact-head checks pass, stop for
+  repository-owner Architecture re-review. Do not merge or start implementation.
+- Remaining risks: unapproved automation auth/budgets, N availability and
+  backup, polling/webhook choice, Codex protocol version, shared status-file
+  conflict with PR #40, and absent actual sales-learning data.
+
 ## 2026-07-28 — Sprint B-0 Database Baseline implementation
 
 - Objective: make the pre-003 schema baseline reproducible so later

@@ -290,3 +290,31 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Approval boundary: this acceptance approves the Architecture contract only. PR #39 remains Draft and `manual-merge-required`; no runtime, migration, RLS, Auth configuration, secret, identity, Production, or commerce-write implementation is authorized by this decision alone.
 - Follow-up / due condition: prepare the bounded Sprint B-0 implementation work instruction, obtain the separate Sprint B-0 Architecture/implementation approval, then use one high-risk manual implementation PR. Enterprise lifecycle automation and external telemetry are follow-up work only when an operating need exists.
 - Rollback or supersession: revert or supersede this documentation PR. No runtime or data rollback is required.
+
+## 2026-07-28 — Revenue-first automation orchestrator
+
+- Category: architecture decision
+- Story / PR: Revenue-first Automation Orchestrator Architecture / pending
+- Status: proposed; repository-owner acceptance required before implementation
+- Owner / approver: repository owner / AI CTO
+- Context and evidence: GitHub/CI/Preview delivery controls, Runtime Queue
+  reliability patterns, workflow idempotency, Revenue/Item Selection engines,
+  and D/N operating rules exist, but no durable controller binds structured
+  review, routing, Codex threads, evidence verification, retry, approval, and
+  sales-learning outcomes.
+- Decision or issue: propose one supervised N-PC controller with a local durable
+  ledger, deterministic policy/router, Codex App Server execution interface
+  with a `codex exec` first adapter/fallback, GitHub/Preview evidence adapters,
+  strict Task/Result JSON Schemas, and human gates for merge, Production,
+  database/security, secrets/cost/permissions, and real commerce writes.
+- Consequences and risks: the smallest MVP avoids a cloud worker, Supabase
+  orchestration schema, and distributed multi-agent platform. The automation
+  bootstrap remains high-risk/manual even though this Story is documentation
+  only. Autonomy begins in SHADOW and expands only from verified actual
+  outcomes.
+- Follow-up / due condition: repository-owner review/acceptance, then execute
+  only the Phase 0 read-only protocol capability spike in
+  `docs/orchestrator/implementation-roadmap.md`. Do not begin implementation
+  from this proposed record.
+- Rollback or supersession: revert this documentation PR or supersede the
+  proposed contracts through a separately reviewed Architecture decision.
