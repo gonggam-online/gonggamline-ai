@@ -216,32 +216,6 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Rollback or supersession: Revert the Story 1 PR. Any semantic policy change
   requires a new ruleset version; do not mutate historical v1 semantics.
 
-## 2026-07-28 — Item Selection profitability policy v1 implementation
-
-- Category: architecture decision
-- Story / PR: Item Selection Evaluation Story 2 / #37
-- Status: implemented; Draft PR validation passed
-- Owner / approver: Revenue with Supplier / Procurement consumption;
-  repository-owner Architecture directive
-- Context and evidence: Story 1 is merged. The owner approved versioned fee,
-  fulfillment, advertising, return-loss, VAT, precision, and contribution
-  thresholds while retaining the existing separate Stories 2–6 boundaries.
-- Decision or issue: Revenue owns immutable policy
-  `gonggamline-profitability-2026-07-27-v1`. It computes base, stress,
-  current-effective, and normalized scenarios from explicit trusted facts.
-  Item Selection consumes the normalized/stress threshold result. Any required
-  estimated or missing cost caps the verdict at `MANUAL_REVIEW`; hard-gate
-  `FAIL` and `UNKNOWN` retain precedence.
-- Consequences and risks: Candidate screening can no longer use promotion
-  economics or rounded display values to bypass normalized/stress thresholds.
-  This is high-risk/manual financial code. The policy deliberately excludes
-  monthly fixed overhead from per-unit contribution.
-- Follow-up / due condition: approve Database Baseline and Admin
-  identity/authorization/RLS/CSRF Architecture PRs before Stories 3–4.
-  Persistence, API, and UI remain separate Stories.
-- Rollback or supersession: revert the Story 2 commit. A future policy must use
-  a new version; historical v1 inputs/results must remain reproducible once
-  persistence is approved.
 
 ## 2026-07-28 — Item Selection profitability policy v1 implementation
 

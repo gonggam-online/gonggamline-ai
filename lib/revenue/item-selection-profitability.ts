@@ -67,6 +67,7 @@ export type RateFact = {
   sourceType: CostSourceType;
   sourceReference: string | null;
   effectiveFrom: string | null;
+  includedIn: readonly string[];
   confirmationStatus: CostConfirmationStatus;
 };
 
@@ -109,7 +110,7 @@ export type SanitizedProviderProfitabilityFacts = {
 };
 
 export type SupplierProfitabilityFactSource = {
-  provider: "domeggook";
+  provider: string;
   providerItemId: string;
   supplierPriceKrw: number | null;
   shippingFeeKrw: number | null;
@@ -128,6 +129,8 @@ export type ProfitabilityCostLine = {
   displayAmountKrw: number;
   sourceType: CostSourceType;
   sourceReference: string | null;
+  effectiveFrom: string | null;
+  includedIn: readonly string[];
   confirmationStatus: CostConfirmationStatus;
   vatTreatment: VatTreatment | "RATE";
 };
@@ -252,6 +255,8 @@ function lineFromMoney(fact: MoneyFact): ProfitabilityCostLine {
     displayAmountKrw: displayWon(rawAmountKrw),
     sourceType: fact.sourceType,
     sourceReference: fact.sourceReference,
+    effectiveFrom: fact.effectiveFrom,
+    includedIn: fact.includedIn,
     confirmationStatus: fact.confirmationStatus,
     vatTreatment: fact.vatTreatment,
   };
@@ -270,6 +275,8 @@ function rateLine(
     displayAmountKrw: displayWon(rawAmountKrw),
     sourceType: fact.sourceType,
     sourceReference: fact.sourceReference,
+    effectiveFrom: fact.effectiveFrom,
+    includedIn: fact.includedIn,
     confirmationStatus: fact.confirmationStatus,
     vatTreatment: "RATE",
   };
@@ -341,6 +348,7 @@ function estimatedRateFact(rate: number, reference: string): RateFact {
     sourceType: "APPROVED_POLICY",
     sourceReference: reference,
     effectiveFrom: ITEM_SELECTION_PROFITABILITY_POLICY_EFFECTIVE_DATE,
+    includedIn: [],
     confirmationStatus: "ESTIMATED",
   };
 }
@@ -636,8 +644,28 @@ export function mapSupplierProfitabilityFacts(
     shippingVatTreatment: VatTreatment;
   },
 ): SanitizedProviderProfitabilityFacts {
+  if (item.provider !== "domeggook") {
+    throw new RangeError("provider must be domeggook.");
+  }
   if (!/^\d{1,20}$/.test(item.providerItemId)) {
     throw new RangeError("providerItemId must contain 1 to 20 digits.");
+  }
+  for (const [field, value] of [
+    ["supplierPriceKrw", item.supplierPriceKrw],
+    ["shippingFeeKrw", item.shippingFeeKrw],
+  ] as const) {
+    if (value !== null && (!Number.isFinite(value) || value < 0)) {
+      throw new RangeError(`${field} must be null or a non-negative finite number.`);
+    }
+  }
+  if (
+    item.minimumOrderQuantity !== null &&
+    (!Number.isInteger(item.minimumOrderQuantity) ||
+      item.minimumOrderQuantity < 1)
+  ) {
+    throw new RangeError(
+      "minimumOrderQuantity must be null or an integer greater than or equal to 1.",
+    );
   }
   if (input.observedAt.trim() === "") {
     throw new RangeError("observedAt is required.");

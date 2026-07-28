@@ -55,6 +55,7 @@ function rate(
     sourceType: status === "ESTIMATED" ? "APPROVED_POLICY" : "WING",
     sourceReference: status === "MISSING" ? null : "rate:evidence",
     effectiveFrom: status === "MISSING" ? null : "2026-07-27",
+    includedIn: [],
     confirmationStatus: status,
   };
 }
@@ -387,6 +388,75 @@ test("maps only sanitized provider facts and exposes missing values", () => {
     "supplierShippingCost",
   ]);
   assert.equal(JSON.stringify(mapped).includes("raw"), false);
+});
+
+test("rejects a non-Domeggook provider before any fact can be CONFIRMED", () => {
+  assert.throws(
+    () =>
+      mapSupplierProfitabilityFacts(
+        {
+          provider: "untrusted-provider",
+          providerItemId: "123",
+          supplierPriceKrw: 5_000,
+          shippingFeeKrw: 500,
+          minimumOrderQuantity: 1,
+        },
+        {
+          observedAt: "2026-07-27",
+          supplierVatTreatment: "VAT_INCLUSIVE_DEDUCTIBLE",
+          shippingVatTreatment: "VAT_INCLUSIVE_DEDUCTIBLE",
+        },
+      ),
+    /provider must be domeggook/,
+  );
+});
+
+test("rejects invalid provider numeric facts instead of confirming them", () => {
+  for (const item of [
+    { supplierPriceKrw: -1, shippingFeeKrw: 0, minimumOrderQuantity: 1 },
+    { supplierPriceKrw: Number.NaN, shippingFeeKrw: 0, minimumOrderQuantity: 1 },
+    { supplierPriceKrw: 0, shippingFeeKrw: Number.POSITIVE_INFINITY, minimumOrderQuantity: 1 },
+    { supplierPriceKrw: 0, shippingFeeKrw: 0, minimumOrderQuantity: 0 },
+    { supplierPriceKrw: 0, shippingFeeKrw: 0, minimumOrderQuantity: 1.5 },
+  ]) {
+    assert.throws(() =>
+      mapSupplierProfitabilityFacts(
+        {
+          provider: "domeggook",
+          providerItemId: "123",
+          ...item,
+        },
+        {
+          observedAt: "2026-07-27",
+          supplierVatTreatment: "VAT_INCLUSIVE_DEDUCTIBLE",
+          shippingVatTreatment: "VAT_INCLUSIVE_DEDUCTIBLE",
+        },
+      ),
+    );
+  }
+});
+
+test("preserves effective dates and inclusion relationships on cost lines", () => {
+  const result = calculateItemSelectionProfitability(
+    input({
+      fulfillment: {
+        normalized: money("fulfillment.normalized", 3_000, {
+          includedIn: ["pickPackPackagingLabelSet"],
+        }),
+        currentEffective: null,
+      },
+    }),
+  );
+  const fulfillment = result.scenarios.normalizedScenario?.costs.find(
+    ({ id }) => id === "fulfillment.normalized",
+  );
+  const advertising = result.scenarios.normalizedScenario?.costs.find(
+    ({ id }) => id === "advertising",
+  );
+  assert.equal(fulfillment?.effectiveFrom, "2026-07-27");
+  assert.deepEqual(fulfillment?.includedIn, ["pickPackPackagingLabelSet"]);
+  assert.equal(advertising?.effectiveFrom, "2026-07-27");
+  assert.deepEqual(advertising?.includedIn, []);
 });
 
 test("confirmed threshold results integrate with Item Selection verdicts", () => {

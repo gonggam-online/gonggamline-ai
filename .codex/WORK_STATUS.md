@@ -26,27 +26,28 @@
   Catalog contracts, migrations, and tests; implemented the versioned Revenue
   policy, four scenarios, trust/provenance/VAT/inclusion validation, sanitized
   provider mapper, evaluator integration, and focused tests.
-- Current: implementation, local gates, Draft PR, and first exact-head remote
-  gates passed; record the delivery evidence on the PR head.
+- Current: review follow-up implemented and all local gates passed; push the
+  review-fix commit and confirm exact-head CI and Preview browser validation.
 - Blockers/owner actions: no blocker for Story 2. Database Baseline and Admin
   Architecture approvals remain prerequisites for Stories 3–4.
 - Changed files: Revenue profitability policy, Item Selection evaluator,
   focused tests, policy documentation, changelog, Decision Log, and this file.
-- Commands/results: `main == origin/main == 04508f0`; initial worktree was
-  clean except the recorded blocker status. Typecheck and focused lint passed.
-  Focused policy/evaluator tests passed 37/37; the full unit/integration suite,
-  repository lint, typecheck, and Production build passed. Repository lint had
-  no errors; warnings came from pre-existing generated Playwright report
-  assets. The Windows Node runtime returned `uv_os_get_passwd ENOMEM` while
-  `tsx` selected its temp directory; an ignored local dependency file was
-  temporarily adjusted only to execute tests, then restored. No repository
-  dependency or runtime code contains that workaround.
+- Commands/results: review follow-up preserves `effectiveFrom` and `includedIn`
+  on cost lines and rejects non-Domeggook or invalid numeric provider facts.
+  Focused policy/evaluator tests passed 40/40; full unit/integration passed
+  261/261; typecheck and Production build passed. Repository lint excluding
+  the pre-existing generated `playwright-report` passed with 0 errors and 4
+  pre-existing test warnings. The unfiltered lint command fails only because
+  generated Playwright trace assets are present locally. The Windows Node
+  runtime returned `uv_os_get_passwd ENOMEM` while `tsx` selected its temp
+  directory; ignored dependency files were temporarily adjusted only to run
+  tests and then restored. No `node_modules` file is staged or committed.
 - Delivery: implementation commit
   `58db717fa00f40522838de90c427acd921bc7a83` is pushed. Draft PR #37 has
   `manual-merge-required`; auto-merge is disabled. Exact-head CI run
   `30313836655` and Preview browser validation run `30313836624` passed.
-- Last commit: `04508f033892d57cab29c3430231d29424c36fa2`.
-- Exact next action: commit/push this delivery record, confirm the new
+- Last commit: `9b35ec2ef4836e054aa3c6747584b4d807c7d951`.
+- Exact next action: commit/push the review fix, confirm the new
   exact-head CI/Preview gates, then stop for manual review without merging.
 - Remaining risks: provider unit price freshness still depends on the bounded
   observation time; persisted replay, authenticated APIs, and UI evidence
