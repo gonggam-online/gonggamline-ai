@@ -1,5 +1,49 @@
 # Work status
 
+## 2026-07-28 — Orchestrator Phase 0 protocol capability spike
+
+- Objective: prove the accepted Task/Result contracts and installed Codex
+  execution interfaces with read-only evidence before building a controller.
+- Branch: `codex/chore/orchestrator-protocol-spike`, based on PR #41 merge
+  `a6894fce05480d9b599dcb9a03f9100c607b3fe6`.
+- Risk: `manual-merge-required`. The probes are read-only, but this is the
+  initial automation bootstrap.
+- Revenue impact: P2 enablement and risk reduction. Measured protocol
+  compatibility prevents rework and unsafe automation before revenue-supporting
+  tasks are dispatched.
+- Scope: Phase 0 TaskContract/example, sanitized CLI/App Server evidence,
+  capability report, Architecture acceptance/status records, and no product
+  runtime change.
+- Non-goals: product code, API, migration, CI, Supabase, Vercel/Production,
+  commerce writes, durable ledger/router/worker implementation, secrets, OAuth,
+  paid API, or permission expansion.
+- Root-cause class: capability uncertainty. Codex Desktop bundles an executable
+  that external PowerShell cannot launch; official `@openai/codex` CLI
+  `0.145.0` was installed for the approved spike and uses the existing ChatGPT
+  login.
+- Completed: confirmed PR #41 merged; fast-forwarded clean `main`; completed
+  governance boot; created the dedicated branch; recorded the approved
+  TaskContract; generated the experimental App Server JSON Schema bundle in a
+  temporary directory; completed sanitized structured-exec, App Server
+  lifecycle/resume/interrupt, Windows cancellation, usage, and synthetic
+  redaction probes; recorded only sanitized summaries and hashes.
+- Current work: complete final diff review and deliver the dedicated Draft PR.
+- Blockers/owner actions: none. Final PR merge remains manual.
+- Changed files: `docs/orchestrator/**`, `.ai/DECISION_LOG.md`, and this file
+  only.
+- Validation: Task/Result JSON Schemas compile and examples validate; fixtures
+  parse; lint passes with 0 errors and 4 pre-existing warnings; typecheck
+  passes; 268/268 tests pass; Production build passes with 69 routes. Local
+  Playwright reached all 39 tests: 32 passed and the same seven
+  Supabase-dependent pages failed with external `missing_url` configuration
+  before the outer command timeout. The probes made no product/runtime change.
+- Delivery: pending.
+- Exact next action: review and commit the complete scoped diff, push the task
+  branch, and open a high-risk/manual Draft PR without merging it.
+- Remaining risks: CLI/Desktop version skew, experimental App Server protocol
+  churn, usage/cost semantics under ChatGPT auth, and Windows process
+  cancellation behavior.
+
 ## 2026-07-28 — Revenue-first automation orchestrator design
 
 - Objective: design an implementable GPT review -> task routing -> Codex

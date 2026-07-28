@@ -1,11 +1,13 @@
 # Revenue-first automation orchestrator architecture
 
-Status: Proposed Architecture Story
+Status: Accepted Architecture Story
 
 Risk: high-risk/manual bootstrap, even though this change is documentation-only
 
 Owner: repository owner / AI CTO; execution owner: Codex Autonomous Engineering Lead
-Base evidence: `origin/main` `eea7adf927498bd200cfe51e67cb1e37373e58bf`
+Approval evidence: PR #41 merge
+`a6894fce05480d9b599dcb9a03f9100c607b3fe6`; Phase 0 separately authorized
+by the repository owner on 2026-07-28
 
 ## 1. Decision summary
 
@@ -303,8 +305,9 @@ Codex version instead of assuming a remembered contract.
   runtime and commerce domains.
 - Existing sources reused: Git/GitHub, repository governance, CI/Preview,
   Runtime Queue patterns, typed contracts.
-- New lifecycle/external tooling: yes; therefore this document is the required
-  Architecture Story and implementation remains unauthorized until accepted.
+- New lifecycle/external tooling: yes; this document is the accepted
+  Architecture Story. Implementation remains phase-gated; only the separately
+  authorized Phase 0 read-only spike is in scope for this PR.
 - Security/failure/observability/test/rollout/rollback are defined here and in
   the linked documents.
 - Risk: the bootstrap is high-risk/manual by repository policy. No auto-merge.

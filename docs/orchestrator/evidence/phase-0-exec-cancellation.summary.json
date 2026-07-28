@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "codexCliVersion": "0.145.0",
+  "sandbox": "read-only",
+  "threadId": "019fa86b-8119-73c1-a511-3c941cc34d3d",
+  "parentProcessTerminationRequested": true,
+  "childProcessTreeExitedWithParent": false,
+  "explicitChildCleanupRequired": true,
+  "remainingProbeProcessesAfterCleanup": 0,
+  "preProbeDiffHash": "72087e26fc36f7d22d2d153cd01fa2dac8f71556",
+  "postProbeDiffHash": "72087e26fc36f7d22d2d153cd01fa2dac8f71556",
+  "decisionImpact": "Do not treat termination of the codex.cmd parent as complete cancellation on Windows; retain process-tree ownership and reconciliation. Prefer App Server turn/interrupt for normal cancellation.",
+  "rawLogCommitted": false,
+  "sanitized": true
+}

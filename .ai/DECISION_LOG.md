@@ -318,3 +318,25 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   from this proposed record.
 - Rollback or supersession: revert this documentation PR or supersede the
   proposed contracts through a separately reviewed Architecture decision.
+
+## 2026-07-28 — Revenue-first automation orchestrator accepted; Phase 0 authorized
+
+- Category: architecture acceptance and bounded implementation authorization
+- Story / PR: Revenue-first Automation Orchestrator Architecture / PR #41
+- Status: accepted; Phase 0 read-only protocol capability spike authorized
+- Owner / approver: repository owner
+- Approved merge SHA: `a6894fce05480d9b599dcb9a03f9100c607b3fe6`
+- Decision: accept the Engineering Orchestration boundary and authorize only
+  Phase 0 from `docs/orchestrator/implementation-roadmap.md` on dedicated branch
+  `codex/chore/orchestrator-protocol-spike` and a separate manual Draft PR.
+- Scope: schema/example validation, installed Codex CLI/App Server schema
+  capture, structured read-only repository assessment, thread/usage/
+  cancellation/redaction evidence, and a measured adapter recommendation.
+- Non-goals: product runtime, database/migration/RLS/Auth, CI changes,
+  Production, commerce writes, durable ledger/router/controller implementation,
+  OAuth, new secrets, paid API enablement, or authority expansion.
+- Risk and approval: read-only discovery is normal-risk, but the bootstrap PR
+  remains `manual-merge-required`; final merge requires repository-owner
+  approval.
+- Rollback: close the unmerged Phase 0 PR and remove its documentation/evidence
+  commit. No runtime or data rollback is required.
