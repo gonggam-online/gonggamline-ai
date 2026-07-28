@@ -229,6 +229,34 @@ active administrator remains. Self-tombstoning and self-factor-reset are
 forbidden. Email changes do not change the principal because `sub` is the only
 identity key.
 
+The `pending_mfa` activation bootstrap is the single exception to the normal
+active-administrator function precondition. The dedicated
+`private.activate_pending_admin_v1()` `SECURITY DEFINER` RPC:
+
+- accepts no target subject, role, status, or arbitrary payload; the target is
+  always the verified `auth.uid()` of the caller;
+- has EXECUTE granted to `authenticated` only, with EXECUTE revoked from
+  `PUBLIC`, `anon`, `service_role`, and every other login role; its dedicated
+  owner is `NOLOGIN`, is not a runtime principal, and retains no membership
+  grant to an application role;
+- requires the registry row for that same subject to be exactly
+  `pending_mfa`, locks it, and rejects every other state;
+- requires a freshly issued, cryptographically verified AAL2 JWT with the same
+  non-null `session_id`, an `iat` no more than 60 seconds old, and a verified
+  TOTP factor/session established by the pinned Supabase Auth client flow;
+- changes only that row to `active`, increments `authz_version`, and atomically
+  records `ADMIN_ACTIVATED`;
+- returns only the new version and `SESSION_REFRESH_REQUIRED`. The caller must
+  refresh claims, replace all auth-cookie chunks and the authenticated CSRF
+  token, then prove the new active/version/AAL2 principal;
+- cannot invoke, proxy, or share authority with general protected-data
+  mutations and grants no protected table access.
+
+A concurrent loser or replay after activation receives 409
+`ADMIN_ALREADY_ACTIVATED`; a different subject cannot activate the target
+because no target parameter exists. Activation remains disabled while the
+required audit/telemetry gate is unhealthy.
+
 TOTP and recovery contract:
 
 1. An invited subject signs in at AAL1, enters `pending_mfa`, enrolls one TOTP
@@ -254,6 +282,23 @@ TOTP and recovery contract:
 6. Every invite, activation, suspension, tombstone, factor change, failed
    recovery, and break-glass operation emits a sanitized audit event and
    receives post-event review.
+
+Direct Supabase MFA unenroll is an explicit threat. An authenticated
+administrator can call the public Supabase Auth factor-unenroll API without
+using GonggamLine UI; UI hiding or application-route sequencing is not a
+security boundary. Supabase may leave an already issued AAL2 access JWT usable
+until token expiry or refresh, and a database RPC cannot synchronously inspect
+the live Auth factor inventory.
+
+V1 therefore applies a bounded residual-risk control at every AAL2 mutation
+RPC, including activation: verified JWT `iat` must be no more than 60 seconds
+old at database time, in addition to current registry/session/version checks.
+After direct unenroll, refresh produces a non-AAL2 token and is denied; an old
+AAL2 JWT can have at most the remainder of this 60-second freshness window.
+There is no claim of immediate revocation. Production mutation activation
+requires the repository owner to explicitly accept this maximum exposure at
+the accepted implementation head, or approve a superseding design with live
+Auth-factor introspection. Changing the window is an Architecture change.
 
 ## 7. Role claim and immediate revocation
 
@@ -326,8 +371,9 @@ registry contents.
 
 ## 8. Session and Next.js server contract
 
-Implementation pins `@supabase/ssr` exactly to `0.12.3` and uses its supported
-browser/server cookie pattern. The reviewed official package guidance states
+Implementation pins `@supabase/ssr` exactly to `0.12.3` and
+`@supabase/supabase-js` exactly to `2.110.7` as the reviewed compatible pair,
+and uses their supported browser/server cookie pattern. The reviewed official package guidance states
 that the browser side needs access to the refresh token to maintain the browser
 session; therefore v1 does not claim a supported server-only HttpOnly Supabase
 session flow. Any package-version change requires the Auth Foundation PR to
@@ -376,12 +422,18 @@ Cookies:
   not read or log them.
 - Supabase Auth is configured for a 30-minute inactivity timeout and a 12-hour
   absolute session time box. Access-token expiry is 15 minutes; refresh-token
-  rotation and reuse detection are enabled. Cookie `Max-Age`/`Expires` may not
-  exceed the server-side session limits, and server-side expiry is
-  authoritative.
+  rotation and reuse detection are enabled. Auth cookies omit
+  `Max-Age`/`Expires` and remain browser session cookies; cookie persistence is
+  storage behavior, not an authorization or server-session lifetime. Supabase
+  Auth's server-side session record,
+  inactivity/absolute limits, verification, and revocation are authoritative.
+  A server session orphaned after local-cookie loss cannot authenticate without
+  its tokens and expires by those server limits; if its session/subject is
+  known, logout/account recovery explicitly revokes it. It cannot be
+  reconstructed from unverified client state.
 - Login, PKCE callback, TOTP enrollment/challenge, refresh, chunk replacement,
   and logout use the browser/server clients exactly as supported by
-  `@supabase/ssr@0.12.3`. Proxy performs refresh/cookie propagation only; it is
+  `@supabase/ssr@0.12.3` with `@supabase/supabase-js@2.110.7`. Proxy performs refresh/cookie propagation only; it is
   never the authorization gate. Route Handlers and RPCs revalidate claims.
 - Logout deletes every SDK chunk and the CSRF cookie. Partial chunk state,
   malformed storage, expired absolute/idle lifetime, refresh reuse, or
@@ -480,18 +532,18 @@ Principal matrix for every protected object:
 | Principal | SELECT | direct INSERT/UPDATE/DELETE | RPC EXECUTE | Required predicate |
 |---|---|---|---|---|
 | `anon` | deny | deny | deny | none |
-| authenticated non-admin | deny | deny | deny | `private.is_active_admin()` false |
+| authenticated non-admin | deny | deny | only `activate_pending_admin_v1` when the caller's own row is `pending_mfa`; otherwise deny | exact section 6 bootstrap predicate, never general mutation |
 | revoked/stale admin | deny | deny | deny | status/version mismatch fails |
 | active AAL1 admin | allow only for object rows listed as readable | deny | read-only RPC only | verified admin/version; AAL1 |
 | active AAL2 admin | allow only for object rows listed as readable | deny | only named mutation RPCs | verified admin/version/session; AAL2 |
-| `service_role` | database role can bypass RLS, but v1 application use is prohibited | prohibited in normal paths | prohibited | secret absent from Story 3/runtime |
+| `service_role` | no application data access | prohibited in normal/data paths | no database RPC; server-only Auth Admin API allowlist in section 11.1 only | secret absent from browser, Story 3, SSR, and general data runtime |
 | background worker/service principal | deny | deny | deny | unsupported in v1 |
 
 Protected-object matrix:
 
 | Object | Direct SELECT | Direct DML | Allowed AAL2 RPC | `USING` / `WITH CHECK` and immutability |
 |---|---|---|---|---|
-| `private.admin_principals` | none through Data API | none | individually reviewed invite, activate, suspend, factor-reset, tombstone functions | private schema; no Data API policy; RPC locks rows and protects last active admin |
+| `private.admin_principals` | none through Data API | none | `activate_pending_admin_v1` bootstrap plus individually reviewed invite, suspend, factor-reset, tombstone functions | private schema; bootstrap is self-only; other RPCs require active AAL2; locks rows and protects last active admin |
 | `item_selection_runs` | active admin AAL1/AAL2 | none | `create_item_selection_run_v1`, `finalize_item_selection_run_v1` | SELECT `USING private.is_active_admin()`; no INSERT/UPDATE/DELETE policy; terminal rows immutable; retry creates a new run |
 | `item_selection_evaluations` | active admin AAL1/AAL2 | none | inserted only inside `finalize_item_selection_run_v1` | SELECT `USING private.is_active_admin()`; no INSERT/UPDATE/DELETE policy; finalized rows append-only |
 | run retry/lineage fields | through authorized run SELECT | none | set only by run-create RPC | remains run-level metadata; cannot alter candidate hashes |
@@ -518,16 +570,21 @@ UPDATE, it must add a restrictive AAL2 policy plus both `USING` and
 Normal browser-originated application requests use the verified user's access
 token so RLS remains effective.
 
-A `SECURITY DEFINER` function is the only v1 mutation boundary and is allowed
-only for the named lifecycle and Item Selection transaction use cases. Each
-function must:
+A `SECURITY DEFINER` function is the only v1 database mutation boundary and is
+allowed only for named lifecycle and Item Selection transaction use cases.
+Every general protected-data or administrator-management function requires an
+active administrator. The sole lifecycle-bootstrap exception is
+`private.activate_pending_admin_v1()`, whose narrower caller, state, subject,
+fresh-AAL2, session, grant, output, and audit contract is fixed in section 6.
+Each function must:
 
 - be named and reviewed individually;
 - be owned by a dedicated non-login, non-superuser role without `BYPASSRLS`;
   the owner receives only required schema/object privileges;
 - set an empty/fixed `search_path`;
 - schema-qualify every object;
-- validate `private.is_active_admin()` inside the function;
+- validate `private.is_active_admin()` inside the function, except that the
+  activation bootstrap validates its complete section 6 predicate instead;
 - revalidate verified `sub = auth.uid()`, active status, role,
   `authz_version`, non-null `session_id`, and `aal = aal2` inside every
   mutation function;
@@ -551,11 +608,57 @@ The service-role key:
   session-aware SSR client;
 - is not required for Story 3 create/finalize calls;
 - is prohibited as a general repository/service client;
-- may be introduced only by a later named server operation whose accepted
-  Architecture proves why user-JWT RLS and a reviewed function cannot work;
+- is permitted only inside the separately deployed server-only Auth control
+  plane below and only for its five named Auth Admin operations;
 - requires a separate stateless `supabase-js` client, explicit central
   authorization before invocation, secret scoping, audit, and negative tests;
 - never converts a failed authorization or RLS result into success.
+
+### 11.1 Privileged Supabase Auth control plane
+
+V1 selects option B: a separate server-only Auth control plane is permitted
+because Auth invitations, global session revocation, cross-user factor
+administration, break-glass recovery, and Auth-user disable/delete cannot use
+user-JWT database RLS. Its allowlist is exhaustive:
+
+1. invite an additional administrator Auth user;
+2. revoke every session/refresh token for an exact target subject;
+3. remove/reset another administrator's MFA factors;
+4. execute repository-owner break-glass recovery;
+5. disable or delete an exact Auth user after registry tombstoning approval.
+
+No generic Auth Admin API proxy exists. Story 3, Item Selection, ordinary data,
+browser code, SSR session clients, and general services remain service-role
+free. Each operation has its own server-only module and Route Handler, imports
+a stateless Auth Admin client from a secret-only module, and cannot accept an
+arbitrary Auth API method or URL. The service-role secret is a
+Production/Preview-separated Vercel server secret; browser imports, client
+bundles, logs, DTOs, errors, and artifacts must prove its absence.
+
+Before an Auth Admin call, the route verifies exact Origin/CSRF, rate limit and
+idempotency key; cryptographically verifies an active AAL2 administrator,
+current registry `authz_version`, session, and JWT age no more than 60 seconds;
+and confirms exact target UUID and configured Supabase project/environment.
+Self-factor reset/delete is forbidden. Break-glass has no browser route and is
+repository-owner out-of-band only.
+
+Invitation is the only operation whose target has no Auth `sub` before the
+call. It binds the idempotency record to the normalized, server-validated target
+email and exact environment, then verifies the returned Auth user UUID and
+stores that UUID as the registry `sub`; the email remains secret telemetry and
+is never placed in the registry/audit event. Every later operation requires
+that exact stored target `sub`.
+
+Revocation order is registry-first: lock the target, move it to the approved
+fail-closed state and increment `authz_version`, commit its audit intent, then
+call the exact Auth Admin operation. Auth-side failure leaves the registry
+revoked, records a retryable partial-failure event with the same
+correlation/idempotency key, and queues bounded retry; it never restores active
+state. Repeating the same key returns the stored operation/result; changing
+operation, target, or environment conflicts. Invitation creates the registry
+`invited` intent before sending Auth invitation; delivery failure leaves a
+non-active retryable record. Disable/delete requires pre-existing
+suspended/tombstoned state and never deletes registry or audit history.
 
 ## 12. CSRF, origin, CORS, and content contract
 
@@ -748,6 +851,64 @@ Required audit sink failure behavior:
 - degraded audit state never relaxes authentication, authorization, RLS, AAL2,
   CSRF, or idempotency.
 
+### 14.1 Denial telemetry sink prerequisite
+
+The external durable sink/provider is intentionally not invented by this
+Architecture. Before any Preview or Production protected mutation is enabled,
+a separate high-risk **Security Telemetry Sink Operations** decision must be
+accepted by the repository owner at an exact head. Until then the sink
+readiness flag is false and protected writes, activation, Auth-control-plane
+operations, and Story 3 finalization remain frozen.
+
+That prerequisite must select the exact managed provider, region, account,
+plan, retention capability, backup/export destination, and data-processing
+terms. Its implementation contract is already fixed:
+
+- append-only streams are separately named
+  `gonggamline-security-denial-preview-v1` and
+  `gonggamline-security-denial-production-v1`; no environment shares a writer,
+  key, queue, index, or backup;
+- the writer is a dedicated server-only `security-telemetry-writer` identity
+  with append-only permission and a per-environment secret in Vercel; neither
+  browser, general service-role client, administrator JWT, nor read identity
+  can write;
+- the only event fields are schema version, event ID, occurred-at,
+  environment, correlation ID, idempotency key, verified subject when
+  available, action/resource code, opaque resource ID, outcome, reason code,
+  assurance, authz version, and allowlisted safe request metadata. Bodies,
+  email, tokens, factors, provider evidence, stacks, and secrets are forbidden;
+- idempotency is `(environment, event_id)`; correlation ID groups attempts but
+  does not deduplicate them. Exact duplicates are retained once, payload
+  mismatch on the same event ID is quarantined and alerts;
+- the separately selected provider-managed durable encrypted queue retries transient failures with
+  exponential backoff plus jitter at 1, 2, 4, 8, 16, and 30 seconds, then every
+  5 minutes for 24 hours. The queue acknowledges only a provider durable-write
+  receipt and preserves ordering per correlation ID;
+- health is failed after the first required write cannot obtain a durable
+  receipt within 5 seconds, writer authentication fails, backlog age exceeds
+  60 seconds, or schema/retrieval canary fails. The central mutation gate then
+  flips to write freeze before another protected write is admitted;
+- recovery requires restored provider health, secret validation, canary
+  append/read, ordered backlog drain with idempotency verification, zero
+  quarantined mismatches, and repository-owner unfreeze approval. Backlog loss
+  is an incident and cannot be waived by reenabling writes;
+- Production events remain immutable and queryable for seven years. The
+  selected provider and owner-approved operations runbook own retention lock,
+  encrypted backup/export, quarterly restore tests, and evidence. Preview uses
+  a separate non-Production retention chosen by the prerequisite and can never
+  receive Production data;
+- the dedicated security-reader identity is read-only and granted only to the
+  repository-owner incident runbook. Administrators and application roles have
+  no direct query, update, retention-change, or delete permission. Legal
+  deletion requires a superseding Architecture and owner-approved operation.
+
+The prerequisite acceptance test must prove provider receipt semantics,
+append-only/deny-delete policy, writer and reader isolation, redaction/schema
+rejection, duplicate/mismatch behavior, queue exhaustion, automatic write
+freeze, recovery/backlog replay, seven-year Production retention, backup and
+restore, and Preview/Production separation. A configured but unproven sink is
+not Ready.
+
 ## 15. Error and recovery contract
 
 HTTP behavior:
@@ -808,16 +969,16 @@ user-JWT/RPC boundary.
 
 | Step | Action and success criterion | Failure / rollback state |
 |---|---|---|
-| 1 | Accept this Architecture and Sprint B-0; prove the full sequence in disposable and dedicated Preview/Staging environments. | no Production action |
+| 1 | Accept this Architecture, the Security Telemetry Sink Operations prerequisite, and Sprint B-0; prove the full sequence in disposable and dedicated Preview/Staging environments. | no Production action |
 | 2 | Enter maintenance/write-freeze mode; all company-data mutations return 503 while read-only health remains available. | remain frozen |
-| 3 | Verify exact Production project, origin, backup, secrets, session settings, and owner-approved administrator bootstrap identifiers. | abort; no policy change |
+| 3 | Verify exact Production project, origin, backup, secrets, session settings, telemetry provider/receipt/retention health, owner-approved administrator bootstrap identifiers, and recorded owner acceptance of the 60-second direct-unenroll residual exposure. | abort; no policy change |
 | 4 | Create private registry/audit/rate-limit objects and dedicated non-login function owner; bootstrap the invited admin. | rollback new unused private objects or forward-fix while frozen |
 | 5 | Install and verify the Custom Access Token Hook; prove issuer/audience/project, role/version, session, AAL1/AAL2, stale and revoked synthetic cases. | disable Hook and remain frozen; no anonymous write restoration needed |
 | 6 | Prepare new RLS and RPC definitions without exposing protected writes; fingerprint grants, owners, policies, functions, and broad policies scheduled for removal. | drop only unused new definitions or forward-fix while frozen |
 | 7 | Deploy the SSR auth application and central Route Handler security gate with every protected write feature disabled. | restore prior read application only if write freeze remains |
 | 8 | Run Production-safe login/session/AAL read checks and non-Production mutation deny/allow tests against the exact artifacts. | remain frozen |
 | 9 | In one reviewed database change window, remove broad anonymous/development policies, revoke direct protected-table DML, and activate final SELECT plus AAL2 RPC grants/policies. | forward-fix or keep all writes disabled; never restore broad anonymous writes |
-| 10 | Re-run anon, non-admin, stale, AAL1, AAL2, direct Data API, RPC, owner/BYPASSRLS, audit, and service-role-path tests. | write freeze remains |
+| 10 | Re-run anon, pending-MFA bootstrap, non-admin, stale, AAL1, AAL2, direct Data API, direct-unenroll/old-JWT RPC, owner/BYPASSRLS, audit/telemetry-freeze, and service-role/control-plane tests. | write freeze remains |
 | 11 | Enable one bounded protected write path, smoke it with owner-controlled AAL2/CSRF/idempotency, then enable only explicitly approved routes. | disable the affected application write flag |
 | 12 | Repository owner approves Production write activation and records exact application/migration SHAs and evidence. | no approval means frozen/disabled |
 
@@ -877,6 +1038,10 @@ Identity/session:
 - `getSession()` data cannot authorize;
 - refresh, chunked cookie, expiry, callback state/PKCE, logout, and no-store
   behavior;
+- cookie expiry cannot authorize or extend a server session; lost/expired
+  cookies with an orphaned server session trigger server-side revocation;
+  logout removes every current and obsolete chunk suffix and repeated logout
+  is safe;
 - open-redirect rejection;
 - AAL1 read and AAL2 mutation behavior;
 - revoked subject and authz-version mismatch denied before JWT expiry.
@@ -885,7 +1050,8 @@ Identity/session:
 - stale-claim one-refresh maximum, cookie cleanup, machine-readable response,
   refresh-session revocation, and no refresh loop;
 - email change preserves the same authoritative `sub`;
-- pinned `@supabase/ssr@0.12.3` browser/server proof for PKCE callback, token
+- pinned `@supabase/ssr@0.12.3` plus
+  `@supabase/supabase-js@2.110.7` browser/server proof for PKCE callback, token
   refresh/rotation, chunk replacement, TOTP, logout, idle/absolute expiry,
   no-store, and Preview/Production separation;
 - loopback HTTPS or dev-only CSRF cookie naming cannot be enabled in Preview or
@@ -913,6 +1079,20 @@ Authorization/RLS:
   function's internal active-admin/version/session/AAL2 checks;
 - service-role key/import/client is absent from normal Story 3 and
   browser-originated application paths.
+- `pending_mfa` self-activation succeeds only through
+  `activate_pending_admin_v1` with the caller's own subject, freshly verified
+  AAL2 factor/session, exact EXECUTE grants, version increment, audit, and
+  post-activation claim/CSRF refresh; failure, concurrent activation, replay,
+  and attempted activation of another subject are denied;
+- lifecycle bootstrap cannot call or grant general protected-data mutations;
+- each of the five Auth control-plane operations proves exact caller, target,
+  environment, CSRF, rate, idempotency, registry-first revocation, audit, and
+  partial-failure behavior; arbitrary Auth Admin API calls, browser imports,
+  general-admin break-glass, and service-role use by Story 3/general data paths
+  are denied;
+- direct public Auth API factor unenroll followed by an old AAL2 JWT direct RPC
+  is denied after the normative 60-second JWT-age boundary; the test records
+  maximum exposure and the owner acceptance decision.
 
 CSRF/origin:
 
@@ -947,6 +1127,12 @@ Operations:
 - audit allow/deny/rollback events, direct mutation denial, seven-year
   retention, backup/restore, redaction, allowlisted before/after metadata, and
   read/mutation behavior during each sink failure;
+- the exact accepted Security Telemetry Sink Operations prerequisite proves
+  append-only provider receipt, writer/reader isolation, event allowlist,
+  correlation/idempotency, retry/backoff, duplicate conflict, backlog recovery,
+  automatic protected-write freeze, retention/backup/restore, and strict
+  Preview/Production separation; missing or unhealthy sink blocks activation
+  and all Production mutations;
 - maintenance cutover failure at every step leaves writes frozen, never
   restores broad policies, handles Auth Hook failure, and proves emergency
   write freeze and break-glass;
@@ -969,9 +1155,13 @@ of the following separate high-risk/manual Stories:
    principal resolver, login/logout/MFA surfaces.
 3. Authorization Foundation: registry, Auth Hook, role/version claims, RLS
    helper, audit, and rate-limit functions.
-4. Route Security Migration: explicit public allowlist, protected reads,
+4. Security Telemetry Sink Operations: exact provider, isolated writer/reader,
+   queue/freeze, retention, backup, and recovery proof.
+5. Auth Control Plane: five named server-only Auth Admin operations and no
+   generic service-role client.
+6. Route Security Migration: explicit public allowlist, protected reads,
    AAL2/CSRF mutations, user-JWT clients, negative tests.
-5. Item Selection Story 3 persistence using the exact accepted subject, claim,
+7. Item Selection Story 3 persistence using the exact accepted subject, claim,
    RLS, RPC, audit, and CSRF contracts.
 
 Story 3 itself remains limited by PR #38. It does not gain API/UI, provider
@@ -987,12 +1177,16 @@ approve:
 2. `sub` UUID, `user_role=admin`, and `authz_version`;
 3. private active-admin registry and manual environment bootstrap;
 4. AAL1 reads and mandatory TOTP/AAL2 mutations;
-5. user-JWT RLS with no normal service-role path;
+5. user-JWT RLS with service role limited to the five named server-only Auth
+   control-plane operations and absent from Story 3/general data paths;
 6. removal of broad anonymous/development policies before Production writes;
 7. signed cookie-to-header CSRF, exact origins, and no credentialed CORS;
 8. audit, rate limits, fail-closed behavior, and no secret/evidence leakage;
 9. ordered high-risk/manual implementation Stories and Production runbook;
 10. that no implementation begins merely because this Draft exists.
+11. the explicit maximum 60-second exposure after direct public MFA unenroll;
+12. the separate exact-provider Security Telemetry Sink Operations
+    prerequisite and Production-write freeze until it is accepted and healthy.
 
 ## 22. Authoritative references
 

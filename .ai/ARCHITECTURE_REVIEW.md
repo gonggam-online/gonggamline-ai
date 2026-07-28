@@ -119,7 +119,12 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
   TOTP state machine, exact JWT refresh/revocation, protected-object matrix,
   dedicated function ownership, supported `@supabase/ssr@0.12.3` browser/server
   cookie contract, maintenance-window cutover, and audit retention/failure
-  semantics. The revised exact head still requires independent review.
+  semantics. A second review added the self-only pending-MFA activation
+  bootstrap, five-operation server-only Auth control plane, bounded
+  direct-unenroll exposure, mandatory telemetry-provider prerequisite, and
+  pinned SSR/supabase-js session cleanup contract. The revised exact head still
+  requires independent review and explicit owner acceptance of the remaining
+  60-second MFA-unenroll exposure.
 - Current-state finding: application routes have no accepted administrator
   session or CSRF boundary and rely on anonymous Supabase access with broad
   development policies.

@@ -32,14 +32,20 @@
   `manual-merge-required`; independently reviewed the first Draft and addressed
   its AAL2/Data API, CSRF binding, admin/MFA lifecycle, JWT refresh/revocation,
   RLS matrix, function owner, SSR cookie, cutover, audit, route/content, XSS,
-  rate-limit, and acceptance-test blockers.
+  rate-limit, and acceptance-test blockers; a second independent review found
+  four remaining approval blockers plus an SSR correction, now addressed by a
+  pending-MFA bootstrap RPC, isolated Auth control plane, bounded direct-factor
+  unenroll exposure, mandatory telemetry-sink prerequisite, and pinned
+  SSR/supabase-js cleanup/session contracts.
 - Current work: validate and deliver the blocker-remediated documentation on
   the same Draft PR #39. Keep Architecture Proposed; do not mark Accepted or
   Ready, enable auto-merge, or merge.
 - Blockers/owner actions: repository-owner Architecture review and explicit
-  acceptance at an exact head SHA are required. Sprint B-0, Auth Foundation,
-  Authorization Foundation, Route Security Migration, and Item Selection Story
-  3 remain blocked.
+  acceptance at an exact head SHA are required, including acceptance or
+  supersession of the maximum 60-second direct-MFA-unenroll exposure. The exact
+  telemetry provider/runbook requires a separate accepted prerequisite. Sprint
+  B-0, Auth Foundation, Authorization Foundation, Route Security Migration,
+  and Item Selection Story 3 remain blocked.
 - Changed files:
   `docs/architecture/ADMIN-IDENTITY-AUTHORIZATION-RLS-CSRF-V1.md`,
   `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`, and this file.
@@ -55,9 +61,10 @@
   re-review. Do not record acceptance or start Sprint B-0/Auth/RLS/Story 3
   implementation.
 - Remaining risks: the Production administrator UUID, secrets, exact project
-  settings, and cutover approval remain unknown by design; all runtime/schema
-  work stays blocked until Architecture acceptance and separate high-risk
-  Stories.
+  settings, telemetry provider, and cutover approval remain unknown by design.
+  The repository owner must explicitly accept or supersede the maximum
+  60-second direct-MFA-unenroll exposure. All runtime/schema work stays blocked
+  until Architecture acceptance and separate high-risk Stories.
 
 ## 2026-07-28 — Item Selection Database Baseline Architecture v1
 
