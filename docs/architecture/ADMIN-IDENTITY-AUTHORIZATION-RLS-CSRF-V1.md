@@ -229,8 +229,9 @@ active administrator remains. Self-tombstoning and self-factor-reset are
 forbidden. Email changes do not change the principal because `sub` is the only
 identity key.
 
-The `pending_mfa` activation bootstrap is the single exception to the normal
-active-administrator function precondition. The dedicated internal
+The `pending_mfa` activation bootstrap is one of exactly two self-only
+lifecycle exceptions to the normal active-administrator function precondition;
+the other is invitation acceptance below. The dedicated internal
 `private.activate_pending_admin_v1()` `SECURITY DEFINER` function, reached
 only through the exposed wrapper `api.activate_pending_admin_v1()`:
 
@@ -257,6 +258,43 @@ A concurrent loser or replay after activation receives 409
 `ADMIN_ALREADY_ACTIVATED`; a different subject cannot activate the target
 because no target parameter exists. Activation remains disabled while the
 required audit/telemetry gate is unhealthy.
+
+Invitation acceptance is also a narrow self-only bootstrap, separate from
+activation and every general mutation. The exposed
+`api.accept_admin_invitation_v1()` wrapper has no arguments and calls only
+`private.accept_admin_invitation_v1()`. EXECUTE is granted to
+`authenticated`; it is revoked from `PUBLIC`, `anon`, `service_role`, and all
+other login roles. The private function remains unexposed and executable only
+by its exact `api_rpc_owner`.
+
+The private function is owned by a dedicated
+`invitation_acceptance_owner NOLOGIN` role without superuser/BYPASSRLS. It has
+only the registry/audit privileges required for this transition, EXECUTE on the
+session-row helper, and column-level SELECT on
+`auth.users(id, email_confirmed_at)`; it cannot read email, identities,
+credentials, factors, refresh tokens, or unrelated sessions/tables.
+
+Inside one transaction the private function:
+
+1. verifies the signed JWT issuer/audience/project, exact `aal=aal1`, non-null
+   `session_id`, and `auth.uid() = sub`;
+2. proves the session is live in `auth.sessions` and belongs to the same
+   `auth.uid()` under section 11.2;
+3. proves the same `auth.users.id` has completed the invitation confirmation
+   flow, without reading or returning its email;
+4. locks the caller's registry row and requires exactly `status=invited`;
+5. validates the database telemetry readiness lease before the first and final
+   write;
+6. changes only that row to `pending_mfa`, increments `authz_version`, and
+   atomically records `ADMIN_INVITE_ACCEPTED`;
+7. returns only the new version and `SESSION_REFRESH_REQUIRED`; refreshed
+   claims and CSRF state must be verified before MFA enrollment continues.
+
+There is no target parameter and no general-data authority. A concurrent loser
+or replay receives 409 `ADMIN_INVITATION_ALREADY_ACCEPTED`; a caller whose
+subject differs from the row, whose state is not invited, whose session is
+logged out, or whose invitation is unconfirmed is denied without revealing
+registry/email existence.
 
 TOTP and recovery contract:
 
@@ -332,14 +370,16 @@ Application authorization requires all of:
 - `user_role === "admin"`;
 - positive integer `authz_version`;
 - `aal` equal to the assurance required by the operation;
-- non-null, valid Supabase `session_id` for every mutation;
+- non-null, valid Supabase `session_id` whose matching `auth.sessions` row
+  exists for every protected read and mutation;
 - registry row with the same subject, active status, admin role, and identical
   version.
 
-Database RLS calls `private.is_active_admin()`, which applies the same checks
-using `auth.uid()`, `auth.jwt()`, and the registry. The helper is
+Database RLS and internal functions call `private.is_active_admin()`, which
+applies the same checks using `auth.uid()`, `auth.jwt()`, the registry, and the
+section 11.2 session-row helper. The helper is
 `SECURITY DEFINER`, has a fixed empty `search_path`, contains no dynamic SQL,
-and is executable only by `authenticated`.
+and is executable only by exact internal read/mutation function owners.
 
 A role/status/version change therefore denies the next database call even if
 the old JWT has not refreshed. Logout-all/recovery also revokes Supabase Auth
@@ -413,7 +453,7 @@ type AdminPrincipalV1 = {
   role: "admin";
   authzVersion: number;
   assurance: "aal1" | "aal2";
-  sessionId: string | null;
+  sessionId: string;    // verified UUID with a live auth.sessions row
 };
 ```
 
@@ -538,7 +578,7 @@ Principal matrix for every protected object:
 | Principal | SELECT | direct INSERT/UPDATE/DELETE | RPC EXECUTE | Required predicate |
 |---|---|---|---|---|
 | `anon` | deny | deny | deny | none |
-| authenticated non-admin | deny | deny | only `activate_pending_admin_v1` when the caller's own row is `pending_mfa`; otherwise deny | exact section 6 bootstrap predicate, never general mutation |
+| authenticated non-admin | deny | deny | only `accept_admin_invitation_v1` for own `invited` row or `activate_pending_admin_v1` for own `pending_mfa` row; otherwise deny | exact section 6 bootstrap predicates, never general mutation |
 | revoked/stale admin | deny | deny | deny | status/version mismatch fails |
 | active AAL1 admin | no direct table SELECT | deny | only named read wrappers | verified admin/version; AAL1 |
 | active AAL2 admin | no direct table SELECT | deny | only named read/mutation wrappers | verified admin/version/session; AAL2 |
@@ -549,7 +589,8 @@ Protected-object matrix:
 
 | Object | Direct SELECT | Direct DML | Allowed AAL2 RPC | `USING` / `WITH CHECK` and immutability |
 |---|---|---|---|---|
-| `private.admin_principals` | none through Data API | none | `activate_pending_admin_v1` bootstrap plus individually reviewed invite, suspend, factor-reset, tombstone functions | private schema; bootstrap is self-only; other RPCs require active AAL2; locks rows and protects last active admin |
+| `private.admin_principals` | none through Data API | none | self-only `accept_admin_invitation_v1` and `activate_pending_admin_v1` bootstraps plus individually reviewed prepare/complete-invite, suspend, factor-reset, tombstone wrappers | private schema; bootstraps are self-only; management wrappers require active AAL2; locks rows and protects last active admin |
+| `private.admin_auth_control_intents_v1` | none | none | prepare/complete/reconcile invitation wrappers only | pre-sub encrypted/HMAC email envelope; no registry row before verified Auth sub; closed PII crypto-shredded |
 | `item_selection_runs` | none through Data API; bounded read wrapper only | none | `read/create/finalize_item_selection_run_v1` wrappers | internal SELECT enforces `private.is_active_admin()`; terminal rows immutable; retry creates a new run |
 | `item_selection_evaluations` | none through Data API; bounded read wrapper only | none | read wrapper plus insert only inside finalization | internal SELECT enforces active admin; finalized rows append-only |
 | run retry/lineage fields | through bounded run-read DTO | none | set only by run-create RPC | remains run-level metadata; cannot alter candidate hashes |
@@ -586,6 +627,11 @@ wrapper functions such as:
 
 - `api.activate_pending_admin_v1()` ->
   `private.activate_pending_admin_v1()`;
+- `api.accept_admin_invitation_v1()` ->
+  `private.accept_admin_invitation_v1()`;
+- `api.prepare_admin_invitation_v1(...)` and
+  `api.complete_admin_invitation_v1(...)` -> exact private control-intent
+  functions;
 - `api.create_item_selection_run_v1(...)` ->
   `private.create_item_selection_run_v1(...)`;
 - `api.finalize_item_selection_run_v1(...)` ->
@@ -638,9 +684,11 @@ token so RLS remains effective.
 A `SECURITY DEFINER` function is the only v1 database mutation boundary and is
 allowed only for named lifecycle and Item Selection transaction use cases.
 Every general protected-data or administrator-management function requires an
-active administrator. The sole lifecycle-bootstrap exception is
-`private.activate_pending_admin_v1()`, whose narrower caller, state, subject,
-fresh-AAL2, session, grant, output, and audit contract is fixed in section 6.
+active administrator. The only lifecycle-bootstrap exceptions are
+`private.accept_admin_invitation_v1()` and
+`private.activate_pending_admin_v1()`, whose narrower self-only caller, state,
+subject, assurance, session, grant, output, telemetry, and audit contracts are
+fixed in section 6.
 Each function must:
 
 - be named and reviewed individually;
@@ -648,8 +696,8 @@ Each function must:
   the owner receives only required schema/object privileges;
 - set an empty/fixed `search_path`;
 - schema-qualify every object;
-- validate `private.is_active_admin()` inside the function, except that the
-  activation bootstrap validates its complete section 6 predicate instead;
+- validate `private.is_active_admin()` inside the function, except that the two
+  lifecycle bootstraps validate their complete section 6 predicates instead;
 - revalidate verified `sub = auth.uid()`, active status, role,
   `authz_version`, non-null `session_id`, and `aal = aal2` inside every
   mutation function;
@@ -709,11 +757,68 @@ Self-factor reset/delete is forbidden. Break-glass has no browser route and is
 repository-owner out-of-band only.
 
 Invitation is the only operation whose target has no Auth `sub` before the
-call. It binds the idempotency record to the normalized, server-validated target
-email and exact environment, then verifies the returned Auth user UUID and
-stores that UUID as the registry `sub`; the email remains secret telemetry and
-is never placed in the registry/audit event. Every later operation requires
-that exact stored target `sub`.
+call. It cannot create a registry row or pretend a subject exists before Auth
+succeeds. The AAL2 control-plane Route Handler first creates an idempotent
+pre-sub intent through `api.prepare_admin_invitation_v1(...)`.
+`private.admin_auth_control_intents_v1` stores:
+
+- opaque intent UUID, exact environment, operation `ADMIN_INVITE`, creator
+  subject/session/version, idempotency-key digest, state, attempt count, safe
+  error code, timestamps, nullable returned Auth `sub`, and delivery state;
+- AES-256-GCM ciphertext/IV/tag of the normalized email, encrypted by a
+  server-only per-environment invitation key, plus an HMAC-SHA-256 lookup value
+  made with a different per-environment key and both key versions;
+- no plaintext email, password, token, invitation URL, or raw Auth response.
+
+The keys exist only in the isolated Auth-control-plane secret module. Raw email
+exists transiently in the validated HTTPS request and process memory, is never
+passed to audit/telemetry/log/error/trace/artifact output, and is redacted
+before any exception crosses the module. Only that module can decrypt the
+exact intent. Closed intents crypto-shred ciphertext and email HMAC after 30
+days while retaining non-identifying intent/sub/state/audit metadata for seven
+years.
+
+The unique idempotency contract is `(environment, operation,
+idempotency_key_digest)`. Reuse with the same email HMAC returns the stored
+intent/result; reuse with another email/environment conflicts. A second open
+intent for the same environment/email HMAC conflicts. The prepare wrapper
+requires active AAL2, current live session, CSRF/rate checks at the route,
+telemetry readiness inside the function, and atomically audits only the opaque
+intent ID.
+
+Invitation ordering is normative:
+
+1. commit intent state `PREPARED`; no registry row exists;
+2. decrypt only in the secret module and call
+   `auth.admin.inviteUserByEmail(email, { redirectTo })`;
+3. on success, validate returned `user.id` UUID/project and call
+   `api.complete_admin_invitation_v1(intentId, returnedSub)`;
+4. that function locks the intent, requires `PREPARED` or `AUTH_CREATED`,
+   records the sub, creates exactly one registry `invited` row at version 1,
+   and commits `REGISTRY_COMMITTED` atomically with audit;
+5. every later operation uses only that registry `sub`.
+
+Failure and retry rules:
+
+- deterministic Auth rejection leaves `AUTH_FAILED_RETRYABLE` or
+  `AUTH_FAILED_TERMINAL` with an allowlisted code and no registry row;
+- timeout/network ambiguity becomes `AUTH_OUTCOME_UNKNOWN`; it is never blindly
+  re-invited. The owner-approved reconciler decrypts in memory and uses pinned
+  `auth.admin.listUsers({ page, perPage })` with bounded complete pagination to
+  find an exact normalized-email match. Zero matches permits a same-intent
+  retry after the Auth email cooldown; one matching unconfirmed user adopts
+  that sub; multiple, confirmed, older, or environment-mismatched users require
+  manual conflict resolution;
+- Auth success followed by registry/DB failure is reconciled and then replays
+  `complete_admin_invitation_v1` with the same intent/sub. A different sub
+  conflicts; an identical existing registry row returns the stored result;
+- successful API delivery remains `DELIVERY_UNCONFIRMED` until invitation
+  acceptance. Bounce/expiry never creates another registry row. Owner-approved
+  retry first soft-deletes the exact unconfirmed Auth user, tombstones the old
+  invited registry identity for history, increments the intent generation, and
+  performs a new invite whose new sub is separately recorded;
+- process crash at every boundary is recovered from committed intent state;
+  attempts are bounded and rate-limited, and no failure promotes an identity.
 
 Revocation order is registry-first: lock the target, move it to the approved
 fail-closed state and increment `authz_version`, commit its audit intent, then
@@ -721,9 +826,9 @@ call the exact Auth Admin operation. Auth-side failure leaves the registry
 revoked, records a retryable partial-failure event with the same
 correlation/idempotency key, and queues bounded retry; it never restores active
 state. Repeating the same key returns the stored operation/result; changing
-operation, target, or environment conflicts. Invitation creates the registry
-`invited` intent before sending Auth invitation; delivery failure leaves a
-non-active retryable record. Disable/delete requires pre-existing
+operation, target, or environment conflicts. Invitation follows the separate
+pre-sub intent contract above and never creates a registry row until Auth
+returns a verified sub. Disable/delete requires pre-existing
 suspended/tombstoned state and never deletes registry or audit history.
 
 The pinned `@supabase/supabase-js@2.110.7` operation map is exact:
@@ -766,6 +871,57 @@ If any pinned-SDK proof differs in the exact target Supabase project,
 Production activation remains frozen and the operation falls back to the
 repository-owner runbook or a superseding Architecture. No undocumented Auth
 schema write is an allowed fallback.
+
+### 11.2 Logged-out session-row enforcement
+
+V1 adopts Supabase's documented strong sign-out check: the signed JWT
+`session_id` must correspond to the primary key of an `auth.sessions` row.
+Supabase documents that sign-out removes affected session rows while the
+already issued JWT otherwise remains cryptographically valid until `exp`.
+Therefore signature/expiry alone is insufficient for any protected read or
+mutation.
+
+`private.assert_auth_session_present_v1(lock_for_mutation boolean)` is a
+`SECURITY DEFINER` helper owned by
+`auth_session_check_owner NOLOGIN`, with empty search path and no dynamic SQL.
+That owner has only `USAGE` on `auth` and column-level SELECT needed for
+`auth.sessions(id, user_id)`; it has no INSERT/UPDATE/DELETE, no access to
+refresh tokens, identities, email, factors, or application tables, and no
+`BYPASSRLS`/superuser privilege. EXECUTE is revoked from `PUBLIC`, `anon`,
+`authenticated`, `service_role`, `api_rpc_owner`, and login roles, and granted
+only to the exact internal read/mutation function owner roles.
+
+The helper requires:
+
+- verified non-null UUID `session_id` and UUID `sub`;
+- `auth.uid() = sub`;
+- exactly one `auth.sessions` row with `id = session_id` and
+  `user_id = auth.uid()`;
+- normal JWT issuer/audience/project/`exp`/`nbf` checks already completed.
+
+Every internal bounded read function invokes the helper before reading company
+data. Every activation, invitation acceptance, lifecycle, Auth-intent, Story 3,
+and future mutation function invokes it with `lock_for_mutation=true` before
+its first write. That mode locks the matching session row `FOR KEY SHARE` for
+the transaction and rechecks existence immediately before the final
+audit/write statement. Supabase sign-out's row deletion must wait for an
+already-running locked mutation; consequently, after sign-out returns, no
+mutation using that deleted session can still commit. Mutation statement
+timeout remains five seconds.
+
+A missing/mismatched row returns sanitized 401 `SESSION_REVOKED`, even if the
+JWT signature, `exp`, role, version, AAL, and telemetry lease remain valid.
+Neither `api` wrappers nor internal owners can bypass the helper. The check
+specifically enforces explicit session-row removal such as sign-out; configured
+inactivity/time-box limits are still enforced by Auth refresh plus JWT expiry
+and are not inferred solely from row presence because Supabase may clean those
+rows later.
+
+The Auth Foundation migration must fingerprint the required `auth.sessions`
+columns against the exact target Supabase version and run the official
+sign-out/session-row integration proof in disposable and dedicated Preview
+projects. If the schema or deletion semantics differ, Production protected
+reads and writes remain disabled until a superseding accepted contract exists.
 
 ## 12. CSRF, origin, CORS, and content contract
 
@@ -1261,6 +1417,12 @@ Authorization/RLS:
   AAL2 factor/session, exact EXECUTE grants, version increment, audit, and
   post-activation claim/CSRF refresh; failure, concurrent activation, replay,
   and attempted activation of another subject are denied;
+- invitation acceptance succeeds only through the no-argument
+  `accept_admin_invitation_v1` wrapper for the caller's own confirmed invited
+  subject at AAL1 with a present session row and healthy telemetry lease;
+  another subject, unconfirmed invite, missing/logged-out session, wrong state,
+  replay, and concurrent acceptance are denied and cannot gain general-data
+  authority;
 - lifecycle bootstrap cannot call or grant general protected-data mutations;
 - only the exposed `api` schema is selectable for protected user-JWT RPCs;
   `private` remains absent from exposed/extra-search schemas. Exact
@@ -1279,6 +1441,11 @@ Authorization/RLS:
   global sign-out exists, never stores another user's JWT, distinguishes
   registry access-JWT denial from refresh-session destruction, and rejects
   undocumented Auth-schema/API fallback;
+- global/local logout removes the expected `auth.sessions` row and the old
+  otherwise-valid JWT is denied by direct `api` read and mutation wrapper calls.
+  Tests also cover mismatched session owner, missing/null session claim,
+  helper/grant bypass attempts, mutation-vs-logout locking, and prove no old-JWT
+  commit can occur after logout returns;
 - direct public Auth API factor unenroll followed by an old AAL2 JWT direct RPC
   is denied after the normative 60-second JWT-age boundary; the test records
   maximum exposure and the owner acceptance decision.
@@ -1309,6 +1476,13 @@ Operations:
 - no token, secret, email, provider payload, evidence text, or stack in rows,
   responses, logs, traces, or artifacts;
 - clean full migration replay and schema comparison;
+- invitation intent tests cover same-key replay, different-email conflict,
+  duplicate open intent, no registry row before Auth success, verified returned
+  sub, Auth deterministic failure, transport ambiguity, zero/one/multiple-user
+  reconciliation, API-success/DB-failure replay, different-sub conflict,
+  delivery bounce/expiry generation retry, concurrent completion, crash at
+  every boundary, bounded attempts, and raw-email absence from registry,
+  audit, telemetry, logs, traces, errors, and artifacts;
 - invite -> `pending_mfa` -> verified AAL2 -> active lifecycle, pending-MFA
   mutation denial, additional-admin authority, last-active-admin protection,
   factor reset/unenroll downgrade, reauthentication, session/factor/CSRF
@@ -1387,6 +1561,10 @@ approve:
 14. supported Auth API limits, including no target-sub-only global sign-out;
 15. database-enforced telemetry lease with at most 30 seconds to freeze when
     the monitor cannot reach the database.
+16. self-only AAL1 invitation acceptance and pre-sub encrypted invitation
+    intent ordering;
+17. `auth.sessions` row enforcement for every protected read/mutation so
+    explicit logout immediately denies old JWT wrapper calls.
 
 ## 22. Authoritative references
 
@@ -1402,6 +1580,8 @@ approve:
   https://supabase.com/docs/reference/javascript/auth-admin-signout
 - Supabase sign-out/session semantics:
   https://supabase.com/docs/guides/auth/signout
+- Supabase Auth sessions and documented `auth.sessions` old-JWT check:
+  https://supabase.com/docs/guides/auth/sessions
 - Supabase Auth Admin invitation, update/ban, and deletion:
   https://supabase.com/docs/reference/javascript/auth-admin-inviteuserbyemail
   https://supabase.com/docs/reference/javascript/auth-admin-updateuserbyid

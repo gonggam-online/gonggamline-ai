@@ -39,7 +39,10 @@
   SSR/supabase-js cleanup/session contracts. A third independent review found
   three high blockers, now addressed in the Draft by exposed `api` wrappers
   over hidden `private` functions, exact pinned-SDK Auth operation limits, and
-  an environment-specific database telemetry readiness lease/write gate.
+  an environment-specific database telemetry readiness lease/write gate. A
+  fourth independent review found three high blockers, now addressed by the
+  self-only AAL1 invitation-acceptance wrapper, encrypted idempotent pre-sub
+  invitation intent, and `auth.sessions` checks inside all protected wrappers.
 - Current work: validate and deliver the blocker-remediated documentation on
   the same Draft PR #39. Keep Architecture Proposed; do not mark Accepted or
   Ready, enable auto-merge, or merge.

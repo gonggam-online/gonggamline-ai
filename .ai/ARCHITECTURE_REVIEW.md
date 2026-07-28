@@ -131,6 +131,12 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
   target-sub-only global sign-out; and a 30-second maximum database-visible
   telemetry lease makes direct RPCs fail closed independently of application
   flags. The new exact head remains Proposed and requires independent review.
+- Fourth review follow-up: the invited-to-pending-MFA bootstrap is now an exact
+  self-only AAL1 wrapper; invitation uses an encrypted idempotent pre-sub
+  control intent and creates the registry row only after Auth returns a
+  verified sub; and every protected read/mutation verifies the JWT session ID
+  against `auth.sessions`, making explicit logout deny old-JWT direct RPCs.
+  The new exact head remains Proposed and requires independent review.
 - Current-state finding: application routes have no accepted administrator
   session or CSRF boundary and rely on anonymous Supabase access with broad
   development policies.

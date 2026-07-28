@@ -299,7 +299,10 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   PostgREST to individually granted `api` wrapper RPCs, maps each Auth lifecycle
   operation to a supported pinned-SDK API (with no claimed sub-only global
   logout), and requires every internal mutation to validate a database-visible
-  telemetry readiness lease that expires within 30 seconds.
+  telemetry readiness lease that expires within 30 seconds. The next proposed
+  refinement adds a self-only invitation-acceptance wrapper, an encrypted
+  idempotent pre-sub Auth invitation intent, and an `auth.sessions` existence
+  check inside every protected read/mutation to reject logged-out old JWTs.
 - Consequences and risks: This documentation is high-risk/manual because it
   defines future auth, authorization, RLS, secrets, and Production access.
   It authorizes no implementation, configuration, user enrollment, migration,
