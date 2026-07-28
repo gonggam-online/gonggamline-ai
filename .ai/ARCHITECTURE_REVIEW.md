@@ -160,6 +160,14 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
   calls out the direct LOGIN identities, capability lifecycle, and
   JavaScript-readable cookie/session residual explicitly. The new exact head
   remains Proposed and requires independent review.
+- Eighth review follow-up: `AUTH_CREATED` now has one table-writing core with
+  completion-direct and privilege-isolated reconciliation-adapter paths;
+  ambiguous zero-match enters provider settlement quarantine and stable-zero
+  verification with late-success conflict handling; and unconfirmed invitation
+  retirement now has exact AAL2/runbook request boundaries, server-only
+  finalization, lock order, Auth absence evidence, and soft-delete retry
+  contracts. The new exact head remains Proposed and requires independent
+  review.
 - Current-state finding: application routes have no accepted administrator
   session or CSRF boundary and rely on anonymous Supabase access with broad
   development policies.

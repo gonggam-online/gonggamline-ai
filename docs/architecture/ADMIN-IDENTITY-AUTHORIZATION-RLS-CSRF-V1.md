@@ -240,6 +240,55 @@ acceptance and retirement cannot both commit. It grants no path for
 `pending_mfa`, `active`, or `suspended` subjects and cannot be reused as a
 general tombstone operation.
 
+The active-admin path begins only through
+`api.request_unconfirmed_admin_invitation_retirement_v1(uuid, uuid, bigint,
+bigint, text)`, binding intent ID, target sub, expected intent generation,
+expected registry version, and idempotency digest. The authenticated role has
+EXECUTE only on this wrapper. It is SECURITY DEFINER, owned by
+`api_request_invitation_retirement_owner NOLOGIN`, and that owner has only
+USAGE on `private` plus EXECUTE on the matching
+`private.request_unconfirmed_admin_invitation_retirement_v1(...)`; neither
+function can finalize retirement. The private request function verifies active
+AAL2, live locked caller session, current caller version, CSRF-at-route,
+telemetry/rate/idempotency, and exact target binding, then creates an audited
+pending retirement request.
+
+Finalization has no user-JWT wrapper. The isolated Auth control module verifies
+the target with pinned factor-list APIs and then connects as the
+environment-specific `invitation_retirement LOGIN` role. That role can EXECUTE
+only `private.finalize_unconfirmed_admin_invitation_retirement_v1(uuid, uuid,
+bigint, bigint, text, text)` and
+`private.record_admin_invitation_soft_delete_result_v1(uuid, uuid, bigint,
+text, text)`. Both are SECURITY DEFINER and owned by
+`invitation_retirement_owner NOLOGIN`; the owner has exact SELECT/UPDATE on the
+retirement request, invitation intent, registry status/version, and audit
+columns, INSERT audit, and SELECT on `auth.sessions(id,user_id)` only. It has no
+factor-table write/read, general Auth, or unrelated registry privilege.
+Factor absence is attested by the trusted retirement LOGIN identity using the
+exact provider response digest/correlation/expiry; direct user input cannot
+supply that evidence. Session absence is rechecked from `auth.sessions` inside
+finalization.
+
+The finalizer always locks `private.admin_auth_control_intents_v1` by intent ID
+first, then the exact administrator registry row by sub, then checks session
+absence. Invitation acceptance uses the same intent-before-registry order.
+Under those locks it rechecks `invited`, unaccepted delivery, generation,
+registry version, factor/session evidence, and pending request before
+tombstoning/auditing. The soft-delete result writer may only advance
+`DELETE_PENDING -> DELETE_CONFIRMED` or retain `DELETE_RETRYABLE` with an
+allowlisted error; it cannot restore or alter the tombstoned registry subject.
+Bounded retries use the same operation/idempotency key and block replacement
+invitation until `DELETE_CONFIRMED`.
+
+The repository-owner path does not impersonate AAL2 or call the exposed
+wrapper. It uses an environment-specific out-of-band runbook credential
+`invitation_retirement_owner_runbook LOGIN`, with EXECUTE only on
+`private.owner_request_unconfirmed_admin_invitation_retirement_v1(...)`.
+That SECURITY DEFINER adapter records owner approval/environment/target and
+creates the same pending request, then the same server-only finalizer performs
+all absence checks and state changes. The runbook credential has no EXECUTE on
+finalization, soft-delete result, acceptance, or general lifecycle functions.
+
 The `pending_mfa` activation bootstrap is one of exactly two self-only
 lifecycle exceptions to the normal active-administrator function precondition;
 the other is invitation acceptance below. The dedicated internal
@@ -644,6 +693,8 @@ wrapper functions such as:
   `private.activate_pending_admin_v1()`;
 - `api.accept_admin_invitation_v1()` ->
   `private.accept_admin_invitation_v1()`;
+- `api.request_unconfirmed_admin_invitation_retirement_v1(...)` ->
+  `private.request_unconfirmed_admin_invitation_retirement_v1(...)`;
 - invitation prepare/record/reissue/completion are server-only `private`
   control-plane functions and have no `api` wrapper;
 - `api.create_item_selection_run_v1(...)` ->
@@ -656,7 +707,8 @@ wrapper functions such as:
 Each wrapper is `SECURITY DEFINER` and has its own dedicated wrapper-specific
 `NOLOGIN` owner (for example
 `api_activate_pending_admin_owner`,
-`api_accept_admin_invitation_owner`, and
+`api_accept_admin_invitation_owner`,
+`api_request_invitation_retirement_owner`, and
 `api_create_item_selection_run_owner`) without `SUPERUSER`, `BYPASSRLS`, or
 membership in another wrapper-owner role. Each uses
 `SET search_path = ''`, schema-qualifies its single internal call, accepts and
@@ -887,9 +939,29 @@ After `inviteUserByEmail` returns an exact sub, the completion identity calls
 `private.record_admin_invitation_auth_created_v1(...)` with the still-unconsumed
 Auth-result-record capability. That transaction locks the intent, verifies and
 consumes only the record capability, stores the exact sub, and transitions only
-`AUTH_CALL_STARTED` or `AUTH_OUTCOME_UNKNOWN` to durable `AUTH_CREATED`. This
-function, or the owner-approved reconciler invoking it after exact Auth-user
-proof, is the sole writer of `AUTH_CREATED`.
+`AUTH_CALL_STARTED` or `AUTH_OUTCOME_UNKNOWN` to durable `AUTH_CREATED`.
+
+`private.record_admin_invitation_auth_created_v1(...)` is the sole table writer
+for `AUTH_CREATED`. It is SECURITY DEFINER, owned by
+`invitation_auth_created_owner NOLOGIN`, uses an empty search path and no
+dynamic SQL. That owner alone receives column SELECT/UPDATE on the exact intent
+state/sub/capability/audit-reference columns and INSERT on the append-only
+security audit table; it has no registry, Auth, factor, session, or unrelated
+table privilege. EXECUTE on the core is revoked from all login/Data API/wrapper
+roles and granted only to `auth_invitation_completion` and
+`invitation_reconciliation_auth_created_owner NOLOGIN`.
+
+`private.record_admin_invitation_reconciliation_auth_created_v1(...)` is a
+separate SECURITY DEFINER adapter owned by
+`invitation_reconciliation_auth_created_owner`. The adapter owns no table
+privilege and may only EXECUTE the core writer; it validates the reconciler
+identity and settlement proof, then calls the core with reconciliation mode.
+The `auth_invitation_reconciler LOGIN` role can EXECUTE the adapter but cannot
+EXECUTE the core or any completion sibling. The completion identity can execute
+the core with the record capability but cannot execute the reconciliation
+adapter. Both modes lock the same intent and use the same state/generation/sub
+compare-and-set, so concurrent writers produce one `AUTH_CREATED` row/audit and
+the loser receives the stored exact result or a binding conflict.
 
 Immediately before the external Auth call, the completion identity invokes
 `private.mark_admin_invitation_auth_call_started_v1(...)`. It consumes the
@@ -973,14 +1045,35 @@ Failure and retry rules:
   the record function's reconciler-only proof path and commits `AUTH_CREATED`.
   Multiple, confirmed, older, or environment-mismatched users commit a
   fail-closed conflict requiring manual resolution;
-- zero matches atomically transitions `AUTH_OUTCOME_UNKNOWN` to
-  `AUTH_FAILED_RETRYABLE` with audited `AUTH_USER_NOT_FOUND`. After the Auth
-  email cooldown, `private.retry_admin_invitation_auth_call_v1(...)` locks that
-  state, revalidates actor approval, telemetry and database rate limits,
-  increments intent generation and attempt epoch, invalidates all old
-  capabilities, returns new marker and record capabilities once, and moves to
-  `PREPARED`. Concurrent reconcilers/retries serialize on the intent; the first
-  valid state/generation wins and every loser returns the stored state or 409;
+- a single zero-match listing is never final absence evidence. The first
+  complete zero-match transitions `AUTH_OUTCOME_UNKNOWN` to
+  `AUTH_SETTLEMENT_QUARANTINE`, records the provider request/correlation
+  evidence and database start time, and invalidates the generation's record
+  capability. Quarantine lasts at least 24 hours and at least the greater of
+  the measured pinned-provider request settlement bound and invitation-email
+  delivery retry window accepted by the owner;
+- stable zero requires three independently fetched, complete `listUsers`
+  paginations after quarantine, each at least 15 minutes apart, plus no matching
+  Auth audit/delivery event. The reconciler rechecks under the intent lock
+  immediately before commit. Only then may
+  `private.record_admin_invitation_reconciliation_zero_match_v1(...)` move to
+  audited `AUTH_FAILED_RETRYABLE/AUTH_USER_NOT_FOUND_STABLE`;
+- after the Auth email cooldown,
+  `private.retry_admin_invitation_auth_call_v1(...)` locks that state,
+  revalidates actor approval, telemetry and database rate limits, increments
+  intent generation and attempt epoch, invalidates all old capabilities,
+  returns new marker and record capabilities once, and moves to `PREPARED`.
+  It also acquires an environment/email-HMAC advisory lock and performs a final
+  provider/user uniqueness check before releasing a new marker. Concurrent
+  reconcilers/retries serialize on the intent; the first valid
+  state/generation wins and every loser returns the stored state or 409;
+- every later prepare, marker, record, and completion checks all earlier
+  generations for a matching Auth subject. If an old ambiguous Auth call
+  appears after stable-zero or after a new generation starts, the current and
+  old generations move to fail-closed `AUTH_LATE_SUCCESS_CONFLICT`, all
+  capabilities are invalidated, no registry row is created, and manual
+  repository-owner reconciliation is required. A late old-generation user is
+  never adopted by or silently deleted for the new generation;
 - Auth success followed by failure before `AUTH_CREATED` commits leaves
   `AUTH_CALL_STARTED`, or `AUTH_OUTCOME_UNKNOWN` if the ambiguity writer
   commits. It can never return to `PREPARED` without the zero-match retry
@@ -1677,11 +1770,25 @@ Authorization/RLS:
   zero/one/multiple-match reconciliation, retry cooldown, generation/attempt
   increment, new dual-capability issuance, stale/concurrent reconciliation,
   and concurrent retry all preserve one committed state and audit event;
+- `AUTH_CREATED` tests prove the core is the only table writer, the completion
+  identity's direct core path and reconciler adapter's internal-core path,
+  exact SECURITY DEFINER owners/table/function grants, and one audit result
+  under concurrent writers. Reconciler direct-core calls, completion adapter
+  calls, sibling-function calls, wrong identities, wrong proof mode, and
+  mismatched state/generation/sub are denied;
+- settlement tests prove one zero-match cannot authorize retry, the full
+  quarantine and three stable-zero observations, final under-lock check,
+  provider/audit evidence, and email-HMAC advisory lock. A controlled old Auth
+  call that succeeds after zero-match or concurrently with new-generation
+  marker/record forces `AUTH_LATE_SUCCESS_CONFLICT`, invalidates both
+  generations, and creates no registry row;
 - bounce/expiry tests prove the dedicated unconfirmed
-  `invited -> tombstoned` exception, actor/AAL2 or owner authority, no accepted
-  session/factor, version increment, registry-first audit, Auth soft-delete
-  partial failure, and lock serialization against concurrent invitation
-  acceptance. Every non-invited use is denied;
+  `invited -> tombstoned` exception, exact request wrapper/private/finalizer/
+  result-writer owners and grants, separate AAL2 and owner-runbook request
+  paths, intent-before-registry locks, no accepted session/factor, version
+  increment, registry-first audit, Auth soft-delete partial failure/retry, and
+  lock serialization against concurrent invitation acceptance. Every direct
+  finalizer/result-writer user call and every non-invited use is denied;
 - lifecycle bootstrap cannot call or grant general protected-data mutations;
 - only the exposed `api` schema is selectable for protected user-JWT RPCs;
   `private` remains absent from exposed/extra-search schemas. Exact
@@ -1842,6 +1949,12 @@ approve:
     loss does not revoke a server session, and the maximum configured
     server-session exposure until explicit revocation or Auth time-box
     enforcement.
+21. single-core `AUTH_CREATED` ownership with completion-direct and
+    reconciliation-adapter call paths, plus the settlement quarantine,
+    stable-zero, and late-success conflict boundary;
+22. the two-stage unconfirmed-invitation retirement request/finalization
+    boundary, separate AAL2 and owner-runbook request authority, exact Auth
+    absence evidence, registry-first tombstone, and soft-delete retry block.
 
 ## 22. Authoritative references
 

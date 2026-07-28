@@ -318,6 +318,10 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   capabilities, assigns exact failure/ambiguity/reconciliation writers and
   grants, and adds a registry-first unconfirmed-invitation retirement
   transition that cannot race successfully with invitation acceptance.
+  The latest proposed refinement unifies `AUTH_CREATED` under one privileged
+  core writer, adds stable-zero settlement quarantine and late-success
+  conflict handling, and completes the request/finalize/retry boundary for
+  unconfirmed invitation retirement.
 - Consequences and risks: This documentation is high-risk/manual because it
   defines future auth, authorization, RLS, secrets, and Production access.
   It authorizes no implementation, configuration, user enrollment, migration,

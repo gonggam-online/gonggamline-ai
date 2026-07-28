@@ -59,6 +59,11 @@
   now uses purpose-separated marker/record capabilities, exact failure and
   reconciliation functions/grants with generation-safe retry, and a dedicated
   unconfirmed-invitation tombstone transition locked against acceptance.
+  An eighth independent review found duplicate `AUTH_CREATED` writer authority,
+  a late-success race after zero-match, and incomplete retirement execution
+  grants; the Draft now uses one core writer with a reconciliation adapter,
+  settlement quarantine/stable-zero/late-success conflict, and exact
+  AAL2/runbook request plus server-only retirement finalization boundaries.
 - Current work: validate and deliver the blocker-remediated documentation on
   the same Draft PR #39. Keep Architecture Proposed; do not mark Accepted or
   Ready, enable auto-merge, or merge.
