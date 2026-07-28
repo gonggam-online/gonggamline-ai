@@ -105,3 +105,22 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 - Implementation authorization: none until this Story is manually approved.
 - Story:
   [Sprint B-0 Database Baseline Execution v1](../docs/architecture/SPRINT-B0-DATABASE-BASELINE-EXECUTION-V1.md).
+
+### 2026-07-28 — Admin Identity, Authorization, RLS, and CSRF Architecture v1
+
+- Status: proposed; repository-owner manual approval required.
+- Boundary: Application Security / Database Security for the single-company
+  administrator surface.
+- Principal proposal: verified Supabase Auth `sub` UUID with
+  `user_role=admin`, versioned authorization, active-registry cross-check,
+  mandatory AAL2 for mutations, user-JWT RLS, and signed same-origin CSRF.
+- Current-state finding: application routes have no accepted administrator
+  session or CSRF boundary and rely on anonymous Supabase access with broad
+  development policies.
+- Risk: high-risk/manual because the decisions govern auth, authorization, RLS,
+  secrets, and Production access.
+- Implementation authorization: none until repository-owner acceptance.
+- Story:
+  [Admin Identity, Authorization, RLS, and CSRF Architecture v1](../docs/architecture/ADMIN-IDENTITY-AUTHORIZATION-RLS-CSRF-V1.md).
+- Decision record:
+  [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-28--admin-identity-authorization-rls-and-csrf-architecture-v1).
