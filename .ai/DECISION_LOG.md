@@ -277,13 +277,16 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 
 - Category: architecture decision
 - Story / PR: Admin Identity, Authorization, RLS, and CSRF Architecture v1 / PR #39
-- Status: proposed; repository-owner manual approval required
+- Status: Accepted
 - Owner / approver: Database / Security and Application Security; repository owner
+- Approval date: 2026-07-28
+- Approved head SHA: `0d68585400eb6ce279c40e93560fea1d69d94a92`
 - Root cause: the prior documentation-first enterprise control plane could not be proven without implementation. Each attempt to make its ledgers complete added new roles, functions, states, locks, and provider assumptions, so independent review kept finding new platform or execution conflicts.
 - Decision: supersede that design with the smallest v1 boundary: manual Supabase Dashboard provisioning/disablement; server-only `GONGGAMLINE_ADMIN_USER_IDS`; `getUser()` on every protected Route Handler request; AAL2 protected mutations; exact-origin JSON CSRF; default-deny protected Data API access; one operationally contained service-role module; and transactional application audit.
 - Explicit removals: custom Auth Hook, invitation automation/reconciliation, database admin-lifecycle state machines, direct `auth.sessions` access, automatic MFA/break-glass/soft-delete, per-function owner-role proliferation, and telemetry lease/freeze/recovery.
 - Evidence rule: exact SDK, SQL, grant, lock, and rollback behavior is accepted from disposable implementation tests, not from an expanding hypothetical contract ledger.
 - Repository-owner session decision: v1 does not require immediate revocation of a logged-out access JWT. Sign-out must prevent refresh; an issued access JWT can remain valid until its configured 15-minute expiry, while protected mutations also require AAL2 freshness of no more than 60 seconds. `getUser()` validates the access JWT and user against the Auth server but does not prove refresh-session existence. V1 therefore accepts a maximum 15-minute protected-read boundary and a maximum 60-second AAL2 mutation-freshness boundary. Direct `auth.sessions` validation and a more complex immediate-revocation lifecycle remain excluded; a shorter token lifetime or separate revocation mechanism requires a follow-up Security Story.
 - Consequences and risks: service-role retains full data access/BYPASSRLS and access JWTs are not instantly revoked. Server-only containment, bounded token and mutation freshness, Auth-server JWT/user validation, no direct protected Data API grants, environment isolation, and negative tests bound those risks.
-- Follow-up / due condition: independent review of the reduced exact head, explicit repository-owner acceptance, then one separate high-risk vertical-slice implementation PR. Enterprise lifecycle automation and external telemetry are follow-up work only when an operating need exists.
+- Approval boundary: this acceptance approves the Architecture contract only. PR #39 remains Draft and `manual-merge-required`; no runtime, migration, RLS, Auth configuration, secret, identity, Production, or commerce-write implementation is authorized by this decision alone.
+- Follow-up / due condition: prepare the bounded Sprint B-0 implementation work instruction, obtain the separate Sprint B-0 Architecture/implementation approval, then use one high-risk manual implementation PR. Enterprise lifecycle automation and external telemetry are follow-up work only when an operating need exists.
 - Rollback or supersession: revert or supersede this documentation PR. No runtime or data rollback is required.

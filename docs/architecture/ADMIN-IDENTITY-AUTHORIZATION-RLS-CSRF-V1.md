@@ -2,13 +2,14 @@
 
 ## Status and authority
 
-- Status: Proposed.
+- Status: Accepted by repository owner on 2026-07-28.
+- Approved exact head: `0d68585400eb6ce279c40e93560fea1d69d94a92`.
 - PR: #39.
 - Base: PR #38 squash commit `cd4bae71ac77d74751ae3575a8574d7c174a6748`.
 - Risk: high-risk/manual.
 - Owner: Database / Security with Application Security.
-- Acceptance requires an explicit repository-owner decision against the reviewed exact head.
-- This Draft authorizes no runtime, migration, RLS, Auth, secret, identity, Preview, Production, or commerce-write change.
+- Acceptance authority: repository owner.
+- This acceptance approves the Architecture contract only. PR #39 remains Draft and high-risk/manual; it authorizes no runtime, migration, RLS, Auth, secret, identity, Preview, Production, or commerce-write change by itself.
 
 ## 1. Root cause and architecture decision
 
@@ -177,11 +178,11 @@ Architecture review is complete when the document:
 
 After those conditions pass, a reviewer may block acceptance only with evidence of an official-platform conflict, a security invariant violation, or a non-executable acceptance test. Enhancements, additional roles, lifecycle automation, telemetry providers, retention targets, and hypothetical future states are follow-up issues and cannot reopen v1.
 
-Disputed platform behavior must be settled by a minimal disposable implementation proof, not another normative ledger entry. Architecture Accepted authorizes the implementation Story; it does not assert that unimplemented code has already passed.
+Disputed platform behavior must be settled by a minimal disposable implementation proof, not another normative ledger entry. Architecture acceptance enables a separately approved implementation Story; it does not authorize implementation by itself or assert that unimplemented code has already passed.
 
 ## 11. Implementation handoff
 
-After repository-owner acceptance, implement one vertical slice in this order:
+After repository-owner acceptance and separate approval of the high-risk implementation Story, implement one vertical slice in this order:
 
 1. server-only configuration parser and administrator UUID allowlist;
 2. Supabase SSR sign-in/callback/logout and per-request `getUser()` guard;
@@ -193,9 +194,9 @@ After repository-owner acceptance, implement one vertical slice in this order:
 
 Production remains blocked until the separate high-risk implementation PR passes, the repository owner approves its exact migration/configuration, and broad development policies are removed. Rollback disables protected routes and removes the administrator allowlist deployment while preserving data and audit history.
 
-## 12. Owner decisions before acceptance
+## 12. Accepted owner decisions
 
-The repository owner must approve:
+The repository owner approved:
 
 - manual Dashboard provisioning and disablement for v1;
 - the server-only UUID allowlist;

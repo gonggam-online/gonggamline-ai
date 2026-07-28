@@ -93,6 +93,31 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 - Decision record:
   [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-28--item-selection-database-baseline-architecture-v1).
 
+### 2026-07-28 — Admin Identity, Authorization, RLS, and CSRF Architecture v1
+
+- Status: Accepted by repository owner on 2026-07-28.
+- Approved head SHA:
+  `0d68585400eb6ce279c40e93560fea1d69d94a92`.
+- Boundary: smallest single-company administrator server boundary.
+- Decision: use manual Supabase Dashboard provisioning, a server-only UUID
+  allowlist, per-request Auth-server access-JWT/user validation, AAL2
+  mutations, exact-origin JSON CSRF, default-deny protected Data API access,
+  and one isolated service-role module.
+- Accepted residual session boundary: sign-out prevents refresh but does not
+  immediately invalidate an issued access JWT; protected reads retain a
+  maximum 15-minute token-lifetime boundary and mutations additionally require
+  AAL2 freshness of no more than 60 seconds.
+- Exclusions remain binding: custom Auth Hook, application administrator
+  lifecycle automation, direct `auth.sessions` access, separate revocation
+  ledger, per-function owner-role proliferation, and telemetry state machines.
+- Implementation authorization: none from this documentation acceptance
+  alone. PR #39 remains Draft and high-risk/manual. Sprint B-0 requires its
+  separate repository-owner approval and implementation PR.
+- Story:
+  [Admin Identity, Authorization, RLS, and CSRF Architecture v1](../docs/architecture/ADMIN-IDENTITY-AUTHORIZATION-RLS-CSRF-V1.md).
+- Decision record:
+  [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-28--admin-identity-authorization-rls-and-csrf-architecture-v1).
+
 ## Proposed Architecture Stories
 
 ### 2026-07-27 — Sprint B-0 Database Baseline Execution v1
@@ -105,18 +130,3 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 - Implementation authorization: none until this Story is manually approved.
 - Story:
   [Sprint B-0 Database Baseline Execution v1](../docs/architecture/SPRINT-B0-DATABASE-BASELINE-EXECUTION-V1.md).
-
-### 2026-07-28 — Admin Identity, Authorization, RLS, and CSRF Architecture v1
-
-- Status: proposed; repository-owner manual approval required.
-- Boundary: smallest single-company administrator server boundary.
-- Root-cause finding: the prior Draft specified an unimplemented enterprise identity control plane with 31 principals, 25 functions, 17 states, Auth Hook, direct Auth-schema locking, invitation lifecycle, and telemetry recovery. Repeated ledger normalization created new unverifiable contracts and caused the correction/re-review loop.
-- Superseding proposal: manual Supabase Dashboard provisioning, server-only UUID allowlist, per-request Auth-server `getUser()` verification, AAL2 mutations, exact-origin JSON CSRF, default-deny protected Data API access, and one isolated service-role module.
-- Removed from v1: custom Auth Hook, software invitation/retirement/soft-delete, `auth.sessions` access, per-function owner roles, break-glass/MFA administration, and telemetry lease/freeze/recovery state machines.
-- Platform reality: service-role has full data access and bypasses RLS. Sign-out terminates refresh capability, but an issued access JWT can remain valid until its configured 15-minute expiry; `getUser()` validates the JWT and user but does not guarantee immediate session revocation. V1 accepts that read boundary and the separate 60-second AAL2 mutation-freshness boundary, with direct protected Data API access still denied.
-- Validation authority: exact SQL/SDK/lock behavior must be proven in a disposable implementation. Existing application tests do not prove unimplemented security contracts.
-- Review closure: only an official-platform conflict, security-invariant violation, or non-executable acceptance test may block v1; enhancements become follow-up work.
-- Current-state finding: application routes still have no accepted administrator/session/CSRF boundary and broad development policies remain.
-- Risk: high-risk/manual. This Draft authorizes no implementation, configuration, user, secret, Preview/Production, or commerce write.
-- Implementation authorization: none until exact-head repository-owner acceptance.
-- PR: #39.
