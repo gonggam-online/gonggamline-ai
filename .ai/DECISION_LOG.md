@@ -258,7 +258,9 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   database, with append-only canonical UTF-8 evaluation/evidence text,
   database-generated SHA-256 hashes, round-trip decimal decision values,
   non-authoritative micro-won/ppm and JSONB query projections, and
-  transactional idempotent run finalization.
+  transactional idempotent run finalization. Profitability calculation
+  implementation is versioned independently from policy; retries create linked
+  runs; database time is returned only as post-commit persistence metadata.
 - Consequences and risks: This is documentation only and authorizes no schema
   or Production action. Later migration/RLS/Production work is high-risk,
   manual, and depends on accepted Sprint B-0 and Admin Architecture.

@@ -39,6 +39,9 @@ whether a candidate may move beyond `MANUAL_REVIEW`.
   are `gonggamline-item-selection-v1`,
   `item-selection-evaluator-v1`, and
   `gonggamline-profitability-2026-07-27-v1`.
+- Profitability policy identity does not identify calculation implementation.
+  Story 3 introduces the separate immutable calculation contract identifier
+  `gonggamline-profitability-calculation-v1`.
 - No approved admin principal, RLS contract, CSRF contract, Item Selection
   migration, repository, API, or UI exists.
 
@@ -116,8 +119,10 @@ Story 3 creates only these Item Selection-owned objects:
 | `ruleset_version` | `text not null` | immutable selection ruleset |
 | `evaluator_version` | `text not null` | immutable evaluator implementation |
 | `profitability_policy_version` | `text not null` | immutable Revenue policy |
+| `profitability_calculation_contract_version` | `text not null` | immutable profitability calculation implementation contract |
 | `request_fingerprint` | `text not null` | canonical request SHA-256 |
 | `idempotency_key_hash` | `text not null` | SHA-256; raw key is never stored |
+| `retry_of_run_id` | `uuid null` | optional FK to the terminal run being retried |
 | `requested_by_principal_id` | `text not null` | trusted admin principal subject |
 | `started_at` | `timestamptz not null` | database time |
 | `completed_at` | `timestamptz null` | terminal transition time |
@@ -135,6 +140,11 @@ Story 3 creates only these Item Selection-owned objects:
 Constraints:
 
 - unique `(requested_by_principal_id, idempotency_key_hash)`;
+- `retry_of_run_id` references `item_selection_runs(id)` with
+  `ON DELETE RESTRICT`;
+- `retry_of_run_id <> id`; an initial run stores `null`;
+- a retry may reference only an existing terminal run and always inserts a new
+  run row rather than changing the referenced run;
 - terminal rows cannot return to `RUNNING`;
 - `completed_at` is required exactly for terminal states;
 - run version columns and request identity are immutable after insert.
@@ -190,8 +200,15 @@ Authoritative decision representation:
 - Every numeric input and output that can affect a verdict is stored in the
   canonical snapshot as the shortest canonical decimal string that round-trips
   to the identical IEEE-754 binary64 value used by the engine.
-- The original money fact decimal string, VAT treatment, and calculation
-  contract/version are stored beside the resulting decision value.
+- Because Story 2 `MoneyFact.amountKrw` is a JavaScript `number`, the persisted
+  money fact string is the canonical round-trip decimal string generated from
+  the binary64 input value received by Story 2. It is not represented as an
+  untouched supplier-origin numeric string.
+- Preserving a future provider's original numeric token/string is a separate
+  provider-ingestion contract and must not be inferred from `MoneyFact`.
+- The Story 2 input canonical string, VAT treatment, policy version, and
+  profitability calculation contract version are stored beside the resulting
+  decision value.
 - VAT semantics are additionally expressible as a rational operation:
   deductible VAT-inclusive amount uses numerator `10` and denominator `11`
   against the original amount. This rational provenance explains a repeating
@@ -223,7 +240,8 @@ Query projections:
 - VAT is an explicit enum:
   `VAT_EXCLUSIVE`, `VAT_INCLUSIVE_DEDUCTIBLE`,
   `VAT_INCLUSIVE_NON_DEDUCTIBLE`, or `TAX_EXEMPT`.
-- Every money/rate fact stores its original canonical decimal string,
+- Every money/rate fact stores the canonical round-trip decimal string derived
+  from the binary64 value received by Story 2,
   derived integer projections, source type, safe source reference,
   `effectiveFrom`, `includedIn`, VAT treatment, and confirmation status.
 - Engine outputs persist canonical decision strings plus the engine-produced
@@ -241,7 +259,8 @@ decimal, half-tie, negative-profit, and overflow projection tests.
 containing:
 
 - snapshot schema version;
-- ruleset, evaluator, and profitability policy versions;
+- ruleset, evaluator, profitability policy, and profitability calculation
+  contract versions;
 - provider and item identity;
 - original position and observation timestamps;
 - all five hard-gate inputs with status and their existing evidence contract,
@@ -294,8 +313,8 @@ remain UTF-8 text.
 
 ## 8. Story 3 persistence aggregate DTO
 
-The repository persists one explicit, versioned aggregate per evaluated
-candidate. Story 3 may name the TypeScript type
+The repository persists one explicit, versioned write aggregate per evaluated
+candidate. Story 3 names the TypeScript write type
 `ItemSelectionPersistenceAggregateV1`; its minimum contract is:
 
 ```text
@@ -303,6 +322,7 @@ schemaVersion
 rulesetVersion
 evaluatorVersion
 profitabilityPolicyVersion
+profitabilityCalculationContractVersion
 providerFacts
 profitabilityInput
 profitabilityResult
@@ -315,11 +335,8 @@ hashes:
   evaluatorInput
   evaluatorOutput
   aggregate
-persistenceMetadata:
-  runId
-  evaluationId
-  originalPosition
-  persistedAt
+retryOfRunId
+originalPosition
 ```
 
 - `providerFacts` is exactly the sanitized Domeggook fact contract; no raw
@@ -327,15 +344,33 @@ persistenceMetadata:
 - `profitabilityInput` and complete `profitabilityResult` use the merged Story
   2 contracts, including every scenario, cost line, missing/estimated facts,
   and decision booleans.
+- `profitabilityCalculationContractVersion` identifies the calculation
+  implementation contract independently of `profitabilityPolicyVersion`. For
+  v1 it is `gonggamline-profitability-calculation-v1`.
 - `evaluatorInput` and `evaluatorOutput` use the merged Story 1 contracts.
-- Every stage is independently canonicalized and hashed. The aggregate hash
-  covers the ordered stage hashes, versions, and schema version.
+- Every stage is independently canonicalized and hashed. The decision aggregate
+  hash covers, in fixed order, the schema, ruleset, evaluator, profitability
+  policy, and profitability calculation contract versions; provider,
+  profitability input/result, and evaluator input/output stage hashes;
+  provider item identity; original position; and nullable `retryOfRunId`.
+- The write DTO uses camelCase `retryOfRunId`; the repository maps it exactly to
+  `item_selection_runs.retry_of_run_id`. Initial runs require `null`. A retry
+  requires the referenced terminal run ID and creates a new run.
 - Persistence metadata is storage provenance and is not injected into domain
   inputs or stage hashes, except the aggregate envelope declares its metadata
   schema separately.
 - `observedAt` belongs only to a source fact/evidence contract that currently
   defines it. Story 3 must not invent `effectiveDate`, freshness, or observation
   fields on domain types that do not have them.
+- The persistence write DTO does not accept `persistedAt`. PostgreSQL generates
+  authoritative `created_at` using database time in the commit transaction.
+- After commit, the repository reads `created_at` and returns it as
+  `persistedAt` only in `ItemSelectionPersistenceResultV1`.
+- `persistedAt` is excluded from verdict inputs, every stage hash, and the
+  decision aggregate hash. If an API later needs a tamper-evident persistence
+  envelope, it uses a separately named `persistenceEnvelopeHash` covering the
+  decision aggregate hash, database IDs, and `persistedAt`; it never changes or
+  replaces the decision aggregate hash.
 - `persistedAt`, database `created_at`, run start/completion times, and
   reconciliation times are persistence metadata. They are never treated as
   provider observation time, policy effective time, or score freshness.
@@ -372,15 +407,19 @@ Historical reproduction has two levels:
 1. Exact decision reproduction: return stored authoritative canonical texts,
    outputs, hashes, and versions byte-for-byte.
 2. Engine replay verification: run the archived implementation for the stored
-   version against the stored canonical input and compare canonical output
-   hashes.
+   `profitabilityCalculationContractVersion` and `evaluatorVersion` against the
+   stored canonical input, then compare every canonical stage output hash and
+   the decision aggregate hash.
 
 Policy constants are not loaded from mutable database settings. Each released
 policy version remains in code and tests. Removing a version requires a
 separate retention/supersession decision and cannot invalidate stored history.
-If an archived implementation is unavailable, the record remains auditable but
-is explicitly reported as `REPLAY_IMPLEMENTATION_UNAVAILABLE`; it is never
-recalculated using the latest policy.
+Profitability replay requires both the stored policy version and calculation
+contract version; equal policy versions never imply equal implementations. If
+an archived calculation/evaluator implementation is unavailable, the record
+remains auditable but is explicitly reported as
+`REPLAY_IMPLEMENTATION_UNAVAILABLE`; it is never recalculated using the latest
+policy or implementation.
 
 ## 11. Transaction, finalization, and idempotency
 
@@ -429,8 +468,8 @@ Finalization state contract:
   candidates are observed or the case where every observed candidate failed or
   was skipped.
 - `FAILED` and `PARTIAL` are terminal and immutable in v1. Reprocessing creates
-  a new run with a new idempotency key and `retryOfRunId` persistence metadata;
-  it never appends to or upgrades the old run.
+  a new run with a new idempotency key and write-DTO `retryOfRunId`, mapped to
+  database `retry_of_run_id`; it never appends to or upgrades the old run.
 - A stale `RUNNING` run may be terminalized as `FAILED` only by the separately
   authorized reconciliation function after proving no finalization committed.
   It stores the allowlisted stale-run code and zero persisted evaluations.
@@ -621,9 +660,15 @@ Required acceptance evidence:
 - snapshot canonicalization golden tests;
 - authoritative text byte, database-generated digest, and JSONB projection
   equivalence tests;
+- profitability policy/calculation-version independence, missing implementation
+  version, and replay-version mismatch tests;
 - transaction rollback and retry tests;
 - first finalization, identical terminal replay, divergent terminal conflict,
   count invariant, and new-run retry tests;
+- `retry_of_run_id` FK/restrict/self-reference/terminal-target tests and
+  `retryOfRunId` repository mapping tests;
+- database-generated `created_at` and post-commit `persistedAt` result tests
+  proving write DTO and decision hashes exclude persistence time;
 - immutable-row and delete-restriction tests;
 - positive/negative RLS tests;
 - no secrets/raw provider payload in rows or logs;

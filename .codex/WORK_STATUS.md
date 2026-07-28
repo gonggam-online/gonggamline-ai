@@ -26,9 +26,9 @@
   the evaluator/profitability engine has no approved operating persistence/API
   path; inspected the baseline gap, recovery plan, migrations, Supabase access,
   and existing numeric conventions; drafted the Database Architecture.
-- Current: PR #38 Architecture review is implemented and local gates passed;
-  commit/push the review update and confirm new exact-head CI and Preview while
-  retaining Draft/manual state.
+- Current: remaining PR #38 storage contracts and local gates passed; commit,
+  push, and confirm new exact-head CI/Preview while retaining Draft/manual
+  state.
 - Blockers/owner actions: owner acceptance is required. Admin Identity /
   Authorization / RLS / CSRF Architecture and accepted Sprint B-0 remain
   prerequisites for Story 3.
@@ -42,7 +42,9 @@
   ignored `tsx` dependency files were temporarily adjusted, tests passed, and
   those files were restored without staging. Review follow-up document
   consistency, `git diff --check`, 261/261 tests, lint (0 errors, the same 4
-  warnings), typecheck, and Production build also passed.
+  warnings), typecheck, and Production build also passed. The follow-up
+  calculation-version, retry-link, and DB-authored persistence-time contracts
+  passed the same document checks, 261/261 tests, lint, typecheck, and build.
 - Last commit: `7491b239f5935643778330a08ed4b070511c4c7a`.
 - Exact next action: validate documentation and submit a Draft PR; do not
   approve, mark Ready, merge, or enable auto-merge.
