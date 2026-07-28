@@ -27,8 +27,10 @@
   temporary directory; completed sanitized structured-exec, App Server
   lifecycle/resume/interrupt, Windows cancellation, usage, and synthetic
   redaction probes; recorded only sanitized summaries and hashes.
-- Current work: complete final diff review and deliver the dedicated Draft PR.
-- Blockers/owner actions: none. Final PR merge remains manual.
+- Current work: repository-owner review of Draft PR #42. No merge is authorized
+  by this task.
+- Blockers/owner actions: repository owner must review and manually merge PR
+  #42 only if its evidence and remaining risks are acceptable.
 - Changed files: `docs/orchestrator/**`, `.ai/DECISION_LOG.md`, and this file
   only.
 - Validation: Task/Result JSON Schemas compile and examples validate; fixtures
@@ -37,9 +39,12 @@
   Playwright reached all 39 tests: 32 passed and the same seven
   Supabase-dependent pages failed with external `missing_url` configuration
   before the outer command timeout. The probes made no product/runtime change.
-- Delivery: pending.
-- Exact next action: review and commit the complete scoped diff, push the task
-  branch, and open a high-risk/manual Draft PR without merging it.
+- Delivery: dedicated branch pushed; Draft PR #42 is open with
+  `manual-merge-required`. Exact-head CI, Preview browser validation, Vercel
+  Preview readiness, mergeability, unresolved review threads, and local/remote
+  head equality are verified at terminal handoff.
+- Exact next action: repository-owner review; keep the PR unmerged until that
+  manual decision.
 - Remaining risks: CLI/Desktop version skew, experimental App Server protocol
   churn, usage/cost semantics under ChatGPT auth, and Windows process
   cancellation behavior.
