@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "gonggamline-sprint-b0-baseline-manifest-v1",
+  "supabaseCliVersion": "2.110.0",
+  "promotedSources": {
+    "000_products_baseline.sql": {
+      "source": "supabase/recovery-sources/products-baseline.sql",
+      "sha256": "24c6900c0a46d78679d66f58b300101ab89018e533c4324f0232f77ec1bd6f05",
+      "transformation": "omit-source-rls-and-anon-policies"
+    },
+    "001_product_workflow_extension.sql": {
+      "source": "supabase/recovery-sources/product-workflow-extension.sql",
+      "sha256": "d09a6222f0f224b5f5e8e22d090fbbc32cc7d321483b472ab3fdd6273ed4d8b7",
+      "transformation": "provenance-header-only"
+    },
+    "002_commerce_os_core_schema.sql": {
+      "source": "supabase/recovery-sources/commerce-os-core-schema.sql",
+      "sha256": "91ed18b196486fe58d1ea9ac89e33c81552edf7d3eabaf047f79d5c5a50ef2fd",
+      "transformation": "provenance-header-only"
+    }
+  },
+  "preservedMigrations": {
+    "003_coupang_competition_analysis.sql": "244bb2c06171d2a3546e49d14d34ea8d9a3b1cb4c1e57ba939e57d5120d74efc",
+    "004_automatic_competition_pipeline.sql": "74b62e1b031f18fdc9dc74c437c5b87e42a10919925aef9b3aa1d23ec6d0f532",
+    "005_market_intelligence_engine.sql": "f27b34a47c990d7a356e01696de5636b35a22e32010841045913759ed87acb51",
+    "006_market_intelligence_analytics.sql": "8305cda4c2f439fba25a2c3407831cf6647d5eb04030bb12b2c7d7ba79c55cc9",
+    "007_market_intelligence_orchestration.sql": "cc111a29fb82205b0b21e0b71672ecb53696d4c50af77ba9d83d9f52a5a7117e",
+    "008_market_data_warehouse.sql": "9c1b87dbbf0a633656768ab1799bbb00d60b56216d0acf5f50dc00465874a2e0",
+    "009_ai_product_bundle_discovery.sql": "53c8408d3bb0ec01ae1c873c416d6ba2c2e1fbb607a1d6b2805ec549feff2d53",
+    "010_supplier_intelligence_engine.sql": "85d3208be9fa99426adeec161f2a26a3b3e4d4f09806ebec56d846e3526109ca",
+    "011_procurement_workflow_engine.sql": "2adb937c872e0dddf687dcf6cbe1c7766effad262588fbae859693c3be6b08d3",
+    "012_product_workspace_listing_ai.sql": "1845cdab9276231247d72db43979895cbf640f6a0443e9f4f3d0e52dbe194bfb",
+    "013_commerce_workflow_integration.sql": "f4a9494ffc2934dbce2c2296bfb5e4721130204a30cf69d2d8d997a952672633",
+    "014_coupang_seller_engine.sql": "f865d8fc8eabdd660d6d6740cedb0cb6f63d48e8884a0d61ca0e5597cda58979",
+    "015_ai_decision_engine.sql": "3b4205ea9c1db9e5de2e803ce8f56050057dd40eea730ea6b0a50b9d30c9a1bc",
+    "016_ai_company_os_foundation.sql": "c9c2b9a59612495d350333157500de892bd53f3e62c86e1eda1659b713b4894f",
+    "017_command_center_workflow_automation.sql": "b88db18fd2f878ae9ecabeec93724ea67ed4a9d41b9a5a0c10a66d35e11ade65",
+    "018_autonomous_company_enterprise.sql": "f72a2f4abe21e649a5c699918c0d98f720364f49387e6e4021395a0f8a517d4b",
+    "019_sprint1_revenue_core_foundation.sql": "8e825834119ad0d300652d2116c755de295b28a400fc3cd23aa0f19f250cb705",
+    "020_sprint2_runtime_execution.sql": "db9ae7ca477dc7646a42699591472ff2510517443cc264394c824dd64771c47c"
+  }
+}

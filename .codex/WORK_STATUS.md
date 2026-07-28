@@ -1,5 +1,37 @@
 # Work status
 
+## 2026-07-28 — Sprint B-0 Database Baseline implementation
+
+- Objective: make the pre-003 schema baseline reproducible so later
+  engine-selected Item Selection persistence can be implemented without
+  Production schema guessing.
+- Branch: `codex/feat/sprint-b0-database-baseline-v1`, based on PR #39 squash
+  commit `eea7adf927498bd200cfe51e67cb1e37373e58bf`.
+- Risk: high-risk/manual because the diff adds migration history and disposable
+  database tooling.
+- Revenue impact: prerequisite for auditable persistence of products selected
+  by the merged Item Selection engine.
+- Root-cause class: database baseline gap; the migration chain began at 003
+  while authoritative pre-003 sources remained recovery evidence only.
+- Scope: promote the three recovery sources into migrations 000 through 002,
+  preserve 003 through 020 by hash, add a pinned disposable Supabase replay
+  runner and CI job, and add structural/provenance tests.
+- Explicit non-goals: Auth, new RLS or policy implementation, Story 3
+  persistence, API, UI, Production access, and commerce writes. Recovered
+  permissive Products policies are not promoted.
+- Current work: implementation and local static validation. The current host
+  lacks Docker/PostgreSQL, so local database replay fails closed at preflight;
+  exact-head GitHub CI must execute the disposable replay.
+- Changed files: pre-003 migrations, Supabase config/manifest, replay script,
+  database-baseline tests/report, CI workflow, and this status file.
+- Exact next action: complete local test/lint/typecheck/build validation,
+  review the full diff, push one Draft `manual-merge-required` PR, and require
+  exact-head disposable replay plus Preview validation. Do not mark Ready or
+  merge.
+- Remaining risks: actual SQL replay is pending CI; existing development
+  policies in migrations 005 through 020 remain unchanged because RLS is
+  explicitly outside this approval.
+
 
 ## 2026-07-28 — Admin Security Architecture v1 Accepted
 
