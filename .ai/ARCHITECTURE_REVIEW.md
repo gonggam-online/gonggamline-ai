@@ -111,29 +111,21 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 - Status: proposed; repository-owner manual approval required.
 - Boundary: Application Security / Database Security for the single-company
   administrator surface.
-- Principal proposal: verified Supabase Auth `sub` UUID with
-  `user_role=admin`, versioned authorization, active-registry cross-check,
-  direct protected-table DML revoked, mandatory AAL2 mutation RPCs, user-JWT
-  RLS, and session-bound signed same-origin CSRF.
-- Final normalization proposal: v1 administrator provisioning is one
-  repository-owner-only manual runbook. It makes one supported
-  `inviteUserByEmail` call, registers only the exact synchronously returned
-  subject, never automatically retries an ambiguous result, and requires
-  manual provider inspection before an exact-one adoption. Initial and
-  additional administrators use the same contract.
-- Lifecycle proposal: invitation acceptance and unconfirmed-invitation
-  retirement serialize only on the exact administrator-registry row. Auth
-  soft-delete is a tombstone-first owner runbook with audited, same-sub manual
-  retry; no provider workflow state machine is stored in the database.
-- Security proposal: minimal exposed wrappers call hidden private functions
-  with dedicated owners; every protected operation verifies the live Auth
-  session, registry/version, required AAL, and database-visible telemetry gate.
-  The canonical contract ledger is the sole inventory for principals,
-  functions, states, locks, durations, CSRF/session artifacts, and external
-  provider operations.
-- Remaining owner decisions: explicit acceptance of the maximum 60-second
-  direct-MFA-unenroll exposure, the maximum 30-second telemetry lease boundary,
-  and the separately approved telemetry provider/runbook prerequisite.
+- Final normalization: the Architecture document's Ledgers R–T are the sole
+  normative source for principals, functions, actor classes, states, locks,
+  durations, browser security, provider operations, events, and acceptance
+  tests. Explanatory prose cites ledger rows and does not duplicate contracts.
+- Provisioning remains repository-owner-only and manual for initial and
+  additional administrators. Software never reissues an ambiguous provider
+  call. Invitation acceptance/retirement serialize on the exact
+  registry row; Auth soft-delete is a separate tombstone-first manual retry.
+- Mutation authority is partitioned into USER_JWT, SELF_BOOTSTRAP,
+  OWNER_RUNBOOK, and INFRASTRUCTURE. Telemetry writer/recovery grants and all
+  lock modes are defined once in the canonical ledgers. Protected mutations
+  require telemetry readiness; protected reads remain available under current
+  identity/session/assurance checks.
+- Remaining owner decisions are the residual boundaries referenced by Ledger
+  D and the separate telemetry-provider/runbook prerequisite.
 - Current-state finding: application routes have no accepted administrator
   session or CSRF boundary and rely on anonymous Supabase access with broad
   development policies.

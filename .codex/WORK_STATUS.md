@@ -23,26 +23,21 @@
 - Root-cause class: security Architecture prerequisite. Current routes have no
   accepted admin/session/CSRF boundary and use anon database access with broad
   development policies.
-- Completed: confirmed PR #38 is squash-merged; read binding governance and
-  Database/Security policies; audited current Supabase clients, access maps,
-  permissive RLS evidence, unauthenticated mutation routes, and dependencies;
-  compared official Supabase, Next.js, PostgreSQL, and OWASP guidance; drafted
-  and repeatedly independently reviewed this Proposed Architecture; opened
-  Draft PR #39 with `manual-merge-required`. The final normalization replaces
-  invitation orchestration with one repository-owner-only manual provisioning
-  runbook, exact synchronous-sub registration, fail-closed manual
-  reconciliation, registry-row-only acceptance/retirement serialization, and
-  tombstone-first manual Auth soft-delete. It retains self-only lifecycle
-  wrappers, live-session enforcement, dedicated function owners, pinned SDK
-  behavior, bounded MFA residual risk, and the database telemetry gate. A
-  canonical ledger provides the sole role/function/state/lock/duration/
-  browser-artifact/provider contract inventory.
-- Current work: validate and deliver the final normalized documentation on the
+- Completed: confirmed PR #38 merge; audited current security evidence and
+  binding governance; opened Draft PR #39 with `manual-merge-required`; and
+  processed the independent Architecture reviews. The closing normalization
+  removes duplicated normative prose and makes Ledgers R-T the sole source for
+  principals, functions, actor classes, states, lock modes, durations, browser
+  security, provider operations, events, and acceptance tests. Provisioning is
+  owner-only/manual, software never reissues ambiguous provider calls,
+  lifecycle locks are explicit, and soft-delete retry is isolated from other
+  Auth lifecycle work.
+- Current work: validate and deliver the ledger-normalized documentation on the
   same Draft PR #39. Keep Architecture Proposed; do not mark Accepted or Ready,
   enable auto-merge, or merge.
 - Blockers/owner actions: repository-owner Architecture review and explicit
-  acceptance at an exact head SHA are required, including acceptance or
-  supersession of the maximum 60-second direct-MFA-unenroll exposure. The exact
+  acceptance at an exact head SHA are required, including disposition of the
+  residual boundaries in Ledger D. The exact
   telemetry provider/runbook requires a separate accepted prerequisite. Sprint
   B-0, Auth Foundation, Authorization Foundation, Route Security Migration,
   and Item Selection Story 3 remain blocked.
@@ -50,22 +45,22 @@
   `docs/architecture/ADMIN-IDENTITY-AUTHORIZATION-RLS-CSRF-V1.md`,
   `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`, and this file.
 - Validation: branch diff contains only these four documentation/status files.
-  Remote whitespace/tab/null-byte and Proposed/no-implementation consistency
-  checks passed. CI and Preview browser validation passed for the complete
-  Architecture content before this status-only checkpoint; the final exact-head
-  GitHub runs are the authoritative delivery gate and are reported outside this
-  file to avoid a self-referential status-commit cycle.
-- Last commit: blocker-remediation commit on the current PR #39 branch `HEAD`;
-  Git/GitHub remains the authoritative mutable SHA source.
-- Exact next action: submit the final normalized exact head for independent Architecture
+  Canonical inventory, identifier uniqueness, owner/caller/EXECUTE fingerprint,
+  state/duration/test coverage, stale-term scan, lock-mode graph, and
+  `git diff --check` pass. Unit/integration, lint, typecheck, and Production
+  build pass. Final exact-head GitHub runs remain the delivery authority and are
+  reported outside this file to avoid a self-referential commit cycle.
+- Last commit: current PR #39 branch `HEAD`; Git/GitHub is the authoritative
+  mutable SHA source.
+- Exact next action: push the ledger-normalized exact head, pass exact-head CI
+  and Preview browser validation, then submit it for independent Architecture
   re-review. Do not record acceptance or start Sprint B-0/Auth/RLS/Story 3
   implementation.
 - Remaining risks: the Production administrator UUID, secrets, exact project
   settings, telemetry provider, and cutover approval remain unknown by design.
-  The repository owner must explicitly accept or supersede the maximum
-  60-second direct-MFA-unenroll exposure and the maximum 30-second
-  monitor-to-database lease failure boundary. All runtime/schema work stays
-  blocked until Architecture acceptance and separate high-risk Stories.
+  The repository owner must explicitly accept or supersede the Ledger D
+  residual boundaries. All runtime/schema work stays blocked until Architecture
+  acceptance and separate high-risk Stories.
 
 ## 2026-07-28 — Item Selection Database Baseline Architecture v1
 

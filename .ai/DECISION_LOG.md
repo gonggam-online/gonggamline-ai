@@ -277,7 +277,7 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 
 - Category: architecture decision
 - Story / PR: Admin Identity, Authorization, RLS, and CSRF Architecture v1 /
-  pending
+  PR #39
 - Status: proposed; repository-owner manual approval required
 - Owner / approver: Database / Security and Application Security; repository
   owner
@@ -286,29 +286,24 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   administrator identity, role, session, AAL, CSRF, or exact-origin gate.
   Server services use the public anonymous Supabase key, while recovered and
   Git migrations contain broad development policies.
-- Decision or issue: Propose invitation-only Supabase Auth with verified
-  `sub` UUID, `user_role=admin`, versioned active-admin registry, AAL1 ordinary
-  reads, TOTP/AAL2 sensitive reads and mutations, user-JWT default-deny RLS,
-  session/version-bound same-origin CSRF, bounded rates, and append-only
-  sanitized security audit events. Administrator provisioning is deliberately
-  manual in v1: one repository-owner runbook makes one supported Auth invite
-  call and creates a registry row only for the exact synchronous returned
-  subject. Ambiguous provider outcomes stop for manual reconciliation and are
-  never retried automatically. Invitation acceptance and retirement serialize
-  on the exact registry row; Auth soft-delete is tombstone-first and retried
-  manually for the same subject. Minimal PostgREST wrappers call hidden private
-  functions with dedicated owners. Every protected operation verifies the live
-  Auth session, registry/version, required AAL, and the database telemetry
-  lease. The Architecture document's canonical contract ledger is the sole
-  inventory for roles, functions, states, locks, durations, browser security
-  artifacts, and provider boundaries.
+- Decision or issue: Propose invitation-only Supabase Auth, verified subjects,
+  a versioned active-admin registry, user-JWT default-deny RLS, TOTP assurance,
+  session-bound same-origin CSRF, append-only security audit, and a
+  database-visible protected-mutation telemetry gate. Ledgers R–T in the
+  Architecture document are the sole normative contract. They partition every
+  function into one actor class, bind every owner/caller/grant and lock mode,
+  define every state and numeric operations value, and connect acceptance tests
+  to exact rows. Initial/additional provisioning remains one manual
+  repository-owner boundary; software never reissues an ambiguous call.
+  Soft-delete is a distinct tombstone-first manual retry and does not
+  generalize to other Auth lifecycle operations.
 - Consequences and risks: This documentation is high-risk/manual because it
   defines future auth, authorization, RLS, secrets, and Production access.
   It authorizes no implementation, configuration, user enrollment, migration,
   secret, Preview, or Production change. Broad anonymous policies must not
   coexist with claims of protected Production writes.
-- Follow-up / due condition: independent review of the blocker-remediated exact
-  head, including explicit owner disposition of the 60-second residual risk,
+- Follow-up / due condition: independent review of the normalized exact head,
+  including explicit owner disposition of Ledger D residual risks,
   followed by owner Architecture review and acceptance at that SHA, then
   separate manual Sprint B-0, Auth Foundation, Security Telemetry Sink,
   Authorization Foundation, Route Security Migration, and Item Selection Story
