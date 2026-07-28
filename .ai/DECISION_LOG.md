@@ -303,6 +303,12 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   refinement adds a self-only invitation-acceptance wrapper, an encrypted
   idempotent pre-sub Auth invitation intent, and an `auth.sessions` existence
   check inside every protected read/mutation to reject logged-out old JWTs.
+  The latest proposed refinement grants the session-check helper only the
+  column-level privileges PostgreSQL requires for `FOR KEY SHARE`, holds that
+  lock for bounded reads as well as writes, makes invitation completion
+  server-only with atomic intent/sub/environment/generation/expiry/nonce
+  provenance, and replaces the shared wrapper owner with one NOLOGIN owner per
+  wrapper.
 - Consequences and risks: This documentation is high-risk/manual because it
   defines future auth, authorization, RLS, secrets, and Production access.
   It authorizes no implementation, configuration, user enrollment, migration,

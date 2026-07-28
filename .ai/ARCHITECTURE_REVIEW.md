@@ -137,6 +137,14 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
   verified sub; and every protected read/mutation verifies the JWT session ID
   against `auth.sessions`, making explicit logout deny old-JWT direct RPCs.
   The new exact head remains Proposed and requires independent review.
+- Fifth review follow-up: `auth.sessions` enforcement now carries the exact
+  PostgreSQL column privileges required by its transaction-duration lock and
+  includes migration permission proofs; invitation completion is bound to a
+  server-only direct-Postgres identity plus an atomic one-time capability;
+  protected reads retain the session-row lock through result materialization
+  so logout cannot return first; and wrapper functions use separate NOLOGIN
+  owners with no sibling EXECUTE grant. The new exact head remains Proposed
+  and requires independent review.
 - Current-state finding: application routes have no accepted administrator
   session or CSRF boundary and rely on anonymous Supabase access with broad
   development policies.

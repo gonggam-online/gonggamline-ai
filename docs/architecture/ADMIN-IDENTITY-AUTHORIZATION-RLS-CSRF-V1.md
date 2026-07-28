@@ -265,7 +265,7 @@ activation and every general mutation. The exposed
 `private.accept_admin_invitation_v1()`. EXECUTE is granted to
 `authenticated`; it is revoked from `PUBLIC`, `anon`, `service_role`, and all
 other login roles. The private function remains unexposed and executable only
-by its exact `api_rpc_owner`.
+by `api_accept_admin_invitation_owner`.
 
 The private function is owned by a dedicated
 `invitation_acceptance_owner NOLOGIN` role without superuser/BYPASSRLS. It has
@@ -630,8 +630,8 @@ wrapper functions such as:
 - `api.accept_admin_invitation_v1()` ->
   `private.accept_admin_invitation_v1()`;
 - `api.prepare_admin_invitation_v1(...)` and
-  `api.complete_admin_invitation_v1(...)` -> exact private control-intent
-  functions;
+  the server-only `private.complete_admin_invitation_v1(...)` control-plane
+  function; completion has no `api` wrapper;
 - `api.create_item_selection_run_v1(...)` ->
   `private.create_item_selection_run_v1(...)`;
 - `api.finalize_item_selection_run_v1(...)` ->
@@ -639,13 +639,17 @@ wrapper functions such as:
 - exact lifecycle and bounded audit-read wrappers accepted by their
   implementation Stories.
 
-Each wrapper is `SECURITY DEFINER`, owned by a dedicated
-`api_rpc_owner NOLOGIN` role without `SUPERUSER` or `BYPASSRLS`, uses
+Each wrapper is `SECURITY DEFINER` and has its own dedicated wrapper-specific
+`NOLOGIN` owner (for example
+`api_activate_pending_admin_owner`,
+`api_accept_admin_invitation_owner`, and
+`api_create_item_selection_run_owner`) without `SUPERUSER`, `BYPASSRLS`, or
+membership in another wrapper-owner role. Each uses
 `SET search_path = ''`, schema-qualifies its single internal call, accepts and
 returns only the exact typed DTO, and contains no authorization shortcut or
-dynamic SQL. Only `api_rpc_owner` receives `USAGE` on `private` and EXECUTE on
-the exact internal function it wraps; it receives no table privileges and
-cannot call any sibling internal function.
+dynamic SQL. Each wrapper owner receives `USAGE` on `private` and EXECUTE only
+on its one exact internal function; it receives no table privilege or EXECUTE
+on a sibling internal function. There is no shared wrapper-owner role.
 
 Grant contract:
 
@@ -662,9 +666,9 @@ revoke all on schema private
   from public, anon, authenticated, service_role;
 revoke execute on all functions in schema private
   from public, anon, authenticated, service_role;
-grant usage on schema private to api_rpc_owner;
+grant usage on schema private to api_activate_pending_admin_owner;
 grant execute on function private.activate_pending_admin_v1()
-  to api_rpc_owner;
+  to api_activate_pending_admin_owner;
 ```
 
 Default privileges revoke function EXECUTE from `PUBLIC`, `anon`,
@@ -786,13 +790,47 @@ requires active AAL2, current live session, CSRF/rate checks at the route,
 telemetry readiness inside the function, and atomically audits only the opaque
 intent ID.
 
+Invitation completion is not exposed through PostgREST and accepts no user JWT.
+The server-only Auth module holds a separate per-environment direct-Postgres
+credential for `auth_invitation_completion LOGIN`. That role has no role
+membership, Data API key, table privilege, or service-role capability; it has
+only `USAGE` on `private` and EXECUTE on the exact
+`private.complete_admin_invitation_v1(uuid, uuid, text, bigint, text)`
+signature. The function is `SECURITY DEFINER`, owned by
+`auth_invitation_completion_owner NOLOGIN`, and its owner has only the
+control-intent/registry/audit/telemetry privileges required to complete an
+invitation.
+
+Prepare generates a cryptographically random 256-bit completion nonce, stores
+only its SHA-256 digest with the intent generation and a database-issued
+five-minute expiry, and returns the plaintext once to the server-only Route
+Handler response context; it never reaches the browser, logs, audit, or
+telemetry. The direct completion transaction locks the intent and atomically
+verifies:
+
+- `session_user = auth_invitation_completion` (the caller identity remains
+  observable even though SECURITY DEFINER changes `current_user` to the
+  function owner);
+- exact intent ID and state;
+- exact returned Auth sub UUID;
+- immutable database environment equals the request environment;
+- exact current intent generation;
+- database time is before the completion expiry;
+- constant-time nonce-digest equality and nonce not previously consumed;
+- healthy telemetry lease and no existing conflicting registry subject.
+
+It consumes the nonce, records the Auth sub, creates the registry row, advances
+intent state, and audits in the same transaction. No `authenticated`,
+`service_role`, wrapper owner, or other control-plane role can execute it.
+
 Invitation ordering is normative:
 
 1. commit intent state `PREPARED`; no registry row exists;
 2. decrypt only in the secret module and call
    `auth.admin.inviteUserByEmail(email, { redirectTo })`;
-3. on success, validate returned `user.id` UUID/project and call
-   `api.complete_admin_invitation_v1(intentId, returnedSub)`;
+3. on success, validate returned `user.id` UUID/project and use the dedicated
+   direct-DB identity to call `private.complete_admin_invitation_v1` with exact
+   intent, returned sub, environment, generation, and one-time nonce;
 4. that function locks the intent, requires `PREPARED` or `AUTH_CREATED`,
    records the sub, creates exactly one registry `invited` row at version 1,
    and commits `REGISTRY_COMMITTED` atomically with audit;
@@ -881,15 +919,21 @@ already issued JWT otherwise remains cryptographically valid until `exp`.
 Therefore signature/expiry alone is insufficient for any protected read or
 mutation.
 
-`private.assert_auth_session_present_v1(lock_for_mutation boolean)` is a
-`SECURITY DEFINER` helper owned by
-`auth_session_check_owner NOLOGIN`, with empty search path and no dynamic SQL.
-That owner has only `USAGE` on `auth` and column-level SELECT needed for
-`auth.sessions(id, user_id)`; it has no INSERT/UPDATE/DELETE, no access to
-refresh tokens, identities, email, factors, or application tables, and no
-`BYPASSRLS`/superuser privilege. EXECUTE is revoked from `PUBLIC`, `anon`,
-`authenticated`, `service_role`, `api_rpc_owner`, and login roles, and granted
-only to the exact internal read/mutation function owner roles.
+`private.assert_auth_session_present_v1()` is a `SECURITY DEFINER` helper owned
+by `auth_session_lock_owner NOLOGIN`, with empty search path and no dynamic
+SQL. PostgreSQL locking clauses require `SELECT` on referenced columns and
+`UPDATE` on at least one column. Its exact grants are therefore `USAGE` on
+`auth`, `SELECT (id, user_id)` on `auth.sessions`, and the minimum
+`UPDATE (id)` required for `FOR KEY SHARE`. `id` is the locked primary-key
+column. The role receives no UPDATE on any other column and no
+INSERT/DELETE/TRUNCATE/REFERENCES/TRIGGER, access to refresh tokens,
+identities, email, factors, or application tables, membership,
+`BYPASSRLS`, or superuser privilege. The helper contains no UPDATE statement.
+The otherwise-sensitive `UPDATE (id)` privilege is reachable only inside this
+fixed helper because the owner is NOLOGIN and is not granted to any migration,
+application, control-plane, or wrapper role. EXECUTE is revoked from `PUBLIC`,
+`anon`, `authenticated`, `service_role`, every wrapper owner, and all login
+roles, and granted only to the exact internal read/mutation function owners.
 
 The helper requires:
 
@@ -899,15 +943,21 @@ The helper requires:
   `user_id = auth.uid()`;
 - normal JWT issuer/audience/project/`exp`/`nbf` checks already completed.
 
-Every internal bounded read function invokes the helper before reading company
-data. Every activation, invitation acceptance, lifecycle, Auth-intent, Story 3,
-and future mutation function invokes it with `lock_for_mutation=true` before
-its first write. That mode locks the matching session row `FOR KEY SHARE` for
-the transaction and rechecks existence immediately before the final
-audit/write statement. Supabase sign-out's row deletion must wait for an
-already-running locked mutation; consequently, after sign-out returns, no
-mutation using that deleted session can still commit. Mutation statement
-timeout remains five seconds.
+Every internal bounded read and mutation function invokes the helper before
+accessing company data. The helper executes the exact predicate above with
+`FOR KEY SHARE` and retains the session-row lock until the wrapper transaction
+ends. A read wrapper acquires the lock before its first protected query and
+does not end its transaction until its bounded result has been materialized.
+Activation, invitation acceptance, lifecycle, Auth-intent, Story 3, and future
+mutations acquire the same lock before their first protected access and recheck
+existence immediately before the final audit/write statement.
+
+Supabase sign-out's row deletion must wait for an already-running protected
+read or mutation. Consequently, after sign-out returns, no transaction using
+that deleted session can newly return protected data or commit a mutation.
+Bytes fully materialized before logout may still be in network transit and are
+not described as a post-logout authorization. Read and mutation statement
+timeouts remain five seconds.
 
 A missing/mismatched row returns sanitized 401 `SESSION_REVOKED`, even if the
 JWT signature, `exp`, role, version, AAL, and telemetry lease remain valid.
@@ -918,10 +968,20 @@ and are not inferred solely from row presence because Supabase may clean those
 rows later.
 
 The Auth Foundation migration must fingerprint the required `auth.sessions`
-columns against the exact target Supabase version and run the official
-sign-out/session-row integration proof in disposable and dedicated Preview
-projects. If the schema or deletion semantics differ, Production protected
-reads and writes remain disabled until a superseding accepted contract exists.
+columns and primary key against the exact target Supabase version. Its
+privilege proof queries `information_schema.column_privileges`,
+`information_schema.table_privileges`, `pg_proc`, `pg_roles`, and role
+membership to prove the exact column grants, NOLOGIN/non-superuser/non-BYPASSRLS
+owner, fixed `search_path`, SECURITY DEFINER owner, and absence of broader
+grants. Positive migration proof executes the helper through each authorized
+internal owner. Negative proof verifies permission denied for application,
+control-plane, and wrapper roles on direct session SELECT/locking/UPDATE and
+helper EXECUTE, and verifies helper failure when a disposable migration fixture
+individually omits `USAGE auth`, `SELECT (id)`, `SELECT (user_id)`, or
+`UPDATE (id)`. The official sign-out/session-row integration proof runs in
+disposable and dedicated Preview projects. If the schema, privilege, locking,
+or deletion semantics differ, Production protected reads and writes remain
+disabled until a superseding accepted contract exists.
 
 ## 12. CSRF, origin, CORS, and content contract
 
@@ -1191,7 +1251,7 @@ private.security_write_gate_v1
 ```
 
 The row is not in an exposed schema and has no privileges for `PUBLIC`, `anon`,
-`authenticated`, `service_role`, application owners, or `api_rpc_owner`.
+`authenticated`, `service_role`, application owners, or any API wrapper owner.
 Preview and Production have different rows, databases, provider receipts, and
 writer credentials; `environment` must equal the immutable database setting
 for the target deployment.
@@ -1423,12 +1483,21 @@ Authorization/RLS:
   another subject, unconfirmed invite, missing/logged-out session, wrong state,
   replay, and concurrent acceptance are denied and cannot gain general-data
   authority;
+- invitation completion has no exposed `api` wrapper and is callable only by
+  the per-environment direct-Postgres `auth_invitation_completion` identity.
+  Migration and integration tests deny direct completion by a user JWT,
+  `authenticated`, `service_role`, every wrapper owner, and every other
+  control-plane identity; they also reject a forged returned sub, consumed or
+  replayed nonce, expired capability, wrong generation, another intent,
+  another environment, and concurrent completion. The success case proves
+  atomic nonce consumption, exact returned-sub binding, registry creation,
+  intent transition, and audit;
 - lifecycle bootstrap cannot call or grant general protected-data mutations;
 - only the exposed `api` schema is selectable for protected user-JWT RPCs;
   `private` remains absent from exposed/extra-search schemas. Exact
   schema-USAGE, wrapper EXECUTE, private-function revoke, default privilege,
-  `api_rpc_owner`, schema-cache, and user-JWT positive/negative calls match
-  section 10.1;
+  wrapper-specific owner isolation, schema-cache, and user-JWT
+  positive/negative calls match section 10.1;
 - each of the five Auth control-plane operations proves exact caller, target,
   environment, CSRF, rate, idempotency, registry-first revocation, audit, and
   partial-failure behavior; arbitrary Auth Admin API calls, browser imports,
@@ -1442,10 +1511,14 @@ Authorization/RLS:
   registry access-JWT denial from refresh-session destruction, and rejects
   undocumented Auth-schema/API fallback;
 - global/local logout removes the expected `auth.sessions` row and the old
-  otherwise-valid JWT is denied by direct `api` read and mutation wrapper calls.
-  Tests also cover mismatched session owner, missing/null session claim,
-  helper/grant bypass attempts, mutation-vs-logout locking, and prove no old-JWT
-  commit can occur after logout returns;
+  otherwise-valid JWT is denied by direct `api` read and mutation wrapper
+  calls. Tests also cover mismatched session owner, missing/null session claim,
+  helper/grant bypass attempts, and exact migration privilege proofs. A
+  read-vs-logout concurrency test pauses a bounded read after its
+  `FOR KEY SHARE` lock, proves logout waits for read transaction completion,
+  then proves that after logout returns the old JWT cannot start a successful
+  direct read or mutation. The equivalent mutation-vs-logout test proves no
+  old-JWT commit after logout returns;
 - direct public Auth API factor unenroll followed by an old AAL2 JWT direct RPC
   is denied after the normative 60-second JWT-age boundary; the test records
   maximum exposure and the owner acceptance decision.
@@ -1582,6 +1655,8 @@ approve:
   https://supabase.com/docs/guides/auth/signout
 - Supabase Auth sessions and documented `auth.sessions` old-JWT check:
   https://supabase.com/docs/guides/auth/sessions
+- PostgreSQL locking-clause privilege requirements:
+  https://www.postgresql.org/docs/current/sql-select.html
 - Supabase Auth Admin invitation, update/ban, and deletion:
   https://supabase.com/docs/reference/javascript/auth-admin-inviteuserbyemail
   https://supabase.com/docs/reference/javascript/auth-admin-updateuserbyid

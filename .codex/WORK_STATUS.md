@@ -43,6 +43,11 @@
   fourth independent review found three high blockers, now addressed by the
   self-only AAL1 invitation-acceptance wrapper, encrypted idempotent pre-sub
   invitation intent, and `auth.sessions` checks inside all protected wrappers.
+  A fifth independent review found the remaining lock privilege, invitation
+  provenance, read/logout concurrency, and shared-owner contradictions; the
+  Draft now specifies exact column grants and permission proofs, a server-only
+  completion identity with an atomic one-time capability, read-held session
+  locks through result materialization, and wrapper-specific NOLOGIN owners.
 - Current work: validate and deliver the blocker-remediated documentation on
   the same Draft PR #39. Keep Architecture Proposed; do not mark Accepted or
   Ready, enable auto-merge, or merge.
