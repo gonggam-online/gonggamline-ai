@@ -7,11 +7,17 @@ import test from "node:test";
 interface BaselineManifest {
   schemaVersion: string;
   supabaseCliVersion: string;
+  migrations: MigrationArtifact[];
   promotedSources: Record<
     string,
     { source: string; sha256: string; transformation: string }
   >;
-  preservedMigrations: Record<string, string>;
+}
+
+interface MigrationArtifact {
+  order: number;
+  file: string;
+  sha256: string;
 }
 
 const repositoryRoot = path.resolve(import.meta.dirname, "..");
@@ -30,6 +36,39 @@ function canonicalLfSha256(contents: Buffer | string): string {
 
 function readRepositoryFile(relativePath: string): Buffer {
   return readFileSync(path.join(repositoryRoot, relativePath));
+}
+
+function verifyMigrationInventory(
+  actualNames: string[],
+  artifacts: MigrationArtifact[],
+  readMigration: (fileName: string) => Buffer | string,
+): void {
+  assert.equal(actualNames.length, 21, "migration directory must contain 21 SQL files");
+  assert.equal(artifacts.length, 21, "manifest must contain 21 migration artifacts");
+  assert.equal(
+    new Set(artifacts.map(({ file }) => file)).size,
+    artifacts.length,
+    "manifest migration filenames must be unique",
+  );
+  assert.deepEqual(
+    artifacts.map(({ order }) => order),
+    Array.from({ length: artifacts.length }, (_, order) => order),
+    "manifest migration order must be contiguous from zero",
+  );
+  assert.deepEqual(
+    artifacts.map(({ file }) => file),
+    actualNames,
+    "manifest migration order must exactly match the migration directory",
+  );
+
+  for (const artifact of artifacts) {
+    assert.match(artifact.sha256, /^[0-9a-f]{64}$/);
+    assert.equal(
+      canonicalLfSha256(readMigration(artifact.file)),
+      artifact.sha256,
+      artifact.file,
+    );
+  }
 }
 
 function normalizedBody(fileName: string): string {
@@ -82,29 +121,83 @@ test("products baseline preserves schema but omits recovered RLS statements", ()
   assert.match(source, /create policy "Allow public insert products"/);
 });
 
-test("migrations 003 through 020 remain byte-for-byte unchanged", () => {
-  for (const [fileName, expectedHash] of Object.entries(
-    manifest.preservedMigrations,
-  )) {
-    assert.equal(
-      canonicalLfSha256(readFileSync(path.join(migrationsDirectory, fileName))),
-      expectedHash,
-      fileName,
-    );
-  }
-});
-
-test("canonical baseline migrations sort before preserved migration 003", () => {
+test("manifest fixes the complete ordered migration inventory and artifact hashes", () => {
   const migrationNames = readdirSync(migrationsDirectory)
     .filter((fileName) => fileName.endsWith(".sql"))
     .sort();
 
-  assert.deepEqual(migrationNames.slice(0, 4), [
-    "000_products_baseline.sql",
-    "001_product_workflow_extension.sql",
-    "002_commerce_os_core_schema.sql",
-    "003_coupang_competition_analysis.sql",
-  ]);
+  verifyMigrationInventory(migrationNames, manifest.migrations, (fileName) =>
+    readFileSync(path.join(migrationsDirectory, fileName)),
+  );
+});
+
+test("migration inventory validation rejects every protected drift class", () => {
+  const names = manifest.migrations.map(({ file }) => file);
+  const contents = new Map(
+    names.map((fileName) => [
+      fileName,
+      readFileSync(path.join(migrationsDirectory, fileName)),
+    ]),
+  );
+  const readMigration = (fileName: string): Buffer => {
+    const contentsForFile = contents.get(fileName);
+    assert.ok(contentsForFile, fileName);
+    return contentsForFile;
+  };
+
+  assert.throws(() =>
+    verifyMigrationInventory(names.slice(0, -1), manifest.migrations, readMigration),
+  );
+  assert.throws(() =>
+    verifyMigrationInventory(
+      [...names, "021_unapproved.sql"],
+      manifest.migrations,
+      readMigration,
+    ),
+  );
+  assert.throws(() =>
+    verifyMigrationInventory(names, manifest.migrations.slice(0, -1), readMigration),
+  );
+  assert.throws(() =>
+    verifyMigrationInventory(
+      names,
+      [
+        ...manifest.migrations,
+        { order: 21, file: "021_manifest_only.sql", sha256: "0".repeat(64) },
+      ],
+      readMigration,
+    ),
+  );
+  assert.throws(() =>
+    verifyMigrationInventory(
+      names,
+      [manifest.migrations[1], manifest.migrations[0], ...manifest.migrations.slice(2)],
+      readMigration,
+    ),
+  );
+  assert.throws(() =>
+    verifyMigrationInventory(
+      names,
+      manifest.migrations.map((artifact, index) =>
+        index === 1 ? { ...artifact, file: manifest.migrations[0].file } : artifact,
+      ),
+      readMigration,
+    ),
+  );
+  assert.throws(() =>
+    verifyMigrationInventory(names, manifest.migrations, (fileName) =>
+      fileName === names[0] ? `${readMigration(fileName)}\n-- drift` : readMigration(fileName),
+    ),
+  );
+  assert.throws(() =>
+    verifyMigrationInventory(
+      names,
+      manifest.migrations.map((artifact, index) =>
+        index === 0 ? { ...artifact, sha256: "0".repeat(64) } : artifact,
+      ),
+      readMigration,
+    ),
+  );
 });
 
 test("replay runner is pinned and refuses Production markers", () => {
