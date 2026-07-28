@@ -1,5 +1,50 @@
 # Work status
 
+## 2026-07-28 — Revenue-first automation orchestrator design
+
+- Objective: design an implementable GPT review -> task routing -> Codex
+  execution -> evidence verification -> next-task/approval loop that advances
+  real sales, net profit, and operator-time reduction.
+- Branch: `docs/automation-orchestrator-design`, based on `origin/main`
+  `eea7adf927498bd200cfe51e67cb1e37373e58bf`.
+- Risk: high-risk/manual bootstrap by `.ai/risk-classification.md`;
+  documentation only; no implementation, external configuration, database,
+  Production, or commerce write.
+- Scope/non-goals: six files under `docs/orchestrator/**` plus the minimum
+  Decision Log and Work Status records. Product code, API, migration, CI,
+  Vercel/Supabase state, and Coupang remain unchanged.
+- Root-cause class: capability/Architecture gap. Existing CI/Preview and Runtime
+  Queue patterns are reusable, but there is no durable cross-PC task/thread/
+  worktree ledger or evidence-normalizing verifier.
+- Current evidence: clean independent worktree; expected GitHub origin; latest
+  base is PR #39 merge `eea7adf`; open Draft PR #40 changes Sprint B-0 database
+  files and this status file but not `docs/orchestrator/**`.
+- Reclassification: Sprint A recovered pre-003 sources and inspected
+  Production; Database and Admin Security Architectures are accepted. Sprint
+  B-0 is implemented only on unmerged Draft PR #40. Deployed Admin Auth/RLS,
+  Item Selection persistence, and Production adoption remain unconfirmed.
+- Completed: repository/PR/worktree safety checks; mandatory governance boot;
+  current system/workflow/runtime/external-boundary audit; official Codex
+  interface review; architecture, workflow, approval, roadmap, and Task/Result
+  schemas drafted.
+- Validation: both Draft 2020-12 JSON Schemas compile with AJV; Markdown links,
+  state/outcome coverage, secret/path scans, and `git diff --check` pass. Lint
+  passes with 0 errors and 4 pre-existing test warnings; typecheck passes;
+  261/261 unit/integration tests pass; Production build passes with 69 routes.
+  Local Playwright reached all 39 tests but the command timed out after the
+  known seven Supabase-dependent page failures (`missing_url`); the other 32
+  tests, including read-only health, revenue-critical, and Dashboard flows,
+  passed. This documentation diff changes no runtime path.
+- Current work: final diff review and Git delivery.
+- Blockers/owner actions: none for design/delivery. Implementation requires
+  Architecture acceptance plus the explicit decisions in the roadmap.
+- Changed files: `docs/orchestrator/**`, `.ai/DECISION_LOG.md`, and this file.
+- Exact next action: commit/push, open a Draft PR with
+  `manual-merge-required`, and verify exact-head CI/Preview without merging.
+- Remaining risks: unapproved automation auth/budgets, N availability and
+  backup, polling/webhook choice, Codex protocol version, shared status-file
+  conflict with PR #40, and absent actual sales-learning data.
+
 
 ## 2026-07-28 — Admin Security Architecture v1 Accepted
 
