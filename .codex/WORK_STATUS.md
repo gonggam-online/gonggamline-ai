@@ -3,64 +3,18 @@
 
 ## 2026-07-28 — Admin Security Architecture v1 Draft
 
-- Objective: remove the security-Architecture blocker before Item Selection
-  persistence by defining one trusted administrator, authorization, RLS, CSRF,
-  audit, and rollout contract.
-- Branch: `codex/docs/admin-auth-rls-csrf-architecture-v1`, based exactly on
-  PR #38 squash commit `cd4bae71ac77d74751ae3575a8574d7c174a6748`.
-- Risk: high-risk/manual because this Architecture governs authentication,
-  authorization, RLS, secrets, and Production access. Documentation only; no
-  implementation is authorized.
-- Revenue impact: P1 prerequisite for Story 3 and the shortest safe path from
-  approved evaluation engines to an operator-controlled persistence workflow.
-- Scope: current-state security evidence, Supabase Auth principal/session,
-  administrator claim and registry, AAL, route classes, default-deny RLS,
-  service-role boundary, signed CSRF, exact origins, CORS, rate limits, audit,
-  recovery, deployment order, rollback, and acceptance tests.
-- Non-goals: packages, runtime/API/UI code, migrations, RLS execution, Supabase
-  configuration, user creation, secrets, Preview/Production changes, Story 3,
-  or any commerce write.
-- Root-cause class: security Architecture prerequisite. Current routes have no
-  accepted admin/session/CSRF boundary and use anon database access with broad
-  development policies.
-- Completed: confirmed PR #38 merge; audited current security evidence and
-  binding governance; opened Draft PR #39 with `manual-merge-required`; and
-  processed the independent Architecture reviews. The closing normalization
-  removes duplicated normative prose and makes Ledgers R-T the sole source for
-  principals, functions, actor classes, states, lock modes, durations, browser
-  security, provider operations, events, and acceptance tests. Provisioning is
-  owner-only/manual, software never reissues ambiguous provider calls,
-  lifecycle locks are explicit, and soft-delete retry is isolated from other
-  Auth lifecycle work.
-- Current work: validate and deliver the ledger-normalized documentation on the
-  same Draft PR #39. Keep Architecture Proposed; do not mark Accepted or Ready,
-  enable auto-merge, or merge.
-- Blockers/owner actions: repository-owner Architecture review and explicit
-  acceptance at an exact head SHA are required, including disposition of the
-  residual boundaries in Ledger D. The exact
-  telemetry provider/runbook requires a separate accepted prerequisite. Sprint
-  B-0, Auth Foundation, Authorization Foundation, Route Security Migration,
-  and Item Selection Story 3 remain blocked.
-- Changed files:
-  `docs/architecture/ADMIN-IDENTITY-AUTHORIZATION-RLS-CSRF-V1.md`,
-  `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`, and this file.
-- Validation: branch diff contains only these four documentation/status files.
-  Canonical inventory, identifier uniqueness, owner/caller/EXECUTE fingerprint,
-  state/duration/test coverage, stale-term scan, lock-mode graph, and
-  `git diff --check` pass. Unit/integration, lint, typecheck, and Production
-  build pass. Final exact-head GitHub runs remain the delivery authority and are
-  reported outside this file to avoid a self-referential commit cycle.
-- Last commit: current PR #39 branch `HEAD`; Git/GitHub is the authoritative
-  mutable SHA source.
-- Exact next action: push the ledger-normalized exact head, pass exact-head CI
-  and Preview browser validation, then submit it for independent Architecture
-  re-review. Do not record acceptance or start Sprint B-0/Auth/RLS/Story 3
-  implementation.
-- Remaining risks: the Production administrator UUID, secrets, exact project
-  settings, telemetry provider, and cutover approval remain unknown by design.
-  The repository owner must explicitly accept or supersede the Ledger D
-  residual boundaries. All runtime/schema work stays blocked until Architecture
-  acceptance and separate high-risk Stories.
+- Objective: remove the actual administrator-security prerequisite without delaying Item Selection persistence through an unimplemented enterprise control plane.
+- Branch: `codex/docs/admin-auth-rls-csrf-architecture-v1`, based on PR #38 squash commit `cd4bae71ac77d74751ae3575a8574d7c174a6748`.
+- Risk: high-risk/manual; documentation only.
+- Root cause: repeated correction was caused by attempting to prove 31 principals, 25 functions, 17 states, custom Auth/provider behavior, Auth-schema locks, and telemetry recovery entirely in documentation. Each normalization enlarged the validation surface.
+- Corrective decision: replace the canonical-ledger design with a minimal server boundary using manual Dashboard provisioning, a server-only UUID allowlist, per-request `getUser()`, AAL2 mutation assurance, exact-origin JSON CSRF, default-deny protected Data API access, one contained service-role module, and atomic database audit.
+- Removed from v1: Auth Hook, software invitation/retirement/soft-delete, `auth.sessions` access, automatic MFA/break-glass lifecycle, per-function owner roles, and telemetry lease/freeze/recovery.
+- Validation model: official platform facts plus executable A01-A12 tests in a fresh disposable Supabase environment. Existing unit/lint/build success is not represented as proof of unimplemented security.
+- Current work: deliver the reduced Proposed Architecture on Draft PR #39. Do not mark Accepted/Ready, enable auto-merge, merge, or implement.
+- Blockers/owner actions: one bounded independent review, then explicit repository-owner acceptance at the exact head. Implementation and Production remain separate high-risk/manual approvals.
+- Changed files: `docs/architecture/ADMIN-IDENTITY-AUTHORIZATION-RLS-CSRF-V1.md`, `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`, and this file.
+- Exact next action: run exact-head documentation/CI checks and one bounded independent review using the closure rule in the Architecture. If it passes, request repository-owner acceptance; do not reopen v1 for future enhancements.
+- Remaining risks: service-role full access, non-instant JWT revocation, exact environment UUIDs/secrets, broad development policy removal, and disposable security-test implementation remain explicit.
 
 ## 2026-07-28 — Item Selection Database Baseline Architecture v1
 
