@@ -23,8 +23,9 @@ const manifest = JSON.parse(
   ),
 ) as BaselineManifest;
 
-function sha256(contents: Buffer | string): string {
-  return createHash("sha256").update(contents).digest("hex");
+function canonicalLfSha256(contents: Buffer | string): string {
+  const canonicalText = contents.toString().replaceAll("\r\n", "\n");
+  return createHash("sha256").update(canonicalText, "utf8").digest("hex");
 }
 
 function readRepositoryFile(relativePath: string): Buffer {
@@ -49,7 +50,7 @@ test("baseline manifest pins the disposable Supabase CLI and schema version", ()
 
 test("promoted source digests match the preserved recovery evidence", () => {
   for (const entry of Object.values(manifest.promotedSources)) {
-    assert.equal(sha256(readRepositoryFile(entry.source)), entry.sha256);
+    assert.equal(canonicalLfSha256(readRepositoryFile(entry.source)), entry.sha256);
   }
 });
 
@@ -86,7 +87,7 @@ test("migrations 003 through 020 remain byte-for-byte unchanged", () => {
     manifest.preservedMigrations,
   )) {
     assert.equal(
-      sha256(readFileSync(path.join(migrationsDirectory, fileName))),
+      canonicalLfSha256(readFileSync(path.join(migrationsDirectory, fileName))),
       expectedHash,
       fileName,
     );

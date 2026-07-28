@@ -1,6 +1,6 @@
 -- Sprint B-0 canonical pre-003 baseline.
 -- Source: supabase/recovery-sources/commerce-os-core-schema.sql
--- Source SHA-256: 91ed18b196486fe58d1ea9ac89e33c81552edf7d3eabaf047f79d5c5a50ef2fd
+-- Canonical LF UTF-8 source SHA-256: 2c67803769d61925fdec1e4955994d803e65e0a99ed5888d015cd51b66aec1f8
 -- Transformation: provenance header only; SQL body preserved byte-for-byte.
 
 -- 공감라인 AI Commerce OS v4.0 - 핵심 스키마

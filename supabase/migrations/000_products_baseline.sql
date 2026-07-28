@@ -1,6 +1,6 @@
 -- Sprint B-0 canonical pre-003 baseline.
 -- Source: supabase/recovery-sources/products-baseline.sql
--- Source SHA-256: 24c6900c0a46d78679d66f58b300101ab89018e533c4324f0232f77ec1bd6f05
+-- Canonical LF UTF-8 source SHA-256: e28cb65cb5078bec2977edf76da2ae281f80f06f2afa175d5635b79cc4069e30
 -- Transformation: preserve table schema; omit the source RLS enablement and
 -- permissive anon policies. RLS/auth implementation is outside this approved
 -- Database Baseline change and requires its own high-risk scope.

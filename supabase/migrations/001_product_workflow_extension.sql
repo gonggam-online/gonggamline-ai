@@ -1,6 +1,6 @@
 -- Sprint B-0 canonical pre-003 baseline.
 -- Source: supabase/recovery-sources/product-workflow-extension.sql
--- Source SHA-256: d09a6222f0f224b5f5e8e22d090fbbc32cc7d321483b472ab3fdd6273ed4d8b7
+-- Canonical LF UTF-8 source SHA-256: 1cd7dde0368678db4ba3da998822e4e03cbaf0e663adb606403153e2a02f6c4e
 -- Transformation: provenance header only; SQL body preserved byte-for-byte.
 
 alter table public.products

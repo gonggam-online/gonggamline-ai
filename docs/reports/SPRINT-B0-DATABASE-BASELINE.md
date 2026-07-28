@@ -26,7 +26,8 @@ high-risk RLS implementation approval.
 3. `002_commerce_os_core_schema.sql`
 4. Existing migrations 003 through 020, unchanged
 
-Source and preserved-migration SHA-256 values are authoritative in
+Source and preserved-migration SHA-256 values are computed from canonical LF
+UTF-8 bytes so Windows and Linux checkouts agree. They are authoritative in
 `supabase/baseline-manifest.json`.
 
 ## Replay boundary
