@@ -60,9 +60,13 @@ function scores(
 
 const confirmedProfitability: ProfitabilityPolicyInput = {
   status: "CONFIRMED",
-  approvedMinimumsStatus: "APPROVED",
-  meetsApprovedMinimums: true,
-  contributionMarginRate: 20,
+  policyVersion: "gonggamline-profitability-2026-07-27-v1",
+  meetsRecommendMinimums: true,
+  meetsConditionalMinimums: true,
+  contributionMarginRate: 0.2,
+  estimatedFacts: [],
+  missingFacts: [],
+  nextActions: [],
 };
 
 function evaluate(
@@ -203,9 +207,13 @@ test("incomplete profitability caps a full score at MANUAL_REVIEW", () => {
   const result = evaluate({
     profitability: {
       status: "INCOMPLETE",
-      approvedMinimumsStatus: "APPROVED",
-      meetsApprovedMinimums: null,
+      policyVersion: "gonggamline-profitability-2026-07-27-v1",
+      meetsRecommendMinimums: null,
+      meetsConditionalMinimums: null,
       contributionMarginRate: null,
+      estimatedFacts: [],
+      missingFacts: ["supplierUnitCost"],
+      nextActions: ["supplierUnitCost을(를) 확인하세요."],
     },
   });
 
@@ -213,13 +221,17 @@ test("incomplete profitability caps a full score at MANUAL_REVIEW", () => {
   assert(result.missingFacts.includes("profitability.requiredInputs"));
 });
 
-test("unapproved profit minimums cap a full score at MANUAL_REVIEW", () => {
+test("missing profit policy caps a full score at MANUAL_REVIEW", () => {
   const result = evaluate({
     profitability: {
       status: "CONFIRMED",
-      approvedMinimumsStatus: "UNAPPROVED",
-      meetsApprovedMinimums: null,
-      contributionMarginRate: 25,
+      policyVersion: null,
+      meetsRecommendMinimums: null,
+      meetsConditionalMinimums: null,
+      contributionMarginRate: 0.25,
+      estimatedFacts: [],
+      missingFacts: [],
+      nextActions: [],
     },
   });
 
@@ -238,7 +250,7 @@ test("uses CONDITIONAL when approved profitability minimums are missed", () => {
   const result = evaluate({
     profitability: {
       ...confirmedProfitability,
-      meetsApprovedMinimums: false,
+      meetsRecommendMinimums: false,
     },
   });
 
@@ -278,7 +290,7 @@ test("sorts by verdict, total score, margin, numeric item id, then position", ()
     originalPosition: 2,
     profitability: {
       ...confirmedProfitability,
-      contributionMarginRate: 10,
+      contributionMarginRate: 0.1,
     },
   });
   const recommendHigherMargin = evaluate({
@@ -286,7 +298,7 @@ test("sorts by verdict, total score, margin, numeric item id, then position", ()
     originalPosition: 1,
     profitability: {
       ...confirmedProfitability,
-      contributionMarginRate: 30,
+      contributionMarginRate: 0.3,
     },
   });
   const conditional = evaluate({
@@ -322,9 +334,13 @@ test("places null score and margin last inside MANUAL_REVIEW deterministically",
     scoreInputs: scores(100, ["supplyStability"]),
     profitability: {
       status: "NOT_EVALUATED",
-      approvedMinimumsStatus: "UNAPPROVED",
-      meetsApprovedMinimums: null,
+      policyVersion: null,
+      meetsRecommendMinimums: null,
+      meetsConditionalMinimums: null,
       contributionMarginRate: null,
+      estimatedFacts: [],
+      missingFacts: ["profitability"],
+      nextActions: ["profitability을(를) 확인하세요."],
     },
   });
 

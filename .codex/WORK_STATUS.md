@@ -1,5 +1,58 @@
 # Work status
 
+## 2026-07-28 — Item Selection profitability policy v1
+
+- Objective: implement owner-approved profitability policy
+  `gonggamline-profitability-2026-07-27-v1` and integrate its trusted result
+  with the Item Selection evaluator.
+- Branch: `codex/feat/item-selection-profitability-v1`, based on clean merged
+  `main` `04508f033892d57cab29c3430231d29424c36fa2`.
+- Risk: high-risk. The directive changes pricing/margin semantics and also
+  requests migration, auth-bound persistence/API, and Production delivery.
+- Revenue impact: P1/P0. The approved thresholds prevent estimated or missing
+  costs from producing false recommendations and define normalized and stress
+  contribution-profit gates.
+- Scope: Revenue policy, provider-fact contract, base/stress/current/normalized
+  scenarios, cost trust, VAT/precision, evaluator verdict integration, and
+  unit/domain tests.
+- Non-goals: migration, persistence, API, UI, admin auth/authorization, RLS,
+  and CSRF.
+- Root-cause class: code/capability gap after explicit owner financial and
+  Architecture approval.
+- Completed: read the owner directives and binding repository governance;
+  fast-forward verified local/remote `main`; created the task branch; inspected
+  the approved Item Selection Architecture Story, Decision Log, database
+  baseline status, Revenue calculation, Item Selection evaluator, Supplier
+  Catalog contracts, migrations, and tests; implemented the versioned Revenue
+  policy, four scenarios, trust/provenance/VAT/inclusion validation, sanitized
+  provider mapper, evaluator integration, and focused tests.
+- Current: review follow-up implemented and all local gates passed; push the
+  review-fix commit and confirm exact-head CI and Preview browser validation.
+- Blockers/owner actions: no blocker for Story 2. Database Baseline and Admin
+  Architecture approvals remain prerequisites for Stories 3–4.
+- Changed files: Revenue profitability policy, Item Selection evaluator,
+  focused tests, policy documentation, changelog, Decision Log, and this file.
+- Commands/results: review follow-up preserves `effectiveFrom` and `includedIn`
+  on cost lines and rejects non-Domeggook or invalid numeric provider facts.
+  Focused policy/evaluator tests passed 40/40; full unit/integration passed
+  261/261; typecheck and Production build passed. Repository lint excluding
+  the pre-existing generated `playwright-report` passed with 0 errors and 4
+  pre-existing test warnings. The unfiltered lint command fails only because
+  generated Playwright trace assets are present locally. The Windows Node
+  runtime returned `uv_os_get_passwd ENOMEM` while `tsx` selected its temp
+  directory; ignored dependency files were temporarily adjusted only to run
+  tests and then restored. No `node_modules` file is staged or committed.
+- Delivery: implementation commit
+  `58db717fa00f40522838de90c427acd921bc7a83` is pushed. Draft PR #37 has
+  `manual-merge-required`; auto-merge is disabled. Exact-head CI run
+  `30313836655` and Preview browser validation run `30313836624` passed.
+- Last commit: `9b35ec2ef4836e054aa3c6747584b4d807c7d951`.
+- Exact next action: commit/push the review fix, confirm the new
+  exact-head CI/Preview gates, then stop for manual review without merging.
+- Remaining risks: provider unit price freshness still depends on the bounded
+  observation time; persisted replay, authenticated APIs, and UI evidence
+  remain intentionally deferred.
+
 ## 2026-07-27 — Item Selection pure evaluator v1
 
 - Objective: implement Story 1 from the approved Item Selection Evaluation v1
