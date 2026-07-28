@@ -115,59 +115,25 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
   `user_role=admin`, versioned authorization, active-registry cross-check,
   direct protected-table DML revoked, mandatory AAL2 mutation RPCs, user-JWT
   RLS, and session-bound signed same-origin CSRF.
-- Review follow-up: independent blockers were addressed with an administrator /
-  TOTP state machine, exact JWT refresh/revocation, protected-object matrix,
-  dedicated function ownership, supported `@supabase/ssr@0.12.3` browser/server
-  cookie contract, maintenance-window cutover, and audit retention/failure
-  semantics. A second review added the self-only pending-MFA activation
-  bootstrap, five-operation server-only Auth control plane, bounded
-  direct-unenroll exposure, mandatory telemetry-provider prerequisite, and
-  pinned SSR/supabase-js session cleanup contract. The revised exact head still
-  requires independent review and explicit owner acceptance of the remaining
-  60-second MFA-unenroll exposure.
-- Third review follow-up: protected PostgREST mutations now expose only minimal
-  `api` wrappers while all `private` objects remain hidden; Auth control-plane
-  operations map to exact pinned-SDK APIs and explicitly reject a fictional
-  target-sub-only global sign-out; and a 30-second maximum database-visible
-  telemetry lease makes direct RPCs fail closed independently of application
-  flags. The new exact head remains Proposed and requires independent review.
-- Fourth review follow-up: the invited-to-pending-MFA bootstrap is now an exact
-  self-only AAL1 wrapper; invitation uses an encrypted idempotent pre-sub
-  control intent and creates the registry row only after Auth returns a
-  verified sub; and every protected read/mutation verifies the JWT session ID
-  against `auth.sessions`, making explicit logout deny old-JWT direct RPCs.
-  The new exact head remains Proposed and requires independent review.
-- Fifth review follow-up: `auth.sessions` enforcement now carries the exact
-  PostgreSQL column privileges required by its transaction-duration lock and
-  includes migration permission proofs; invitation completion is bound to a
-  server-only direct-Postgres identity plus an atomic one-time capability;
-  protected reads retain the session-row lock through result materialization
-  so logout cannot return first; and wrapper functions use separate NOLOGIN
-  owners with no sibling EXECUTE grant. The new exact head remains Proposed
-  and requires independent review.
-- Sixth review follow-up: invitation prepare is now a non-PostgREST,
-  server-only crypto boundary with exact identity and database
-  actor/session/rate/idempotency checks; the invitation state machine separates
-  pre-call, Auth-called, Auth-created, capability reissue, and exact terminal
-  recovery; and Auth cookies follow Supabase's long-lived storage guidance
-  without claiming cookie loss revokes an unidentified server session. The new
-  exact head remains Proposed and requires independent review.
-- Seventh review follow-up: marker and Auth-result-record capabilities are now
-  purpose-separated; exact server-only writers and grants cover deterministic,
-  ambiguous, reconciled, and retry states without reverting a started call to
-  PREPARED; and bounce/expiry uses a narrowly guarded unconfirmed-invitation
-  tombstone transition serialized against acceptance. The owner checklist now
-  calls out the direct LOGIN identities, capability lifecycle, and
-  JavaScript-readable cookie/session residual explicitly. The new exact head
-  remains Proposed and requires independent review.
-- Eighth review follow-up: `AUTH_CREATED` now has one table-writing core with
-  completion-direct and privilege-isolated reconciliation-adapter paths;
-  ambiguous zero-match enters provider settlement quarantine and stable-zero
-  verification with late-success conflict handling; and unconfirmed invitation
-  retirement now has exact AAL2/runbook request boundaries, server-only
-  finalization, lock order, Auth absence evidence, and soft-delete retry
-  contracts. The new exact head remains Proposed and requires independent
-  review.
+- Final normalization proposal: v1 administrator provisioning is one
+  repository-owner-only manual runbook. It makes one supported
+  `inviteUserByEmail` call, registers only the exact synchronously returned
+  subject, never automatically retries an ambiguous result, and requires
+  manual provider inspection before an exact-one adoption. Initial and
+  additional administrators use the same contract.
+- Lifecycle proposal: invitation acceptance and unconfirmed-invitation
+  retirement serialize only on the exact administrator-registry row. Auth
+  soft-delete is a tombstone-first owner runbook with audited, same-sub manual
+  retry; no provider workflow state machine is stored in the database.
+- Security proposal: minimal exposed wrappers call hidden private functions
+  with dedicated owners; every protected operation verifies the live Auth
+  session, registry/version, required AAL, and database-visible telemetry gate.
+  The canonical contract ledger is the sole inventory for principals,
+  functions, states, locks, durations, CSRF/session artifacts, and external
+  provider operations.
+- Remaining owner decisions: explicit acceptance of the maximum 60-second
+  direct-MFA-unenroll exposure, the maximum 30-second telemetry lease boundary,
+  and the separately approved telemetry provider/runbook prerequisite.
 - Current-state finding: application routes have no accepted administrator
   session or CSRF boundary and rely on anonymous Supabase access with broad
   development policies.

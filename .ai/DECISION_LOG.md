@@ -287,41 +287,21 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   Server services use the public anonymous Supabase key, while recovered and
   Git migrations contain broad development policies.
 - Decision or issue: Propose invitation-only Supabase Auth with verified
-  `sub` UUID, `user_role=admin`, versioned active-admin registry,
-  AAL1 reads, direct protected-table DML revoked, TOTP/AAL2 mutation RPCs,
-  user-JWT default-deny RLS, no normal service-role path, session/version-bound
-  same-origin CSRF, bounded mutation rates, and append-only sanitized security
-  audit events. The proposed refinement permits service role only in five
-  isolated Auth control-plane operations, adds a self-only pending-MFA
-  activation RPC, bounds direct-MFA-unenroll old-JWT exposure to 60 seconds,
-  and blocks Production mutations until an exact telemetry provider/runbook is
-  separately accepted and healthy. A further proposed refinement limits
-  PostgREST to individually granted `api` wrapper RPCs, maps each Auth lifecycle
-  operation to a supported pinned-SDK API (with no claimed sub-only global
-  logout), and requires every internal mutation to validate a database-visible
-  telemetry readiness lease that expires within 30 seconds. The next proposed
-  refinement adds a self-only invitation-acceptance wrapper, an encrypted
-  idempotent pre-sub Auth invitation intent, and an `auth.sessions` existence
-  check inside every protected read/mutation to reject logged-out old JWTs.
-  The latest proposed refinement grants the session-check helper only the
-  column-level privileges PostgreSQL requires for `FOR KEY SHARE`, holds that
-  lock for bounded reads as well as writes, makes invitation completion
-  server-only with atomic intent/sub/environment/generation/expiry/nonce
-  provenance, and replaces the shared wrapper owner with one NOLOGIN owner per
-  wrapper.
-  The next proposed refinement moves invitation prepare behind a dedicated
-  server-only crypto identity, completes the nonce/capability retry state
-  machine across Auth and database ambiguity, and adopts long-lived Supabase
-  Auth cookies while separating cookie loss, explicit logout, chunk cleanup,
-  and Auth timeout behavior.
-  The latest proposed refinement separates marker and Auth-result-record
-  capabilities, assigns exact failure/ambiguity/reconciliation writers and
-  grants, and adds a registry-first unconfirmed-invitation retirement
-  transition that cannot race successfully with invitation acceptance.
-  The latest proposed refinement unifies `AUTH_CREATED` under one privileged
-  core writer, adds stable-zero settlement quarantine and late-success
-  conflict handling, and completes the request/finalize/retry boundary for
-  unconfirmed invitation retirement.
+  `sub` UUID, `user_role=admin`, versioned active-admin registry, AAL1 ordinary
+  reads, TOTP/AAL2 sensitive reads and mutations, user-JWT default-deny RLS,
+  session/version-bound same-origin CSRF, bounded rates, and append-only
+  sanitized security audit events. Administrator provisioning is deliberately
+  manual in v1: one repository-owner runbook makes one supported Auth invite
+  call and creates a registry row only for the exact synchronous returned
+  subject. Ambiguous provider outcomes stop for manual reconciliation and are
+  never retried automatically. Invitation acceptance and retirement serialize
+  on the exact registry row; Auth soft-delete is tombstone-first and retried
+  manually for the same subject. Minimal PostgREST wrappers call hidden private
+  functions with dedicated owners. Every protected operation verifies the live
+  Auth session, registry/version, required AAL, and the database telemetry
+  lease. The Architecture document's canonical contract ledger is the sole
+  inventory for roles, functions, states, locks, durations, browser security
+  artifacts, and provider boundaries.
 - Consequences and risks: This documentation is high-risk/manual because it
   defines future auth, authorization, RLS, secrets, and Production access.
   It authorizes no implementation, configuration, user enrollment, migration,

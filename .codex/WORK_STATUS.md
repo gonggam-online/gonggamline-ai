@@ -24,49 +24,22 @@
   accepted admin/session/CSRF boundary and use anon database access with broad
   development policies.
 - Completed: confirmed PR #38 is squash-merged; read binding governance and
-  Database/Security policies; audited the Supabase client, application access
-  map, permissive RLS evidence, representative unauthenticated mutation routes,
-  and dependencies; compared current official Supabase, Next.js, and OWASP
-  guidance; drafted and indexed the proposed Architecture; recorded the
-  proposed decision; opened Draft PR #39 and applied
-  `manual-merge-required`; independently reviewed the first Draft and addressed
-  its AAL2/Data API, CSRF binding, admin/MFA lifecycle, JWT refresh/revocation,
-  RLS matrix, function owner, SSR cookie, cutover, audit, route/content, XSS,
-  rate-limit, and acceptance-test blockers; a second independent review found
-  four remaining approval blockers plus an SSR correction, now addressed by a
-  pending-MFA bootstrap RPC, isolated Auth control plane, bounded direct-factor
-  unenroll exposure, mandatory telemetry-sink prerequisite, and pinned
-  SSR/supabase-js cleanup/session contracts. A third independent review found
-  three high blockers, now addressed in the Draft by exposed `api` wrappers
-  over hidden `private` functions, exact pinned-SDK Auth operation limits, and
-  an environment-specific database telemetry readiness lease/write gate. A
-  fourth independent review found three high blockers, now addressed by the
-  self-only AAL1 invitation-acceptance wrapper, encrypted idempotent pre-sub
-  invitation intent, and `auth.sessions` checks inside all protected wrappers.
-  A fifth independent review found the remaining lock privilege, invitation
-  provenance, read/logout concurrency, and shared-owner contradictions; the
-  Draft now specifies exact column grants and permission proofs, a server-only
-  completion identity with an atomic one-time capability, read-held session
-  locks through result materialization, and wrapper-specific NOLOGIN owners.
-  A sixth independent review found prepare-crypto provenance, completion
-  capability retry, and cookie/orphan-session blockers; the Draft now uses a
-  server-only prepare identity, explicit pre-call/Auth-created/finalization
-  transitions with safe capability reissue and terminal recovery, and
-  Supabase-aligned long-lived cookies with separated loss/logout/cleanup/
-  timeout tests.
-  A seventh independent review found a dual-use capability, incomplete
-  failure/ambiguity writers, and bounce/expiry lifecycle conflict; the Draft
-  now uses purpose-separated marker/record capabilities, exact failure and
-  reconciliation functions/grants with generation-safe retry, and a dedicated
-  unconfirmed-invitation tombstone transition locked against acceptance.
-  An eighth independent review found duplicate `AUTH_CREATED` writer authority,
-  a late-success race after zero-match, and incomplete retirement execution
-  grants; the Draft now uses one core writer with a reconciliation adapter,
-  settlement quarantine/stable-zero/late-success conflict, and exact
-  AAL2/runbook request plus server-only retirement finalization boundaries.
-- Current work: validate and deliver the blocker-remediated documentation on
-  the same Draft PR #39. Keep Architecture Proposed; do not mark Accepted or
-  Ready, enable auto-merge, or merge.
+  Database/Security policies; audited current Supabase clients, access maps,
+  permissive RLS evidence, unauthenticated mutation routes, and dependencies;
+  compared official Supabase, Next.js, PostgreSQL, and OWASP guidance; drafted
+  and repeatedly independently reviewed this Proposed Architecture; opened
+  Draft PR #39 with `manual-merge-required`. The final normalization replaces
+  invitation orchestration with one repository-owner-only manual provisioning
+  runbook, exact synchronous-sub registration, fail-closed manual
+  reconciliation, registry-row-only acceptance/retirement serialization, and
+  tombstone-first manual Auth soft-delete. It retains self-only lifecycle
+  wrappers, live-session enforcement, dedicated function owners, pinned SDK
+  behavior, bounded MFA residual risk, and the database telemetry gate. A
+  canonical ledger provides the sole role/function/state/lock/duration/
+  browser-artifact/provider contract inventory.
+- Current work: validate and deliver the final normalized documentation on the
+  same Draft PR #39. Keep Architecture Proposed; do not mark Accepted or Ready,
+  enable auto-merge, or merge.
 - Blockers/owner actions: repository-owner Architecture review and explicit
   acceptance at an exact head SHA are required, including acceptance or
   supersession of the maximum 60-second direct-MFA-unenroll exposure. The exact
@@ -84,7 +57,7 @@
   file to avoid a self-referential status-commit cycle.
 - Last commit: blocker-remediation commit on the current PR #39 branch `HEAD`;
   Git/GitHub remains the authoritative mutable SHA source.
-- Exact next action: submit the new exact head for independent Architecture
+- Exact next action: submit the final normalized exact head for independent Architecture
   re-review. Do not record acceptance or start Sprint B-0/Auth/RLS/Story 3
   implementation.
 - Remaining risks: the Production administrator UUID, secrets, exact project
