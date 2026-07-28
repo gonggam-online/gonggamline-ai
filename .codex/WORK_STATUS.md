@@ -35,12 +35,20 @@
   known seven Supabase-dependent page failures (`missing_url`); the other 32
   tests, including read-only health, revenue-critical, and Dashboard flows,
   passed. This documentation diff changes no runtime path.
-- Current work: final diff review and Git delivery.
+- Delivery: design commit
+  `6fbbee22bb44e2f45f377b3ce71eefb986071d98` is pushed. Draft PR #41 is open
+  with `manual-merge-required`; auto-merge and merge remain disabled. Exact-head
+  CI run `30343769928` and Preview browser run `30343769935` passed. Vercel
+  exact-commit status is success; Preview evidence artifact `8682105417`
+  (`sha256:a8c454f9174f95c722b7812f9e6bc16152dfd40a9a4b8ac819d13f92fc6d2f8f`)
+  is retained through 2026-08-11.
+- Current work: record this delivery checkpoint and verify the resulting final
+  status-only commit.
 - Blockers/owner actions: none for design/delivery. Implementation requires
   Architecture acceptance plus the explicit decisions in the roadmap.
 - Changed files: `docs/orchestrator/**`, `.ai/DECISION_LOG.md`, and this file.
-- Exact next action: commit/push, open a Draft PR with
-  `manual-merge-required`, and verify exact-head CI/Preview without merging.
+- Exact next action: after final status-only exact-head checks pass, stop for
+  repository-owner Architecture review. Do not merge or start implementation.
 - Remaining risks: unapproved automation auth/budgets, N availability and
   backup, polling/webhook choice, Codex protocol version, shared status-file
   conflict with PR #40, and absent actual sales-learning data.
