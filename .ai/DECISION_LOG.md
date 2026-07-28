@@ -260,7 +260,8 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   non-authoritative micro-won/ppm and JSONB query projections, and
   transactional idempotent run finalization. Profitability calculation
   implementation is versioned independently from policy; retries create linked
-  runs; database time is returned only as post-commit persistence metadata.
+  runs but retry lineage is excluded from candidate decision identity and
+  hashes; database time is returned only as post-commit persistence metadata.
 - Consequences and risks: This is documentation only and authorizes no schema
   or Production action. Later migration/RLS/Production work is high-risk,
   manual, and depends on accepted Sprint B-0 and Admin Architecture.

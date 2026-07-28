@@ -26,9 +26,9 @@
   the evaluator/profitability engine has no approved operating persistence/API
   path; inspected the baseline gap, recovery plan, migrations, Supabase access,
   and existing numeric conventions; drafted the Database Architecture.
-- Current: remaining PR #38 storage contracts and local gates passed; commit,
-  push, and confirm new exact-head CI/Preview while retaining Draft/manual
-  state.
+- Current: Draft PR #38 remains under repository-owner Architecture review.
+  Retry lineage is separated from candidate decision identity; this follow-up
+  is being validated and delivered without changing Draft/manual state.
 - Blockers/owner actions: owner acceptance is required. Admin Identity /
   Authorization / RLS / CSRF Architecture and accepted Sprint B-0 remain
   prerequisites for Story 3.
@@ -45,9 +45,14 @@
   warnings), typecheck, and Production build also passed. The follow-up
   calculation-version, retry-link, and DB-authored persistence-time contracts
   passed the same document checks, 261/261 tests, lint, typecheck, and build.
-- Last commit: `7491b239f5935643778330a08ed4b070511c4c7a`.
-- Exact next action: validate documentation and submit a Draft PR; do not
-  approve, mark Ready, merge, or enable auto-merge.
+  Retry lineage separation from candidate decision identity passed document
+  consistency, `git diff --check`, 261/261 tests, lint (0 errors, 4 existing
+  warnings), typecheck, and Production build.
+- Last commit: current PR #38 branch `HEAD`; Git/GitHub is the authoritative
+  mutable SHA source and this status intentionally does not create a follow-up
+  commit merely to record its own SHA.
+- Exact next action: repository owner reviews Draft PR #38. Do not mark the
+  Architecture Accepted or Ready, enable auto-merge, or merge it.
 - Remaining risks: owner may revise numeric scale, retention, backup, principal,
   or migration sequencing; no Item Selection persistence can start before the
   required Architecture acceptances.

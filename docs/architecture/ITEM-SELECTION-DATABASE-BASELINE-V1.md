@@ -313,6 +313,12 @@ remain UTF-8 text.
 
 ## 8. Story 3 persistence aggregate DTO
 
+Run creation uses a separate `ItemSelectionRunWriteV1` DTO. Its run-level
+metadata includes provider, keyword, requested size, all version identifiers,
+idempotency key material, principal identity, and nullable `retryOfRunId`.
+The repository maps `retryOfRunId` only to
+`item_selection_runs.retry_of_run_id`.
+
 The repository persists one explicit, versioned write aggregate per evaluated
 candidate. Story 3 names the TypeScript write type
 `ItemSelectionPersistenceAggregateV1`; its minimum contract is:
@@ -335,7 +341,6 @@ hashes:
   evaluatorInput
   evaluatorOutput
   aggregate
-retryOfRunId
 originalPosition
 ```
 
@@ -352,10 +357,14 @@ originalPosition
   hash covers, in fixed order, the schema, ruleset, evaluator, profitability
   policy, and profitability calculation contract versions; provider,
   profitability input/result, and evaluator input/output stage hashes;
-  provider item identity; original position; and nullable `retryOfRunId`.
-- The write DTO uses camelCase `retryOfRunId`; the repository maps it exactly to
-  `item_selection_runs.retry_of_run_id`. Initial runs require `null`. A retry
-  requires the referenced terminal run ID and creates a new run.
+  provider item identity; and original position.
+- `retryOfRunId` is not a candidate evaluation field. It is excluded from
+  `ItemSelectionPersistenceAggregateV1`, verdict inputs, every stage hash, and
+  the candidate decision aggregate hash.
+- `ItemSelectionRunWriteV1` uses camelCase `retryOfRunId`; the repository maps
+  it exactly to `item_selection_runs.retry_of_run_id`. Initial runs require
+  `null`. A retry requires the referenced terminal run ID and creates a new
+  run.
 - Persistence metadata is storage provenance and is not injected into domain
   inputs or stage hashes, except the aggregate envelope declares its metadata
   schema separately.
@@ -367,10 +376,17 @@ originalPosition
 - After commit, the repository reads `created_at` and returns it as
   `persistedAt` only in `ItemSelectionPersistenceResultV1`.
 - `persistedAt` is excluded from verdict inputs, every stage hash, and the
-  decision aggregate hash. If an API later needs a tamper-evident persistence
-  envelope, it uses a separately named `persistenceEnvelopeHash` covering the
-  decision aggregate hash, database IDs, and `persistedAt`; it never changes or
-  replaces the decision aggregate hash.
+  decision aggregate hash.
+- A tamper-evident run/persistence envelope, when implemented, uses a separately
+  named `runEnvelopeHash` or `persistenceEnvelopeHash`. It covers the run ID,
+  nullable `retryOfRunId`, the ordered set of candidate decision aggregate
+  hashes, and authoritative database timestamps. It never changes, nests into,
+  or replaces a candidate decision aggregate hash.
+- Therefore an initial run and its retry can produce identical candidate
+  decision aggregate hashes when evaluation inputs, policy, calculation
+  implementation, evaluator implementation, and outputs are identical. Their
+  distinct run IDs and the retry run's `retryOfRunId` distinguish execution
+  lineage only.
 - `persistedAt`, database `created_at`, run start/completion times, and
   reconciliation times are persistence metadata. They are never treated as
   provider observation time, policy effective time, or score freshness.
@@ -468,8 +484,8 @@ Finalization state contract:
   candidates are observed or the case where every observed candidate failed or
   was skipped.
 - `FAILED` and `PARTIAL` are terminal and immutable in v1. Reprocessing creates
-  a new run with a new idempotency key and write-DTO `retryOfRunId`, mapped to
-  database `retry_of_run_id`; it never appends to or upgrades the old run.
+  a new run with a new idempotency key and run-write DTO `retryOfRunId`, mapped
+  to database `retry_of_run_id`; it never appends to or upgrades the old run.
 - A stale `RUNNING` run may be terminalized as `FAILED` only by the separately
   authorized reconciliation function after proving no finalization committed.
   It stores the allowlisted stale-run code and zero persisted evaluations.
@@ -667,6 +683,13 @@ Required acceptance evidence:
   count invariant, and new-run retry tests;
 - `retry_of_run_id` FK/restrict/self-reference/terminal-target tests and
   `retryOfRunId` repository mapping tests;
+- initial run and identical-result retry produce identical candidate decision
+  aggregate hashes;
+- retry lineage is persisted on the new run and leaves the referenced terminal
+  run unchanged;
+- run/persistence envelope hashing is separate from candidate decision hashing;
+- changing only `retryOfRunId` cannot affect verdict input, any stage hash, or
+  candidate decision aggregate hash;
 - database-generated `created_at` and post-commit `persistedAt` result tests
   proving write DTO and decision hashes exclude persistence time;
 - immutable-row and delete-restriction tests;
