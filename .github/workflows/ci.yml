@@ -42,6 +42,22 @@ jobs:
       - run: npm ci
       - run: npm test --if-present
 
+  ci-db-baseline-replay:
+    name: ci-db-baseline-replay
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.110.0
+      - name: Start disposable Supabase stack
+        run: supabase start
+      - name: Replay the complete migration chain
+        run: supabase db reset --local
+      - name: Stop and discard disposable stack
+        if: always()
+        run: supabase stop --no-backup
+
   ci-build:
     name: ci-build
     runs-on: ubuntu-latest

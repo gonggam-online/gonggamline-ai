@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "gonggamline-sprint-b0-baseline-manifest-v1",
+  "supabaseCliVersion": "2.110.0",
+  "migrations": [
+    {
+      "order": 0,
+      "file": "000_products_baseline.sql",
+      "sha256": "519660cc7e3a00f08f734382626deb8c0647809736e47a376db05578d313bfcb"
+    },
+    {
+      "order": 1,
+      "file": "001_product_workflow_extension.sql",
+      "sha256": "457d4caf17aa8bff200a092a8aaa1353d3f0a44bd966d66f39b9a2f272c7bfe8"
+    },
+    {
+      "order": 2,
+      "file": "002_commerce_os_core_schema.sql",
+      "sha256": "b9797b085bdcef52c7209bcfdaf53ffddc47fa0d10a4e57d3a5daa7993850350"
+    },
+    {
+      "order": 3,
+      "file": "003_coupang_competition_analysis.sql",
+      "sha256": "69b998e833c1a8a474f724672e34a95b342d8bdb1928f663345b2f48bf5899e1"
+    },
+    {
+      "order": 4,
+      "file": "004_automatic_competition_pipeline.sql",
+      "sha256": "a97bf7dc6537954d2c6c16ddaa10efb74d0edbbb45d3dd4d608f491a063a2baa"
+    },
+    {
+      "order": 5,
+      "file": "005_market_intelligence_engine.sql",
+      "sha256": "685ecb365552d6c1b5815f7f5fb24e04e7cadd5e99b02a9add187ce5468af175"
+    },
+    {
+      "order": 6,
+      "file": "006_market_intelligence_analytics.sql",
+      "sha256": "c77dff6ecee311219d486c879118146e64ed43778acee622293b50ae56fe30fb"
+    },
+    {
+      "order": 7,
+      "file": "007_market_intelligence_orchestration.sql",
+      "sha256": "704a0d6010e4e743a7fdad1faee999a259ba590d824139fb5fac6a496b50f34c"
+    },
+    {
+      "order": 8,
+      "file": "008_market_data_warehouse.sql",
+      "sha256": "f29b5e6196fb821b93fcdf7f0b733c7c590e5e3fb81f3286e976ff8ea213fea6"
+    },
+    {
+      "order": 9,
+      "file": "009_ai_product_bundle_discovery.sql",
+      "sha256": "9f609e6ea70567d0283dd4de7609a65388cc1dcc270d7b590f70279f4358e806"
+    },
+    {
+      "order": 10,
+      "file": "010_supplier_intelligence_engine.sql",
+      "sha256": "cf594c56ea1ac6705e31964f61a72dd0152681ca2879ccf4964e7d271d171b65"
+    },
+    {
+      "order": 11,
+      "file": "011_procurement_workflow_engine.sql",
+      "sha256": "7d58fe06572ce6be48979793b4955b684084494c4979e87432f10680f1adc077"
+    },
+    {
+      "order": 12,
+      "file": "012_product_workspace_listing_ai.sql",
+      "sha256": "0cad3065528b66a6b78bddd6d024c93679153a2980bc3817ac0dca3141e36fb6"
+    },
+    {
+      "order": 13,
+      "file": "013_commerce_workflow_integration.sql",
+      "sha256": "0f5a6e2b203623461cc8f78473b1ea52e98da223b83542bb84f833074eaa35d6"
+    },
+    {
+      "order": 14,
+      "file": "014_coupang_seller_engine.sql",
+      "sha256": "476685cb3ccb78b575558ab021cd1cf7c6a5228c3a429aadfc426ad5208db736"
+    },
+    {
+      "order": 15,
+      "file": "015_ai_decision_engine.sql",
+      "sha256": "246c3aa049b6345e833a5fa124e04b35299b6124f15f7aa70b49e9d5cd7321e8"
+    },
+    {
+      "order": 16,
+      "file": "016_ai_company_os_foundation.sql",
+      "sha256": "51a80edf4315a58e2aa62cec5d69b233ab71cae8d50f497ab878d79107365195"
+    },
+    {
+      "order": 17,
+      "file": "017_command_center_workflow_automation.sql",
+      "sha256": "e788d195840f946420b707e6164e761c8acfaafcd3a1b875174d0078726c5e06"
+    },
+    {
+      "order": 18,
+      "file": "018_autonomous_company_enterprise.sql",
+      "sha256": "f4beea5b20b308506ef911c8e1c6c43fc43c9f5b900b1eee0b15d55f731dd384"
+    },
+    {
+      "order": 19,
+      "file": "019_sprint1_revenue_core_foundation.sql",
+      "sha256": "21e40834b3c6112746bc3a52b618e9a5b13e9280820873043bce0a7fa5524dbb"
+    },
+    {
+      "order": 20,
+      "file": "020_sprint2_runtime_execution.sql",
+      "sha256": "7d3bf926d86ab92aea298d0a018f19a8705a946e95a28c8d43b37ff0468a5bcb"
+    }
+  ],
+  "promotedSources": {
+    "000_products_baseline.sql": {
+      "source": "supabase/recovery-sources/products-baseline.sql",
+      "sha256": "e28cb65cb5078bec2977edf76da2ae281f80f06f2afa175d5635b79cc4069e30",
+      "transformation": "omit-source-rls-and-anon-policies"
+    },
+    "001_product_workflow_extension.sql": {
+      "source": "supabase/recovery-sources/product-workflow-extension.sql",
+      "sha256": "1cd7dde0368678db4ba3da998822e4e03cbaf0e663adb606403153e2a02f6c4e",
+      "transformation": "provenance-header-only"
+    },
+    "002_commerce_os_core_schema.sql": {
+      "source": "supabase/recovery-sources/commerce-os-core-schema.sql",
+      "sha256": "2c67803769d61925fdec1e4955994d803e65e0a99ed5888d015cd51b66aec1f8",
+      "transformation": "provenance-header-only"
+    }
+  }
+}
