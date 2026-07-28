@@ -34,7 +34,7 @@ V1 includes:
 
 - one-company administrator sign-in;
 - manual administrator provisioning and disablement;
-- active-session verification for protected server routes;
+- Auth-server validation of the access JWT and user for protected server routes;
 - server-only administrator allowlisting;
 - AAL1 protected reads and AAL2 protected mutations/sensitive reads;
 - default-deny protected data access;
@@ -94,14 +94,16 @@ The CSRF token format is `v1.<expiry>.<nonce>.<mac>`. The MAC binds purpose, adm
 
 ## 5. Session and logout semantics
 
-Supabase access tokens remain valid until their encoded expiry even after sign-out. V1 does not claim instant JWT revocation.
+Supabase access tokens remain valid until their encoded expiry even after sign-out. V1 does not claim instant JWT or session revocation.
 
-- Server routes call `getUser()` on every protected request, so a revoked Auth session is denied there.
+- Server routes call `getUser()` on every protected request to validate the access JWT and user against the Auth server. This does not prove that the corresponding refresh session still exists or make a logged-out access JWT immediately invalid.
+- Sign-out destroys the affected refresh session, so it cannot issue another access token, but an already issued access JWT can remain valid until its encoded expiry.
+- The maximum residual exposure for a protected read is the configured 15-minute access-token lifetime. A protected mutation has the additional AAL2 freshness boundary of 60 seconds.
 - Direct Data API access to protected objects is denied regardless of access-token freshness because `anon` and `authenticated` have no protected privileges.
 - Access-token lifetime must be configured to 15 minutes before Production enablement.
 - Cookie deletion is local cleanup and is not treated as proof of server revocation.
 
-No application function reads or locks `auth.sessions`.
+V1 does not read or lock `auth.sessions` and does not maintain a separate session-revocation ledger. Immediate logout revocation, a shorter access-token lifetime, or another immediate-revocation mechanism may be considered in a follow-up Security Story if the operating need justifies it.
 
 ## 6. Administrator lifecycle
 
@@ -151,11 +153,11 @@ A protected business mutation and its required audit insert commit in one transa
 |---|---|---|
 | A01 | unauthenticated protected route | 401; no data-module call |
 | A02 | valid Auth user not in allowlist | 403; no data-module call |
-| A03 | allowlisted live AAL1 administrator | ordinary protected read succeeds; mutation denied |
-| A04 | allowlisted live AAL2 administrator | declared mutation succeeds within rate and CSRF rules |
+| A03 | allowlisted administrator with a valid AAL1 access JWT | ordinary protected read succeeds; mutation denied |
+| A04 | allowlisted administrator with a valid, sufficiently fresh AAL2 access JWT | declared mutation succeeds within rate and CSRF rules |
 | A05 | wrong/missing Origin, JSON type, CSRF purpose, subject, session, MAC, or expiry | 403 and no mutation |
 | A06 | direct Data API request with `anon`, valid administrator JWT, logged-out unexpired JWT, and non-admin JWT | every protected table/function request denied |
-| A07 | revoked session presented to Route Handler | `getUser()` denial; no protected work starts |
+| A07 | sign in and retain the access and refresh tokens; sign out; attempt refresh; present the retained access JWT before and after its configured lifetime; present it to a mutation after the 60-second AAL2 freshness boundary | refresh fails after sign-out; immediate rejection of the retained unexpired access JWT is not a v1 guarantee; the expired JWT is rejected by the protected Route Handler; the mutation is rejected after the AAL2 freshness boundary |
 | A08 | service-role dependency scan and client bundle scan | only the server allowlist imports it; browser bundle contains none |
 | A09 | forced audit insert failure | business mutation rolls back |
 | A10 | manual provisioning/disablement in disposable environment | exact UUID gains/loses access only after allowlist deployment |
@@ -198,7 +200,7 @@ The repository owner must approve:
 - manual Dashboard provisioning and disablement for v1;
 - the server-only UUID allowlist;
 - the service-role operational-containment model and its residual full-access risk;
-- 15-minute access tokens and non-instant JWT revocation;
+- refresh-session termination without immediate access-JWT revocation, including the accepted maximum 15-minute read exposure and maximum 60-second AAL2 mutation-freshness boundary;
 - AAL2 for protected mutations;
 - default-deny direct Data API access;
 - implementation-first proof for exact SQL/SDK details;
