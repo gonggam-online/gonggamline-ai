@@ -113,7 +113,13 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
   administrator surface.
 - Principal proposal: verified Supabase Auth `sub` UUID with
   `user_role=admin`, versioned authorization, active-registry cross-check,
-  mandatory AAL2 for mutations, user-JWT RLS, and signed same-origin CSRF.
+  direct protected-table DML revoked, mandatory AAL2 mutation RPCs, user-JWT
+  RLS, and session-bound signed same-origin CSRF.
+- Review follow-up: independent blockers were addressed with an administrator /
+  TOTP state machine, exact JWT refresh/revocation, protected-object matrix,
+  dedicated function ownership, supported `@supabase/ssr@0.12.3` browser/server
+  cookie contract, maintenance-window cutover, and audit retention/failure
+  semantics. The revised exact head still requires independent review.
 - Current-state finding: application routes have no accepted administrator
   session or CSRF boundary and rely on anonymous Supabase access with broad
   development policies.

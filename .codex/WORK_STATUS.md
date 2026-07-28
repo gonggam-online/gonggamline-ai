@@ -29,9 +29,12 @@
   and dependencies; compared current official Supabase, Next.js, and OWASP
   guidance; drafted and indexed the proposed Architecture; recorded the
   proposed decision; opened Draft PR #39 and applied
-  `manual-merge-required`.
-- Current work: documentation delivery is complete for repository-owner
-  Architecture review. Keep PR #39 Draft and Proposed; do not mark Accepted,
+  `manual-merge-required`; independently reviewed the first Draft and addressed
+  its AAL2/Data API, CSRF binding, admin/MFA lifecycle, JWT refresh/revocation,
+  RLS matrix, function owner, SSR cookie, cutover, audit, route/content, XSS,
+  rate-limit, and acceptance-test blockers.
+- Current work: validate and deliver the blocker-remediated documentation on
+  the same Draft PR #39. Keep Architecture Proposed; do not mark Accepted or
   Ready, enable auto-merge, or merge.
 - Blockers/owner actions: repository-owner Architecture review and explicit
   acceptance at an exact head SHA are required. Sprint B-0, Auth Foundation,
@@ -46,16 +49,15 @@
   Architecture content before this status-only checkpoint; the final exact-head
   GitHub runs are the authoritative delivery gate and are reported outside this
   file to avoid a self-referential status-commit cycle.
-- Last commit: this status-only checkpoint on PR #39; GitHub is the
-  authoritative SHA source.
-- Exact next action: repository-owner Architecture review. If changes are
-  requested, amend the same Draft PR. If accepted, record the approval date,
-  approver, and reviewed head SHA, rerun exact-head gates, then Ready the manual
-  PR without merging automatically.
-- Remaining risks: pinned Supabase SSR HttpOnly cookie behavior must be proven
-  during implementation; the Production administrator UUID and secrets remain
-  unknown by design; existing broad policies remain unchanged until separately
-  approved high-risk implementation.
+- Last commit: blocker-remediation commit on the current PR #39 branch `HEAD`;
+  Git/GitHub remains the authoritative mutable SHA source.
+- Exact next action: submit the new exact head for independent Architecture
+  re-review. Do not record acceptance or start Sprint B-0/Auth/RLS/Story 3
+  implementation.
+- Remaining risks: the Production administrator UUID, secrets, exact project
+  settings, and cutover approval remain unknown by design; all runtime/schema
+  work stays blocked until Architecture acceptance and separate high-risk
+  Stories.
 
 ## 2026-07-28 — Item Selection Database Baseline Architecture v1
 

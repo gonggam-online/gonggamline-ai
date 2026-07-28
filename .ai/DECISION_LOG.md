@@ -288,16 +288,18 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   Git migrations contain broad development policies.
 - Decision or issue: Propose invitation-only Supabase Auth with verified
   `sub` UUID, `user_role=admin`, versioned active-admin registry,
-  AAL1 reads, TOTP/AAL2 mutations, user-JWT default-deny RLS, no normal
-  service-role path, signed same-origin CSRF, bounded mutation rates, and
-  append-only sanitized security audit events.
+  AAL1 reads, direct protected-table DML revoked, TOTP/AAL2 mutation RPCs,
+  user-JWT default-deny RLS, no normal service-role path, session/version-bound
+  same-origin CSRF, bounded mutation rates, and append-only sanitized security
+  audit events.
 - Consequences and risks: This documentation is high-risk/manual because it
   defines future auth, authorization, RLS, secrets, and Production access.
   It authorizes no implementation, configuration, user enrollment, migration,
   secret, Preview, or Production change. Broad anonymous policies must not
   coexist with claims of protected Production writes.
-- Follow-up / due condition: owner Architecture review and acceptance at an
-  exact head SHA, then separate manual Sprint B-0, Auth Foundation,
+- Follow-up / due condition: independent review of the blocker-remediated exact
+  head, followed by owner Architecture review and acceptance at that SHA, then
+  separate manual Sprint B-0, Auth Foundation,
   Authorization Foundation, Route Security Migration, and Item Selection Story
   3 PRs in the approved order.
 - Rollback or supersession: revert the documentation PR or supersede with an
