@@ -27,9 +27,10 @@
   compliance gates; created the dedicated branch; implemented Phase 1
   primitives and focused restart/D/N/duplicate/lease/audit/budget/contract/
   routing/recovery tests.
-- Current work: full repository validation, diff review, and dedicated Draft
-  PR delivery.
-- Blockers/owner actions: none before delivery. Final PR merge remains manual.
+- Current work: exact-head CI/Preview verification, followed by
+  repository-owner review of Draft PR #43.
+- Blockers/owner actions: repository owner must manually review and merge PR
+  #43 only if its evidence and remaining risks are acceptable.
 - Changed files: `tools/orchestrator/**`, focused tests, package metadata,
   `docs/orchestrator/**`, Decision Log, and this status file.
 - Validation: focused Phase 1 tests 14/14 pass; full lint passes with zero
@@ -38,9 +39,12 @@
   282/282; Production build passes with 69 routes. Local Playwright reached all
   39 tests: 32 passed and the same seven Supabase-dependent pages failed with
   external `missing_url` configuration before the outer timeout.
-- Delivery: pending.
-- Exact next action: run full lint/tests/build/browser gates, review the entire
-  diff, commit/push, and open a separate high-risk Draft PR.
+- Delivery: dedicated branch pushed; Draft PR #43 is open with
+  `manual-merge-required` and auto-merge disabled. Exact-head CI, Preview
+  browser, Vercel readiness, mergeability, review threads, and local/remote
+  equality are verified at terminal handoff.
+- Exact next action: repository-owner review after exact-head gates; do not
+  merge or start Phase 2 without a separate decision.
 - Remaining risks: `node:sqlite` requires supported Node 24 runtime; future
   streamed usage integration and actual process stop remain Phase 2; ledger
   backup/retention and numeric daily caps still require owner decisions.
