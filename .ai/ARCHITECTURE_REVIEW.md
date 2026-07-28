@@ -109,30 +109,14 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 ### 2026-07-28 — Admin Identity, Authorization, RLS, and CSRF Architecture v1
 
 - Status: proposed; repository-owner manual approval required.
-- Boundary: Application Security / Database Security for the single-company
-  administrator surface.
-- Final normalization: the Architecture document's Ledgers R–T are the sole
-  normative source for principals, functions, actor classes, states, locks,
-  durations, browser security, provider operations, events, and acceptance
-  tests. Explanatory prose cites ledger rows and does not duplicate contracts.
-- Provisioning remains repository-owner-only and manual for initial and
-  additional administrators. Software never reissues an ambiguous provider
-  call. Invitation acceptance/retirement serialize on the exact
-  registry row; Auth soft-delete is a separate tombstone-first manual retry.
-- Mutation authority is partitioned into USER_JWT, SELF_BOOTSTRAP,
-  OWNER_RUNBOOK, and INFRASTRUCTURE. Telemetry writer/recovery grants and all
-  lock modes are defined once in the canonical ledgers. Protected mutations
-  require telemetry readiness; protected reads remain available under current
-  identity/session/assurance checks.
-- Remaining owner decisions are the residual boundaries referenced by Ledger
-  D and the separate telemetry-provider/runbook prerequisite.
-- Current-state finding: application routes have no accepted administrator
-  session or CSRF boundary and rely on anonymous Supabase access with broad
-  development policies.
-- Risk: high-risk/manual because the decisions govern auth, authorization, RLS,
-  secrets, and Production access.
-- Implementation authorization: none until repository-owner acceptance.
-- Story:
-  [Admin Identity, Authorization, RLS, and CSRF Architecture v1](../docs/architecture/ADMIN-IDENTITY-AUTHORIZATION-RLS-CSRF-V1.md).
-- Decision record:
-  [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-28--admin-identity-authorization-rls-and-csrf-architecture-v1).
+- Boundary: smallest single-company administrator server boundary.
+- Root-cause finding: the prior Draft specified an unimplemented enterprise identity control plane with 31 principals, 25 functions, 17 states, Auth Hook, direct Auth-schema locking, invitation lifecycle, and telemetry recovery. Repeated ledger normalization created new unverifiable contracts and caused the correction/re-review loop.
+- Superseding proposal: manual Supabase Dashboard provisioning, server-only UUID allowlist, per-request Auth-server `getUser()` verification, AAL2 mutations, exact-origin JSON CSRF, default-deny protected Data API access, and one isolated service-role module.
+- Removed from v1: custom Auth Hook, software invitation/retirement/soft-delete, `auth.sessions` access, per-function owner roles, break-glass/MFA administration, and telemetry lease/freeze/recovery state machines.
+- Platform reality: service-role has full data access and bypasses RLS; revoked access JWTs remain valid until expiry. The design acknowledges both and uses operational containment plus direct protected Data API denial.
+- Validation authority: exact SQL/SDK/lock behavior must be proven in a disposable implementation. Existing application tests do not prove unimplemented security contracts.
+- Review closure: only an official-platform conflict, security-invariant violation, or non-executable acceptance test may block v1; enhancements become follow-up work.
+- Current-state finding: application routes still have no accepted administrator/session/CSRF boundary and broad development policies remain.
+- Risk: high-risk/manual. This Draft authorizes no implementation, configuration, user, secret, Preview/Production, or commerce write.
+- Implementation authorization: none until exact-head repository-owner acceptance.
+- PR: #39.
