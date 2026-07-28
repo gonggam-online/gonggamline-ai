@@ -1,5 +1,64 @@
 # Work status
 
+## 2026-07-28 — Item Selection Database Baseline Architecture v1
+
+- Objective: define the database contract required to persist and reproduce
+  Item Selection engine decisions so only engine-selected products can advance
+  toward a first sale.
+- Branch: `codex/docs/item-selection-database-architecture-v1`, based on merged
+  Story 2 squash `7491b239f5935643778330a08ed4b070511c4c7a`.
+- Risk: normal-risk documentation PR; every later migration, RLS, or Production
+  execution remains high-risk/manual.
+- Revenue impact: P1. This is the shortest approved prerequisite to turn the
+  merged evaluator into an auditable operator workflow.
+- Scope: DB/runtime selection, migration baseline, immutable canonical text
+  snapshots, provider evidence, authoritative round-trip decision values,
+  derived money/rate projections, reproducibility, transaction/idempotency,
+  environment separation, retention/recovery, migration verification, and
+  Story 3 handoff.
+- Non-goals: migration, schema execution, persistence code, API, UI, auth/RLS,
+  CSRF, Production access, Product creation, listing, price, purchasing, order,
+  inventory, fulfillment, or any marketplace write.
+- Root-cause class: database/Architecture prerequisite. Direct operational
+  integration is stopped by the approved Story 3–5 ordering.
+- Completed: verified Story 2 merge and Production smoke; synchronized clean
+  `main`; reread governance and approved Item Selection Architecture; confirmed
+  the evaluator/profitability engine has no approved operating persistence/API
+  path; inspected the baseline gap, recovery plan, migrations, Supabase access,
+  and existing numeric conventions; drafted the Database Architecture.
+- Current: repository owner accepted the PR #38 Database Baseline Architecture
+  on 2026-07-28 for head
+  `8b1e6ab589491e77dfa7ac5d71c99b40db03030a`. The acceptance record is being
+  delivered on the same manual PR without changing application/runtime code.
+- Blockers/owner actions: Database Baseline Architecture approval is complete.
+  Accepted Admin Identity / Authorization / RLS / CSRF Architecture and
+  accepted Sprint B-0 remain prerequisites for Story 3.
+- Changed files: Database Architecture document, Architecture Review index,
+  Decision Log acceptance record, and this status.
+- Commands/results: initial branch was clean and exactly based on
+  `7491b239f5935643778330a08ed4b070511c4c7a`; no runtime or migration file is
+  changed. `git diff --check`, lint (0 errors, 4 pre-existing test warnings),
+  typecheck, 261/261 unit/integration tests, and Production build passed. The
+  recurring Windows `uv_os_get_passwd ENOMEM` affected the first test launch;
+  ignored `tsx` dependency files were temporarily adjusted, tests passed, and
+  those files were restored without staging. Review follow-up document
+  consistency, `git diff --check`, 261/261 tests, lint (0 errors, the same 4
+  warnings), typecheck, and Production build also passed. The follow-up
+  calculation-version, retry-link, and DB-authored persistence-time contracts
+  passed the same document checks, 261/261 tests, lint, typecheck, and build.
+  Retry lineage separation from candidate decision identity passed document
+  consistency, `git diff --check`, 261/261 tests, lint (0 errors, 4 existing
+  warnings), typecheck, and Production build. The owner acceptance record passed
+  the same document consistency, diff, test, lint, typecheck, and build gates.
+- Last commit: approval-record commit on the current PR #38 branch `HEAD`;
+  Git/GitHub remains the authoritative mutable SHA source.
+- Exact next action: after PR #38 is manually squash-merged, draft the separate
+  Admin Identity / Authorization / RLS / CSRF Architecture PR. Do not begin
+  migration, persistence, API, UI, auth, RLS, CSRF runtime, or Story 3 work.
+- Remaining risks: principal, authorization, RLS, CSRF, and Sprint B-0 execution
+  contracts remain unaccepted; no Item Selection persistence can start before
+  those required Architecture acceptances.
+
 ## 2026-07-28 — Item Selection profitability policy v1
 
 - Objective: implement owner-approved profitability policy

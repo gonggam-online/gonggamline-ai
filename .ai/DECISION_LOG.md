@@ -243,3 +243,32 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Rollback or supersession: revert the Story 2 commit. A future policy must use
   a new version; historical v1 inputs/results must remain reproducible once
   persistence is approved.
+
+
+## 2026-07-28 — Item Selection Database Baseline Architecture v1
+
+- Category: architecture decision
+- Story / PR: Item Selection Database Baseline Architecture v1 / PR #38
+- Status: Accepted
+- Owner / approver: Database / Security; repository owner
+- Approval date: 2026-07-28
+- Approved head SHA: `8b1e6ab589491e77dfa7ac5d71c99b40db03030a`
+- Context and evidence: Item Selection Stories 1–2 are merged, but durable
+  evaluation history is blocked by the pre-003 database baseline gap and the
+  absence of accepted admin identity/RLS contracts.
+- Decision or issue: Accept Supabase Postgres as the existing Vercel-compatible
+  database, with append-only canonical UTF-8 evaluation/evidence text,
+  database-generated SHA-256 hashes, round-trip decimal decision values,
+  non-authoritative micro-won/ppm and JSONB query projections, and
+  transactional idempotent run finalization. Profitability calculation
+  implementation is versioned independently from policy; retries create linked
+  runs but retry lineage is excluded from candidate decision identity and
+  hashes; database time is returned only as post-commit persistence metadata.
+- Consequences and risks: This is documentation only and authorizes no schema
+  or Production action. Later migration/RLS/Production work is high-risk,
+  manual, and depends on accepted Sprint B-0 and Admin Architecture.
+- Follow-up / due condition: Draft and accept the separate Admin Identity /
+  Authorization / RLS / CSRF Architecture, then separately approve Sprint B-0.
+  Do not begin Story 3 until both prerequisites are accepted.
+- Rollback or supersession: Revert the documentation PR or replace it with an
+  explicitly accepted version. No runtime or data rollback is required.
