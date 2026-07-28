@@ -152,6 +152,14 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
   recovery; and Auth cookies follow Supabase's long-lived storage guidance
   without claiming cookie loss revokes an unidentified server session. The new
   exact head remains Proposed and requires independent review.
+- Seventh review follow-up: marker and Auth-result-record capabilities are now
+  purpose-separated; exact server-only writers and grants cover deterministic,
+  ambiguous, reconciled, and retry states without reverting a started call to
+  PREPARED; and bounce/expiry uses a narrowly guarded unconfirmed-invitation
+  tombstone transition serialized against acceptance. The owner checklist now
+  calls out the direct LOGIN identities, capability lifecycle, and
+  JavaScript-readable cookie/session residual explicitly. The new exact head
+  remains Proposed and requires independent review.
 - Current-state finding: application routes have no accepted administrator
   session or CSRF boundary and rely on anonymous Supabase access with broad
   development policies.

@@ -219,6 +219,7 @@ Administrator lifecycle is fixed as follows:
 | `pending_mfa` -> `active` | same subject | freshly verified AAL2 | TOTP factor enrolled and challenged successfully | `active` | rotate/refresh the session and CSRF token | increment | `ADMIN_ACTIVATED`; missing AAL2 is 403 `MFA_REQUIRED` |
 | `active` -> `suspended` | another active AAL2 admin, or repository-owner break-glass runbook | AAL2 or owner out-of-band | target is not the last active admin | `suspended` | immediately deny old JWT through registry/version, invalidate application CSRF, apply Auth ban; no unsupported sub-only session-delete claim | increment | `ADMIN_SUSPENDED`; last-admin attempt is 409 |
 | `suspended` -> `invited` | active AAL2 admin or repository owner | AAL2 or owner out-of-band | recovery/re-invitation approved | `invited` | delete exact factors through supported Admin MFA API, verify session termination, then unban/re-invite by runbook | increment | `ADMIN_REINVITED`; invalid state is 409 |
+| unconfirmed `invited` -> `tombstoned` | another active AAL2 admin or repository owner | AAL2 or owner out-of-band | exact invitation expired/bounced; invitation never accepted; target remains `invited`; no verified factor or live Auth session; replacement generation approved | `tombstoned` | registry denial commits first, then exact Auth user soft-delete; partial Auth failure stays tombstoned and retries | increment | `ADMIN_INVITATION_RETIRED`; concurrent acceptance/state change is 409 |
 | non-tombstoned -> `tombstoned` | another active AAL2 admin or repository owner | AAL2 or owner out-of-band | target suspended; not last active admin; retention check passed | `tombstoned` | delete exact factors then soft-delete Auth user; old access JWT remains application-denied | increment | `ADMIN_TOMBSTONED`; invalid state is 409 |
 
 An administrator cannot activate, suspend, tombstone, or reset the factor of
@@ -228,6 +229,16 @@ administrators before commit. Self-suspension is allowed only when another
 active administrator remains. Self-tombstoning and self-factor-reset are
 forbidden. Email changes do not change the principal because `sub` is the only
 identity key.
+
+The direct unconfirmed-invitation retirement row is the sole exception to the
+general suspended-before-tombstoned precondition. Its dedicated transaction
+locks the invitation intent and registry row in the same fixed order as
+invitation acceptance, rechecks state/generation/version and absence of
+acceptance/session/factor evidence, increments `authz_version`, tombstones the
+registry subject, and writes audit before any Auth soft-delete. Therefore
+acceptance and retirement cannot both commit. It grants no path for
+`pending_mfa`, `active`, or `suspended` subjects and cannot be reused as a
+general tombstone operation.
 
 The `pending_mfa` activation bootstrap is one of exactly two self-only
 lifecycle exceptions to the normal active-administrator function precondition;
@@ -838,6 +849,15 @@ private.mark_admin_invitation_auth_call_started_v1(
 private.record_admin_invitation_auth_created_v1(
   uuid, uuid, text, bigint, bigint, text
 )
+private.record_admin_invitation_auth_failure_v1(
+  uuid, text, bigint, bigint, text, text
+)
+private.record_admin_invitation_auth_outcome_unknown_v1(
+  uuid, text, bigint, bigint, text
+)
+private.retry_admin_invitation_auth_call_v1(
+  uuid, text, bigint, bigint
+)
 private.reissue_admin_invitation_completion_capability_v1(
   uuid, uuid, text, bigint
 )
@@ -846,29 +866,38 @@ private.complete_admin_invitation_v1(
 )
 ```
 
-They bind, in order, the intent, returned/stored sub where applicable,
-environment, intent generation, capability version where applicable, and
-capability plaintext. The reissue function has no old-capability argument
+They bind, in order, the intent, returned/stored sub or allowlisted
+failure/ambiguity code where applicable, environment, intent generation,
+attempt/capability version where applicable, and capability plaintext. The
+reissue function has no old-capability argument
 because it requires the already stored `AUTH_CREATED` sub and rotates only
 under the trusted completion identity.
 
-Prepare generates a random 256-bit Auth-response capability, stores only its
-SHA-256 digest with intent generation, capability version, and a
-database-issued five-minute expiry, and returns the plaintext once to the
-server-only Route Handler context. It never reaches the browser, logs, audit,
-or telemetry. After `inviteUserByEmail` returns an exact sub, the completion
-identity calls `private.record_admin_invitation_auth_created_v1(...)`. That
-transaction locks the intent, verifies and consumes the Auth-response
-capability, stores the exact sub, and transitions only `AUTH_CALL_STARTED` or
-`AUTH_OUTCOME_UNKNOWN` to durable `AUTH_CREATED`. This function, or the
-owner-approved reconciler invoking it after exact Auth-user proof, is the sole
-writer of `AUTH_CREATED`.
+Prepare generates a random 256-bit call-marker capability and a separate
+random 256-bit Auth-result-record capability.
+It stores only separately purpose-tagged SHA-256 digests, versions, consumption
+timestamps, and database-issued five-minute expiries, and returns both
+plaintext values once to the server-only Route Handler context. Neither reaches
+the browser, logs, audit, or telemetry. A capability is valid only for its
+exact purpose, intent, environment, intent generation, capability version, and
+unexpired/unconsumed digest; marker and record digests can never be
+interchanged.
+
+After `inviteUserByEmail` returns an exact sub, the completion identity calls
+`private.record_admin_invitation_auth_created_v1(...)` with the still-unconsumed
+Auth-result-record capability. That transaction locks the intent, verifies and
+consumes only the record capability, stores the exact sub, and transitions only
+`AUTH_CALL_STARTED` or `AUTH_OUTCOME_UNKNOWN` to durable `AUTH_CREATED`. This
+function, or the owner-approved reconciler invoking it after exact Auth-user
+proof, is the sole writer of `AUTH_CREATED`.
 
 Immediately before the external Auth call, the completion identity invokes
 `private.mark_admin_invitation_auth_call_started_v1(...)`. It consumes the
-current `PREPARED` capability, increments the attempt count, records
+current marker capability only, increments the attempt count, records
 `auth_call_started_at`, and transitions to `AUTH_CALL_STARTED`. Only after that
-commit may the module call Auth. Consequently `PREPARED` with no
+commit may the module call Auth. An exact retry after marker commit/response
+loss returns the stored `AUTH_CALL_STARTED` marker result without consuming or
+revealing the record capability. Consequently `PREPARED` with no
 `auth_call_started_at` proves that Auth was never called; every crash or timeout
 after the marker is ambiguous and must reconcile rather than re-invite.
 
@@ -898,39 +927,72 @@ identity, or other control-plane role can execute these functions.
 
 Invitation ordering is normative:
 
-1. server-only prepare commits `PREPARED` and an Auth-response capability; no
-   registry row exists;
+1. server-only prepare commits `PREPARED` with separate marker and
+   Auth-result-record capabilities; no registry row exists;
 2. atomically commit `AUTH_CALL_STARTED`, then decrypt only in the secret
    module and call
    `auth.admin.inviteUserByEmail(email, { redirectTo })`;
 3. on success, validate returned `user.id` UUID/project and record exact
    intent/sub/environment/generation/capability version with the Auth-response
-   capability, durably transitioning to `AUTH_CREATED`;
+   record capability, durably transitioning to `AUTH_CREATED`;
 4. use the returned completion capability to create exactly one registry
    `invited` row at version 1 and commit `REGISTRY_COMMITTED`;
 5. every later operation uses only that registry `sub`.
 
 Failure and retry rules:
 
-- deterministic Auth rejection leaves `AUTH_FAILED_RETRYABLE` or
-  `AUTH_FAILED_TERMINAL` with an allowlisted code and no registry row;
-- timeout/network ambiguity becomes `AUTH_OUTCOME_UNKNOWN`; it is never blindly
-  re-invited. The owner-approved reconciler decrypts in memory and uses pinned
+- deterministic Auth rejection is recorded only by
+  `private.record_admin_invitation_auth_failure_v1(...)`. The completion
+  identity supplies an allowlisted failure class/code; the function locks the
+  exact `AUTH_CALL_STARTED` intent, verifies environment/generation/attempt and
+  telemetry, consumes no record capability, writes
+  `AUTH_FAILED_RETRYABLE` or `AUTH_FAILED_TERMINAL`, and appends the audit event
+  atomically. Terminal classification cannot be retried on the same intent;
+- crash, timeout, or network ambiguity after the marker is recorded only by
+  `private.record_admin_invitation_auth_outcome_unknown_v1(...)`. It locks
+  `AUTH_CALL_STARTED`, verifies the same binding, writes
+  `AUTH_OUTCOME_UNKNOWN`, and audits atomically; it never claims `PREPARED` and
+  is never blindly re-invited;
+- those two writer functions are executable only by
+  `auth_invitation_completion LOGIN` through their exact signatures.
+  `PUBLIC`, Data API roles, prepare/wrapper owners, and application roles have
+  no EXECUTE grant. The owner-approved ambiguity reconciler uses a separate
+  per-environment `auth_invitation_reconciler LOGIN` identity with only USAGE
+  on `private` and EXECUTE only on
+  `private.record_admin_invitation_reconciliation_zero_match_v1(uuid, text,
+  bigint, bigint, text)`,
+  `private.record_admin_invitation_reconciliation_auth_created_v1(uuid, uuid,
+  text, bigint, bigint, text)`, and
+  `private.record_admin_invitation_reconciliation_conflict_v1(uuid, text,
+  bigint, bigint, text)`. These bind intent, optional proven sub, environment,
+  generation, attempt, and allowlisted reconciliation code. No server identity
+  owns tables or has service-role capability;
+- the reconciler decrypts in memory and uses pinned
   `auth.admin.listUsers({ page, perPage })` with bounded complete pagination to
-  find an exact normalized-email match. Zero matches permits a same-intent
-  retry after the Auth email cooldown; one matching unconfirmed user adopts
-  that sub; multiple, confirmed, older, or environment-mismatched users require
-  manual conflict resolution;
+  find an exact normalized-email match. One matching unconfirmed user invokes
+  the record function's reconciler-only proof path and commits `AUTH_CREATED`.
+  Multiple, confirmed, older, or environment-mismatched users commit a
+  fail-closed conflict requiring manual resolution;
+- zero matches atomically transitions `AUTH_OUTCOME_UNKNOWN` to
+  `AUTH_FAILED_RETRYABLE` with audited `AUTH_USER_NOT_FOUND`. After the Auth
+  email cooldown, `private.retry_admin_invitation_auth_call_v1(...)` locks that
+  state, revalidates actor approval, telemetry and database rate limits,
+  increments intent generation and attempt epoch, invalidates all old
+  capabilities, returns new marker and record capabilities once, and moves to
+  `PREPARED`. Concurrent reconcilers/retries serialize on the intent; the first
+  valid state/generation wins and every loser returns the stored state or 409;
 - Auth success followed by failure before `AUTH_CREATED` commits leaves
-  `PREPARED` or, when writable, `AUTH_OUTCOME_UNKNOWN`; reconciliation must
-  prove the exact Auth user before the record function stores the sub and
-  transitions to `AUTH_CREATED`. A different sub conflicts;
-- if the five-minute Auth-response capability expires while the intent is
+  `AUTH_CALL_STARTED`, or `AUTH_OUTCOME_UNKNOWN` if the ambiguity writer
+  commits. It can never return to `PREPARED` without the zero-match retry
+  transition above. Reconciliation must prove the exact Auth user before the
+  record function stores the sub and transitions to `AUTH_CREATED`. A
+  different sub conflicts;
+- if either five-minute pre-call capability expires while the intent is
   still `PREPARED` with no call marker and zero attempts, the prepare identity
   may call `private.reissue_admin_invitation_auth_response_capability_v1(...)`
-  to atomically rotate it under the original
-  actor/session/idempotency/rate checks. Once `AUTH_CALL_STARTED` exists, no
-  caller assertion can renew it;
+  to atomically rotate both purpose-separated digests under the original
+  actor/session/idempotency/rate checks and return both plaintext values once.
+  Once `AUTH_CALL_STARTED` exists, no caller assertion can renew either;
   reconciliation must first prove the exact Auth outcome and commit
   `AUTH_CREATED`;
 - `private.reissue_admin_invitation_completion_capability_v1(...)` may issue a
@@ -950,9 +1012,13 @@ Failure and retry rules:
   explicitly idempotent rather than contradictory;
 - successful API delivery remains `DELIVERY_UNCONFIRMED` until invitation
   acceptance. Bounce/expiry never creates another registry row. Owner-approved
-  retry first soft-deletes the exact unconfirmed Auth user, tombstones the old
-  invited registry identity for history, increments the intent generation, and
-  performs a new invite whose new sub is separately recorded;
+  retry first uses the dedicated unconfirmed `invited -> tombstoned`
+  transaction above. It locks against concurrent acceptance, increments
+  `authz_version`, commits registry denial/audit, then soft-deletes the exact
+  unconfirmed Auth user. A soft-delete partial failure remains tombstoned and
+  blocks replacement invitation while bounded retry runs. Only after Auth
+  deletion is verified may a separately approved new intent/generation invite
+  a new sub; the old subject is never reused;
 - process crash at every boundary is recovered from committed intent state;
   attempts are bounded and rate-limited, and no failure promotes an identity.
 
@@ -1592,6 +1658,12 @@ Authorization/RLS:
   another environment, and concurrent completion. The success case proves
   atomic nonce consumption, exact returned-sub binding, registry creation,
   intent transition, and audit;
+- marker and Auth-result-record capabilities have different purpose-tagged
+  digests and versions. Tests cover normal marker/Auth/record flow, marker
+  commit-response loss and exact retry, record capability remaining usable
+  after marker consumption, marker supplied to record, record supplied to
+  marker, old/replayed/expired/wrong-stage/wrong-generation capabilities, and
+  concurrent marker/record calls;
 - invitation prepare has no exposed `api` wrapper. Tests prove that user JWT,
   `authenticated`, `service_role`, every wrapper owner, completion identity,
   and direct PostgREST calls cannot insert an intent or supply
@@ -1599,6 +1671,17 @@ Authorization/RLS:
   after Route Origin/CSRF and database actor/session/rate/idempotency checks.
   Forged actor/session/version/environment/key-version fields, duplicate-key
   conflicts, rate bypass, and missing telemetry fail closed;
+- failure-state tests prove the exact completion/reconciler grants and atomic
+  `AUTH_CALL_STARTED -> AUTH_FAILED_RETRYABLE`, `AUTH_FAILED_TERMINAL`, and
+  `AUTH_OUTCOME_UNKNOWN` writers; deterministic failure, crash/timeout,
+  zero/one/multiple-match reconciliation, retry cooldown, generation/attempt
+  increment, new dual-capability issuance, stale/concurrent reconciliation,
+  and concurrent retry all preserve one committed state and audit event;
+- bounce/expiry tests prove the dedicated unconfirmed
+  `invited -> tombstoned` exception, actor/AAL2 or owner authority, no accepted
+  session/factor, version increment, registry-first audit, Auth soft-delete
+  partial failure, and lock serialization against concurrent invitation
+  acceptance. Every non-invited use is denied;
 - lifecycle bootstrap cannot call or grant general protected-data mutations;
 - only the exposed `api` schema is selectable for protected user-JWT RPCs;
   `private` remains absent from exposed/extra-search schemas. Exact
@@ -1749,6 +1832,16 @@ approve:
     intent ordering;
 17. `auth.sessions` row enforcement for every protected read/mutation so
     explicit logout immediately denies old JWT wrapper calls.
+18. the narrow direct-Postgres LOGIN identities for server-only invitation
+    prepare, completion, and reconciliation, their exact grants, secret
+    isolation, and absence from browser/Data API/general Story 3 paths;
+19. the purpose-separated marker/record/completion capability state machine,
+    consumption and reissue rules, failure/ambiguity writers, and exact
+    terminal-result recovery;
+20. JavaScript-readable long-lived Supabase Auth cookies, the fact that cookie
+    loss does not revoke a server session, and the maximum configured
+    server-session exposure until explicit revocation or Auth time-box
+    enforcement.
 
 ## 22. Authoritative references
 
@@ -1756,8 +1849,6 @@ approve:
   https://supabase.com/docs/guides/auth/server-side/creating-a-client
 - Supabase SSR cookie/HttpOnly limitation:
   https://supabase.com/docs/guides/troubleshooting/how-do-i-make-the-cookies-httponly-vwweFx
-- Supabase SSR advanced cookie lifetime guidance:
-  https://supabase.com/docs/guides/auth/server-side/advanced-guide
 - Supabase SSR advanced cookie lifetime guidance:
   https://supabase.com/docs/guides/auth/server-side/advanced-guide
 - Supabase dedicated API schemas and explicit grants:

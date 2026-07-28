@@ -314,6 +314,10 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   machine across Auth and database ambiguity, and adopts long-lived Supabase
   Auth cookies while separating cookie loss, explicit logout, chunk cleanup,
   and Auth timeout behavior.
+  The latest proposed refinement separates marker and Auth-result-record
+  capabilities, assigns exact failure/ambiguity/reconciliation writers and
+  grants, and adds a registry-first unconfirmed-invitation retirement
+  transition that cannot race successfully with invitation acceptance.
 - Consequences and risks: This documentation is high-risk/manual because it
   defines future auth, authorization, RLS, secrets, and Production access.
   It authorizes no implementation, configuration, user enrollment, migration,

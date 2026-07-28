@@ -54,6 +54,11 @@
   transitions with safe capability reissue and terminal recovery, and
   Supabase-aligned long-lived cookies with separated loss/logout/cleanup/
   timeout tests.
+  A seventh independent review found a dual-use capability, incomplete
+  failure/ambiguity writers, and bounce/expiry lifecycle conflict; the Draft
+  now uses purpose-separated marker/record capabilities, exact failure and
+  reconciliation functions/grants with generation-safe retry, and a dedicated
+  unconfirmed-invitation tombstone transition locked against acceptance.
 - Current work: validate and deliver the blocker-remediated documentation on
   the same Draft PR #39. Keep Architecture Proposed; do not mark Accepted or
   Ready, enable auto-merge, or merge.
