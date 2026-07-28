@@ -24,31 +24,38 @@
   accepted admin/session/CSRF boundary and use anon database access with broad
   development policies.
 - Completed: confirmed PR #38 is squash-merged; read binding governance and
-  Database/Security policies; audited current Supabase client, access map,
-  permissive RLS evidence, representative unauthenticated mutation routes, and
-  installed dependencies; compared current official Supabase, Next.js, and
-  OWASP guidance; created and indexed the proposed Architecture and decision
-  record.
-- Current work: validate the documentation diff and open a Draft manual PR for
-  repository-owner Architecture review. Do not mark Accepted or Ready.
-- Blockers/owner actions: Architecture acceptance is intentionally pending.
-  Sprint B-0, Auth Foundation, Authorization Foundation, Route Security
-  Migration, and Item Selection Story 3 remain blocked.
+  Database/Security policies; audited the Supabase client, application access
+  map, permissive RLS evidence, representative unauthenticated mutation routes,
+  and dependencies; compared current official Supabase, Next.js, and OWASP
+  guidance; drafted and indexed the proposed Architecture; recorded the
+  proposed decision; opened Draft PR #39 and applied
+  `manual-merge-required`.
+- Current work: documentation delivery is complete for repository-owner
+  Architecture review. Keep PR #39 Draft and Proposed; do not mark Accepted,
+  Ready, enable auto-merge, or merge.
+- Blockers/owner actions: repository-owner Architecture review and explicit
+  acceptance at an exact head SHA are required. Sprint B-0, Auth Foundation,
+  Authorization Foundation, Route Security Migration, and Item Selection Story
+  3 remain blocked.
 - Changed files:
   `docs/architecture/ADMIN-IDENTITY-AUTHORIZATION-RLS-CSRF-V1.md`,
   `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`, and this file.
-- Validation: remote content consistency and diff checks are pending. Runtime
-  code is unchanged; full CI/build and Preview evidence will be collected for
-  the exact PR head.
-- Last commit: remote branch documentation commits; GitHub is the authoritative
-  current SHA source.
-- Exact next action: inspect the complete remote diff, verify Proposed-only
-  status and source links, open a Draft PR with `manual-merge-required`, then
-  wait for exact-head CI/Preview before owner review.
-- Remaining risks: cookie behavior must be proven with the pinned Supabase SSR
-  version; the Production administrator UUID and secrets remain unknown by
-  design; existing broad policies remain unchanged until separately approved
-  high-risk implementation.
+- Validation: branch diff contains only these four documentation/status files.
+  Remote whitespace/tab/null-byte and Proposed/no-implementation consistency
+  checks passed. CI and Preview browser validation passed for the complete
+  Architecture content before this status-only checkpoint; the final exact-head
+  GitHub runs are the authoritative delivery gate and are reported outside this
+  file to avoid a self-referential status-commit cycle.
+- Last commit: this status-only checkpoint on PR #39; GitHub is the
+  authoritative SHA source.
+- Exact next action: repository-owner Architecture review. If changes are
+  requested, amend the same Draft PR. If accepted, record the approval date,
+  approver, and reviewed head SHA, rerun exact-head gates, then Ready the manual
+  PR without merging automatically.
+- Remaining risks: pinned Supabase SSR HttpOnly cookie behavior must be proven
+  during implementation; the Production administrator UUID and secrets remain
+  unknown by design; existing broad policies remain unchanged until separately
+  approved high-risk implementation.
 
 ## 2026-07-28 — Item Selection Database Baseline Architecture v1
 
