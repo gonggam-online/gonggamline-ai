@@ -11,10 +11,11 @@
   execution remains high-risk/manual.
 - Revenue impact: P1. This is the shortest approved prerequisite to turn the
   merged evaluator into an auditable operator workflow.
-- Scope: DB/runtime selection, migration baseline, immutable snapshots,
-  provider evidence, exact money/VAT/rate/rounding storage, reproducibility,
-  transaction/idempotency, environment separation, rollback, migration
-  verification, and Story 3 handoff.
+- Scope: DB/runtime selection, migration baseline, immutable canonical text
+  snapshots, provider evidence, authoritative round-trip decision values,
+  derived money/rate projections, reproducibility, transaction/idempotency,
+  environment separation, retention/recovery, migration verification, and
+  Story 3 handoff.
 - Non-goals: migration, schema execution, persistence code, API, UI, auth/RLS,
   CSRF, Production access, Product creation, listing, price, purchasing, order,
   inventory, fulfillment, or any marketplace write.
@@ -25,8 +26,9 @@
   the evaluator/profitability engine has no approved operating persistence/API
   path; inspected the baseline gap, recovery plan, migrations, Supabase access,
   and existing numeric conventions; drafted the Database Architecture.
-- Current: documentation and local gates passed; commit, push, and submit a
-  Draft PR for repository-owner review.
+- Current: PR #38 Architecture review is implemented and local gates passed;
+  commit/push the review update and confirm new exact-head CI and Preview while
+  retaining Draft/manual state.
 - Blockers/owner actions: owner acceptance is required. Admin Identity /
   Authorization / RLS / CSRF Architecture and accepted Sprint B-0 remain
   prerequisites for Story 3.
@@ -38,7 +40,9 @@
   typecheck, 261/261 unit/integration tests, and Production build passed. The
   recurring Windows `uv_os_get_passwd ENOMEM` affected the first test launch;
   ignored `tsx` dependency files were temporarily adjusted, tests passed, and
-  those files were restored without staging.
+  those files were restored without staging. Review follow-up document
+  consistency, `git diff --check`, 261/261 tests, lint (0 errors, the same 4
+  warnings), typecheck, and Production build also passed.
 - Last commit: `7491b239f5935643778330a08ed4b070511c4c7a`.
 - Exact next action: validate documentation and submit a Draft PR; do not
   approve, mark Ready, merge, or enable auto-merge.

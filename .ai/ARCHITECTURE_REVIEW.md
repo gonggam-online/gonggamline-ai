@@ -80,9 +80,10 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 - Status: Draft; repository-owner review and explicit acceptance required.
 - Boundary: Database / Security contract for immutable Item Selection
   evaluation history.
-- Decision proposed: retain Supabase Postgres and use exact scaled integers,
-  versioned canonical JSON snapshots, hashes, append-only evaluations, and
-  transactional idempotent finalization.
+- Decision proposed: retain Supabase Postgres; preserve authoritative
+  round-trip decimal values and canonical UTF-8 text bytes; use scaled integers
+  and JSONB only as non-authoritative query projections; keep append-only
+  evaluations and transactional idempotent finalization.
 - Implementation authorization: none. No migration, database connection,
   runtime code, API, UI, auth, RLS, or Production execution is authorized.
 - Story:

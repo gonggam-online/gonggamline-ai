@@ -255,9 +255,10 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   evaluation history is blocked by the pre-003 database baseline gap and the
   absence of accepted admin identity/RLS contracts.
 - Decision or issue: Propose Supabase Postgres as the existing Vercel-compatible
-  database, with append-only canonical evaluation snapshots, SHA-256 evidence,
-  exact micro-won and parts-per-million integer units, and transactional
-  idempotent run finalization.
+  database, with append-only canonical UTF-8 evaluation/evidence text,
+  database-generated SHA-256 hashes, round-trip decimal decision values,
+  non-authoritative micro-won/ppm and JSONB query projections, and
+  transactional idempotent run finalization.
 - Consequences and risks: This is documentation only and authorizes no schema
   or Production action. Later migration/RLS/Production work is high-risk,
   manual, and depends on accepted Sprint B-0 and Admin Architecture.
