@@ -117,6 +117,10 @@ try {
         final === undefined
           ? "MISSING_RESULT"
           : ledger.runResult(final.run.runId)?.failureCode,
+      evidence:
+        final === undefined
+          ? []
+          : ledger.runResult(final.run.runId)?.evidence,
       auditChainValid: ledger.verifyAuditChain(),
       targetPath,
     })}\n`,

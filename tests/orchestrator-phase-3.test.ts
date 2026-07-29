@@ -464,3 +464,52 @@ test("bounded loop carries verifier failure into a successful retry", async () =
     rmSync(directory, { recursive: true, force: true });
   }
 });
+
+test("bounded loop ends in FAILED without throwing after retry exhaustion", async () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "phase-3-ceiling-"));
+  const ledger = createLedger(directory);
+  const worker = {
+    name: "always-failing-worker",
+    async execute(): Promise<WorkerOutcome> {
+      return {
+        kind: "FAILED",
+        summary: "retryable fixture failure",
+        errorCode: "FIXTURE_FAILURE",
+        retryable: true,
+        evidence: ["fixture:failure"],
+      };
+    },
+  };
+  try {
+    const results = await runDevelopmentLoop(
+      ledger,
+      worker,
+      async () => undefined,
+      {
+        first: {
+          projectId: "project-phase-3",
+          taskId: "task-phase-3",
+          runId: "run-ceiling-1",
+          idempotencyKey: "run:ceiling:1",
+          controllerId: "controller-N",
+          leaseExpiresAt: "2026-07-30T09:30:00.000Z",
+          now: () => timestamp,
+          budget: {
+            tokenLimit: 10_000,
+            wallTimeSeconds: 300,
+            estimatedCostKrwLimit: 1_000,
+          },
+        },
+        nextRunId: (attempt) => `run-ceiling-${attempt}`,
+        nextIdempotencyKey: (attempt) => `run:ceiling:${attempt}`,
+      },
+    );
+
+    assert.equal(results.length, 3);
+    assert.equal(results.at(-1)?.run.state, "FAILED");
+    assert.equal(ledger.taskState("task-phase-3"), "FAILED");
+  } finally {
+    ledger.close();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});

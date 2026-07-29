@@ -31,6 +31,25 @@ export async function runDevelopmentLoop(
   results.push(current);
   while (current.run.state === "RETRYABLE_FAILURE") {
     const attempt = current.run.attempt + 1;
+    if (attempt > current.run.maxAttempts) {
+      try {
+        await engine.retry(current.run.runId, {
+          ...request.first,
+          runId: request.nextRunId(attempt),
+          idempotencyKey: request.nextIdempotencyKey(attempt),
+        });
+      } catch (error) {
+        if (
+          !(error instanceof Error) ||
+          error.message !== "Run retry ceiling exhausted"
+        ) {
+          throw error;
+        }
+      }
+      current = { ...current, run: ledger.run(current.run.runId) };
+      results[results.length - 1] = current;
+      break;
+    }
     current = await engine.retry(current.run.runId, {
       ...request.first,
       runId: request.nextRunId(attempt),
