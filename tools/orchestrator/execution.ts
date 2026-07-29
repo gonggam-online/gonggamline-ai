@@ -25,6 +25,10 @@ export interface WorkerExecutionContext {
   readonly attempt: number;
   readonly retryOfRunId: string | null;
   readonly resumedFrom: RunCheckpoint | null;
+  readonly priorFailure: {
+    readonly code: string | null;
+    readonly evidence: readonly string[];
+  } | null;
 }
 
 export type WorkerOutcome =
@@ -204,6 +208,10 @@ export class OrchestratorExecutionEngine {
     request: RunExecutionRequest,
   ): Promise<RunExecutionResult> {
     const resumedFrom = this.ledger.latestRunCheckpoint(run.runId);
+    const priorResult =
+      run.retryOfRunId === null
+        ? null
+        : this.ledger.runResult(run.retryOfRunId);
     if (
       !this.ledger.acquireLease(
         {
@@ -296,6 +304,13 @@ export class OrchestratorExecutionEngine {
           attempt: run.attempt,
           retryOfRunId: run.retryOfRunId,
           resumedFrom,
+          priorFailure:
+            priorResult === null
+              ? null
+              : {
+                  code: priorResult.failureCode,
+                  evidence: priorResult.evidence,
+                },
         },
         hooks,
         ),

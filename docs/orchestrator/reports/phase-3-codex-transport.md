@@ -1,0 +1,109 @@
+# Phase 3 Codex transport and local execution slice
+
+Status: implemented on `codex/feat/orchestrator-phase-3`; delivery requires a
+separate `manual-merge-required` Draft PR.
+
+Base: PR #44 merge
+`52ffa71d4cefb51fe980c19b0b5dff7532d5f685`.
+
+## Decision
+
+Use the installed Codex App Server over local stdio JSONL as the first real
+Worker transport. The installed CLI exposes `initialize`, `thread/start`,
+`turn/start`, streamed notifications, token-usage updates, and
+`turn/interrupt`. This preserves the Phase 2 `WorkerAdapter` boundary while
+providing lifecycle and interruption primitives.
+
+The adapter launches `codex app-server --stdio` in the approved repository. It
+sends a structured goal plus run, task, attempt, retry, and correlation
+identity. Final output is constrained by a controller-owned schema. Raw model
+output and raw transport lines are not persisted: results are reduced to
+sanitized summaries and hashes. Worker evidence remains informational and
+cannot satisfy the controller verifier.
+
+This is process-level policy enforcement, not an operating-system sandbox.
+App Server receives workspace-write with network disabled and approval policy
+`never`, plus a minimum child environment. The controller additionally checks
+the canonical repository, origin, branch, base SHA, single worktree checkout,
+owned status hash, allowlisted changed paths, and symlink traversal before and
+after execution. There is no firewall, container, Windows restricted token, or
+network namespace.
+
+## Implemented and verified
+
+- Real App Server stdio transport with initialize/thread/turn lifecycle.
+- Structured goal and correlation context, including prior verifier failure on
+  retry.
+- Hashed transport checkpoints and controller-observed token usage.
+- Structured success, failure, and human-approval outcomes.
+- Abnormal process/error/malformed protocol fail-close behavior.
+- Duplicate terminal-event suppression and a maximum-one interrupt request.
+- Minimum environment propagation without credential/token/secret variables.
+- Canonical root/origin/branch/base checks, single checkout, clean first
+  attempt, owned retry status, allowed changed paths, and symlink rejection.
+- A bounded development loop that lets the durable Phase 2 controller create
+  retry runs with `retryOfRunId`.
+- Verifier failure context is fed into the next attempt; only controller-run
+  fixed verification commands can produce `COMPLETED`.
+
+## Partial implementation and known limits
+
+- App Server requests network-disabled workspace-write, but the local Windows
+  process has no independently proven firewall or restricted-token boundary.
+- Command intent is constrained by prompt, sandbox policy, stripped
+  credentials, clean-start policy, and post-execution Git inspection. The
+  adapter does not intercept every Worker subprocess. A destructive command
+  that returns the repository to the same observable HEAD/status could evade
+  post-run detection. Isolated branches/worktrees and backups remain required.
+- The SQLite ledger, leases, route uniqueness, retry lineage, checkpoints, and
+  audit chain are durable. The App Server subprocess is not reattached after a
+  controller restart; recovery uses the existing controller checkpoint
+  contract.
+- Interrupt delivery is best effort. Phase 2 guarantees terminal persistence
+  without waiting forever, but a stuck child may still require operator cleanup.
+- The adapter does not commit. The slice ends at a verified local change and
+  persisted completion result.
+
+## Interface only
+
+- An operator supplies the structured goal, approved workspace boundary,
+  budgets, verification plan, and route allocation.
+- There is no product UI or public API for submitting the goal.
+
+## Phase 4 or later
+
+- GitHub push/write and duplicate-free Draft PR creation.
+- CI and exact Preview reconciliation.
+- Planner/reviewer task decomposition and revenue-priority scoring.
+- Production, Supabase, Vercel Production, marketplace, order, purchasing, or
+  other external writes.
+
+## Opt-in local live smoke
+
+The hermetic suite never invokes authenticated Codex. A live smoke is
+operator-controlled because it consumes the current Codex allowance and mutates
+its approved worktree.
+
+1. Prepare a clean, dedicated non-`main` branch checked out exactly once.
+2. Record its exact HEAD and canonical origin. Do not use a worktree containing
+   user changes.
+3. Configure `AppServerWorkerAdapter` with that root, origin, branch, HEAD, and
+   the smallest allowed path. Deny secrets and repository metadata.
+4. Use fixed verifier command IDs and conservative token, cost, wall-time, and
+   retry limits.
+5. Run `runDevelopmentLoop` from a supervised local process. Never print the
+   environment or raw transport payload.
+6. Inspect `git status`, `git diff`, ledger result/checkpoints, and verifier
+   hashes. Treat any policy, timeout, budget, adapter, or verification failure
+   as fail-close.
+7. Keep or revert only the Worker-created fixture through ordinary reviewed Git
+   operations. Do not push, merge, deploy, or contact external services.
+
+The delivery report records live smoke as `PASS`, `FAIL`, `BLOCKED`, or
+`NOT RUN`; hermetic tests cannot substitute for it.
+
+## Rollback
+
+Revert the Phase 3 PR. No migration, Production data, Supabase object, GitHub
+write, Vercel deployment, or commerce action is created by this implementation.
+

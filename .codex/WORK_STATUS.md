@@ -1417,3 +1417,65 @@ perform the documented read-only Supabase schema and completeness inspection.
   linked for Revenue Opportunity calculation.
 - ROI and cost provenance require business/data-contract approval before
   implementation.
+
+---
+
+## Orchestrator Phase 3 Codex transport — 2026-07-30
+
+### Objective, branch, and risk
+
+- Objective: connect the Phase 2 controller to Codex App Server and prove a
+  bounded local develop/verify/retry slice.
+- Branch: `codex/feat/orchestrator-phase-3`
+- Base: PR #44 merge
+  `52ffa71d4cefb51fe980c19b0b5dff7532d5f685`
+- Risk: high-risk automation bootstrap; Draft PR and
+  `manual-merge-required`.
+
+### Scope and non-goals
+
+- Scope: stdio transport, structured identity/result, usage/checkpoints,
+  interrupt, local repository/worktree boundary, retry feedback, tests, and
+  operator documentation.
+- Non-goals: GitHub write/reconciliation, Production, Supabase, Vercel
+  Production, marketplace calls, browser automation, secret setup, and Phase 4.
+- Root-cause class: implementation checkpoint; no external configuration or
+  database fault is being compensated for in code.
+
+### Completed and current work
+
+- Confirmed clean latest `origin/main` containing PR #44 and created the
+  dedicated branch.
+- Confirmed installed Codex CLI/App Server protocol and generated temporary
+  type references outside the repository.
+- Implemented transport, workspace boundary, and bounded retry-loop primitives.
+- Added hermetic Phase 3 contract tests and implementation/security report.
+- Current: full local regression validation and delivery preparation.
+
+### Changed files
+
+- `tools/orchestrator/app-server-worker.ts`
+- `tools/orchestrator/workspace-boundary.ts`
+- `tools/orchestrator/development-loop.ts`
+- `tools/orchestrator/execution.ts`
+- `tools/orchestrator/index.ts`
+- `tests/orchestrator-phase-3.test.ts`
+- `docs/orchestrator/reports/phase-3-codex-transport.md`
+- `CHANGELOG-Orchestrator-Phase3.md`
+- `.ai/DECISION_LOG.md`
+- `.codex/WORK_STATUS.md`
+
+### Verification and next action
+
+- Typecheck: passed after the first compile correction.
+- Focused Phase 3 tests: 6/6 passed.
+- Next: run all local gates, classify the optional authenticated live smoke,
+  then commit/push a Draft PR.
+
+### Remaining risks and owner actions
+
+- Local App Server workspace-write is not an independently proven OS/network
+  sandbox; the report records the exact guarantee and residual risk.
+- Live authenticated Codex smoke consumes the current Codex allowance and must
+  not be conflated with hermetic CI.
+- Repository-owner manual merge remains required. Phase 4 is not authorized.

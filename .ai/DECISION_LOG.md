@@ -392,3 +392,24 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   authorization.
 - Rollback or supersession: revert the Phase 2 PR. Product runtime and external
   systems remain unchanged.
+
+## 2026-07-30 — Orchestrator Phase 3 Codex transport authorized
+
+- Category: bounded implementation authorization
+- Dependency: PR #44 merged as
+  `52ffa71d4cefb51fe980c19b0b5dff7532d5f685`
+- Owner / approver: repository owner
+- Decision: connect the Phase 2 controller to the installed Codex App Server
+  stdio protocol and add only the isolated local develop/verify/retry slice.
+- Architecture compliance: preserve the Worker, verifier, ledger, state,
+  budget, timeout, retry, interrupt, and approval contracts; add no product
+  Domain or external write authority.
+- Risk: high-risk automation bootstrap; `manual-merge-required`, Draft PR, and
+  no auto-merge.
+- Non-goals: GitHub write automation, CI/Preview reconciliation, Production,
+  Supabase, Vercel Production, marketplace actions, browser automation,
+  secrets, paid API setup, and Phase 4.
+- Known boundary: App Server sandbox requests, minimum environment, and Git
+  postconditions are enforced, but this local Windows process is not an
+  independently proven firewall or restricted-token sandbox.
+- Rollback: revert the Phase 3 PR. No external or database rollback is required.
