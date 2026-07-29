@@ -121,6 +121,10 @@ try {
         final === undefined
           ? []
           : ledger.runResult(final.run.runId)?.evidence,
+      lastCheckpoint:
+        final === undefined
+          ? null
+          : ledger.latestRunCheckpoint(final.run.runId),
       auditChainValid: ledger.verifyAuditChain(),
       targetPath,
     })}\n`,

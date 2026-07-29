@@ -291,6 +291,19 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
         if (waiter !== undefined) {
           pending.delete(message.id);
           if (isObject(message.error)) {
+            hooks.checkpoint({
+              kind: "TRANSPORT_REQUEST_FAILED",
+              payload: {
+                code:
+                  typeof message.error.code === "number"
+                    ? message.error.code
+                    : "UNKNOWN",
+                message:
+                  typeof message.error.message === "string"
+                    ? sanitizeOrchestratorText(message.error.message)
+                    : "App Server request failed",
+              },
+            });
             waiter.reject(new Error("App Server request failed"));
           } else {
             waiter.resolve(message.result);
