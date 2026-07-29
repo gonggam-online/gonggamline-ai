@@ -3,6 +3,10 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
 import { assertTransition, type TaskState } from "./state-machine.ts";
+import {
+  sanitizeOrchestratorText,
+  sanitizeOrchestratorValue,
+} from "./redaction.ts";
 
 export interface TaskIdentity {
   readonly projectId: string;
@@ -23,6 +27,38 @@ export interface TaskLease {
   readonly taskId: string;
   readonly controllerId: string;
   readonly expiresAt: string;
+}
+
+export interface OrchestratorRun {
+  readonly projectId: string;
+  readonly taskId: string;
+  readonly runId: string;
+  readonly retryOfRunId: string | null;
+  readonly idempotencyKey: string;
+  readonly workerAdapter: string;
+  readonly attempt: number;
+  readonly maxAttempts: number;
+  readonly state: TaskState;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface RunCheckpoint {
+  readonly sequence: number;
+  readonly kind: string;
+  readonly payloadHash: string;
+  readonly payload: unknown;
+  readonly createdAt: string;
+}
+
+export interface RunResult {
+  readonly outcome: "SUCCEEDED" | "FAILED" | "WAITING_FOR_HUMAN";
+  readonly summary: string;
+  readonly outputHash: string | null;
+  readonly evidence: readonly string[];
+  readonly failureCode: string | null;
+  readonly approvalReason: string | null;
+  readonly createdAt: string;
 }
 
 interface TaskStateRow {
@@ -106,12 +142,9 @@ export class OrchestratorLedger {
     const version = this.#database
       .prepare("SELECT COALESCE(MAX(version), 0) AS version FROM schema_migrations")
       .get() as { version: number };
-    if (version.version >= 1) {
-      return;
-    }
-
-    this.#transaction(() => {
-      this.#database.exec(`
+    if (version.version < 1) {
+      this.#transaction(() => {
+        this.#database.exec(`
         CREATE TABLE projects (
           project_id TEXT PRIMARY KEY,
           created_at TEXT NOT NULL
@@ -175,8 +208,56 @@ export class OrchestratorLedger {
         );
         INSERT INTO schema_migrations(version, applied_at)
           VALUES (1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
-      `);
-    });
+        `);
+      });
+    }
+
+    const current = this.#database
+      .prepare("SELECT COALESCE(MAX(version), 0) AS version FROM schema_migrations")
+      .get() as { version: number };
+    if (current.version < 2) {
+      this.#transaction(() => {
+        this.#database.exec(`
+          CREATE TABLE orchestrator_runs (
+            run_id TEXT PRIMARY KEY,
+            project_id TEXT NOT NULL REFERENCES projects(project_id),
+            task_id TEXT NOT NULL REFERENCES tasks(task_id),
+            retry_of_run_id TEXT REFERENCES orchestrator_runs(run_id),
+            idempotency_key TEXT NOT NULL UNIQUE,
+            worker_adapter TEXT NOT NULL,
+            attempt INTEGER NOT NULL,
+            max_attempts INTEGER NOT NULL DEFAULT 3,
+            state TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+          );
+          CREATE UNIQUE INDEX one_initial_run_per_task
+            ON orchestrator_runs(task_id)
+            WHERE retry_of_run_id IS NULL;
+          CREATE TABLE run_checkpoints (
+            run_id TEXT NOT NULL REFERENCES orchestrator_runs(run_id),
+            sequence INTEGER NOT NULL,
+            checkpoint_kind TEXT NOT NULL,
+            payload_json TEXT NOT NULL,
+            payload_hash TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            PRIMARY KEY(run_id, sequence)
+          );
+          CREATE TABLE run_results (
+            run_id TEXT PRIMARY KEY REFERENCES orchestrator_runs(run_id),
+            outcome TEXT NOT NULL,
+            summary TEXT NOT NULL,
+            output_hash TEXT,
+            evidence_json TEXT NOT NULL,
+            failure_code TEXT,
+            approval_reason TEXT,
+            created_at TEXT NOT NULL
+          );
+          INSERT INTO schema_migrations(version, applied_at)
+            VALUES (2, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+        `);
+      });
+    }
   }
 
   #transaction<T>(operation: () => T): T {
@@ -277,6 +358,267 @@ export class OrchestratorLedger {
       throw new Error(`Unknown task: ${taskId}`);
     }
     return row.state;
+  }
+
+  readyTaskIds(projectId: string): string[] {
+    const rows = this.#database
+      .prepare(
+        `SELECT task_id AS taskId FROM tasks
+         WHERE project_id = ? AND state = 'READY'
+         ORDER BY created_at, task_id`,
+      )
+      .all(projectId) as { taskId: string }[];
+    return rows.map(({ taskId }) => taskId);
+  }
+
+  createRun(
+    input: {
+      projectId: string;
+      taskId: string;
+      runId: string;
+      retryOfRunId: string | null;
+      idempotencyKey: string;
+      workerAdapter: string;
+    },
+    now: string,
+  ): "CREATED" | "EXISTS" {
+    return this.#transaction(() => {
+      const retryOf =
+        input.retryOfRunId === null ? null : this.run(input.retryOfRunId);
+      if (retryOf !== null && retryOf.taskId !== input.taskId) {
+        throw new Error("Retry run must belong to the same task");
+      }
+      const attempt = retryOf === null ? 1 : retryOf.attempt + 1;
+      const result = this.#database
+        .prepare(
+          `INSERT OR IGNORE INTO orchestrator_runs(
+            run_id, project_id, task_id, retry_of_run_id, idempotency_key,
+            worker_adapter, attempt, max_attempts, state, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, 3, 'PLANNED', ?, ?)`,
+        )
+        .run(
+          input.runId,
+          input.projectId,
+          input.taskId,
+          input.retryOfRunId,
+          input.idempotencyKey,
+          input.workerAdapter,
+          attempt,
+          now,
+          now,
+        );
+      if (result.changes === 0) {
+        const existing = this.#database
+          .prepare(
+            `SELECT run_id AS runId, task_id AS taskId,
+                    idempotency_key AS idempotencyKey
+             FROM orchestrator_runs
+             WHERE run_id = ? OR idempotency_key = ?`,
+          )
+          .get(input.runId, input.idempotencyKey) as
+          | { runId: string; taskId: string; idempotencyKey: string }
+          | undefined;
+        if (
+          existing?.runId === input.runId &&
+          existing.taskId === input.taskId &&
+          existing.idempotencyKey === input.idempotencyKey
+        ) {
+          return "EXISTS";
+        }
+        throw new Error("Run identity or idempotency key collision");
+      }
+      this.appendAudit(
+        "RUN_CREATED",
+        {
+          ...input,
+          attempt,
+        },
+        now,
+      );
+      return "CREATED";
+    });
+  }
+
+  run(runId: string): OrchestratorRun {
+    const row = this.#database
+      .prepare(
+        `SELECT project_id AS projectId, task_id AS taskId, run_id AS runId,
+                retry_of_run_id AS retryOfRunId,
+                idempotency_key AS idempotencyKey,
+                worker_adapter AS workerAdapter, attempt,
+                max_attempts AS maxAttempts, state,
+                created_at AS createdAt, updated_at AS updatedAt
+         FROM orchestrator_runs WHERE run_id = ?`,
+      )
+      .get(runId) as OrchestratorRun | undefined;
+    if (row === undefined) {
+      throw new Error(`Unknown run: ${runId}`);
+    }
+    return row;
+  }
+
+  transitionRun(runId: string, to: TaskState, now: string): void {
+    this.#transaction(() => {
+      const from = this.run(runId).state;
+      assertTransition(from, to);
+      this.#database
+        .prepare(
+          "UPDATE orchestrator_runs SET state = ?, updated_at = ? WHERE run_id = ?",
+        )
+        .run(to, now, runId);
+      this.appendAudit("RUN_TRANSITIONED", { runId, from, to }, now);
+    });
+  }
+
+  appendRunCheckpoint(
+    runId: string,
+    checkpoint: { kind: string; payload: unknown },
+    now: string,
+  ): RunCheckpoint {
+    return this.#transaction(() => {
+      this.run(runId);
+      const latest = this.#database
+        .prepare(
+          `SELECT COALESCE(MAX(sequence), 0) AS sequence
+           FROM run_checkpoints WHERE run_id = ?`,
+        )
+        .get(runId) as { sequence: number };
+      const sequence = latest.sequence + 1;
+      const payloadJson = stableJson(
+        sanitizeOrchestratorValue(checkpoint.payload),
+      );
+      const payloadHash = sha256(payloadJson);
+      this.#database
+        .prepare(
+          `INSERT INTO run_checkpoints(
+            run_id, sequence, checkpoint_kind, payload_json,
+            payload_hash, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?)`,
+        )
+        .run(
+          runId,
+          sequence,
+          checkpoint.kind,
+          payloadJson,
+          payloadHash,
+          now,
+        );
+      const stored = {
+        sequence,
+        kind: checkpoint.kind,
+        payloadHash,
+        payload: JSON.parse(payloadJson) as unknown,
+        createdAt: now,
+      };
+      this.appendAudit(
+        "RUN_CHECKPOINTED",
+        { runId, sequence, kind: checkpoint.kind, payloadHash },
+        now,
+      );
+      return stored;
+    });
+  }
+
+  latestRunCheckpoint(runId: string): RunCheckpoint | null {
+    const row = this.#database
+      .prepare(
+        `SELECT sequence, checkpoint_kind AS kind, payload_hash AS payloadHash,
+                payload_json AS payloadJson, created_at AS createdAt
+         FROM run_checkpoints WHERE run_id = ?
+         ORDER BY sequence DESC LIMIT 1`,
+      )
+      .get(runId) as
+      | Omit<RunCheckpoint, "payload"> & { payloadJson: string }
+      | undefined;
+    if (row === undefined) {
+      return null;
+    }
+    return {
+      sequence: row.sequence,
+      kind: row.kind,
+      payloadHash: row.payloadHash,
+      payload: JSON.parse(row.payloadJson) as unknown,
+      createdAt: row.createdAt,
+    };
+  }
+
+  recordRunResult(
+    runId: string,
+    result: Omit<RunResult, "createdAt">,
+    now: string,
+  ): void {
+    this.#transaction(() => {
+      this.run(runId);
+      const sanitizedEvidence = sanitizeOrchestratorValue(
+        result.evidence,
+      ) as string[];
+      const sanitizedSummary = sanitizeOrchestratorText(result.summary);
+      const sanitizedFailureCode =
+        result.failureCode === null
+          ? null
+          : sanitizeOrchestratorText(result.failureCode);
+      const sanitizedApprovalReason =
+        result.approvalReason === null
+          ? null
+          : sanitizeOrchestratorText(result.approvalReason);
+      const insert = this.#database
+        .prepare(
+          `INSERT OR IGNORE INTO run_results(
+            run_id, outcome, summary, output_hash, evidence_json,
+            failure_code, approval_reason, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        )
+        .run(
+          runId,
+          result.outcome,
+          sanitizedSummary,
+          result.outputHash,
+          stableJson(sanitizedEvidence),
+          sanitizedFailureCode,
+          sanitizedApprovalReason,
+          now,
+        );
+      if (insert.changes !== 1) {
+        throw new Error("Run result is immutable");
+      }
+      this.appendAudit(
+        "RUN_RESULT_RECORDED",
+        {
+          runId,
+          outcome: result.outcome,
+          outputHash: result.outputHash,
+          evidence: sanitizedEvidence,
+          failureCode: sanitizedFailureCode,
+          approvalReason: sanitizedApprovalReason,
+        },
+        now,
+      );
+    });
+  }
+
+  runResult(runId: string): RunResult | null {
+    const row = this.#database
+      .prepare(
+        `SELECT outcome, summary, output_hash AS outputHash,
+                evidence_json AS evidenceJson, failure_code AS failureCode,
+                approval_reason AS approvalReason, created_at AS createdAt
+         FROM run_results WHERE run_id = ?`,
+      )
+      .get(runId) as
+      | Omit<RunResult, "evidence"> & { evidenceJson: string }
+      | undefined;
+    if (row === undefined) {
+      return null;
+    }
+    return {
+      outcome: row.outcome,
+      summary: row.summary,
+      outputHash: row.outputHash,
+      evidence: JSON.parse(row.evidenceJson) as string[],
+      failureCode: row.failureCode,
+      approvalReason: row.approvalReason,
+      createdAt: row.createdAt,
+    };
   }
 
   transition(taskId: string, to: TaskState, now: string): void {
