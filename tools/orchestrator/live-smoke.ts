@@ -60,6 +60,7 @@ const adapter = new AppServerWorkerAdapter({
   },
 });
 
+async function main(): Promise<void> {
 try {
   ledger.registerProject(projectId, now());
   ledger.registerRepository({
@@ -127,3 +128,10 @@ try {
   ledger.close();
   rmSync(temporaryDirectory, { recursive: true, force: true });
 }
+}
+
+void main().catch((error: unknown) => {
+  const message = error instanceof Error ? error.message : "Unknown live-smoke error";
+  process.stderr.write(`${JSON.stringify({ status: "FAILED", error: message })}\n`);
+  process.exitCode = 1;
+});
