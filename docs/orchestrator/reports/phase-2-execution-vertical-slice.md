@@ -38,6 +38,12 @@ Engineering Orchestration tool boundary.
   wall-clock timer also operates when a Worker reports no usage. Either breach
   interrupts at most once and fails closed; late Worker results and hooks are
   ignored after timeout.
+- The controller latches the first usage-based budget breach before notifying
+  the Worker. A Worker cannot catch the hook error and restore success, and a
+  passing verifier cannot override the stored failure dimension and evidence.
+- Interrupt is requested once without making terminal persistence wait for the
+  adapter Promise. A pending or rejected interrupt cannot prevent timeout
+  fail-close; its rejection is observed to prevent an unhandled rejection.
 - The worktree guard validates exact repository root, canonical origin, base
   SHA, branch, clean state, and single checkout.
 - Worker `SUCCEEDED` is only provisional. The controller transitions to
@@ -96,9 +102,9 @@ minimum child environment, and secret exclusion.
 
 Local release-gate evidence:
 
-- focused Phase 1+2 tests: 31/31 passed, including a fixture documentation
+- focused Phase 1+2 tests: 34/34 passed, including a fixture documentation
   Worker that produces a policy-checked, verified local Git commit;
-- full tests: 299/299 passed;
+- full tests: 302/302 passed;
 - lint: zero errors and four pre-existing warnings;
 - typecheck: passed;
 - production build: passed with 69 routes;

@@ -26,7 +26,8 @@
 - Completed: governance and Architecture gates, dedicated branch, ledger v2,
   execution engine, fake Worker, worktree guard, mandatory fixed-ID verifier,
   minimum child environment, independent wall-time timeout, interrupt-once,
-  late-result suppression, and Phase 1+2 focused tests.
+  late-result suppression, controller-owned usage breach latch, non-blocking
+  interrupt observation, and Phase 1+2 focused tests.
 - Current work: re-run all local and exact-head remote gates, then hand Draft
   PR #44 back to the repository owner without merging.
 - Blockers/owner actions: repository-owner review and manual merge are required
@@ -34,12 +35,12 @@
 - Changed files: `tools/orchestrator/**`,
   `tests/orchestrator-phase-2.test.ts`, Orchestrator report/changelog, Decision
   Log, and this status file.
-- Validation: updated focused Phase 1+2 tests 31/31 pass; full tests 299/299
+- Validation: updated focused Phase 1+2 tests 34/34 pass; full tests 302/302
   pass; lint passes with zero errors and four pre-existing warnings; typecheck,
   production build with 69 routes, and local Playwright 39/39 pass. Diff,
-  secret, and external execution boundary audits pass. Exact-head CI, DB
-  replay, Preview, and Preview browser validation remain to be re-run after
-  push.
+  secret, and external execution boundary audits pass. Exact-head CI, security
+  audit, DB replay, Preview, and Preview browser validation remain to be re-run
+  after push.
 - Delivery: implementation commit
   `5435b93f2b579b0d93899520c48da32e026f2299` is pushed. Draft PR #44 targets
   `main`, is `manual-merge-required`, and is not eligible for auto-merge. Its

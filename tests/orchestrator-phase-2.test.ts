@@ -459,6 +459,66 @@ test("budget failure interrupts once and cannot become success", async () => {
   }
 });
 
+test("controller preserves a caught usage breach over Worker and verifier success", async () => {
+  const fixture = createFixture();
+  let interrupts = 0;
+  let verifierCalls = 0;
+  const worker: WorkerAdapter = {
+    name: "budget-catching-worker",
+    async execute(_context, hooks): Promise<WorkerOutcome> {
+      try {
+        await hooks.observeUsage({
+          inputTokens: 101,
+          outputTokens: 0,
+          reasoningTokens: 0,
+          estimatedCostKrw: 0,
+          elapsedSeconds: 1,
+        });
+      } catch {
+        // A Worker cannot erase the controller-owned budget breach.
+      }
+      return {
+        kind: "SUCCEEDED",
+        summary: "worker ignored budget breach",
+        output: { unsafeSuccess: true },
+        evidence: ["worker:self-asserted-success"],
+      };
+    },
+  };
+  try {
+    const engine = new OrchestratorExecutionEngine(
+      fixture.ledger,
+      worker,
+      async () => {
+        interrupts += 1;
+      },
+      (_repositoryRoot, commandIds) => {
+        verifierCalls += 1;
+        return passingVerifier(_repositoryRoot, commandIds);
+      },
+    );
+    const result = await engine.execute({
+      ...request("run-caught-budget", "run:caught-budget"),
+      budget: {
+        tokenLimit: 100,
+        wallTimeSeconds: 300,
+        estimatedCostKrwLimit: 1_000,
+      },
+    });
+    const stored = fixture.ledger.runResult("run-caught-budget");
+    assert.equal(result.run.state, "FAILED");
+    assert.equal(fixture.ledger.taskState("task-phase-2"), "FAILED");
+    assert.equal(interrupts, 1);
+    assert.equal(verifierCalls, 0);
+    assert.equal(stored?.failureCode, "TOKENS");
+    assert.deepEqual(stored?.evidence, ["controller:budget-exceeded:TOKENS"]);
+    assert.equal(stored?.evidence.includes("worker:self-asserted-success"), false);
+  } finally {
+    fixture.ledger.close();
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
 test("wall-clock timeout stops a Worker that never reports usage", async () => {
   const fixture = createFixture();
   let interrupts = 0;
@@ -491,6 +551,108 @@ test("wall-clock timeout stops a Worker that never reports usage", async () => {
     assert.equal(
       fixture.ledger.runResult("run-wall-timeout")?.failureCode,
       "WALL_TIME_TIMEOUT",
+    );
+  } finally {
+    fixture.ledger.close();
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
+test("wall-clock timeout does not await a permanently pending interrupt", async () => {
+  const fixture = createFixture();
+  let interrupts = 0;
+  try {
+    const engine = new OrchestratorExecutionEngine(
+      fixture.ledger,
+      {
+        name: "hanging-worker-and-interrupt",
+        async execute(): Promise<WorkerOutcome> {
+          return new Promise<WorkerOutcome>(() => undefined);
+        },
+      },
+      async () => {
+        interrupts += 1;
+        return new Promise<void>(() => undefined);
+      },
+      passingVerifier,
+    );
+    const completed = await Promise.race([
+      engine.execute({
+        ...request("run-pending-interrupt", "run:pending-interrupt"),
+        budget: {
+          tokenLimit: 1_000,
+          wallTimeSeconds: 0.005,
+          estimatedCostKrwLimit: 1_000,
+        },
+      }),
+      new Promise<never>((_resolve, reject) => {
+        setTimeout(() => reject(new Error("execute did not terminate")), 250);
+      }),
+    ]);
+    assert.equal(completed.run.state, "FAILED");
+    assert.equal(fixture.ledger.taskState("task-phase-2"), "FAILED");
+    assert.equal(interrupts, 1);
+    assert.equal(
+      fixture.ledger.runResult("run-pending-interrupt")?.failureCode,
+      "WALL_TIME_TIMEOUT",
+    );
+    assert.deepEqual(
+      fixture.ledger.runResult("run-pending-interrupt")?.evidence,
+      ["controller:wall-clock-timeout"],
+    );
+  } finally {
+    fixture.ledger.close();
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
+test("wall-clock timeout survives interrupt rejection and ignores late success", async () => {
+  const fixture = createFixture();
+  let interrupts = 0;
+  try {
+    const engine = new OrchestratorExecutionEngine(
+      fixture.ledger,
+      {
+        name: "late-worker-rejected-interrupt",
+        async execute(): Promise<WorkerOutcome> {
+          return new Promise((resolve) => {
+            setTimeout(
+              () =>
+                resolve({
+                  kind: "SUCCEEDED",
+                  summary: "late success",
+                  output: {},
+                  evidence: ["worker:late-after-rejected-interrupt"],
+                }),
+              50,
+            );
+          });
+        },
+      },
+      async () => {
+        interrupts += 1;
+        throw new Error("synthetic interrupt rejection");
+      },
+      passingVerifier,
+    );
+    await engine.execute({
+      ...request("run-rejected-interrupt", "run:rejected-interrupt"),
+      budget: {
+        tokenLimit: 1_000,
+        wallTimeSeconds: 0.005,
+        estimatedCostKrwLimit: 1_000,
+      },
+    });
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    const stored = fixture.ledger.runResult("run-rejected-interrupt");
+    assert.equal(fixture.ledger.run("run-rejected-interrupt").state, "FAILED");
+    assert.equal(fixture.ledger.taskState("task-phase-2"), "FAILED");
+    assert.equal(interrupts, 1);
+    assert.equal(stored?.failureCode, "WALL_TIME_TIMEOUT");
+    assert.deepEqual(stored?.evidence, ["controller:wall-clock-timeout"]);
+    assert.equal(
+      stored?.evidence.includes("worker:late-after-rejected-interrupt"),
+      false,
     );
   } finally {
     fixture.ledger.close();

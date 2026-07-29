@@ -1,6 +1,12 @@
 import { createHash } from "node:crypto";
 
-import { BudgetExceededError, BudgetGuard, type UsageSnapshot } from "./budget.ts";
+import {
+  BudgetExceededError,
+  BudgetGuard,
+  exceededDimension,
+  type BudgetDimension,
+  type UsageSnapshot,
+} from "./budget.ts";
 import {
   OrchestratorLedger,
   type OrchestratorRun,
@@ -240,14 +246,19 @@ export class OrchestratorExecutionEngine {
     );
 
     let interruptRequested = false;
-    const interruptOnce = async (): Promise<void> => {
+    const interruptOnce = (): void => {
       if (interruptRequested) {
         return;
       }
       interruptRequested = true;
-      await this.interrupt();
+      void this.interrupt().catch(() => {
+        // Interrupt completion is adapter telemetry, not a terminal-state gate.
+      });
     };
-    const budget = new BudgetGuard(request.budget, interruptOnce);
+    const budget = new BudgetGuard(request.budget, async () => {
+      interruptOnce();
+    });
+    let budgetBreach: BudgetDimension | null = null;
     let hooksActive = true;
     const hooks: WorkerHooks = {
       checkpoint: (checkpoint): void => {
@@ -259,6 +270,10 @@ export class OrchestratorExecutionEngine {
       observeUsage: async (usage): Promise<void> => {
         if (!hooksActive) {
           return;
+        }
+        const dimension = exceededDimension(request.budget, usage);
+        if (dimension !== null && budgetBreach === null) {
+          budgetBreach = dimension;
         }
         this.ledger.appendRunCheckpoint(
           run.runId,
@@ -298,11 +313,7 @@ export class OrchestratorExecutionEngine {
     const settled = await Promise.race([workerPromise, timeoutPromise]);
     if (settled.type === "timeout") {
       hooksActive = false;
-      try {
-        await interruptOnce();
-      } catch {
-        // Interruption failure cannot convert timeout into success.
-      }
+      interruptOnce();
       outcome = {
         kind: "FAILED",
         summary: "Worker wall-clock timeout exceeded",
@@ -330,6 +341,17 @@ export class OrchestratorExecutionEngine {
           evidence: [],
         };
       }
+    }
+
+    if (budgetBreach !== null) {
+      hooksActive = false;
+      outcome = {
+        kind: "FAILED",
+        summary: "Execution budget exceeded",
+        errorCode: budgetBreach,
+        retryable: false,
+        evidence: [`controller:budget-exceeded:${budgetBreach}`],
+      };
     }
 
     if (outcome.kind === "WAITING_FOR_HUMAN") {

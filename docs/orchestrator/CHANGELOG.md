@@ -12,6 +12,10 @@
   credential-free child environment.
 - Added an independent wall-clock timeout with interrupt-once and late-result
   suppression.
+- Latched usage-budget breaches in the controller so caught hook errors,
+  Worker success, and verifier success cannot reverse a failure.
+- Decoupled timeout persistence from interrupt adapter completion; pending and
+  rejected interrupt Promises are observed without blocking fail-close.
 - Added a deterministic fake Worker adapter and focused success, failure,
   retry, approval, recovery, security, and guard tests.
 - Documented that command-surface restriction is implemented but operating-
