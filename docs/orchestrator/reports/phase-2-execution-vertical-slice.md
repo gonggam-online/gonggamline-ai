@@ -43,7 +43,9 @@ Engineering Orchestration tool boundary.
   passing verifier cannot override the stored failure dimension and evidence.
 - Interrupt is requested once without making terminal persistence wait for the
   adapter Promise. A pending or rejected interrupt cannot prevent timeout
-  fail-close; its rejection is observed to prevent an unhandled rejection.
+  fail-close. The adapter invocation runs inside a Promise chain, so both a
+  synchronous throw and asynchronous rejection are observed without an
+  unhandled rejection.
 - The worktree guard validates exact repository root, canonical origin, base
   SHA, branch, clean state, and single checkout.
 - Worker `SUCCEEDED` is only provisional. The controller transitions to
@@ -102,9 +104,9 @@ minimum child environment, and secret exclusion.
 
 Local release-gate evidence:
 
-- focused Phase 1+2 tests: 34/34 passed, including a fixture documentation
+- focused Phase 1+2 tests: 35/35 passed, including a fixture documentation
   Worker that produces a policy-checked, verified local Git commit;
-- full tests: 302/302 passed;
+- full tests: 303/303 passed;
 - lint: zero errors and four pre-existing warnings;
 - typecheck: passed;
 - production build: passed with 69 routes;

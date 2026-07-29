@@ -16,6 +16,8 @@
   Worker success, and verifier success cannot reverse a failure.
 - Decoupled timeout persistence from interrupt adapter completion; pending and
   rejected interrupt Promises are observed without blocking fail-close.
+- Moved interrupt adapter invocation into the observed Promise chain so a
+  synchronous throw also cannot block timeout persistence.
 - Added a deterministic fake Worker adapter and focused success, failure,
   retry, approval, recovery, security, and guard tests.
 - Documented that command-surface restriction is implemented but operating-

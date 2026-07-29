@@ -660,6 +660,70 @@ test("wall-clock timeout survives interrupt rejection and ignores late success",
   }
 });
 
+test("wall-clock timeout survives synchronous interrupt throw and ignores late hooks", async () => {
+  const fixture = createFixture();
+  let interrupts = 0;
+  try {
+    const engine = new OrchestratorExecutionEngine(
+      fixture.ledger,
+      {
+        name: "late-worker-sync-throw-interrupt",
+        async execute(_context, hooks): Promise<WorkerOutcome> {
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              hooks.checkpoint({
+                kind: "LATE_CHECKPOINT",
+                payload: { ignored: true },
+              });
+              resolve({
+                kind: "SUCCEEDED",
+                summary: "late success",
+                output: {},
+                evidence: ["worker:late-after-sync-throw"],
+              });
+            }, 50);
+          });
+        },
+      },
+      () => {
+        interrupts += 1;
+        throw new Error("synthetic synchronous interrupt throw");
+      },
+      passingVerifier,
+    );
+    const completed = await engine.execute({
+      ...request("run-sync-throw-interrupt", "run:sync-throw-interrupt"),
+      budget: {
+        tokenLimit: 1_000,
+        wallTimeSeconds: 0.005,
+        estimatedCostKrwLimit: 1_000,
+      },
+    });
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    const stored = fixture.ledger.runResult("run-sync-throw-interrupt");
+    assert.equal(completed.run.state, "FAILED");
+    assert.equal(
+      fixture.ledger.run("run-sync-throw-interrupt").state,
+      "FAILED",
+    );
+    assert.equal(fixture.ledger.taskState("task-phase-2"), "FAILED");
+    assert.equal(interrupts, 1);
+    assert.equal(stored?.failureCode, "WALL_TIME_TIMEOUT");
+    assert.deepEqual(stored?.evidence, ["controller:wall-clock-timeout"]);
+    assert.equal(
+      stored?.evidence.includes("worker:late-after-sync-throw"),
+      false,
+    );
+    assert.equal(
+      fixture.ledger.latestRunCheckpoint("run-sync-throw-interrupt")?.kind,
+      "WORKER_DISPATCHED",
+    );
+  } finally {
+    fixture.ledger.close();
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
 test("late Worker success after timeout is ignored without a second transition", async () => {
   const fixture = createFixture();
   let interrupts = 0;

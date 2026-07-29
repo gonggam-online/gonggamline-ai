@@ -251,9 +251,11 @@ export class OrchestratorExecutionEngine {
         return;
       }
       interruptRequested = true;
-      void this.interrupt().catch(() => {
-        // Interrupt completion is adapter telemetry, not a terminal-state gate.
-      });
+      void Promise.resolve()
+        .then(() => this.interrupt())
+        .catch(() => {
+          // Interrupt completion is adapter telemetry, not a terminal-state gate.
+        });
     };
     const budget = new BudgetGuard(request.budget, async () => {
       interruptOnce();
