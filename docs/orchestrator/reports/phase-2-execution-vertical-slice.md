@@ -69,8 +69,16 @@ Local release-gate evidence:
 - production build: passed with 69 routes;
 - Playwright: 39/39 passed.
 
-Exact commit/PR identifiers and remote gates are recorded after terminal
-delivery.
+Delivery evidence:
+
+- implementation commit:
+  `5435b93f2b579b0d93899520c48da32e026f2299`;
+- Draft PR: #44, `manual-merge-required`;
+- initial exact-head CI, disposable DB baseline replay, Vercel Preview, and
+  Preview browser validation: passed.
+
+The final status-only checkpoint is revalidated before repository-owner
+handoff.
 
 ## Rollback and remaining work
 
