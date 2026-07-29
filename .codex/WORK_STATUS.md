@@ -24,28 +24,36 @@
   Supabase/Vercel/Production, secret/config changes, and commerce writes.
 - Root-cause class: code/capability gap inside the accepted Architecture.
 - Completed: governance and Architecture gates, dedicated branch, ledger v2,
-  execution engine, fake Worker, worktree guard, verifier, and Phase 1+2
-  focused tests.
-- Current work: deliver this exact status checkpoint, then revalidate the new
-  exact head and hand Draft PR #44 to the repository owner.
+  execution engine, fake Worker, worktree guard, mandatory fixed-ID verifier,
+  minimum child environment, independent wall-time timeout, interrupt-once,
+  late-result suppression, and Phase 1+2 focused tests.
+- Current work: re-run all local and exact-head remote gates, then hand Draft
+  PR #44 back to the repository owner without merging.
 - Blockers/owner actions: repository-owner review and manual merge are required
   after final exact-head verification. Phase 3 is not authorized by this PR.
 - Changed files: `tools/orchestrator/**`,
   `tests/orchestrator-phase-2.test.ts`, Orchestrator report/changelog, Decision
   Log, and this status file.
-- Validation: focused Phase 1+2 tests 26/26 pass; full tests 294/294 pass;
-  lint passes with zero errors and four pre-existing warnings; typecheck,
-  production build, and local Playwright 39/39 pass.
+- Validation: updated focused Phase 1+2 tests 31/31 pass; full tests 299/299
+  pass; lint passes with zero errors and four pre-existing warnings; typecheck,
+  production build with 69 routes, and local Playwright 39/39 pass. Diff,
+  secret, and external execution boundary audits pass. Exact-head CI, DB
+  replay, Preview, and Preview browser validation remain to be re-run after
+  push.
 - Delivery: implementation commit
   `5435b93f2b579b0d93899520c48da32e026f2299` is pushed. Draft PR #44 targets
   `main`, is `manual-merge-required`, and is not eligible for auto-merge. Its
   initial exact-head CI, DB replay, Vercel Preview, and Preview browser
   validation all passed.
-- Exact next action: push this status-only checkpoint, verify the resulting
-  exact head, then request repository-owner review without merging.
-- Remaining risks: actual Codex adapter authentication/cost/transport policy,
-  ledger retention/backup, numeric daily caps, GitHub/CI/Preview integration,
-  and real planner quality remain later checkpoints.
+- Exact next action: complete local gates, commit and push the narrow review
+  fix, then verify the resulting exact head and request repository-owner review
+  without merging.
+- Remaining risks: the fixed verifier command surface is not operating-system
+  network isolation; approved repository scripts remain trusted code. Actual
+  Codex process termination depends on the later transport adapter. Codex
+  authentication/cost/transport policy, ledger retention/backup, numeric daily
+  caps, GitHub/CI/Preview integration, and planner quality remain later
+  checkpoints.
 
 ## 2026-07-28 — Orchestrator Phase 1 local controller primitives
 

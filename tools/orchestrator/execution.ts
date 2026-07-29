@@ -7,6 +7,11 @@ import {
   type RunCheckpoint,
 } from "./ledger.ts";
 import type { TaskState } from "./state-machine.ts";
+import {
+  runLocalVerification,
+  type VerificationCommandId,
+  type VerificationEvidence,
+} from "./verifier.ts";
 
 export interface WorkerExecutionContext {
   readonly taskId: string;
@@ -66,12 +71,22 @@ export interface RunExecutionRequest {
     readonly wallTimeSeconds: number;
     readonly estimatedCostKrwLimit: number;
   };
+  readonly verificationPlan?: {
+    readonly repositoryRoot: string;
+    readonly requiredCommandIds: readonly VerificationCommandId[];
+    readonly retryableOnFailure: boolean;
+  };
 }
 
 export interface RunExecutionResult {
   readonly run: OrchestratorRun;
   readonly outcome: WorkerOutcome | null;
 }
+
+export type RunVerifier = (
+  repositoryRoot: string,
+  commandIds: readonly string[],
+) => VerificationEvidence[];
 
 function sha256(value: unknown): string {
   return createHash("sha256")
@@ -94,6 +109,7 @@ export class OrchestratorExecutionEngine {
     private readonly ledger: OrchestratorLedger,
     private readonly worker: WorkerAdapter,
     private readonly interrupt: () => Promise<void>,
+    private readonly verifier: RunVerifier = runLocalVerification,
   ) {}
 
   async execute(request: RunExecutionRequest): Promise<RunExecutionResult> {
@@ -223,12 +239,27 @@ export class OrchestratorExecutionEngine {
       request.now(),
     );
 
-    const budget = new BudgetGuard(request.budget, this.interrupt);
+    let interruptRequested = false;
+    const interruptOnce = async (): Promise<void> => {
+      if (interruptRequested) {
+        return;
+      }
+      interruptRequested = true;
+      await this.interrupt();
+    };
+    const budget = new BudgetGuard(request.budget, interruptOnce);
+    let hooksActive = true;
     const hooks: WorkerHooks = {
       checkpoint: (checkpoint): void => {
+        if (!hooksActive) {
+          return;
+        }
         this.ledger.appendRunCheckpoint(run.runId, checkpoint, request.now());
       },
       observeUsage: async (usage): Promise<void> => {
+        if (!hooksActive) {
+          return;
+        }
         this.ledger.appendRunCheckpoint(
           run.runId,
           { kind: "USAGE", payload: usage },
@@ -239,8 +270,8 @@ export class OrchestratorExecutionEngine {
     };
 
     let outcome: WorkerOutcome;
-    try {
-      outcome = await this.worker.execute(
+    const workerPromise = this.worker
+      .execute(
         {
           taskId: run.taskId,
           runId: run.runId,
@@ -249,18 +280,56 @@ export class OrchestratorExecutionEngine {
           resumedFrom,
         },
         hooks,
+      )
+      .then(
+        (workerOutcome) =>
+          ({ type: "outcome", outcome: workerOutcome }) as const,
+        (error: unknown) => ({ type: "error", error }) as const,
       );
-    } catch (error) {
-      const budgetExceeded = error instanceof BudgetExceededError;
+    let timeoutHandle: NodeJS.Timeout | null = null;
+    const timeoutPromise = new Promise<{ readonly type: "timeout" }>(
+      (resolve) => {
+        timeoutHandle = setTimeout(
+          () => resolve({ type: "timeout" }),
+          Math.max(1, request.budget.wallTimeSeconds * 1_000),
+        );
+      },
+    );
+    const settled = await Promise.race([workerPromise, timeoutPromise]);
+    if (settled.type === "timeout") {
+      hooksActive = false;
+      try {
+        await interruptOnce();
+      } catch {
+        // Interruption failure cannot convert timeout into success.
+      }
       outcome = {
         kind: "FAILED",
-        summary: budgetExceeded
-          ? "Execution budget exceeded"
-          : "Worker adapter failed",
-        errorCode: budgetExceeded ? error.dimension : "WORKER_ADAPTER_ERROR",
-        retryable: !budgetExceeded,
-        evidence: [],
+        summary: "Worker wall-clock timeout exceeded",
+        errorCode: "WALL_TIME_TIMEOUT",
+        retryable: false,
+        evidence: ["controller:wall-clock-timeout"],
       };
+    } else {
+      if (timeoutHandle !== null) {
+        clearTimeout(timeoutHandle);
+      }
+      if (settled.type === "outcome") {
+        outcome = settled.outcome;
+      } else {
+        const budgetExceeded = settled.error instanceof BudgetExceededError;
+        outcome = {
+          kind: "FAILED",
+          summary: budgetExceeded
+            ? "Execution budget exceeded"
+            : "Worker adapter failed",
+          errorCode: budgetExceeded
+            ? settled.error.dimension
+            : "WORKER_ADAPTER_ERROR",
+          retryable: !budgetExceeded,
+          evidence: [],
+        };
+      }
     }
 
     if (outcome.kind === "WAITING_FOR_HUMAN") {
@@ -290,6 +359,56 @@ export class OrchestratorExecutionEngine {
 
     this.ledger.transitionRun(run.runId, "VERIFYING", request.now());
     this.ledger.transition(run.taskId, "VERIFYING", request.now());
+    if (outcome.kind === "SUCCEEDED") {
+      const plan = request.verificationPlan;
+      if (plan === undefined || plan.requiredCommandIds.length === 0) {
+        outcome = {
+          kind: "FAILED",
+          summary: "Required verification plan was not executed",
+          errorCode: "VERIFICATION_NOT_RUN",
+          retryable: false,
+          evidence: ["controller:verification-not-run"],
+        };
+      } else {
+        try {
+          const verification = this.verifier(
+            plan.repositoryRoot,
+            plan.requiredCommandIds,
+          );
+          const allRequiredPassed =
+            verification.length === plan.requiredCommandIds.length &&
+            verification.every((entry) => entry.passed);
+          if (!allRequiredPassed) {
+            outcome = {
+              kind: "FAILED",
+              summary: "Required verification failed",
+              errorCode: "VERIFICATION_FAILED",
+              retryable: plan.retryableOnFailure,
+              evidence: verification.map(
+                (entry) =>
+                  `verification:${entry.commandId}:${entry.exitCode}:${entry.outputHash}`,
+              ),
+            };
+          } else {
+            outcome = {
+              ...outcome,
+              evidence: verification.map(
+                (entry) =>
+                  `verification:${entry.commandId}:${entry.outputHash}`,
+              ),
+            };
+          }
+        } catch {
+          outcome = {
+            kind: "FAILED",
+            summary: "Verification plan was rejected",
+            errorCode: "VERIFICATION_PLAN_REJECTED",
+            retryable: false,
+            evidence: ["controller:verification-plan-rejected"],
+          };
+        }
+      }
+    }
     this.ledger.recordRunResult(
       run.runId,
       {

@@ -18,7 +18,9 @@ checkpoints and sanitized evidence, applies retry and approval rules, and
 exposes typed ledger status queries. The implementation remains local to the
 Engineering Orchestration tool boundary.
 
-## Implemented boundary
+## Implementation maturity
+
+### Implemented and verified
 
 - SQLite ledger migration v2 adds runs, retry lineage, checkpoints, and
   immutable results.
@@ -32,14 +34,46 @@ Engineering Orchestration tool boundary.
   `WAITING_FOR_HUMAN` state; no success result is invented while approval is
   pending.
 - Resume uses the last persisted checkpoint and the same run identity.
-- Streamed usage checkpoints feed the Phase 1 budget guard. A breach interrupts
-  once and ends as `FAILED`.
+- Streamed usage checkpoints feed the Phase 1 budget guard. An independent
+  wall-clock timer also operates when a Worker reports no usage. Either breach
+  interrupts at most once and fails closed; late Worker results and hooks are
+  ignored after timeout.
 - The worktree guard validates exact repository root, canonical origin, base
   SHA, branch, clean state, and single checkout.
-- The verifier executes only local process commands, records exit status,
-  duration, and output hash, and rejects known external-capable CLIs.
+- Worker `SUCCEEDED` is only provisional. The controller transitions to
+  `VERIFYING`, runs every required verifier command, and permits `COMPLETED`
+  only when all required checks pass. Worker-provided evidence cannot satisfy
+  this gate.
+- The verifier accepts only the fixed command IDs `GIT_DIFF_CHECK`, `LINT`,
+  `TYPECHECK`, `TEST`, and `BUILD`. Executables, arguments, and timeouts are
+  controller-owned. Child processes receive a minimum explicit environment
+  that excludes credentials, tokens, secrets, and `NODE_OPTIONS`.
 - `FakeWorkerAdapter` provides an actual deterministic dispatch boundary for
   tests without external side effects.
+
+### Partially implemented
+
+- Verification command-surface isolation is implemented, but operating-system
+  network isolation is not. The controller prevents arbitrary `node`,
+  `npm install`, `npx`, `git push`, PowerShell, Python, and executable requests.
+  It also runs approved npm commands with offline and ignore-scripts settings.
+  Nevertheless, approved repository scripts execute trusted repository code;
+  this local process model has no firewall, container, or restricted network
+  namespace. It must not be described as external-call blocking.
+- Interruption is invoked and bounded to one call, but whether an underlying
+  process actually exits depends on the injected adapter's interrupt
+  implementation.
+
+### Interface only
+
+- `WorkerAdapter` and the interrupt callback define the transport boundary.
+  No actual Codex App Server or `codex exec` transport is connected.
+
+### Phase 3 or later
+
+- Worktree creation, commit/push/Draft PR automation, GitHub write operations,
+  CI and Vercel Preview reconciliation, planner/reviewer integration, durable
+  cloud workers, and operating-system sandboxing remain outside Phase 2.
 
 ## Security and external effects
 
@@ -56,14 +90,15 @@ Engineering Orchestration tool boundary.
 
 Focused tests cover successful dispatch, deterministic task selection,
 checkpoint/result audit, duplicate suppression, bounded retry and lineage,
-approval wait and resume, budget interruption, worktree guards, verifier
-hashing, and external-command rejection.
+approval wait and resume, usage and wall-time interruption, late-result
+suppression, worktree guards, mandatory verification, fixed command IDs,
+minimum child environment, and secret exclusion.
 
 Local release-gate evidence:
 
-- focused Phase 1+2 tests: 26/26 passed, including a fixture documentation
+- focused Phase 1+2 tests: 31/31 passed, including a fixture documentation
   Worker that produces a policy-checked, verified local Git commit;
-- full tests: 294/294 passed;
+- full tests: 299/299 passed;
 - lint: zero errors and four pre-existing warnings;
 - typecheck: passed;
 - production build: passed with 69 routes;

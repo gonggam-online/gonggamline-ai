@@ -7,6 +7,7 @@ import test from "node:test";
 
 import {
   OrchestratorExecutionEngine,
+  type RunVerifier,
   type WorkerAdapter,
   type WorkerOutcome,
 } from "../tools/orchestrator/execution.ts";
@@ -15,11 +16,20 @@ import { OrchestratorLedger } from "../tools/orchestrator/ledger.ts";
 import {
   runLocalVerification,
   verifyChangedPaths,
+  type VerificationCommandId,
 } from "../tools/orchestrator/verifier.ts";
 import { inspectWorktree } from "../tools/orchestrator/worktree-guard.ts";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "..");
 const timestamp = "2026-07-29T09:00:00.000Z";
+const passingVerifier: RunVerifier = (_repositoryRoot, commandIds) =>
+  commandIds.map((commandId) => ({
+    commandId: commandId as VerificationCommandId,
+    exitCode: 0,
+    durationMs: 1,
+    outputHash: "a".repeat(64),
+    passed: true,
+  }));
 
 function createFixture(): {
   readonly ledger: OrchestratorLedger;
@@ -64,6 +74,11 @@ function request(runId: string, idempotencyKey: string) {
       wallTimeSeconds: 300,
       estimatedCostKrwLimit: 1_000,
     },
+    verificationPlan: {
+      repositoryRoot,
+      requiredCommandIds: ["GIT_DIFF_CHECK"],
+      retryableOnFailure: true,
+    },
   } as const;
 }
 
@@ -83,6 +98,7 @@ test("run executes a safe worker and persists state, checkpoints, and evidence",
       fixture.ledger,
       worker,
       async () => undefined,
+      passingVerifier,
     );
     const result = await engine.execute(request("run-001", "run:001"));
 
@@ -90,12 +106,98 @@ test("run executes a safe worker and persists state, checkpoints, and evidence",
     assert.equal(result.run.attempt, 1);
     assert.equal(result.outcome?.kind, "SUCCEEDED");
     assert.equal(fixture.ledger.runResult("run-001")?.outcome, "SUCCEEDED");
+    const storedEvidence = fixture.ledger.runResult("run-001")?.evidence ?? [];
     assert.equal(
-      fixture.ledger.runResult("run-001")?.evidence.includes("verify:passed"),
+      storedEvidence.some((entry) =>
+        entry.startsWith("verification:GIT_DIFF_CHECK:"),
+      ),
       true,
     );
+    assert.equal(storedEvidence.includes("verify:passed"), false);
     assert.equal(fixture.ledger.latestRunCheckpoint("run-001")?.kind, "FILE_WRITTEN");
     assert.equal(fixture.ledger.verifyAuditChain(), true);
+  } finally {
+    fixture.ledger.close();
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
+test("Worker success cannot complete when a required verifier fails", async () => {
+  const fixture = createFixture();
+  try {
+    const engine = new OrchestratorExecutionEngine(
+      fixture.ledger,
+      new FakeWorkerAdapter({
+        kind: "SUCCEEDED",
+        summary: "unverified worker success",
+        output: { candidate: true },
+        evidence: ["worker:self-asserted-pass"],
+      }),
+      async () => undefined,
+      (_repositoryRoot, commandIds) =>
+        commandIds.map((commandId) => ({
+          commandId: commandId as VerificationCommandId,
+          exitCode: 1,
+          durationMs: 1,
+          outputHash: "b".repeat(64),
+          passed: false,
+        })),
+    );
+    const result = await engine.execute(
+      request("run-verifier-failed", "run:verifier-failed"),
+    );
+    assert.equal(result.run.state, "RETRYABLE_FAILURE");
+    assert.equal(
+      fixture.ledger.taskState("task-phase-2"),
+      "RETRYABLE_FAILURE",
+    );
+    assert.equal(
+      fixture.ledger.runResult("run-verifier-failed")?.failureCode,
+      "VERIFICATION_FAILED",
+    );
+    assert.equal(
+      fixture.ledger
+        .runResult("run-verifier-failed")
+        ?.evidence.includes("worker:self-asserted-pass"),
+      false,
+    );
+  } finally {
+    fixture.ledger.close();
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
+test("Worker success cannot complete without a required verification plan", async () => {
+  const fixture = createFixture();
+  let verifierCalls = 0;
+  try {
+    const engine = new OrchestratorExecutionEngine(
+      fixture.ledger,
+      new FakeWorkerAdapter({
+        kind: "SUCCEEDED",
+        summary: "missing plan",
+        output: {},
+        evidence: ["worker:self-asserted-pass"],
+      }),
+      async () => undefined,
+      () => {
+        verifierCalls += 1;
+        return [];
+      },
+    );
+    const withoutPlan = { ...request(
+      "run-no-verification",
+      "run:no-verification",
+    ) };
+    delete (withoutPlan as { verificationPlan?: unknown }).verificationPlan;
+    const result = await engine.execute(withoutPlan);
+    assert.equal(result.run.state, "FAILED");
+    assert.equal(fixture.ledger.taskState("task-phase-2"), "FAILED");
+    assert.equal(verifierCalls, 0);
+    assert.equal(
+      fixture.ledger.runResult("run-no-verification")?.failureCode,
+      "VERIFICATION_NOT_RUN",
+    );
   } finally {
     fixture.ledger.close();
     rmSync(fixture.directory, { recursive: true, force: true });
@@ -122,6 +224,7 @@ test("run idempotency prevents duplicate worker dispatch", async () => {
       fixture.ledger,
       worker,
       async () => undefined,
+      passingVerifier,
     );
     await engine.execute(request("run-idempotent", "run:idempotent"));
     const duplicate = await engine.execute(
@@ -149,6 +252,7 @@ test("engine selects the next READY task deterministically", async () => {
         evidence: ["selection:ready"],
       }),
       async () => undefined,
+      passingVerifier,
     );
     const result = await engine.executeNextReady({
       ...request("run-selected", "run:selected"),
@@ -199,6 +303,7 @@ test("retry preserves retryOfRunId and increments the attempt", async () => {
       fixture.ledger,
       worker,
       async () => undefined,
+      passingVerifier,
     );
     const first = await engine.execute(request("run-failed", "run:failed"));
     assert.equal(first.run.state, "RETRYABLE_FAILURE");
@@ -229,6 +334,7 @@ test("retry ceiling makes both run and task permanently FAILED", async () => {
       fixture.ledger,
       worker,
       async () => undefined,
+      passingVerifier,
     );
     await engine.execute(request("run-ceiling-1", "run:ceiling:1"));
     await engine.retry("run-ceiling-1", {
@@ -285,6 +391,7 @@ test("approval wait is distinct and can resume from its persisted checkpoint", a
       fixture.ledger,
       worker,
       async () => undefined,
+      passingVerifier,
     );
     const waiting = await engine.execute(request("run-approval", "run:approval"));
     assert.equal(waiting.run.state, "WAITING_FOR_HUMAN");
@@ -295,6 +402,7 @@ test("approval wait is distinct and can resume from its persisted checkpoint", a
       leaseExpiresAt: "2026-07-29T09:30:00.000Z",
       now: () => timestamp,
       budget: request("unused", "unused").budget,
+      verificationPlan: request("unused", "unused").verificationPlan,
     });
     assert.equal(resumed.run.state, "COMPLETED");
     assert.notEqual(resumedSequence, null);
@@ -332,6 +440,7 @@ test("budget failure interrupts once and cannot become success", async () => {
       async () => {
         interrupts += 1;
       },
+      passingVerifier,
     );
     const result = await engine.execute({
       ...request("run-budget", "run:budget"),
@@ -344,6 +453,102 @@ test("budget failure interrupts once and cannot become success", async () => {
     assert.equal(interrupts, 1);
     assert.equal(result.run.state, "FAILED");
     assert.equal(fixture.ledger.runResult("run-budget")?.failureCode, "TOKENS");
+  } finally {
+    fixture.ledger.close();
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
+test("wall-clock timeout stops a Worker that never reports usage", async () => {
+  const fixture = createFixture();
+  let interrupts = 0;
+  const worker: WorkerAdapter = {
+    name: "hanging-safe-worker",
+    async execute(): Promise<WorkerOutcome> {
+      return new Promise<WorkerOutcome>(() => undefined);
+    },
+  };
+  try {
+    const engine = new OrchestratorExecutionEngine(
+      fixture.ledger,
+      worker,
+      async () => {
+        interrupts += 1;
+      },
+      passingVerifier,
+    );
+    const result = await engine.execute({
+      ...request("run-wall-timeout", "run:wall-timeout"),
+      budget: {
+        tokenLimit: 1_000,
+        wallTimeSeconds: 0.01,
+        estimatedCostKrwLimit: 1_000,
+      },
+    });
+    assert.equal(result.run.state, "FAILED");
+    assert.equal(fixture.ledger.taskState("task-phase-2"), "FAILED");
+    assert.equal(interrupts, 1);
+    assert.equal(
+      fixture.ledger.runResult("run-wall-timeout")?.failureCode,
+      "WALL_TIME_TIMEOUT",
+    );
+  } finally {
+    fixture.ledger.close();
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
+test("late Worker success after timeout is ignored without a second transition", async () => {
+  const fixture = createFixture();
+  let interrupts = 0;
+  const worker: WorkerAdapter = {
+    name: "late-safe-worker",
+    async execute(): Promise<WorkerOutcome> {
+      return new Promise((resolve) => {
+        setTimeout(
+          () =>
+            resolve({
+              kind: "SUCCEEDED",
+              summary: "too late",
+              output: { late: true },
+              evidence: ["worker:late-success"],
+            }),
+          50,
+        );
+      });
+    },
+  };
+  try {
+    const engine = new OrchestratorExecutionEngine(
+      fixture.ledger,
+      worker,
+      async () => {
+        interrupts += 1;
+      },
+      passingVerifier,
+    );
+    await engine.execute({
+      ...request("run-late-timeout", "run:late-timeout"),
+      budget: {
+        tokenLimit: 1_000,
+        wallTimeSeconds: 0.005,
+        estimatedCostKrwLimit: 1_000,
+      },
+    });
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    assert.equal(fixture.ledger.run("run-late-timeout").state, "FAILED");
+    assert.equal(fixture.ledger.taskState("task-phase-2"), "FAILED");
+    assert.equal(interrupts, 1);
+    assert.equal(
+      fixture.ledger.runResult("run-late-timeout")?.failureCode,
+      "WALL_TIME_TIMEOUT",
+    );
+    assert.equal(
+      fixture.ledger
+        .runResult("run-late-timeout")
+        ?.evidence.includes("worker:late-success"),
+      false,
+    );
   } finally {
     fixture.ledger.close();
     rmSync(fixture.directory, { recursive: true, force: true });
@@ -375,6 +580,7 @@ test("checkpoint and result persistence redact synthetic secret material", async
       fixture.ledger,
       worker,
       async () => undefined,
+      passingVerifier,
     );
     await engine.execute(request("run-redaction", "run:redaction"));
     const checkpoint = JSON.stringify(
@@ -439,30 +645,74 @@ test("worktree guard verifies exact origin, SHA, clean state, and unique branch"
   }
 });
 
-test("local verifier stores hashes and rejects external-capable commands", () => {
-  const evidence = runLocalVerification(repositoryRoot, [
-    {
-      name: "node-smoke",
-      executable: process.execPath,
-      args: ["-e", "process.stdout.write('safe fixture')"],
-      timeoutMs: 10_000,
+test("local verifier stores hashes and rejects every unapproved command path", () => {
+  let processRuns = 0;
+  const evidence = runLocalVerification(
+    repositoryRoot,
+    ["GIT_DIFF_CHECK"],
+    () => {
+      processRuns += 1;
+      return {
+        status: 0,
+        stdout: "safe fixture",
+        stderr: "",
+        timedOut: false,
+      };
     },
-  ]);
+  );
   assert.equal(evidence.length, 1);
   assert.equal(evidence[0]?.passed, true);
   assert.match(evidence[0]?.outputHash ?? "", /^[a-f0-9]{64}$/);
-  assert.throws(
-    () =>
-      runLocalVerification(repositoryRoot, [
-        {
-          name: "forbidden-network",
-          executable: "curl.exe",
-          args: ["https://example.invalid"],
-          timeoutMs: 10_000,
-        },
-      ]),
-    /forbidden/,
-  );
+  assert.equal(processRuns, 1);
+
+  for (const commandId of [
+    "NODE_NETWORK_SCRIPT",
+    "NPM_INSTALL",
+    "NPX_EXTERNAL_SCRIPT",
+    "GIT_PUSH",
+    "POWERSHELL_NETWORK",
+    "PYTHON_NETWORK",
+    "ARBITRARY_EXECUTABLE",
+  ]) {
+    assert.throws(
+      () =>
+        runLocalVerification(repositoryRoot, [commandId], () => {
+          processRuns += 1;
+          return { status: 0, stdout: "", stderr: "", timedOut: false };
+        }),
+      /not approved/,
+    );
+  }
+  assert.equal(processRuns, 1);
+});
+
+test("verifier child environment excludes credentials and secret variables", () => {
+  const priorToken = process.env.SYNTHETIC_SECRET_TOKEN;
+  const priorGithub = process.env.GITHUB_TOKEN;
+  process.env.SYNTHETIC_SECRET_TOKEN = "synthetic-secret";
+  process.env.GITHUB_TOKEN = "synthetic-github-token";
+  let childEnvironment: Readonly<Record<string, string>> | null = null;
+  try {
+    runLocalVerification(repositoryRoot, ["GIT_DIFF_CHECK"], (invocation) => {
+      childEnvironment = invocation.env;
+      return { status: 0, stdout: "", stderr: "", timedOut: false };
+    });
+  } finally {
+    if (priorToken === undefined) {
+      delete process.env.SYNTHETIC_SECRET_TOKEN;
+    } else {
+      process.env.SYNTHETIC_SECRET_TOKEN = priorToken;
+    }
+    if (priorGithub === undefined) {
+      delete process.env.GITHUB_TOKEN;
+    } else {
+      process.env.GITHUB_TOKEN = priorGithub;
+    }
+  }
+  assert.notEqual(childEnvironment, null);
+  assert.equal("SYNTHETIC_SECRET_TOKEN" in childEnvironment!, false);
+  assert.equal("GITHUB_TOKEN" in childEnvironment!, false);
+  assert.equal("NODE_OPTIONS" in childEnvironment!, false);
 });
 
 test("diff verifier applies allow and deny paths to tracked and untracked files", () => {
@@ -584,12 +834,7 @@ test("vertical slice dispatches a documentation worker to a verified local commi
           denied: [],
         });
         const verification = runLocalVerification(fixtureRepository, [
-          {
-            name: "git-diff-check",
-            executable: "git",
-            args: ["diff", "--check"],
-            timeoutMs: 10_000,
-          },
+          "GIT_DIFF_CHECK",
         ]);
         assert.equal(verification.every((entry) => entry.passed), true);
         execFileSync("git", ["-C", fixtureRepository, "add", "docs/phase-2.md"]);
@@ -634,6 +879,11 @@ test("vertical slice dispatches a documentation worker to a verified local commi
         tokenLimit: 1_000,
         wallTimeSeconds: 60,
         estimatedCostKrwLimit: 0,
+      },
+      verificationPlan: {
+        repositoryRoot: fixtureRepository,
+        requiredCommandIds: ["GIT_DIFF_CHECK"],
+        retryableOnFailure: true,
       },
     });
     assert.equal(result.run.state, "COMPLETED");

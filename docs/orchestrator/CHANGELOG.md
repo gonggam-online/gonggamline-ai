@@ -7,10 +7,15 @@
   result evidence, retry lineage, approval wait, and resume.
 - Added duplicate suppression and bounded budget interruption using the Phase 1
   ledger, lease, state, and budget primitives.
-- Added exact worktree guards and a local-only verifier that hashes output and
-  rejects external-capable CLIs.
+- Added exact worktree guards and a controller-owned verifier with fixed
+  command IDs, mandatory success gating, hashed evidence, and a minimum
+  credential-free child environment.
+- Added an independent wall-clock timeout with interrupt-once and late-result
+  suppression.
 - Added a deterministic fake Worker adapter and focused success, failure,
   retry, approval, recovery, security, and guard tests.
+- Documented that command-surface restriction is implemented but operating-
+  system network isolation and actual process termination remain incomplete.
 - Did not add Codex network execution, GitHub writes, CI/Preview polling,
   product APIs, Supabase changes, Production changes, or commerce writes.
 
