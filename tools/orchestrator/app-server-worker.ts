@@ -224,7 +224,7 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
     }
 
     const executable =
-      this.config.executable ?? (process.platform === "win32" ? "codex.cmd" : "codex");
+      this.config.executable ?? (process.platform === "win32" ? "codex.exe" : "codex");
     const child = this.launcher(executable, ["app-server", "--stdio"], {
       cwd: this.config.workspace.repositoryRoot,
       env: safeEnvironment(),
@@ -266,6 +266,10 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
         return;
       }
       terminal = true;
+      hooks.checkpoint({
+        kind: "TRANSPORT_FAILED",
+        payload: { message: sanitizeOrchestratorText(error.message) },
+      });
       for (const waiter of pending.values()) {
         waiter.reject(error);
       }
