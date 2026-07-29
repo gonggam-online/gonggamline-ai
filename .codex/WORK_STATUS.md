@@ -1,5 +1,54 @@
 # Work status
 
+## 2026-07-28 — Orchestrator Phase 1 local controller primitives
+
+- Objective: implement only the approved Phase 1 deterministic ledger, policy,
+  router, budget, and recovery foundation after PR #42.
+- Branch/base: `codex/feat/orchestrator-phase-1`, based on PR #42 merge
+  `75d48dba3da9cb36bdecbd34de5604346379e601`.
+- Risk: high-risk/manual bootstrap; `manual-merge-required`, no auto-merge.
+- Revenue impact: P2 enablement and risk reduction. Preventing duplicate tasks,
+  branches, PRs, actions, and runaway usage is required before automation can
+  safely reduce delivery time.
+- Architecture compliance: accepted Engineering Orchestration lifecycle and
+  contracts own the change; no new Domain, DB, Queue, public API, or external
+  integration is introduced. The SQLite ledger is local tool state outside
+  Git.
+- Scope: canonical Task/Result validation, local SQLite migration/ledger,
+  state/lease/idempotency/audit, explicit N/D routing, allow/deny and approval
+  policy, token/time/cost guard, App Server interrupt-first cancellation, and
+  correlated Windows recovery planning.
+- Non-goals: Phase 2+ Codex execution, worktree mutation, GitHub writer,
+  CI/Preview polling, planner, Product/API/migration/Supabase/Vercel/Production,
+  commerce write, OAuth, secret, or paid API.
+- Root-cause class: code/capability gap already covered by accepted
+  Architecture and measured Phase 0 evidence.
+- Completed: verified PR #42 merge and clean worktree; completed governance and
+  compliance gates; created the dedicated branch; implemented Phase 1
+  primitives and focused restart/D/N/duplicate/lease/audit/budget/contract/
+  routing/recovery tests.
+- Current work: exact-head CI/Preview verification, followed by
+  repository-owner review of Draft PR #43.
+- Blockers/owner actions: repository owner must manually review and merge PR
+  #43 only if its evidence and remaining risks are acceptable.
+- Changed files: `tools/orchestrator/**`, focused tests, package metadata,
+  `docs/orchestrator/**`, Decision Log, and this status file.
+- Validation: focused Phase 1 tests 14/14 pass; full lint passes with zero
+  errors and four pre-existing warnings; typecheck passes after aligning
+  development Node types with the active Node 24 runtime; full tests pass
+  282/282; Production build passes with 69 routes. Local Playwright reached all
+  39 tests: 32 passed and the same seven Supabase-dependent pages failed with
+  external `missing_url` configuration before the outer timeout.
+- Delivery: dedicated branch pushed; Draft PR #43 is open with
+  `manual-merge-required` and auto-merge disabled. Exact-head CI, Preview
+  browser, Vercel readiness, mergeability, review threads, and local/remote
+  equality are verified at terminal handoff.
+- Exact next action: repository-owner review after exact-head gates; do not
+  merge or start Phase 2 without a separate decision.
+- Remaining risks: `node:sqlite` requires supported Node 24 runtime; future
+  streamed usage integration and actual process stop remain Phase 2; ledger
+  backup/retention and numeric daily caps still require owner decisions.
+
 ## 2026-07-28 — Orchestrator Phase 0 protocol capability spike
 
 - Objective: prove the accepted Task/Result contracts and installed Codex
