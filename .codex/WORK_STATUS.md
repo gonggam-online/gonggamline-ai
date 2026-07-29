@@ -35,7 +35,7 @@
 - Changed files: `tools/orchestrator/**`,
   `tests/orchestrator-phase-2.test.ts`, Orchestrator report/changelog, Decision
   Log, and this status file.
-- Validation: updated focused Phase 1+2 tests 35/35 pass; full tests 303/303
+- Validation: updated focused Phase 1+2 tests 37/37 pass; full tests 305/305
   pass; lint passes with zero errors and four pre-existing warnings; typecheck,
   production build with 69 routes, and local Playwright 39/39 pass. Diff,
   secret, and external execution boundary audits pass. Exact-head CI, security

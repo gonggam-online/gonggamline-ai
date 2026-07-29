@@ -58,6 +58,10 @@ Engineering Orchestration tool boundary.
   that excludes credentials, tokens, secrets, and `NODE_OPTIONS`.
 - `FakeWorkerAdapter` provides an actual deterministic dispatch boundary for
   tests without external side effects.
+- Worker invocation also runs inside an observed Promise chain. Synchronous
+  throws and asynchronous rejections both persist `WORKER_ADAPTER_ERROR`
+  evidence and end in the policy-approved retryable failure state rather than
+  leaving a run or task `RUNNING`.
 
 ### Partially implemented
 
@@ -104,9 +108,9 @@ minimum child environment, and secret exclusion.
 
 Local release-gate evidence:
 
-- focused Phase 1+2 tests: 35/35 passed, including a fixture documentation
+- focused Phase 1+2 tests: 37/37 passed, including a fixture documentation
   Worker that produces a policy-checked, verified local Git commit;
-- full tests: 303/303 passed;
+- full tests: 305/305 passed;
 - lint: zero errors and four pre-existing warnings;
 - typecheck: passed;
 - production build: passed with 69 routes;

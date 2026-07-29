@@ -18,6 +18,8 @@
   rejected interrupt Promises are observed without blocking fail-close.
 - Moved interrupt adapter invocation into the observed Promise chain so a
   synchronous throw also cannot block timeout persistence.
+- Moved Worker invocation into the observed Promise chain so synchronous
+  throws and asynchronous rejections share the persisted adapter-failure path.
 - Added a deterministic fake Worker adapter and focused success, failure,
   retry, approval, recovery, security, and guard tests.
 - Documented that command-surface restriction is implemented but operating-

@@ -122,6 +122,69 @@ test("run executes a safe worker and persists state, checkpoints, and evidence",
   }
 });
 
+test("synchronous Worker execute throw fails closed as an adapter error", async () => {
+  const fixture = createFixture();
+  try {
+    const engine = new OrchestratorExecutionEngine(
+      fixture.ledger,
+      {
+        name: "synchronous-throw-worker",
+        execute(): Promise<WorkerOutcome> {
+          throw new Error("synthetic synchronous Worker throw");
+        },
+      },
+      async () => undefined,
+      passingVerifier,
+    );
+    const completed = await engine.execute(
+      request("run-worker-sync-throw", "run:worker-sync-throw"),
+    );
+    const stored = fixture.ledger.runResult("run-worker-sync-throw");
+    assert.equal(completed.run.state, "RETRYABLE_FAILURE");
+    assert.equal(
+      fixture.ledger.taskState("task-phase-2"),
+      "RETRYABLE_FAILURE",
+    );
+    assert.notEqual(completed.run.state, "RUNNING");
+    assert.equal(stored?.failureCode, "WORKER_ADAPTER_ERROR");
+    assert.deepEqual(stored?.evidence, ["controller:worker-adapter-error"]);
+  } finally {
+    fixture.ledger.close();
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
+test("asynchronous Worker execute rejection keeps the adapter fail-close path", async () => {
+  const fixture = createFixture();
+  try {
+    const engine = new OrchestratorExecutionEngine(
+      fixture.ledger,
+      {
+        name: "asynchronous-reject-worker",
+        async execute(): Promise<WorkerOutcome> {
+          throw new Error("synthetic asynchronous Worker rejection");
+        },
+      },
+      async () => undefined,
+      passingVerifier,
+    );
+    const completed = await engine.execute(
+      request("run-worker-async-reject", "run:worker-async-reject"),
+    );
+    const stored = fixture.ledger.runResult("run-worker-async-reject");
+    assert.equal(completed.run.state, "RETRYABLE_FAILURE");
+    assert.equal(
+      fixture.ledger.taskState("task-phase-2"),
+      "RETRYABLE_FAILURE",
+    );
+    assert.equal(stored?.failureCode, "WORKER_ADAPTER_ERROR");
+    assert.deepEqual(stored?.evidence, ["controller:worker-adapter-error"]);
+  } finally {
+    fixture.ledger.close();
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
 test("Worker success cannot complete when a required verifier fails", async () => {
   const fixture = createFixture();
   try {

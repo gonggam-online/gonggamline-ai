@@ -287,8 +287,9 @@ export class OrchestratorExecutionEngine {
     };
 
     let outcome: WorkerOutcome;
-    const workerPromise = this.worker
-      .execute(
+    const workerPromise = Promise.resolve()
+      .then(() =>
+        this.worker.execute(
         {
           taskId: run.taskId,
           runId: run.runId,
@@ -297,6 +298,7 @@ export class OrchestratorExecutionEngine {
           resumedFrom,
         },
         hooks,
+        ),
       )
       .then(
         (workerOutcome) =>
@@ -340,7 +342,9 @@ export class OrchestratorExecutionEngine {
             ? settled.error.dimension
             : "WORKER_ADAPTER_ERROR",
           retryable: !budgetExceeded,
-          evidence: [],
+          evidence: budgetExceeded
+            ? []
+            : ["controller:worker-adapter-error"],
         };
       }
     }
