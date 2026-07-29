@@ -1,5 +1,19 @@
 # Orchestrator changelog
 
+## 2026-07-29 — Phase 2 execution vertical slice
+
+- Added local run creation, deterministic `READY` task selection, Worker
+  dispatch, synchronized task/run state transitions, checkpoints, immutable
+  result evidence, retry lineage, approval wait, and resume.
+- Added duplicate suppression and bounded budget interruption using the Phase 1
+  ledger, lease, state, and budget primitives.
+- Added exact worktree guards and a local-only verifier that hashes output and
+  rejects external-capable CLIs.
+- Added a deterministic fake Worker adapter and focused success, failure,
+  retry, approval, recovery, security, and guard tests.
+- Did not add Codex network execution, GitHub writes, CI/Preview polling,
+  product APIs, Supabase changes, Production changes, or commerce writes.
+
 ## 2026-07-28 — Phase 1 local ledger, policy, and router
 
 - Added a Node 24 `node:sqlite` ledger with embedded schema migration,

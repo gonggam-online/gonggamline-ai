@@ -1,5 +1,46 @@
 # Work status
 
+## 2026-07-29 — Orchestrator Phase 2 execution vertical slice
+
+- Objective: complete the shortest safe run-to-worker-to-result Vertical Slice
+  on top of merged Phase 1.
+- Branch/base: `codex/feat/orchestrator-phase-2`, based on PR #43 merge
+  `59d866e0dc67cb1afa16323b3afe696a4e7825cb`.
+- Risk: high-risk/manual automation bootstrap; `manual-merge-required`, no
+  auto-merge.
+- Revenue impact: P2 operational enablement. Deterministic dispatch, retry,
+  approval, and recovery are required before the orchestrator can safely reduce
+  engineering cycle time.
+- Architecture compliance: accepted Engineering Orchestration lifecycle owns
+  the change. It reuses the approved local SQLite, state, lease, policy,
+  budget, audit, and recovery boundaries and introduces no product Domain,
+  public API, Supabase DB, migration, external integration, or commerce write.
+- Scope: local run migration/status, `READY` task selection, Worker dispatch,
+  task/run state synchronization, checkpoint/result evidence, duplicate
+  suppression, retry lineage, approval wait/resume, budget fail-close, exact
+  worktree guard, local verifier, fake safe adapter, tests, and documentation.
+- Non-goals: actual Codex paid/network execution, worktree creation, commit
+  automation, push/PR, CI/Preview polling, planner/reviewer, product API,
+  Supabase/Vercel/Production, secret/config changes, and commerce writes.
+- Root-cause class: code/capability gap inside the accepted Architecture.
+- Completed: governance and Architecture gates, dedicated branch, ledger v2,
+  execution engine, fake Worker, worktree guard, verifier, and Phase 1+2
+  focused tests.
+- Current work: complete documentation, full local release gates, diff/security
+  audit, commit, push, Draft PR, and exact-head CI/Preview evidence.
+- Blockers/owner actions: none for the approved local fake-worker slice.
+- Changed files: `tools/orchestrator/**`,
+  `tests/orchestrator-phase-2.test.ts`, Orchestrator report/changelog, Decision
+  Log, and this status file.
+- Validation: focused Phase 1+2 tests 26/26 pass; full tests 294/294 pass;
+  lint passes with zero errors and four pre-existing warnings; typecheck,
+  production build, and local Playwright 39/39 pass.
+- Exact next action: complete diff/security audits, commit, push, create the
+  high-risk/manual Draft PR, and verify its exact-head gates.
+- Remaining risks: actual Codex adapter authentication/cost/transport policy,
+  ledger retention/backup, numeric daily caps, GitHub/CI/Preview integration,
+  and real planner quality remain later checkpoints.
+
 ## 2026-07-28 — Orchestrator Phase 1 local controller primitives
 
 - Objective: implement only the approved Phase 1 deterministic ledger, policy,

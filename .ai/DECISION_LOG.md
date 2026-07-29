@@ -364,3 +364,31 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   external commerce write, paid API, secret, or Phase 2+ implementation.
 - Rollback: revert the Phase 1 implementation PR. Product runtime and external
   state are unchanged.
+
+## 2026-07-29 — Orchestrator Phase 2 execution vertical slice authorized
+
+- Category: bounded implementation authorization
+- Story / PR: Orchestrator Phase 2 execution vertical slice / pending
+- Status: approved by repository-owner task directive; delivery pending
+- Owner / approver: repository owner
+- Context and evidence: PR #43 merged Phase 1 at
+  `59d866e0dc67cb1afa16323b3afe696a4e7825cb`; local Supabase/Playwright
+  readiness then passed 39/39 with 282/282 repository tests.
+- Decision or issue: authorize the shortest safe local execution slice:
+  run creation, `READY` task selection, fake Worker dispatch, synchronized
+  states, checkpoints, immutable success/failure evidence, idempotency,
+  bounded retry with `retryOfRunId`, approval wait, resume, exact worktree
+  guard, and local verification.
+- Architecture compliance: accepted Engineering Orchestration owns this
+  lifecycle. The slice reuses Phase 1 local SQLite and control primitives and
+  adds no product Domain, public API, Supabase migration, Auth/RLS/CSRF,
+  external integration, Production mutation, or commerce write.
+- Consequences and risks: the automation bootstrap remains high-risk/manual and
+  receives `manual-merge-required`. Actual Codex transport, authentication,
+  cost-bearing execution, GitHub writes, CI/Preview polling, and planner logic
+  remain unimplemented and separately gated.
+- Follow-up / due condition: deliver one bounded Draft PR with full local and
+  exact-head Preview evidence; begin no Phase 3 implementation from this
+  authorization.
+- Rollback or supersession: revert the Phase 2 PR. Product runtime and external
+  systems remain unchanged.
