@@ -1020,6 +1020,24 @@ test("verifier child environment excludes credentials and secret variables", () 
   assert.equal("NODE_OPTIONS" in childEnvironment!, false);
 });
 
+test("verifier invokes npm through the fixed Windows command boundary", () => {
+  let executable = "";
+  let args: readonly string[] = [];
+  runLocalVerification(repositoryRoot, ["LINT"], (invocation) => {
+    executable = invocation.executable;
+    args = invocation.args;
+    return { status: 0, stdout: "", stderr: "", timedOut: false };
+  });
+
+  if (process.platform === "win32") {
+    assert.equal(executable, process.env.ComSpec ?? "cmd.exe");
+    assert.deepEqual(args, ["/d", "/s", "/c", "npm.cmd", "run", "lint"]);
+  } else {
+    assert.equal(executable, "npm");
+    assert.deepEqual(args, ["run", "lint"]);
+  }
+});
+
 test("diff verifier applies allow and deny paths to tracked and untracked files", () => {
   const directory = mkdtempSync(path.join(tmpdir(), "orchestrator-diff-"));
   try {
