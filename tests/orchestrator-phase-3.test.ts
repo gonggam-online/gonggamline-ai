@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { EventEmitter } from "node:events";
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -19,10 +20,12 @@ import {
   type AppServerProcess,
 } from "../tools/orchestrator/app-server-worker.ts";
 import { runDevelopmentLoop } from "../tools/orchestrator/development-loop.ts";
-import type {
-  WorkerExecutionContext,
-  WorkerHooks,
-  WorkerOutcome,
+import {
+  OrchestratorExecutionEngine,
+  type RunExecutionRequest,
+  type WorkerExecutionContext,
+  type WorkerHooks,
+  type WorkerOutcome,
 } from "../tools/orchestrator/execution.ts";
 import { OrchestratorLedger } from "../tools/orchestrator/ledger.ts";
 import type { VerificationCommandId } from "../tools/orchestrator/verifier.ts";
@@ -34,6 +37,10 @@ import {
 const timestamp = "2026-07-30T09:00:00.000Z";
 const canonicalOrigin =
   "https://github.com/gonggam-online/gonggamline-ai.git";
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 function git(root: string, args: readonly string[]): string {
   return execFileSync("git", ["-C", root, ...args], {
@@ -99,15 +106,22 @@ interface FakeServerOptions {
   readonly duplicateTerminal?: boolean;
   readonly suppressTerminal?: boolean;
   readonly completionItemOnly?: boolean;
+  readonly ignoreStdinEnd?: boolean;
+  readonly terminationBehavior?: "exit" | "reject" | "pending" | "throw";
+  readonly onTerminate?: () => void;
+  readonly usageInputTokens?: number;
 }
 
 class FakeAppServerProcess extends EventEmitter implements AppServerProcess {
   readonly stdout = new PassThrough();
   readonly stderr = new PassThrough();
   readonly stdin: Writable;
+  terminationCalls = 0;
+  #options: FakeServerOptions;
 
   constructor(options: FakeServerOptions) {
     super();
+    this.#options = options;
     this.stdin = new Writable({
       write: (chunk, _encoding, callback) => {
         const request = JSON.parse(String(chunk).trim()) as {
@@ -134,6 +148,22 @@ class FakeAppServerProcess extends EventEmitter implements AppServerProcess {
         this.stdout.write(`${JSON.stringify({ id: request.id, result })}\n`);
         if (request.method === "turn/start") {
           options.onTurn?.();
+          if (options.usageInputTokens !== undefined) {
+            this.stdout.write(
+              `${JSON.stringify({
+                method: "thread/tokenUsage/updated",
+                params: {
+                  tokenUsage: {
+                    total: {
+                      inputTokens: options.usageInputTokens,
+                      outputTokens: 0,
+                      reasoningOutputTokens: 0,
+                    },
+                  },
+                },
+              })}\n`,
+            );
+          }
           const finalText =
             options.finalText ??
             JSON.stringify({
@@ -179,7 +209,31 @@ class FakeAppServerProcess extends EventEmitter implements AppServerProcess {
         }
         callback();
       },
+      final: (callback) => {
+        if (!options.ignoreStdinEnd) {
+          setImmediate(() => this.emit("exit", 0));
+        }
+        callback();
+      },
     });
+  }
+
+  terminate(): boolean | Promise<boolean> {
+    this.terminationCalls += 1;
+    this.#options.onTerminate?.();
+    switch (this.#options.terminationBehavior ?? "exit") {
+      case "throw":
+        throw new Error("synthetic synchronous termination throw");
+      case "reject":
+        return Promise.reject(
+          new Error("synthetic asynchronous termination rejection"),
+        );
+      case "pending":
+        return new Promise<boolean>(() => undefined);
+      case "exit":
+        setImmediate(() => this.emit("exit", 137));
+        return true;
+    }
   }
 }
 
@@ -217,6 +271,7 @@ test("App Server transport completes only inside the approved workspace", async 
 
 test("transport rejects malformed JSONL without accepting success", async () => {
   const fixture = createRepository();
+  const checkpoints: Array<{ kind: string; payload: unknown }> = [];
   try {
     const adapter = new AppServerWorkerAdapter(
       {
@@ -227,8 +282,20 @@ test("transport rejects malformed JSONL without accepting success", async () => 
       () => new FakeAppServerProcess({ malformedEvent: true }),
     );
     await assert.rejects(
-      adapter.execute(context(), hooks()),
+      adapter.execute(context(), {
+        checkpoint: (checkpoint) => checkpoints.push(checkpoint),
+        observeUsage: async () => undefined,
+      }),
       /Malformed App Server JSONL event/,
+    );
+    assert.equal(
+      checkpoints.some(
+        (checkpoint) =>
+          checkpoint.kind === "PROCESS_SHUTDOWN_REQUESTED" &&
+          isObject(checkpoint.payload) &&
+          checkpoint.payload.normalCompletion === false,
+      ),
+      true,
     );
   } finally {
     rmSync(fixture.directory, { recursive: true, force: true });
@@ -328,6 +395,282 @@ test("transport forwards interrupt at most once", async () => {
     );
     child?.emit("exit", 1);
     await assert.rejects(execution, /exited before completion/);
+  } finally {
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
+function engineRequest(
+  runId: string,
+  budget: RunExecutionRequest["budget"],
+): RunExecutionRequest {
+  return {
+    projectId: "project-phase-3",
+    taskId: "task-phase-3",
+    runId,
+    idempotencyKey: `idempotency:${runId}`,
+    controllerId: "controller-N",
+    leaseExpiresAt: "2026-07-30T09:30:00.000Z",
+    now: () => timestamp,
+    budget,
+  };
+}
+
+test("timeout terminates an ignoring App Server before a late file mutation", async () => {
+  const repository = createRepository();
+  const ledgerDirectory = mkdtempSync(path.join(tmpdir(), "phase-3-timeout-"));
+  const ledger = createLedger(ledgerDirectory);
+  let child: FakeAppServerProcess | undefined;
+  let lateWrite: NodeJS.Timeout | undefined;
+  try {
+    const adapter = new AppServerWorkerAdapter(
+      {
+        goal: "Simulate a hanging Worker",
+        correlationId: "correlation-timeout-shutdown",
+        workspace: {
+          ...repository.boundary,
+          pathPolicy: { allowed: ["docs/late.md"], denied: [".git/**"] },
+        },
+        shutdownGraceMs: 5,
+        forcedExitGraceMs: 10,
+      },
+      () => {
+        child = new FakeAppServerProcess({
+          suppressTerminal: true,
+          ignoreStdinEnd: true,
+          terminationBehavior: "exit",
+          onTurn: () => {
+            lateWrite = setTimeout(
+              () =>
+                writeFileSync(
+                  path.join(repository.directory, "docs", "late.md"),
+                  "late\n",
+                ),
+              40,
+            );
+          },
+          onTerminate: () => {
+            if (lateWrite !== undefined) {
+              clearTimeout(lateWrite);
+            }
+          },
+        });
+        return child;
+      },
+    );
+    const engine = new OrchestratorExecutionEngine(
+      ledger,
+      adapter,
+      () => adapter.interrupt(),
+    );
+    const result = await engine.execute(
+      engineRequest("run-timeout-shutdown", {
+        tokenLimit: 10_000,
+        wallTimeSeconds: 0.005,
+        estimatedCostKrwLimit: 1_000,
+      }),
+    );
+    await new Promise((resolve) => setTimeout(resolve, 60));
+
+    assert.equal(result.run.state, "FAILED");
+    assert.equal(ledger.taskState("task-phase-3"), "FAILED");
+    assert.equal(
+      ledger.runResult("run-timeout-shutdown")?.failureCode,
+      "WALL_TIME_TIMEOUT",
+    );
+    assert.equal(child?.terminationCalls, 1);
+    assert.equal(
+      existsSync(path.join(repository.directory, "docs", "late.md")),
+      false,
+    );
+    assert.equal(
+      ledger
+        .runCheckpoints("run-timeout-shutdown")
+        .some((checkpoint) => checkpoint.kind === "PROCESS_EXITED"),
+      true,
+    );
+  } finally {
+    if (lateWrite !== undefined) {
+      clearTimeout(lateWrite);
+    }
+    ledger.close();
+    rmSync(ledgerDirectory, { recursive: true, force: true });
+    rmSync(repository.directory, { recursive: true, force: true });
+  }
+});
+
+test("budget breach terminates the App Server before a late file mutation", async () => {
+  const repository = createRepository();
+  const ledgerDirectory = mkdtempSync(path.join(tmpdir(), "phase-3-budget-"));
+  const ledger = createLedger(ledgerDirectory);
+  let child: FakeAppServerProcess | undefined;
+  let lateWrite: NodeJS.Timeout | undefined;
+  try {
+    const adapter = new AppServerWorkerAdapter(
+      {
+        goal: "Simulate a budget-breaching Worker",
+        correlationId: "correlation-budget-shutdown",
+        workspace: {
+          ...repository.boundary,
+          pathPolicy: {
+            allowed: ["docs/budget-late.md"],
+            denied: [".git/**"],
+          },
+        },
+        shutdownGraceMs: 5,
+        forcedExitGraceMs: 10,
+      },
+      () => {
+        child = new FakeAppServerProcess({
+          suppressTerminal: true,
+          ignoreStdinEnd: true,
+          terminationBehavior: "exit",
+          usageInputTokens: 101,
+          onTurn: () => {
+            lateWrite = setTimeout(
+              () =>
+                writeFileSync(
+                  path.join(repository.directory, "docs", "budget-late.md"),
+                  "late\n",
+                ),
+              40,
+            );
+          },
+          onTerminate: () => {
+            if (lateWrite !== undefined) {
+              clearTimeout(lateWrite);
+            }
+          },
+        });
+        return child;
+      },
+    );
+    const engine = new OrchestratorExecutionEngine(
+      ledger,
+      adapter,
+      () => adapter.interrupt(),
+    );
+    const result = await engine.execute(
+      engineRequest("run-budget-shutdown", {
+        tokenLimit: 100,
+        wallTimeSeconds: 10,
+        estimatedCostKrwLimit: 1_000,
+      }),
+    );
+    await new Promise((resolve) => setTimeout(resolve, 60));
+
+    assert.equal(result.run.state, "FAILED");
+    assert.equal(
+      ledger.runResult("run-budget-shutdown")?.failureCode,
+      "TOKENS",
+    );
+    assert.equal(child?.terminationCalls, 1);
+    assert.equal(
+      existsSync(path.join(repository.directory, "docs", "budget-late.md")),
+      false,
+    );
+  } finally {
+    if (lateWrite !== undefined) {
+      clearTimeout(lateWrite);
+    }
+    ledger.close();
+    rmSync(ledgerDirectory, { recursive: true, force: true });
+    rmSync(repository.directory, { recursive: true, force: true });
+  }
+});
+
+for (const behavior of ["throw", "reject", "pending"] as const) {
+  test(`termination ${behavior} cannot block timeout persistence`, async () => {
+    const repository = createRepository();
+    const ledgerDirectory = mkdtempSync(
+      path.join(tmpdir(), `phase-3-terminate-${behavior}-`),
+    );
+    const ledger = createLedger(ledgerDirectory);
+    let child: FakeAppServerProcess | undefined;
+    try {
+      const adapter = new AppServerWorkerAdapter(
+        {
+          goal: "Simulate a stuck App Server",
+          correlationId: `correlation-terminate-${behavior}`,
+          workspace: repository.boundary,
+          shutdownGraceMs: 5,
+          forcedExitGraceMs: 5,
+        },
+        () => {
+          child = new FakeAppServerProcess({
+            suppressTerminal: true,
+            ignoreStdinEnd: true,
+            terminationBehavior: behavior,
+          });
+          return child;
+        },
+      );
+      const engine = new OrchestratorExecutionEngine(
+        ledger,
+        adapter,
+        () => adapter.interrupt(),
+      );
+      const result = await engine.execute(
+        engineRequest(`run-terminate-${behavior}`, {
+          tokenLimit: 10_000,
+          wallTimeSeconds: 0.005,
+          estimatedCostKrwLimit: 1_000,
+        }),
+      );
+
+      assert.equal(result.run.state, "FAILED");
+      assert.equal(ledger.taskState("task-phase-3"), "FAILED");
+      assert.equal(
+        ledger.runResult(`run-terminate-${behavior}`)?.failureCode,
+        "WALL_TIME_TIMEOUT",
+      );
+      assert.equal(child?.terminationCalls, 1);
+    } finally {
+      ledger.close();
+      rmSync(ledgerDirectory, { recursive: true, force: true });
+      rmSync(repository.directory, { recursive: true, force: true });
+    }
+  });
+}
+
+test("normal completion observes process exit without forced termination", async () => {
+  const fixture = createRepository();
+  const checkpoints: Array<{ kind: string; payload: unknown }> = [];
+  let child: FakeAppServerProcess | undefined;
+  try {
+    const adapter = new AppServerWorkerAdapter(
+      {
+        goal: "Return structured success",
+        correlationId: "correlation-normal-exit",
+        workspace: fixture.boundary,
+        shutdownGraceMs: 20,
+        forcedExitGraceMs: 20,
+      },
+      () => {
+        child = new FakeAppServerProcess({});
+        return child;
+      },
+    );
+    const outcome = await adapter.execute(context(), {
+      checkpoint: (checkpoint) => checkpoints.push(checkpoint),
+      observeUsage: async () => undefined,
+    });
+
+    assert.equal(outcome.kind, "SUCCEEDED");
+    assert.equal(child?.terminationCalls, 0);
+    assert.equal(
+      checkpoints.some((checkpoint) => checkpoint.kind === "PROCESS_EXITED"),
+      true,
+    );
+    assert.equal(
+      checkpoints.some(
+        (checkpoint) =>
+          checkpoint.kind === "PROCESS_SHUTDOWN_REQUESTED" &&
+          isObject(checkpoint.payload) &&
+          checkpoint.payload.normalCompletion === true,
+      ),
+      true,
+    );
   } finally {
     rmSync(fixture.directory, { recursive: true, force: true });
   }

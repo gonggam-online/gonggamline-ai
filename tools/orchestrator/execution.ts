@@ -253,20 +253,37 @@ export class OrchestratorExecutionEngine {
       request.now(),
     );
 
-    let interruptRequested = false;
-    const interruptOnce = (): void => {
-      if (interruptRequested) {
-        return;
+    let interruptPromise: Promise<"SETTLED" | "REJECTED"> | null = null;
+    const interruptOnce = (): Promise<"SETTLED" | "REJECTED"> => {
+      if (interruptPromise !== null) {
+        return interruptPromise;
       }
-      interruptRequested = true;
-      void Promise.resolve()
+      interruptPromise = Promise.resolve()
         .then(() => this.interrupt())
-        .catch(() => {
-          // Interrupt completion is adapter telemetry, not a terminal-state gate.
-        });
+        .then(
+          () => "SETTLED" as const,
+          () => "REJECTED" as const,
+        );
+      return interruptPromise;
+    };
+    const awaitInterruptBoundary = async (): Promise<void> => {
+      const status = await Promise.race([
+        interruptOnce(),
+        new Promise<"TIMED_OUT">((resolve) =>
+          setTimeout(() => resolve("TIMED_OUT"), 100),
+        ),
+      ]);
+      this.ledger.appendRunCheckpoint(
+        run.runId,
+        {
+          kind: "INTERRUPT_BOUNDARY",
+          payload: { status },
+        },
+        request.now(),
+      );
     };
     const budget = new BudgetGuard(request.budget, async () => {
-      interruptOnce();
+      await awaitInterruptBoundary();
     });
     let budgetBreach: BudgetDimension | null = null;
     let hooksActive = true;
@@ -331,8 +348,8 @@ export class OrchestratorExecutionEngine {
     );
     const settled = await Promise.race([workerPromise, timeoutPromise]);
     if (settled.type === "timeout") {
+      await awaitInterruptBoundary();
       hooksActive = false;
-      interruptOnce();
       outcome = {
         kind: "FAILED",
         summary: "Worker wall-clock timeout exceeded",

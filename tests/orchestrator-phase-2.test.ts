@@ -779,7 +779,7 @@ test("wall-clock timeout survives synchronous interrupt throw and ignores late h
     );
     assert.equal(
       fixture.ledger.latestRunCheckpoint("run-sync-throw-interrupt")?.kind,
-      "WORKER_DISPATCHED",
+      "INTERRUPT_BOUNDARY",
     );
   } finally {
     fixture.ledger.close();

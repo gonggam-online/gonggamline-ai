@@ -1453,7 +1453,10 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Actual Codex App Server smoke: completed in one attempt after fail-close
   probes identified and corrected Windows npm CLI launch and streamed terminal
   item handling.
-- Current: final full regression validation and delivery preparation.
+- PR #45 review fix: added controller-bounded interrupt quiescence, direct App
+  Server child termination, observed exit evidence, and late-write regression
+  coverage.
+- Current: final full regression and live-smoke revalidation.
 
 ### Changed files
 
@@ -1471,7 +1474,7 @@ perform the documented read-only Supabase schema and completeness inspection.
 
 ### Verification and next action
 
-- Focused Phase 1+2+3 tests: 48/48 passed at final source state.
+- Focused Phase 1+2+3 tests: 54/54 passed after bounded-shutdown changes.
 - Full tests: 316/316 passed at final source state.
 - Lint: zero errors and four pre-existing warnings.
 - Typecheck: passed.

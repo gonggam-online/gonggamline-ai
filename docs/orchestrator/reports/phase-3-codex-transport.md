@@ -60,8 +60,21 @@ network namespace.
   audit chain are durable. The App Server subprocess is not reattached after a
   controller restart; recovery uses the existing controller checkpoint
   contract.
-- Interrupt delivery is best effort. Phase 2 guarantees terminal persistence
-  without waiting forever, but a stuck child may still require operator cleanup.
+- Interrupt delivery now has a bounded direct-child shutdown contract. The
+  controller waits at most 100 ms for the adapter boundary before terminal
+  persistence. The adapter sends `turn/interrupt`, closes stdin, waits a short
+  grace period, requests direct child termination at most once, and requires an
+  observed process exit before a normal result can return.
+- Windows npm installations resolve the packaged native `codex.exe` directly,
+  avoiding an intermediate Node wrapper that could orphan the App Server child.
+  Non-Windows installations use the resolved `codex` executable. This controls
+  the directly spawned App Server process, not an independently enumerated
+  descendant process tree.
+- If an injected termination callback throws, rejects, or never settles, the
+  controller still persists the timeout/budget failure after its independent
+  bound. `PROCESS_TERMINATION_FAILED` or `PROCESS_EXIT_TIMEOUT` records the
+  incomplete shutdown. The production launcher uses the synchronous Node
+  `ChildProcess.kill` request and fails closed unless exit is observed.
 - The adapter does not commit. The slice ends at a verified local change and
   persisted completion result.
 

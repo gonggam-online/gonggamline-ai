@@ -28,6 +28,9 @@ export interface AppServerProcess {
   readonly stderr: Readable;
   once(event: "error", listener: (error: Error) => void): this;
   once(event: "exit", listener: (code: number | null) => void): this;
+  terminate(
+    signal: NodeJS.Signals,
+  ): boolean | Promise<boolean>;
 }
 
 export type AppServerLauncher = (
@@ -45,6 +48,8 @@ export interface AppServerWorkerConfig {
   readonly goal: string;
   readonly correlationId: string;
   readonly workspace: WorkspaceBoundary;
+  readonly shutdownGraceMs?: number;
+  readonly forcedExitGraceMs?: number;
 }
 
 function codexCommand(config: AppServerWorkerConfig): {
@@ -60,17 +65,32 @@ function codexCommand(config: AppServerWorkerConfig): {
   if (process.platform === "win32") {
     const appData = process.env.APPDATA;
     if (appData !== undefined) {
-      const npmEntry = path.join(
+      const architecture =
+        process.arch === "arm64"
+          ? {
+              packageName: "codex-win32-arm64",
+              triple: "aarch64-pc-windows-msvc",
+            }
+          : {
+              packageName: "codex-win32-x64",
+              triple: "x86_64-pc-windows-msvc",
+            };
+      const nativeExecutable = path.join(
         appData,
         "npm",
         "node_modules",
         "@openai",
         "codex",
+        "node_modules",
+        "@openai",
+        architecture.packageName,
+        "vendor",
+        architecture.triple,
         "bin",
-        "codex.js",
+        "codex.exe",
       );
-      if (existsSync(npmEntry)) {
-        return { executable: process.execPath, argsPrefix: [npmEntry] };
+      if (existsSync(nativeExecutable)) {
+        return { executable: nativeExecutable, argsPrefix: [] };
       }
     }
   }
@@ -135,14 +155,18 @@ function safeEnvironment(
   return result;
 }
 
-const defaultLauncher: AppServerLauncher = (executable, args, options) =>
-  spawn(executable, [...args], {
+const defaultLauncher: AppServerLauncher = (executable, args, options) => {
+  const child = spawn(executable, [...args], {
     cwd: options.cwd,
     env: options.env,
     shell: false,
     windowsHide: true,
     stdio: ["pipe", "pipe", "pipe"],
   }) as ChildProcessWithoutNullStreams;
+  return Object.assign(child, {
+    terminate: (signal: NodeJS.Signals) => child.kill(signal),
+  });
+};
 
 function hash(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
@@ -232,6 +256,7 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
         threadId: string | null;
         turnId: string | null;
         interruptRequested: boolean;
+        shutdown: (normalCompletion: boolean) => Promise<void>;
       }
     | null = null;
   #ownedStatusHash: string | undefined;
@@ -280,16 +305,92 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
         send({ method, id, params });
       });
     };
+    let exitObserved = false;
+    let resolveExit: () => void = () => undefined;
+    const exitPromise = new Promise<void>((resolve) => {
+      resolveExit = resolve;
+    });
+    let terminationRequested = false;
+    let shutdownPromise: Promise<void> | null = null;
+    const waitForExit = async (milliseconds: number): Promise<boolean> => {
+      if (exitObserved) {
+        return true;
+      }
+      return Promise.race([
+        exitPromise.then(() => true),
+        new Promise<false>((resolve) =>
+          setTimeout(() => resolve(false), Math.max(1, milliseconds)),
+        ),
+      ]);
+    };
+    const terminateOnce = (): void => {
+      if (terminationRequested || exitObserved) {
+        return;
+      }
+      terminationRequested = true;
+      hooks.checkpoint({
+        kind: "PROCESS_TERMINATION_REQUESTED",
+        payload: { signal: "SIGKILL" },
+      });
+      void Promise.resolve()
+        .then(() => child.terminate("SIGKILL"))
+        .then(
+          () => undefined,
+          (error: unknown) => {
+            hooks.checkpoint({
+              kind: "PROCESS_TERMINATION_FAILED",
+              payload: {
+                message: sanitizeOrchestratorText(
+                  error instanceof Error
+                    ? error.message
+                    : "Unknown termination failure",
+                ),
+              },
+            });
+          },
+        );
+    };
+    const shutdown = (normalCompletion: boolean): Promise<void> => {
+      if (shutdownPromise !== null) {
+        return shutdownPromise;
+      }
+      shutdownPromise = (async () => {
+        hooks.checkpoint({
+          kind: "PROCESS_SHUTDOWN_REQUESTED",
+          payload: { normalCompletion },
+        });
+        child.stdin.end();
+        if (
+          await waitForExit(
+            this.config.shutdownGraceMs ?? 50,
+          )
+        ) {
+          return;
+        }
+        terminateOnce();
+        if (!(await waitForExit(this.config.forcedExitGraceMs ?? 50))) {
+          hooks.checkpoint({
+            kind: "PROCESS_EXIT_TIMEOUT",
+            payload: { terminationRequested },
+          });
+          throw new Error("App Server did not exit after bounded termination");
+        }
+      })();
+      void shutdownPromise.catch(() => undefined);
+      return shutdownPromise;
+    };
     const active = {
       process: child,
       send,
       threadId: null as string | null,
       turnId: null as string | null,
       interruptRequested: false,
+      shutdown,
     };
     this.#active = active;
 
     let terminal = false;
+    let normalTurnCompletion = false;
     let completedAgentMessage: string | null = null;
     let resolveTerminal: (value: WorkerOutcome) => void = () => undefined;
     let rejectTerminal: (error: Error) => void = () => undefined;
@@ -411,6 +512,7 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
         });
         return;
       }
+      normalTurnCompletion = true;
       const finalMessage = [...turn.items]
         .reverse()
         .find(
@@ -437,6 +539,12 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
     });
     child.once("error", failTransport);
     child.once("exit", (code) => {
+      exitObserved = true;
+      resolveExit();
+      hooks.checkpoint({
+        kind: "PROCESS_EXITED",
+        payload: { code, terminationRequested },
+      });
       if (!terminal) {
         failTransport(new Error(`App Server exited before completion: ${code}`));
       }
@@ -489,31 +597,35 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
       });
       return outcome;
     } finally {
-      this.#active = null;
       lines.close();
-      child.stdin.end();
-      for (const waiter of pending.values()) {
-        waiter.reject(new Error("App Server session closed"));
+      try {
+        await shutdown(normalTurnCompletion);
+      } finally {
+        this.#active = null;
+        for (const waiter of pending.values()) {
+          waiter.reject(new Error("App Server session closed"));
+        }
+        pending.clear();
       }
-      pending.clear();
     }
   }
 
   async interrupt(): Promise<void> {
     const active = this.#active;
-    if (
-      active === null ||
-      active.interruptRequested ||
-      active.threadId === null ||
-      active.turnId === null
-    ) {
+    if (active === null) {
       return;
     }
+    if (active.interruptRequested) {
+      return active.shutdown(false);
+    }
     active.interruptRequested = true;
-    active.send({
-      method: "turn/interrupt",
-      id: 1_000_000,
-      params: { threadId: active.threadId, turnId: active.turnId },
-    });
+    if (active.threadId !== null && active.turnId !== null) {
+      active.send({
+        method: "turn/interrupt",
+        id: 1_000_000,
+        params: { threadId: active.threadId, turnId: active.turnId },
+      });
+    }
+    return active.shutdown(false);
   }
 }
