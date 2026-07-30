@@ -3,6 +3,35 @@
 Append entries; do not rewrite history. Each Story records applicable
 Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 
+## 2026-07-30 — Production Schema Security Reconciliation v1
+
+- Category: architecture decision
+- Story / PR: Production Schema Security Reconciliation v1 / pending
+- Status: accepted for architecture and discovery; implementation phases
+  remain high-risk/manual
+- Owner / approver: Database / Security; repository owner
+- Context and evidence: Production has all 57 tables expected from migrations
+  000-020 but no Supabase migration history. Migration 021 is absent. A
+  verified logical backup and an official schema diff show nine
+  Production-only permissive policies, seven RLS-state differences, and broad
+  grant/default-privilege drift. Migrations 005-020 also retain development
+  `FOR ALL` policies.
+- Decision or issue: Production drift must not be copied into intended schema,
+  and permissive policies must not be removed until active anonymous-client
+  dependencies are replaced or explicitly approved. Define a complete access
+  matrix, migrate application access first, then deliver one forward-only
+  reconciliation migration after 021. Keep migrations 000-021 immutable.
+- Consequences and risks: History repair and migration 021 remain blocked.
+  Product routes currently depend on anonymous Supabase access; premature
+  restriction can interrupt revenue operations. Dormant Commerce OS tables
+  remain exposed by legacy policies until the ordered high-risk remediation.
+- Follow-up / due condition: complete R0 access inventory and obtain exact
+  target-state approval; then deliver R1 application access, R2 database
+  reconciliation, and R3 Production rollout as separate reviewable changes.
+- Rollback or supersession: revert the documentation PR. Later rollback must
+  disable the affected feature or restore from a verified backup and must not
+  reintroduce unconditional anonymous writes.
+
 ## 2026-07-30 — Engineering Orchestrator Phase 4 delivery boundary
 
 - Decision: extend the accepted lifecycle through verified commit, exact-head
