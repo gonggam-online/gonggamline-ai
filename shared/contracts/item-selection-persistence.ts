@@ -152,3 +152,72 @@ export interface ItemSelectionRunAggregateV1 {
   readonly run: ItemSelectionRunRecordV1;
   readonly evaluations: readonly ItemSelectionPersistenceResultV1[];
 }
+
+export interface ItemSelectionRunCreateRequestV1 {
+  readonly provider: "domeggook";
+  readonly keyword: string;
+  readonly requestedSize: number;
+  readonly rulesetVersion: string;
+  readonly evaluatorVersion: string;
+  readonly profitabilityPolicyVersion: string;
+  readonly profitabilityCalculationContractVersion:
+    typeof ITEM_SELECTION_PROFITABILITY_CALCULATION_CONTRACT_VERSION;
+  readonly requestFingerprint: Sha256Hex;
+  readonly retryOfRunId: string | null;
+}
+
+export interface ItemSelectionRunFinalizeRequestV1 {
+  readonly terminalStatus: Exclude<ItemSelectionRunStatus, "RUNNING">;
+  readonly expectedRequestFingerprint: Sha256Hex;
+  readonly expectedRulesetVersion: string;
+  readonly expectedEvaluatorVersion: string;
+  readonly expectedProfitabilityPolicyVersion: string;
+  readonly expectedProfitabilityCalculationContractVersion:
+    typeof ITEM_SELECTION_PROFITABILITY_CALCULATION_CONTRACT_VERSION;
+  readonly evaluations: readonly ItemSelectionEvaluationWriteV1[];
+  readonly candidateFailuresCanonicalText: string;
+  readonly observedCandidateCount: number;
+  readonly successfullyEvaluatedCount: number;
+  readonly failedCandidateCount: number;
+  readonly skippedCandidateCount: number;
+  readonly failureCode: string | null;
+}
+
+export interface ItemSelectionEvaluationDtoV1 {
+  readonly evaluationId: string;
+  readonly providerItemNumber: string;
+  readonly originalPosition: number;
+  readonly verdict: ItemSelectionVerdict;
+  readonly totalScoreUnits: number | null;
+  readonly coverageUnits: number;
+  readonly normalizedMarginUnits: number | null;
+  readonly normalizedProfitKrwMicros: string | null;
+  readonly snapshotSha256: Sha256Hex;
+  readonly providerEvidenceSha256: Sha256Hex;
+  readonly createdAt: string;
+}
+
+export interface ItemSelectionRunDtoV1 {
+  readonly id: string;
+  readonly provider: "domeggook";
+  readonly keyword: string;
+  readonly requestedSize: number;
+  readonly status: ItemSelectionRunStatus;
+  readonly rulesetVersion: string;
+  readonly evaluatorVersion: string;
+  readonly profitabilityPolicyVersion: string;
+  readonly profitabilityCalculationContractVersion: string;
+  readonly requestFingerprint: Sha256Hex;
+  readonly retryOfRunId: string | null;
+  readonly startedAt: string;
+  readonly completedAt: string | null;
+  readonly failureCode: string | null;
+  readonly observedCandidateCount: number;
+  readonly successfullyEvaluatedCount: number;
+  readonly persistedEvaluationCount: number;
+  readonly failedCandidateCount: number;
+  readonly skippedCandidateCount: number;
+  readonly candidateFailuresSha256: Sha256Hex;
+  readonly createdAt: string;
+  readonly evaluations: readonly ItemSelectionEvaluationDtoV1[];
+}
