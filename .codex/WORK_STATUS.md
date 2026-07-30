@@ -1450,7 +1450,10 @@ perform the documented read-only Supabase schema and completeness inspection.
   type references outside the repository.
 - Implemented transport, workspace boundary, and bounded retry-loop primitives.
 - Added hermetic Phase 3 contract tests and implementation/security report.
-- Current: full local regression validation and delivery preparation.
+- Actual Codex App Server smoke: completed in one attempt after fail-close
+  probes identified and corrected Windows npm CLI launch and streamed terminal
+  item handling.
+- Current: final full regression validation and delivery preparation.
 
 ### Changed files
 
@@ -1461,16 +1464,23 @@ perform the documented read-only Supabase schema and completeness inspection.
 - `tools/orchestrator/index.ts`
 - `tests/orchestrator-phase-3.test.ts`
 - `docs/orchestrator/reports/phase-3-codex-transport.md`
+- `docs/orchestrator/reports/phase-3-live-smoke.md`
 - `CHANGELOG-Orchestrator-Phase3.md`
 - `.ai/DECISION_LOG.md`
 - `.codex/WORK_STATUS.md`
 
 ### Verification and next action
 
-- Typecheck: passed after the first compile correction.
-- Focused Phase 3 tests: 6/6 passed.
-- Next: run all local gates, classify the optional authenticated live smoke,
-  then commit/push a Draft PR.
+- Focused Phase 1+2+3 tests: 48/48 passed at final source state.
+- Full tests: 316/316 passed at final source state.
+- Lint: zero errors and four pre-existing warnings.
+- Typecheck: passed.
+- Production build: passed with 69 routes.
+- Playwright: 39/39 passed.
+- Actual Codex App Server live smoke: `COMPLETED`, one attempt, allowlisted
+  documentation path only, controller `GIT_DIFF_CHECK`, audit chain valid.
+- Next: commit the final evidence, run security/baseline checks, push, create
+  the Draft PR, and verify exact-head CI/Preview.
 
 ### Remaining risks and owner actions
 

@@ -1,7 +1,8 @@
 # Phase 3 Codex transport and local execution slice
 
-Status: implemented on `codex/feat/orchestrator-phase-3`; delivery requires a
-separate `manual-merge-required` Draft PR.
+Status: implemented and locally verified on
+`codex/feat/orchestrator-phase-3`; delivery requires a separate
+`manual-merge-required` Draft PR.
 
 Base: PR #44 merge
 `52ffa71d4cefb51fe980c19b0b5dff7532d5f685`.
@@ -102,8 +103,37 @@ its approved worktree.
 The delivery report records live smoke as `PASS`, `FAIL`, `BLOCKED`, or
 `NOT RUN`; hermetic tests cannot substitute for it.
 
+The repository provides the supervised entrypoint:
+
+```powershell
+npx.cmd tsx tools/orchestrator/live-smoke.ts <repository-root> <allowed-target>
+```
+
+On 2026-07-30 the live smoke first proved token-budget fail-close at the
+original 20,000-token ceiling. Subsequent probes exposed two real Windows/App
+Server integration defects: packaged executable launch returned `EPERM`, and
+the final structured message arrived through `item/completed` while the final
+turn item list was empty. The adapter was corrected to launch the installed npm
+CLI through `node` without a shell and to consume the documented streamed item.
+The final clean-worktree run completed in one attempt with:
+
+- one allowlisted change:
+  `docs/orchestrator/reports/phase-3-live-smoke.md`;
+- controller `GIT_DIFF_CHECK` evidence;
+- valid SQLite audit chain;
+- no commit, push, deploy, database, marketplace, or other external write.
+
+## Final local verification
+
+- Phase 1+2+3 focused tests: 48/48 passed.
+- Full unit/integration tests: 316/316 passed.
+- Lint: zero errors and four pre-existing warnings.
+- Typecheck: passed.
+- Production build: passed with 69 routes.
+- Playwright: 39/39 passed.
+- `git diff --check`: passed.
+
 ## Rollback
 
 Revert the Phase 3 PR. No migration, Production data, Supabase object, GitHub
 write, Vercel deployment, or commerce action is created by this implementation.
-
