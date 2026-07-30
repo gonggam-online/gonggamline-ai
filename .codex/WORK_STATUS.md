@@ -1456,6 +1456,9 @@ perform the documented read-only Supabase schema and completeness inspection.
 - PR #45 review fix: added controller-bounded interrupt quiescence, direct App
   Server child termination, observed exit evidence, and late-write regression
   coverage.
+- PR #45 shutdown-precedence review fix: unconfirmed interrupt/shutdown now
+  supersedes timeout/budget outcomes with non-retryable
+  `PROCESS_SHUTDOWN_FAILED`; the original cause remains in evidence.
 - Current: final full regression and live-smoke revalidation.
 
 ### Changed files
@@ -1474,12 +1477,16 @@ perform the documented read-only Supabase schema and completeness inspection.
 
 ### Verification and next action
 
-- Focused Phase 1+2+3 tests: 54/54 passed after bounded-shutdown changes.
-- Full tests: 322/322 passed after bounded-shutdown changes.
+- Focused Phase 1+2+3 tests: 55/55 passed after shutdown-precedence changes.
+- Full tests: 323/323 passed after shutdown-precedence changes.
 - Lint: zero errors and four pre-existing warnings.
 - Typecheck: passed.
 - Production build: passed with 69 routes.
 - Playwright: 39/39 passed.
+- Tracked secret/generated-output audit: passed.
+- Local disposable DB replay: blocked because Docker is not installed on this
+  N PC; the script refused any Production or linked database fallback. The
+  exact-head GitHub disposable runner remains the binding replay gate.
 - Actual Codex App Server live smoke: `COMPLETED`, one attempt, allowlisted
   documentation path only, controller `GIT_DIFF_CHECK`, audit chain valid.
 - Bounded-shutdown live smoke: `COMPLETED`, one attempt, final

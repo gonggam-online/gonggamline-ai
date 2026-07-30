@@ -71,8 +71,13 @@ network namespace.
   the directly spawned App Server process, not an independently enumerated
   descendant process tree.
 - If an injected termination callback throws, rejects, or never settles, the
-  controller still persists the timeout/budget failure after its independent
-  bound. `PROCESS_TERMINATION_FAILED` or `PROCESS_EXIT_TIMEOUT` records the
+  controller still persists a terminal result after its independent bound.
+  An interrupt/shutdown boundary that is `REJECTED` or `TIMED_OUT` supersedes
+  the original timeout or budget code with the non-retryable
+  `PROCESS_SHUTDOWN_FAILED`; evidence preserves the original
+  `WALL_TIME_TIMEOUT` or budget dimension. The original failure code is kept
+  only when the adapter boundary settles after observing `PROCESS_EXITED`.
+  `PROCESS_TERMINATION_FAILED` or `PROCESS_EXIT_TIMEOUT` checkpoints record the
   incomplete shutdown. The production launcher uses the synchronous Node
   `ChildProcess.kill` request and fails closed unless exit is observed.
 - The adapter does not commit. The slice ends at a verified local change and
@@ -138,8 +143,8 @@ The final clean-worktree run completed in one attempt with:
 
 ## Final local verification
 
-- Phase 1+2+3 focused tests: 54/54 passed.
-- Full unit/integration tests: 322/322 passed.
+- Phase 1+2+3 focused tests: 55/55 passed.
+- Full unit/integration tests: 323/323 passed.
 - Lint: zero errors and four pre-existing warnings.
 - Typecheck: passed.
 - Production build: passed with 69 routes.

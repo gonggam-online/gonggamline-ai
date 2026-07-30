@@ -622,7 +622,20 @@ for (const behavior of ["throw", "reject", "pending"] as const) {
       assert.equal(ledger.taskState("task-phase-3"), "FAILED");
       assert.equal(
         ledger.runResult(`run-terminate-${behavior}`)?.failureCode,
-        "WALL_TIME_TIMEOUT",
+        "PROCESS_SHUTDOWN_FAILED",
+      );
+      assert.deepEqual(
+        ledger.runResult(`run-terminate-${behavior}`)?.evidence,
+        [
+          "controller:process-shutdown-failed",
+          "controller:original-failure:WALL_TIME_TIMEOUT",
+        ],
+      );
+      assert.equal(
+        ledger
+          .runCheckpoints(`run-terminate-${behavior}`)
+          .some((checkpoint) => checkpoint.kind === "PROCESS_EXIT_TIMEOUT"),
+        true,
       );
       assert.equal(child?.terminationCalls, 1);
     } finally {
@@ -632,6 +645,67 @@ for (const behavior of ["throw", "reject", "pending"] as const) {
     }
   });
 }
+
+test("unconfirmed shutdown supersedes a token budget breach", async () => {
+  const repository = createRepository();
+  const ledgerDirectory = mkdtempSync(
+    path.join(tmpdir(), "phase-3-budget-shutdown-failure-"),
+  );
+  const ledger = createLedger(ledgerDirectory);
+  let child: FakeAppServerProcess | undefined;
+  try {
+    const adapter = new AppServerWorkerAdapter(
+      {
+        goal: "Simulate an unconfirmed shutdown after budget breach",
+        correlationId: "correlation-budget-shutdown-failure",
+        workspace: repository.boundary,
+        shutdownGraceMs: 5,
+        forcedExitGraceMs: 5,
+      },
+      () => {
+        child = new FakeAppServerProcess({
+          suppressTerminal: true,
+          ignoreStdinEnd: true,
+          terminationBehavior: "pending",
+          usageInputTokens: 101,
+        });
+        return child;
+      },
+    );
+    const engine = new OrchestratorExecutionEngine(
+      ledger,
+      adapter,
+      () => adapter.interrupt(),
+    );
+    const result = await engine.execute(
+      engineRequest("run-budget-shutdown-failure", {
+        tokenLimit: 100,
+        wallTimeSeconds: 10,
+        estimatedCostKrwLimit: 1_000,
+      }),
+    );
+    const stored = ledger.runResult("run-budget-shutdown-failure");
+
+    assert.equal(result.run.state, "FAILED");
+    assert.equal(ledger.taskState("task-phase-3"), "FAILED");
+    assert.equal(stored?.failureCode, "PROCESS_SHUTDOWN_FAILED");
+    assert.deepEqual(stored?.evidence, [
+      "controller:process-shutdown-failed",
+      "controller:original-failure:TOKENS",
+    ]);
+    assert.equal(
+      ledger
+        .runCheckpoints("run-budget-shutdown-failure")
+        .some((checkpoint) => checkpoint.kind === "PROCESS_EXIT_TIMEOUT"),
+      true,
+    );
+    assert.equal(child?.terminationCalls, 1);
+  } finally {
+    ledger.close();
+    rmSync(ledgerDirectory, { recursive: true, force: true });
+    rmSync(repository.directory, { recursive: true, force: true });
+  }
+});
 
 test("normal completion observes process exit without forced termination", async () => {
   const fixture = createRepository();

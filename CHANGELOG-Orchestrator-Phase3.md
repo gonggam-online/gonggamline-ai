@@ -14,6 +14,9 @@
   request, observed-exit checkpoints, and controller quiescence barrier.
 - Native Windows Codex child resolution to avoid terminating only an npm
   wrapper process.
+- Controller shutdown precedence that records unconfirmed timeout/budget
+  termination as non-retryable `PROCESS_SHUTDOWN_FAILED` while retaining the
+  original failure dimension as evidence.
 
 ## External impact
 

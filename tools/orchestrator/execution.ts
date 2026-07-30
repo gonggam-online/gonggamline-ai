@@ -274,8 +274,14 @@ export class OrchestratorExecutionEngine {
         );
       return interruptPromise;
     };
-    const awaitInterruptBoundary = async (): Promise<void> => {
-      const status = await Promise.race([
+    type InterruptBoundaryStatus = "SETTLED" | "REJECTED" | "TIMED_OUT";
+    let interruptBoundaryPromise: Promise<InterruptBoundaryStatus> | null =
+      null;
+    const awaitInterruptBoundary = (): Promise<InterruptBoundaryStatus> => {
+      if (interruptBoundaryPromise !== null) {
+        return interruptBoundaryPromise;
+      }
+      interruptBoundaryPromise = Promise.race([
         interruptOnce(),
         new Promise<"TIMED_OUT">((resolve) =>
           setTimeout(
@@ -283,16 +289,31 @@ export class OrchestratorExecutionEngine {
             this.worker.interruptBoundaryMs ?? 100,
           ),
         ),
-      ]);
-      this.ledger.appendRunCheckpoint(
-        run.runId,
-        {
-          kind: "INTERRUPT_BOUNDARY",
-          payload: { status },
-        },
-        request.now(),
-      );
+      ]).then((status) => {
+        this.ledger.appendRunCheckpoint(
+          run.runId,
+          {
+            kind: "INTERRUPT_BOUNDARY",
+            payload: { status },
+          },
+          request.now(),
+        );
+        return status;
+      });
+      return interruptBoundaryPromise;
     };
+    const shutdownFailure = (
+      originalFailureCode: string,
+    ): WorkerOutcome => ({
+      kind: "FAILED",
+      summary: "Worker shutdown could not be confirmed",
+      errorCode: "PROCESS_SHUTDOWN_FAILED",
+      retryable: false,
+      evidence: [
+        "controller:process-shutdown-failed",
+        `controller:original-failure:${originalFailureCode}`,
+      ],
+    });
     const budget = new BudgetGuard(request.budget, async () => {
       await awaitInterruptBoundary();
     });
@@ -359,15 +380,18 @@ export class OrchestratorExecutionEngine {
     );
     const settled = await Promise.race([workerPromise, timeoutPromise]);
     if (settled.type === "timeout") {
-      await awaitInterruptBoundary();
+      const interruptStatus = await awaitInterruptBoundary();
       hooksActive = false;
-      outcome = {
-        kind: "FAILED",
-        summary: "Worker wall-clock timeout exceeded",
-        errorCode: "WALL_TIME_TIMEOUT",
-        retryable: false,
-        evidence: ["controller:wall-clock-timeout"],
-      };
+      outcome =
+        interruptStatus === "SETTLED"
+          ? {
+              kind: "FAILED",
+              summary: "Worker wall-clock timeout exceeded",
+              errorCode: "WALL_TIME_TIMEOUT",
+              retryable: false,
+              evidence: ["controller:wall-clock-timeout"],
+            }
+          : shutdownFailure("WALL_TIME_TIMEOUT");
     } else {
       if (timeoutHandle !== null) {
         clearTimeout(timeoutHandle);
@@ -401,13 +425,17 @@ export class OrchestratorExecutionEngine {
 
     if (budgetBreach !== null) {
       hooksActive = false;
-      outcome = {
-        kind: "FAILED",
-        summary: "Execution budget exceeded",
-        errorCode: budgetBreach,
-        retryable: false,
-        evidence: [`controller:budget-exceeded:${budgetBreach}`],
-      };
+      const interruptStatus = await awaitInterruptBoundary();
+      outcome =
+        interruptStatus === "SETTLED"
+          ? {
+              kind: "FAILED",
+              summary: "Execution budget exceeded",
+              errorCode: budgetBreach,
+              retryable: false,
+              evidence: [`controller:budget-exceeded:${budgetBreach}`],
+            }
+          : shutdownFailure(budgetBreach);
     }
 
     if (outcome.kind === "WAITING_FOR_HUMAN") {
