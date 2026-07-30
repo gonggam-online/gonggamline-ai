@@ -3,6 +3,7 @@ export * from "./app-server-worker.ts";
 export * from "./contracts.ts";
 export * from "./development-loop.ts";
 export * from "./delivery.ts";
+export * from "./delivery-actions.ts";
 export * from "./execution.ts";
 export * from "./fake-worker.ts";
 export * from "./ledger.ts";

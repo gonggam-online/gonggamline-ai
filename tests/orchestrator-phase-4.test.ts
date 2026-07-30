@@ -6,8 +6,16 @@ import path from "node:path";
 import test from "node:test";
 
 import { createDeliveryLifecycle } from "../tools/orchestrator/delivery.ts";
+import {
+  createVerifiedCommit,
+  pushExactHead,
+  reconcileDraftPullRequest,
+  type DeliveryCommandRunner,
+  type DeliveryIdentity,
+} from "../tools/orchestrator/delivery-actions.ts";
 import { runSupervisedOperator } from "../tools/orchestrator/operator.ts";
 import type { WorkerOutcome } from "../tools/orchestrator/execution.ts";
+import { OrchestratorLedger } from "../tools/orchestrator/ledger.ts";
 
 const timestamp = "2026-07-30T00:00:00.000Z";
 
@@ -161,5 +169,220 @@ test("supervised operator rejects a mismatched approved base before execution", 
     );
   } finally {
     rmSync(path.dirname(setup.root), { recursive: true, force: true });
+  }
+});
+
+const exactHead = "a".repeat(40);
+const deliveryIdentity: DeliveryIdentity = {
+  repositoryRoot: "C:\\fixture",
+  repositoryFullName: "example/repo",
+  baseBranch: "main",
+  baseSha: "b".repeat(40),
+  branch: "codex/feat/phase-4",
+  taskId: "phase-4-task",
+};
+
+function deliveryRunner(options?: {
+  readonly existingPullRequests?: readonly unknown[];
+  readonly draftUrl?: string;
+}): {
+  readonly runner: DeliveryCommandRunner;
+  readonly calls: Array<{ executable: string; args: readonly string[] }>;
+} {
+  const calls: Array<{ executable: string; args: readonly string[] }> = [];
+  return {
+    calls,
+    runner: {
+      run(executable, args) {
+        calls.push({ executable, args });
+        if (executable === "git") {
+          if (args[0] === "branch") {
+            return { stdout: deliveryIdentity.branch, exitCode: 0 };
+          }
+          if (args[0] === "rev-parse") {
+            return { stdout: exactHead, exitCode: 0 };
+          }
+          if (args[0] === "merge-base") {
+            return { stdout: "", exitCode: 0 };
+          }
+          if (args[0] === "ls-remote") {
+            return { stdout: `${exactHead}\trefs/heads/${deliveryIdentity.branch}`, exitCode: 0 };
+          }
+          if (args[0] === "push") {
+            return { stdout: "", exitCode: 0 };
+          }
+        }
+        if (executable === "gh" && args[0] === "pr" && args[1] === "list") {
+          return {
+            stdout: JSON.stringify(options?.existingPullRequests ?? []),
+            exitCode: 0,
+          };
+        }
+        if (executable === "gh" && args[0] === "pr" && args[1] === "create") {
+          return {
+            stdout: options?.draftUrl ?? "https://github.com/example/repo/pull/77",
+            exitCode: 0,
+          };
+        }
+        if (executable === "gh" && args[0] === "pr" && args[1] === "edit") {
+          return { stdout: "", exitCode: 0 };
+        }
+        return { stdout: "", exitCode: 1 };
+      },
+    },
+  };
+}
+
+test("exact-head push is idempotent and never uses force", () => {
+  const ledger = new OrchestratorLedger(":memory:", process.cwd());
+  const fixtureRunner = deliveryRunner();
+  try {
+    const first = pushExactHead(
+      ledger,
+      deliveryIdentity,
+      "push:phase-4",
+      fixtureRunner.runner,
+    );
+    const second = pushExactHead(
+      ledger,
+      deliveryIdentity,
+      "push:phase-4",
+      fixtureRunner.runner,
+    );
+
+    assert.equal(first.status, "CREATED");
+    assert.equal(second.status, "RECONCILED");
+    assert.equal(first.reference, exactHead);
+    const push = fixtureRunner.calls.find(
+      ({ executable, args }) => executable === "git" && args[0] === "push",
+    );
+    assert.ok(push);
+    assert.equal(push.args.includes("--force"), false);
+    assert.equal(
+      fixtureRunner.calls.filter(
+        ({ executable, args }) => executable === "git" && args[0] === "push",
+      ).length,
+      1,
+    );
+  } finally {
+    ledger.close();
+  }
+});
+
+test("verified commit stages only the declared path and reconciles by SHA", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "phase-4-commit-"));
+  const ledger = new OrchestratorLedger(":memory:", directory);
+  try {
+    execFileSync("git", ["init", "-b", "main", directory]);
+    execFileSync("git", ["-C", directory, "config", "user.email", "fixture@example.invalid"]);
+    execFileSync("git", ["-C", directory, "config", "user.name", "Fixture"]);
+    writeFileSync(path.join(directory, "approved.txt"), "before\n");
+    execFileSync("git", ["-C", directory, "add", "approved.txt"]);
+    execFileSync("git", ["-C", directory, "commit", "-m", "seed"]);
+    const baseSha = git(directory, ["rev-parse", "HEAD"]);
+    execFileSync("git", ["-C", directory, "switch", "-c", "codex/feat/commit"]);
+    writeFileSync(path.join(directory, "approved.txt"), "after\n");
+    const identity: DeliveryIdentity = {
+      repositoryRoot: directory,
+      repositoryFullName: "example/repo",
+      baseBranch: "main",
+      baseSha,
+      branch: "codex/feat/commit",
+      taskId: "commit-task",
+    };
+
+    const first = createVerifiedCommit(ledger, {
+      identity,
+      paths: ["approved.txt"],
+      message: "test: approved commit",
+      idempotencyKey: "commit:approved",
+    });
+    const second = createVerifiedCommit(ledger, {
+      identity,
+      paths: ["approved.txt"],
+      message: "test: approved commit",
+      idempotencyKey: "commit:approved",
+    });
+
+    assert.equal(first.status, "CREATED");
+    assert.equal(second.status, "RECONCILED");
+    assert.equal(first.reference, git(directory, ["rev-parse", "HEAD"]));
+    assert.equal(git(directory, ["status", "--short"]), "");
+  } finally {
+    ledger.close();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("Draft PR creation is duplicate-free and reconciles the required label", () => {
+  const ledger = new OrchestratorLedger(":memory:", process.cwd());
+  const fixtureRunner = deliveryRunner();
+  try {
+    const result = reconcileDraftPullRequest(
+      ledger,
+      {
+        identity: deliveryIdentity,
+        title: "feat: Phase 4",
+        bodyFile: "phase-4-pr.md",
+        requiredLabel: "manual-merge-required",
+        idempotencyKey: "pr:phase-4",
+      },
+      fixtureRunner.runner,
+    );
+
+    assert.equal(result.status, "CREATED");
+    assert.equal(result.reference, "https://github.com/example/repo/pull/77");
+    assert.equal(
+      fixtureRunner.calls.filter(
+        ({ executable, args }) =>
+          executable === "gh" && args[0] === "pr" && args[1] === "create",
+      ).length,
+      1,
+    );
+    assert.equal(
+      fixtureRunner.calls.some(
+        ({ executable, args }) =>
+          executable === "gh" &&
+          args[0] === "pr" &&
+          args[1] === "edit" &&
+          args.includes("manual-merge-required"),
+      ),
+      true,
+    );
+  } finally {
+    ledger.close();
+  }
+});
+
+test("Draft PR reconciliation fails closed when duplicates exist", () => {
+  const ledger = new OrchestratorLedger(":memory:", process.cwd());
+  const duplicate = {
+    number: 1,
+    url: "https://github.com/example/repo/pull/1",
+    isDraft: true,
+    headRefName: deliveryIdentity.branch,
+    baseRefName: "main",
+  };
+  const fixtureRunner = deliveryRunner({
+    existingPullRequests: [duplicate, { ...duplicate, number: 2 }],
+  });
+  try {
+    assert.throws(
+      () =>
+        reconcileDraftPullRequest(
+          ledger,
+          {
+            identity: deliveryIdentity,
+            title: "feat: Phase 4",
+            bodyFile: "phase-4-pr.md",
+            requiredLabel: "manual-merge-required",
+            idempotencyKey: "pr:duplicates",
+          },
+          fixtureRunner.runner,
+        ),
+      /Duplicate open pull requests/,
+    );
+  } finally {
+    ledger.close();
   }
 });
