@@ -459,3 +459,17 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   Production, secrets, network expansion, or commerce writes.
 - Rollback: revert the Phase 4.2 PR. The Item Selection D worktree remains
   preserved for retry after the controller fix is merged.
+
+## 2026-07-30 — Item Selection Security Vertical Slice v1 implementation
+
+- Category: approved high-risk Auth/RLS/database implementation.
+- Dependency: PR #49 merged as
+  `2737c698878106effdb678bf646460efb13a133a`.
+- Decision: execute the accepted Item Selection persistence and Admin security
+  design through the supervised orchestrator in bounded checkpoints.
+- Security boundary: fail-closed SSR Auth, UUID allowlist, fresh AAL2,
+  purpose-bound CSRF, rate limits, RLS/default deny, audited service-role RPCs,
+  and immutable evidence.
+- Delivery: Draft PR #50, `manual-merge-required`, no Ready/merge/Production
+  operation without repository-owner approval.
+- Rollback: revert the unmerged PR and discard disposable/Preview resources.

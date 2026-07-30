@@ -58,6 +58,21 @@ jobs:
         if: always()
         run: supabase stop --no-backup
 
+  ci-item-selection-security:
+    name: ci-item-selection-security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.110.0
+      - run: npm ci
+      - name: Replay 000-021 and verify A01-A12
+        shell: pwsh
+        run: ./scripts/verify-item-selection-security-slice.ps1 -Start -Stop
+
   ci-build:
     name: ci-build
     runs-on: ubuntu-latest

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "gonggamline-item-selection-security-fingerprint-v1",
+  "tables": [
+    "item_selection_evaluations",
+    "item_selection_runs",
+    "security_audit_events"
+  ],
+  "type": "item_selection_evaluation_write_v1",
+  "functions": [
+    "create_item_selection_run_v1",
+    "finalize_item_selection_run_v1"
+  ],
+  "rlsTables": [
+    "item_selection_evaluations",
+    "item_selection_runs",
+    "security_audit_events"
+  ],
+  "directRolesDenied": [
+    "anon",
+    "authenticated"
+  ],
+  "auditEvents": [
+    "ITEM_SELECTION_CREATE",
+    "ITEM_SELECTION_FINALIZE"
+  ]
+}
