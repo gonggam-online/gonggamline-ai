@@ -5,6 +5,7 @@ export const deliveryStages = [
   "PULL_REQUEST",
   "CI",
   "PREVIEW",
+  "PREVIEW_BROWSER",
 ] as const;
 
 export type DeliveryStage = (typeof deliveryStages)[number];

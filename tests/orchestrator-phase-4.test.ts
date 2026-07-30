@@ -106,7 +106,7 @@ test("delivery lifecycle is typed and leaves external stages inert", () => {
   assert.equal(lifecycle.stages[0]?.status, "READY");
   assert.deepEqual(
     lifecycle.stages.slice(1).map(({ status, externalWrite }) => [status, externalWrite]),
-    Array.from({ length: 5 }, () => ["NOT_STARTED", true]),
+    Array.from({ length: 6 }, () => ["NOT_STARTED", true]),
   );
 });
 
@@ -173,6 +173,179 @@ test("supervised operator rejects a mismatched approved base before execution", 
       }),
       /approved base SHA/,
     );
+  } finally {
+    rmSync(path.dirname(setup.root), { recursive: true, force: true });
+  }
+});
+
+test("supervised operator routes approved implementation tasks to D", async () => {
+  const setup = fixture();
+  try {
+    const task = JSON.parse(readFileSync(setup.contract, "utf8")) as Record<
+      string,
+      unknown
+    >;
+    task.taskKind = "IMPLEMENTATION";
+    task.execution = {
+      ...(task.execution as Record<string, unknown>),
+      pcId: "D",
+    };
+    writeFileSync(setup.contract, JSON.stringify(task));
+
+    const result = await runSupervisedOperator({
+      taskContractPath: setup.contract,
+      ledgerPath: setup.ledger,
+      repositoryRoot: setup.root,
+      now: () => timestamp,
+      workerFactory: () => ({
+        name: "fixture-worker",
+        async execute(): Promise<WorkerOutcome> {
+          return {
+            kind: "SUCCEEDED",
+            summary: "implemented",
+            output: {},
+            evidence: ["worker:completed"],
+          };
+        },
+      }),
+      verifier: (_root: string, commandIds: readonly string[]) =>
+        commandIds.map((commandId) => ({
+          commandId: commandId as "GIT_DIFF_CHECK",
+          exitCode: 0,
+          durationMs: 1,
+          outputHash: "b".repeat(64),
+          passed: true,
+        })),
+    });
+
+    assert.equal(result.finalState, "COMPLETED");
+  } finally {
+    rmSync(path.dirname(setup.root), { recursive: true, force: true });
+  }
+});
+
+test("supervised operator hands a completed run to idempotent delivery", async () => {
+  const setup = fixture();
+  let executions = 0;
+  let pullRequestCreated = false;
+  const writes: string[] = [];
+  const headSha = "d".repeat(40);
+  const runner: DeliveryCommandRunner = {
+    run(executable, args) {
+      const command = `${executable} ${args.join(" ")}`;
+      if (executable === "git") {
+        if (args[0] === "branch") {
+          return { stdout: "codex/feat/phase-4", exitCode: 0 };
+        }
+        if (args[0] === "rev-parse") {
+          return { stdout: headSha, exitCode: 0 };
+        }
+        if (args[0] === "merge-base") {
+          return { stdout: "", exitCode: 0 };
+        }
+        if (args[0] === "add") {
+          writes.push("commit:add");
+          return { stdout: "", exitCode: 0 };
+        }
+        if (args[0] === "diff" && args.includes("--name-only")) {
+          return { stdout: "allowed/change.txt", exitCode: 0 };
+        }
+        if (args[0] === "diff" || args[0] === "commit") {
+          if (args[0] === "commit") {
+            writes.push("commit:create");
+          }
+          return { stdout: "", exitCode: 0 };
+        }
+        if (args[0] === "push") {
+          writes.push("push");
+          return { stdout: "", exitCode: 0 };
+        }
+        if (args[0] === "ls-remote") {
+          return {
+            stdout: `${headSha}\trefs/heads/codex/feat/phase-4`,
+            exitCode: 0,
+          };
+        }
+      }
+      if (command.startsWith("gh pr list")) {
+        return {
+          stdout: JSON.stringify(
+            pullRequestCreated
+              ? [
+                  {
+                    number: 77,
+                    url: "https://github.com/example/repo/pull/77",
+                    isDraft: true,
+                    headRefName: "codex/feat/phase-4",
+                    baseRefName: "main",
+                  },
+                ]
+              : [],
+          ),
+          exitCode: 0,
+        };
+      }
+      if (command.startsWith("gh pr create")) {
+        pullRequestCreated = true;
+        writes.push("pr:create");
+        return {
+          stdout: "https://github.com/example/repo/pull/77",
+          exitCode: 0,
+        };
+      }
+      if (command.startsWith("gh pr edit")) {
+        return { stdout: "", exitCode: 0 };
+      }
+      if (command.startsWith("gh run list")) {
+        return { stdout: "[]", exitCode: 0 };
+      }
+      return { stdout: "", exitCode: 1 };
+    },
+  };
+  try {
+    const options = {
+      taskContractPath: setup.contract,
+      ledgerPath: setup.ledger,
+      repositoryRoot: setup.root,
+      now: () => timestamp,
+      workerFactory: () => ({
+        name: "fixture-worker",
+        async execute(): Promise<WorkerOutcome> {
+          executions += 1;
+          return {
+            kind: "SUCCEEDED" as const,
+            summary: "implemented",
+            output: {},
+            evidence: ["worker:completed"],
+          };
+        },
+      }),
+      verifier: (_root: string, commandIds: readonly string[]) =>
+        commandIds.map((commandId) => ({
+          commandId: commandId as "GIT_DIFF_CHECK",
+          exitCode: 0,
+          durationMs: 1,
+          outputHash: "b".repeat(64),
+          passed: true,
+        })),
+      delivery: {
+        paths: ["allowed/change.txt"],
+        commitMessage: "feat: deliver fixture",
+        pullRequestTitle: "feat: deliver fixture",
+        pullRequestBodyFile: "phase-4.md",
+      },
+      deliveryRunner: runner,
+    };
+
+    const first = await runSupervisedOperator(options);
+    const second = await runSupervisedOperator(options);
+
+    assert.equal(first.finalState, "WAITING_FOR_CI");
+    assert.equal(second.finalState, "WAITING_FOR_CI");
+    assert.equal(executions, 1);
+    assert.equal(writes.filter((entry) => entry === "commit:create").length, 1);
+    assert.equal(writes.filter((entry) => entry === "push").length, 1);
+    assert.equal(writes.filter((entry) => entry === "pr:create").length, 1);
   } finally {
     rmSync(path.dirname(setup.root), { recursive: true, force: true });
   }

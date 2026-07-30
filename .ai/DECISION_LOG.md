@@ -427,3 +427,19 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   postconditions are enforced, but this local Windows process is not an
   independently proven firewall or restricted-token sandbox.
 - Rollback: revert the Phase 3 PR. No external or database rollback is required.
+
+## 2026-07-30 — Orchestrator Phase 4.1 integration authorized
+
+- Category: bounded integration implementation
+- Dependency: PR #47 merged as
+  `f134c85b9f8f899065b4a7105b4c592ac7b2d10b`.
+- Owner / approver: repository owner
+- Decision: connect the supervised operator's verified `COMPLETED` result to
+  the merged delivery pipeline, support approved Product implementation
+  routing to D, and preserve restart-safe external-write idempotency.
+- Risk: high-risk automation integration; Draft PR,
+  `manual-merge-required`, and no auto-merge.
+- Non-goals: planner/reviewer, Product implementation, Supabase, Production
+  mutation, secrets, Ready/merge automation, and commerce writes.
+- Rollback: revert the Phase 4.1 PR. Existing Phase 1–4 primitives and Product
+  runtime remain unchanged.

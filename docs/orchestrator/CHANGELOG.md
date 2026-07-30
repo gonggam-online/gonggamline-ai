@@ -1,5 +1,16 @@
 # Orchestrator changelog
 
+## 2026-07-30 — Phase 4.1 operator and delivery integration
+
+- Connected a completed supervised operator run to the Phase 4 delivery
+  pipeline through an explicit local delivery-submission manifest.
+- Routed approved `IMPLEMENTATION` TaskContracts to D while retaining
+  orchestrator tasks on N.
+- Made delivery reconciliation restart-safe without re-running the Worker or
+  requiring the pre-commit clean/base workspace state.
+- Added the missing Preview-browser lifecycle stage and focused routing,
+  handoff, and duplicate-write regression coverage.
+
 ## 2026-07-30 — Phase 4 GitHub and Preview delivery
 
 - Added a supervised canonical TaskContract operator entrypoint.

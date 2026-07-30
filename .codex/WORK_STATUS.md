@@ -1,5 +1,38 @@
 # Work status
 
+## 2026-07-30 — Orchestrator Phase 4.1 operator-delivery integration
+
+- Objective: connect the merged supervised operator and delivery pipeline with
+  the smallest restart-safe integration.
+- Branch/base:
+  `codex/feat/orchestrator-phase-4-1-operator-delivery`, based on PR #47 merge
+  `f134c85b9f8f899065b4a7105b4c592ac7b2d10b`.
+- Risk: high-risk automation integration; Draft PR,
+  `manual-merge-required`, no Ready/merge/auto-merge.
+- Revenue impact: removes the manual seam between verified implementation and
+  delivery, enabling the approved Item Selection slice to exercise the
+  orchestrator end to end.
+- Scope: TaskKind-based D/N routing, optional delivery manifest, verified-run
+  handoff, restart reconciliation, lifecycle correction, tests, and report.
+- Non-goals: Product code, planner/reviewer, Supabase, Production/configuration,
+  secrets, commerce writes, Ready, merge, or auto-merge.
+- Root-cause class: code/capability gap between two merged Phase 4 components.
+- Completed: exact Production smoke for merge SHA, main and Item Selection D
+  worktree fast-forward, dedicated worktree, implementation, focused tests
+  13/13, full tests 337/337, typecheck, lint with zero errors/four pre-existing
+  warnings, and 69-route Production build.
+- Current work: complete diff review, intentional commit, push, Draft PR, and
+  exact-head CI/Preview/browser verification.
+- Blockers/owner actions: repository-owner manual review/merge after all gates.
+- Changed files: operator/delivery lifecycle, Phase 4 tests, orchestrator
+  changelog/report, Decision Log, and this status file.
+- Browser validation: local Playwright is 32/39. The same seven DB-dependent
+  pages fail because local Supabase is externally unconfigured
+  (`missing_url`); all other pages, APIs, and revenue-critical scenarios pass.
+- Exact next action: review and publish the bounded high-risk Draft PR.
+- Remaining risks: local CLI authorization and process-level rather than
+  independently proven OS isolation; planner/reviewer remain unimplemented.
+
 ## 2026-07-30 — Orchestrator Phase 4 GitHub and Preview delivery
 
 - Objective: extend the local controller through verified commit, exact-head
