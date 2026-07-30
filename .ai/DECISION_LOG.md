@@ -3,6 +3,20 @@
 Append entries; do not rewrite history. Each Story records applicable
 Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 
+## 2026-07-30 — Engineering Orchestrator Phase 4 delivery boundary
+
+- Decision: extend the accepted lifecycle through verified commit, exact-head
+  task-branch push, duplicate-free Draft PR, exact CI/Preview/browser evidence,
+  and `WAITING_FOR_HUMAN`.
+- Business reason: remove repeated delivery coordination before protected Item
+  Selection work supporting reproducible profitable-product screening.
+- Boundary: local supervised operator plus GitHub task-branch/Draft-PR writes;
+  no Ready transition, merge, Production, Supabase, configuration, secret, or
+  commerce write.
+- Risk: high-risk automation bootstrap; `manual-merge-required`.
+- Evidence: `docs/orchestrator/reports/phase-4-github-preview-delivery.md`.
+- Rollback: revert the Phase 4 PR.
+
 ## Entry template
 
 ### YYYY-MM-DD — Title

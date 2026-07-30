@@ -1,5 +1,15 @@
 # Orchestrator changelog
 
+## 2026-07-30 — Phase 4 GitHub and Preview delivery
+
+- Added a supervised canonical TaskContract operator entrypoint.
+- Added verified commit, exact-head push, duplicate-free Draft PR, required
+  label, CI, Preview, and browser-artifact reconciliation.
+- Added restart-safe external action idempotency and terminal
+  `WAITING_FOR_HUMAN`.
+- Corrected App Server token accounting to use protocol `totalTokens`.
+- Added the first protected Item Selection TaskContract draft.
+
 ## 2026-07-29 — Phase 2 execution vertical slice
 
 - Added local run creation, deterministic `READY` task selection, Worker

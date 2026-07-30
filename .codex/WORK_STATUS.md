@@ -1,5 +1,48 @@
 # Work status
 
+## 2026-07-30 — Orchestrator Phase 4 GitHub and Preview delivery
+
+- Objective: extend the local controller through verified commit, exact-head
+  push, duplicate-free Draft PR, exact CI/Preview/browser evidence, and
+  `WAITING_FOR_HUMAN`.
+- Branch/base: `codex/feat/orchestrator-phase-4-github-preview`, based on PR
+  #46 merge `bc8ec1c038bcc767c2646f06bdb0b43a52677900`.
+- Risk: high-risk automation bootstrap; Draft PR,
+  `manual-merge-required`, no auto-merge.
+- Revenue impact: reduces repeated engineering delivery work and prepares the
+  protected Item Selection persistence task.
+- Architecture: accepted Engineering Orchestration lifecycle; no new Product
+  Domain, public API, database, migration, Supabase, Production, or commerce
+  boundary.
+- Scope: operator, delivery lifecycle, token accounting, commit/push/Draft PR
+  idempotency, exact CI/Preview/browser evidence, restart-safe pipeline, tests,
+  report, and follow-up Item Selection TaskContract.
+- Non-goals: planner/reviewer, Ready/merge/auto-merge, Production, Supabase,
+  configuration, secrets, paid API, commerce, and Product implementation.
+- Root-cause class: code/capability gap within approved Architecture.
+- Completed: safety boot, dedicated worktree, durable Task/run evidence,
+  token-accounting correction, four implementation checkpoints, focused tests,
+  typecheck, lint, and diff checks.
+- Current work: final status-only checkpoint and exact-head remote revalidation
+  before repository-owner handoff.
+- Blockers/owner actions: none before high-risk final merge review.
+- Changed files: `tools/orchestrator/**`, Phase 3/4 tests,
+  `docs/orchestrator/**`, Decision Log, and this status file.
+- Validation: Phase 4 focused 11/11; full tests 335/335; repository lint zero
+  errors/four pre-existing warnings; typecheck and 69-route Production build
+  pass. Local Playwright is 32/39 with the same seven external Supabase
+  `missing_url` failures; remaining routes and revenue-critical flows pass.
+- Checkpoints: `90ebfbb`, `378df6f`, `6018805`, `3878bdd`, `e7b5b1d`.
+- Delivery: Draft PR #47 is open with `manual-merge-required`, auto-merge
+  disabled, and first exact head
+  `df59e3744e2528c335eb64403af5a9f105cf7e37`. CI, disposable DB replay,
+  Vercel Preview deployment `5668533232`, Preview browser run `30510915660`,
+  and evidence artifact `8747089141` passed on that head.
+- Exact next action: push this final status checkpoint, verify every gate on
+  its exact SHA, then stop at repository-owner review without Ready or merge.
+- Remaining risks: process-level rather than OS isolation, local CLI auth,
+  supervised polling, and no planner/reviewer automation.
+
 ## 2026-07-30 — Item Selection security vertical-slice instruction delivery
 
 - Objective: land the independently reviewed implementation instruction before

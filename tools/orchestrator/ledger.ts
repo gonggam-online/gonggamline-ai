@@ -61,6 +61,13 @@ export interface RunResult {
   readonly createdAt: string;
 }
 
+export interface ReservedAction {
+  readonly actionScope: string;
+  readonly idempotencyKey: string;
+  readonly payloadHash: string;
+  readonly externalReference: string | null;
+}
+
 interface TaskStateRow {
   state: TaskState;
 }
@@ -784,6 +791,23 @@ export class OrchestratorLedger {
     if (result.changes !== 1) {
       throw new Error("External action reference conflict");
     }
+  }
+
+  reservedAction(
+    actionScope: string,
+    idempotencyKey: string,
+  ): ReservedAction | null {
+    const row = this.#database
+      .prepare(
+        `SELECT action_scope AS actionScope,
+                idempotency_key AS idempotencyKey,
+                payload_hash AS payloadHash,
+                external_reference AS externalReference
+         FROM action_keys
+         WHERE action_scope = ? AND idempotency_key = ?`,
+      )
+      .get(actionScope, idempotencyKey) as ReservedAction | undefined;
+    return row ?? null;
   }
 
   appendAudit(eventType: string, payload: unknown, occurredAt: string): string {

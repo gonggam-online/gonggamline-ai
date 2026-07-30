@@ -8,6 +8,7 @@ export interface UsageSnapshot {
   readonly inputTokens: number;
   readonly outputTokens: number;
   readonly reasoningTokens: number;
+  readonly totalTokens?: number;
   readonly estimatedCostKrw: number;
   readonly elapsedSeconds: number;
 }
@@ -28,7 +29,10 @@ export function exceededDimension(
   limit: BudgetLimit,
   usage: UsageSnapshot,
 ): BudgetDimension | null {
-  if (usage.inputTokens + usage.outputTokens + usage.reasoningTokens > limit.tokenLimit) {
+  const observedTokens =
+    usage.totalTokens ??
+    usage.inputTokens + usage.outputTokens + usage.reasoningTokens;
+  if (observedTokens > limit.tokenLimit) {
     return "TOKENS";
   }
   if (usage.elapsedSeconds > limit.wallTimeSeconds) {
