@@ -16,16 +16,19 @@
 - Completed: Production backup (`schema.sql`, `data.sql`, `roles.sql`) with
   restricted ACL and SHA-256; read-only object/prerequisite inspection;
   disposable 000-021 replay; linked-to-migrations security diff.
-- Current work: document the accepted reconciliation architecture and access
-  matrix gate.
+- Current work: verify exact-head CI and Preview for Draft PR #51.
 - Non-goals: migration SQL, history repair, Production write, secret/config
   changes, permissive-policy preservation, or migration 021 application.
 - Blockers/owner actions: R1-R3 require the exact access matrix and separate
   high-risk delivery approvals after this Architecture Story.
 - Changed files: architecture story/review/decision log, changelog, work
   status, and Supabase CLI metadata ignore rule.
-- Exact next action: validate the documentation diff, commit/push, create a
-  manual high-risk Draft PR, and verify exact-head CI/Preview.
+- Delivery: architecture commit `d0972cd` is pushed. Draft PR #51 targets
+  `main`, carries `manual-merge-required`, and has a Ready Vercel deployment.
+  GitHub Actions did not create runs for the initial `opened` event, so this
+  status checkpoint also provides a bounded `synchronize` event for retry.
+- Exact next action: push this status checkpoint and verify exact-head CI,
+  Preview, and browser evidence.
 - Remaining risks: current Product routes use anon Supabase access; legacy
   Commerce OS and migration 005-020 policies remain broadly permissive.
 
