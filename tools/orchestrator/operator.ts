@@ -5,6 +5,14 @@ import { pathToFileURL } from "node:url";
 import { AppServerWorkerAdapter } from "./app-server-worker.ts";
 import { createContractValidators } from "./contracts.ts";
 import { runDevelopmentLoop } from "./development-loop.ts";
+import {
+  localDeliveryCommandRunner,
+  type DeliveryCommandRunner,
+} from "./delivery-actions.ts";
+import {
+  runDeliveryPipeline,
+  type DeliveryPipelineResult,
+} from "./delivery-pipeline.ts";
 import { createDeliveryLifecycle, type DeliveryLifecycle } from "./delivery.ts";
 import type {
   RunExecutionResult,
@@ -24,6 +32,7 @@ interface TaskContract {
   readonly projectId: string;
   readonly taskId: string;
   readonly parentTaskId?: string | null;
+  readonly taskKind: string;
   readonly objective: string;
   readonly repository: {
     readonly canonicalOrigin: string;
@@ -49,6 +58,9 @@ interface TaskContract {
     readonly tokenLimit: number;
     readonly costKrwLimit: number;
   };
+  readonly risk: {
+    readonly requiredLabel: string;
+  };
 }
 
 export interface OperatorSummary {
@@ -57,6 +69,14 @@ export interface OperatorSummary {
   readonly attempts: number;
   readonly lifecycle: DeliveryLifecycle;
   readonly evidence: readonly string[];
+  readonly delivery: DeliveryPipelineResult | null;
+}
+
+export interface DeliverySubmission {
+  readonly paths: readonly string[];
+  readonly commitMessage: string;
+  readonly pullRequestTitle: string;
+  readonly pullRequestBodyFile: string;
 }
 
 export interface SupervisedOperatorOptions {
@@ -69,6 +89,8 @@ export interface SupervisedOperatorOptions {
   readonly now?: () => string;
   readonly workerFactory?: (boundary: WorkspaceBoundary, goal: string) => WorkerAdapter;
   readonly verifier?: RunVerifier;
+  readonly delivery?: DeliverySubmission;
+  readonly deliveryRunner?: DeliveryCommandRunner;
 }
 
 const commandNames: Readonly<Record<string, VerificationCommandId>> = {
@@ -82,6 +104,29 @@ const commandNames: Readonly<Record<string, VerificationCommandId>> = {
 
 function readJson(filePath: string): unknown {
   return JSON.parse(readFileSync(filePath, "utf8")) as unknown;
+}
+
+function deliverySubmission(value: unknown): DeliverySubmission {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    !("paths" in value) ||
+    !Array.isArray(value.paths) ||
+    value.paths.length === 0 ||
+    value.paths.some((entry) => typeof entry !== "string" || entry.length === 0) ||
+    !("commitMessage" in value) ||
+    typeof value.commitMessage !== "string" ||
+    value.commitMessage.length === 0 ||
+    !("pullRequestTitle" in value) ||
+    typeof value.pullRequestTitle !== "string" ||
+    value.pullRequestTitle.length === 0 ||
+    !("pullRequestBodyFile" in value) ||
+    typeof value.pullRequestBodyFile !== "string" ||
+    value.pullRequestBodyFile.length === 0
+  ) {
+    throw new Error("Delivery submission is invalid");
+  }
+  return value as unknown as DeliverySubmission;
 }
 
 function verificationIds(contract: TaskContract): VerificationCommandId[] {
@@ -98,6 +143,34 @@ function repositoryId(origin: string): string {
     throw new Error("Canonical repository origin has no repository name");
   }
   return match[1];
+}
+
+function repositoryFullName(origin: string): string {
+  const match = /github\.com[/:]([^/]+)\/([^/]+?)(?:\.git)?$/.exec(origin);
+  if (match?.[1] === undefined || match[2] === undefined) {
+    throw new Error("Canonical origin is not a supported GitHub repository");
+  }
+  return `${match[1]}/${match[2]}`;
+}
+
+function taskClass(contract: TaskContract): string {
+  return contract.taskKind === "IMPLEMENTATION"
+    ? "APPROVED_PRODUCT_IMPLEMENTATION"
+    : "ORCHESTRATOR";
+}
+
+function existingRun(
+  ledger: OrchestratorLedger,
+  runId: string,
+): ReturnType<OrchestratorLedger["run"]> | null {
+  try {
+    return ledger.run(runId);
+  } catch (error) {
+    if (error instanceof Error && error.message === `Unknown run: ${runId}`) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 function finalEvidence(result: RunExecutionResult): readonly string[] {
@@ -144,9 +217,8 @@ export async function runSupervisedOperator(
       denied: contract.scope.forbiddenPaths,
     },
   };
-  inspectExecutionWorkspace(boundary);
   const selectedPc = selectPc(defaultPcRoutes, {
-    taskClass: "ORCHESTRATOR",
+    taskClass: taskClass(contract),
     requiredCapabilities: [],
     availableCapabilitiesByPc: {
       [contract.execution.pcId]: ["git", "node", "codex"],
@@ -190,59 +262,103 @@ export async function runSupervisedOperator(
         timestamp,
       );
     }
-    const worker =
-      options.workerFactory?.(boundary, contract.objective) ??
-      new AppServerWorkerAdapter({
-        goal: contract.objective,
-        correlationId: contract.taskId,
-        workspace: boundary,
-      });
     const runId = options.runId ?? `${contract.taskId}:run:1`;
-    const results = await runDevelopmentLoop(
-      ledger,
-      worker,
-      () => {
-        if (worker instanceof AppServerWorkerAdapter) {
-          return worker.interrupt();
-        }
-        return Promise.resolve();
-      },
-      {
-        first: {
-          projectId: contract.projectId,
-          taskId: contract.taskId,
-          runId,
-          idempotencyKey: `${contract.execution.idempotencyKey}:run:1`,
-          controllerId: contract.execution.controllerId,
-          leaseExpiresAt: new Date(Date.parse(timestamp) + contract.budgets.wallTimeMinutes * 60_000).toISOString(),
-          now,
-          budget: {
-            tokenLimit: contract.budgets.tokenLimit,
-            wallTimeSeconds: contract.budgets.wallTimeMinutes * 60,
-            estimatedCostKrwLimit: contract.budgets.costKrwLimit,
-          },
-          verificationPlan: {
-            repositoryRoot,
-            requiredCommandIds: verificationIds(contract),
-            retryableOnFailure: true,
-          },
+    const priorRun = existingRun(ledger, runId);
+    let final: RunExecutionResult;
+    let attempts: number;
+    if (priorRun?.state === "COMPLETED" && options.delivery !== undefined) {
+      final = { run: priorRun, outcome: null };
+      attempts = priorRun.attempt;
+    } else {
+      inspectExecutionWorkspace(boundary);
+      const worker =
+        options.workerFactory?.(boundary, contract.objective) ??
+        new AppServerWorkerAdapter({
+          goal: contract.objective,
+          correlationId: contract.taskId,
+          workspace: boundary,
+        });
+      const results = await runDevelopmentLoop(
+        ledger,
+        worker,
+        () => {
+          if (worker instanceof AppServerWorkerAdapter) {
+            return worker.interrupt();
+          }
+          return Promise.resolve();
         },
-        nextRunId: (attempt) => `${contract.taskId}:run:${attempt}`,
-        nextIdempotencyKey: (attempt) =>
-          `${contract.execution.idempotencyKey}:run:${attempt}`,
-      },
-      options.verifier,
-    );
-    const final = results.at(-1);
-    if (final === undefined) {
-      throw new Error("Development loop returned no result");
+        {
+          first: {
+            projectId: contract.projectId,
+            taskId: contract.taskId,
+            runId,
+            idempotencyKey: `${contract.execution.idempotencyKey}:run:1`,
+            controllerId: contract.execution.controllerId,
+            leaseExpiresAt: new Date(Date.parse(timestamp) + contract.budgets.wallTimeMinutes * 60_000).toISOString(),
+            now,
+            budget: {
+              tokenLimit: contract.budgets.tokenLimit,
+              wallTimeSeconds: contract.budgets.wallTimeMinutes * 60,
+              estimatedCostKrwLimit: contract.budgets.costKrwLimit,
+            },
+            verificationPlan: {
+              repositoryRoot,
+              requiredCommandIds: verificationIds(contract),
+              retryableOnFailure: true,
+            },
+          },
+          nextRunId: (attempt) => `${contract.taskId}:run:${attempt}`,
+          nextIdempotencyKey: (attempt) =>
+            `${contract.execution.idempotencyKey}:run:${attempt}`,
+        },
+        options.verifier,
+      );
+      const completed = results.at(-1);
+      if (completed === undefined) {
+        throw new Error("Development loop returned no result");
+      }
+      final = completed;
+      attempts = results.length;
     }
+    const delivery =
+      final.run.state === "COMPLETED" && options.delivery !== undefined
+        ? runDeliveryPipeline(
+            ledger,
+            {
+              commit: {
+                identity: {
+                  repositoryRoot,
+                  repositoryFullName: repositoryFullName(
+                    contract.repository.canonicalOrigin,
+                  ),
+                  baseBranch: contract.repository.baseBranch,
+                  baseSha: contract.repository.baseSha,
+                  branch: contract.repository.workBranch,
+                  taskId: contract.taskId,
+                },
+                paths: options.delivery.paths,
+                message: options.delivery.commitMessage,
+                idempotencyKey: `${contract.execution.idempotencyKey}:commit`,
+              },
+              pushIdempotencyKey: `${contract.execution.idempotencyKey}:push`,
+              pullRequest: {
+                title: options.delivery.pullRequestTitle,
+                bodyFile: path.resolve(options.delivery.pullRequestBodyFile),
+                requiredLabel: contract.risk.requiredLabel,
+                idempotencyKey: `${contract.execution.idempotencyKey}:pr`,
+              },
+              requiredWorkflowNames: ["CI", "Preview browser validation"],
+            },
+            options.deliveryRunner ?? localDeliveryCommandRunner,
+          )
+        : null;
     return sanitizeOrchestratorValue({
       taskId: contract.taskId,
-      finalState: final.run.state,
-      attempts: results.length,
+      finalState: delivery?.state ?? final.run.state,
+      attempts,
       lifecycle: createDeliveryLifecycle(contract.taskId),
       evidence: finalEvidence(final),
+      delivery,
     }) as OperatorSummary;
   } finally {
     ledger.close();
@@ -250,11 +366,22 @@ export async function runSupervisedOperator(
 }
 
 async function main(): Promise<void> {
-  const [taskContractPath, ledgerPath] = process.argv.slice(2);
+  const [taskContractPath, ledgerPath, deliverySubmissionPath] =
+    process.argv.slice(2);
   if (taskContractPath === undefined || ledgerPath === undefined) {
-    throw new Error("Usage: operator <task-contract.json> <absolute-ledger.sqlite>");
+    throw new Error(
+      "Usage: operator <task-contract.json> <absolute-ledger.sqlite> [delivery-submission.json]",
+    );
   }
-  const summary = await runSupervisedOperator({ taskContractPath, ledgerPath });
+  const delivery =
+    deliverySubmissionPath === undefined
+      ? undefined
+      : deliverySubmission(readJson(path.resolve(deliverySubmissionPath)));
+  const summary = await runSupervisedOperator({
+    taskContractPath,
+    ledgerPath,
+    delivery,
+  });
   process.stdout.write(`${JSON.stringify(summary)}\n`);
 }
 
@@ -271,6 +398,7 @@ if (
       evidence: [
         error instanceof Error ? error.message : "Unknown operator failure",
       ],
+      delivery: null,
     });
     process.stdout.write(`${JSON.stringify(summary)}\n`);
     process.exitCode = 1;
