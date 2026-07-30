@@ -1,5 +1,43 @@
 # Work status
 
+## 2026-07-30 - Production access matrix v1
+
+- Objective: complete R0 by assigning every migration 000-021 public table a
+  machine-verifiable, default-deny target access boundary before any
+  reconciliation SQL exists.
+- Branch/base: `codex/docs/production-access-matrix-v1`, based on PR #51 merge
+  `e48e4341d987a428a34702337fb81c2bf6584cf2`.
+- Risk: normal-risk documentation and contract test. The wider reconciliation
+  program remains high-risk/manual.
+- Revenue impact: removes the classification blocker for safely replacing
+  anonymous writes without interrupting Product or revenue operations.
+- Root-cause class: database/security contract gap; deployed access differs
+  from migration intent and active consumers still use the shared anon client.
+- Scope: 60-table access matrix, consumer evidence, R1 blockers, static
+  inventory test, report, changelog, decision record, and delivery evidence.
+- Non-goals: migration SQL, RLS/grant changes, migration-history repair,
+  secrets/configuration, runtime behavior, Production writes, or edits to
+  migrations 000-021.
+- Completed: safe branch check; governance and accepted architecture review;
+  code-consumer audit; 60-table matrix; focused contract test 4/4; typecheck;
+  356/356 full tests; 77-page Production build; generated-output-excluded lint
+  with zero errors and four pre-existing warnings.
+- Current work: intentional commit, push, Draft PR, and exact-head gates.
+- Blockers/owner actions: none for the R0 Draft PR. Matrix approval/merge is
+  required before an R1 implementation Story can rely on it.
+- Changed files: access matrix JSON/report/test, changelog, Decision Log, and
+  this status file.
+- Browser validation: 32 passed, one skipped, and seven DB-dependent pages
+  failed only because local Supabase is externally unconfigured
+  (`missing_url`). Product/revenue/security and all independent checks passed.
+- Lint note: the default command scans ignored generated `playwright-report`
+  assets and reports 184 generated-code errors; excluding ignored Playwright
+  output yields zero errors and four pre-existing test warnings.
+- Exact next action: review diff; commit, push, create the Draft PR, then verify
+  exact-head CI and Preview.
+- Remaining risks: mixed administrator/worker groups need route-level client
+  separation in R1; current anonymous write paths remain unchanged.
+
 ## 2026-07-30 — Production schema security reconciliation
 
 - Objective: reconcile missing Supabase migration history and deployed security
