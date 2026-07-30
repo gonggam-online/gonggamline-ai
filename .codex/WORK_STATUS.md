@@ -1475,13 +1475,16 @@ perform the documented read-only Supabase schema and completeness inspection.
 ### Verification and next action
 
 - Focused Phase 1+2+3 tests: 54/54 passed after bounded-shutdown changes.
-- Full tests: 316/316 passed at final source state.
+- Full tests: 322/322 passed after bounded-shutdown changes.
 - Lint: zero errors and four pre-existing warnings.
 - Typecheck: passed.
 - Production build: passed with 69 routes.
 - Playwright: 39/39 passed.
 - Actual Codex App Server live smoke: `COMPLETED`, one attempt, allowlisted
   documentation path only, controller `GIT_DIFF_CHECK`, audit chain valid.
+- Bounded-shutdown live smoke: `COMPLETED`, one attempt, final
+  `PROCESS_EXITED`, termination requested once after grace, allowlisted
+  documentation path only.
 - Next: commit the final evidence, run security/baseline checks, push, create
   the Draft PR, and verify exact-head CI/Preview.
 

@@ -138,13 +138,19 @@ The final clean-worktree run completed in one attempt with:
 
 ## Final local verification
 
-- Phase 1+2+3 focused tests: 48/48 passed.
-- Full unit/integration tests: 316/316 passed.
+- Phase 1+2+3 focused tests: 54/54 passed.
+- Full unit/integration tests: 322/322 passed.
 - Lint: zero errors and four pre-existing warnings.
 - Typecheck: passed.
 - Production build: passed with 69 routes.
 - Playwright: 39/39 passed.
 - `git diff --check`: passed.
+
+The bounded-shutdown review smoke completed in one attempt on the native
+Windows App Server child. The final persisted checkpoint was
+`PROCESS_EXITED`; one termination request was made after stdin grace expired,
+and controller verification ran only after the observed exit. The only changed
+path was `docs/orchestrator/reports/phase-3-shutdown-live-smoke.md`.
 
 ## Rollback
 
