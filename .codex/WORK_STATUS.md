@@ -1,5 +1,27 @@
 # Work status
 
+## 2026-07-30 — Item Selection Security Vertical Slice v1
+
+- Objective: implement the accepted versioned Item Selection persistence and
+  protected Admin security boundary through the Phase 4.2 orchestrator.
+- Branch/base: `codex/feat/item-selection-security-vertical-slice-v1-impl`,
+  based on merge `2737c698878106effdb678bf646460efb13a133a`.
+- Risk: high; Draft PR #50, `manual-merge-required`, no auto-merge.
+- Root-cause class: implementation; local disposable replay is externally
+  blocked because Docker is not installed on D.
+- Completed: package pins, migration 021 and manifest, contracts, Auth/CSRF/
+  rate/service-role modules, protected routes, A01-A12 evidence, replay script,
+  CI job, lint, typecheck, 352/352 tests, and Production build.
+- Current work: publish checkpoint 5 and verify exact-head CI, Preview, and
+  browser smoke.
+- Non-goals: Production, real UUIDs/users/secrets, migration application,
+  commerce writes, Ready transition, or merge.
+- Owner action: review and manually merge only after every exact-head gate.
+- Exact next action: commit/push checkpoint 5, then observe exact-head CI and
+  Vercel Preview evidence.
+- Remaining risks: Auth/RLS/service-role/migration correctness and local replay
+  absence; CI disposable replay is binding.
+
 ## 2026-07-30 — Orchestrator Phase 4.2 Windows verifier fix
 
 - Objective: restore controller-owned npm verification on Windows Node 24 so

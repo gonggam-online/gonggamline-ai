@@ -1,0 +1,63 @@
+import { cookies } from "next/headers";
+
+import { adminRateLimiter } from "@/lib/auth/admin-rate-limit.server";
+import {
+  AdminRequestGuardError,
+  AdminUnsupportedMediaTypeError,
+  requireAdminRequest,
+  requireExactAdminOrigin,
+  requireJsonContentType,
+} from "@/lib/auth/admin-request-guard.server";
+import {
+  ADMIN_CSRF_COOKIE_NAME,
+  AdminCsrfError,
+  verifyAdminCsrfToken,
+} from "@/lib/auth/csrf.server";
+import { createSupabaseSsrServerClient } from "@/lib/auth/supabase-ssr.server";
+
+export async function POST(request: Request): Promise<Response> {
+  try {
+    requireExactAdminOrigin(request);
+    requireJsonContentType(request);
+    const body: unknown = await request.json();
+    if (
+      typeof body !== "object" ||
+      body === null ||
+      Array.isArray(body) ||
+      Object.keys(body).length !== 0
+    ) {
+      return Response.json({ code: "INVALID_REQUEST" }, { status: 400 });
+    }
+    const client = await createSupabaseSsrServerClient();
+    const context = await requireAdminRequest(request, "read", { client });
+    verifyAdminCsrfToken(request, "admin-session", context);
+    const rate = adminRateLimiter.consume(context.administratorUserId, "read");
+    if (!rate.allowed) {
+      return Response.json({ code: "RATE_LIMITED" }, { status: 429 });
+    }
+    const { error } = await client.auth.signOut({ scope: "global" });
+    if (error) {
+      return Response.json({ code: "SIGN_OUT_FAILED" }, { status: 500 });
+    }
+    (await cookies()).set(ADMIN_CSRF_COOKIE_NAME, "", {
+      secure: true,
+      httpOnly: true,
+      sameSite: "strict",
+      path: "/",
+      maxAge: 0,
+    });
+    return Response.json({ signedOut: true });
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      return Response.json({ code: "INVALID_REQUEST" }, { status: 400 });
+    }
+    if (
+      error instanceof AdminRequestGuardError ||
+      error instanceof AdminUnsupportedMediaTypeError ||
+      error instanceof AdminCsrfError
+    ) {
+      return Response.json({ code: error.code }, { status: error.status });
+    }
+    return Response.json({ code: "AUTHENTICATION_UNAVAILABLE" }, { status: 500 });
+  }
+}
