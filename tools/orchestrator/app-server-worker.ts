@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { createInterface } from "node:readline";
 import type { Readable, Writable } from "node:stream";
 
@@ -39,9 +41,40 @@ export type AppServerLauncher = (
 
 export interface AppServerWorkerConfig {
   readonly executable?: string;
+  readonly executableArgsPrefix?: readonly string[];
   readonly goal: string;
   readonly correlationId: string;
   readonly workspace: WorkspaceBoundary;
+}
+
+function codexCommand(config: AppServerWorkerConfig): {
+  readonly executable: string;
+  readonly argsPrefix: readonly string[];
+} {
+  if (config.executable !== undefined) {
+    return {
+      executable: config.executable,
+      argsPrefix: config.executableArgsPrefix ?? [],
+    };
+  }
+  if (process.platform === "win32") {
+    const appData = process.env.APPDATA;
+    if (appData !== undefined) {
+      const npmEntry = path.join(
+        appData,
+        "npm",
+        "node_modules",
+        "@openai",
+        "codex",
+        "bin",
+        "codex.js",
+      );
+      if (existsSync(npmEntry)) {
+        return { executable: process.execPath, argsPrefix: [npmEntry] };
+      }
+    }
+  }
+  return { executable: "codex", argsPrefix: [] };
 }
 
 const workerOutputSchema = {
@@ -223,12 +256,15 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
       assertCleanStart(before);
     }
 
-    const executable =
-      this.config.executable ?? (process.platform === "win32" ? "codex.exe" : "codex");
-    const child = this.launcher(executable, ["app-server", "--stdio"], {
+    const command = codexCommand(this.config);
+    const child = this.launcher(
+      command.executable,
+      [...command.argsPrefix, "app-server", "--stdio"],
+      {
       cwd: this.config.workspace.repositoryRoot,
       env: safeEnvironment(),
-    });
+      },
+    );
     let nextId = 1;
     const pending = new Map<
       number,
