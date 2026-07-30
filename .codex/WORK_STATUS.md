@@ -1492,6 +1492,9 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Bounded-shutdown live smoke: `COMPLETED`, one attempt, final
   `PROCESS_EXITED`, termination requested once after grace, allowlisted
   documentation path only.
+- Shutdown-precedence native live smoke: `COMPLETED`, one attempt, final
+  `PROCESS_EXITED`, termination requested once, audit chain valid, controller
+  `GIT_DIFF_CHECK` passed, allowlisted documentation path only.
 - Next: commit the final evidence, run security/baseline checks, push, create
   the Draft PR, and verify exact-head CI/Preview.
 

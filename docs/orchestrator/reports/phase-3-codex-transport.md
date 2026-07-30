@@ -157,6 +157,12 @@ Windows App Server child. The final persisted checkpoint was
 and controller verification ran only after the observed exit. The only changed
 path was `docs/orchestrator/reports/phase-3-shutdown-live-smoke.md`.
 
+The shutdown-precedence review smoke also completed in one attempt on the
+native Windows child. Its final checkpoint was `PROCESS_EXITED`, the audit
+chain was valid, controller `GIT_DIFF_CHECK` passed, and the sole allowlisted
+change was
+`docs/orchestrator/reports/phase-3-shutdown-precedence-live-smoke.md`.
+
 ## Rollback
 
 Revert the Phase 3 PR. No migration, Production data, Supabase object, GitHub
