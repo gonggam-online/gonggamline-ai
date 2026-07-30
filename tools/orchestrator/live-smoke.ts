@@ -93,7 +93,7 @@ try {
         leaseExpiresAt: new Date(Date.now() + 5 * 60_000).toISOString(),
         now,
         budget: {
-          tokenLimit: 20_000,
+          tokenLimit: 100_000,
           wallTimeSeconds: 180,
           estimatedCostKrwLimit: 1_000,
         },
