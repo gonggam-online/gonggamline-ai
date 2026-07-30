@@ -25,6 +25,10 @@ export interface WorkerExecutionContext {
   readonly attempt: number;
   readonly retryOfRunId: string | null;
   readonly resumedFrom: RunCheckpoint | null;
+  readonly priorFailure: {
+    readonly code: string | null;
+    readonly evidence: readonly string[];
+  } | null;
 }
 
 export type WorkerOutcome =
@@ -58,10 +62,18 @@ export interface WorkerHooks {
 
 export interface WorkerAdapter {
   readonly name: string;
+  readonly interruptBoundaryMs?: number;
   execute(
     context: WorkerExecutionContext,
     hooks: WorkerHooks,
   ): Promise<WorkerOutcome>;
+}
+
+export class WorkerShutdownError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "WorkerShutdownError";
+  }
 }
 
 export interface RunExecutionRequest {
@@ -204,6 +216,10 @@ export class OrchestratorExecutionEngine {
     request: RunExecutionRequest,
   ): Promise<RunExecutionResult> {
     const resumedFrom = this.ledger.latestRunCheckpoint(run.runId);
+    const priorResult =
+      run.retryOfRunId === null
+        ? null
+        : this.ledger.runResult(run.retryOfRunId);
     if (
       !this.ledger.acquireLease(
         {
@@ -245,20 +261,61 @@ export class OrchestratorExecutionEngine {
       request.now(),
     );
 
-    let interruptRequested = false;
-    const interruptOnce = (): void => {
-      if (interruptRequested) {
-        return;
+    let interruptPromise: Promise<"SETTLED" | "REJECTED"> | null = null;
+    const interruptOnce = (): Promise<"SETTLED" | "REJECTED"> => {
+      if (interruptPromise !== null) {
+        return interruptPromise;
       }
-      interruptRequested = true;
-      void Promise.resolve()
+      interruptPromise = Promise.resolve()
         .then(() => this.interrupt())
-        .catch(() => {
-          // Interrupt completion is adapter telemetry, not a terminal-state gate.
-        });
+        .then(
+          () => "SETTLED" as const,
+          () => "REJECTED" as const,
+        );
+      return interruptPromise;
     };
+    type InterruptBoundaryStatus = "SETTLED" | "REJECTED" | "TIMED_OUT";
+    let interruptBoundaryPromise: Promise<InterruptBoundaryStatus> | null =
+      null;
+    const awaitInterruptBoundary = (): Promise<InterruptBoundaryStatus> => {
+      if (interruptBoundaryPromise !== null) {
+        return interruptBoundaryPromise;
+      }
+      interruptBoundaryPromise = Promise.race([
+        interruptOnce(),
+        new Promise<"TIMED_OUT">((resolve) =>
+          setTimeout(
+            () => resolve("TIMED_OUT"),
+            this.worker.interruptBoundaryMs ?? 100,
+          ),
+        ),
+      ]).then((status) => {
+        this.ledger.appendRunCheckpoint(
+          run.runId,
+          {
+            kind: "INTERRUPT_BOUNDARY",
+            payload: { status },
+          },
+          request.now(),
+        );
+        return status;
+      });
+      return interruptBoundaryPromise;
+    };
+    const shutdownFailure = (
+      originalFailureCode: string,
+    ): WorkerOutcome => ({
+      kind: "FAILED",
+      summary: "Worker shutdown could not be confirmed",
+      errorCode: "PROCESS_SHUTDOWN_FAILED",
+      retryable: false,
+      evidence: [
+        "controller:process-shutdown-failed",
+        `controller:original-failure:${originalFailureCode}`,
+      ],
+    });
     const budget = new BudgetGuard(request.budget, async () => {
-      interruptOnce();
+      await awaitInterruptBoundary();
     });
     let budgetBreach: BudgetDimension | null = null;
     let hooksActive = true;
@@ -296,6 +353,13 @@ export class OrchestratorExecutionEngine {
           attempt: run.attempt,
           retryOfRunId: run.retryOfRunId,
           resumedFrom,
+          priorFailure:
+            priorResult === null
+              ? null
+              : {
+                  code: priorResult.failureCode,
+                  evidence: priorResult.evidence,
+                },
         },
         hooks,
         ),
@@ -316,15 +380,18 @@ export class OrchestratorExecutionEngine {
     );
     const settled = await Promise.race([workerPromise, timeoutPromise]);
     if (settled.type === "timeout") {
+      const interruptStatus = await awaitInterruptBoundary();
       hooksActive = false;
-      interruptOnce();
-      outcome = {
-        kind: "FAILED",
-        summary: "Worker wall-clock timeout exceeded",
-        errorCode: "WALL_TIME_TIMEOUT",
-        retryable: false,
-        evidence: ["controller:wall-clock-timeout"],
-      };
+      outcome =
+        interruptStatus === "SETTLED"
+          ? {
+              kind: "FAILED",
+              summary: "Worker wall-clock timeout exceeded",
+              errorCode: "WALL_TIME_TIMEOUT",
+              retryable: false,
+              evidence: ["controller:wall-clock-timeout"],
+            }
+          : shutdownFailure("WALL_TIME_TIMEOUT");
     } else {
       if (timeoutHandle !== null) {
         clearTimeout(timeoutHandle);
@@ -333,31 +400,42 @@ export class OrchestratorExecutionEngine {
         outcome = settled.outcome;
       } else {
         const budgetExceeded = settled.error instanceof BudgetExceededError;
+        const shutdownFailed = settled.error instanceof WorkerShutdownError;
         outcome = {
           kind: "FAILED",
           summary: budgetExceeded
             ? "Execution budget exceeded"
-            : "Worker adapter failed",
+            : shutdownFailed
+              ? "Worker shutdown could not be confirmed"
+              : "Worker adapter failed",
           errorCode: budgetExceeded
             ? settled.error.dimension
-            : "WORKER_ADAPTER_ERROR",
-          retryable: !budgetExceeded,
+            : shutdownFailed
+              ? "PROCESS_SHUTDOWN_FAILED"
+              : "WORKER_ADAPTER_ERROR",
+          retryable: !budgetExceeded && !shutdownFailed,
           evidence: budgetExceeded
             ? []
-            : ["controller:worker-adapter-error"],
+            : shutdownFailed
+              ? ["controller:process-shutdown-failed"]
+              : ["controller:worker-adapter-error"],
         };
       }
     }
 
     if (budgetBreach !== null) {
       hooksActive = false;
-      outcome = {
-        kind: "FAILED",
-        summary: "Execution budget exceeded",
-        errorCode: budgetBreach,
-        retryable: false,
-        evidence: [`controller:budget-exceeded:${budgetBreach}`],
-      };
+      const interruptStatus = await awaitInterruptBoundary();
+      outcome =
+        interruptStatus === "SETTLED"
+          ? {
+              kind: "FAILED",
+              summary: "Execution budget exceeded",
+              errorCode: budgetBreach,
+              retryable: false,
+              evidence: [`controller:budget-exceeded:${budgetBreach}`],
+            }
+          : shutdownFailure(budgetBreach);
     }
 
     if (outcome.kind === "WAITING_FOR_HUMAN") {

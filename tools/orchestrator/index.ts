@@ -1,5 +1,7 @@
 export * from "./budget.ts";
+export * from "./app-server-worker.ts";
 export * from "./contracts.ts";
+export * from "./development-loop.ts";
 export * from "./execution.ts";
 export * from "./fake-worker.ts";
 export * from "./ledger.ts";
@@ -10,3 +12,4 @@ export * from "./router.ts";
 export * from "./state-machine.ts";
 export * from "./verifier.ts";
 export * from "./worktree-guard.ts";
+export * from "./workspace-boundary.ts";

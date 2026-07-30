@@ -657,11 +657,14 @@ test("wall-clock timeout does not await a permanently pending interrupt", async 
     assert.equal(interrupts, 1);
     assert.equal(
       fixture.ledger.runResult("run-pending-interrupt")?.failureCode,
-      "WALL_TIME_TIMEOUT",
+      "PROCESS_SHUTDOWN_FAILED",
     );
     assert.deepEqual(
       fixture.ledger.runResult("run-pending-interrupt")?.evidence,
-      ["controller:wall-clock-timeout"],
+      [
+        "controller:process-shutdown-failed",
+        "controller:original-failure:WALL_TIME_TIMEOUT",
+      ],
     );
   } finally {
     fixture.ledger.close();
@@ -711,8 +714,11 @@ test("wall-clock timeout survives interrupt rejection and ignores late success",
     assert.equal(fixture.ledger.run("run-rejected-interrupt").state, "FAILED");
     assert.equal(fixture.ledger.taskState("task-phase-2"), "FAILED");
     assert.equal(interrupts, 1);
-    assert.equal(stored?.failureCode, "WALL_TIME_TIMEOUT");
-    assert.deepEqual(stored?.evidence, ["controller:wall-clock-timeout"]);
+    assert.equal(stored?.failureCode, "PROCESS_SHUTDOWN_FAILED");
+    assert.deepEqual(stored?.evidence, [
+      "controller:process-shutdown-failed",
+      "controller:original-failure:WALL_TIME_TIMEOUT",
+    ]);
     assert.equal(
       stored?.evidence.includes("worker:late-after-rejected-interrupt"),
       false,
@@ -762,6 +768,9 @@ test("wall-clock timeout survives synchronous interrupt throw and ignores late h
         estimatedCostKrwLimit: 1_000,
       },
     });
+    const terminalCheckpointCount = fixture.ledger.runCheckpoints(
+      "run-sync-throw-interrupt",
+    ).length;
     await new Promise((resolve) => setTimeout(resolve, 80));
     const stored = fixture.ledger.runResult("run-sync-throw-interrupt");
     assert.equal(completed.run.state, "FAILED");
@@ -771,15 +780,22 @@ test("wall-clock timeout survives synchronous interrupt throw and ignores late h
     );
     assert.equal(fixture.ledger.taskState("task-phase-2"), "FAILED");
     assert.equal(interrupts, 1);
-    assert.equal(stored?.failureCode, "WALL_TIME_TIMEOUT");
-    assert.deepEqual(stored?.evidence, ["controller:wall-clock-timeout"]);
+    assert.equal(stored?.failureCode, "PROCESS_SHUTDOWN_FAILED");
+    assert.deepEqual(stored?.evidence, [
+      "controller:process-shutdown-failed",
+      "controller:original-failure:WALL_TIME_TIMEOUT",
+    ]);
     assert.equal(
       stored?.evidence.includes("worker:late-after-sync-throw"),
       false,
     );
     assert.equal(
       fixture.ledger.latestRunCheckpoint("run-sync-throw-interrupt")?.kind,
-      "WORKER_DISPATCHED",
+      "INTERRUPT_BOUNDARY",
+    );
+    assert.equal(
+      fixture.ledger.runCheckpoints("run-sync-throw-interrupt").length,
+      terminalCheckpointCount,
     );
   } finally {
     fixture.ledger.close();

@@ -1417,3 +1417,91 @@ perform the documented read-only Supabase schema and completeness inspection.
   linked for Revenue Opportunity calculation.
 - ROI and cost provenance require business/data-contract approval before
   implementation.
+
+---
+
+## Orchestrator Phase 3 Codex transport — 2026-07-30
+
+### Objective, branch, and risk
+
+- Objective: connect the Phase 2 controller to Codex App Server and prove a
+  bounded local develop/verify/retry slice.
+- Branch: `codex/feat/orchestrator-phase-3`
+- Base: PR #44 merge
+  `52ffa71d4cefb51fe980c19b0b5dff7532d5f685`
+- Risk: high-risk automation bootstrap; Draft PR and
+  `manual-merge-required`.
+
+### Scope and non-goals
+
+- Scope: stdio transport, structured identity/result, usage/checkpoints,
+  interrupt, local repository/worktree boundary, retry feedback, tests, and
+  operator documentation.
+- Non-goals: GitHub write/reconciliation, Production, Supabase, Vercel
+  Production, marketplace calls, browser automation, secret setup, and Phase 4.
+- Root-cause class: implementation checkpoint; no external configuration or
+  database fault is being compensated for in code.
+
+### Completed and current work
+
+- Confirmed clean latest `origin/main` containing PR #44 and created the
+  dedicated branch.
+- Confirmed installed Codex CLI/App Server protocol and generated temporary
+  type references outside the repository.
+- Implemented transport, workspace boundary, and bounded retry-loop primitives.
+- Added hermetic Phase 3 contract tests and implementation/security report.
+- Actual Codex App Server smoke: completed in one attempt after fail-close
+  probes identified and corrected Windows npm CLI launch and streamed terminal
+  item handling.
+- PR #45 review fix: added controller-bounded interrupt quiescence, direct App
+  Server child termination, observed exit evidence, and late-write regression
+  coverage.
+- PR #45 shutdown-precedence review fix: unconfirmed interrupt/shutdown now
+  supersedes timeout/budget outcomes with non-retryable
+  `PROCESS_SHUTDOWN_FAILED`; the original cause remains in evidence.
+- Current: final full regression and live-smoke revalidation.
+
+### Changed files
+
+- `tools/orchestrator/app-server-worker.ts`
+- `tools/orchestrator/workspace-boundary.ts`
+- `tools/orchestrator/development-loop.ts`
+- `tools/orchestrator/execution.ts`
+- `tools/orchestrator/index.ts`
+- `tests/orchestrator-phase-3.test.ts`
+- `docs/orchestrator/reports/phase-3-codex-transport.md`
+- `docs/orchestrator/reports/phase-3-live-smoke.md`
+- `CHANGELOG-Orchestrator-Phase3.md`
+- `.ai/DECISION_LOG.md`
+- `.codex/WORK_STATUS.md`
+
+### Verification and next action
+
+- Focused Phase 1+2+3 tests: 55/55 passed after shutdown-precedence changes.
+- Full tests: 323/323 passed after shutdown-precedence changes.
+- Lint: zero errors and four pre-existing warnings.
+- Typecheck: passed.
+- Production build: passed with 69 routes.
+- Playwright: 39/39 passed.
+- Tracked secret/generated-output audit: passed.
+- Local disposable DB replay: blocked because Docker is not installed on this
+  N PC; the script refused any Production or linked database fallback. The
+  exact-head GitHub disposable runner remains the binding replay gate.
+- Actual Codex App Server live smoke: `COMPLETED`, one attempt, allowlisted
+  documentation path only, controller `GIT_DIFF_CHECK`, audit chain valid.
+- Bounded-shutdown live smoke: `COMPLETED`, one attempt, final
+  `PROCESS_EXITED`, termination requested once after grace, allowlisted
+  documentation path only.
+- Shutdown-precedence native live smoke: `COMPLETED`, one attempt, final
+  `PROCESS_EXITED`, termination requested once, audit chain valid, controller
+  `GIT_DIFF_CHECK` passed, allowlisted documentation path only.
+- Next: commit the final evidence, run security/baseline checks, push, create
+  the Draft PR, and verify exact-head CI/Preview.
+
+### Remaining risks and owner actions
+
+- Local App Server workspace-write is not an independently proven OS/network
+  sandbox; the report records the exact guarantee and residual risk.
+- Live authenticated Codex smoke consumes the current Codex allowance and must
+  not be conflated with hermetic CI.
+- Repository-owner manual merge remains required. Phase 4 is not authorized.

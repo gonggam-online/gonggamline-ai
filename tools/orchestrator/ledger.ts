@@ -542,6 +542,27 @@ export class OrchestratorLedger {
     };
   }
 
+  runCheckpoints(runId: string): readonly RunCheckpoint[] {
+    this.run(runId);
+    const rows = this.#database
+      .prepare(
+        `SELECT sequence, checkpoint_kind AS kind, payload_hash AS payloadHash,
+                payload_json AS payloadJson, created_at AS createdAt
+         FROM run_checkpoints WHERE run_id = ?
+         ORDER BY sequence ASC`,
+      )
+      .all(runId) as Array<
+      Omit<RunCheckpoint, "payload"> & { payloadJson: string }
+    >;
+    return rows.map((row) => ({
+      sequence: row.sequence,
+      kind: row.kind,
+      payloadHash: row.payloadHash,
+      payload: JSON.parse(row.payloadJson) as unknown,
+      createdAt: row.createdAt,
+    }));
+  }
+
   recordRunResult(
     runId: string,
     result: Omit<RunResult, "createdAt">,
