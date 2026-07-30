@@ -13,6 +13,11 @@ import {
   type DeliveryCommandRunner,
   type DeliveryIdentity,
 } from "../tools/orchestrator/delivery-actions.ts";
+import {
+  observeExactHeadWorkflows,
+  observeExactPreview,
+  observePreviewBrowserEvidence,
+} from "../tools/orchestrator/delivery-observer.ts";
 import { runSupervisedOperator } from "../tools/orchestrator/operator.ts";
 import type { WorkerOutcome } from "../tools/orchestrator/execution.ts";
 import { OrchestratorLedger } from "../tools/orchestrator/ledger.ts";
@@ -385,4 +390,122 @@ test("Draft PR reconciliation fails closed when duplicates exist", () => {
   } finally {
     ledger.close();
   }
+});
+
+function observationRunner(
+  responses: Readonly<Record<string, unknown>>,
+): DeliveryCommandRunner {
+  return {
+    run(executable, args) {
+      const key = `${executable} ${args.join(" ")}`;
+      const response = responses[key];
+      return response === undefined
+        ? { stdout: "", exitCode: 1 }
+        : { stdout: JSON.stringify(response), exitCode: 0 };
+    },
+  };
+}
+
+test("workflow observation accepts only required runs on the exact head", () => {
+  const command = `gh run list --repo example/repo --commit ${exactHead} --event pull_request --json databaseId,headSha,status,conclusion,workflowName,url --limit 50`;
+  const runner = observationRunner({
+    [command]: [
+      {
+        databaseId: 10,
+        headSha: exactHead,
+        status: "completed",
+        conclusion: "success",
+        workflowName: "CI",
+        url: "https://github.com/example/repo/actions/runs/10",
+      },
+      {
+        databaseId: 9,
+        headSha: "c".repeat(40),
+        status: "completed",
+        conclusion: "success",
+        workflowName: "Preview browser validation",
+        url: "https://github.com/example/repo/actions/runs/9",
+      },
+    ],
+  });
+
+  const evidence = observeExactHeadWorkflows({
+    repositoryRoot: "C:\\fixture",
+    repositoryFullName: "example/repo",
+    headSha: exactHead,
+    requiredWorkflowNames: ["CI", "Preview browser validation"],
+    runner,
+  });
+
+  assert.deepEqual(evidence.map(({ status }) => status), [
+    "SUCCEEDED",
+    "WAITING",
+  ]);
+});
+
+test("Preview observation rejects Production and resolves exact Preview", () => {
+  const deployments =
+    `gh api repos/example/repo/deployments?sha=${exactHead}&environment=Preview&per_page=10`;
+  const statuses =
+    "gh api repos/example/repo/deployments/88/statuses?per_page=5";
+  const runner = observationRunner({
+    [deployments]: [
+      { id: 87, sha: exactHead, environment: "Production" },
+      { id: 88, sha: exactHead, environment: "Preview" },
+    ],
+    [statuses]: [
+      {
+        state: "success",
+        environment_url: "https://preview.example.invalid",
+      },
+    ],
+  });
+
+  const evidence = observeExactPreview({
+    repositoryRoot: "C:\\fixture",
+    repositoryFullName: "example/repo",
+    headSha: exactHead,
+    runner,
+  });
+
+  assert.equal(evidence.status, "SUCCEEDED");
+  assert.equal(evidence.deploymentId, 88);
+  assert.equal(evidence.environment, "Preview");
+});
+
+test("browser evidence requires a non-expired artifact from the exact workflow", () => {
+  const artifacts =
+    "gh api repos/example/repo/actions/runs/99/artifacts";
+  const runner = observationRunner({
+    [artifacts]: {
+      artifacts: [
+        {
+          id: 123,
+          name: "preview-browser-evidence",
+          expired: false,
+          size_in_bytes: 456,
+          archive_download_url:
+            "https://api.github.com/repos/example/repo/actions/artifacts/123/zip",
+        },
+      ],
+    },
+  });
+
+  const evidence = observePreviewBrowserEvidence({
+    repositoryRoot: "C:\\fixture",
+    repositoryFullName: "example/repo",
+    headSha: exactHead,
+    workflow: {
+      name: "Preview browser validation",
+      runId: 99,
+      status: "SUCCEEDED",
+      url: "https://github.com/example/repo/actions/runs/99",
+      headSha: exactHead,
+    },
+    runner,
+  });
+
+  assert.equal(evidence.status, "SUCCEEDED");
+  assert.equal(evidence.artifactId, 123);
+  assert.match(evidence.artifactDigest ?? "", /^[a-f0-9]{64}$/);
 });

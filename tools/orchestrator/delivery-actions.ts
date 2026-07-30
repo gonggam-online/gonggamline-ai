@@ -10,7 +10,7 @@ export interface CommandResult {
 
 export interface DeliveryCommandRunner {
   run(
-    executable: "git" | "gh",
+    executable: "git" | "gh" | "npm.cmd",
     args: readonly string[],
     cwd: string,
   ): CommandResult;
