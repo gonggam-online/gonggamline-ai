@@ -290,6 +290,7 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
     this.#active = active;
 
     let terminal = false;
+    let completedAgentMessage: string | null = null;
     let resolveTerminal: (value: WorkerOutcome) => void = () => undefined;
     let rejectTerminal: (error: Error) => void = () => undefined;
     const terminalPromise = new Promise<WorkerOutcome>((resolve, reject) => {
@@ -384,6 +385,17 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
         }
         return;
       }
+      if (message.method === "item/completed") {
+        const item = message.params.item;
+        if (
+          isObject(item) &&
+          item.type === "agentMessage" &&
+          typeof item.text === "string"
+        ) {
+          completedAgentMessage = item.text;
+        }
+        return;
+      }
       if (message.method !== "turn/completed" || terminal) {
         return;
       }
@@ -407,9 +419,13 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
             item.type === "agentMessage" &&
             typeof item.text === "string",
         );
-      resolveTerminal(
+      const finalText =
         finalMessage !== undefined && isObject(finalMessage)
-          ? parseOutcome(String(finalMessage.text))
+          ? String(finalMessage.text)
+          : completedAgentMessage;
+      resolveTerminal(
+        finalText !== null
+          ? parseOutcome(finalText)
           : {
               kind: "FAILED",
               summary: "Codex completed without a final structured result",

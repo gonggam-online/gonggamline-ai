@@ -98,6 +98,7 @@ interface FakeServerOptions {
   readonly malformedEvent?: boolean;
   readonly duplicateTerminal?: boolean;
   readonly suppressTerminal?: boolean;
+  readonly completionItemOnly?: boolean;
 }
 
 class FakeAppServerProcess extends EventEmitter implements AppServerProcess {
@@ -148,12 +149,27 @@ class FakeAppServerProcess extends EventEmitter implements AppServerProcess {
             params: {
               turn: {
                 status: "completed",
-                items: [{ type: "agentMessage", text: finalText }],
+                items: options.completionItemOnly
+                  ? []
+                  : [{ type: "agentMessage", text: finalText }],
               },
             },
           });
           if (!options.suppressTerminal) {
             setImmediate(() => {
+              if (options.completionItemOnly) {
+                this.stdout.write(
+                  `${JSON.stringify({
+                    method: "item/completed",
+                    params: {
+                      threadId: "thread-phase-3",
+                      turnId: "turn-phase-3",
+                      completedAtMs: Date.now(),
+                      item: { type: "agentMessage", text: finalText },
+                    },
+                  })}\n`,
+                );
+              }
               this.stdout.write(`${terminal}\n`);
               if (options.duplicateTerminal) {
                 this.stdout.write(`${terminal}\n`);
@@ -214,6 +230,24 @@ test("transport rejects malformed JSONL without accepting success", async () => 
       adapter.execute(context(), hooks()),
       /Malformed App Server JSONL event/,
     );
+  } finally {
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
+test("transport accepts the completed agent item when final turn items are empty", async () => {
+  const fixture = createRepository();
+  try {
+    const adapter = new AppServerWorkerAdapter(
+      {
+        goal: "Return structured success",
+        correlationId: "correlation-item-completed",
+        workspace: fixture.boundary,
+      },
+      () => new FakeAppServerProcess({ completionItemOnly: true }),
+    );
+    const outcome = await adapter.execute(context(), hooks());
+    assert.equal(outcome.kind, "SUCCEEDED");
   } finally {
     rmSync(fixture.directory, { recursive: true, force: true });
   }
