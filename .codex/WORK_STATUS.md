@@ -1,5 +1,30 @@
 # Work status
 
+## 2026-07-30 — Item Selection security vertical-slice instruction delivery
+
+- Objective: land the independently reviewed implementation instruction before
+  starting the approved ItemSelectionRun security vertical slice.
+- Branch/base: `codex/docs/item-selection-security-slice-instruction`, normally
+  merged with `origin/main`
+  `267ab17b0fc83263674a6dd8e94d6ba53e0e6eb6`.
+- Risk: high-risk/manual documentation because the instruction governs a later
+  migration, Auth, authorization, RLS, CSRF, and service-role implementation.
+- Revenue impact: unblocks the smallest protected persistence path for products
+  selected by the merged evaluator and profitability engine.
+- Scope: one reviewed task instruction and this recovery status entry.
+- Non-goals: implementation, migration, Auth/RLS/API/UI changes, Production,
+  secrets, external writes, and further orchestrator development.
+- Current work: validate the synchronized document branch, publish a Draft PR
+  with `manual-merge-required`, verify its exact head, and use the repository
+  owner's explicit approval for manual merge.
+- Changed files: the Item Selection security vertical-slice implementation
+  instruction and this status file.
+- Exact next action: run document consistency, diff, unit/integration, lint,
+  typecheck, and Production-build validation before push.
+- Remaining risks: the implementation remains high-risk and must run only on a
+  fresh branch from the document merge; Production and real credentials remain
+  separately prohibited.
+
 ## 2026-07-29 — Orchestrator Phase 2 execution vertical slice
 
 - Objective: complete the shortest safe run-to-worker-to-result Vertical Slice
