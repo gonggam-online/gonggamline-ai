@@ -1,0 +1,195 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectId": "gonggamline-orchestrator",
+  "taskId": "orchestrator-phase-0-protocol-spike",
+  "parentTaskId": null,
+  "taskKind": "DISCOVERY",
+  "objective": "Measure the installed Codex CLI and App Server protocols with one structured read-only repository assessment, cancellation probe, usage capture, and sanitized evidence.",
+  "businessImpact": {
+    "priority": "P2",
+    "impactType": [
+      "OPERATOR_TIME",
+      "RISK_REDUCTION",
+      "LEARNING"
+    ],
+    "hypothesis": "Measured protocol evidence prevents an incompatible adapter choice and avoids rework before the orchestrator handles revenue-supporting engineering tasks.",
+    "metric": "Phase 0 done criteria passed with zero repository writes from the read-only probes",
+    "targetValue": "100%",
+    "measurementWindow": "Phase 0"
+  },
+  "repository": {
+    "canonicalOrigin": "https://github.com/gonggam-online/gonggamline-ai.git",
+    "baseBranch": "main",
+    "baseSha": "a6894fce05480d9b599dcb9a03f9100c607b3fe6",
+    "workBranch": "codex/chore/orchestrator-protocol-spike",
+    "dependencyPrNumbers": [
+      41
+    ]
+  },
+  "execution": {
+    "pcId": "N",
+    "worktreePath": "C:\\Users\\HaKwanghee\\.codex\\worktrees\\fa1e\\gonggamline-ai-git",
+    "controllerId": "n-phase-0-spike",
+    "codexThreadId": null,
+    "reviewResponseId": null,
+    "idempotencyKey": "sha256:d7dc3732cfc61b03c6d4558dc416429e9304f031a918ca7f459f47e15129689f",
+    "sandbox": "read-only"
+  },
+  "scope": {
+    "summary": [
+      "Validate TaskContract and ResultContract schemas and committed examples.",
+      "Capture installed Codex CLI and generated App Server protocol evidence.",
+      "Run structured read-only exec and App Server lifecycle probes.",
+      "Record a measured Phase 1 adapter recommendation."
+    ],
+    "nonGoals": [
+      "No product runtime, API, database, migration, CI, deployment, or commerce change.",
+      "No durable ledger, router, worker, webhook, or production orchestrator implementation.",
+      "No new OAuth, secret, paid API, permission expansion, or external write."
+    ],
+    "allowedPaths": [
+      "docs/orchestrator/**",
+      ".ai/DECISION_LOG.md",
+      ".codex/WORK_STATUS.md"
+    ],
+    "forbiddenPaths": [
+      "app/**",
+      "components/**",
+      "lib/**",
+      "services/**",
+      "supabase/**",
+      ".github/**"
+    ]
+  },
+  "architecture": {
+    "owner": "Engineering Orchestration",
+    "status": "ACCEPTED",
+    "references": [
+      "docs/orchestrator/architecture.md",
+      "docs/orchestrator/workflow.md",
+      "docs/orchestrator/approval-policy.md",
+      "docs/orchestrator/implementation-roadmap.md",
+      ".ai/DECISION_LOG.md"
+    ],
+    "introducesNewBoundary": false,
+    "approvedSha": "a6894fce05480d9b599dcb9a03f9100c607b3fe6"
+  },
+  "risk": {
+    "classification": "HIGH",
+    "reasons": [
+      "The probes are read-only normal-risk discovery, but repository policy classifies the initial automation bootstrap as manual."
+    ],
+    "requiredLabel": "manual-merge-required"
+  },
+  "doneCriteria": [
+    {
+      "id": "schemas-valid",
+      "description": "Both contract schemas compile and their Phase 0 examples validate.",
+      "evidenceType": "schema-validation"
+    },
+    {
+      "id": "generated-schema-captured",
+      "description": "Installed CLI version and generated App Server schema bundle hash are recorded.",
+      "evidenceType": "tool-capability"
+    },
+    {
+      "id": "exec-read-only",
+      "description": "One structured codex exec assessment completes in read-only mode with thread, events, usage, and unchanged Git status.",
+      "evidenceType": "execution-transcript"
+    },
+    {
+      "id": "app-server-lifecycle",
+      "description": "App Server initialize, thread start/read/resume, turn start/completion, interrupt, and usage behavior are measured.",
+      "evidenceType": "protocol-transcript"
+    },
+    {
+      "id": "adapter-decision",
+      "description": "The Phase 1 adapter recommendation is based on measured complexity, recovery, and cancellation evidence.",
+      "evidenceType": "decision"
+    }
+  ],
+  "verification": {
+    "commands": [
+      {
+        "name": "schema-validation",
+        "command": "npx --yes ajv-cli validate --spec=draft2020",
+        "timeoutSeconds": 120
+      },
+      {
+        "name": "repository-quality",
+        "command": "npm run lint && npm run typecheck && npm test && npm run build",
+        "timeoutSeconds": 7200
+      },
+      {
+        "name": "git-safety",
+        "command": "git diff --check && git status --short --branch",
+        "timeoutSeconds": 120
+      }
+    ],
+    "requiredEvidence": [
+      "sanitized protocol transcript",
+      "schema validation output",
+      "CLI and App Server schema version/hash",
+      "pre/post read-only Git status",
+      "adapter decision"
+    ],
+    "browserRequired": false,
+    "exactPreviewRequired": true
+  },
+  "budgets": {
+    "wallTimeMinutes": 120,
+    "tokenLimit": 20000,
+    "costKrwLimit": 0,
+    "dailyTaskLimit": 1,
+    "dailyCostKrwLimit": 0
+  },
+  "retryPolicy": {
+    "maxAttempts": 3,
+    "maxIdenticalErrors": 2,
+    "backoff": {
+      "initialSeconds": 5,
+      "maxSeconds": 60,
+      "multiplier": 2,
+      "jitter": true
+    },
+    "sameThreadClasses": [
+      "TRANSIENT",
+      "CODE"
+    ],
+    "newThreadClasses": [
+      "CONTEXT_CORRUPT"
+    ]
+  },
+  "approval": {
+    "requiredBefore": [
+      "FINAL_PR_MERGE"
+    ],
+    "prohibitedActions": [
+      "PRODUCTION_DEPLOY",
+      "PRODUCTION_ROLLBACK",
+      "SUPABASE_SCHEMA",
+      "SUPABASE_RLS_AUTH",
+      "SUPABASE_DATA",
+      "REAL_LISTING",
+      "REAL_PRICE_INVENTORY_AD",
+      "REAL_ORDER_PURCHASE_FULFILLMENT",
+      "RETURN_SETTLEMENT_PAYMENT",
+      "OAUTH_LOGIN",
+      "SECRET_CHANGE",
+      "PAID_API_OR_LIMIT",
+      "PERMISSION_EXPANSION",
+      "FORCE_PUSH_OR_PROTECTED_BRANCH",
+      "LEGAL_FINANCIAL_CERTIFICATION",
+      "AUTONOMY_EXPANSION",
+      "RETRY_BUDGET_OVERRIDE"
+    ],
+    "approvalIds": [
+      "user-phase-0-approval-2026-07-28"
+    ]
+  },
+  "rollback": {
+    "plan": "Stop all probe processes, remove only Phase 0 documentation/evidence in this branch, and close the unmerged PR.",
+    "verification": "Confirm no probe process remains, Git status matches the intended Phase 0 diff, and product/runtime paths are unchanged.",
+    "fullyReversible": true
+  }
+}

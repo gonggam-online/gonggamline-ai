@@ -1,0 +1,741 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gonggamline.example/schemas/orchestrator/result-contract.schema.json",
+  "title": "GonggamLine Orchestrator Result Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "projectId",
+    "taskId",
+    "attempt",
+    "startedAt",
+    "finishedAt",
+    "state",
+    "reviewOutcome",
+    "summary",
+    "repository",
+    "changes",
+    "verification",
+    "delivery",
+    "failure",
+    "retry",
+    "humanAction",
+    "nextContext",
+    "evidence",
+    "usage",
+    "businessImpact"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "projectId": {
+      "$ref": "#/$defs/id"
+    },
+    "taskId": {
+      "$ref": "#/$defs/id"
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finishedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "state": {
+      "$ref": "#/$defs/state"
+    },
+    "reviewOutcome": {
+      "enum": [
+        "NEXT_TASK",
+        "RETRY",
+        "REPLAN",
+        "WAIT_FOR_CI",
+        "WAITING_FOR_HUMAN",
+        "BLOCKED",
+        "PROJECT_COMPLETED"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalOrigin",
+        "baseBranch",
+        "baseSha",
+        "workBranch",
+        "worktreePath",
+        "statusClean"
+      ],
+      "properties": {
+        "canonicalOrigin": {
+          "type": "string"
+        },
+        "baseBranch": {
+          "type": "string"
+        },
+        "baseSha": {
+          "$ref": "#/$defs/sha"
+        },
+        "workBranch": {
+          "type": "string"
+        },
+        "worktreePath": {
+          "type": "string"
+        },
+        "statusClean": {
+          "type": "boolean"
+        },
+        "headSha": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "codexThreadId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reviewResponseId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pcId": {
+          "enum": [
+            "N",
+            "D"
+          ]
+        }
+      }
+    },
+    "changes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "files",
+        "diffSummary",
+        "diffHash",
+        "allowedPathCheck"
+      ],
+      "properties": {
+        "files": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "diffSummary": {
+          "type": "string"
+        },
+        "diffHash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(sha256:[a-f0-9]{64})?$"
+        },
+        "allowedPathCheck": {
+          "$ref": "#/$defs/gate"
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "overall",
+        "checks"
+      ],
+      "properties": {
+        "overall": {
+          "$ref": "#/$defs/gate"
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "status",
+              "startedAt",
+              "finishedAt",
+              "exitCode",
+              "evidenceIds"
+            ],
+            "properties": {
+              "name": {
+                "$ref": "#/$defs/id"
+              },
+              "status": {
+                "$ref": "#/$defs/gate"
+              },
+              "startedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "finishedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "exitCode": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "summary": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "evidenceIds": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/id"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commit",
+        "push",
+        "pullRequest",
+        "ci",
+        "preview",
+        "production"
+      ],
+      "properties": {
+        "commit": {
+          "$ref": "#/$defs/deliveryItem"
+        },
+        "push": {
+          "$ref": "#/$defs/deliveryItem"
+        },
+        "pullRequest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "number",
+            "url",
+            "draft",
+            "headSha",
+            "baseSha"
+          ],
+          "properties": {
+            "status": {
+              "$ref": "#/$defs/gate"
+            },
+            "number": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1
+            },
+            "url": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "uri"
+            },
+            "draft": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "headSha": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/sha"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baseSha": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/sha"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "ci": {
+          "$ref": "#/$defs/externalGate"
+        },
+        "preview": {
+          "$ref": "#/$defs/externalGate"
+        },
+        "production": {
+          "$ref": "#/$defs/externalGate"
+        },
+        "supabase": {
+          "$ref": "#/$defs/externalGate"
+        }
+      }
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "present",
+        "class",
+        "code",
+        "message",
+        "normalizedSignature",
+        "retryable"
+      ],
+      "properties": {
+        "present": {
+          "type": "boolean"
+        },
+        "class": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            null,
+            "EXTERNAL_CONFIGURATION",
+            "DATABASE",
+            "CODE",
+            "TRANSIENT",
+            "POLICY_APPROVAL",
+            "CONFLICT",
+            "BUDGET",
+            "UNKNOWN"
+          ]
+        },
+        "code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "message": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "normalizedSignature": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "retryable": {
+          "type": "boolean"
+        }
+      }
+    },
+    "retry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recommended",
+        "mode",
+        "notBefore",
+        "remainingAttempts"
+      ],
+      "properties": {
+        "recommended": {
+          "type": "boolean"
+        },
+        "mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            null,
+            "IMMEDIATE",
+            "BACKOFF",
+            "SAME_THREAD",
+            "NEW_THREAD",
+            "REPLAN"
+          ]
+        },
+        "notBefore": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "remainingAttempts": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "humanAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "approvalAction",
+        "request",
+        "sitePath",
+        "impact",
+        "cost",
+        "secretHandling",
+        "verification",
+        "rollback",
+        "expiresAt"
+      ],
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "approvalAction": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "request": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sitePath": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "impact": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cost": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "secretHandling": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "verification": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rollback": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "expiresAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    },
+    "nextContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verifiedFacts",
+        "assumptions",
+        "unconfirmed",
+        "userDecisions",
+        "recommendedNextObjective"
+      ],
+      "properties": {
+        "verifiedFacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "unconfirmed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "userDecisions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recommendedNextObjective": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "source",
+          "observedAt",
+          "sha256",
+          "sanitized"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "uri": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sanitized": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "wallTimeSeconds",
+        "inputTokens",
+        "cachedInputTokens",
+        "outputTokens",
+        "reasoningTokens",
+        "estimatedCostKrw"
+      ],
+      "properties": {
+        "wallTimeSeconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "inputTokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cachedInputTokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "outputTokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reasoningTokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "estimatedCostKrw": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "businessImpact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hypothesis",
+        "operatorMinutesSavedEstimate",
+        "revenueImpactEstimateKrw",
+        "actualEvidenceAvailable"
+      ],
+      "properties": {
+        "hypothesis": {
+          "type": "string"
+        },
+        "operatorMinutesSavedEstimate": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "revenueImpactEstimateKrw": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "actualEvidenceAvailable": {
+          "type": "boolean"
+        },
+        "actualEvidenceIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "state": {
+      "enum": [
+        "PLANNED",
+        "READY",
+        "RUNNING",
+        "VERIFYING",
+        "WAITING_FOR_CI",
+        "WAITING_FOR_HUMAN",
+        "RETRYABLE_FAILURE",
+        "REPLANNING",
+        "BLOCKED",
+        "FAILED",
+        "COMPLETED",
+        "CANCELLED"
+      ]
+    },
+    "gate": {
+      "enum": [
+        "NOT_REQUIRED",
+        "PENDING",
+        "PASSED",
+        "FAILED",
+        "BLOCKED"
+      ]
+    },
+    "deliveryItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "sha"
+      ],
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/gate"
+        },
+        "sha": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "externalGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "exactSha",
+        "references",
+        "summary"
+      ],
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/gate"
+        },
+        "exactSha": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "summary": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

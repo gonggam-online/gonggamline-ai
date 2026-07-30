@@ -72,11 +72,12 @@ function verifyMigrationInventory(
 }
 
 function normalizedBody(fileName: string): string {
-  const text = readFileSync(path.join(migrationsDirectory, fileName), "utf8");
+  const text = readFileSync(path.join(migrationsDirectory, fileName), "utf8")
+    .replaceAll("\r\n", "\n");
   const marker = "\n\n";
   const bodyStart = text.indexOf(marker);
   assert.notEqual(bodyStart, -1, `${fileName} must have a provenance header`);
-  return text.slice(bodyStart + marker.length).replaceAll("\r\n", "\n");
+  return text.slice(bodyStart + marker.length);
 }
 
 test("baseline manifest pins the disposable Supabase CLI and schema version", () => {

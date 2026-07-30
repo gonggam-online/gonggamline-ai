@@ -1,5 +1,234 @@
 # Work status
 
+## 2026-07-29 — Orchestrator Phase 2 execution vertical slice
+
+- Objective: complete the shortest safe run-to-worker-to-result Vertical Slice
+  on top of merged Phase 1.
+- Branch/base: `codex/feat/orchestrator-phase-2`, based on PR #43 merge
+  `59d866e0dc67cb1afa16323b3afe696a4e7825cb`.
+- Risk: high-risk/manual automation bootstrap; `manual-merge-required`, no
+  auto-merge.
+- Revenue impact: P2 operational enablement. Deterministic dispatch, retry,
+  approval, and recovery are required before the orchestrator can safely reduce
+  engineering cycle time.
+- Architecture compliance: accepted Engineering Orchestration lifecycle owns
+  the change. It reuses the approved local SQLite, state, lease, policy,
+  budget, audit, and recovery boundaries and introduces no product Domain,
+  public API, Supabase DB, migration, external integration, or commerce write.
+- Scope: local run migration/status, `READY` task selection, Worker dispatch,
+  task/run state synchronization, checkpoint/result evidence, duplicate
+  suppression, retry lineage, approval wait/resume, budget fail-close, exact
+  worktree guard, local verifier, fake safe adapter, tests, and documentation.
+- Non-goals: actual Codex paid/network execution, worktree creation, commit
+  automation, push/PR, CI/Preview polling, planner/reviewer, product API,
+  Supabase/Vercel/Production, secret/config changes, and commerce writes.
+- Root-cause class: code/capability gap inside the accepted Architecture.
+- Completed: governance and Architecture gates, dedicated branch, ledger v2,
+  execution engine, fake Worker, worktree guard, mandatory fixed-ID verifier,
+  minimum child environment, independent wall-time timeout, interrupt-once,
+  late-result suppression, controller-owned usage breach latch, non-blocking
+  interrupt observation, and Phase 1+2 focused tests.
+- Current work: re-run all local and exact-head remote gates, then hand Draft
+  PR #44 back to the repository owner without merging.
+- Blockers/owner actions: repository-owner review and manual merge are required
+  after final exact-head verification. Phase 3 is not authorized by this PR.
+- Changed files: `tools/orchestrator/**`,
+  `tests/orchestrator-phase-2.test.ts`, Orchestrator report/changelog, Decision
+  Log, and this status file.
+- Validation: updated focused Phase 1+2 tests 37/37 pass; full tests 305/305
+  pass; lint passes with zero errors and four pre-existing warnings; typecheck,
+  production build with 69 routes, and local Playwright 39/39 pass. Diff,
+  secret, and external execution boundary audits pass. Exact-head CI, security
+  audit, DB replay, Preview, and Preview browser validation remain to be re-run
+  after push.
+- Delivery: implementation commit
+  `5435b93f2b579b0d93899520c48da32e026f2299` is pushed. Draft PR #44 targets
+  `main`, is `manual-merge-required`, and is not eligible for auto-merge. Its
+  initial exact-head CI, DB replay, Vercel Preview, and Preview browser
+  validation all passed.
+- Exact next action: complete local gates, commit and push the narrow review
+  fix, then verify the resulting exact head and request repository-owner review
+  without merging.
+- Remaining risks: the fixed verifier command surface is not operating-system
+  network isolation; approved repository scripts remain trusted code. Actual
+  Codex process termination depends on the later transport adapter. Codex
+  authentication/cost/transport policy, ledger retention/backup, numeric daily
+  caps, GitHub/CI/Preview integration, and planner quality remain later
+  checkpoints.
+
+## 2026-07-28 — Orchestrator Phase 1 local controller primitives
+
+- Objective: implement only the approved Phase 1 deterministic ledger, policy,
+  router, budget, and recovery foundation after PR #42.
+- Branch/base: `codex/feat/orchestrator-phase-1`, based on PR #42 merge
+  `75d48dba3da9cb36bdecbd34de5604346379e601`.
+- Risk: high-risk/manual bootstrap; `manual-merge-required`, no auto-merge.
+- Revenue impact: P2 enablement and risk reduction. Preventing duplicate tasks,
+  branches, PRs, actions, and runaway usage is required before automation can
+  safely reduce delivery time.
+- Architecture compliance: accepted Engineering Orchestration lifecycle and
+  contracts own the change; no new Domain, DB, Queue, public API, or external
+  integration is introduced. The SQLite ledger is local tool state outside
+  Git.
+- Scope: canonical Task/Result validation, local SQLite migration/ledger,
+  state/lease/idempotency/audit, explicit N/D routing, allow/deny and approval
+  policy, token/time/cost guard, App Server interrupt-first cancellation, and
+  correlated Windows recovery planning.
+- Non-goals: Phase 2+ Codex execution, worktree mutation, GitHub writer,
+  CI/Preview polling, planner, Product/API/migration/Supabase/Vercel/Production,
+  commerce write, OAuth, secret, or paid API.
+- Root-cause class: code/capability gap already covered by accepted
+  Architecture and measured Phase 0 evidence.
+- Completed: verified PR #42 merge and clean worktree; completed governance and
+  compliance gates; created the dedicated branch; implemented Phase 1
+  primitives and focused restart/D/N/duplicate/lease/audit/budget/contract/
+  routing/recovery tests.
+- Current work: exact-head CI/Preview verification, followed by
+  repository-owner review of Draft PR #43.
+- Blockers/owner actions: repository owner must manually review and merge PR
+  #43 only if its evidence and remaining risks are acceptable.
+- Changed files: `tools/orchestrator/**`, focused tests, package metadata,
+  `docs/orchestrator/**`, Decision Log, and this status file.
+- Validation: focused Phase 1 tests 14/14 pass; full lint passes with zero
+  errors and four pre-existing warnings; typecheck passes after aligning
+  development Node types with the active Node 24 runtime; full tests pass
+  282/282; Production build passes with 69 routes. Local Playwright reached all
+  39 tests: 32 passed and the same seven Supabase-dependent pages failed with
+  external `missing_url` configuration before the outer timeout.
+- Delivery: dedicated branch pushed; Draft PR #43 is open with
+  `manual-merge-required` and auto-merge disabled. Exact-head CI, Preview
+  browser, Vercel readiness, mergeability, review threads, and local/remote
+  equality are verified at terminal handoff.
+- Exact next action: repository-owner review after exact-head gates; do not
+  merge or start Phase 2 without a separate decision.
+- Remaining risks: `node:sqlite` requires supported Node 24 runtime; future
+  streamed usage integration and actual process stop remain Phase 2; ledger
+  backup/retention and numeric daily caps still require owner decisions.
+
+## 2026-07-28 — Orchestrator Phase 0 protocol capability spike
+
+- Objective: prove the accepted Task/Result contracts and installed Codex
+  execution interfaces with read-only evidence before building a controller.
+- Branch: `codex/chore/orchestrator-protocol-spike`, based on PR #41 merge
+  `a6894fce05480d9b599dcb9a03f9100c607b3fe6`.
+- Risk: `manual-merge-required`. The probes are read-only, but this is the
+  initial automation bootstrap.
+- Revenue impact: P2 enablement and risk reduction. Measured protocol
+  compatibility prevents rework and unsafe automation before revenue-supporting
+  tasks are dispatched.
+- Scope: Phase 0 TaskContract/example, sanitized CLI/App Server evidence,
+  capability report, Architecture acceptance/status records, and no product
+  runtime change.
+- Non-goals: product code, API, migration, CI, Supabase, Vercel/Production,
+  commerce writes, durable ledger/router/worker implementation, secrets, OAuth,
+  paid API, or permission expansion.
+- Root-cause class: capability uncertainty. Codex Desktop bundles an executable
+  that external PowerShell cannot launch; official `@openai/codex` CLI
+  `0.145.0` was installed for the approved spike and uses the existing ChatGPT
+  login.
+- Completed: confirmed PR #41 merged; fast-forwarded clean `main`; completed
+  governance boot; created the dedicated branch; recorded the approved
+  TaskContract; generated the experimental App Server JSON Schema bundle in a
+  temporary directory; completed sanitized structured-exec, App Server
+  lifecycle/resume/interrupt, Windows cancellation, usage, and synthetic
+  redaction probes; recorded only sanitized summaries and hashes.
+- Current work: repository-owner review of Draft PR #42. No merge is authorized
+  by this task.
+- Blockers/owner actions: repository owner must review and manually merge PR
+  #42 only if its evidence and remaining risks are acceptable.
+- Changed files: `docs/orchestrator/**`, `.ai/DECISION_LOG.md`, and this file
+  only.
+- Validation: Task/Result JSON Schemas compile and examples validate; fixtures
+  parse; lint passes with 0 errors and 4 pre-existing warnings; typecheck
+  passes; 268/268 tests pass; Production build passes with 69 routes. Local
+  Playwright reached all 39 tests: 32 passed and the same seven
+  Supabase-dependent pages failed with external `missing_url` configuration
+  before the outer command timeout. The probes made no product/runtime change.
+- Delivery: dedicated branch pushed; Draft PR #42 is open with
+  `manual-merge-required`. Exact-head CI, Preview browser validation, Vercel
+  Preview readiness, mergeability, unresolved review threads, and local/remote
+  head equality are verified at terminal handoff.
+- Exact next action: repository-owner review; keep the PR unmerged until that
+  manual decision.
+- Remaining risks: CLI/Desktop version skew, experimental App Server protocol
+  churn, usage/cost semantics under ChatGPT auth, and Windows process
+  cancellation behavior.
+
+## 2026-07-28 — Revenue-first automation orchestrator design
+
+- Objective: design an implementable GPT review -> task routing -> Codex
+  execution -> evidence verification -> next-task/approval loop that advances
+  real sales, net profit, and operator-time reduction.
+- Branch: `docs/automation-orchestrator-design`, based on `origin/main`
+  `eea7adf927498bd200cfe51e67cb1e37373e58bf`.
+- Risk: high-risk/manual bootstrap by `.ai/risk-classification.md`;
+  documentation only; no implementation, external configuration, database,
+  Production, or commerce write.
+- Scope/non-goals: six files under `docs/orchestrator/**` plus the minimum
+  Decision Log and Work Status records. Product code, API, migration, CI,
+  Vercel/Supabase state, and Coupang remain unchanged.
+- Root-cause class: capability/Architecture gap. Existing CI/Preview and Runtime
+  Queue patterns are reusable, but there is no durable cross-PC task/thread/
+  worktree ledger or evidence-normalizing verifier.
+- Current evidence: clean independent worktree; expected GitHub origin; latest
+  original base was PR #39 merge `eea7adf`. PR #40 later merged as
+  `cca761a1a49a39265a75a3a03bb15e81c004def8`; that latest `origin/main` is
+  being incorporated through a normal merge without force-push.
+- Reclassification: Sprint A recovered pre-003 sources and inspected
+  Production; Database and Admin Security Architectures are accepted. Sprint
+  B-0 is merged on `main`, including disposable replay evidence. Deployed Admin
+  Auth/RLS, Item Selection persistence, and Production adoption remain
+  unconfirmed.
+- Completed: repository/PR/worktree safety checks; mandatory governance boot;
+  current system/workflow/runtime/external-boundary audit; official Codex
+  interface review; architecture, workflow, approval, roadmap, and Task/Result
+  schemas drafted.
+- Validation: both Draft 2020-12 JSON Schemas compile with AJV; Markdown links,
+  state/outcome coverage, secret/path scans, and `git diff --check` pass. Lint
+  passes with 0 errors and 4 pre-existing test warnings; typecheck passes;
+  261/261 unit/integration tests pass; Production build passes with 69 routes.
+  Local Playwright reached all 39 tests but the command timed out after the
+  known seven Supabase-dependent page failures (`missing_url`); the other 32
+  tests, including read-only health, revenue-critical, and Dashboard flows,
+  passed. This documentation diff changes no runtime path.
+- Delivery: design commit
+  `6fbbee22bb44e2f45f377b3ce71eefb986071d98` is pushed. Draft PR #41 is open
+  with `manual-merge-required`; auto-merge and merge remain disabled. Exact-head
+  CI run `30343769928` and Preview browser run `30343769935` passed. Vercel
+  exact-commit status is success; Preview evidence artifact `8682105417`
+  (`sha256:a8c454f9174f95c722b7812f9e6bc16152dfd40a9a4b8ac819d13f92fc6d2f8f`)
+  is retained through 2026-08-11.
+- Main reconciliation: merged `origin/main`
+  `cca761a1a49a39265a75a3a03bb15e81c004def8` normally without force-push.
+  Preserved both this record and the merged PR #40 Sprint B-0 record. Fixed the
+  newly merged provenance test to normalize CRLF before finding its header/body
+  separator; migration bytes and manifest contracts are unchanged.
+- Reconciliation validation: lint passes with 0 errors and 4 pre-existing
+  warnings; typecheck passes; focused Sprint B-0 tests pass 7/7; full tests pass
+  268/268; Production build passes with 69 routes. Local Playwright again
+  reaches all 39 tests, with the same 32 passes and seven `missing_url`
+  external-configuration failures before the command timeout.
+- Reconciliation delivery: merge commit
+  `305b3c57ffb3a77717dcf79c66edbbc5d4caa088` is pushed without force. PR #41
+  is mergeable, Draft, and labeled only `manual-merge-required`; its body now
+  records high-risk/manual. Exact-head CI `30349872267` and Preview browser
+  validation `30349871278` pass, Vercel Preview is Ready, and evidence artifact
+  `8684461640` has digest
+  `sha256:c57984165723c20e84e4be54f4067ce40a0cccbb7420bf0f5bf25fe065d10aa8`.
+  Unresolved review threads: 0.
+- Current work: record this final delivery checkpoint and verify the resulting
+  status-only exact head.
+- Blockers/owner actions: none for design/delivery. Implementation requires
+  Architecture acceptance plus the explicit decisions in the roadmap.
+- Changed files: `docs/orchestrator/**`, `.ai/DECISION_LOG.md`, this file, and
+  the Windows line-ending normalization in
+  `tests/sprint-b0-database-baseline.test.ts`.
+- Exact next action: after final exact-head checks pass, stop for
+  repository-owner Architecture re-review. Do not merge or start implementation.
+- Remaining risks: unapproved automation auth/budgets, N availability and
+  backup, polling/webhook choice, Codex protocol version, shared status-file
+  conflict with PR #40, and absent actual sales-learning data.
+
 ## 2026-07-28 — Sprint B-0 Database Baseline implementation
 
 - Objective: make the pre-003 schema baseline reproducible so later
@@ -1188,3 +1417,91 @@ perform the documented read-only Supabase schema and completeness inspection.
   linked for Revenue Opportunity calculation.
 - ROI and cost provenance require business/data-contract approval before
   implementation.
+
+---
+
+## Orchestrator Phase 3 Codex transport — 2026-07-30
+
+### Objective, branch, and risk
+
+- Objective: connect the Phase 2 controller to Codex App Server and prove a
+  bounded local develop/verify/retry slice.
+- Branch: `codex/feat/orchestrator-phase-3`
+- Base: PR #44 merge
+  `52ffa71d4cefb51fe980c19b0b5dff7532d5f685`
+- Risk: high-risk automation bootstrap; Draft PR and
+  `manual-merge-required`.
+
+### Scope and non-goals
+
+- Scope: stdio transport, structured identity/result, usage/checkpoints,
+  interrupt, local repository/worktree boundary, retry feedback, tests, and
+  operator documentation.
+- Non-goals: GitHub write/reconciliation, Production, Supabase, Vercel
+  Production, marketplace calls, browser automation, secret setup, and Phase 4.
+- Root-cause class: implementation checkpoint; no external configuration or
+  database fault is being compensated for in code.
+
+### Completed and current work
+
+- Confirmed clean latest `origin/main` containing PR #44 and created the
+  dedicated branch.
+- Confirmed installed Codex CLI/App Server protocol and generated temporary
+  type references outside the repository.
+- Implemented transport, workspace boundary, and bounded retry-loop primitives.
+- Added hermetic Phase 3 contract tests and implementation/security report.
+- Actual Codex App Server smoke: completed in one attempt after fail-close
+  probes identified and corrected Windows npm CLI launch and streamed terminal
+  item handling.
+- PR #45 review fix: added controller-bounded interrupt quiescence, direct App
+  Server child termination, observed exit evidence, and late-write regression
+  coverage.
+- PR #45 shutdown-precedence review fix: unconfirmed interrupt/shutdown now
+  supersedes timeout/budget outcomes with non-retryable
+  `PROCESS_SHUTDOWN_FAILED`; the original cause remains in evidence.
+- Current: final full regression and live-smoke revalidation.
+
+### Changed files
+
+- `tools/orchestrator/app-server-worker.ts`
+- `tools/orchestrator/workspace-boundary.ts`
+- `tools/orchestrator/development-loop.ts`
+- `tools/orchestrator/execution.ts`
+- `tools/orchestrator/index.ts`
+- `tests/orchestrator-phase-3.test.ts`
+- `docs/orchestrator/reports/phase-3-codex-transport.md`
+- `docs/orchestrator/reports/phase-3-live-smoke.md`
+- `CHANGELOG-Orchestrator-Phase3.md`
+- `.ai/DECISION_LOG.md`
+- `.codex/WORK_STATUS.md`
+
+### Verification and next action
+
+- Focused Phase 1+2+3 tests: 55/55 passed after shutdown-precedence changes.
+- Full tests: 323/323 passed after shutdown-precedence changes.
+- Lint: zero errors and four pre-existing warnings.
+- Typecheck: passed.
+- Production build: passed with 69 routes.
+- Playwright: 39/39 passed.
+- Tracked secret/generated-output audit: passed.
+- Local disposable DB replay: blocked because Docker is not installed on this
+  N PC; the script refused any Production or linked database fallback. The
+  exact-head GitHub disposable runner remains the binding replay gate.
+- Actual Codex App Server live smoke: `COMPLETED`, one attempt, allowlisted
+  documentation path only, controller `GIT_DIFF_CHECK`, audit chain valid.
+- Bounded-shutdown live smoke: `COMPLETED`, one attempt, final
+  `PROCESS_EXITED`, termination requested once after grace, allowlisted
+  documentation path only.
+- Shutdown-precedence native live smoke: `COMPLETED`, one attempt, final
+  `PROCESS_EXITED`, termination requested once, audit chain valid, controller
+  `GIT_DIFF_CHECK` passed, allowlisted documentation path only.
+- Next: commit the final evidence, run security/baseline checks, push, create
+  the Draft PR, and verify exact-head CI/Preview.
+
+### Remaining risks and owner actions
+
+- Local App Server workspace-write is not an independently proven OS/network
+  sandbox; the report records the exact guarantee and residual risk.
+- Live authenticated Codex smoke consumes the current Codex allowance and must
+  not be conflated with hermetic CI.
+- Repository-owner manual merge remains required. Phase 4 is not authorized.

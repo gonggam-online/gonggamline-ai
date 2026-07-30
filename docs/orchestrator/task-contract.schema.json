@@ -1,0 +1,600 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gonggamline.example/schemas/orchestrator/task-contract.schema.json",
+  "title": "GonggamLine Orchestrator Task Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "projectId",
+    "taskId",
+    "taskKind",
+    "objective",
+    "businessImpact",
+    "repository",
+    "execution",
+    "scope",
+    "architecture",
+    "risk",
+    "doneCriteria",
+    "verification",
+    "budgets",
+    "retryPolicy",
+    "approval",
+    "rollback"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "projectId": {
+      "$ref": "#/$defs/id"
+    },
+    "taskId": {
+      "$ref": "#/$defs/id"
+    },
+    "parentTaskId": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "taskKind": {
+      "type": "string",
+      "enum": [
+        "DISCOVERY",
+        "ARCHITECTURE",
+        "DOCUMENTATION",
+        "IMPLEMENTATION",
+        "TEST",
+        "REVIEW",
+        "RELEASE",
+        "INCIDENT"
+      ]
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "businessImpact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "priority",
+        "impactType",
+        "hypothesis",
+        "metric"
+      ],
+      "properties": {
+        "priority": {
+          "enum": [
+            "P0",
+            "P1",
+            "P2",
+            "P3",
+            "P4"
+          ]
+        },
+        "impactType": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "SALES",
+              "NET_PROFIT",
+              "OPERATOR_TIME",
+              "RISK_REDUCTION",
+              "LEARNING"
+            ]
+          }
+        },
+        "hypothesis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metric": {
+          "type": "string",
+          "minLength": 1
+        },
+        "targetValue": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "measurementWindow": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalOrigin",
+        "baseBranch",
+        "baseSha",
+        "workBranch"
+      ],
+      "properties": {
+        "canonicalOrigin": {
+          "type": "string",
+          "pattern": "^https://github\\.com/[^/]+/[^/]+(?:\\.git)?$"
+        },
+        "baseBranch": {
+          "$ref": "#/$defs/baseGitRef"
+        },
+        "baseSha": {
+          "$ref": "#/$defs/sha"
+        },
+        "workBranch": {
+          "$ref": "#/$defs/workGitRef"
+        },
+        "dependencyPrNumbers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "default": []
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pcId",
+        "worktreePath",
+        "controllerId",
+        "idempotencyKey",
+        "sandbox"
+      ],
+      "properties": {
+        "pcId": {
+          "enum": [
+            "N",
+            "D"
+          ]
+        },
+        "worktreePath": {
+          "type": "string",
+          "minLength": 3
+        },
+        "controllerId": {
+          "$ref": "#/$defs/id"
+        },
+        "codexThreadId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reviewResponseId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "idempotencyKey": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "sandbox": {
+          "enum": [
+            "read-only",
+            "workspace-write"
+          ]
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary",
+        "nonGoals",
+        "allowedPaths",
+        "forbiddenPaths"
+      ],
+      "properties": {
+        "summary": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "nonGoals": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "allowedPaths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/repoPathPattern"
+          }
+        },
+        "forbiddenPaths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/repoPathPattern"
+          }
+        }
+      }
+    },
+    "architecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "status",
+        "references",
+        "introducesNewBoundary"
+      ],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "NOT_REQUIRED",
+            "PROPOSED",
+            "ACCEPTED"
+          ]
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "introducesNewBoundary": {
+          "type": "boolean"
+        },
+        "approvedSha": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "classification",
+        "reasons",
+        "requiredLabel"
+      ],
+      "properties": {
+        "classification": {
+          "enum": [
+            "NORMAL",
+            "HIGH"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "requiredLabel": {
+          "enum": [
+            "normal-risk",
+            "manual-merge-required"
+          ]
+        }
+      }
+    },
+    "doneCriteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/criterion"
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commands",
+        "requiredEvidence",
+        "browserRequired",
+        "exactPreviewRequired"
+      ],
+      "properties": {
+        "commands": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "command",
+              "timeoutSeconds"
+            ],
+            "properties": {
+              "name": {
+                "$ref": "#/$defs/id"
+              },
+              "command": {
+                "type": "string",
+                "minLength": 1
+              },
+              "timeoutSeconds": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 7200
+              }
+            }
+          }
+        },
+        "requiredEvidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "browserRequired": {
+          "type": "boolean"
+        },
+        "exactPreviewRequired": {
+          "type": "boolean"
+        }
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "wallTimeMinutes",
+        "tokenLimit",
+        "costKrwLimit",
+        "dailyTaskLimit",
+        "dailyCostKrwLimit"
+      ],
+      "properties": {
+        "wallTimeMinutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "tokenLimit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "costKrwLimit": {
+          "type": "number",
+          "minimum": 0
+        },
+        "dailyTaskLimit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "dailyCostKrwLimit": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "retryPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxAttempts",
+        "maxIdenticalErrors",
+        "backoff",
+        "sameThreadClasses",
+        "newThreadClasses"
+      ],
+      "properties": {
+        "maxAttempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "maxIdenticalErrors": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "backoff": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "initialSeconds",
+            "maxSeconds",
+            "multiplier",
+            "jitter"
+          ],
+          "properties": {
+            "initialSeconds": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "maxSeconds": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "multiplier": {
+              "type": "number",
+              "exclusiveMinimum": 1
+            },
+            "jitter": {
+              "type": "boolean"
+            }
+          }
+        },
+        "sameThreadClasses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "newThreadClasses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requiredBefore",
+        "prohibitedActions"
+      ],
+      "properties": {
+        "requiredBefore": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/approvalAction"
+          }
+        },
+        "prohibitedActions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/approvalAction"
+          }
+        },
+        "approvalIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plan",
+        "verification",
+        "fullyReversible"
+      ],
+      "properties": {
+        "plan": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fullyReversible": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "baseGitRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^(?!.*\\.\\.)(?!.*[~^:?*\\[\\\\])(?!.*//)(?!.*(?:^|/)\\.)(?!.*\\.lock$)[^\\s]+$"
+    },
+    "workGitRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^(?!main$)(?!.*\\.\\.)(?!.*[~^:?*\\[\\\\])(?!.*//)(?!.*(?:^|/)\\.)(?!.*\\.lock$)[^\\s]+$"
+    },
+    "repoPathPattern": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?![A-Za-z]:)(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    },
+    "criterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "description",
+        "evidenceType"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidenceType": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "approvalAction": {
+      "enum": [
+        "FINAL_PR_MERGE",
+        "PRODUCTION_DEPLOY",
+        "PRODUCTION_ROLLBACK",
+        "SUPABASE_SCHEMA",
+        "SUPABASE_RLS_AUTH",
+        "SUPABASE_DATA",
+        "REAL_LISTING",
+        "REAL_PRICE_INVENTORY_AD",
+        "REAL_ORDER_PURCHASE_FULFILLMENT",
+        "RETURN_SETTLEMENT_PAYMENT",
+        "OAUTH_LOGIN",
+        "SECRET_CHANGE",
+        "PAID_API_OR_LIMIT",
+        "PERMISSION_EXPANSION",
+        "FORCE_PUSH_OR_PROTECTED_BRANCH",
+        "LEGAL_FINANCIAL_CERTIFICATION",
+        "AUTONOMY_EXPANSION",
+        "RETRY_BUDGET_OVERRIDE"
+      ]
+    }
+  }
+}

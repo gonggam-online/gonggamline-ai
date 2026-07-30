@@ -290,3 +290,126 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Approval boundary: this acceptance approves the Architecture contract only. PR #39 remains Draft and `manual-merge-required`; no runtime, migration, RLS, Auth configuration, secret, identity, Production, or commerce-write implementation is authorized by this decision alone.
 - Follow-up / due condition: prepare the bounded Sprint B-0 implementation work instruction, obtain the separate Sprint B-0 Architecture/implementation approval, then use one high-risk manual implementation PR. Enterprise lifecycle automation and external telemetry are follow-up work only when an operating need exists.
 - Rollback or supersession: revert or supersede this documentation PR. No runtime or data rollback is required.
+
+## 2026-07-28 — Revenue-first automation orchestrator
+
+- Category: architecture decision
+- Story / PR: Revenue-first Automation Orchestrator Architecture / pending
+- Status: proposed; repository-owner acceptance required before implementation
+- Owner / approver: repository owner / AI CTO
+- Context and evidence: GitHub/CI/Preview delivery controls, Runtime Queue
+  reliability patterns, workflow idempotency, Revenue/Item Selection engines,
+  and D/N operating rules exist, but no durable controller binds structured
+  review, routing, Codex threads, evidence verification, retry, approval, and
+  sales-learning outcomes.
+- Decision or issue: propose one supervised N-PC controller with a local durable
+  ledger, deterministic policy/router, Codex App Server execution interface
+  with a `codex exec` first adapter/fallback, GitHub/Preview evidence adapters,
+  strict Task/Result JSON Schemas, and human gates for merge, Production,
+  database/security, secrets/cost/permissions, and real commerce writes.
+- Consequences and risks: the smallest MVP avoids a cloud worker, Supabase
+  orchestration schema, and distributed multi-agent platform. The automation
+  bootstrap remains high-risk/manual even though this Story is documentation
+  only. Autonomy begins in SHADOW and expands only from verified actual
+  outcomes.
+- Follow-up / due condition: repository-owner review/acceptance, then execute
+  only the Phase 0 read-only protocol capability spike in
+  `docs/orchestrator/implementation-roadmap.md`. Do not begin implementation
+  from this proposed record.
+- Rollback or supersession: revert this documentation PR or supersede the
+  proposed contracts through a separately reviewed Architecture decision.
+
+## 2026-07-28 — Revenue-first automation orchestrator accepted; Phase 0 authorized
+
+- Category: architecture acceptance and bounded implementation authorization
+- Story / PR: Revenue-first Automation Orchestrator Architecture / PR #41
+- Status: accepted; Phase 0 read-only protocol capability spike authorized
+- Owner / approver: repository owner
+- Approved merge SHA: `a6894fce05480d9b599dcb9a03f9100c607b3fe6`
+- Decision: accept the Engineering Orchestration boundary and authorize only
+  Phase 0 from `docs/orchestrator/implementation-roadmap.md` on dedicated branch
+  `codex/chore/orchestrator-protocol-spike` and a separate manual Draft PR.
+- Scope: schema/example validation, installed Codex CLI/App Server schema
+  capture, structured read-only repository assessment, thread/usage/
+  cancellation/redaction evidence, and a measured adapter recommendation.
+- Non-goals: product runtime, database/migration/RLS/Auth, CI changes,
+  Production, commerce writes, durable ledger/router/controller implementation,
+  OAuth, new secrets, paid API enablement, or authority expansion.
+- Risk and approval: read-only discovery is normal-risk, but the bootstrap PR
+  remains `manual-merge-required`; final merge requires repository-owner
+  approval.
+- Rollback: close the unmerged Phase 0 PR and remove its documentation/evidence
+  commit. No runtime or data rollback is required.
+
+## 2026-07-28 — Orchestrator Phase 1 separately authorized
+
+- Category: bounded implementation authorization
+- Dependency: PR #42 merged as
+  `75d48dba3da9cb36bdecbd34de5604346379e601`
+- Owner / approver: repository owner
+- Decision: authorize only Phase 1 local ledger, policy, router, budget, and
+  recovery primitives on `codex/feat/orchestrator-phase-1` and a separate
+  Draft PR.
+- Architecture compliance: Engineering Orchestration owns the lifecycle;
+  accepted PR #41 defines the state, contract, identity, SQLite, routing,
+  approval, audit, and recovery boundaries. No new Architecture boundary is
+  introduced.
+- Risk: `manual-merge-required` initial automation implementation; no
+  auto-merge.
+- Required Phase 0 findings: controller-enforced token budgets, canonical
+  ResultContract post-validation, App Server interrupt first, and correlated
+  fail-closed Windows process recovery.
+- Non-goals: Codex execution, worktree mutation, commit/push/PR automation,
+  CI/Preview polling, planner/reviewer, cloud worker, Supabase, Production,
+  external commerce write, paid API, secret, or Phase 2+ implementation.
+- Rollback: revert the Phase 1 implementation PR. Product runtime and external
+  state are unchanged.
+
+## 2026-07-29 — Orchestrator Phase 2 execution vertical slice authorized
+
+- Category: bounded implementation authorization
+- Story / PR: Orchestrator Phase 2 execution vertical slice / pending
+- Status: approved by repository-owner task directive; delivery pending
+- Owner / approver: repository owner
+- Context and evidence: PR #43 merged Phase 1 at
+  `59d866e0dc67cb1afa16323b3afe696a4e7825cb`; local Supabase/Playwright
+  readiness then passed 39/39 with 282/282 repository tests.
+- Decision or issue: authorize the shortest safe local execution slice:
+  run creation, `READY` task selection, fake Worker dispatch, synchronized
+  states, checkpoints, immutable success/failure evidence, idempotency,
+  bounded retry with `retryOfRunId`, approval wait, resume, exact worktree
+  guard, and local verification.
+- Architecture compliance: accepted Engineering Orchestration owns this
+  lifecycle. The slice reuses Phase 1 local SQLite and control primitives and
+  adds no product Domain, public API, Supabase migration, Auth/RLS/CSRF,
+  external integration, Production mutation, or commerce write.
+- Consequences and risks: the automation bootstrap remains high-risk/manual and
+  receives `manual-merge-required`. Actual Codex transport, authentication,
+  cost-bearing execution, GitHub writes, CI/Preview polling, and planner logic
+  remain unimplemented and separately gated.
+- Follow-up / due condition: deliver one bounded Draft PR with full local and
+  exact-head Preview evidence; begin no Phase 3 implementation from this
+  authorization.
+- Rollback or supersession: revert the Phase 2 PR. Product runtime and external
+  systems remain unchanged.
+
+## 2026-07-30 — Orchestrator Phase 3 Codex transport authorized
+
+- Category: bounded implementation authorization
+- Dependency: PR #44 merged as
+  `52ffa71d4cefb51fe980c19b0b5dff7532d5f685`
+- Owner / approver: repository owner
+- Decision: connect the Phase 2 controller to the installed Codex App Server
+  stdio protocol and add only the isolated local develop/verify/retry slice.
+- Architecture compliance: preserve the Worker, verifier, ledger, state,
+  budget, timeout, retry, interrupt, and approval contracts; add no product
+  Domain or external write authority.
+- Risk: high-risk automation bootstrap; `manual-merge-required`, Draft PR, and
+  no auto-merge.
+- Non-goals: GitHub write automation, CI/Preview reconciliation, Production,
+  Supabase, Vercel Production, marketplace actions, browser automation,
+  secrets, paid API setup, and Phase 4.
+- Known boundary: App Server sandbox requests, minimum environment, and Git
+  postconditions are enforced, but this local Windows process is not an
+  independently proven firewall or restricted-token sandbox.
+- Rollback: revert the Phase 3 PR. No external or database rollback is required.
