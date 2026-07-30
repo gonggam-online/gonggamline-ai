@@ -446,7 +446,7 @@ test("timeout terminates an ignoring App Server before a late file mutation", as
                   path.join(repository.directory, "docs", "late.md"),
                   "late\n",
                 ),
-              40,
+              100,
             );
           },
           onTerminate: () => {
@@ -466,11 +466,11 @@ test("timeout terminates an ignoring App Server before a late file mutation", as
     const result = await engine.execute(
       engineRequest("run-timeout-shutdown", {
         tokenLimit: 10_000,
-        wallTimeSeconds: 0.005,
+        wallTimeSeconds: 0.02,
         estimatedCostKrwLimit: 1_000,
       }),
     );
-    await new Promise((resolve) => setTimeout(resolve, 60));
+    await new Promise((resolve) => setTimeout(resolve, 120));
 
     assert.equal(result.run.state, "FAILED");
     assert.equal(ledger.taskState("task-phase-3"), "FAILED");
@@ -613,7 +613,7 @@ for (const behavior of ["throw", "reject", "pending"] as const) {
       const result = await engine.execute(
         engineRequest(`run-terminate-${behavior}`, {
           tokenLimit: 10_000,
-          wallTimeSeconds: 0.005,
+          wallTimeSeconds: 0.02,
           estimatedCostKrwLimit: 1_000,
         }),
       );

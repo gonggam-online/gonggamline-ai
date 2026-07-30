@@ -62,10 +62,18 @@ export interface WorkerHooks {
 
 export interface WorkerAdapter {
   readonly name: string;
+  readonly interruptBoundaryMs?: number;
   execute(
     context: WorkerExecutionContext,
     hooks: WorkerHooks,
   ): Promise<WorkerOutcome>;
+}
+
+export class WorkerShutdownError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "WorkerShutdownError";
+  }
 }
 
 export interface RunExecutionRequest {
@@ -270,7 +278,10 @@ export class OrchestratorExecutionEngine {
       const status = await Promise.race([
         interruptOnce(),
         new Promise<"TIMED_OUT">((resolve) =>
-          setTimeout(() => resolve("TIMED_OUT"), 100),
+          setTimeout(
+            () => resolve("TIMED_OUT"),
+            this.worker.interruptBoundaryMs ?? 100,
+          ),
         ),
       ]);
       this.ledger.appendRunCheckpoint(
@@ -365,18 +376,25 @@ export class OrchestratorExecutionEngine {
         outcome = settled.outcome;
       } else {
         const budgetExceeded = settled.error instanceof BudgetExceededError;
+        const shutdownFailed = settled.error instanceof WorkerShutdownError;
         outcome = {
           kind: "FAILED",
           summary: budgetExceeded
             ? "Execution budget exceeded"
-            : "Worker adapter failed",
+            : shutdownFailed
+              ? "Worker shutdown could not be confirmed"
+              : "Worker adapter failed",
           errorCode: budgetExceeded
             ? settled.error.dimension
-            : "WORKER_ADAPTER_ERROR",
-          retryable: !budgetExceeded,
+            : shutdownFailed
+              ? "PROCESS_SHUTDOWN_FAILED"
+              : "WORKER_ADAPTER_ERROR",
+          retryable: !budgetExceeded && !shutdownFailed,
           evidence: budgetExceeded
             ? []
-            : ["controller:worker-adapter-error"],
+            : shutdownFailed
+              ? ["controller:process-shutdown-failed"]
+              : ["controller:worker-adapter-error"],
         };
       }
     }

@@ -11,6 +11,7 @@ import type {
   WorkerHooks,
   WorkerOutcome,
 } from "./execution.ts";
+import { WorkerShutdownError } from "./execution.ts";
 import { sanitizeOrchestratorText } from "./redaction.ts";
 import {
   assertCleanStart,
@@ -249,6 +250,7 @@ function parseOutcome(message: string): WorkerOutcome {
 
 export class AppServerWorkerAdapter implements WorkerAdapter {
   readonly name = "codex-app-server-stdio";
+  readonly interruptBoundaryMs: number;
   #active:
     | {
         readonly process: AppServerProcess;
@@ -264,7 +266,12 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
   constructor(
     private readonly config: AppServerWorkerConfig,
     private readonly launcher: AppServerLauncher = defaultLauncher,
-  ) {}
+  ) {
+    this.interruptBoundaryMs =
+      (config.shutdownGraceMs ?? 50) +
+      (config.forcedExitGraceMs ?? 1_000) +
+      50;
+  }
 
   async execute(
     context: WorkerExecutionContext,
@@ -306,6 +313,7 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
       });
     };
     let exitObserved = false;
+    let sessionClosed = false;
     let resolveExit: () => void = () => undefined;
     const exitPromise = new Promise<void>((resolve) => {
       resolveExit = resolve;
@@ -328,15 +336,20 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
         return;
       }
       terminationRequested = true;
-      hooks.checkpoint({
+      if (!sessionClosed) {
+        hooks.checkpoint({
         kind: "PROCESS_TERMINATION_REQUESTED",
         payload: { signal: "SIGKILL" },
-      });
+        });
+      }
       void Promise.resolve()
         .then(() => child.terminate("SIGKILL"))
         .then(
           () => undefined,
           (error: unknown) => {
+            if (sessionClosed) {
+              return;
+            }
             hooks.checkpoint({
               kind: "PROCESS_TERMINATION_FAILED",
               payload: {
@@ -355,10 +368,12 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
         return shutdownPromise;
       }
       shutdownPromise = (async () => {
-        hooks.checkpoint({
+        if (!sessionClosed) {
+          hooks.checkpoint({
           kind: "PROCESS_SHUTDOWN_REQUESTED",
           payload: { normalCompletion },
-        });
+          });
+        }
         child.stdin.end();
         if (
           await waitForExit(
@@ -368,12 +383,16 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
           return;
         }
         terminateOnce();
-        if (!(await waitForExit(this.config.forcedExitGraceMs ?? 50))) {
-          hooks.checkpoint({
+        if (!(await waitForExit(this.config.forcedExitGraceMs ?? 1_000))) {
+          if (!sessionClosed) {
+            hooks.checkpoint({
             kind: "PROCESS_EXIT_TIMEOUT",
             payload: { terminationRequested },
-          });
-          throw new Error("App Server did not exit after bounded termination");
+            });
+          }
+          throw new WorkerShutdownError(
+            "App Server did not exit after bounded termination",
+          );
         }
       })();
       void shutdownPromise.catch(() => undefined);
@@ -541,10 +560,12 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
     child.once("exit", (code) => {
       exitObserved = true;
       resolveExit();
-      hooks.checkpoint({
-        kind: "PROCESS_EXITED",
-        payload: { code, terminationRequested },
-      });
+      if (!sessionClosed) {
+        hooks.checkpoint({
+          kind: "PROCESS_EXITED",
+          payload: { code, terminationRequested },
+        });
+      }
       if (!terminal) {
         failTransport(new Error(`App Server exited before completion: ${code}`));
       }
@@ -601,6 +622,7 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
       try {
         await shutdown(normalTurnCompletion);
       } finally {
+        sessionClosed = true;
         this.#active = null;
         for (const waiter of pending.values()) {
           waiter.reject(new Error("App Server session closed"));
