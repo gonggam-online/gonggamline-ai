@@ -32,6 +32,23 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 
 ## Approved Architecture Stories
 
+### 2026-07-30 — Production Schema Security Reconciliation v1
+
+- Status: accepted for architecture and discovery by repository owner on
+  2026-07-30.
+- Boundary: Database / Security reconciliation for Production drift and
+  missing Supabase migration history.
+- Decision: do not preserve permissive development policies and do not remove
+  them before application access is classified. Use a forward-only migration
+  after 021, preceded by an approved access matrix and compatible server access
+  changes.
+- Implementation authorization: documentation and inventory only. SQL,
+  history repair, and Production execution require the ordered R1-R3 approvals.
+- Story:
+  [Production Schema Security Reconciliation v1](../docs/architecture/PRODUCTION-SCHEMA-SECURITY-RECONCILIATION-V1.md).
+- Decision record:
+  [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-30--production-schema-security-reconciliation-v1).
+
 ### 2026-07-27 — Domeggook Read-only Supplier Catalog Adapter v1
 
 - Status: approved by repository-owner AI CTO directive.
