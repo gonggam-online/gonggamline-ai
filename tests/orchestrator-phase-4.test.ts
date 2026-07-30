@@ -18,6 +18,7 @@ import {
   observeExactPreview,
   observePreviewBrowserEvidence,
 } from "../tools/orchestrator/delivery-observer.ts";
+import { runDeliveryPipeline } from "../tools/orchestrator/delivery-pipeline.ts";
 import { runSupervisedOperator } from "../tools/orchestrator/operator.ts";
 import type { WorkerOutcome } from "../tools/orchestrator/execution.ts";
 import { OrchestratorLedger } from "../tools/orchestrator/ledger.ts";
@@ -508,4 +509,163 @@ test("browser evidence requires a non-expired artifact from the exact workflow",
   assert.equal(evidence.status, "SUCCEEDED");
   assert.equal(evidence.artifactId, 123);
   assert.match(evidence.artifactDigest ?? "", /^[a-f0-9]{64}$/);
+});
+
+test("delivery pipeline restarts without duplicate writes and stops for human", () => {
+  const ledger = new OrchestratorLedger(":memory:", process.cwd());
+  let pullRequestCreated = false;
+  const writes: string[] = [];
+  const runner: DeliveryCommandRunner = {
+    run(executable, args) {
+      const command = `${executable} ${args.join(" ")}`;
+      if (executable === "git") {
+        if (args[0] === "branch") {
+          return { stdout: deliveryIdentity.branch, exitCode: 0 };
+        }
+        if (args[0] === "rev-parse") {
+          return { stdout: exactHead, exitCode: 0 };
+        }
+        if (args[0] === "merge-base") {
+          return { stdout: "", exitCode: 0 };
+        }
+        if (args[0] === "add") {
+          writes.push("commit:add");
+          return { stdout: "", exitCode: 0 };
+        }
+        if (args[0] === "diff" && args.includes("--name-only")) {
+          return { stdout: "approved.txt", exitCode: 0 };
+        }
+        if (args[0] === "diff") {
+          return { stdout: "", exitCode: 0 };
+        }
+        if (args[0] === "commit") {
+          writes.push("commit:create");
+          return { stdout: "", exitCode: 0 };
+        }
+        if (args[0] === "push") {
+          writes.push("push");
+          return { stdout: "", exitCode: 0 };
+        }
+        if (args[0] === "ls-remote") {
+          return {
+            stdout: `${exactHead}\trefs/heads/${deliveryIdentity.branch}`,
+            exitCode: 0,
+          };
+        }
+      }
+      if (command.startsWith("gh pr list")) {
+        return {
+          stdout: JSON.stringify(
+            pullRequestCreated
+              ? [
+                  {
+                    number: 77,
+                    url: "https://github.com/example/repo/pull/77",
+                    isDraft: true,
+                    headRefName: deliveryIdentity.branch,
+                    baseRefName: "main",
+                  },
+                ]
+              : [],
+          ),
+          exitCode: 0,
+        };
+      }
+      if (command.startsWith("gh pr create")) {
+        pullRequestCreated = true;
+        writes.push("pr:create");
+        return {
+          stdout: "https://github.com/example/repo/pull/77",
+          exitCode: 0,
+        };
+      }
+      if (command.startsWith("gh pr edit")) {
+        return { stdout: "", exitCode: 0 };
+      }
+      if (command.startsWith("gh run list")) {
+        return {
+          stdout: JSON.stringify(
+            ["CI", "Preview browser validation"].map((workflowName, index) => ({
+              databaseId: 100 + index,
+              headSha: exactHead,
+              status: "completed",
+              conclusion: "success",
+              workflowName,
+              url: `https://github.com/example/repo/actions/runs/${100 + index}`,
+            })),
+          ),
+          exitCode: 0,
+        };
+      }
+      if (command.includes("/deployments?")) {
+        return {
+          stdout: JSON.stringify([
+            { id: 88, sha: exactHead, environment: "Preview" },
+          ]),
+          exitCode: 0,
+        };
+      }
+      if (command.includes("/deployments/88/statuses")) {
+        return {
+          stdout: JSON.stringify([
+            {
+              state: "success",
+              environment_url: "https://preview.example.invalid",
+            },
+          ]),
+          exitCode: 0,
+        };
+      }
+      if (command.includes("/actions/runs/101/artifacts")) {
+        return {
+          stdout: JSON.stringify({
+            artifacts: [
+              {
+                id: 123,
+                name: "preview-browser-evidence",
+                expired: false,
+                size_in_bytes: 456,
+                archive_download_url:
+                  "https://api.github.com/repos/example/repo/actions/artifacts/123/zip",
+              },
+            ],
+          }),
+          exitCode: 0,
+        };
+      }
+      return { stdout: "", exitCode: 1 };
+    },
+  };
+  const request = {
+    commit: {
+      identity: deliveryIdentity,
+      paths: ["approved.txt"],
+      message: "feat: phase 4 fixture",
+      idempotencyKey: "pipeline:commit",
+    },
+    pushIdempotencyKey: "pipeline:push",
+    pullRequest: {
+      title: "feat: phase 4 fixture",
+      bodyFile: "phase-4.md",
+      requiredLabel: "manual-merge-required",
+      idempotencyKey: "pipeline:pr",
+    },
+    requiredWorkflowNames: [
+      "CI",
+      "Preview browser validation",
+    ] as const,
+  };
+  try {
+    const first = runDeliveryPipeline(ledger, request, runner);
+    const second = runDeliveryPipeline(ledger, request, runner);
+
+    assert.equal(first.state, "WAITING_FOR_HUMAN");
+    assert.equal(second.state, "WAITING_FOR_HUMAN");
+    assert.equal(writes.filter((entry) => entry === "commit:create").length, 1);
+    assert.equal(writes.filter((entry) => entry === "push").length, 1);
+    assert.equal(writes.filter((entry) => entry === "pr:create").length, 1);
+    assert.equal(ledger.verifyAuditChain(), true);
+  } finally {
+    ledger.close();
+  }
 });
