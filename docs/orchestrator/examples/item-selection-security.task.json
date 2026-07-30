@@ -1,0 +1,172 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectId": "gonggamline-revenue-first",
+  "taskId": "item-selection-security-vertical-slice-v1",
+  "parentTaskId": null,
+  "taskKind": "IMPLEMENTATION",
+  "objective": "Implement the approved protected ItemSelectionRun security vertical slice exactly within its implementation instruction and stop at a verified high-risk Draft PR.",
+  "businessImpact": {
+    "priority": "P1",
+    "impactType": ["SALES", "OPERATOR_TIME", "RISK_REDUCTION"],
+    "hypothesis": "Protected reproducible Item Selection reduces repeated supplier screening without allowing unauthorized selections into the revenue workflow.",
+    "metric": "A01-A12 and exact-head delivery gates pass with zero Production or commerce writes",
+    "targetValue": "100%",
+    "measurementWindow": "Item Selection security Vertical Slice v1"
+  },
+  "repository": {
+    "canonicalOrigin": "https://github.com/gonggam-online/gonggamline-ai.git",
+    "baseBranch": "main",
+    "baseSha": "bc8ec1c038bcc767c2646f06bdb0b43a52677900",
+    "workBranch": "codex/feat/item-selection-security-vertical-slice-v1-impl",
+    "dependencyPrNumbers": [46]
+  },
+  "execution": {
+    "pcId": "D",
+    "worktreePath": "D:\\Dev\\worktrees\\item-selection-security-vertical-slice-v1",
+    "controllerId": "d-item-selection-security-controller",
+    "codexThreadId": null,
+    "reviewResponseId": null,
+    "idempotencyKey": "sha256:4d5a7ff826f2ad04762f32c1de3f2296c27164773721ce5cde9dbd37fe37c812",
+    "sandbox": "workspace-write"
+  },
+  "scope": {
+    "summary": [
+      "Implement migration 021 and refresh the baseline manifest.",
+      "Implement the approved Auth, CSRF, rate, service-role, routes, repository, and A01-A12 evidence."
+    ],
+    "nonGoals": [
+      "No Production, real credentials, real data, Ready transition, merge, commerce write, or unrelated refactor."
+    ],
+    "allowedPaths": [
+      "supabase/migrations/021_item_selection_security_vertical_slice.sql",
+      "supabase/baseline-manifest.json",
+      "package.json",
+      "package-lock.json",
+      "app/admin/login/page.tsx",
+      "app/api/admin/**",
+      "lib/auth/**",
+      "lib/supabase/service-role.server.ts",
+      "services/item-selection-run.repository.ts",
+      "shared/contracts/item-selection-persistence.ts",
+      "tests/admin-auth-contract.test.ts",
+      "tests/item-selection-security-*.test.ts",
+      "tests/e2e/admin-item-selection-security.spec.ts",
+      "tests/fixtures/item-selection-security-fingerprint.json",
+      "scripts/verify-item-selection-security-slice.ps1",
+      ".github/workflows/ci.yml",
+      "docs/**",
+      ".ai/DECISION_LOG.md",
+      ".codex/WORK_STATUS.md"
+    ],
+    "forbiddenPaths": [
+      "supabase/migrations/000_initial_schema.sql",
+      "supabase/migrations/001_memory_system.sql",
+      "supabase/migrations/002_revenue_engine.sql",
+      "supabase/migrations/003_runtime_queue.sql",
+      "supabase/migrations/004_revenue_dashboard.sql",
+      "supabase/migrations/005_marketplace_intelligence.sql",
+      "supabase/migrations/006_decision_engine.sql",
+      "supabase/migrations/007_ai_workers.sql",
+      "supabase/migrations/008_system_settings.sql",
+      "supabase/migrations/009_agent_memory.sql",
+      "supabase/migrations/010_runtime_queue_hardening.sql",
+      "supabase/migrations/011_runtime_queue_worker.sql",
+      "supabase/migrations/012_runtime_queue_monitoring.sql",
+      "supabase/migrations/013_runtime_queue_recovery.sql",
+      "supabase/migrations/014_runtime_queue_retry.sql",
+      "supabase/migrations/015_runtime_queue_dead_letter.sql",
+      "supabase/migrations/016_runtime_queue_admin.sql",
+      "supabase/migrations/017_runtime_queue_rls.sql",
+      "supabase/migrations/018_runtime_queue_security.sql",
+      "supabase/migrations/019_runtime_queue_observability.sql",
+      "supabase/migrations/020_database_baseline_v1.sql",
+      ".env",
+      ".env.local",
+      "node_modules/**",
+      ".next/**",
+      "playwright-report/**",
+      "test-results/**"
+    ]
+  },
+  "architecture": {
+    "owner": "Supplier / Procurement and Admin Security",
+    "status": "ACCEPTED",
+    "references": [
+      "docs/tasks/ITEM-SELECTION-SECURITY-VERTICAL-SLICE-IMPLEMENTATION-INSTRUCTION.md",
+      "docs/architecture/ITEM-SELECTION-EVALUATION-V1.md",
+      "docs/architecture/ITEM-SELECTION-DATABASE-BASELINE-V1.md",
+      "docs/architecture/ADMIN-IDENTITY-AUTHORIZATION-RLS-CSRF-V1.md"
+    ],
+    "introducesNewBoundary": false,
+    "approvedSha": "bc8ec1c038bcc767c2646f06bdb0b43a52677900"
+  },
+  "risk": {
+    "classification": "HIGH",
+    "reasons": ["Migration, Auth, authorization, RLS, CSRF, service-role, and protected writes are high-risk."],
+    "requiredLabel": "manual-merge-required"
+  },
+  "doneCriteria": [
+    {"id": "security-matrix", "description": "A01-A12 pass.", "evidenceType": "security-test"},
+    {"id": "migration-replay", "description": "Disposable 000-021 replay and fingerprint pass.", "evidenceType": "database-replay"},
+    {"id": "release-gates", "description": "Local and exact-head gates pass.", "evidenceType": "release-gate"},
+    {"id": "manual-boundary", "description": "Draft PR stops at WAITING_FOR_HUMAN.", "evidenceType": "approval-boundary"}
+  ],
+  "verification": {
+    "commands": [
+      {"name": "git-safety", "command": "git diff --check", "timeoutSeconds": 120},
+      {"name": "lint", "command": "npm run lint", "timeoutSeconds": 1200},
+      {"name": "typecheck", "command": "npm run typecheck", "timeoutSeconds": 1200},
+      {"name": "test", "command": "npm test", "timeoutSeconds": 7200},
+      {"name": "build", "command": "npm run build", "timeoutSeconds": 7200}
+    ],
+    "requiredEvidence": [
+      "A01-A12",
+      "migration replay and fingerprint",
+      "exact-head CI",
+      "exact Preview",
+      "Preview browser artifact"
+    ],
+    "browserRequired": true,
+    "exactPreviewRequired": true
+  },
+  "budgets": {
+    "wallTimeMinutes": 240,
+    "tokenLimit": 600000,
+    "costKrwLimit": 0,
+    "dailyTaskLimit": 1,
+    "dailyCostKrwLimit": 0
+  },
+  "retryPolicy": {
+    "maxAttempts": 3,
+    "maxIdenticalErrors": 2,
+    "backoff": {"initialSeconds": 5, "maxSeconds": 60, "multiplier": 2, "jitter": true},
+    "sameThreadClasses": ["TRANSIENT", "CODE"],
+    "newThreadClasses": ["CONTEXT_CORRUPT"]
+  },
+  "approval": {
+    "requiredBefore": ["FINAL_PR_MERGE", "SUPABASE_SCHEMA", "SUPABASE_RLS_AUTH"],
+    "prohibitedActions": [
+      "PRODUCTION_DEPLOY",
+      "PRODUCTION_ROLLBACK",
+      "SUPABASE_DATA",
+      "REAL_LISTING",
+      "REAL_PRICE_INVENTORY_AD",
+      "REAL_ORDER_PURCHASE_FULFILLMENT",
+      "RETURN_SETTLEMENT_PAYMENT",
+      "OAUTH_LOGIN",
+      "SECRET_CHANGE",
+      "PAID_API_OR_LIMIT",
+      "PERMISSION_EXPANSION",
+      "FORCE_PUSH_OR_PROTECTED_BRANCH",
+      "LEGAL_FINANCIAL_CERTIFICATION",
+      "AUTONOMY_EXPANSION",
+      "RETRY_BUDGET_OVERRIDE"
+    ],
+    "approvalIds": ["owner-approved-item-selection-security-instruction-pr-46"]
+  },
+  "rollback": {
+    "plan": "Revert the unmerged implementation PR and discard only disposable or Preview resources.",
+    "verification": "Confirm Production, real users, real secrets, and migrations 000-020 remain unchanged.",
+    "fullyReversible": true
+  }
+}
