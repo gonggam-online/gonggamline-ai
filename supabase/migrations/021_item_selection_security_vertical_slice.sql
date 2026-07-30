@@ -1,9 +1,9 @@
 -- Item Selection security vertical slice: immutable persistence and audited RPCs.
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 
 DO $$
 BEGIN
-  IF to_regprocedure('public.digest(bytea,text)') IS NULL THEN
+  IF to_regprocedure('extensions.digest(bytea,text)') IS NULL THEN
     RAISE EXCEPTION 'pgcrypto digest(bytea,text) is required';
   END IF;
 END
@@ -39,7 +39,7 @@ CREATE TABLE public.item_selection_runs (
   candidate_failures_canonical_text text NOT NULL DEFAULT '{"failures":[],"schemaVersion":"gonggamline-item-selection-candidate-failures-v1"}',
   candidate_failures_projection jsonb NOT NULL DEFAULT '{"failures":[],"schemaVersion":"gonggamline-item-selection-candidate-failures-v1"}'::jsonb,
   candidate_failures_sha256 text GENERATED ALWAYS AS (
-    encode(public.digest(convert_to(candidate_failures_canonical_text, 'UTF8'), 'sha256'), 'hex')
+    encode(extensions.digest(convert_to(candidate_failures_canonical_text, 'UTF8'), 'sha256'), 'hex')
   ) STORED,
   created_at timestamptz NOT NULL DEFAULT transaction_timestamp(),
   CONSTRAINT item_selection_runs_idempotency_unique
@@ -83,12 +83,12 @@ CREATE TABLE public.item_selection_evaluations (
   canonical_snapshot_text text NOT NULL,
   snapshot_projection jsonb NOT NULL,
   snapshot_sha256 text GENERATED ALWAYS AS (
-    encode(public.digest(convert_to(canonical_snapshot_text, 'UTF8'), 'sha256'), 'hex')
+    encode(extensions.digest(convert_to(canonical_snapshot_text, 'UTF8'), 'sha256'), 'hex')
   ) STORED,
   canonical_evidence_text text NOT NULL,
   evidence_projection jsonb NOT NULL,
   provider_evidence_sha256 text GENERATED ALWAYS AS (
-    encode(public.digest(convert_to(canonical_evidence_text, 'UTF8'), 'sha256'), 'hex')
+    encode(extensions.digest(convert_to(canonical_evidence_text, 'UTF8'), 'sha256'), 'hex')
   ) STORED,
   created_at timestamptz NOT NULL DEFAULT transaction_timestamp(),
   CONSTRAINT item_selection_evaluations_run_item_unique UNIQUE (run_id, provider_item_number),
