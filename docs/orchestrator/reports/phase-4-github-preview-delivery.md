@@ -64,6 +64,15 @@ The operator-local ledger is outside Git at
   all other routes passed.
 - Exact-head CI, Preview, and browser validation remain required.
 
+## Initial remote delivery evidence
+
+Draft PR #47 is open with `manual-merge-required`. Its first exact head
+`df59e3744e2528c335eb64403af5a9f105cf7e37` passed CI, disposable database
+replay, Vercel Preview deployment `5668533232`, and Preview browser workflow
+run `30510915660`. Evidence artifact `8747089141` is non-expired and retained
+through 2026-08-13. A final status-only commit requires one last exact-head
+revalidation before handoff.
+
 ## Security, rollback, and remaining risks
 
 No force push, `main` push, Ready transition, merge, auto-merge, Production,

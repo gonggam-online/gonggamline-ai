@@ -23,8 +23,8 @@
 - Completed: safety boot, dedicated worktree, durable Task/run evidence,
   token-accounting correction, four implementation checkpoints, focused tests,
   typecheck, lint, and diff checks.
-- Current work: validate the follow-up TaskContract and run all local gates
-  before final commit/push/Draft PR.
+- Current work: final status-only checkpoint and exact-head remote revalidation
+  before repository-owner handoff.
 - Blockers/owner actions: none before high-risk final merge review.
 - Changed files: `tools/orchestrator/**`, Phase 3/4 tests,
   `docs/orchestrator/**`, Decision Log, and this status file.
@@ -33,8 +33,13 @@
   pass. Local Playwright is 32/39 with the same seven external Supabase
   `missing_url` failures; remaining routes and revenue-critical flows pass.
 - Checkpoints: `90ebfbb`, `378df6f`, `6018805`, `3878bdd`, `e7b5b1d`.
-- Exact next action: validate the TaskContract, review the diff, run full
-  lint/typecheck/tests/build/Playwright, then deliver a high-risk Draft PR.
+- Delivery: Draft PR #47 is open with `manual-merge-required`, auto-merge
+  disabled, and first exact head
+  `df59e3744e2528c335eb64403af5a9f105cf7e37`. CI, disposable DB replay,
+  Vercel Preview deployment `5668533232`, Preview browser run `30510915660`,
+  and evidence artifact `8747089141` passed on that head.
+- Exact next action: push this final status checkpoint, verify every gate on
+  its exact SHA, then stop at repository-owner review without Ready or merge.
 - Remaining risks: process-level rather than OS isolation, local CLI auth,
   supervised polling, and no planner/reviewer automation.
 
