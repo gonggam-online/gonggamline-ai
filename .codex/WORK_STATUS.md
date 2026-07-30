@@ -1,5 +1,27 @@
 # Work status
 
+## 2026-07-30 — Orchestrator Phase 4.2 Windows verifier fix
+
+- Objective: restore controller-owned npm verification on Windows Node 24 so
+  the approved Item Selection TaskContract can proceed.
+- Branch/base: `codex/fix/orchestrator-windows-verifier-spawn`, based on
+  `ab26c231cb069c60dd085bf5b1560f142db58d9a`.
+- Risk: high-risk automation bootstrap; Draft PR,
+  `manual-merge-required`, no auto-merge.
+- Root cause: code/capability defect. `spawnSync("npm.cmd", ..., shell:false)`
+  returns `EINVAL` on the active Windows runtime.
+- Scope: fixed Windows invocation for the existing allowlisted npm verifier
+  commands, regression test, report, changelog, and work status.
+- Non-goals: Product implementation, arbitrary shell commands, network,
+  database/Auth changes, Production, secrets, or commerce writes.
+- Completed: reproduction, minimal fixed-command implementation, focused tests
+  24/24, real Windows controller LINT pass, typecheck, and diff check.
+- Current work: full validation and high-risk Draft PR delivery.
+- Preserved work: the Item Selection D worktree retains only the Worker-created
+  package pin changes and is not being edited by this fix.
+- Exact next action: run full gates, commit, push, open Draft PR, and verify its
+  exact head.
+
 ## 2026-07-30 — Orchestrator Phase 4.1 operator-delivery integration
 
 - Objective: connect the merged supervised operator and delivery pipeline with

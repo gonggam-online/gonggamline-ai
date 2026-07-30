@@ -51,7 +51,16 @@ interface ApprovedCommand {
   readonly timeoutMs: number;
 }
 
-const npmExecutable = process.platform === "win32" ? "npm.cmd" : "npm";
+function npmCommand(args: readonly string[], timeoutMs: number): ApprovedCommand {
+  if (process.platform === "win32") {
+    return {
+      executable: process.env.ComSpec ?? "cmd.exe",
+      args: ["/d", "/s", "/c", "npm.cmd", ...args],
+      timeoutMs,
+    };
+  }
+  return { executable: "npm", args, timeoutMs };
+}
 
 const approvedCommands: Readonly<
   Record<VerificationCommandId, ApprovedCommand>
@@ -62,24 +71,16 @@ const approvedCommands: Readonly<
     timeoutMs: 60_000,
   },
   LINT: {
-    executable: npmExecutable,
-    args: ["run", "lint"],
-    timeoutMs: 10 * 60_000,
+    ...npmCommand(["run", "lint"], 10 * 60_000),
   },
   TYPECHECK: {
-    executable: npmExecutable,
-    args: ["run", "typecheck"],
-    timeoutMs: 10 * 60_000,
+    ...npmCommand(["run", "typecheck"], 10 * 60_000),
   },
   TEST: {
-    executable: npmExecutable,
-    args: ["test"],
-    timeoutMs: 15 * 60_000,
+    ...npmCommand(["test"], 15 * 60_000),
   },
   BUILD: {
-    executable: npmExecutable,
-    args: ["run", "build"],
-    timeoutMs: 15 * 60_000,
+    ...npmCommand(["run", "build"], 15 * 60_000),
   },
 };
 

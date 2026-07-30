@@ -1,5 +1,14 @@
 # Orchestrator changelog
 
+## 2026-07-30 — Phase 4.2 Windows verifier process boundary
+
+- Fixed the controller-owned verifier on Windows Node 24, where spawning
+  `npm.cmd` directly with `shell: false` returns `EINVAL`.
+- Kept the command surface fixed by invoking the approved npm scripts through
+  `cmd.exe /d /s /c` without enabling a general shell command path.
+- Added platform-specific invocation coverage and a real Windows verifier
+  regression check.
+
 ## 2026-07-30 — Phase 4.1 operator and delivery integration
 
 - Connected a completed supervised operator run to the Phase 4 delivery

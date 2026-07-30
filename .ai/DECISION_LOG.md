@@ -443,3 +443,19 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   mutation, secrets, Ready/merge automation, and commerce writes.
 - Rollback: revert the Phase 4.1 PR. Existing Phase 1–4 primitives and Product
   runtime remain unchanged.
+
+## 2026-07-30 — Orchestrator Phase 4.2 Windows verifier fix authorized
+
+- Category: necessary controller defect correction discovered by an approved
+  Item Selection TaskContract execution.
+- Dependency: PR #48 merged as
+  `ab26c231cb069c60dd085bf5b1560f142db58d9a`.
+- Decision: preserve the fixed verifier command allowlist while invoking
+  approved npm scripts through the Windows command processor required by Node
+  24.
+- Risk: high-risk automation bootstrap; Draft PR,
+  `manual-merge-required`, no auto-merge.
+- Non-goals: arbitrary shell execution, Product implementation, database/Auth,
+  Production, secrets, network expansion, or commerce writes.
+- Rollback: revert the Phase 4.2 PR. The Item Selection D worktree remains
+  preserved for retry after the controller fix is merged.
