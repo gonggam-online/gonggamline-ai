@@ -296,8 +296,8 @@ numbers, discards whitespace, and does not preserve input key order. Therefore:
   bytes are authoritative;
 - JSONB columns are derived query projections only and may reorder keys;
 - `snapshot_sha256`, `provider_evidence_sha256`, and candidate-failure hashes
-  are generated in PostgreSQL as lowercase hex SHA-256 of
-  `convert_to(authoritative_text, 'UTF8')`;
+  require a verified UTF-8 database and are generated in PostgreSQL as
+  lowercase hex SHA-256 of the authoritative text's UTF-8 bytes;
 - the migration explicitly enables and verifies the supported `pgcrypto`
   `digest` function in disposable replay before creating generated hashes;
 - the transaction function parses the text, verifies its schema/version,
