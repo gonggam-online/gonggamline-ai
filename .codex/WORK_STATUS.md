@@ -1,5 +1,38 @@
 # Work status
 
+## 2026-07-30 - R1 Product mutation audit
+
+- Objective: translate the approved R0 Product access class into a complete,
+  code-backed inventory of externally reachable mutation paths and R1 stop
+  conditions.
+- Branch/base: `codex/docs/r1-product-mutation-audit`, stacked on PR #52 head
+  `d1edfdcee4d0c49855e500e534745cf8e2f3ddd9`.
+- Risk: normal-risk read-only audit/test. Later Auth/authorization and
+  financial-field implementation is high-risk/manual.
+- Root-cause class: code/security boundary gap. Five routes mutate `products`
+  through the shared anonymous client without the accepted Admin guard.
+- Revenue impact: identifies the minimum safe route split required to remove
+  anonymous Product writes without breaking supplier search or competition
+  analysis.
+- Scope: mutation inventory, source-alignment test, implementation order,
+  stop conditions, report, changelog, and delivery.
+- Non-goals: runtime/Auth/CSRF/RLS/migration/financial formula/API response/
+  secret/Production changes or R1 implementation authorization.
+- Completed: audited five mutation surfaces; found the GET-side-effect in
+  Domeggook search; recorded protected Admin and isolated-worker targets;
+  focused tests 7/7; full tests 359/359; typecheck; generated-output-excluded
+  lint with zero errors/four pre-existing warnings; 77-page build.
+- Browser validation: unchanged documentation/test-only diff. The immediately
+  preceding R0 exact Preview browser gate passed; local environment retains the
+  known seven Supabase-unconfigured page failures.
+- Current work: review, commit, push, and create a stacked Draft PR.
+- Blocker/owner action: R1 runtime implementation cannot begin until PR #52 is
+  merged and the high-risk implementation boundary is explicitly authorized.
+- Exact next action: deliver this audit as a Draft PR targeting the PR #52
+  branch, then wait at the R1 authorization boundary.
+- Remaining risks: Product PATCH contains financial calculations; automatic
+  competition analysis mixes trigger authorization and worker persistence.
+
 ## 2026-07-30 - Production access matrix v1
 
 - Objective: complete R0 by assigning every migration 000-021 public table a
