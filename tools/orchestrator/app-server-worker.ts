@@ -486,6 +486,10 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
         if (isObject(tokenUsage) && isObject(tokenUsage.total)) {
           void hooks
             .observeUsage({
+              totalTokens:
+                typeof tokenUsage.total.totalTokens === "number"
+                  ? tokenUsage.total.totalTokens
+                  : undefined,
               inputTokens:
                 typeof tokenUsage.total.inputTokens === "number"
                   ? tokenUsage.total.inputTokens

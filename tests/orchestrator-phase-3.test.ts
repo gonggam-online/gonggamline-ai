@@ -110,6 +110,9 @@ interface FakeServerOptions {
   readonly terminationBehavior?: "exit" | "reject" | "pending" | "throw";
   readonly onTerminate?: () => void;
   readonly usageInputTokens?: number;
+  readonly usageOutputTokens?: number;
+  readonly usageReasoningTokens?: number;
+  readonly usageTotalTokens?: number;
 }
 
 class FakeAppServerProcess extends EventEmitter implements AppServerProcess {
@@ -155,9 +158,11 @@ class FakeAppServerProcess extends EventEmitter implements AppServerProcess {
                 params: {
                   tokenUsage: {
                     total: {
+                      totalTokens: options.usageTotalTokens,
                       inputTokens: options.usageInputTokens,
-                      outputTokens: 0,
-                      reasoningOutputTokens: 0,
+                      outputTokens: options.usageOutputTokens ?? 0,
+                      reasoningOutputTokens:
+                        options.usageReasoningTokens ?? 0,
                     },
                   },
                 },
@@ -264,6 +269,52 @@ test("App Server transport completes only inside the approved workspace", async 
       readFileSync(path.join(fixture.directory, "docs", "fixture.md"), "utf8"),
       "after\n",
     );
+  } finally {
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
+test("App Server budget uses protocol totalTokens without double-counting reasoning", async () => {
+  const fixture = createRepository();
+  const observations: Array<{
+    inputTokens: number;
+    outputTokens: number;
+    reasoningTokens: number;
+    totalTokens?: number;
+  }> = [];
+  try {
+    const adapter = new AppServerWorkerAdapter(
+      {
+        goal: "Return structured success",
+        correlationId: "correlation-token-accounting",
+        workspace: fixture.boundary,
+      },
+      () =>
+        new FakeAppServerProcess({
+          usageInputTokens: 80,
+          usageOutputTokens: 20,
+          usageReasoningTokens: 15,
+          usageTotalTokens: 100,
+        }),
+    );
+    const outcome = await adapter.execute(context(), {
+      checkpoint: () => undefined,
+      observeUsage: async (usage) => {
+        observations.push(usage);
+      },
+    });
+
+    assert.equal(outcome.kind, "SUCCEEDED");
+    assert.deepEqual(observations, [
+      {
+        inputTokens: 80,
+        outputTokens: 20,
+        reasoningTokens: 15,
+        totalTokens: 100,
+        estimatedCostKrw: 0,
+        elapsedSeconds: 0,
+      },
+    ]);
   } finally {
     rmSync(fixture.directory, { recursive: true, force: true });
   }
