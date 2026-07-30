@@ -106,6 +106,11 @@
       "order": 20,
       "file": "020_sprint2_runtime_execution.sql",
       "sha256": "7d3bf926d86ab92aea298d0a018f19a8705a946e95a28c8d43b37ff0468a5bcb"
+    },
+    {
+      "order": 21,
+      "file": "021_item_selection_security_vertical_slice.sql",
+      "sha256": "784864521108d9116bc8adfdde0dc5e329778695cb547fe5aa019c9b268908e5"
     }
   ],
   "promotedSources": {

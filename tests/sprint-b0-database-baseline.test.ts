@@ -43,8 +43,8 @@ function verifyMigrationInventory(
   artifacts: MigrationArtifact[],
   readMigration: (fileName: string) => Buffer | string,
 ): void {
-  assert.equal(actualNames.length, 21, "migration directory must contain 21 SQL files");
-  assert.equal(artifacts.length, 21, "manifest must contain 21 migration artifacts");
+  assert.equal(actualNames.length, 22, "migration directory must contain 22 SQL files");
+  assert.equal(artifacts.length, 22, "manifest must contain 22 migration artifacts");
   assert.equal(
     new Set(artifacts.map(({ file }) => file)).size,
     artifacts.length,
