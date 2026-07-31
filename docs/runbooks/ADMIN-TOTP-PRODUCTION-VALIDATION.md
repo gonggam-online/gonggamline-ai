@@ -65,4 +65,3 @@ If every verified authenticator is lost, access remains fail-closed:
    before removing only the lost factor.
 4. Return to Production, enroll a replacement, and verify AAL2 before any
    protected mutation.
-

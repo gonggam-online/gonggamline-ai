@@ -1,5 +1,48 @@
 # Work status
 
+## 2026-07-31 — Admin Password Recovery architecture
+
+- Objective: define the minimum fail-closed administrator password recovery
+  lifecycle required before the exposed Production credential can be rotated.
+- Branch/base: `codex/docs/admin-password-recovery-architecture`; rebased by
+  merge onto latest `origin/main` at
+  `ee7fec23d27bd17b2c1db576f78fd246364bf0a8` after PR #58 merged.
+- Risk: documentation-only with mandatory manual approval; future Auth
+  implementation/configuration/Production actions are high-risk.
+- Revenue impact: restores safe operator access needed for AAL2-protected
+  revenue operations without credential or recovery bypass.
+- Root-cause class: code capability gap plus external redirect configuration.
+  Existing callback handles ordinary PKCE codes only; no password-update
+  lifecycle exists.
+- Scope: architecture, contracts, failure/security/test/rollout/rollback, and
+  approval boundaries.
+- Non-goals: runtime implementation, Supabase configuration, password/session
+  mutation, Auth Admin API, database/RLS, MFA reset, or commerce writes.
+- Completed: inspected existing callback/login/SSR boundaries; reviewed
+  official Supabase recovery, update-user, password-security, and email-link
+  contracts; confirmed a new Auth lifecycle; drafted the Architecture Story,
+  review index, decision proposal, and changelog.
+- Current work: PR #59 remains an architecture-only manual Draft PR. Its two
+  documentation conflicts with merged PR #58 were resolved by preserving both
+  independent operational records.
+- Blockers / owner actions: manual architecture approval/merge is required
+  before implementation. The exposed Production credential/session remains
+  untrusted and must not be used.
+- Changed files: `docs/architecture/ADMIN-PASSWORD-RECOVERY-V1.md`,
+  `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`,
+  `CHANGELOG-Admin-Password-Recovery-V1.md`, and this status record.
+- Exact next action: validate and push the conflict-resolution merge, wait for
+  the new exact-head checks, then obtain manual architecture approval/merge.
+- Validation results: `git diff --check`, lint, typecheck, 375/375 tests, and
+  Production build with 81 generated pages passed. Lint warnings came only from
+  the existing untracked Playwright report bundle; no changed-source errors.
+  After resolving the PR #58 merge conflicts, typecheck, 375/375 tests, and the
+  81-page Production build passed again. The repository-wide lint command
+  remains non-zero only because it scans the existing generated
+  `playwright-report` bundle; no recovery architecture source is implicated.
+- Remaining risks: exact Supabase PKCE recovery behavior and redirect
+  configuration must be tested with synthetic non-Production users; Production
+  recovery remains blocked.
 ## 2026-07-31 — Production Admin TOTP operational validation
 
 - Objective: validate the merged PR #57 Production Admin TOTP enrollment,
