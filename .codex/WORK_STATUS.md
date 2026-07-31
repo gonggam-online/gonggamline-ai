@@ -1,5 +1,44 @@
 # Work status
 
+## 2026-07-31 — R1 Atomic Product Mutation DB Architecture v1
+
+- Objective: design the transaction contract combining Product mutation,
+  idempotency, and immutable audit for all five R1 surfaces.
+- Branch: `codex/docs/r1-atomic-product-mutation-architecture`.
+- Risk: high-risk/manual; documentation only, `manual-merge-required`.
+- Revenue impact: removes the atomicity blocker for protected Product
+  operations and later anonymous-write retirement; no commerce write occurs.
+- Root-cause class: database architecture gap.
+- Scope: RPC/key/audit contract, worker/batch partial failure, deployment,
+  rollback, disposable replay, and negative authorization tests.
+- Non-goals: SQL/runtime, Production, RLS/grants, environment, real data,
+  external commerce, financial formulas, and history repair.
+- Completed: safe tree/branch; governance, R1 audit, reconciliation, Item
+  Selection precedent and migration 021 review; architecture draft, review
+  index, proposed decision, changelog, and status draft.
+- Current work: documentation delivery and exact-head gates are complete.
+- Blockers / owner actions: manually review Draft PR #54. Architecture
+  acceptance must be recorded with the approved commit SHA before a separate
+  implementation Story; this draft authorizes no implementation.
+- Changed files: Story, Architecture Review, Decision Log, changelog, status.
+- Commands/results: `git diff --check` and document-link existence checks
+  passed; tracked-source lint passed with zero errors and four pre-existing
+  warnings; typecheck passed; 359/359 tests passed; Production build passed
+  with 77 generated pages; local Playwright ran 40 cases with 32 passed, one
+  skipped, and seven existing Supabase-dependent route failures because local
+  Supabase is unconfigured (`/listing`, `/market`, `/procurement`, `/revenue`,
+  `/sourcing`, `/workflow`, `/workspace`). The diff contains no migration,
+  runtime, API, service, feature, contract, or test implementation file.
+- Delivery: commit `6482a0f` was pushed and Draft PR #54 was created with
+  `manual-merge-required`; auto-merge remains disabled. Exact-head CI run
+  `30597259801` and Preview browser run `30597259814` passed.
+- Last commit: `6482a0f docs: design atomic product mutation architecture`.
+- Exact next action: owner review and architecture acceptance decision for
+  Draft PR #54; only then draft a separately approved implementation Story.
+- Remaining risks: exact Product allowlists and SQL signatures need
+  implementation-time evidence; Production drift, R2, R3, and environment
+  prerequisites remain separate gates.
+
 ## 2026-07-30 - R1 Product mutation audit
 
 - Objective: translate the approved R0 Product access class into a complete,
