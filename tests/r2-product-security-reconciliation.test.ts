@@ -2,6 +2,11 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
+import {
+  parseInventoryCsv,
+  type InventoryRow,
+  validateInventory,
+} from "../scripts/validate-r2-product-security-inventory";
 
 const root = path.resolve(import.meta.dirname, "..");
 const read = (file: string) => readFileSync(path.join(root, file), "utf8");
@@ -18,7 +23,69 @@ test("R2 inventory is read-only and captures every architecture stop condition",
   assert.match(sql, /pg_catalog\.pg_get_userbyid/);
   assert.match(sql, /pg_catalog\.pg_extension/);
   assert.match(sql, /count_range/);
+  assert.match(sql, /'default_acl_state'/);
+  assert.doesNotMatch(sql, /schema_migrations[\s\S]+WHERE version IN/);
   assert.doesNotMatch(sql, /\b(?:INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP|CREATE)\b/i);
+});
+
+const functionSignatures = new Map([
+  ["product_mutation_claim_v1", "text, text, text, text, uuid"],
+  ["product_mutation_complete_v1", "uuid, bigint, jsonb, uuid, text, text, uuid"],
+  ["import_product_v1", "jsonb, text, text, uuid, uuid"],
+  ["patch_product_operator_fields_v1", "bigint, timestamp with time zone, jsonb, text, text, uuid, uuid"],
+  ["record_product_competition_v1", "bigint, timestamp with time zone, jsonb, text, text, text, uuid, uuid, text"],
+  ["record_manual_competition_analysis_v1", "bigint, timestamp with time zone, jsonb, text, text, uuid, uuid"],
+  ["record_automatic_competition_analysis_v1", "bigint, timestamp with time zone, jsonb, text, text, uuid, uuid, text"],
+]);
+
+const acceptedInventory = (): InventoryRow[] => [
+  ...Array.from({ length: 23 }, (_, index) => ({
+    category: "migration", schemaName: "supabase_migrations",
+    parentName: "schema_migrations", objectName: index.toString().padStart(3, "0"),
+    definition: `${index.toString().padStart(3, "0")}_migration`,
+  })),
+  ...["products", "product_mutation_requests", "security_audit_events"].map((name) => ({
+    category: "relation", schemaName: "public", parentName: name,
+    objectName: name, definition: "r|postgres|true|false|",
+  })),
+  { category: "policy", schemaName: "public", parentName: "products", objectName: "Allow public insert products", definition: "PERMISSIVE|anon|INSERT||true" },
+  { category: "policy", schemaName: "public", parentName: "products", objectName: "Allow public read products", definition: "PERMISSIVE|anon|SELECT|true|" },
+  { category: "policy", schemaName: "public", parentName: "products", objectName: "Allow public update products", definition: "PERMISSIVE|anon|UPDATE|true|true" },
+  ...[...functionSignatures].map(([name, signature]) => ({
+    category: "function", schemaName: "public", parentName: name,
+    objectName: signature, definition: "postgres|true|search_path=pg_catalog, public|",
+  })),
+  { category: "public_owner", schemaName: "public", parentName: "postgres", objectName: "r", definition: "3" },
+  { category: "public_function_owner", schemaName: "public", parentName: "postgres", objectName: "f", definition: "7" },
+  ...["r", "S", "f"].map((objectType) => ({
+    category: "default_acl_state", schemaName: "public", parentName: "postgres",
+    objectName: objectType, definition: "postgres=arwdDxt/postgres",
+  })),
+  { category: "extension", schemaName: "extensions", parentName: "pgcrypto", objectName: "1.3", definition: "" },
+  { category: "product_rows", schemaName: "public", parentName: "products", objectName: "count_range", definition: "100-999" },
+];
+
+test("R2 validator accepts only the complete known pre-state inventory", () => {
+  assert.deepEqual(validateInventory(acceptedInventory()), []);
+});
+
+test("R2 validator blocks unknown migrations, policies, and missing default ACL evidence", () => {
+  const rows = acceptedInventory();
+  rows.push({ category: "migration", schemaName: "supabase_migrations", parentName: "schema_migrations", objectName: "023", definition: "unknown" });
+  rows.push({ category: "policy", schemaName: "public", parentName: "products", objectName: "unknown write", definition: "PERMISSIVE|anon|ALL|true|true" });
+  const filtered = rows.filter((row) => !(row.category === "default_acl_state" && row.objectName === "S"));
+  const errors = validateInventory(filtered).join("\n");
+  assert.match(errors, /Migration history/);
+  assert.match(errors, /unknown policies/);
+  assert.match(errors, /Missing default ACL state/);
+});
+
+test("R2 validator rejects secret-like evidence and malformed CSV", () => {
+  const rows = acceptedInventory();
+  rows[0] = { ...rows[0], definition: "postgresql://user:password@example.invalid/db" };
+  assert.match(validateInventory(rows).join("\n"), /secret-like material/);
+  assert.throws(() => parseInventoryCsv("wrong,header\n"), /approved v1 contract/);
+  assert.throws(() => parseInventoryCsv('category,schema_name,parent_name,object_name,definition\n"open'), /unterminated/);
 });
 
 test("R2 collector fails closed for Production, missing quarantine, or target drift", () => {

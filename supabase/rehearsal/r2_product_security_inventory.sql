@@ -8,9 +8,6 @@ SELECT 'migration' AS category,
        version AS object_name,
        name AS definition
 FROM supabase_migrations.schema_migrations
-WHERE version IN ('000','001','002','003','004','005','006','007','008','009',
-                  '010','011','012','013','014','015','016','017','018','019',
-                  '020','021','022')
 UNION ALL
 SELECT 'relation', n.nspname, c.relname, c.relname,
        concat_ws('|', c.relkind::text, pg_get_userbyid(c.relowner),
@@ -86,12 +83,41 @@ CROSS JOIN LATERAL pg_catalog.aclexplode(d.defaclacl) acl
 LEFT JOIN pg_catalog.pg_roles grantee ON grantee.oid = acl.grantee
 WHERE n.nspname = 'public' OR d.defaclnamespace = 0
 UNION ALL
+SELECT 'default_acl_state', 'public', creators.rolname, object_type.code,
+       coalesce(array_to_string(d.defaclacl, ','),
+         array_to_string(pg_catalog.acldefault(object_type.code, creators.oid), ','))
+FROM (
+  SELECT DISTINCT owner.oid, owner.rolname
+  FROM pg_catalog.pg_class c
+  JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+  JOIN pg_catalog.pg_roles owner ON owner.oid = c.relowner
+  WHERE n.nspname = 'public'
+  UNION
+  SELECT DISTINCT owner.oid, owner.rolname
+  FROM pg_catalog.pg_proc p
+  JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+  JOIN pg_catalog.pg_roles owner ON owner.oid = p.proowner
+  WHERE n.nspname = 'public'
+) creators
+CROSS JOIN (VALUES ('r'::"char"), ('S'::"char"), ('f'::"char")) object_type(code)
+LEFT JOIN pg_catalog.pg_default_acl d
+  ON d.defaclrole = creators.oid
+ AND d.defaclnamespace = 'public'::regnamespace
+ AND d.defaclobjtype = object_type.code
+UNION ALL
 SELECT 'public_owner', 'public', owner.rolname, c.relkind::text, count(*)::text
 FROM pg_catalog.pg_class c
 JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
 JOIN pg_catalog.pg_roles owner ON owner.oid = c.relowner
 WHERE n.nspname = 'public'
 GROUP BY owner.rolname, c.relkind
+UNION ALL
+SELECT 'public_function_owner', 'public', owner.rolname, 'f', count(*)::text
+FROM pg_catalog.pg_proc p
+JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+JOIN pg_catalog.pg_roles owner ON owner.oid = p.proowner
+WHERE n.nspname = 'public'
+GROUP BY owner.rolname
 UNION ALL
 SELECT 'extension', extnamespace::regnamespace::text, extname, extversion, ''
 FROM pg_catalog.pg_extension

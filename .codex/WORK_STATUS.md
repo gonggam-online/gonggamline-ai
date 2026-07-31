@@ -27,12 +27,16 @@
   the Stage 02 merge at latest `origin/main`; created the dedicated non-main
   branch; read binding governance and accepted R1/R2 designs; audited available
   migration/replay tooling and confirmed local migration-only reset is not
-  accepted restore evidence.
+  accepted restore evidence; implemented the read-only collector and a
+  fail-closed validator for complete migration history, known Product policies,
+  R1 function signatures/owners/security/search paths, creator/default-ACL
+  completeness, malformed evidence, and secret-like content.
 - Current work: resumed by `PROCEED_NOW`. Safe non-Production preparation and
   local validation are complete; the preparation commit, push, high-risk Draft
   PR, and exact-head CI/Preview delivery succeeded. Candidate migration and all
   DB/restore/RLS/Production actions remain stopped at their separate concrete
-  approval gate (9/10 checkpoints complete).
+  approval gate. Independent validator hardening and local gates are complete
+  (9/12 revised checkpoints; delivery is in progress).
 - Blocker / owner action: the repository owner must select a current Production
   backup or provider-approved sanitized clone, approve restore into a new
   isolated non-Production Supabase project, prove it has no Production domain,
@@ -44,9 +48,11 @@
   tests, rehearsal runbook/changelog, and this status record. No migration SQL
   or runtime code.
 - Validation: repository/branch/base safety and architecture stop-condition
-  review passed; 385/385 tests passed; lint passed with zero errors and four
-  pre-existing warnings; typecheck passed; Production build passed with 84
-  generated routes; collector PowerShell parsing and `git diff --check` passed.
+  review passed; validator checkpoint 388/388 tests passed; focused lint and
+  typecheck passed. Full lint passed with no errors; warnings include the four
+  established source warnings plus generated untracked `playwright-report/trace`
+  output. Production build passed with 84 generated routes; collector
+  PowerShell parsing and `git diff --check` passed.
   Local Playwright passed 33, skipped 2, and failed the same seven established
   Supabase-unconfigured routes (`/listing`, `/market`, `/procurement`,
   `/revenue`, `/sourcing`, `/workflow`, `/workspace`); the R1 unauthenticated
@@ -56,13 +62,16 @@
   `f07f99aadbdd77d000be91d971f19bff3e717b9b` passed CI run `30623427285`
   after one failed-job retry for two unrelated existing Orchestrator Phase 3
   timing flakes; all other CI jobs passed on the first attempt. Exact Preview
-  browser run `30623427349` passed.
+  browser run `30623427349` passed. Validator checkpoint Playwright reproduced
+  the same baseline: 33 passed, 2 skipped, and the seven established
+  Supabase-unconfigured route failures; R1 mutation fail-close passed.
 - Last commit: `f07f99a test: prepare R2 security reconciliation inventory`.
 - Delivery: branch pushed; Draft PR #64 targets `main`, has
   `manual-merge-required`, and has no auto-merge.
-- Exact next action: obtain concrete approval for an exact isolated restored
-  target, capture sanitized pre-inventory, stop on any drift/unknown authority,
-  and generate candidate 023 only if every inventory gate passes.
+- Exact next action: commit/push the validator checkpoint, update Draft PR #64,
+  and verify its exact-head CI/Preview. Afterward obtain an exact isolated
+  restored target, capture sanitized pre-inventory, stop on any drift/unknown
+  authority, and generate candidate 023 only if every inventory gate passes.
 - Remaining risks: restore fidelity/quarantine; deployed 022/history/policy/
   grant/owner/default-ACL drift; service-role bypass scope; intentional public
   Product SELECT; future Production concurrency. Anonymous writes must never be

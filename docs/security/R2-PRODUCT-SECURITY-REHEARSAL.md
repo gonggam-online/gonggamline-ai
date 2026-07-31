@@ -24,13 +24,21 @@ After the repository owner confirms the exact target and quarantine controls:
 ./scripts/collect-r2-product-security-inventory.ps1 `
   -TargetProjectRef '<isolated-project-ref>' `
   -ConfirmedNonProduction `
-  -ConfirmedQuarantined
+  -ConfirmedQuarantined `
+  > '<approved-restricted-location>/r2-pre-inventory.csv'
+
+npx tsx scripts/validate-r2-product-security-inventory.ts `
+  '<approved-restricted-location>/r2-pre-inventory.csv'
 ```
 
-The collector opens a read-only transaction and records migration 000-022
-history, Product/R1 relation ownership and RLS, exact policies, relation and
+The collector opens a read-only transaction and records the complete migration
+history; the validator requires exactly 000-022 with no gaps or additions. It
+also records Product/R1 relation ownership and RLS, exact policies, relation and
 function ACLs, R1 function signatures/owners/search paths, public-schema object
-creators, default ACLs, extensions, and a Product row-count range.
+creators, explicit default ACLs plus owner/type completeness states, extensions,
+and a Product row-count range. The validator blocks malformed CSV, secret-like
+content, unknown categories, migration/policy/function drift, missing relations,
+missing creator/default-ACL evidence, and unsafe row counts.
 
 Store raw output only in the approved restricted evidence location. Review it
 for secrets before producing a sanitized artifact. Record only the backup

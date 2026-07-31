@@ -9,6 +9,11 @@
 - Added static security tests that reject mutation SQL, Production/target
   ambiguity, secret output, remote migration commands, or incomplete R1
   function inventory.
+- Added a fail-closed inventory validator that rejects unknown migration
+  history, Product policies, R1 overload/owner/security/search-path drift,
+  incomplete relation/creator/default-ACL evidence, malformed CSV, and
+  secret-like content. The inventory now exposes complete history and explicit
+  default-ACL completeness sentinels instead of filtering away drift.
 - Documented the quarantine, evidence, stop-condition, and separate-approval
   boundary. Candidate migration 023 remains intentionally absent until an
   owner-approved restored inventory passes.

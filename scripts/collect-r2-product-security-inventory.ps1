@@ -29,7 +29,7 @@ if (-not ($databaseUrl -match [regex]::Escape($TargetProjectRef))) {
 }
 
 $sqlPath = Join-Path $repositoryRoot "supabase/rehearsal/r2_product_security_inventory.sql"
-Write-Output "R2 target: $TargetProjectRef"
-Write-Output "Inventory mode: read-only, sanitized catalog metadata"
+Write-Host "R2 target: $TargetProjectRef"
+Write-Host "Inventory mode: read-only, sanitized catalog metadata"
 & psql $databaseUrl --no-psqlrc --set ON_ERROR_STOP=1 --csv --file $sqlPath
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
