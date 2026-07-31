@@ -10,11 +10,11 @@
 - Scope: R1 source re-audit, normative Product RLS/grant/default ACL target, exact forward-only migration order, restore rehearsal, gates, stop conditions, rollback, Architecture Review/Decision Log/changelog evidence.
 - Non-goals: migration SQL, Supabase restore/configuration, Auth/runtime code, Production, real Product/provider/commerce writes, or other access-matrix groups.
 - Completed: verified clean detached worktree; fetched and confirmed exact latest `origin/main`; created dedicated branch; read governance/database/delivery material; audited R0/R1 architecture, migration 022, Product consumers/repository, role tests, public read, and legacy storage reachability; drafted the Architecture Story and governance records.
-- Current work: commit/push, open the mandatory manual Draft PR, and inspect exact checks.
+- Current work: push, open the mandatory manual Draft PR, and inspect exact checks.
 - Blockers / owner actions: manual Architecture Story review/merge is mandatory. Restore selection/execution and any later R2 implementation/Production work require separate explicit approval and are not part of this Story.
 - Changed files: R2 Architecture Story, Architecture Review, Decision Log, R2 changelog, and this status record.
 - Validation: `git diff --check` passed; lint passed with four pre-existing unused-variable warnings and zero errors; typecheck passed; full tests passed 381/381; Production build passed with 84 generated routes. Local Playwright passed 33, skipped 2, and failed 7 only on the established Supabase-unconfigured page group (`/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`, `/workspace`); the R1 anonymous Product mutation fail-close smoke passed. `npm ci` reported 13 dependency audit findings (1 moderate, 12 high) without changing the lockfile; no automatic remediation was attempted.
-- Last commit: none on this branch.
+- Last architecture commit: `ca5f085 docs: define R2 product security target`.
 - Exact next action: commit and push the reviewed architecture evidence, open a high-risk Draft PR, apply `manual-merge-required`, and inspect exact-head gates.
 - Remaining risks: deployed R1/history/policy/grant/owner/default-ACL drift, restore fidelity/quarantine, service-role bypass scope, intentionally public selected Product columns, and future Production concurrency.
 
