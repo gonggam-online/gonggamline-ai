@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "gonggamline-r1-product-mutation-audit-v1",
+  "dependsOn": "docs/security/production-access-matrix-v1.json",
+  "currentCredential": "NEXT_PUBLIC_SUPABASE_ANON_KEY through lib/supabase.ts",
+  "targetBoundary": "authenticated administrator with AAL2 mutation freshness, exact-origin JSON CSRF, route-specific DTO allowlists, idempotency and audit",
+  "implementationAuthorized": false,
+  "surfaces": [
+    {
+      "route": "/api/domeggook-search",
+      "method": "GET",
+      "service": "services/product-storage.service.ts#saveProducts",
+      "operation": "UPSERT",
+      "columns": "provider catalog, cost, profit, score, supplier and availability snapshot fields",
+      "trigger": "supplier search request persists every returned Product",
+      "currentAuthentication": "none",
+      "currentCsrf": "not applicable to GET but GET unexpectedly mutates",
+      "currentIdempotency": "database onConflict product_no",
+      "currentAudit": "console error only",
+      "requiredChange": "split read-only search from an explicit protected JSON mutation; preserve provider fetch as read-only",
+      "risk": ["AUTHORIZATION", "GET_SIDE_EFFECT", "FINANCIAL_FIELDS"]
+    },
+    {
+      "route": "/api/products/[id]",
+      "method": "PATCH",
+      "service": "inline route mutation",
+      "operation": "UPDATE",
+      "columns": "favorite, review state, memo, risk, exclusion and manual sale-price-derived financial fields",
+      "trigger": "Product operator edit",
+      "currentAuthentication": "none",
+      "currentCsrf": "none",
+      "currentIdempotency": "none",
+      "currentAudit": "console error only",
+      "requiredChange": "protect with Admin guard, exact-origin JSON CSRF, an idempotency key and immutable audit evidence",
+      "risk": ["AUTHORIZATION", "CSRF", "FINANCIAL_CALCULATION"]
+    },
+    {
+      "route": "/api/products/[id]/competition",
+      "method": "POST",
+      "service": "inline route mutation",
+      "operation": "UPDATE",
+      "columns": "manual competition inputs, scores, estimates, status, source and analyzed timestamp",
+      "trigger": "manual competition analysis",
+      "currentAuthentication": "none",
+      "currentCsrf": "none",
+      "currentIdempotency": "none",
+      "currentAudit": "none",
+      "requiredChange": "protect as an Admin mutation with exact-origin JSON CSRF, request fingerprint and audit event",
+      "risk": ["AUTHORIZATION", "CSRF", "DECISION_INPUT"]
+    },
+    {
+      "route": "/api/products/[id]/competition/auto",
+      "method": "POST",
+      "service": "features/competition/run-analysis.ts#runAutomaticCompetitionAnalysis",
+      "operation": "UPDATE",
+      "columns": "collected competition metrics, scores, estimates, status, source and analyzed timestamp",
+      "trigger": "single automatic competition analysis",
+      "currentAuthentication": "none",
+      "currentCsrf": "none",
+      "currentIdempotency": "none",
+      "currentAudit": "none",
+      "requiredChange": "protect operator trigger and isolate the analysis worker write client with run identity and audit",
+      "risk": ["AUTHORIZATION", "CSRF", "EXTERNAL_READ_TO_DATABASE_WRITE"]
+    },
+    {
+      "route": "/api/competition/analyze-batch",
+      "method": "POST",
+      "service": "features/competition/run-analysis.ts#runAutomaticCompetitionAnalysis",
+      "operation": "SELECT_AND_UPDATE_BATCH",
+      "columns": "same automatic competition fields for up to 20 Products",
+      "trigger": "bounded batch automatic competition analysis",
+      "currentAuthentication": "none",
+      "currentCsrf": "none",
+      "currentIdempotency": "none",
+      "currentAudit": "per-item response only",
+      "requiredChange": "protect the batch trigger, assign a run id, isolate worker writes and audit partial failures",
+      "risk": ["AUTHORIZATION", "CSRF", "BATCH_WRITE", "PARTIAL_FAILURE"]
+    }
+  ],
+  "recommendedOrder": [
+    "make /api/domeggook-search persistence-free and add a separate protected import command",
+    "protect PATCH /api/products/[id] without changing its public response contract",
+    "protect manual competition analysis",
+    "separate automatic competition trigger authorization from worker persistence",
+    "add negative auth, CSRF, idempotency, audit and partial-failure contract tests"
+  ],
+  "stopConditions": [
+    "R0 access matrix is not merged",
+    "administrator allowlist or service-role secret is absent from the deployment environment",
+    "a route-specific column allowlist is incomplete",
+    "financial calculation ownership or compatibility is unresolved",
+    "negative authorization, idempotency or audit tests fail"
+  ]
+}
