@@ -30,13 +30,15 @@
   accepted restore evidence; implemented the read-only collector and a
   fail-closed validator for complete migration history, known Product policies,
   R1 function signatures/owners/security/search paths, creator/default-ACL
-  completeness, malformed evidence, and secret-like content.
+  completeness, effective Product/RPC privilege matrices, unsafe external-work
+  extensions, malformed evidence, secret-like content, and deterministic
+  sanitized fingerprint reports.
 - Current work: resumed by `PROCEED_NOW`. Safe non-Production preparation and
   local validation are complete; the preparation commit, push, high-risk Draft
   PR, and exact-head CI/Preview delivery succeeded. Candidate migration and all
   DB/restore/RLS/Production actions remain stopped at their separate concrete
-  approval gate. Independent validator hardening, local gates, Draft PR update,
-  and exact-head gates are complete (11/12 revised checkpoints).
+  approval gate. Grant/fingerprint hardening is implemented and focused gates
+  pass (11/15 revised checkpoints; full delivery gates are being rerun).
 - Blocker / owner action: the repository owner must select a current Production
   backup or provider-approved sanitized clone, approve restore into a new
   isolated non-Production Supabase project, prove it has no Production domain,
@@ -48,7 +50,7 @@
   tests, rehearsal runbook/changelog, and this status record. No migration SQL
   or runtime code.
 - Validation: repository/branch/base safety and architecture stop-condition
-  review passed; validator checkpoint 388/388 tests passed; focused lint and
+  review passed; grant/fingerprint checkpoint 390/390 tests passed; focused lint and
   typecheck passed. Full lint passed with no errors; warnings include the four
   established source warnings plus generated untracked `playwright-report/trace`
   output. Production build passed with 84 generated routes; collector

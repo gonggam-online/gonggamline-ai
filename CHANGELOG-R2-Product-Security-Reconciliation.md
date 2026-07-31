@@ -14,6 +14,9 @@
   incomplete relation/creator/default-ACL evidence, malformed CSV, and
   secret-like content. The inventory now exposes complete history and explicit
   default-ACL completeness sentinels instead of filtering away drift.
+- Added exhaustive Product table privilege and R1 RPC execute-state matrices,
+  external-work extension stop conditions, and a deterministic sanitized
+  inventory report/fingerprint that excludes raw catalog rows.
 - Documented the quarantine, evidence, stop-condition, and separate-approval
   boundary. Candidate migration 023 remains intentionally absent until an
   owner-approved restored inventory passes.

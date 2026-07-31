@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 
 export type InventoryRow = Readonly<{
@@ -29,9 +30,18 @@ const expectedFunctions = new Map([
 
 const allowedCategories = new Set([
   "migration", "relation", "policy", "relation_acl", "function",
-  "function_acl", "default_acl", "default_acl_state", "public_owner",
-  "public_function_owner", "extension", "product_rows",
+  "relation_privilege_state", "function_acl", "function_privilege_state",
+  "default_acl", "default_acl_state", "public_owner", "public_function_owner",
+  "extension", "product_rows",
 ]);
+
+const roles = ["PUBLIC", "anon", "authenticated", "service_role"];
+const tablePrivileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"];
+const approvedServiceFunctions = new Set([
+  "import_product_v1", "patch_product_operator_fields_v1",
+  "record_manual_competition_analysis_v1", "record_automatic_competition_analysis_v1",
+]);
+const externalWorkExtensions = new Set(["pg_net", "pg_cron", "wrappers", "http"]);
 
 const sensitivePattern = /(?:postgres(?:ql)?:\/\/|password=|service_role_key|anon_key|bearer\s+|eyJ[A-Za-z0-9_-]{10,}\.)/i;
 
@@ -112,6 +122,31 @@ export function validateInventory(rows: readonly InventoryRow[]): string[] {
     if (!relations.has(relation)) errors.push(`Missing required relation inventory: ${relation}`);
   }
 
+  const tableStates = rows.filter((row) => row.category === "relation_privilege_state");
+  for (const role of roles) {
+    for (const privilege of tablePrivileges) {
+      const states = tableStates.filter((row) => row.parentName === "products" &&
+        row.objectName === role && row.definition.match(new RegExp(`^${privilege}\\|(?:true|false)$`)));
+      if (states.length !== 1) errors.push(`Missing or duplicate Product privilege state: ${role}/${privilege}.`);
+    }
+  }
+
+  const functionStates = rows.filter((row) => row.category === "function_privilege_state");
+  for (const [name, signature] of expectedFunctions) {
+    for (const role of roles) {
+      const states = functionStates.filter((row) => row.parentName === name &&
+        row.objectName === signature && row.definition.match(new RegExp(`^${role}\\|EXECUTE\\|(?:true|false)$`)));
+      if (states.length !== 1) {
+        errors.push(`Missing or duplicate R1 execute state: ${name}/${role}.`);
+        continue;
+      }
+      const expected = role === "service_role" && approvedServiceFunctions.has(name);
+      if (states[0].definition.endsWith(`|${String(!expected)}`)) {
+        errors.push(`R1 execute matrix drift: ${name}/${role}.`);
+      }
+    }
+  }
+
   const creatorRoles = new Set(rows
     .filter((row) => row.category === "public_owner" || row.category === "public_function_owner")
     .map((row) => row.parentName));
@@ -128,17 +163,43 @@ export function validateInventory(rows: readonly InventoryRow[]): string[] {
       /^(?:0|1-99|100-999|1000-9999|10000\+)$/.test(row.definition))) {
     errors.push("Missing sanitized Product row-count range.");
   }
+  const unsafeExtensions = rows.filter((row) => row.category === "extension" &&
+    externalWorkExtensions.has(row.parentName)).map((row) => row.parentName);
+  if (unsafeExtensions.length > 0) {
+    errors.push(`External-work extensions require quarantine review: ${unsafeExtensions.sort().join(", ")}.`);
+  }
   return [...new Set(errors)];
+}
+
+export function buildInventoryReport(rows: readonly InventoryRow[]) {
+  const errors = validateInventory(rows);
+  const canonicalRows = [...rows].sort((left, right) =>
+    [left.category, left.schemaName, left.parentName, left.objectName, left.definition].join("\u001f")
+      .localeCompare([right.category, right.schemaName, right.parentName, right.objectName, right.definition].join("\u001f")));
+  const canonicalText = JSON.stringify(canonicalRows);
+  return {
+    schemaVersion: "gonggamline-r2-product-security-inventory-report-v1",
+    accepted: errors.length === 0,
+    fingerprintSha256: createHash("sha256").update(canonicalText, "utf8").digest("hex"),
+    errors,
+    creatorRoles: [...new Set(rows.filter((row) =>
+      row.category === "public_owner" || row.category === "public_function_owner")
+      .map((row) => row.parentName))].sort(),
+    productPolicies: rows.filter((row) => row.category === "policy")
+      .map((row) => row.objectName).sort(),
+    productRowRange: rows.find((row) => row.category === "product_rows")?.definition ?? null,
+  } as const;
 }
 
 if (process.argv[1]?.endsWith("validate-r2-product-security-inventory.ts")) {
   const inputPath = process.argv[2];
   if (!inputPath) throw new Error("Pass the sanitized inventory CSV path.");
-  const errors = validateInventory(parseInventoryCsv(readFileSync(inputPath, "utf8")));
+  const report = buildInventoryReport(parseInventoryCsv(readFileSync(inputPath, "utf8")));
+  const errors = report.errors;
   if (errors.length > 0) {
     for (const error of errors) process.stderr.write(`BLOCKED: ${error}\n`);
     process.exitCode = 1;
   } else {
-    process.stdout.write("R2 restored inventory gate: PASS\n");
+    process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   }
 }

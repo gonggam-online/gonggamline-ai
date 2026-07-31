@@ -36,9 +36,14 @@ history; the validator requires exactly 000-022 with no gaps or additions. It
 also records Product/R1 relation ownership and RLS, exact policies, relation and
 function ACLs, R1 function signatures/owners/search paths, public-schema object
 creators, explicit default ACLs plus owner/type completeness states, extensions,
-and a Product row-count range. The validator blocks malformed CSV, secret-like
-content, unknown categories, migration/policy/function drift, missing relations,
-missing creator/default-ACL evidence, and unsafe row counts.
+the complete Product privilege matrix for `PUBLIC`, `anon`, `authenticated`, and
+`service_role`, the complete R1 execute matrix, and a Product row-count range.
+The validator blocks malformed CSV, secret-like content, unknown categories,
+migration/policy/function drift, missing relations, missing grant/default-ACL
+evidence, unsafe external-work extensions, and unsafe row counts. A successful
+result is a small canonical JSON report with the classified SHA-256 fingerprint,
+creator roles, Product policy identifiers, and row-count range; it does not
+include raw catalog rows.
 
 Store raw output only in the approved restricted evidence location. Review it
 for secrets before producing a sanitized artifact. Record only the backup

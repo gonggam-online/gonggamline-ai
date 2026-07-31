@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import {
+  buildInventoryReport,
   parseInventoryCsv,
   type InventoryRow,
   validateInventory,
@@ -25,7 +26,8 @@ test("R2 inventory is read-only and captures every architecture stop condition",
   assert.match(sql, /count_range/);
   assert.match(sql, /'default_acl_state'/);
   assert.doesNotMatch(sql, /schema_migrations[\s\S]+WHERE version IN/);
-  assert.doesNotMatch(sql, /\b(?:INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP|CREATE)\b/i);
+  assert.doesNotMatch(sql,
+    /^\s*(?:INSERT\s+INTO|UPDATE\s+\S+|DELETE\s+FROM|TRUNCATE\s+(?:TABLE\s+)?|ALTER\s+|DROP\s+|CREATE\s+)/im);
 });
 
 const functionSignatures = new Map([
@@ -55,6 +57,20 @@ const acceptedInventory = (): InventoryRow[] => [
     category: "function", schemaName: "public", parentName: name,
     objectName: signature, definition: "postgres|true|search_path=pg_catalog, public|",
   })),
+  ...["PUBLIC", "anon", "authenticated", "service_role"].flatMap((role) =>
+    ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"].map((privilege) => ({
+      category: "relation_privilege_state", schemaName: "public", parentName: "products",
+      objectName: role, definition: `${privilege}|${role === "anon" && ["SELECT", "INSERT", "UPDATE"].includes(privilege)}`,
+    }))),
+  ...[...functionSignatures].flatMap(([name, signature]) =>
+    ["PUBLIC", "anon", "authenticated", "service_role"].map((role) => ({
+      category: "function_privilege_state", schemaName: "public", parentName: name,
+      objectName: signature,
+      definition: `${role}|EXECUTE|${role === "service_role" && [
+        "import_product_v1", "patch_product_operator_fields_v1",
+        "record_manual_competition_analysis_v1", "record_automatic_competition_analysis_v1",
+      ].includes(name)}`,
+    }))),
   { category: "public_owner", schemaName: "public", parentName: "postgres", objectName: "r", definition: "3" },
   { category: "public_function_owner", schemaName: "public", parentName: "postgres", objectName: "f", definition: "7" },
   ...["r", "S", "f"].map((objectType) => ({
@@ -86,6 +102,31 @@ test("R2 validator rejects secret-like evidence and malformed CSV", () => {
   assert.match(validateInventory(rows).join("\n"), /secret-like material/);
   assert.throws(() => parseInventoryCsv("wrong,header\n"), /approved v1 contract/);
   assert.throws(() => parseInventoryCsv('category,schema_name,parent_name,object_name,definition\n"open'), /unterminated/);
+});
+
+test("R2 validator blocks incomplete grants, RPC drift, and external-work extensions", () => {
+  const rows = acceptedInventory().filter((row) => !(row.category === "relation_privilege_state" &&
+    row.objectName === "authenticated" && row.definition.startsWith("DELETE|")));
+  const rpcIndex = rows.findIndex((row) => row.category === "function_privilege_state" &&
+    row.parentName === "product_mutation_claim_v1" && row.definition.startsWith("anon|"));
+  rows[rpcIndex] = { ...rows[rpcIndex], definition: "anon|EXECUTE|true" };
+  rows.push({ category: "extension", schemaName: "extensions", parentName: "pg_net", objectName: "0.14", definition: "" });
+  const errors = validateInventory(rows).join("\n");
+  assert.match(errors, /Product privilege state/);
+  assert.match(errors, /execute matrix drift/);
+  assert.match(errors, /quarantine review: pg_net/);
+});
+
+test("R2 report is canonical, deterministic, and contains no catalog rows", () => {
+  const rows = acceptedInventory();
+  const report = buildInventoryReport(rows);
+  const reversed = buildInventoryReport([...rows].reverse());
+  assert.equal(report.accepted, true);
+  assert.equal(report.fingerprintSha256, reversed.fingerprintSha256);
+  assert.match(report.fingerprintSha256, /^[0-9a-f]{64}$/);
+  assert.deepEqual(report.creatorRoles, ["postgres"]);
+  assert.equal(report.productRowRange, "100-999");
+  assert.equal("rows" in report, false);
 });
 
 test("R2 collector fails closed for Production, missing quarantine, or target drift", () => {

@@ -36,6 +36,14 @@ CROSS JOIN LATERAL pg_catalog.aclexplode(
 LEFT JOIN pg_catalog.pg_roles grantee ON grantee.oid = acl.grantee
 WHERE n.nspname = 'public' AND c.relname = 'products'
 UNION ALL
+SELECT 'relation_privilege_state', 'public', 'products', role_name,
+       privilege_name || '|' ||
+       has_table_privilege(role_name, 'public.products', privilege_name)::text
+FROM unnest(ARRAY['PUBLIC','anon','authenticated','service_role']) role_name
+CROSS JOIN unnest(ARRAY[
+  'SELECT','INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER'
+]) privilege_name
+UNION ALL
 SELECT 'function', n.nspname, p.proname,
        pg_catalog.pg_get_function_identity_arguments(p.oid),
        concat_ws('|', pg_catalog.pg_get_userbyid(p.proowner),
@@ -63,6 +71,22 @@ CROSS JOIN LATERAL pg_catalog.aclexplode(
   coalesce(p.proacl, pg_catalog.acldefault('f', p.proowner))
 ) acl
 LEFT JOIN pg_catalog.pg_roles grantee ON grantee.oid = acl.grantee
+WHERE n.nspname = 'public' AND p.proname IN (
+  'product_mutation_claim_v1',
+  'product_mutation_complete_v1',
+  'import_product_v1',
+  'patch_product_operator_fields_v1',
+  'record_product_competition_v1',
+  'record_manual_competition_analysis_v1',
+  'record_automatic_competition_analysis_v1'
+)
+UNION ALL
+SELECT 'function_privilege_state', 'public', p.proname,
+       pg_catalog.pg_get_function_identity_arguments(p.oid),
+       role_name || '|EXECUTE|' || has_function_privilege(role_name, p.oid, 'EXECUTE')::text
+FROM pg_catalog.pg_proc p
+JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+CROSS JOIN unnest(ARRAY['PUBLIC','anon','authenticated','service_role']) role_name
 WHERE n.nspname = 'public' AND p.proname IN (
   'product_mutation_claim_v1',
   'product_mutation_complete_v1',
