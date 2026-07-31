@@ -22,15 +22,20 @@
   baseline tests; full 365/365 tests; changed-source lint; typecheck;
   production build; diff/security review. Local Playwright completed 32 passed,
   one skipped, and seven pre-existing Supabase-unconfigured route failures.
-- Current work: commit, push, Draft PR, and exact-head CI/Preview.
+- Current work: implementation delivery is complete and Draft PR #56 awaits
+  repository-owner review; Production application and merge remain excluded.
 - Blocker: local disposable replay refused to fall back to a linked or
   Production database because Docker Desktop Linux engine is not running.
   Exact-head GitHub disposable replay remains binding.
 - Changed files: migration/manifest, protected Product routes and service,
   Product mutation contracts/repository, CSRF purpose list, regression tests,
   changelog, Decision Log, and this status.
-- Exact next action: complete remaining local gates, publish a Draft
-  high-risk PR with `manual-merge-required`, and require exact-head CI/Preview.
+- Delivery: commit `094803dd3eb110f82678017c65317dcb8e977595`
+  is pushed. Draft PR #56 has `manual-merge-required`. Exact-head CI run
+  `30599893754` passed, including disposable migration replay, and Preview
+  browser run `30599893774` passed.
+- Exact next action: owner review of Draft PR #56. Do not apply migration 022
+  to Production or merge without the separate manual decision.
 - Remaining risks: migration SQL and concurrency/rollback behavior require the
   disposable Postgres gate; Production application and merge remain excluded.
 
