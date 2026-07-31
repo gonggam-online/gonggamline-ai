@@ -21,7 +21,14 @@ test("MFA enrollment is explicit, TOTP-only, server-owned, and no-store", () => 
   assert.match(boundary, /^import "server-only";/);
   assert.match(boundary, /factorType: "totp"/);
   assert.match(boundary, /status\.factors\.length !== 0/);
-  assert.match(boundary, /encodeURIComponent\(\s*data\.totp\.qr_code/);
+  assert.match(
+    boundary,
+    /SVG_DATA_URL_PREFIX = "data:image\/svg\+xml;utf-8,"/,
+  );
+  assert.match(boundary, /qrCode\.startsWith\(SVG_DATA_URL_PREFIX\)/);
+  assert.match(boundary, /qrCode\.startsWith\("<svg"\)/);
+  assert.match(boundary, /encodeURIComponent\(qrCode\)/);
+  assert.match(boundary, /if \(!qrCodeDataUrl\)/);
   assert.match(route, /beginAdminTotpEnrollment/);
   assert.match(route, /"Cache-Control": "no-store"/);
   assert.doesNotMatch(route, /GET\s*\(/);

@@ -1,5 +1,22 @@
 # Decision log
 
+## 2026-07-31 — Admin TOTP SDK QR contract compatibility
+
+- Context: the first owner-approved Production enrollment returned the
+  sanitized `MFA enrollment failed.` result although Production TOTP was
+  enabled. The subsequent status check showed no remaining factor.
+- Evidence: pinned `@supabase/auth-js` 2.110.7 prepends
+  `data:image/svg+xml;utf-8,` to the Auth server SVG. The merged boundary
+  accepted only raw `<svg`.
+- Decision: accept the pinned SDK's exact SVG data-URL prefix unchanged, retain
+  raw-SVG compatibility for older direct contracts, and reject every other QR
+  format. Preserve one-time/no-store handling and sanitized provider errors.
+- Risk / approval: high-risk/manual because this restores real Production Auth
+  enrollment. No auto-merge. Production enrollment remains paused until exact
+  gates, owner merge, deployment, and password rotation.
+- Rollback: revert the compatibility commit. Existing Auth factors and
+  Production configuration are unchanged by the code delivery.
+
 ## 2026-07-31 — R1 Atomic Product Mutation implementation authorization
 
 - Category: high-risk implementation authorization
