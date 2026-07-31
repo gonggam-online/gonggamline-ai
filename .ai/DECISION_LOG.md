@@ -1,5 +1,20 @@
 # Decision log
 
+## 2026-07-31 — Admin Password Recovery v1 proposal
+
+- Status: proposed; not yet architecture-approved.
+- Incident evidence: the Production recovery email completed provider
+  verification but returned to a page with no password-update capability.
+  Session-bearing URL material was exposed and must be revoked.
+- Proposal: add a same-browser PKCE recovery lifecycle inside the existing
+  Admin Auth boundary, preserving UUID allowlist, exact-origin JSON, CSRF,
+  sanitized errors, global sign-out, and fresh TOTP requirements.
+- Approval boundary: documentation only. No recovery route, password update,
+  redirect configuration, Production action, or Auth Admin API is authorized
+  until the architecture PR is manually approved and merged.
+- Story:
+  [`ADMIN-PASSWORD-RECOVERY-V1.md`](../docs/architecture/ADMIN-PASSWORD-RECOVERY-V1.md).
+
 ## 2026-07-31 — R1 Atomic Product Mutation implementation authorization
 
 - Category: high-risk implementation authorization

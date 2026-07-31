@@ -1,5 +1,42 @@
 # Work status
 
+## 2026-07-31 — Admin Password Recovery architecture
+
+- Objective: define the minimum fail-closed administrator password recovery
+  lifecycle required before the exposed Production credential can be rotated.
+- Branch/base: `codex/docs/admin-password-recovery-architecture`, based on
+  latest `origin/main` at `c84ee5b750d640d775f8e1b8868f05606980994d`.
+- Risk: documentation-only with mandatory manual approval; future Auth
+  implementation/configuration/Production actions are high-risk.
+- Revenue impact: restores safe operator access needed for AAL2-protected
+  revenue operations without credential or recovery bypass.
+- Root-cause class: code capability gap plus external redirect configuration.
+  Existing callback handles ordinary PKCE codes only; no password-update
+  lifecycle exists.
+- Scope: architecture, contracts, failure/security/test/rollout/rollback, and
+  approval boundaries.
+- Non-goals: runtime implementation, Supabase configuration, password/session
+  mutation, Auth Admin API, database/RLS, MFA reset, or commerce writes.
+- Completed: inspected existing callback/login/SSR boundaries; reviewed
+  official Supabase recovery, update-user, password-security, and email-link
+  contracts; confirmed a new Auth lifecycle; drafted the Architecture Story,
+  review index, decision proposal, and changelog.
+- Current work: validate and deliver an architecture-only manual Draft PR.
+- Blockers / owner actions: manual architecture approval/merge is required
+  before implementation. The exposed Production credential/session remains
+  untrusted and must not be used.
+- Changed files: `docs/architecture/ADMIN-PASSWORD-RECOVERY-V1.md`,
+  `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`,
+  `CHANGELOG-Admin-Password-Recovery-V1.md`, and this status record.
+- Exact next action: review the complete diff, run documentation-applicable
+  gates, commit/push, and open a manual Draft PR.
+- Validation results: `git diff --check`, lint, typecheck, 375/375 tests, and
+  Production build with 81 generated pages passed. Lint warnings came only from
+  the existing untracked Playwright report bundle; no changed-source errors.
+- Remaining risks: exact Supabase PKCE recovery behavior and redirect
+  configuration must be tested with synthetic non-Production users; Production
+  recovery remains blocked.
+
 ## 2026-07-31 — Admin TOTP MFA enrollment and recovery boundary
 
 - Objective: complete the accepted single-company Admin Auth boundary with
