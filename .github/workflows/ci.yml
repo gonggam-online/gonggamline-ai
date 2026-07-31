@@ -73,6 +73,18 @@ jobs:
         shell: pwsh
         run: ./scripts/verify-item-selection-security-slice.ps1 -Start -Stop
 
+  ci-r1-atomic-product-mutation:
+    name: ci-r1-atomic-product-mutation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.110.0
+      - name: Replay 000-022 and verify atomic mutation behavior
+        shell: pwsh
+        run: ./scripts/verify-r1-atomic-product-mutation.ps1 -Start -Stop
+
   ci-build:
     name: ci-build
     runs-on: ubuntu-latest

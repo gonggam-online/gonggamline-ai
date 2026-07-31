@@ -34,6 +34,10 @@
   is pushed. Draft PR #56 has `manual-merge-required`. Exact-head CI run
   `30599893754` passed, including disposable migration replay, and Preview
   browser run `30599893774` passed.
+- Follow-up hardening: PR #56 remains unmerged while a dedicated disposable
+  Postgres behavior gate is added for first commit, replay, divergent conflict,
+  direct-role denial, and forced-audit rollback. This closes the gap between
+  schema replay and transactional behavior evidence.
 - Exact next action: owner review of Draft PR #56. Do not apply migration 022
   to Production or merge without the separate manual decision.
 - Remaining risks: migration SQL and concurrency/rollback behavior require the

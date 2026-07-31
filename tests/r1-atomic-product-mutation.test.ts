@@ -76,3 +76,19 @@ test("batch is bounded before work and produces stable per-item outcomes", () =>
   assert.match(route, /"REPLAYED" : "SUCCEEDED"/);
   assert.match(route, /status: "FAILED", code: "ITEM_FAILED"/);
 });
+
+
+test("R1 disposable verifier refuses Production and remote database fallback", () => {
+  const script = read("scripts/verify-r1-atomic-product-mutation.ps1");
+  assert.match(script, /refuses Production environment markers/);
+  assert.match(script, /refuses remote database URLs/);
+  assert.match(script, /supabase db reset --local/);
+  assert.match(script, /tests\/sql\/r1-atomic-product-mutation\.sql/);
+  assert.doesNotMatch(script, /db push|--linked/);
+
+  const sql = read("tests/sql/r1-atomic-product-mutation.sql");
+  assert.match(sql, /identical replay duplicated effects/);
+  assert.match(sql, /divergent replay unexpectedly succeeded/);
+  assert.match(sql, /audit failure did not roll back every effect/);
+  assert.match(sql, /has_function_privilege\('anon'/);
+});

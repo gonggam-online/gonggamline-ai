@@ -13,5 +13,9 @@
 - Removed Product persistence from `GET /api/domeggook-search`.
 - Added migration inventory, access isolation, source alignment, batch, and
   atomic-boundary regression tests.
+- Added a fail-closed disposable Postgres gate proving first commit, identical
+  replay, divergent-key conflict, role denial, and audit-failure rollback.
+- Added a fail-closed disposable Postgres gate proving first commit, identical
+  replay, divergent-key conflict, role denial, and audit-failure rollback.
 
 Production migration application and PR merge are intentionally excluded.
