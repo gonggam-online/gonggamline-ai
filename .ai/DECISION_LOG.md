@@ -567,3 +567,23 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   authorization, idempotency, audit, and failure contracts before R2 SQL.
 - Rollback: revert this documentation/test commit. Database and runtime state
   are unchanged.
+
+## 2026-07-31 — Admin TOTP MFA boundary implementation authorized
+
+- Category: approved high-risk Auth implementation.
+- Owner / approver: repository owner.
+- Dependency: accepted Admin Identity, Authorization, RLS, and CSRF
+  Architecture v1 and PR #56 Production rollout.
+- Decision: complete the existing server-owned administrator flow with
+  explicit TOTP enrollment, factor-aware challenge/verify, AAL2 self-unenroll,
+  and sanitized recovery guidance.
+- Recovery boundary: Supabase recovery codes are unsupported. Automatic MFA
+  reset, Auth Admin API access, break-glass bypass, and application-managed
+  administrator lifecycle remain excluded. Loss of every verified factor fails
+  closed and requires the repository owner to remove factors manually in the
+  Supabase Dashboard.
+- Risk and delivery: high-risk/manual; Draft PR with
+  `manual-merge-required`, no auto-merge, no Production deployment, and no
+  merge in this Story.
+- Rollback: revert the unmerged implementation PR. Existing Production Auth,
+  administrator user, environment variables, and database remain unchanged.

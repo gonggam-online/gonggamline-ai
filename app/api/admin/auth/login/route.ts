@@ -1,3 +1,4 @@
+import { readAdminMfaStatus } from "@/lib/auth/admin-mfa.server";
 import { adminRateLimiter } from "@/lib/auth/admin-rate-limit.server";
 import {
   AdminRequestGuardError,
@@ -64,7 +65,10 @@ export async function POST(request: Request): Promise<Response> {
       path: "/",
       maxAge: 0,
     });
-    return Response.json({ authenticated: true });
+    return Response.json({
+      authenticated: true,
+      mfa: await readAdminMfaStatus(client),
+    });
   } catch (error) {
     if (error instanceof SyntaxError) {
       return Response.json({ code: "INVALID_REQUEST" }, { status: 400 });

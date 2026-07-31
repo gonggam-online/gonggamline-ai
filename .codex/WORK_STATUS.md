@@ -1,5 +1,47 @@
 # Work status
 
+## 2026-07-31 — Admin TOTP MFA enrollment and recovery boundary
+
+- Objective: complete the accepted single-company Admin Auth boundary with
+  TOTP enrollment, factor-aware AAL2 verification, and fail-closed manual
+  recovery guidance.
+- Branch/base: `codex/feat/admin-totp-mfa-boundary`, based on
+  `d1abbedb1be21f4e9ac2e330846e79c6d03d1f67`.
+- Risk: high-risk/manual because the Story changes Auth, MFA, session
+  assurance, and administrator recovery behavior.
+- Revenue impact: unblocks protected Product mutation operations without
+  weakening the administrator AAL2 requirement.
+- Root-cause class: code capability gap. Production configuration and the
+  administrator UUID are present, but the application can verify only a known
+  factor ID and cannot enroll a first TOTP factor.
+- Architecture: reuses the accepted Admin Identity / Authorization / RLS /
+  CSRF v1 boundary. It adds no Domain, database, migration, Queue, or external
+  integration. Supabase recovery codes and automatic MFA reset remain
+  unsupported/excluded; recovery stays a repository-owner Dashboard action.
+- Scope: factor status, explicit TOTP enrollment, factor-aware challenge and
+  verification, optional AAL2 self-unenrollment, sanitized recovery guidance,
+  login UI, contract/security tests, Draft PR, and exact Preview evidence.
+- Non-goals: Production deployment, PR merge, Auth Admin API, recovery codes,
+  automatic factor reset, break-glass bypass, database/schema/RLS changes,
+  secrets, and real Product/commerce writes.
+- Completed: repository/main/worktree safety check; mandatory governance,
+  accepted Admin architecture, current Auth code, Next.js 16, and official
+  Supabase MFA contract review; deterministic high-risk classification;
+  dedicated branch creation; server-owned TOTP status/enroll/challenge/verify/
+  unenroll boundary; factor-aware UI; fail-closed manual recovery guidance;
+  14/14 focused and 375/375 full tests; changed-source lint; typecheck;
+  production build; local browser render and unauthenticated fail-close smoke.
+- Current work: final diff review, intentional commit, push, Draft PR, and
+  exact-head GitHub/Vercel Preview evidence.
+- Blockers / owner actions: final merge remains manual after exact-head gates.
+- Exact next action: commit the verified change, push the registered branch,
+  open the high-risk Draft PR, and validate the exact Preview.
+- Remaining risks: Supabase Preview fixtures may not have a provisioned
+  allowlisted user; Preview validation must remain non-destructive and prove
+  public surface stability plus unauthenticated fail-close. Repository-wide
+  lint currently scans an untracked pre-existing `playwright-report/trace`
+  bundle; changed-source lint passes without warnings.
+
 ## 2026-07-31 — R1 Atomic Product Mutation implementation
 
 - Objective: implement the accepted R1 Product mutation transaction boundary
