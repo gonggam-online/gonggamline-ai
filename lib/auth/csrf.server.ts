@@ -10,6 +10,7 @@ export const ADMIN_CSRF_HEADER_NAME = "X-GonggamLine-CSRF";
 export type AdminCsrfPurpose =
   | "admin-mfa"
   | "admin-session"
+  | "admin-password-recovery"
   | "item-selection-create"
   | "item-selection-finalize"
   | "product-import"

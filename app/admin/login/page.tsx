@@ -14,6 +14,7 @@ type LoginResponse = Readonly<{
 
 export default function AdminLoginPage() {
   const [message, setMessage] = useState("");
+  const [recoveryMessage, setRecoveryMessage] = useState("");
   const [mfaStatus, setMfaStatus] = useState<AdminMfaStatusDto | null>(null);
   const [enrollment, setEnrollment] =
     useState<AdminMfaEnrollmentDto | null>(null);
@@ -82,6 +83,24 @@ export default function AdminLoginPage() {
         : body.mfa.verificationRequired
           ? "Signed in. Verify your authenticator to continue."
           : "Signed in with MFA.",
+    );
+  }
+
+  async function requestPasswordReset(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const response = await fetch(
+      "/api/admin/auth/password/reset-request",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.get("recoveryEmail") }),
+      },
+    );
+    setRecoveryMessage(
+      response.ok
+        ? "If the account is eligible, a password recovery email has been sent."
+        : "Password recovery is temporarily unavailable.",
     );
   }
 
@@ -202,6 +221,22 @@ export default function AdminLoginPage() {
         </label>
         <button type="submit">Sign in</button>
       </form>
+      <section aria-labelledby="password-recovery-heading">
+        <h2 id="password-recovery-heading">Reset administrator password</h2>
+        <form onSubmit={requestPasswordReset}>
+          <label>
+            Email{" "}
+            <input
+              name="recoveryEmail"
+              type="email"
+              autoComplete="username"
+              required
+            />
+          </label>
+          <button type="submit">Send recovery email</button>
+        </form>
+        <p aria-live="polite">{recoveryMessage}</p>
+      </section>
       <section aria-labelledby="mfa-heading">
         <h2 id="mfa-heading">Authenticator security</h2>
         <button type="button" onClick={refreshMfaStatus}>

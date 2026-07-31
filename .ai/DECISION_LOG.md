@@ -1,5 +1,20 @@
 # Decision log
 
+## 2026-07-31 — Admin Password Recovery v1 implementation
+
+- Architecture approval: PR #59 was manually merged by the repository owner at
+  merge commit `c22635befa44929d3b3ae0cf35ab68e14b8f5d9a`.
+- Decision: implement only the approved same-browser PKCE recovery lifecycle
+  inside the existing Admin Auth boundary.
+- Security: keep UUID allowlisting, Auth-server user verification,
+  exact-origin JSON, recovery-purpose CSRF, sanitized failures, global
+  sign-out, and fresh login plus TOTP.
+- Exclusions: no Auth Admin API, MFA reset, database/RLS, new secret, implicit
+  fragment parsing, or commerce write.
+- Risk: high-risk/manual. The implementation PR must retain
+  `manual-merge-required`; Production redirect configuration and password
+  rotation require separate owner actions.
+
 ## 2026-07-31 — Admin Password Recovery v1 proposal
 
 - Status: proposed; not yet architecture-approved.
