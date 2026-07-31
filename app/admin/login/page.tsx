@@ -287,7 +287,8 @@ export default function AdminLoginPage() {
             <input
               name="recoveryToken"
               inputMode="numeric"
-              pattern="[0-9]{6}"
+              pattern="[0-9]{8}"
+              maxLength={8}
               autoComplete="one-time-code"
               required
             />

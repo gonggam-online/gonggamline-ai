@@ -58,10 +58,11 @@ Admin login page
 ### Prefetch-resistant recovery amendment
 
 Supabase's default `ConfirmationURL` is single-use and can be consumed by an
-email security scanner before the administrator clicks it. The recovery email
-therefore contains `{{ .Token }}` as a six-digit code and no clickable
-confirmation URL. The administrator manually enters email plus the newest code
-on `/admin/login`.
+email security scanner before the administrator clicks it. Production evidence
+shows that the configured Supabase project issues `{{ .Token }}` as an
+eight-digit code. The recovery email therefore contains that code and no
+clickable confirmation URL. The administrator manually enters email plus the
+newest code on `/admin/login`.
 
 ```text
 Admin login page
@@ -132,7 +133,7 @@ No contract exposes session or identity material.
 
 `POST /api/admin/auth/password/verify-recovery`
 
-- request: `{ "email": string, "token": six-digit string }`
+- request: `{ "email": string, "token": eight-digit string }`
 - success:
   `200 { "verified": true, "redirect": "/admin/password-recovery" }`
 - invalid/expired/replayed/provider failures: sanitized error envelopes

@@ -1,5 +1,45 @@
 # Work status
 
+## 2026-07-31 — Admin recovery OTP length reconciliation
+
+- Objective: align the administrator recovery UI and verification route with
+  the eight-digit numeric OTP issued by the Production Supabase project.
+- Branch/base: `codex/fix/admin-recovery-token-length`, based on merged PR #61
+  at `5fb6b2e0f776ba7bf63cf0a4b44ba6d2834daca5`.
+- Risk: high-risk/manual Auth correction; never auto-merge.
+- Revenue impact: restores administrator password rotation required before
+  protected sales, product, and settlement operations can resume safely.
+- Root-cause class: code/Auth contract mismatch. Production issued an
+  eight-digit recovery OTP while both browser and server required six digits.
+- Scope: recovery-token UI and route validation, contract/E2E regression
+  coverage, architecture decision/changelog/status evidence, Draft PR, exact
+  Preview, manual merge, and Production revalidation.
+- Non-goals: TOTP length, MFA factor changes, password or token handling,
+  Supabase schema/RLS, email resend before deployment, and commerce writes.
+- Completed: explicit owner approval; latest merged baseline and clean
+  dedicated branch; governance/Next.js/Auth audit; deterministic root cause;
+  exact eight-digit UI/server correction; focused contract documentation and
+  browser assertions.
+- Current work: commit, push, Draft PR delivery, and exact-head gates.
+- Blockers / owner actions: manual merge remains mandatory after exact gates.
+  Production must receive a new recovery email after deployment because the
+  current OTP expires and must never be recorded.
+- Changed files: administrator login, recovery verification route, Auth
+  contract/browser tests, recovery architecture/changelog, Decision Log, and
+  this status record.
+- Validation: full unit suite 381/381, changed-source lint, typecheck,
+  Production build with 84 generated routes, and focused Production-mode
+  Chromium 1/1 passed. Repository-wide lint remains blocked only by the
+  existing generated `playwright-report/trace` bundle. The first Playwright
+  invocation exceeded its outer timeout during automatic server lifecycle;
+  the same test passed with the built server controlled explicitly.
+- Last commit: none on this branch.
+- Exact next action: perform the final diff/status audit, commit, push, open
+  the high-risk Draft PR, apply `manual-merge-required`, and await exact gates.
+- Remaining risks: manual merge/deployment, provider OTP configuration drift,
+  one new Production recovery attempt, owner password update, fresh login, and
+  TOTP/AAL2 verification.
+
 ## 2026-07-31 — Admin Password Recovery prefetch mitigation
 
 - Objective: make Production administrator password recovery reliable when
