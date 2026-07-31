@@ -1,5 +1,14 @@
 # Decision log
 
+## 2026-07-31 - R2 Product security target proposed
+
+- Category: proposed high-risk Database / RLS Architecture Story.
+- Dependency: accepted R1 Atomic Product Mutation DB v1 and merged R1 runtime.
+- Decision proposal: retain intentional anonymous Product `SELECT`, remove all anonymous/authenticated Product writes, preserve only explicit guarded service-role reads and exact R1 RPC execution, and set owner-scoped default deny for future public-schema objects.
+- Rehearsal: derive candidate forward migration SQL only from an isolated, quarantined, owner-approved restore inventory; prove negative roles, R1 atomicity/idempotency/audit, public read, and default ACLs before any later Production proposal.
+- Risk and authority: documentation only in this Story. Manual merge is required. Migration SQL, restore, configuration, Auth, Production, and commerce writes remain unauthorized.
+- Rollback: revert the documentation commit. No external or database state is changed.
+
 ## 2026-07-31 — Admin recovery OTP length reconciliation
 
 - Production evidence: the newest code-only recovery email delivered an

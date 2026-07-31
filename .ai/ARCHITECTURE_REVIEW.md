@@ -1,5 +1,14 @@
 # Architecture review
 
+## Proposed Architecture Story: R2 Product Security Target and Rehearsal v1
+
+- Document: `docs/architecture/R2-PRODUCT-SECURITY-TARGET-AND-REHEARSAL-V1.md`
+- Status: proposed; manual repository-owner acceptance required.
+- Scope: R1 compatibility re-audit, Product RLS/grant/default-privilege target, forward-only migration design, and restore-based non-Production rehearsal.
+- Risk: high-risk/manual for all future RLS/database/restore/Production work.
+- Non-goals: migration SQL, restore execution, Supabase/Production changes, Auth changes, runtime implementation, and commerce writes.
+- Gate: future implementation remains blocked until this Story is manually merged and an exact restored inventory satisfies every stop condition.
+
 ## Story compliance gate
 
 Answer before implementation:
