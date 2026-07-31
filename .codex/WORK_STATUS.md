@@ -1,5 +1,67 @@
 # Work status
 
+## 2026-07-31 - R2 Product security reconciliation implementation
+
+- Objective: implement the accepted R2 Product security target as one
+  forward-only migration, remove anonymous Product writes, prove grants/RLS,
+  replay/negative behavior, and deliver a high-risk Draft PR and Preview.
+- Branch/base: `codex/feat/r2-product-security-reconciliation`, based on Stage
+  02 merge `9c3c82a6cbb4a78767231312a26d3d9fef9863d4` (`origin/main`).
+- Risk: high-risk/manual Database/RLS/AuthZ. `manual-merge-required`; no
+  auto-merge, Production, or commerce writes.
+- Revenue impact: closes direct anonymous mutation authority over Product
+  catalog, cost, profit, recommendation, operator, and competition state while
+  preserving the intentional public catalog read and protected R1 commands.
+- Root-cause class: external configuration/database evidence blocker. The
+  accepted architecture forbids candidate 023 generation until a current,
+  isolated, quarantined, owner-approved restore proves exact deployed 022
+  history, Product policies/grants, function owners/search paths, object
+  creators, and default ACLs.
+- Scope: exact restored inventory, inventory-derived candidate 023, synthetic
+  non-Production negative/R1 atomicity/default-ACL rehearsal, local gates,
+  high-risk Draft PR, and exact-head Preview.
+- Non-goals: Production restore/application, migration-history repair, real
+  Product/provider/commerce writes, other access-matrix groups, Auth/runtime
+  redesign, merge, or auto-merge.
+- Completed: confirmed a clean detached starting worktree; fetched and verified
+  the Stage 02 merge at latest `origin/main`; created the dedicated non-main
+  branch; read binding governance and accepted R1/R2 designs; audited available
+  migration/replay tooling and confirmed local migration-only reset is not
+  accepted restore evidence.
+- Current work: resumed by `PROCEED_NOW`. Safe non-Production preparation and
+  local validation are complete; commit, push, high-risk Draft PR, and
+  exact-head CI/Preview delivery are in progress. Candidate migration and all
+  DB/restore/RLS/Production actions remain stopped at their separate concrete
+  approval gate (7/10 checkpoints complete).
+- Blocker / owner action: the repository owner must select a current Production
+  backup or provider-approved sanitized clone, approve restore into a new
+  isolated non-Production Supabase project, prove it has no Production domain,
+  marketplace credentials, webhooks, schedules, queues, outbound email, or
+  paid-provider access, and authorize read-only catalog inventory plus synthetic
+  namespaced Product rehearsal writes on that target. Target-specific secrets
+  remain only in the approved secret store and must not be pasted or committed.
+- Changed files: read-only inventory SQL and collector, R2 static security
+  tests, rehearsal runbook/changelog, and this status record. No migration SQL
+  or runtime code.
+- Validation: repository/branch/base safety and architecture stop-condition
+  review passed; 385/385 tests passed; lint passed with zero errors and four
+  pre-existing warnings; typecheck passed; Production build passed with 84
+  generated routes; collector PowerShell parsing and `git diff --check` passed.
+  Local Playwright passed 33, skipped 2, and failed the same seven established
+  Supabase-unconfigured routes (`/listing`, `/market`, `/procurement`,
+  `/revenue`, `/sourcing`, `/workflow`, `/workspace`); the R1 unauthenticated
+  mutation fail-close smoke passed. CI and Preview remain pending. Actual
+  restored inventory, candidate replay, and DB negative tests remain prohibited
+  until exact-target approval.
+- Last commit: none on this branch.
+- Exact next action: commit and push the validated preparation, open a high-risk
+  Draft PR, and verify exact-head CI/Preview without applying any database
+  change.
+- Remaining risks: restore fidelity/quarantine; deployed 022/history/policy/
+  grant/owner/default-ACL drift; service-role bypass scope; intentional public
+  Product SELECT; future Production concurrency. Anonymous writes must never be
+  restored as rollback.
+
 ## 2026-07-31 - R2 Product security target and non-Production rehearsal architecture
 
 - Objective: re-audit R1 compatibility and define the R2 Product RLS/grant/default-privilege target, forward-only migration design, and restore-based non-Production rehearsal before any implementation.
