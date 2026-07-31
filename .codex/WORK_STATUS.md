@@ -20,8 +20,8 @@
   Supabase's documented email-prefetch failure mode; obtained explicit owner
   approval; created the dedicated branch; designed and implemented the
   code-only OTP verification boundary and documentation amendment.
-- Current work: complete diff/security review, commit, push, and deliver a
-  high-risk Draft PR.
+- Current work: record exact-head CI/Preview evidence and stop at the mandatory
+  repository-owner manual-merge boundary.
 - Blockers / owner actions: Production Reset Password template must not change
   until the exact implementation Preview passes and the PR is manually merged.
   The owner must enter the new password and later verify fresh login plus TOTP.
@@ -34,10 +34,15 @@
   recovery-code UI check; two fixture-dependent tests skipped and seven
   pre-existing Supabase-dependent pages failed because local Supabase is
   unconfigured. Repository-wide lint remains blocked only by the existing
-  generated `playwright-report` bundle.
-- Last commit: none on this branch.
-- Exact next action: review the complete diff and secret/output surface, then
-  commit, push, and create the Draft PR with `manual-merge-required`.
+  generated `playwright-report` bundle. Exact implementation head
+  `50761283fbb8877c3d78565f2662e4ec35ef6e18`: CI run `30614096982` passed;
+  Preview browser run `30614097027` passed; evidence artifact `8786663319`.
+- Delivery: Draft PR #61 targets `main` and has
+  `manual-merge-required`; auto-merge is prohibited.
+- Last commit: `5076128 fix(auth): prevent recovery link prefetch`.
+- Exact next action: repository owner manually reviews and merges PR #61.
+  After Production is Ready, change the Supabase Reset Password template to
+  code-only, then perform one owner-driven recovery/password/TOTP validation.
 - Remaining risks: provider template drift, OTP expiry/replay, manual
   Production merge/configuration, password rotation, session revocation, and
   fresh AAL2 validation.
