@@ -12,3 +12,7 @@
 - Replaced manual factor-ID entry with a factor-aware administrator UI,
   one-time QR/manual secret presentation, and fail-closed owner recovery
   guidance.
+- Corrected Production enrollment compatibility with the pinned Supabase Auth
+  SDK, which prefixes returned SVG QR material with
+  `data:image/svg+xml;utf-8,`; the boundary now accepts that exact trusted
+  prefix while retaining raw-SVG compatibility and rejecting other formats.

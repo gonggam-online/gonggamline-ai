@@ -13,6 +13,7 @@ const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const TOTP_CODE_PATTERN = /^[0-9]{6}$/;
 const TOTP_SECRET_PATTERN = /^[A-Z2-7]{16,128}$/;
+const SVG_DATA_URL_PREFIX = "data:image/svg+xml;utf-8,";
 const FRIENDLY_NAME = "GonggamLine Admin";
 
 export type AdminMfaBoundaryErrorCode =
@@ -120,17 +121,24 @@ export async function beginAdminTotpEnrollment(
     data.type !== "totp" ||
     !UUID_PATTERN.test(data.id) ||
     typeof data.totp.qr_code !== "string" ||
-    !data.totp.qr_code.trimStart().startsWith("<svg") ||
     !TOTP_SECRET_PATTERN.test(data.totp.secret)
   ) {
     throw new AdminMfaBoundaryError("MFA_ENROLLMENT_FAILED", 400);
   }
 
+  const qrCode = data.totp.qr_code.trimStart();
+  const qrCodeDataUrl = qrCode.startsWith(SVG_DATA_URL_PREFIX)
+    ? qrCode
+    : qrCode.startsWith("<svg")
+      ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qrCode)}`
+      : null;
+  if (!qrCodeDataUrl) {
+    throw new AdminMfaBoundaryError("MFA_ENROLLMENT_FAILED", 400);
+  }
+
   return Object.freeze({
     factorId: data.id,
-    qrCodeDataUrl: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-      data.totp.qr_code,
-    )}`,
+    qrCodeDataUrl,
     secret: data.totp.secret,
   });
 }
