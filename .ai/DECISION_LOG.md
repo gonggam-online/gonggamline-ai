@@ -3,6 +3,52 @@
 Append entries; do not rewrite history. Each Story records applicable
 Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 
+## 2026-07-31 — R1 Atomic Product Mutation DB Architecture v1 proposed
+
+- Category: proposed architecture decision
+- Story / PR: R1 Atomic Product Mutation DB Architecture v1 / pending
+- Status: proposed; repository-owner manual acceptance required
+- Owner / approver: Product and Database / Security / pending
+- Context: five Product mutation surfaces use anonymous Supabase writes, while
+  no Product RPC atomically combines mutation, idempotency, and audit.
+- Proposed decision: later add operation-specific Product mutation RPCs and a
+  separate idempotency relation. Each transaction validates, claims/replays,
+  mutates allowlisted fields, inserts one success audit, completes idempotency,
+  and returns a versioned result.
+- Consequences: later implementation is high-risk/manual and requires isolated
+  service role, Admin AAL2/CSRF, concurrency/negative-role tests, disposable
+  replay, and R1-before-R2 ordering. Batch persistence is item-atomic.
+- Authorization: documentation only; no migration, runtime, Production, RLS,
+  environment, real-data, or external-commerce write.
+- Rollback: revert documentation before acceptance. Later rollback preserves
+  Product/key/audit evidence, uses forward fixes, and cannot restore anonymous
+  writes.
+- Follow-up: record owner acceptance with approved SHA, then separately approve
+  the exact implementation Story and migration.
+
+## 2026-07-31 — R1 Atomic Product Mutation DB Architecture v1 proposed
+
+- Category: proposed architecture decision
+- Story / PR: R1 Atomic Product Mutation DB Architecture v1 / pending
+- Status: proposed; repository-owner manual acceptance required
+- Owner / approver: Product and Database / Security / pending
+- Context: five Product mutation surfaces use anonymous Supabase writes, while
+  no Product RPC atomically combines mutation, idempotency, and audit.
+- Proposed decision: later add operation-specific Product mutation RPCs and a
+  separate idempotency relation. Each transaction validates, claims/replays,
+  mutates allowlisted fields, inserts one success audit, completes idempotency,
+  and returns a versioned result.
+- Consequences: later implementation is high-risk/manual and requires isolated
+  service role, Admin AAL2/CSRF, concurrency/negative-role tests, disposable
+  replay, and R1-before-R2 ordering. Batch persistence is item-atomic.
+- Authorization: documentation only; no migration, runtime, Production, RLS,
+  environment, real-data, or external-commerce write.
+- Rollback: revert documentation before acceptance. Later rollback preserves
+  Product/key/audit evidence, uses forward fixes, and cannot restore anonymous
+  writes.
+- Follow-up: record owner acceptance with approved SHA, then separately approve
+  the exact implementation Story and migration.
+
 ## 2026-07-30 — Production Schema Security Reconciliation v1
 
 - Category: architecture decision

@@ -137,6 +137,36 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 
 ## Proposed Architecture Stories
 
+### 2026-07-31 — R1 Atomic Product Mutation DB Architecture v1
+
+- Status: proposed; repository-owner manual acceptance required.
+- Boundary: Product application and Database / Security transaction contract.
+- Proposed decision: operation-specific RPCs make Product mutation,
+  idempotency completion, and immutable success audit one transaction.
+- Delivery: R1 compatible consumers precede R2 restriction; R3 history repair
+  and Production remain separately approved.
+- Implementation authorization: none. Migration SQL, runtime, Production, RLS,
+  environment, real-data, and external-commerce work are excluded.
+- Story:
+  [R1 Atomic Product Mutation DB Architecture v1](../docs/architecture/R1-ATOMIC-PRODUCT-MUTATION-DB-V1.md).
+- Decision record:
+  [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-31--r1-atomic-product-mutation-db-architecture-v1-proposed).
+
+### 2026-07-31 — R1 Atomic Product Mutation DB Architecture v1
+
+- Status: proposed; repository-owner manual acceptance required.
+- Boundary: Product application and Database / Security transaction contract.
+- Proposed decision: operation-specific RPCs make Product mutation,
+  idempotency completion, and immutable success audit one transaction.
+- Delivery: R1 compatible consumers precede R2 restriction; R3 history repair
+  and Production remain separately approved.
+- Implementation authorization: none. Migration SQL, runtime, Production, RLS,
+  environment, real-data, and external-commerce work are excluded.
+- Story:
+  [R1 Atomic Product Mutation DB Architecture v1](../docs/architecture/R1-ATOMIC-PRODUCT-MUTATION-DB-V1.md).
+- Decision record:
+  [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-31--r1-atomic-product-mutation-db-architecture-v1-proposed).
+
 ### 2026-07-27 — Sprint B-0 Database Baseline Execution v1
 
 - Status: proposed; repository-owner manual approval required.
