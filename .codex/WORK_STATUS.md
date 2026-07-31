@@ -4,8 +4,9 @@
 
 - Objective: define the minimum fail-closed administrator password recovery
   lifecycle required before the exposed Production credential can be rotated.
-- Branch/base: `codex/docs/admin-password-recovery-architecture`, based on
-  latest `origin/main` at `c84ee5b750d640d775f8e1b8868f05606980994d`.
+- Branch/base: `codex/docs/admin-password-recovery-architecture`; rebased by
+  merge onto latest `origin/main` at
+  `ee7fec23d27bd17b2c1db576f78fd246364bf0a8` after PR #58 merged.
 - Risk: documentation-only with mandatory manual approval; future Auth
   implementation/configuration/Production actions are high-risk.
 - Revenue impact: restores safe operator access needed for AAL2-protected
@@ -21,21 +22,81 @@
   official Supabase recovery, update-user, password-security, and email-link
   contracts; confirmed a new Auth lifecycle; drafted the Architecture Story,
   review index, decision proposal, and changelog.
-- Current work: validate and deliver an architecture-only manual Draft PR.
+- Current work: PR #59 remains an architecture-only manual Draft PR. Its two
+  documentation conflicts with merged PR #58 were resolved by preserving both
+  independent operational records.
 - Blockers / owner actions: manual architecture approval/merge is required
   before implementation. The exposed Production credential/session remains
   untrusted and must not be used.
 - Changed files: `docs/architecture/ADMIN-PASSWORD-RECOVERY-V1.md`,
   `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`,
   `CHANGELOG-Admin-Password-Recovery-V1.md`, and this status record.
-- Exact next action: review the complete diff, run documentation-applicable
-  gates, commit/push, and open a manual Draft PR.
+- Exact next action: validate and push the conflict-resolution merge, wait for
+  the new exact-head checks, then obtain manual architecture approval/merge.
 - Validation results: `git diff --check`, lint, typecheck, 375/375 tests, and
   Production build with 81 generated pages passed. Lint warnings came only from
   the existing untracked Playwright report bundle; no changed-source errors.
+  After resolving the PR #58 merge conflicts, typecheck, 375/375 tests, and the
+  81-page Production build passed again. The repository-wide lint command
+  remains non-zero only because it scans the existing generated
+  `playwright-report` bundle; no recovery architecture source is implicated.
 - Remaining risks: exact Supabase PKCE recovery behavior and redirect
   configuration must be tested with synthetic non-Production users; Production
   recovery remains blocked.
+## 2026-07-31 — Production Admin TOTP operational validation
+
+- Objective: validate the merged PR #57 Production Admin TOTP enrollment,
+  verification, and fail-closed recovery procedure without business writes.
+- Branch/base: `codex/docs/admin-totp-production-validation`, based on
+  `c84ee5b750d640d775f8e1b8868f05606980994d` (`origin/main`).
+- Risk: high-risk/manual because completing the Story changes a real
+  Production Supabase Auth factor.
+- Revenue impact: safely unlocks AAL2-protected administrator operations while
+  preventing credential or recovery bypass.
+- Root-cause class: code contract mismatch. Production TOTP is enabled. The
+  pinned Auth SDK prefixes the SVG with `data:image/svg+xml;utf-8,`, while the
+  merged boundary accepted only raw `<svg`.
+- Scope: read-only Production baseline, owner-performed TOTP enrollment and
+  verification, sanitized evidence, and manual recovery procedure.
+- Non-goals: password/OTP/secret handling by Codex, factor deletion without a
+  separate approval, database/RLS/environment changes, Product or commerce
+  writes, automatic recovery, or break-glass bypass.
+- Completed: fetched latest `origin/main`; confirmed clean merge baseline and
+  created the dedicated branch; read binding governance and Auth/MFA
+  implementation; classified the Story high-risk/manual; confirmed PR #57
+  exact-head gates and merge; confirmed merge-SHA Production smoke run
+  `30603699327`; rendered `/admin/login` without observed console errors; and
+  confirmed unauthenticated MFA status returns `401` with `no-store`.
+- Current work: deliver the validated QR contract compatibility fix as a
+  high-risk Draft PR; Production enrollment remains paused until manual merge
+  and deployment.
+- Blockers / owner actions: the owner approved enrollment and removal of one
+  unverified factor. Removal succeeded, but a fresh enrollment returned the
+  sanitized `MFA enrollment failed.` result and a read-only status check showed
+  no remaining factor. Production Dashboard evidence confirms TOTP is enabled.
+  The Production administrator password must be rotated by the owner because a
+  browser automation DOM snapshot exposed its value during diagnosis.
+- Changed files: `lib/auth/admin-mfa.server.ts`,
+  `tests/admin-mfa-boundary.test.ts`, `CHANGELOG-Admin-TOTP-MFA-V1.md`,
+  `docs/runbooks/ADMIN-TOTP-PRODUCTION-VALIDATION.md`,
+  `.ai/DECISION_LOG.md`, and this status record.
+- Validation results: PR #57 gates passed; Production smoke passed; public
+  login page rendered; unauthenticated status endpoint failed closed;
+  unverified-factor removal succeeded; enrollment failed without creating a
+  factor; MFA-focused 11/11, full tests 375/375, lint, typecheck, Production
+  build with 81 generated pages, and `git diff --check` passed. Local
+  Playwright: 32 passed, 2 skipped, 7 failed only on the established
+  Supabase-unconfigured routes (`/listing`, `/market`, `/procurement`,
+  `/revenue`, `/sourcing`, `/workflow`, `/workspace`); the Admin Auth
+  fail-closed smoke passed.
+- Last commit: none on this branch.
+- Exact next action: run focused/full validation, deliver a high-risk Draft PR,
+  obtain manual merge, wait for exact Production deployment, confirm password
+  rotation, then retry enrollment once and record sanitized verified/AAL2
+  evidence.
+- Remaining risks: the actual administrator/factor state is intentionally
+  unknown until owner sign-in; lost-factor removal is a separate approved
+  Production/Auth mutation; no secret-bearing evidence may be captured.
 
 ## 2026-07-31 — Admin TOTP MFA enrollment and recovery boundary
 
