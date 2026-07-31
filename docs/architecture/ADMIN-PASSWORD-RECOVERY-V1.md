@@ -2,8 +2,9 @@
 
 ## Status
 
-Proposed. Repository-owner architecture approval and manual merge are required
-before implementation.
+Accepted through manual merge of PR #59. The repository owner approved the
+prefetch-resistant recovery amendment on 2026-07-31 after Production evidence
+showed that email security scanning consumed every clickable recovery link.
 
 ## Problem and objective
 
@@ -38,7 +39,8 @@ adding Auth Admin API access, or weakening AAL2 business-operation controls.
 
 ## Decision proposal
 
-Use a same-browser PKCE flow inside the existing Admin Auth boundary:
+Use a same-browser PKCE flow inside the existing Admin Auth boundary. For
+Production recovery email, use the prefetch-resistant OTP amendment below:
 
 ```text
 Admin login page
@@ -52,6 +54,30 @@ Admin login page
                 -> global sign-out + cookie clearing
                   -> ordinary login + TOTP verification
 ```
+
+### Prefetch-resistant recovery amendment
+
+Supabase's default `ConfirmationURL` is single-use and can be consumed by an
+email security scanner before the administrator clicks it. The recovery email
+therefore contains `{{ .Token }}` as a six-digit code and no clickable
+confirmation URL. The administrator manually enters email plus the newest code
+on `/admin/login`.
+
+```text
+Admin login page
+  -> exact-origin JSON reset-request route
+    -> Supabase resetPasswordForEmail()
+      -> code-only recovery email (`{{ .Token }}`)
+        -> exact-origin JSON verify-recovery route
+          -> verifyOtp({ email, token, type: "recovery" })
+            -> Auth-server user verification + UUID allowlist
+              -> existing recovery grant/page/update lifecycle
+```
+
+The OTP is accepted only in a JSON request body, is never placed in a URL,
+cookie, response, or log, and is not persisted by the application. Invalid,
+expired, replayed, malformed, or non-allowlisted recovery attempts fail closed.
+Recovery continues to grant AAL1 only.
 
 The reset-request endpoint returns the same accepted response for every
 syntactically valid email, is IP-rate-limited, and never logs email or provider
@@ -81,6 +107,12 @@ exact Preview/Production recovery callback URLs. Preserve the Site URL and
 unrelated redirects. This is a separate high-risk Auth configuration approval;
 code must not compensate for a missing allowlist.
 
+Supabase Dashboard > Authentication > Email Templates > Reset Password must
+use a code-only template containing `{{ .Token }}` and must not include
+`{{ .ConfirmationURL }}` or another clickable verification URL. Rollback
+restores the previous template only together with rollback of the OTP
+verification route and UI.
+
 ## Public contracts
 
 `POST /api/admin/auth/password/reset-request`
@@ -97,6 +129,13 @@ code must not compensate for a missing allowlist.
   codes
 
 No contract exposes session or identity material.
+
+`POST /api/admin/auth/password/verify-recovery`
+
+- request: `{ "email": string, "token": six-digit string }`
+- success:
+  `200 { "verified": true, "redirect": "/admin/password-recovery" }`
+- invalid/expired/replayed/provider failures: sanitized error envelopes
 
 ## Failure, security, and observability
 
@@ -136,4 +175,3 @@ No contract exposes session or identity material.
 Rollback removes the recovery routes/page/callback purpose and their exact
 redirect entries. Existing users, factors, database state, and audit history
 remain unchanged.
-

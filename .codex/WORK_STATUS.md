@@ -1,5 +1,47 @@
 # Work status
 
+## 2026-07-31 — Admin Password Recovery prefetch mitigation
+
+- Objective: make Production administrator password recovery reliable when
+  email security scanners consume Supabase single-use confirmation links.
+- Branch/base: `codex/fix/admin-recovery-prefetch`, based on merged PR #60 at
+  `3b80edc55a799acf3594d13b9936039d9829fcf4`.
+- Risk: high-risk/manual Auth and Production email-template configuration;
+  never auto-merge.
+- Revenue impact: restores secure administrator access required for protected
+  revenue operations after credential exposure.
+- Root-cause class: external email prefetch plus an Auth code capability gap.
+- Scope: code-only recovery email contract, manual OTP UI, exact-origin
+  verification route, allowlist/recovery-grant reuse, tests, docs, Draft PR,
+  Preview, manual merge, and Production revalidation.
+- Non-goals: Auth Admin API, database/RLS, MFA reset, new secret, automatic
+  password changes, link tokens, or commerce writes.
+- Completed: reproduced `otp_expired` on the newest Production email; confirmed
+  Supabase's documented email-prefetch failure mode; obtained explicit owner
+  approval; created the dedicated branch; designed and implemented the
+  code-only OTP verification boundary and documentation amendment.
+- Current work: complete diff/security review, commit, push, and deliver a
+  high-risk Draft PR.
+- Blockers / owner actions: Production Reset Password template must not change
+  until the exact implementation Preview passes and the PR is manually merged.
+  The owner must enter the new password and later verify fresh login plus TOTP.
+- Changed files: recovery verification route, administrator login UI, Auth
+  contract and browser tests, architecture/review/decision docs, changelog,
+  and this file.
+- Validation: focused Auth contracts 9/9 passed; changed-source lint passed;
+  typecheck passed; full tests 381/381 passed; Production build passed with 84
+  generated routes. Local Playwright passed 33 tests, including the new
+  recovery-code UI check; two fixture-dependent tests skipped and seven
+  pre-existing Supabase-dependent pages failed because local Supabase is
+  unconfigured. Repository-wide lint remains blocked only by the existing
+  generated `playwright-report` bundle.
+- Last commit: none on this branch.
+- Exact next action: review the complete diff and secret/output surface, then
+  commit, push, and create the Draft PR with `manual-merge-required`.
+- Remaining risks: provider template drift, OTP expiry/replay, manual
+  Production merge/configuration, password rotation, session revocation, and
+  fresh AAL2 validation.
+
 ## 2026-07-31 — Admin Password Recovery implementation
 
 - Objective: implement the fail-closed administrator password recovery flow

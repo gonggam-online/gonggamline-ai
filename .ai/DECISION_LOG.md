@@ -1,5 +1,25 @@
 # Decision log
 
+## 2026-07-31 — Admin Password Recovery prefetch mitigation
+
+- Production evidence: a newly issued recovery message reached Gmail, but its
+  single-use confirmation URL reached the application only after Supabase had
+  marked it `otp_expired`.
+- Root cause: external email link prefetch consumed the default
+  `ConfirmationURL`; repeated email requests cannot reliably repair this.
+- Owner approval: the repository owner explicitly approved high-risk/manual
+  implementation and the Production Supabase email-template change on
+  2026-07-31.
+- Decision: preserve the existing recovery lifecycle but replace the
+  clickable email confirmation step with manual `{{ .Token }}` entry and
+  server-side `verifyOtp({ type: "recovery" })`.
+- Security: never put the OTP in a URL, cookie, response, or log; retain exact
+  origin, rate limits, Auth-server verification, UUID allowlist, recovery
+  grant, CSRF, global sign-out, fresh login, and TOTP/AAL2.
+- Risk and delivery: high-risk/manual; Draft PR, exact gates, manual merge,
+  separately executed Production template change, and owner-performed password
+  update remain mandatory.
+
 ## 2026-07-31 — Admin Password Recovery v1 implementation
 
 - Architecture approval: PR #59 was manually merged by the repository owner at

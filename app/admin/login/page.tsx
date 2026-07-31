@@ -99,9 +99,45 @@ export default function AdminLoginPage() {
     );
     setRecoveryMessage(
       response.ok
-        ? "If the account is eligible, a password recovery email has been sent."
+        ? "If the account is eligible, a password recovery code has been sent."
         : "Password recovery is temporarily unavailable.",
     );
+  }
+
+  async function verifyPasswordRecovery(
+    event: FormEvent<HTMLFormElement>,
+  ): Promise<void> {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const response = await fetch(
+      "/api/admin/auth/password/verify-recovery",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: form.get("recoveryVerificationEmail"),
+          token: form.get("recoveryToken"),
+        }),
+      },
+    );
+    if (!response.ok) {
+      setRecoveryMessage(
+        "Recovery code verification failed. Use the newest code or request another after the provider cooldown.",
+      );
+      return;
+    }
+    const body: unknown = await response.json();
+    if (
+      typeof body !== "object" ||
+      body === null ||
+      (body as Record<string, unknown>).verified !== true ||
+      (body as Record<string, unknown>).redirect !==
+        "/admin/password-recovery"
+    ) {
+      setRecoveryMessage("Password recovery is temporarily unavailable.");
+      return;
+    }
+    window.location.assign("/admin/password-recovery");
   }
 
   async function enrollMfa(): Promise<void> {
@@ -233,9 +269,31 @@ export default function AdminLoginPage() {
               required
             />
           </label>
-          <button type="submit">Send recovery email</button>
+          <button type="submit">Send recovery code</button>
         </form>
         <p aria-live="polite">{recoveryMessage}</p>
+        <form onSubmit={verifyPasswordRecovery}>
+          <label>
+            Email{" "}
+            <input
+              name="recoveryVerificationEmail"
+              type="email"
+              autoComplete="username"
+              required
+            />
+          </label>
+          <label>
+            Recovery code{" "}
+            <input
+              name="recoveryToken"
+              inputMode="numeric"
+              pattern="[0-9]{6}"
+              autoComplete="one-time-code"
+              required
+            />
+          </label>
+          <button type="submit">Verify recovery code</button>
+        </form>
       </section>
       <section aria-labelledby="mfa-heading">
         <h2 id="mfa-heading">Authenticator security</h2>
