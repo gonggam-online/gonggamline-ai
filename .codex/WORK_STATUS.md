@@ -29,10 +29,10 @@
   migration/replay tooling and confirmed local migration-only reset is not
   accepted restore evidence.
 - Current work: resumed by `PROCEED_NOW`. Safe non-Production preparation and
-  local validation are complete; commit, push, high-risk Draft PR, and
-  exact-head CI/Preview delivery are in progress. Candidate migration and all
+  local validation are complete; the preparation commit, push, high-risk Draft
+  PR, and exact-head CI/Preview delivery succeeded. Candidate migration and all
   DB/restore/RLS/Production actions remain stopped at their separate concrete
-  approval gate (7/10 checkpoints complete).
+  approval gate (9/10 checkpoints complete).
 - Blocker / owner action: the repository owner must select a current Production
   backup or provider-approved sanitized clone, approve restore into a new
   isolated non-Production Supabase project, prove it has no Production domain,
@@ -52,11 +52,17 @@
   `/revenue`, `/sourcing`, `/workflow`, `/workspace`); the R1 unauthenticated
   mutation fail-close smoke passed. CI and Preview remain pending. Actual
   restored inventory, candidate replay, and DB negative tests remain prohibited
-  until exact-target approval.
-- Last commit: none on this branch.
-- Exact next action: commit and push the validated preparation, open a high-risk
-  Draft PR, and verify exact-head CI/Preview without applying any database
-  change.
+  until exact-target approval. Exact preparation head
+  `f07f99aadbdd77d000be91d971f19bff3e717b9b` passed CI run `30623427285`
+  after one failed-job retry for two unrelated existing Orchestrator Phase 3
+  timing flakes; all other CI jobs passed on the first attempt. Exact Preview
+  browser run `30623427349` passed.
+- Last commit: `f07f99a test: prepare R2 security reconciliation inventory`.
+- Delivery: branch pushed; Draft PR #64 targets `main`, has
+  `manual-merge-required`, and has no auto-merge.
+- Exact next action: obtain concrete approval for an exact isolated restored
+  target, capture sanitized pre-inventory, stop on any drift/unknown authority,
+  and generate candidate 023 only if every inventory gate passes.
 - Remaining risks: restore fidelity/quarantine; deployed 022/history/policy/
   grant/owner/default-ACL drift; service-role bypass scope; intentional public
   Product SELECT; future Production concurrency. Anonymous writes must never be
