@@ -37,8 +37,8 @@
   local validation are complete; the preparation commit, push, high-risk Draft
   PR, and exact-head CI/Preview delivery succeeded. Candidate migration and all
   DB/restore/RLS/Production actions remain stopped at their separate concrete
-  approval gate. Grant/fingerprint hardening is implemented and focused gates
-  pass (11/15 revised checkpoints; full delivery gates are being rerun).
+  approval gate. Grant/fingerprint hardening, delivery, and exact-head gates
+  pass (14/15 revised checkpoints).
 - Blocker / owner action: the repository owner must select a current Production
   backup or provider-approved sanitized clone, approve restore into a new
   isolated non-Production Supabase project, prove it has no Production domain,
@@ -68,8 +68,10 @@
   the same baseline: 33 passed, 2 skipped, and the seven established
   Supabase-unconfigured route failures; R1 mutation fail-close passed. Exact
   validator head `87dbd75594b2603bebb02df3659093d37a58fde0` passed CI run
-  `30629640251` and Preview browser run `30629640262`.
-- Last commit: `87dbd75 test: harden R2 inventory validation`.
+  `30629640251` and Preview browser run `30629640262`. Exact privilege/report
+  head `09ac92b133981e9a3d4dc04584410d2ec6d36e98` passed CI run
+  `30631247194` and Preview browser run `30631247185`.
+- Last commit: `09ac92b test: classify R2 privilege inventory`.
 - Delivery: branch pushed; Draft PR #64 targets `main`, has
   `manual-merge-required`, and has no auto-merge.
 - Exact next action: obtain an exact isolated restored target, capture and
