@@ -28,6 +28,10 @@ test("A12: Supabase SDK versions and supported SSR/Auth API paths stay pinned", 
     /resetPasswordForEmail/,
   );
   assert.match(
+    source("app/api/admin/auth/password/verify-recovery/route.ts"),
+    /verifyOtp/,
+  );
+  assert.match(
     source("app/api/admin/auth/password/update/route.ts"),
     /updateUser/,
   );
@@ -45,6 +49,7 @@ test("Auth routes never call the Auth Admin API", () => {
     "app/api/admin/auth/csrf/route.ts",
     "app/api/admin/auth/logout/route.ts",
     "app/api/admin/auth/password/reset-request/route.ts",
+    "app/api/admin/auth/password/verify-recovery/route.ts",
     "app/api/admin/auth/password/update/route.ts",
   ]) {
     assert.doesNotMatch(source(relative), /auth\.admin/);
@@ -62,6 +67,30 @@ test("password recovery is enumeration-safe and uses the fixed PKCE callback", (
   );
   assert.match(reset, /\{ accepted: true \}/);
   assert.doesNotMatch(reset, /error\.message|console\.|auth\.admin/);
+});
+
+test("prefetch-safe recovery verifies a manually entered recovery OTP", () => {
+  const verify = source(
+    "app/api/admin/auth/password/verify-recovery/route.ts",
+  );
+  assert.match(verify, /requireExactAdminOrigin/);
+  assert.match(verify, /requireJsonContentType/);
+  assert.match(verify, /adminRateLimiter\.consume\(clientKey\(request\), "mutation"\)/);
+  assert.match(verify, /\/\^\[0-9\]\{6\}\$\//);
+  assert.match(verify, /client\.auth\.verifyOtp\(\{/);
+  assert.match(verify, /type: "recovery"/);
+  assert.match(verify, /client\.auth\.getUser\(\)/);
+  assert.match(verify, /isAllowlistedAdminUser\(user\.id\)/);
+  assert.match(verify, /issueAdminRecoveryGrant\(context\)/);
+  assert.match(verify, /client\.auth\.signOut\(\{ scope: "global" \}\)/);
+  assert.match(verify, /"\/admin\/password-recovery"/);
+  assert.doesNotMatch(verify, /console\.|error\.message|auth\.admin/);
+
+  const login = source("app/admin/login/page.tsx");
+  assert.match(login, /Send recovery code/);
+  assert.match(login, /Verify recovery code/);
+  assert.match(login, /name="recoveryToken"/);
+  assert.match(login, /pattern="\[0-9\]\{6\}"/);
 });
 
 test("recovery callback verifies the allowlisted Auth-server user", () => {

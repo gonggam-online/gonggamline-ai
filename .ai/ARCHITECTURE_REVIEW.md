@@ -172,6 +172,12 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
   separately approved high-risk actions.
 - Story:
   [Admin Password Recovery v1](../docs/architecture/ADMIN-PASSWORD-RECOVERY-V1.md).
+- Prefetch amendment: repository-owner approved on 2026-07-31 after
+  Production `otp_expired` evidence. Recovery email uses manual `{{ .Token }}`
+  entry and server-side `verifyOtp({ type: "recovery" })`; the remaining
+  recovery grant, password update, global sign-out, and TOTP boundaries are
+  unchanged. Implementation and Production template changes remain
+  high-risk/manual.
 
 ## Proposed Architecture Stories
 
