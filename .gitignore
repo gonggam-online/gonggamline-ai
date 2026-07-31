@@ -42,6 +42,9 @@ yarn-error.log*
 # Supabase CLI local link and runtime metadata
 /supabase/.temp/
 
+# Codex-downloaded user attachments remain local and must never be committed
+/.codex-remote-attachments/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

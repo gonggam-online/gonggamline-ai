@@ -135,37 +135,27 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 - Decision record:
   [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-28--admin-identity-authorization-rls-and-csrf-architecture-v1).
 
+### 2026-07-31 — R1 Atomic Product Mutation DB Architecture v1
+
+- Status: accepted by repository owner through manual merge of PR #54 on
+  2026-07-31.
+- Approved head SHA:
+  `cedf3025edbd65c05b36c673991ad4388dce0a8e`.
+- Boundary: Product application and Database / Security transaction contract.
+- Decision: operation-specific RPCs make Product mutation,
+  idempotency completion, and immutable success audit one transaction.
+- Delivery: R1 compatible consumers precede R2 restriction; R3 history repair
+  and Production remain separately approved.
+- Implementation authorization: none from this acceptance alone. A separate
+  high-risk implementation Story is required; migration SQL, runtime,
+  Production, RLS, environment, real-data, and external-commerce work remain
+  excluded.
+- Story:
+  [R1 Atomic Product Mutation DB Architecture v1](../docs/architecture/R1-ATOMIC-PRODUCT-MUTATION-DB-V1.md).
+- Decision record:
+  [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-31--r1-atomic-product-mutation-db-architecture-v1).
+
 ## Proposed Architecture Stories
-
-### 2026-07-31 — R1 Atomic Product Mutation DB Architecture v1
-
-- Status: proposed; repository-owner manual acceptance required.
-- Boundary: Product application and Database / Security transaction contract.
-- Proposed decision: operation-specific RPCs make Product mutation,
-  idempotency completion, and immutable success audit one transaction.
-- Delivery: R1 compatible consumers precede R2 restriction; R3 history repair
-  and Production remain separately approved.
-- Implementation authorization: none. Migration SQL, runtime, Production, RLS,
-  environment, real-data, and external-commerce work are excluded.
-- Story:
-  [R1 Atomic Product Mutation DB Architecture v1](../docs/architecture/R1-ATOMIC-PRODUCT-MUTATION-DB-V1.md).
-- Decision record:
-  [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-31--r1-atomic-product-mutation-db-architecture-v1-proposed).
-
-### 2026-07-31 — R1 Atomic Product Mutation DB Architecture v1
-
-- Status: proposed; repository-owner manual acceptance required.
-- Boundary: Product application and Database / Security transaction contract.
-- Proposed decision: operation-specific RPCs make Product mutation,
-  idempotency completion, and immutable success audit one transaction.
-- Delivery: R1 compatible consumers precede R2 restriction; R3 history repair
-  and Production remain separately approved.
-- Implementation authorization: none. Migration SQL, runtime, Production, RLS,
-  environment, real-data, and external-commerce work are excluded.
-- Story:
-  [R1 Atomic Product Mutation DB Architecture v1](../docs/architecture/R1-ATOMIC-PRODUCT-MUTATION-DB-V1.md).
-- Decision record:
-  [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-31--r1-atomic-product-mutation-db-architecture-v1-proposed).
 
 ### 2026-07-27 — Sprint B-0 Database Baseline Execution v1
 
