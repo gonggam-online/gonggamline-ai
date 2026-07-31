@@ -1,5 +1,26 @@
 # Work status
 
+## 2026-07-31 — Workroom 3 recovery and R1 architecture acceptance
+
+- Objective: reconcile work completed in another Codex room and restore this
+  workspace as the authoritative continuation point.
+- Branch/base: `codex/docs/r1-atomic-product-mutation-acceptance`, based on
+  `origin/main` merge `0804580c62104bc676939ae4a98d7d09b14f2060`.
+- Risk: documentation-only recovery; the later R1 implementation remains
+  high-risk/manual.
+- Completed: confirmed PR #52 merge `2ebf3e8`, PR #53 merge `5eeefbf`, and PR
+  #54 merge `0804580`; local main and origin/main match; Production browser
+  smoke runs #44, #45, and #46 passed, with #46 run `30598051308` validating
+  the PR #54 merge.
+- Reconciliation: record PR #54 owner acceptance with approved head
+  `cedf3025edbd65c05b36c673991ad4388dce0a8e`, remove duplicated proposed
+  records, and ignore preserved local Codex attachments without deleting them.
+- Non-goals: implementation, migration SQL, Auth/RLS, Production/database
+  writes, environment/secrets, or branch/worktree deletion.
+- Exact next action: deliver this documentation-only cleanup PR. After merge,
+  request the separate high-risk R1 implementation authorization.
+- Remaining risk: no R1 implementation is authorized yet.
+
 ## 2026-07-31 — R1 Atomic Product Mutation DB Architecture v1
 
 - Objective: design the transaction contract combining Product mutation,
@@ -16,10 +37,10 @@
 - Completed: safe tree/branch; governance, R1 audit, reconciliation, Item
   Selection precedent and migration 021 review; architecture draft, review
   index, proposed decision, changelog, and status draft.
-- Current work: documentation delivery and exact-head gates are complete.
-- Blockers / owner actions: manually review Draft PR #54. Architecture
-  acceptance must be recorded with the approved commit SHA before a separate
-  implementation Story; this draft authorizes no implementation.
+- Current work: merged and accepted; repository acceptance record is being
+  normalized in the Workroom 3 recovery PR.
+- Blockers / owner actions: separately approve the high-risk implementation
+  Story; architecture acceptance alone authorizes no implementation.
 - Changed files: Story, Architecture Review, Decision Log, changelog, status.
 - Commands/results: `git diff --check` and document-link existence checks
   passed; tracked-source lint passed with zero errors and four pre-existing
@@ -33,8 +54,8 @@
   `manual-merge-required`; auto-merge remains disabled. Exact-head CI run
   `30597259801` and Preview browser run `30597259814` passed.
 - Last commit: `6482a0f docs: design atomic product mutation architecture`.
-- Exact next action: owner review and architecture acceptance decision for
-  Draft PR #54; only then draft a separately approved implementation Story.
+- Exact next action: complete the acceptance-record cleanup, then draft and
+  separately approve the exact implementation Story.
 - Remaining risks: exact Product allowlists and SQL signatures need
   implementation-time evidence; Production drift, R2, R3, and environment
   prerequisites remain separate gates.

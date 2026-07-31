@@ -2,13 +2,16 @@
 
 ## Status and authority
 
-- Status: proposed; repository-owner acceptance and a separate implementation
-  Story are required.
+- Status: accepted by repository owner through manual merge of PR #54 on
+  2026-07-31.
+- Approved head SHA:
+  `cedf3025edbd65c05b36c673991ad4388dce0a8e`.
 - Owner: Product application with Database / Security persistence ownership.
 - Risk: high-risk/manual. Apply `manual-merge-required`; never auto-merge.
-- This PR authorizes documentation only. Migration SQL, runtime, Production,
-  RLS/grants, environment variables, real data, and external commerce writes
-  are excluded.
+- This acceptance authorizes the architecture contract only. A separate,
+  explicitly approved implementation Story is still required. Migration SQL,
+  runtime, Production, RLS/grants, environment variables, real data, and
+  external commerce writes remain excluded.
 
 ## Problem and objective
 
