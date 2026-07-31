@@ -1,5 +1,39 @@
 # Work status
 
+## 2026-07-31 — R1 Atomic Product Mutation implementation
+
+- Objective: implement the accepted R1 Product mutation transaction boundary
+  through additive migration 022, protected commands, idempotency, and audit.
+- Branch/base: `codex/feat/r1-atomic-product-mutation`, based on latest
+  `origin/main` commit `732ede3fce15dae4e4021c12241041bc562487ea`.
+- Risk: high-risk/manual because the Story changes migration, Auth/CSRF,
+  authorization, Product pricing persistence, and Product writes.
+- Revenue impact: prevents retries and partial failures from duplicating or
+  silently losing Product decisions; removes the supplier-search write side
+  effect and prepares R2 anonymous-write retirement.
+- Root-cause class: code/database security capability gap; the local disposable
+  replay blocker is external configuration (Docker Desktop Linux engine off).
+- Scope: migration 022, four operation RPCs, immutable successful audit,
+  hashed idempotency, isolated service-role repository, protected import,
+  operator/manual/automatic/batch routes, read-only Domeggook search, tests.
+- Non-goals: Production migration/application, R2 policy restriction, R3
+  history repair, real provider/commerce writes, secrets/configuration, merge.
+- Completed: safety and architecture gates; implementation; 19 focused R1 and
+  baseline tests; full 365/365 tests; changed-source lint; typecheck;
+  production build; diff/security review. Local Playwright completed 32 passed,
+  one skipped, and seven pre-existing Supabase-unconfigured route failures.
+- Current work: commit, push, Draft PR, and exact-head CI/Preview.
+- Blocker: local disposable replay refused to fall back to a linked or
+  Production database because Docker Desktop Linux engine is not running.
+  Exact-head GitHub disposable replay remains binding.
+- Changed files: migration/manifest, protected Product routes and service,
+  Product mutation contracts/repository, CSRF purpose list, regression tests,
+  changelog, Decision Log, and this status.
+- Exact next action: complete remaining local gates, publish a Draft
+  high-risk PR with `manual-merge-required`, and require exact-head CI/Preview.
+- Remaining risks: migration SQL and concurrency/rollback behavior require the
+  disposable Postgres gate; Production application and merge remain excluded.
+
 ## 2026-07-31 — Workroom 3 recovery and R1 architecture acceptance
 
 - Objective: reconcile work completed in another Codex room and restore this

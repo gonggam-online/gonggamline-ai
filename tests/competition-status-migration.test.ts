@@ -28,7 +28,7 @@ test("estimated remains a distinct completed-analysis state", () => {
 
   assert.match(
     analysisRunner,
-    /competition_analysis_status:\s*market\.source === "external" \? "analyzed" : "estimated"/,
+    /status:\s*market\.source === "external" \? "analyzed" : "estimated"/,
   );
   assert.match(
     competitionPage,
