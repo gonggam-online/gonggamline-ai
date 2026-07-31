@@ -10,7 +10,12 @@ export const ADMIN_CSRF_HEADER_NAME = "X-GonggamLine-CSRF";
 export type AdminCsrfPurpose =
   | "admin-session"
   | "item-selection-create"
-  | "item-selection-finalize";
+  | "item-selection-finalize"
+  | "product-import"
+  | "product-operator-patch"
+  | "product-manual-competition"
+  | "product-automatic-competition"
+  | "product-competition-batch";
 
 export type AdminCsrfToken = Readonly<{
   token: string;

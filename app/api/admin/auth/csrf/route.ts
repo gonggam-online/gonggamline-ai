@@ -17,6 +17,11 @@ const PURPOSES = new Set<AdminCsrfPurpose>([
   "admin-session",
   "item-selection-create",
   "item-selection-finalize",
+  "product-import",
+  "product-operator-patch",
+  "product-manual-competition",
+  "product-automatic-competition",
+  "product-competition-batch",
 ]);
 
 export async function GET(request: Request): Promise<Response> {

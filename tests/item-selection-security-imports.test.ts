@@ -17,21 +17,25 @@ function sourceFiles(directory: string): string[] {
   });
 }
 
-test("A08: the service-role constructor has exactly one importer", () => {
+test("A08: the service-role constructor has only approved repository importers", () => {
   const importers = sourceFiles(root)
     .filter((file) => !file.includes(`${path.sep}node_modules${path.sep}`))
     .filter((file) => !file.includes(`${path.sep}tests${path.sep}`))
     .filter((file) => readFileSync(file, "utf8").includes(serviceRoleModule))
     .map((file) => path.relative(root, file).replaceAll("\\", "/"));
 
-  assert.deepEqual(importers, ["services/item-selection-run.repository.ts"]);
+  assert.deepEqual(importers, [
+    "services/item-selection-run.repository.ts",
+    "services/product-mutation.repository.ts",
+  ]);
 });
 
 test("A08: client components cannot reach protected server modules", () => {
   for (const file of sourceFiles(path.join(root, "app"))) {
     const source = readFileSync(file, "utf8");
     if (/^\s*["']use client["'];/m.test(source)) {
-      assert.doesNotMatch(source, /service-role\.server|item-selection-run\.repository/);
+      assert.doesNotMatch(source,
+        /service-role\.server|item-selection-run\.repository|product-mutation\.repository/);
     }
   }
 });

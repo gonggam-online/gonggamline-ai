@@ -1,19 +1,20 @@
-import { NextResponse } from "next/server";
 import { runAutomaticCompetitionAnalysis } from "@/features/competition/run-analysis";
+import {
+  productMutationErrorResponse, requireProtectedProductMutation,
+} from "@/lib/auth/protected-product-mutation.server";
 
-export async function POST(_request: Request, context: { params: Promise<{ id: string }> }) {
+export async function POST(
+  request: Request, { params }: { params: Promise<{ id: string }> },
+): Promise<Response> {
   try {
-    const { id } = await context.params;
-    const productId = Number(id);
-    if (!Number.isInteger(productId) || productId <= 0) {
-      return NextResponse.json({ success: false, message: "유효하지 않은 상품 ID입니다." }, { status: 400 });
-    }
-    const result = await runAutomaticCompetitionAnalysis(productId);
-    return NextResponse.json({ success: true, ...result });
+    const auth = await requireProtectedProductMutation(request, "product-automatic-competition");
+    const productId = Number((await params).id);
+    if (!Number.isSafeInteger(productId) || productId <= 0)
+      return Response.json({ success: false, code: "INVALID_REQUEST" }, { status: 400 });
+    const result = await runAutomaticCompetitionAnalysis(auth.context, productId,
+      auth.idempotencyKey, "/api/products/[id]/competition/auto");
+    return Response.json({ success: true, ...result });
   } catch (error) {
-    return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : "자동 분석 중 오류가 발생했습니다." },
-      { status: 500 }
-    );
+    return productMutationErrorResponse(error);
   }
 }

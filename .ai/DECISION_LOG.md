@@ -1,5 +1,22 @@
 # Decision log
 
+## 2026-07-31 — R1 Atomic Product Mutation implementation authorization
+
+- Category: high-risk implementation authorization
+- Story: R1 Atomic Product Mutation implementation
+- Status: explicitly approved by repository owner on 2026-07-31
+- Approved architecture: `docs/architecture/R1-ATOMIC-PRODUCT-MUTATION-DB-V1.md`
+  at accepted head `cedf3025edbd65c05b36c673991ad4388dce0a8e`.
+- Authorization: additive forward-only migration, protected Product mutation
+  boundary, idempotency/audit, Auth/CSRF/service-role isolation, tests, push,
+  and Draft PR.
+- Exclusions: Production application and PR merge.
+- Risk and merge: high-risk/manual; apply `manual-merge-required`, never
+  auto-merge.
+- Rollback: disable affected commands and forward-fix additively; preserve
+  Product, request, and audit evidence. Never edit an applied migration or
+  restore unconditional anonymous writes.
+
 Append entries; do not rewrite history. Each Story records applicable
 Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 

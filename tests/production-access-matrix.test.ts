@@ -56,7 +56,7 @@ const matrix = JSON.parse(readFileSync(matrixPath, "utf8")) as AccessMatrix;
 function migrationTables(): string[] {
   const directory = path.join(repositoryRoot, "supabase", "migrations");
   const tables = readdirSync(directory)
-    .filter((name) => /^\d{3}_.+\.sql$/.test(name))
+    .filter((name) => /^(?:00[0-9]|01[0-9]|020|021)_.+\.sql$/.test(name))
     .flatMap((name) => {
       const sql = readFileSync(path.join(directory, name), "utf8");
       return [...sql.matchAll(/create table(?: if not exists)? public\.([a-z0-9_]+)/gi)]

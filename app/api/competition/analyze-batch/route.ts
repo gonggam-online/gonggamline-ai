@@ -1,28 +1,49 @@
-import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
-import { runAutomaticCompetitionAnalysis } from "@/features/competition/run-analysis";
+import { createHash } from "node:crypto";
 
-export async function POST(request: NextRequest) {
+import {
+  deterministicRunId, runAutomaticCompetitionAnalysis,
+} from "@/features/competition/run-analysis";
+import {
+  productMutationErrorResponse, requireProtectedProductMutation,
+} from "@/lib/auth/protected-product-mutation.server";
+import { listProductIdsForCompetition } from "@/services/product-mutation.repository";
+
+export async function POST(request: Request): Promise<Response> {
   try {
-    const body = await request.json().catch(() => ({}));
-    const limit = Math.min(20, Math.max(1, Number(body.limit ?? 10)));
-    const onlyPending = body.onlyPending !== false;
-    let query = supabase.from("products").select("id").order("basic_score", { ascending: false }).limit(limit);
-    if (onlyPending) query = query.in("competition_analysis_status", ["pending", "needs_data"]);
-    const { data, error } = await query;
-    if (error) throw new Error(error.message);
-
-    const results = [];
-    for (const row of data ?? []) {
+    const auth = await requireProtectedProductMutation(request, "product-competition-batch");
+    let body: unknown;
+    try { body = await request.json(); } catch { body = null; }
+    if (!body || typeof body !== "object" || Array.isArray(body) ||
+        Object.keys(body).some((key) => !["limit","onlyPending"].includes(key))) {
+      return Response.json({ success: false, code: "INVALID_REQUEST" }, { status: 400 });
+    }
+    const input = body as Record<string, unknown>;
+    const limit = input.limit ?? 10;
+    const onlyPending = input.onlyPending ?? true;
+    if (!Number.isSafeInteger(limit) || (limit as number) < 1 || (limit as number) > 20 ||
+        typeof onlyPending !== "boolean") {
+      return Response.json({ success: false, code: "INVALID_REQUEST" }, { status: 400 });
+    }
+    const selected = await listProductIdsForCompetition(
+      auth.context, limit as number, onlyPending);
+    const runId = deterministicRunId(auth.idempotencyKey);
+    const results: Array<Record<string, unknown>> = [];
+    for (const id of selected) {
+      const itemKey = createHash("sha256").update(
+        `${auth.idempotencyKey}\n${runId}\n${id}\ncompetition-analysis-v1`, "utf8").digest("hex");
       try {
-        const result = await runAutomaticCompetitionAnalysis(Number(row.id));
-        results.push({ id: row.id, success: true, grade: result.analysis.grade, score: result.analysis.competitionScore, source: result.market.source });
-      } catch (caught) {
-        results.push({ id: row.id, success: false, message: caught instanceof Error ? caught.message : "분석 실패" });
+        const result = await runAutomaticCompetitionAnalysis(auth.context, id,
+          itemKey, "/api/competition/analyze-batch", runId);
+        results.push({ id, status: result.mutation.replayed ? "REPLAYED" : "SUCCEEDED",
+          grade: result.analysis.grade, score: result.analysis.competitionScore,
+          source: result.market.source });
+      } catch {
+        results.push({ id, status: "FAILED", code: "ITEM_FAILED" });
       }
     }
-    return NextResponse.json({ success: true, analyzedCount: results.filter((item) => item.success).length, results });
+    return Response.json({ success: true, runId,
+      analyzedCount: results.filter((item) => item.status !== "FAILED").length, results });
   } catch (error) {
-    return NextResponse.json({ success: false, message: error instanceof Error ? error.message : "일괄 분석 오류" }, { status: 500 });
+    return productMutationErrorResponse(error);
   }
 }

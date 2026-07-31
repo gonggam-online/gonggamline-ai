@@ -46,15 +46,15 @@ test("audit fixes the complete externally reachable Product mutation inventory",
 
 test("audit remains aligned with Product mutation source evidence", () => {
   assert.match(source("app/api/domeggook-search/route.ts"), /export async function GET/);
-  assert.match(source("app/api/domeggook-search/route.ts"), /saveProducts\(/);
-  assert.match(source("services/product-storage.service.ts"), /\.upsert\(rows/);
+  assert.doesNotMatch(source("app/api/domeggook-search/route.ts"), /saveProducts\(/);
+  assert.match(source("app/api/admin/products/import/route.ts"), /importProduct\(/);
   assert.match(source("app/api/products/[id]/route.ts"), /export async function PATCH/);
-  assert.match(source("app/api/products/[id]/route.ts"), /\.update\(updates\)/);
+  assert.match(source("app/api/products/[id]/route.ts"), /patchProductOperatorFields\(/);
   assert.match(source("app/api/products/[id]/competition/route.ts"), /export async function POST/);
-  assert.match(source("app/api/products/[id]/competition/route.ts"), /\.update\(\{/);
+  assert.match(source("app/api/products/[id]/competition/route.ts"), /recordProductCompetition\(/);
   assert.match(source("app/api/products/[id]/competition/auto/route.ts"), /runAutomaticCompetitionAnalysis/);
   assert.match(source("app/api/competition/analyze-batch/route.ts"), /runAutomaticCompetitionAnalysis/);
-  assert.match(source("features/competition/run-analysis.ts"), /\.update\(\{/);
+  assert.match(source("features/competition/run-analysis.ts"), /recordProductCompetition\(/);
 });
 
 test("audit records fail-closed prerequisites and grants no implementation authority", () => {

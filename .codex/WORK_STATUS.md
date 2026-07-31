@@ -1,5 +1,48 @@
 # Work status
 
+## 2026-07-31 — R1 Atomic Product Mutation implementation
+
+- Objective: implement the accepted R1 Product mutation transaction boundary
+  through additive migration 022, protected commands, idempotency, and audit.
+- Branch/base: `codex/feat/r1-atomic-product-mutation`, based on latest
+  `origin/main` commit `732ede3fce15dae4e4021c12241041bc562487ea`.
+- Risk: high-risk/manual because the Story changes migration, Auth/CSRF,
+  authorization, Product pricing persistence, and Product writes.
+- Revenue impact: prevents retries and partial failures from duplicating or
+  silently losing Product decisions; removes the supplier-search write side
+  effect and prepares R2 anonymous-write retirement.
+- Root-cause class: code/database security capability gap; the local disposable
+  replay blocker is external configuration (Docker Desktop Linux engine off).
+- Scope: migration 022, four operation RPCs, immutable successful audit,
+  hashed idempotency, isolated service-role repository, protected import,
+  operator/manual/automatic/batch routes, read-only Domeggook search, tests.
+- Non-goals: Production migration/application, R2 policy restriction, R3
+  history repair, real provider/commerce writes, secrets/configuration, merge.
+- Completed: safety and architecture gates; implementation; 19 focused R1 and
+  baseline tests; full 365/365 tests; changed-source lint; typecheck;
+  production build; diff/security review. Local Playwright completed 32 passed,
+  one skipped, and seven pre-existing Supabase-unconfigured route failures.
+- Current work: implementation delivery is complete and Draft PR #56 awaits
+  repository-owner review; Production application and merge remain excluded.
+- Blocker: local disposable replay refused to fall back to a linked or
+  Production database because Docker Desktop Linux engine is not running.
+  Exact-head GitHub disposable replay remains binding.
+- Changed files: migration/manifest, protected Product routes and service,
+  Product mutation contracts/repository, CSRF purpose list, regression tests,
+  changelog, Decision Log, and this status.
+- Delivery: commit `094803dd3eb110f82678017c65317dcb8e977595`
+  is pushed. Draft PR #56 has `manual-merge-required`. Exact-head CI run
+  `30599893754` passed, including disposable migration replay, and Preview
+  browser run `30599893774` passed.
+- Follow-up hardening: PR #56 remains unmerged while a dedicated disposable
+  Postgres behavior gate is added for first commit, replay, divergent conflict,
+  direct-role denial, and forced-audit rollback. This closes the gap between
+  schema replay and transactional behavior evidence.
+- Exact next action: owner review of Draft PR #56. Do not apply migration 022
+  to Production or merge without the separate manual decision.
+- Remaining risks: migration SQL and concurrency/rollback behavior require the
+  disposable Postgres gate; Production application and merge remain excluded.
+
 ## 2026-07-31 — Workroom 3 recovery and R1 architecture acceptance
 
 - Objective: reconcile work completed in another Codex room and restore this

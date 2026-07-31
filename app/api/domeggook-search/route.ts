@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveProducts } from "../../../services/product-storage.service";
 import type { Product } from "../../../types/product";
 
 type RawProduct = {
@@ -417,11 +416,6 @@ export async function GET(request: NextRequest) {
       return b.estimatedProfit - a.estimatedProfit;
     });
 
-    const storageResult = await saveProducts(
-      keyword,
-      products
-    );
-
     const totalCount = Number(
       data?.domeggook?.header?.numberOfItems ??
         data?.domeggook?.header?.totalCount ??
@@ -438,9 +432,9 @@ export async function GET(request: NextRequest) {
       calculationSettings,
 
       storage: {
-        success: storageResult.errorMessage === null,
-        savedCount: storageResult.savedCount,
-        errorMessage: storageResult.errorMessage,
+        success: true,
+        savedCount: 0,
+        errorMessage: null,
       },
 
       products,
