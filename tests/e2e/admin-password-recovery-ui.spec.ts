@@ -15,6 +15,12 @@ test("administrator recovery exposes a prefetch-safe code entry", async ({
     recovery.getByRole("textbox", { name: "Recovery code" }),
   ).toHaveAttribute("inputmode", "numeric");
   await expect(
+    recovery.getByRole("textbox", { name: "Recovery code" }),
+  ).toHaveAttribute("pattern", "[0-9]{8}");
+  await expect(
+    recovery.getByRole("textbox", { name: "Recovery code" }),
+  ).toHaveAttribute("maxlength", "8");
+  await expect(
     recovery.getByRole("button", { name: "Verify recovery code" }),
   ).toBeVisible();
   await expect(page.locator("body")).not.toContainText("ConfirmationURL");

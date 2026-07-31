@@ -1,5 +1,21 @@
 # Decision log
 
+## 2026-07-31 — Admin recovery OTP length reconciliation
+
+- Production evidence: the newest code-only recovery email delivered an
+  eight-digit numeric OTP, while the UI and verification route required
+  exactly six digits and the browser rejected the request before submission.
+- Root cause: Auth contract drift between the configured Production Supabase
+  project and the hard-coded application recovery-token length.
+- Decision: require exactly eight numeric digits at both the administrator UI
+  and verification route. Keep authenticator TOTP at its independent
+  six-digit contract.
+- Risk and delivery: high-risk/manual Auth correction with focused contract and
+  browser coverage, Draft PR, exact gates, manual merge, and one new
+  Production recovery attempt after deployment.
+- Rollback: revert this correction together with any provider-side OTP length
+  change; UI and server validation must always remain identical.
+
 ## 2026-07-31 — Admin Password Recovery prefetch mitigation
 
 - Production evidence: a newly issued recovery message reached Gmail, but its

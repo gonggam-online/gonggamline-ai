@@ -56,7 +56,7 @@ export async function POST(request: Request): Promise<Response> {
       normalizedEmail === "" ||
       normalizedEmail.length > 254 ||
       !normalizedEmail.includes("@") ||
-      !/^[0-9]{6}$/.test(token)
+      !/^[0-9]{8}$/.test(token)
     ) {
       return Response.json({ code: "INVALID_REQUEST" }, { status: 400 });
     }

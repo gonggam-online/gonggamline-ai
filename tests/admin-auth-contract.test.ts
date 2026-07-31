@@ -76,7 +76,7 @@ test("prefetch-safe recovery verifies a manually entered recovery OTP", () => {
   assert.match(verify, /requireExactAdminOrigin/);
   assert.match(verify, /requireJsonContentType/);
   assert.match(verify, /adminRateLimiter\.consume\(clientKey\(request\), "mutation"\)/);
-  assert.match(verify, /\/\^\[0-9\]\{6\}\$\//);
+  assert.match(verify, /\/\^\[0-9\]\{8\}\$\//);
   assert.match(verify, /client\.auth\.verifyOtp\(\{/);
   assert.match(verify, /type: "recovery"/);
   assert.match(verify, /client\.auth\.getUser\(\)/);
@@ -90,7 +90,8 @@ test("prefetch-safe recovery verifies a manually entered recovery OTP", () => {
   assert.match(login, /Send recovery code/);
   assert.match(login, /Verify recovery code/);
   assert.match(login, /name="recoveryToken"/);
-  assert.match(login, /pattern="\[0-9\]\{6\}"/);
+  assert.match(login, /pattern="\[0-9\]\{8\}"/);
+  assert.match(login, /maxLength=\{8\}/);
 });
 
 test("recovery callback verifies the allowlisted Auth-server user", () => {
