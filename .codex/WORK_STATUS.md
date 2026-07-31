@@ -39,8 +39,16 @@
   DB/restore/RLS/Production actions remain stopped at their separate concrete
   approval gate. Grant/fingerprint hardening, delivery, and exact-head gates
   pass (14/15 revised checkpoints).
-- Blocker / owner action: the repository owner must select a current Production
-  backup or provider-approved sanitized clone, approve restore into a new
+- Blocker / owner action: Production project `sxvtznmoemrcwifungnb` is on the
+  Supabase Free Plan, and its Dashboard explicitly reports that Free projects
+  have no downloadable scheduled backups. The downloaded
+  `db_cluster-31-07-2026@09-35-55.backup.gz` belongs to Preview project
+  `nsmiostuibktcucfctey`, so it is not accepted Production evidence. The owner
+  approved a read-only Production logical dump and knows the DB password, but
+  the direct endpoint is IPv6-only from this Docker host and secure remote
+  password entry remains unresolved. The repository owner must therefore
+  provide local interactive access for the approved Session-pooler dump or
+  select a provider-approved sanitized clone, then approve restore into a new
   isolated non-Production Supabase project, prove it has no Production domain,
   marketplace credentials, webhooks, schedules, queues, outbound email, or
   paid-provider access, and authorize read-only catalog inventory plus synthetic
@@ -74,9 +82,12 @@
 - Last commit: `09ac92b test: classify R2 privilege inventory`.
 - Delivery: branch pushed; Draft PR #64 targets `main`, has
   `manual-merge-required`, and has no auto-merge.
-- Exact next action: obtain an exact isolated restored target, capture and
-  validate sanitized pre-inventory, stop on any drift/unknown authority, and
-  generate candidate 023 only if every inventory gate passes.
+- Exact next action: obtain the exact Session-pooler URI from the Production
+  Dashboard and enter the known password locally (never in chat) to create a
+  current logical dump; otherwise provision a separately approved sanitized
+  clone. Restore only to an isolated quarantined target, capture and validate
+  sanitized pre-inventory, stop on any drift/unknown authority, and generate
+  candidate 023 only if every inventory gate passes.
 - Remaining risks: restore fidelity/quarantine; deployed 022/history/policy/
   grant/owner/default-ACL drift; service-role bypass scope; intentional public
   Product SELECT; future Production concurrency. Anonymous writes must never be
