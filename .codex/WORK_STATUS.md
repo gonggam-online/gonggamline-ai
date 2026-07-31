@@ -1,5 +1,24 @@
 # Work status
 
+## 2026-07-31 - R2 Product security target and non-Production rehearsal architecture
+
+- Objective: re-audit R1 compatibility and define the R2 Product RLS/grant/default-privilege target, forward-only migration design, and restore-based non-Production rehearsal before any implementation.
+- Branch/base: `codex/docs/r2-product-security-target`, based on Stage 01 merge `06476da312b5fc9f5c805bd7af19fc419565d9b8` (`origin/main`).
+- Risk: high-risk/manual Database/RLS architecture; Draft PR, `manual-merge-required`, never auto-merge.
+- Revenue impact: removes the proposed anonymous mutation path around Product cost/profit/catalog state while preserving public discovery and protected revenue operations.
+- Root-cause class: database security target gap. R1 source is compatible, but deployed policy/grant/default-ACL and migration history require restore-based proof.
+- Scope: R1 source re-audit, normative Product RLS/grant/default ACL target, exact forward-only migration order, restore rehearsal, gates, stop conditions, rollback, Architecture Review/Decision Log/changelog evidence.
+- Non-goals: migration SQL, Supabase restore/configuration, Auth/runtime code, Production, real Product/provider/commerce writes, or other access-matrix groups.
+- Completed: verified clean detached worktree; fetched and confirmed exact latest `origin/main`; created dedicated branch; read governance/database/delivery material; audited R0/R1 architecture, migration 022, Product consumers/repository, role tests, public read, and legacy storage reachability; drafted the Architecture Story and governance records.
+- Current work: record exact-head delivery evidence, then stop at manual Architecture Story approval/merge.
+- Blockers / owner actions: repository-owner manual review/merge of Draft PR #63 is mandatory. Restore selection/execution and any later R2 implementation/Production work require separate explicit approval and are not part of this Story.
+- Changed files: R2 Architecture Story, Architecture Review, Decision Log, R2 changelog, and this status record.
+- Validation: `git diff --check` passed; lint passed with four pre-existing unused-variable warnings and zero errors; typecheck passed; full tests passed 381/381; Production build passed with 84 generated routes. Local Playwright passed 33, skipped 2, and failed 7 only on the established Supabase-unconfigured page group (`/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`, `/workspace`); the R1 anonymous Product mutation fail-close smoke passed. `npm ci` reported 13 dependency audit findings (1 moderate, 12 high) without changing the lockfile; no automatic remediation was attempted. Exact architecture head `0d121b37cabc9bed330076c7971715ec2d845553` passed CI run `30621384745` and Preview browser validation run `30621384726`.
+- Last architecture commit: `ca5f085 docs: define R2 product security target`.
+- Delivery: Draft PR #63 targets `main`, is mergeable, and has `manual-merge-required`; auto-merge is prohibited.
+- Exact next action: push this delivery-evidence checkpoint, wait for its exact-head gates, then obtain repository-owner manual architecture approval/merge.
+- Remaining risks: deployed R1/history/policy/grant/owner/default-ACL drift, restore fidelity/quarantine, service-role bypass scope, intentionally public selected Product columns, and future Production concurrency.
+
 ## 2026-07-31 — Admin recovery OTP length reconciliation
 
 - Objective: align the administrator recovery UI and verification route with
