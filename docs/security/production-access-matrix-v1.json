@@ -1,0 +1,283 @@
+{
+  "schemaVersion": "gonggamline-production-access-matrix-v1",
+  "decision": "default-deny",
+  "approvedArchitecture": "docs/architecture/PRODUCTION-SCHEMA-SECURITY-RECONCILIATION-V1.md",
+  "inventoryScope": {
+    "migrations": "000-021",
+    "expectedPublicTableCount": 60,
+    "productionObservedTableCount": 57,
+    "productionMissingTables": [
+      "item_selection_runs",
+      "item_selection_evaluations",
+      "security_audit_events"
+    ]
+  },
+  "classes": [
+    "PUBLIC_READ",
+    "AUTHENTICATED_READ",
+    "SERVER_ONLY",
+    "ADMIN_MUTATION",
+    "WORKER_MUTATION",
+    "DORMANT_DENY"
+  ],
+  "groups": [
+    {
+      "id": "product-catalog",
+      "tables": ["products"],
+      "readClass": "PUBLIC_READ",
+      "writeClasses": ["ADMIN_MUTATION"],
+      "currentPrincipal": "anon via shared lib/supabase.ts",
+      "targetPrincipal": "authenticated administrator through a protected server route",
+      "consumerEvidence": [
+        "services/product-storage.service.ts",
+        "services/products.service.ts",
+        "app/api/products/[id]/route.ts",
+        "features/competition/run-analysis.ts"
+      ],
+      "operations": ["SELECT", "INSERT", "UPDATE"],
+      "columns": "route-specific allowlist required before R1",
+      "idempotency": "required for every mutation before R1",
+      "audit": "administrator principal, correlation id, operation and result required before R1",
+      "failure": "deny mutation and return a sanitized non-success response",
+      "transitionStatus": "BLOCKED_R1"
+    },
+    {
+      "id": "dormant-commerce-os",
+      "tables": [
+        "fulfillment_providers",
+        "commerce_projects",
+        "commerce_project_components",
+        "competition_analyses",
+        "inbound_orders",
+        "inventory_balances"
+      ],
+      "readClass": "DORMANT_DENY",
+      "writeClasses": ["DORMANT_DENY"],
+      "currentPrincipal": "anon and authenticated through Production-only v4_dev_all policies",
+      "targetPrincipal": "none",
+      "consumerEvidence": [],
+      "operations": [],
+      "columns": "none",
+      "idempotency": "not applicable",
+      "audit": "policy removal evidence only",
+      "failure": "deny all Data API access",
+      "transitionStatus": "READY_FOR_R2_AFTER_R1"
+    },
+    {
+      "id": "market-intelligence",
+      "tables": [
+        "market_keywords",
+        "market_products",
+        "market_snapshots",
+        "market_collection_runs",
+        "market_signals",
+        "market_estimates",
+        "market_model_feedback",
+        "market_product_metrics",
+        "market_analysis_runs",
+        "market_collectors",
+        "market_collection_jobs",
+        "market_ai_decisions",
+        "market_product_links",
+        "market_feature_snapshots",
+        "market_feedback_events"
+      ],
+      "readClass": "SERVER_ONLY",
+      "writeClasses": ["ADMIN_MUTATION", "WORKER_MUTATION"],
+      "currentPrincipal": "anon via server routes and shared lib/supabase.ts",
+      "targetPrincipal": "protected administrator routes or isolated market worker",
+      "consumerEvidence": [
+        "services/market-analysis.service.ts",
+        "services/market-orchestration.service.ts",
+        "services/market-observation.service.ts",
+        "app/api/market"
+      ],
+      "operations": ["SELECT", "INSERT", "UPDATE", "UPSERT"],
+      "columns": "use-case-specific allowlist required before R1",
+      "idempotency": "job/run identity or explicit request key required before R1",
+      "audit": "actor, run/job id, correlation id and outcome required before R1",
+      "failure": "fail the route or worker job; never report a failed write as success",
+      "transitionStatus": "BLOCKED_R1"
+    },
+    {
+      "id": "discovery-decision",
+      "tables": [
+        "ai_product_recommendations",
+        "ai_bundle_recommendations",
+        "ai_bundle_items",
+        "ai_decision_runs"
+      ],
+      "readClass": "SERVER_ONLY",
+      "writeClasses": ["ADMIN_MUTATION", "WORKER_MUTATION"],
+      "currentPrincipal": "anon via server services and shared lib/supabase.ts",
+      "targetPrincipal": "protected administrator review route or isolated discovery worker",
+      "consumerEvidence": [
+        "services/discovery.service.ts",
+        "services/sourcing.service.ts",
+        "services/workflow.service.ts"
+      ],
+      "operations": ["SELECT", "INSERT", "UPDATE", "UPSERT", "DELETE"],
+      "columns": "review status is administrator-owned; generated recommendation fields are worker-owned",
+      "idempotency": "decision run identity and review request key required before R1",
+      "audit": "decision run and administrator review evidence required before R1",
+      "failure": "abort the generation/review operation and preserve the prior state",
+      "transitionStatus": "BLOCKED_R1"
+    },
+    {
+      "id": "supplier-sourcing",
+      "tables": ["suppliers", "supplier_quotes", "sourcing_decisions"],
+      "readClass": "SERVER_ONLY",
+      "writeClasses": ["ADMIN_MUTATION"],
+      "currentPrincipal": "anon via server services and shared lib/supabase.ts",
+      "targetPrincipal": "protected administrator sourcing route",
+      "consumerEvidence": [
+        "services/sourcing.service.ts",
+        "services/procurement.service.ts",
+        "services/workspace.service.ts"
+      ],
+      "operations": ["SELECT", "INSERT", "UPDATE"],
+      "columns": "explicit sourcing DTO allowlist required before R1",
+      "idempotency": "supplier/quote request key required before R1",
+      "audit": "administrator, quote/decision id, correlation id and outcome required before R1",
+      "failure": "reject the sourcing mutation without a partial success response",
+      "transitionStatus": "BLOCKED_R1"
+    },
+    {
+      "id": "procurement-workflow-listing",
+      "tables": [
+        "domestic_supplier_products",
+        "procurement_orders",
+        "three_pl_inbound_plans",
+        "commerce_workflows",
+        "commerce_timeline_events",
+        "listing_drafts",
+        "listing_draft_revisions",
+        "workflow_transitions",
+        "workflow_tasks",
+        "workflow_outbox_events"
+      ],
+      "readClass": "SERVER_ONLY",
+      "writeClasses": ["ADMIN_MUTATION", "WORKER_MUTATION"],
+      "currentPrincipal": "anon via server services and shared lib/supabase.ts",
+      "targetPrincipal": "protected administrator route or isolated workflow/listing worker",
+      "consumerEvidence": [
+        "services/procurement.service.ts",
+        "services/workflow.service.ts",
+        "services/listing.service.ts",
+        "services/workspace.service.ts"
+      ],
+      "operations": ["SELECT", "INSERT", "UPDATE", "UPSERT"],
+      "columns": "state-transition-specific allowlist required before R1",
+      "idempotency": "workflow transition key exists; all other mutations require an explicit boundary before R1",
+      "audit": "workflow transition/timeline plus actor and correlation evidence required before R1",
+      "failure": "fail closed; commerce writes remain manually approved and partial transitions must be observable",
+      "transitionStatus": "BLOCKED_R1"
+    },
+    {
+      "id": "coupang-registration",
+      "tables": [
+        "coupang_registration_jobs",
+        "coupang_registration_attempts",
+        "coupang_seller_product_snapshots"
+      ],
+      "readClass": "SERVER_ONLY",
+      "writeClasses": ["ADMIN_MUTATION", "WORKER_MUTATION"],
+      "currentPrincipal": "anon via server services and shared lib/supabase.ts",
+      "targetPrincipal": "protected administrator route or isolated Coupang worker",
+      "consumerEvidence": ["services/coupang-seller.service.ts"],
+      "operations": ["SELECT", "INSERT", "UPDATE"],
+      "columns": "registration lifecycle allowlist required before R1",
+      "idempotency": "listing draft/job identity and attempt number required before R1",
+      "audit": "job, attempt, actor, correlation id and sanitized outcome required before R1",
+      "failure": "stop the registration lifecycle; never use Production marketplace writes for verification",
+      "transitionStatus": "BLOCKED_R1"
+    },
+    {
+      "id": "company-os-memory",
+      "tables": [
+        "ai_workers",
+        "system_releases",
+        "system_health_checks",
+        "revenue_snapshots",
+        "os_command_runs",
+        "os_notifications",
+        "ai_ceo_briefs",
+        "ai_memory_events",
+        "knowledge_assets",
+        "marketplace_connections",
+        "profit_snapshots"
+      ],
+      "readClass": "SERVER_ONLY",
+      "writeClasses": ["ADMIN_MUTATION", "WORKER_MUTATION"],
+      "currentPrincipal": "anon via server routes/services and shared lib/supabase.ts",
+      "targetPrincipal": "protected administrator command route or isolated company worker",
+      "consumerEvidence": [
+        "services/company-os.service.ts",
+        "app/api/os/commands/route.ts",
+        "app/api/os/commands/[id]/route.ts"
+      ],
+      "operations": ["SELECT", "INSERT", "UPDATE"],
+      "columns": "command/worker-specific allowlist required before R1",
+      "idempotency": "command/run identity required before R1",
+      "audit": "command run, worker, actor, correlation id and outcome required before R1",
+      "failure": "fail the command or worker event and retain sanitized diagnostic evidence",
+      "transitionStatus": "BLOCKED_R1"
+    },
+    {
+      "id": "revenue-runtime",
+      "tables": [
+        "revenue_opportunities",
+        "runtime_jobs",
+        "revenue_decisions",
+        "worker_runtime_events"
+      ],
+      "readClass": "SERVER_ONLY",
+      "writeClasses": ["ADMIN_MUTATION", "WORKER_MUTATION"],
+      "currentPrincipal": "anon via server routes/services and shared lib/supabase.ts",
+      "targetPrincipal": "protected administrator route or isolated revenue/runtime worker",
+      "consumerEvidence": [
+        "services/revenue-core.service.ts",
+        "services/runtime-execution.service.ts",
+        "app/api/revenue/jobs/route.ts"
+      ],
+      "operations": ["SELECT", "INSERT", "UPDATE"],
+      "columns": "decision/job transition allowlist required before R1",
+      "idempotency": "runtime job and decision identity required before R1",
+      "audit": "decision and worker runtime event evidence required before R1",
+      "failure": "fail the decision/job transition; never hide a persistence failure",
+      "transitionStatus": "BLOCKED_R1"
+    },
+    {
+      "id": "item-selection",
+      "tables": [
+        "item_selection_runs",
+        "item_selection_evaluations",
+        "security_audit_events"
+      ],
+      "readClass": "SERVER_ONLY",
+      "writeClasses": ["ADMIN_MUTATION"],
+      "currentPrincipal": "not deployed; migration 021 is absent in Production",
+      "targetPrincipal": "guard-bound isolated service-role client and versioned RPC",
+      "consumerEvidence": [
+        "services/item-selection-run.repository.ts",
+        "lib/supabase/service-role.server.ts",
+        "app/api/admin/item-selection/runs"
+      ],
+      "operations": ["SELECT", "RPC"],
+      "columns": "fixed repository selects and versioned RPC arguments",
+      "idempotency": "request fingerprint and idempotency-key hash enforced by migration 021 RPC",
+      "audit": "security_audit_events records administrator, route, correlation id and event code",
+      "failure": "guard or RPC failure returns sanitized non-success and writes no partial finalization",
+      "transitionStatus": "READY_AFTER_PRODUCTION_021"
+    }
+  ],
+  "sqlGenerationGate": {
+    "allowed": false,
+    "blockedUntil": [
+      "R0 matrix is reviewed and approved",
+      "R1 replaces shared-anon mutation paths with protected or isolated server clients",
+      "negative authorization and idempotency tests pass",
+      "deployed policy, RLS, grant and default-privilege inventory is revalidated"
+    ]
+  }
+}

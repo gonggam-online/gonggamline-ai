@@ -1,5 +1,52 @@
 # Work status
 
+## 2026-07-30 - Production access matrix v1
+
+- Objective: complete R0 by assigning every migration 000-021 public table a
+  machine-verifiable, default-deny target access boundary before any
+  reconciliation SQL exists.
+- Branch/base: `codex/docs/production-access-matrix-v1`, based on PR #51 merge
+  `e48e4341d987a428a34702337fb81c2bf6584cf2`.
+- Risk: normal-risk documentation and contract test. The wider reconciliation
+  program remains high-risk/manual.
+- Revenue impact: removes the classification blocker for safely replacing
+  anonymous writes without interrupting Product or revenue operations.
+- Root-cause class: database/security contract gap; deployed access differs
+  from migration intent and active consumers still use the shared anon client.
+- Scope: 60-table access matrix, consumer evidence, R1 blockers, static
+  inventory test, report, changelog, decision record, and delivery evidence.
+- Non-goals: migration SQL, RLS/grant changes, migration-history repair,
+  secrets/configuration, runtime behavior, Production writes, or edits to
+  migrations 000-021.
+- Completed: safe branch check; governance and accepted architecture review;
+  code-consumer audit; 60-table matrix; focused contract test 4/4; typecheck;
+  356/356 full tests; 77-page Production build; generated-output-excluded lint
+  with zero errors and four pre-existing warnings.
+- Current work: record exact-head delivery evidence and leave the Draft PR at
+  the matrix approval boundary.
+- Blockers/owner actions: none for the R0 Draft PR. Matrix approval/merge is
+  required before an R1 implementation Story can rely on it.
+- Changed files: access matrix JSON/report/test, changelog, Decision Log, and
+  this status file.
+- Browser validation: 32 passed, one skipped, and seven DB-dependent pages
+  failed only because local Supabase is externally unconfigured
+  (`missing_url`). Product/revenue/security and all independent checks passed.
+- Lint note: the default command scans ignored generated `playwright-report`
+  assets and reports 184 generated-code errors; excluding ignored Playwright
+  output yields zero errors and four pre-existing test warnings.
+- Delivery: commit `bbc0ddec7bea628d8c216ef4117f13fca9390871`
+  is pushed in Draft PR #52. Exact-head CI run `30525358406` passed, including
+  disposable 000-021 replay and Item Selection security verification. Preview
+  browser run `30525362476` passed; evidence artifact `8752491709`, digest
+  `sha256:b4509556e0c1031ef7915e0e65bff241a5a1c6bafbc1b3c62563b00511fa654e`.
+- Self-review: the matrix is complete and safely blocks SQL. The highest-value
+  next Story is an R1 Product mutation consumer/contract audit, but runtime R1
+  implementation must wait for matrix approval/merge.
+- Exact next action: push this evidence-only checkpoint and verify its exact
+  head. After PR #52 is merged, create the R1 audit branch automatically.
+- Remaining risks: mixed administrator/worker groups need route-level client
+  separation in R1; current anonymous write paths remain unchanged.
+
 ## 2026-07-30 — Production schema security reconciliation
 
 - Objective: reconcile missing Supabase migration history and deployed security

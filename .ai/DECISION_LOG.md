@@ -502,3 +502,26 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Delivery: Draft PR #50, `manual-merge-required`, no Ready/merge/Production
   operation without repository-owner approval.
 - Rollback: revert the unmerged PR and discard disposable/Preview resources.
+
+## 2026-07-30 - Production access matrix v1 target
+
+- Category: R0 database/security inventory contract.
+- Dependency: Production Schema Security Reconciliation v1, merged through PR
+  #51 as `e48e4341d987a428a34702337fb81c2bf6584cf2`.
+- Owner / approver: repository owner approved autonomous continuation within
+  the accepted architecture and retained high-risk boundaries.
+- Decision: assign all 60 migration 000-021 public tables exactly once under a
+  default-deny target. Keep Product anonymous read as the proposed target,
+  require protected administrator mutation, deny the six dormant Commerce OS
+  tables, and require protected administrator or isolated worker access for
+  every other active group.
+- Evidence: `docs/security/production-access-matrix-v1.json` is the
+  machine-verifiable source; its contract test expands groups against the
+  migration inventory and keeps SQL generation disabled.
+- Risk: normal-risk documentation/test Story. It changes no schema, RLS,
+  grants, credentials, runtime behavior, migration history, or Production
+  state.
+- Consequence: R1 must replace shared-anon mutation paths and prove negative
+  authorization, idempotency, audit, and failure contracts before R2 SQL.
+- Rollback: revert this documentation/test commit. Database and runtime state
+  are unchanged.
