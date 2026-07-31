@@ -155,21 +155,25 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 - Decision record:
   [`DECISION_LOG.md`](DECISION_LOG.md#2026-07-31--r1-atomic-product-mutation-db-architecture-v1).
 
-## Proposed Architecture Stories
+## Approved Architecture Stories (continued)
 
 ### 2026-07-31 — Admin Password Recovery v1
 
-- Status: proposed; repository-owner manual approval required.
+- Status: accepted by repository owner through manual merge of PR #59 on
+  2026-07-31. Approved head:
+  `d0e1f6dcbf712329e8bfa835ab5cf59684b82b9d`.
 - Boundary: existing Admin Auth SSR/Route Handler boundary plus a new
   password-recovery lifecycle.
 - Decision proposal: same-browser PKCE recovery, exact redirect allowlist,
   Auth-server user verification, existing UUID allowlist, recovery-purpose
   CSRF, password update, and forced reauthentication.
-- Implementation authorization: none until this Architecture Story is manually
-  approved and merged. Production recovery and redirect configuration remain
+- Implementation authorization: limited to the approved same-browser PKCE
+  recovery lifecycle. Production recovery and redirect configuration remain
   separately approved high-risk actions.
 - Story:
   [Admin Password Recovery v1](../docs/architecture/ADMIN-PASSWORD-RECOVERY-V1.md).
+
+## Proposed Architecture Stories
 
 ### 2026-07-27 — Sprint B-0 Database Baseline Execution v1
 

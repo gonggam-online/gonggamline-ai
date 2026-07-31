@@ -1,5 +1,39 @@
 # Work status
 
+## 2026-07-31 — Admin Password Recovery implementation
+
+- Objective: implement the fail-closed administrator password recovery flow
+  approved by merged Architecture PR #59.
+- Branch/base: `codex/feat/admin-password-recovery`, based on `origin/main`
+  merge `c22635befa44929d3b3ae0cf35ab68e14b8f5d9a`.
+- Risk: high-risk/manual Auth lifecycle; never auto-merge.
+- Revenue impact: restores safe operator access after credential exposure.
+- Root-cause class: code capability gap plus separate Supabase redirect
+  configuration.
+- Scope: reset request, PKCE callback, allowlisted recovery page, recovery
+  CSRF, password update, global sign-out, UI, tests, and release evidence.
+- Non-goals: Auth Admin API, MFA reset, DB/RLS, new secrets, implicit URL
+  fragments, Production configuration, or commerce writes.
+- Completed: verified #59 merge; created the implementation branch; audited
+  existing Auth boundaries and Next.js guidance; implemented the bounded flow,
+  a 15-minute user/session-bound recovery grant, and contract tests. Confirmed
+  the login recovery UI and fail-closed direct recovery-page redirect locally.
+- Current work: commit, push, and deliver the high-risk Draft PR.
+- Blockers / owner actions: the exact Production recovery callback URL requires
+  separate Supabase Auth redirect approval. Implementation and Production
+  deployment require manual merge.
+- Validation: changed-source lint passed; typecheck passed; full tests 380/380
+  passed; Production build passed with 83 generated routes; `git diff --check`
+  passed. Repository-wide lint remains non-zero only because it scans the
+  existing generated `playwright-report` bundle. Local Production-mode browser
+  showed the reset-email UI and redirected a request without a recovery grant
+  back to `/admin/login`; no email or password mutation was performed.
+- Exact next action: commit, push, and deliver a high-risk Draft PR, then wait
+  for exact-head CI and Preview validation.
+- Remaining risks: Production remains blocked until redirect configuration,
+  manual implementation merge/deployment, owner password rotation, session
+  revocation, and fresh TOTP validation.
+
 ## 2026-07-31 — Admin Password Recovery architecture
 
 - Objective: define the minimum fail-closed administrator password recovery

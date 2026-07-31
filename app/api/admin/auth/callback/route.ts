@@ -1,4 +1,11 @@
 import { adminRateLimiter } from "@/lib/auth/admin-rate-limit.server";
+import { isAllowlistedAdminUser } from "@/lib/auth/admin-allowlist.server";
+import {
+  ADMIN_RECOVERY_COOKIE_NAME,
+  ADMIN_RECOVERY_COOKIE_OPTIONS,
+  issueAdminRecoveryGrant,
+} from "@/lib/auth/admin-password-recovery.server";
+import { requireAdminRequest } from "@/lib/auth/admin-request-guard.server";
 import { ADMIN_CSRF_COOKIE_NAME } from "@/lib/auth/csrf.server";
 import { createSupabaseSsrServerClient } from "@/lib/auth/supabase-ssr.server";
 import { cookies } from "next/headers";
@@ -12,7 +19,21 @@ export async function GET(request: Request): Promise<Response> {
       return Response.json({ code: "ORIGIN_DENIED" }, { status: 403 });
     }
     const codes = url.searchParams.getAll("code");
-    if (codes.length !== 1 || codes[0].trim() === "") {
+    const purposes = url.searchParams.getAll("purpose");
+    const purpose =
+      purposes.length === 0
+        ? "login"
+        : purposes.length === 1 && purposes[0] === "password-recovery"
+          ? "password-recovery"
+          : null;
+    if (
+      codes.length !== 1 ||
+      codes[0].trim() === "" ||
+      purpose === null ||
+      [...url.searchParams.keys()].some(
+        (key) => key !== "code" && key !== "purpose",
+      )
+    ) {
       return Response.json({ code: "INVALID_REQUEST" }, { status: 400 });
     }
     const clientKey =
@@ -31,6 +52,27 @@ export async function GET(request: Request): Promise<Response> {
     if (error) {
       return Response.json({ code: "AUTHENTICATION_FAILED" }, { status: 400 });
     }
+    if (purpose === "password-recovery") {
+      const {
+        data: { user },
+        error: userError,
+      } = await client.auth.getUser();
+      if (userError || !user || !isAllowlistedAdminUser(user.id)) {
+        await client.auth.signOut({ scope: "global" });
+        return Response.json({ code: "AUTHORIZATION_DENIED" }, { status: 403 });
+      }
+      const context = await requireAdminRequest(request, "read", { client });
+      (await cookies()).set(
+        ADMIN_RECOVERY_COOKIE_NAME,
+        issueAdminRecoveryGrant(context),
+        ADMIN_RECOVERY_COOKIE_OPTIONS,
+      );
+    } else {
+      (await cookies()).set(ADMIN_RECOVERY_COOKIE_NAME, "", {
+        ...ADMIN_RECOVERY_COOKIE_OPTIONS,
+        maxAge: 0,
+      });
+    }
     (await cookies()).set(ADMIN_CSRF_COOKIE_NAME, "", {
       secure: true,
       httpOnly: true,
@@ -38,7 +80,15 @@ export async function GET(request: Request): Promise<Response> {
       path: "/",
       maxAge: 0,
     });
-    return NextResponse.redirect(new URL("/admin/login", configuredOrigin), 303);
+    return NextResponse.redirect(
+      new URL(
+        purpose === "password-recovery"
+          ? "/admin/password-recovery"
+          : "/admin/login",
+        configuredOrigin,
+      ),
+      303,
+    );
   } catch {
     return Response.json({ code: "AUTHENTICATION_UNAVAILABLE" }, { status: 500 });
   }
