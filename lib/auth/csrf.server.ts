@@ -8,6 +8,7 @@ export const ADMIN_CSRF_COOKIE_NAME = "__Host-gonggamline-csrf";
 export const ADMIN_CSRF_HEADER_NAME = "X-GonggamLine-CSRF";
 
 export type AdminCsrfPurpose =
+  | "admin-mfa"
   | "admin-session"
   | "item-selection-create"
   | "item-selection-finalize"

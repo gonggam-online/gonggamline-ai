@@ -1,3 +1,7 @@
+import {
+  AdminMfaBoundaryError,
+  verifyAdminTotpChallenge,
+} from "@/lib/auth/admin-mfa.server";
 import { adminRateLimiter } from "@/lib/auth/admin-rate-limit.server";
 import {
   AdminRequestGuardError,
@@ -17,7 +21,7 @@ export async function POST(request: Request): Promise<Response> {
     requireJsonContentType(request);
     const client = await createSupabaseSsrServerClient();
     const context = await requireAdminRequest(request, "read", { client });
-    verifyAdminCsrfToken(request, "admin-session", context);
+    verifyAdminCsrfToken(request, "admin-mfa", context);
     const rate = adminRateLimiter.consume(context.administratorUserId, "mutation");
     if (!rate.allowed) {
       return Response.json({ code: "RATE_LIMITED" }, { status: 429 });
@@ -35,18 +39,15 @@ export async function POST(request: Request): Promise<Response> {
       typeof record.code !== "string" ||
       record.factorId.trim() === "" ||
       record.challengeId.trim() === "" ||
-      record.code.trim() === ""
+      !/^[0-9]{6}$/.test(record.code)
     ) {
       return Response.json({ code: "INVALID_REQUEST" }, { status: 400 });
     }
-    const { error } = await client.auth.mfa.verify({
+    await verifyAdminTotpChallenge(client, {
       factorId: record.factorId,
       challengeId: record.challengeId,
       code: record.code,
     });
-    if (error) {
-      return Response.json({ code: "MFA_VERIFICATION_FAILED" }, { status: 400 });
-    }
     const { data, error: aalError } =
       await client.auth.mfa.getAuthenticatorAssuranceLevel();
     if (aalError || data.currentLevel !== "aal2") {
@@ -68,7 +69,8 @@ export async function POST(request: Request): Promise<Response> {
     if (
       error instanceof AdminRequestGuardError ||
       error instanceof AdminUnsupportedMediaTypeError ||
-      error instanceof AdminCsrfError
+      error instanceof AdminCsrfError ||
+      error instanceof AdminMfaBoundaryError
     ) {
       return Response.json({ code: error.code }, { status: error.status });
     }

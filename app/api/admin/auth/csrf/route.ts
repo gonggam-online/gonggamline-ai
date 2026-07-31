@@ -14,6 +14,7 @@ import {
 } from "@/lib/auth/csrf.server";
 
 const PURPOSES = new Set<AdminCsrfPurpose>([
+  "admin-mfa",
   "admin-session",
   "item-selection-create",
   "item-selection-finalize",
@@ -38,7 +39,9 @@ export async function GET(request: Request): Promise<Response> {
     const purpose = values[0] as AdminCsrfPurpose;
     const context = await requireAdminRequest(
       request,
-      purpose === "admin-session" ? "read" : "mutation",
+      purpose === "admin-session" || purpose === "admin-mfa"
+        ? "read"
+        : "mutation",
     );
     const rate = adminRateLimiter.consume(context.administratorUserId, "read");
     if (!rate.allowed) {
