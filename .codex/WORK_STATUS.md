@@ -35,8 +35,8 @@
   local validation are complete; the preparation commit, push, high-risk Draft
   PR, and exact-head CI/Preview delivery succeeded. Candidate migration and all
   DB/restore/RLS/Production actions remain stopped at their separate concrete
-  approval gate. Independent validator hardening and local gates are complete
-  (9/12 revised checkpoints; delivery is in progress).
+  approval gate. Independent validator hardening, local gates, Draft PR update,
+  and exact-head gates are complete (11/12 revised checkpoints).
 - Blocker / owner action: the repository owner must select a current Production
   backup or provider-approved sanitized clone, approve restore into a new
   isolated non-Production Supabase project, prove it has no Production domain,
@@ -64,14 +64,15 @@
   timing flakes; all other CI jobs passed on the first attempt. Exact Preview
   browser run `30623427349` passed. Validator checkpoint Playwright reproduced
   the same baseline: 33 passed, 2 skipped, and the seven established
-  Supabase-unconfigured route failures; R1 mutation fail-close passed.
-- Last commit: `f07f99a test: prepare R2 security reconciliation inventory`.
+  Supabase-unconfigured route failures; R1 mutation fail-close passed. Exact
+  validator head `87dbd75594b2603bebb02df3659093d37a58fde0` passed CI run
+  `30629640251` and Preview browser run `30629640262`.
+- Last commit: `87dbd75 test: harden R2 inventory validation`.
 - Delivery: branch pushed; Draft PR #64 targets `main`, has
   `manual-merge-required`, and has no auto-merge.
-- Exact next action: commit/push the validator checkpoint, update Draft PR #64,
-  and verify its exact-head CI/Preview. Afterward obtain an exact isolated
-  restored target, capture sanitized pre-inventory, stop on any drift/unknown
-  authority, and generate candidate 023 only if every inventory gate passes.
+- Exact next action: obtain an exact isolated restored target, capture and
+  validate sanitized pre-inventory, stop on any drift/unknown authority, and
+  generate candidate 023 only if every inventory gate passes.
 - Remaining risks: restore fidelity/quarantine; deployed 022/history/policy/
   grant/owner/default-ACL drift; service-role bypass scope; intentional public
   Product SELECT; future Production concurrency. Anonymous writes must never be
