@@ -10,6 +10,7 @@ DECLARE
   v_restored_grants_match boolean;
   v_canonical_grants_match boolean;
   v_pre_state text;
+  v_function record;
 BEGIN
   IF to_regclass('public.products') IS NULL THEN
     RAISE EXCEPTION 'R2 precondition failed: public.products is absent';
@@ -122,14 +123,6 @@ BEGIN
     RAISE EXCEPTION 'R2 precondition failed: public creator role inventory drifted';
   END IF;
 
-  PERFORM pg_catalog.set_config('gonggamline.r2_pre_state', v_pre_state, true);
-END $$;
-
-DO $$
-DECLARE
-  v_function record;
-  v_pre_state text := pg_catalog.current_setting('gonggamline.r2_pre_state');
-BEGIN
   FOR v_function IN
     SELECT * FROM (VALUES
       ('product_mutation_claim_v1', to_regprocedure('public.product_mutation_claim_v1(text,text,text,text,uuid)'), false),

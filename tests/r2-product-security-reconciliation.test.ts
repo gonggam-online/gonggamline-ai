@@ -225,21 +225,8 @@ test("R2 candidate 023 accepts only restored drift or canonical 000-022 pre-stat
   assert.match(sql, /\('SELECT', false\), \('INSERT', false\), \('UPDATE', false\), \('DELETE', false\)/);
   assert.match(sql, /\('TRUNCATE', true\), \('REFERENCES', true\), \('TRIGGER', true\)/);
   assert.match(sql, /Product state is mixed or unapproved/);
-  assert.match(sql, /current_setting\('gonggamline\.r2_pre_state'\)/);
   assert.match(sql, /to_regprocedure\('public\.product_mutation_claim_v1/);
   assert.match(sql, /has_function_privilege\('anon', v_function\.function_oid, 'EXECUTE'\)/);
+  assert.doesNotMatch(sql, /current_setting\('gonggamline\.r2_pre_state'\)|set_config\('gonggamline\.r2_pre_state'/);
   assert.doesNotMatch(sql, /v_pre_state\s*:=\s*coalesce/i);
-});
-
-test("temporary R1 identity diagnostic is failure-only and read-only", () => {
-  const workflow = read(".github/workflows/ci.yml");
-  const diagnostic = workflow.match(
-    /- name: Diagnose disposable R1 function identities after replay failure[\s\S]+?(?=\n      - name: Stop and discard disposable stack)/,
-  )?.[0] ?? "";
-  assert.match(diagnostic, /if: failure\(\)/);
-  assert.match(diagnostic, /BEGIN READ ONLY/);
-  assert.match(diagnostic, /R2_CI_R1_IDENTITY_MATRIX/);
-  assert.match(diagnostic, /pg_get_function_identity_arguments/);
-  assert.match(diagnostic, /to_regprocedure/);
-  assert.doesNotMatch(diagnostic, /prosrc|pg_get_functiondef|SELECT\s+\*|DATABASE_URL|password|secret/i);
 });

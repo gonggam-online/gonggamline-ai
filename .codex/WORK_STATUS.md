@@ -9,6 +9,14 @@
   secrets, Production, cycle 1/cycle 2, and database writes are prohibited.
 - Exact next action: capture the sanitized signature difference, remove the
   diagnostic/staging, correct candidate 023, and rerun all gates.
+- Diagnostic run `30689765977` proved all seven catalog identities exact and
+  every expected `to_regprocedure()` exists. No prohibited data was queried.
+  The remaining cause is statement-boundary loss of the transaction-local
+  custom setting between the two DO blocks. The temporary diagnostic/staging
+  are removed and both precondition phases now share the local `v_pre_state`
+  variable in one DO block.
+- Revised candidate SHA-256:
+  `3e93cb214bf796077e150194b58d09f887b2fb016361389833377d2a0e62f2ea`.
 
 ## 2026-08-01 - Temporary disposable-CI R1 function diagnostic
 
