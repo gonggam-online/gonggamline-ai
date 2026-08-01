@@ -1,5 +1,19 @@
 # Architecture review
 
+## Proposed Architecture Story: R3 Migration History Reconciliation v1
+
+- Document: `docs/architecture/R3-MIGRATION-HISTORY-RECONCILIATION-V1.md`
+- Status: proposed; manual repository-owner acceptance required.
+- Scope: read-only restored-catalog classification, official Supabase CLI
+  history-repair design, R2/R3 ordering correction, rehearsal/Production gates,
+  and rollback.
+- Risk: high-risk/manual for every later history or Production action.
+- Non-goals: migration repair execution, direct history writes, candidate 023,
+  schema/RLS changes, Production, Auth, configuration, and commerce writes.
+- Gate: later implementation remains blocked until this Architecture Story is
+  manually merged and a separate exact-target implementation action is
+  explicitly approved.
+
 ## Proposed Architecture Story: R2 Product Security Target and Rehearsal v1
 
 - Document: `docs/architecture/R2-PRODUCT-SECURITY-TARGET-AND-REHEARSAL-V1.md`
