@@ -38,14 +38,23 @@ WHERE n.nspname = 'public' AND c.relname = 'products'
 UNION ALL
 SELECT 'relation_privilege_state', 'public', 'products', role_name,
        privilege_name || '|' ||
-       has_table_privilege(role_name, 'public.products', privilege_name)::text
-FROM unnest(ARRAY['PUBLIC','anon','authenticated','service_role']) role_name
+       CASE WHEN role_name = 'PUBLIC' THEN EXISTS (
+         SELECT 1
+         FROM pg_catalog.aclexplode(coalesce(c.relacl,
+           pg_catalog.acldefault('r', c.relowner))) public_acl
+         WHERE public_acl.grantee = 0
+           AND public_acl.privilege_type = privilege_name
+       ) ELSE has_table_privilege(role_name, c.oid, privilege_name) END::text
+FROM pg_catalog.pg_class c
+JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+CROSS JOIN unnest(ARRAY['PUBLIC','anon','authenticated','service_role']) role_name
 CROSS JOIN unnest(ARRAY[
   'SELECT','INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER'
 ]) privilege_name
+WHERE n.nspname = 'public' AND c.relname = 'products'
 UNION ALL
 SELECT 'function', n.nspname, p.proname,
-       pg_catalog.pg_get_function_identity_arguments(p.oid),
+       pg_catalog.oidvectortypes(p.proargtypes),
        concat_ws('|', pg_catalog.pg_get_userbyid(p.proowner),
                  p.prosecdef::text,
                  coalesce(array_to_string(p.proconfig, ','), ''),
@@ -63,7 +72,7 @@ WHERE n.nspname = 'public' AND p.proname IN (
 )
 UNION ALL
 SELECT 'function_acl', n.nspname, p.proname,
-       pg_catalog.pg_get_function_identity_arguments(p.oid),
+       pg_catalog.oidvectortypes(p.proargtypes),
        concat_ws('|', coalesce(grantee.rolname, 'PUBLIC'), privilege_type)
 FROM pg_catalog.pg_proc p
 JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
@@ -82,8 +91,14 @@ WHERE n.nspname = 'public' AND p.proname IN (
 )
 UNION ALL
 SELECT 'function_privilege_state', 'public', p.proname,
-       pg_catalog.pg_get_function_identity_arguments(p.oid),
-       role_name || '|EXECUTE|' || has_function_privilege(role_name, p.oid, 'EXECUTE')::text
+       pg_catalog.oidvectortypes(p.proargtypes),
+       role_name || '|EXECUTE|' || CASE WHEN role_name = 'PUBLIC' THEN EXISTS (
+         SELECT 1
+         FROM pg_catalog.aclexplode(coalesce(p.proacl,
+           pg_catalog.acldefault('f', p.proowner))) public_acl
+         WHERE public_acl.grantee = 0
+           AND public_acl.privilege_type = 'EXECUTE'
+       ) ELSE has_function_privilege(role_name, p.oid, 'EXECUTE') END::text
 FROM pg_catalog.pg_proc p
 JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
 CROSS JOIN unnest(ARRAY['PUBLIC','anon','authenticated','service_role']) role_name
@@ -107,7 +122,7 @@ CROSS JOIN LATERAL pg_catalog.aclexplode(d.defaclacl) acl
 LEFT JOIN pg_catalog.pg_roles grantee ON grantee.oid = acl.grantee
 WHERE n.nspname = 'public' OR d.defaclnamespace = 0
 UNION ALL
-SELECT 'default_acl_state', 'public', creators.rolname, object_type.code,
+SELECT 'default_acl_state', 'public', creators.rolname, object_type.code::text,
        coalesce(array_to_string(d.defaclacl, ','),
          array_to_string(pg_catalog.acldefault(object_type.code, creators.oid), ','))
 FROM (

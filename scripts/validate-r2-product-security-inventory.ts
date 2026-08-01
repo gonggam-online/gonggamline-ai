@@ -196,10 +196,9 @@ if (process.argv[1]?.endsWith("validate-r2-product-security-inventory.ts")) {
   if (!inputPath) throw new Error("Pass the sanitized inventory CSV path.");
   const report = buildInventoryReport(parseInventoryCsv(readFileSync(inputPath, "utf8")));
   const errors = report.errors;
+  process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   if (errors.length > 0) {
     for (const error of errors) process.stderr.write(`BLOCKED: ${error}\n`);
     process.exitCode = 1;
-  } else {
-    process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   }
 }

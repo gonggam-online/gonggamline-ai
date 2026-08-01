@@ -20,11 +20,13 @@ test("R2 inventory is read-only and captures every architecture stop condition",
   assert.match(sql, /pg_catalog\.pg_policies/);
   assert.match(sql, /pg_catalog\.aclexplode/);
   assert.match(sql, /pg_catalog\.pg_default_acl/);
-  assert.match(sql, /pg_catalog\.pg_get_function_identity_arguments/);
+  assert.match(sql, /pg_catalog\.oidvectortypes\(p\.proargtypes\)/);
   assert.match(sql, /pg_catalog\.pg_get_userbyid/);
   assert.match(sql, /pg_catalog\.pg_extension/);
   assert.match(sql, /count_range/);
   assert.match(sql, /'default_acl_state'/);
+  assert.match(sql, /object_type\.code::text/);
+  assert.match(sql, /public_acl\.grantee = 0/);
   assert.doesNotMatch(sql, /schema_migrations[\s\S]+WHERE version IN/);
   assert.doesNotMatch(sql,
     /^\s*(?:INSERT\s+INTO|UPDATE\s+\S+|DELETE\s+FROM|TRUNCATE\s+(?:TABLE\s+)?|ALTER\s+|DROP\s+|CREATE\s+)/im);
@@ -137,6 +139,7 @@ test("R2 collector fails closed for Production, missing quarantine, or target dr
   assert.match(script, /R2_REHEARSAL_DATABASE_URL/);
   assert.match(script, /does not match the confirmed target project ref/);
   assert.match(script, /--no-psqlrc/);
+  assert.match(script, /--quiet/);
   assert.match(script, /--csv/);
   assert.doesNotMatch(script, /db push|--linked|migration up|db reset/);
 });

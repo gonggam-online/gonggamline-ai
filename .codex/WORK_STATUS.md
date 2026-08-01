@@ -1,5 +1,40 @@
 # Work status
 
+## 2026-08-01 - R2 read-only restored inventory after cycle 2
+
+- Objective: run the merged read-only R2 collector against the repaired cycle 2
+  restore and verify migration history, Product RLS/policies/grants, R1 function
+  owner/search-path/ACL, creator/default ACL, and extension inventory.
+- Exact target: `r3-rehearsal-cycle2-db-e3eb20e1`; it remained network `none`
+  with no published ports and was stopped immediately after collection.
+- Boundary: read-only catalog queries only. No database write, candidate 023,
+  schema/RLS/Auth/commerce/Production action, container deletion, or volume
+  deletion occurred.
+- Collector corrections: cast default-ACL object codes for the inventory UNION;
+  evaluate `PUBLIC` through ACL grantee OID zero instead of treating it as a
+  login role; normalize function identities to argument types; suppress psql
+  command tags from CSV; and emit the sanitized report even when validation
+  fails closed.
+- Evidence: the structurally valid sanitized report failed closed with
+  fingerprint
+  `dbf1c4daedf92a85f86513885d8daf4fa2905ca9d1e5e16d123c5697e75a3d56`.
+  Migration history was exactly 000-022; creator role was `postgres`; Product
+  row range was `100-999`; the three restored Product policies were the known
+  public insert/read/update policies.
+- Findings: 17 R1 function EXECUTE grants differ from migration 022's exact
+  matrix. Browser roles retain EXECUTE on protected mutation functions and
+  `service_role` retains EXECUTE on three helper functions. Migration 022
+  explicitly revokes these grants, so this is real restored security drift,
+  not a collector formatting error.
+- Classification: R3 permits known permissive ACL differences to be classified
+  `CLASSIFIED_FORWARD_FIX`, and R2 migration order later reasserts the exact R1
+  matrix. R2 also requires restored R1 compatibility to pass before candidate
+  023 generation, so the current inventory remains blocked pending an explicit
+  reviewed resolution; no candidate was generated.
+- Evidence hygiene: temporary CSV/report artifacts were deleted after the
+  sanitized fingerprint and findings were recorded. No secrets or catalog row
+  contents were committed.
+
 ## 2026-08-01 - R3 deterministic fresh restore cycle 2
 
 - Objective: reproduce cycle 1 on an independent fresh restore and complete
