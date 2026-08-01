@@ -1,5 +1,15 @@
 # Work status
 
+## 2026-08-01 - Temporary disposable-CI R1 identity diagnostic
+
+- Owner approved a failure-only read-only diagnostic in PR #64's disposable
+  exact 000-022 database after run `30689601605` remained fail-closed.
+- Output is restricted to seven function names, catalog identity arguments,
+  and expected `to_regprocedure()` existence booleans. Function bodies, rows,
+  secrets, Production, cycle 1/cycle 2, and database writes are prohibited.
+- Exact next action: capture the sanitized signature difference, remove the
+  diagnostic/staging, correct candidate 023, and rerun all gates.
+
 ## 2026-08-01 - Temporary disposable-CI R1 function diagnostic
 
 - Exact-head `55966945aa075bcabb4152361d06ec22ed919be1` passed Product
