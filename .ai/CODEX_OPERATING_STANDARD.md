@@ -14,6 +14,8 @@ durable source of project instructions and delivery state.
    conversation history.
 4. Preserve user changes and stop before branch selection if the working tree
    contains unexplained overlapping changes.
+5. Identify the earliest blocked revenue-path stage and record why this task is
+   the smallest reliable next action before implementation.
 
 ## 2. Automatic branch selection
 
@@ -103,7 +105,38 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .codex/notify.ps1 -Event com
 - A new PC is ready only after remote identity, clean status, branch state,
   required runtime/tooling, and project validation are confirmed.
 
-## 7. Capability limits
+### Cloud-first, local-minimum state
+
+- Prefer GitHub for code, branches, PRs, issues, and durable task evidence; CI
+  and approved cloud services for reproducible validation artifacts; managed
+  databases for operational data; and approved secret stores for credentials.
+- Do not use a local disk as the only source of truth. Commit/push safe durable
+  state promptly, or record the remote recovery pointer and exact next action.
+- Keep local downloads, dumps, browser artifacts, caches, and restored databases
+  only when necessary. They must be untracked, access-limited, named with their
+  purpose, assigned a retention/cleanup action, and never silently copied to an
+  unapproved cloud location.
+- Prefer reproducible remote workflows over device-specific setup. Document the
+  minimum bootstrap and external dependencies needed on another authorized PC.
+- Cloud-first never overrides secrecy, data residency, least privilege, cost,
+  Production safety, or owner-approval requirements.
+
+## 7. Autonomous continuation loop
+
+For authorized normal-risk work, repeat planning, execution, verification,
+delivery, feedback inspection, and the next safe action until the Story reaches
+its real terminal state. Create or select the appropriate non-`main` branch and
+use authenticated repository/browser/computer tools for routine operations when
+available. Do not ask the owner to perform an operation that the active tool can
+safely perform within existing authority.
+
+This loop does not authorize Production, database/schema/migration/RLS/Auth,
+secrets/configuration, paid calls, commerce writes, destructive actions, or a
+high-risk merge. At those boundaries, present the exact target, evidence,
+gates, rollback, and remaining risk, then obtain explicit approval. Continue
+all independent safe work while approval is pending.
+
+## 8. Capability limits
 
 Repository instructions can standardize Codex behavior, but cannot grant OS,
 GitHub, Supabase, Vercel, or Codex platform permissions. They also cannot

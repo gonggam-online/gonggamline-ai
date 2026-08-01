@@ -1,5 +1,104 @@
 # Decision log
 
+## 2026-08-01 — R3 rehearsal evidence validator and transport stop
+
+- Category: implementation decision under merged R3 Architecture Story PR #65.
+- Decision: implement the deterministic two-cycle evidence validator now, but
+  do not implement or execute a repair adapter until an approved transport can
+  connect the pinned official CLI to the quarantined restore without exposing
+  a database URL or weakening network isolation.
+- Evidence: the approved target has Docker network mode `none` and no published
+  ports. An external Supabase CLI cannot reach it; direct migration-history SQL
+  remains permanently prohibited.
+- Impact: manifest, quarantine, exact history, catalog/Product invariance,
+  dry-run, replay, sanitization, and negative gates become executable contracts.
+- Rollback: revert the validator, tests, runbook, and changelog. No database or
+  migration-history state is changed by this decision.
+
+
+## 2026-08-01 — R3 rehearsal evidence validator and transport stop
+
+- Category: implementation decision under merged R3 Architecture Story PR #65.
+- Decision: implement the deterministic two-cycle evidence validator now, but
+  do not implement or execute a repair adapter until an approved transport can
+  connect the pinned official CLI to the quarantined restore without exposing
+  a database URL or weakening network isolation.
+- Evidence: the approved target has Docker network mode `none` and no published
+  ports. An external Supabase CLI cannot reach it; direct migration-history SQL
+  remains permanently prohibited.
+- Impact: manifest, quarantine, exact history, catalog/Product invariance,
+  dry-run, replay, sanitization, and negative gates become executable contracts.
+- Rollback: revert the validator, tests, runbook, and changelog. No database or
+  migration-history state is changed by this decision.
+
+
+## 2026-08-01 — Revenue-speed, cloud-portable autonomous delivery
+
+- Category: accepted governance amendment directed by the repository owner.
+- Decision: make the shortest safe path to measurable revenue the first
+  planning gate; prefer approved cloud sources of truth and minimum ephemeral
+  local storage; continue authorized normal-risk delivery autonomously through
+  feedback and the next safe action.
+- Rationale: prevent prolonged system-building without sales, allow operations
+  and Codex work to resume from any authorized PC, and reduce routine owner
+  handoffs.
+- Safety boundary: cloud-first does not permit uploading secrets or sensitive
+  Production/business data to unapproved services. Autonomy does not weaken
+  Production, database, RLS/Auth, secrets/configuration, commerce, paid,
+  destructive, or high-risk manual-merge approvals.
+- Impact: Story admission and WORK_STATUS records must identify the earliest
+  blocked revenue step, measurable proof, remote source of truth, local-only
+  artifacts and cleanup, and the next autonomous action.
+- Rollback: revert this governance Story. Existing stricter safety and approval
+  controls remain independently binding.
+
+
+## 2026-08-01 — Revenue-speed, cloud-portable autonomous delivery
+
+- Category: accepted governance amendment directed by the repository owner.
+- Decision: make the shortest safe path to measurable revenue the first
+  planning gate; prefer approved cloud sources of truth and minimum ephemeral
+  local storage; continue authorized normal-risk delivery autonomously through
+  feedback and the next safe action.
+- Rationale: prevent prolonged system-building without sales, allow operations
+  and Codex work to resume from any authorized PC, and reduce routine owner
+  handoffs.
+- Safety boundary: cloud-first does not permit uploading secrets or sensitive
+  Production/business data to unapproved services. Autonomy does not weaken
+  Production, database, RLS/Auth, secrets/configuration, commerce, paid,
+  destructive, or high-risk manual-merge approvals.
+- Impact: Story admission and WORK_STATUS records must identify the earliest
+  blocked revenue step, measurable proof, remote source of truth, local-only
+  artifacts and cleanup, and the next autonomous action.
+- Rollback: revert this governance Story. Existing stricter safety and approval
+  controls remain independently binding.
+
+
+## 2026-08-01 — R3 Migration History Reconciliation v1
+
+- Category: proposed architecture decision.
+- Story / PR: R3 Migration History Reconciliation v1 / pending.
+- Status: proposed; manual repository-owner acceptance required.
+- Owner / approver: Database / Security; repository owner pending.
+- Context and evidence: the current Production logical archive and isolated
+  restore have no `supabase_migrations.schema_migrations`, while the 000-020
+  schema groups and the named 021/022 relations/functions are present. The R2
+  inventory requires exact 000-022 history, exposing a circular dependency in
+  the earlier R2-before-R3 ordering.
+- Decision or issue: separate history metadata from schema state. First
+  rehearse official CLI repair for exactly 000-022 on a fresh isolated restore,
+  prove catalog equality and a no-historical-DDL dry run, then allow R2 to
+  derive and rehearse 023. Production later repairs 000-022 immediately before
+  an exact dry run that must list only approved 023.
+- Consequences and risks: object presence is not exact migration proof; 021/022
+  remain execution-gated. The logical restore omits global role definitions and
+  synthesized one local `NOLOGIN` owner. History repair, candidate 023, RLS,
+  Production, and merge remain unauthorized.
+- Rollback or supersession: revert this documentation PR. Later metadata-only
+  rollback may use only official CLI `--status reverted` for the exact approved
+  versions before any schema migration begins; never write history directly or
+  restore anonymous writes.
+
 ## 2026-07-31 - R2 Product security target proposed
 
 - Category: proposed high-risk Database / RLS Architecture Story.

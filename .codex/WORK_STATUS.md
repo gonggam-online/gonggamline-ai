@@ -100,6 +100,151 @@
   grant/owner/default-ACL drift; service-role bypass scope; intentional public
   Product SELECT; future Production concurrency. Anonymous writes must never be
   restored as rollback.
+## 2026-08-01 - R3 migration-history rehearsal implementation
+
+- Objective: implement the merged R3 Story's fail-closed two-cycle rehearsal
+  evidence contract so R2 Product security can advance toward migration 023.
+- Branch/base: `codex/feat/r3-history-rehearsal`, based on governance merge
+  `9e031bbece37eb0182726404bc9f6554cfe54bba` (`origin/main`).
+- Risk: high-risk/manual Database/history tooling; no auto-merge.
+- Revenue impact: removes the next deterministic blocker to eliminating
+  anonymous Product writes while preventing unsafe historical replay.
+- Root-cause class: database delivery/evidence gap plus execution-transport
+  conflict. The approved network-none target is unreachable by an external
+  Supabase CLI without weakening quarantine or exposing a connection URL.
+- Scope: offline evidence schema/validator, manifest hashes, exact 000-022
+  history, catalog/Product invariance, empty dry-run, deterministic two-cycle
+  replay, negative gates, sanitization, tests, runbook, and Draft PR.
+- Non-goals: repair runner or execution, DB/history/schema/RLS/Auth writes,
+  Production, candidate 023, PR #64 merge, secrets/config, or commerce writes.
+- Completed: latest main and merged R3 authority confirmed; R2 blocker and
+  existing artifacts audited; dedicated branch created; validator, tests,
+  runbook, Architecture Review, Decision Log, and changelog implemented.
+- Current work: local validation complete; final review and delivery pending.
+- Blocker / owner action: after this implementation is validated, approve one
+  exact non-Production transport design before any repair adapter or command.
+- Changed files: R3 validator, tests, implementation runbook, changelog,
+  Architecture Review, Decision Log, and this status record.
+- Local-only artifacts: no new dump, restore, evidence, credential, or database
+  was created. The previously approved dump/restore remains outside Git.
+- Validation: focused R3 implementation tests passed 4/4; full tests passed
+  390/390; lint passed with zero errors and four pre-existing warnings;
+  typecheck passed; Production build passed with 84 routes; diff check passed.
+  Local Playwright passed 33, skipped 2, and failed 7 only on the established
+  Supabase-unconfigured route group (`/listing`, `/market`, `/procurement`,
+  `/revenue`, `/sourcing`, `/workflow`, `/workspace`); R1 Product mutation
+  fail-close and revenue-critical checks passed.
+- Delivery: pending high-risk Draft PR with `manual-merge-required`.
+- Exact next action: review/stage the complete diff, commit/push, create the
+  high-risk Draft PR, verify exact-head CI/Preview, then present the exact
+  transport approval boundary.
+- Remaining risks: CLI connectivity under quarantine, logical-dump global-role
+  omissions, exact 021/022 semantic equivalence, and concurrent Production
+  drift remain unresolved. Production remains prohibited.
+
+
+## 2026-08-01 - Revenue-speed, cloud portability, and autonomy governance
+
+- Objective: make fast measurable revenue, cross-PC cloud-portable state, and
+  autonomous normal-risk continuation explicit permanent development rules.
+- Branch/base: `codex/docs/revenue-cloud-autonomy`, based on merged R3 PR #65
+  at `14f215e156708844d82f43945f89a178c22741c4` (`origin/main`).
+- Risk: normal-risk governance documentation; no runtime, schema, Auth,
+  Production, commerce, secret, or external configuration mutation.
+- Revenue impact: prevents speculative system-building from displacing the
+  shortest reliable path to a measurable first and next sale.
+- Root-cause class: process/governance gap. Existing rules stated the revenue
+  mission and GitHub source of truth but did not make revenue speed and local
+  data minimization explicit execution gates.
+- Scope: AGENTS and permanent governance rules for revenue-path admission,
+  approved-cloud-first state, local artifact retention/cleanup, cross-PC
+  recovery, autonomous continuation, progress, and preserved approval limits.
+- Non-goals: runtime code, architecture boundary, database/RLS/Auth,
+  Production, secrets/configuration, paid calls, commerce writes, or weakening
+  high-risk/manual merge controls.
+- Completed: latest main and clean worktree confirmed; governing documents
+  audited; dedicated branch created; policy amendments, changelog, and static
+  regression tests implemented; local repository gates completed.
+- Current work: final diff/secret review and normal-risk delivery.
+- Changed files: `AGENTS.md`, CTO directive, Constitution, business priority,
+  operating standard, autonomous development, Decision Log, changelog, and
+  this status record.
+- Local-only artifacts: none created for this Story beyond ordinary repository
+  tooling/cache; no dump, credential, or business dataset is in scope.
+- Validation: governance regression tests passed 3/3 as part of the full suite;
+  full tests passed 386/386; lint passed with zero errors and four pre-existing
+  warnings; typecheck passed; Production build passed with 84 routes; diff
+  check passed. Local Playwright passed 33, skipped 2, and failed 7 only on the
+  established Supabase-unconfigured route group (`/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, `/workspace`); R1
+  anonymous Product mutation fail-close and revenue-critical checks passed.
+- Delivery: pending normal-risk PR; native auto-merge only after all exact-head
+  gates pass.
+- Exact next action: review/stage the complete diff, commit/push, create the PR,
+  and validate exact-head CI/Preview before normal-risk auto-merge eligibility.
+- Remaining risks: cloud providers can add cost, residency, access, and outage
+  risk; approved service selection and secret/data classification remain
+  task-specific. Automation remains bounded by credentials and approvals.
+
+
+## 2026-08-01 - R3 migration-history reconciliation architecture
+
+- Objective: design a safe official-CLI migration-history reconciliation that
+  removes the R2/R3 circular gate without replaying historical DDL or writing
+  Production/history in this Story.
+- Branch/base: `codex/docs/r3-migration-history-reconciliation`, based on Stage
+  02 merge `9c3c82a6cbb4a78767231312a26d3d9fef9863d4` (`origin/main`).
+- Risk: high-risk/manual Database/history architecture; Draft PR,
+  `manual-merge-required`, no auto-merge.
+- Revenue impact: prevents an unsafe historical replay or false migration
+  certification while preserving the path to remove anonymous Product writes.
+- Root-cause class: database metadata drift. The deployed application schema
+  and 021/022 object surface exist, but application migration history is absent.
+- Scope: repository manifest audit, read-only isolated restored-catalog
+  evidence, per-version classification model, official CLI repair ordering,
+  stop conditions, rehearsal/Production gates, rollback, tests, and Draft PR.
+- Non-goals: `migration repair`, direct history writes, `db push`, candidate
+  023, schema/RLS/Auth changes, Production/config/secrets, commerce writes, or
+  merge.
+- Completed: preserved PR #64 as a separate all-green Draft/manual PR; created
+  this branch from latest `origin/main`; verified the stopped restore remains
+  network-none with no ports; audited the canonical 000-022 manifest and prior
+  Production classifications; collected sanitized read-only R3 catalog
+  evidence; identified and designed resolution of the R2/R3 circular gate.
+- Evidence: source archive SHA-256
+  `E3EB20E15E481C5A959978E2AE18E972088E3E263019F50F943AF15CF3AF6FDB`;
+  sanitized R3 CSV SHA-256
+  `3D229F91017856443390B669BE3F89C01D3409A2B98E248BEEAAFCCA64D0FA9B`.
+  The restore has 61 public tables, the named 021/022 relations and nine named
+  SECURITY DEFINER functions, three historical anonymous Product policies, and
+  no application migration-history relation. Raw evidence remains outside Git.
+- Current work: local implementation, read-only rehearsal inspection, and
+  validation are complete; delivery and exact-head gates remain.
+- Blocker / owner action: actual history repair and all Production actions need
+  a separately approved exact target, pinned CLI, versions, commands, backup,
+  dry-run expectation, monitoring, and rollback. This Story requires manual PR
+  acceptance and merge before such implementation.
+- Changed files: R3 architecture, runbook, read-only catalog SQL, static tests,
+  changelog, Architecture Review, Decision Log, and this status record.
+- Validation: R3 static tests passed 2/2; full tests passed 383/383; sequential
+  typecheck passed; Production build passed with 84 routes; source lint passed
+  with zero errors and four pre-existing warnings. Unscoped lint found only
+  generated Playwright trace bundles, so the source-only rerun excluded
+  `playwright-report` and `test-results`. Local Playwright passed 33, skipped 2,
+  and failed 7 only on the established Supabase-unconfigured page group
+  (`/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
+  `/workspace`); the R1 anonymous Product mutation fail-close smoke passed.
+  The R3 catalog SQL completed in a read-only transaction against the isolated
+  network-none restore, and the container was stopped afterward. A parallel
+  build/typecheck attempt raced on generated `.next/types`; the required
+  sequential build then typecheck both passed. Staged diff check passed.
+- Delivery: pending high-risk Draft PR; no auto-merge.
+- Exact next action: finish the staged scope/secret review, commit/push, create
+  the Draft PR with `manual-merge-required`, and verify exact-head CI/Preview.
+- Remaining risks: logical dumps omit global roles; exact 021/022 body,
+  constraint, ACL, default-ACL, and owner-attribute equivalence remains
+  execution-gated; CLI handling of short 000-style versions must be rehearsed;
+  concurrent Production drift can invalidate any earlier comparison.
 
 ## 2026-07-31 - R2 Product security target and non-Production rehearsal architecture
 

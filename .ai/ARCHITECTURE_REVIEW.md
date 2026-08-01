@@ -1,5 +1,51 @@
 # Architecture review
 
+## R3 rehearsal implementation compliance — 2026-08-01
+
+- Approved source: merged R3 Architecture Story PR #65, merge
+  `14f215e156708844d82f43945f89a178c22741c4`.
+- In-scope implementation: offline sanitized evidence validator, deterministic
+  repair-plan fingerprint, negative tests, runbook, and delivery evidence.
+- Boundary preserved: no database connection, migration repair, direct history
+  SQL, schema/RLS/Auth change, Production action, candidate 023, or PR #64
+  merge.
+- Architecture stop: execution adapter remains blocked because network-none/no
+  port quarantine is unreachable by the external official CLI. A separate
+  Database/Security transport decision and exact-target approval are required.
+- Classification: high-risk/manual because this validator gates a later
+  migration-history mutation; `manual-merge-required`, no auto-merge.
+
+
+## R3 rehearsal implementation compliance — 2026-08-01
+
+- Approved source: merged R3 Architecture Story PR #65, merge
+  `14f215e156708844d82f43945f89a178c22741c4`.
+- In-scope implementation: offline sanitized evidence validator, deterministic
+  repair-plan fingerprint, negative tests, runbook, and delivery evidence.
+- Boundary preserved: no database connection, migration repair, direct history
+  SQL, schema/RLS/Auth change, Production action, candidate 023, or PR #64
+  merge.
+- Architecture stop: execution adapter remains blocked because network-none/no
+  port quarantine is unreachable by the external official CLI. A separate
+  Database/Security transport decision and exact-target approval are required.
+- Classification: high-risk/manual because this validator gates a later
+  migration-history mutation; `manual-merge-required`, no auto-merge.
+
+
+## Proposed Architecture Story: R3 Migration History Reconciliation v1
+
+- Document: `docs/architecture/R3-MIGRATION-HISTORY-RECONCILIATION-V1.md`
+- Status: proposed; manual repository-owner acceptance required.
+- Scope: read-only restored-catalog classification, official Supabase CLI
+  history-repair design, R2/R3 ordering correction, rehearsal/Production gates,
+  and rollback.
+- Risk: high-risk/manual for every later history or Production action.
+- Non-goals: migration repair execution, direct history writes, candidate 023,
+  schema/RLS changes, Production, Auth, configuration, and commerce writes.
+- Gate: later implementation remains blocked until this Architecture Story is
+  manually merged and a separate exact-target implementation action is
+  explicitly approved.
+
 ## Proposed Architecture Story: R2 Product Security Target and Rehearsal v1
 
 - Document: `docs/architecture/R2-PRODUCT-SECURITY-TARGET-AND-REHEARSAL-V1.md`
