@@ -51,22 +51,9 @@ jobs:
         with:
           version: 2.110.0
       - name: Start disposable Supabase stack
-        run: |
-          diagnostic_migration=/tmp/023_product_security_target.sql
-          mv supabase/migrations/023_product_security_target.sql "$diagnostic_migration"
-          if ! supabase start; then
-            mv "$diagnostic_migration" supabase/migrations/023_product_security_target.sql
-            exit 1
-          fi
-          mv "$diagnostic_migration" supabase/migrations/023_product_security_target.sql
+        run: supabase start
       - name: Replay the complete migration chain
         run: supabase db reset --local
-      - name: Diagnose disposable R1 function contracts after replay failure
-        if: failure()
-        run: |
-          docker exec -i supabase_db_gonggamline-ai-sprint-b0 \
-            psql -U postgres -d postgres --no-psqlrc --quiet --tuples-only --no-align --set ON_ERROR_STOP=1 \
-            --command "BEGIN READ ONLY; SELECT concat('R2_CI_R1_FUNCTION_MATRIX|', string_agg(format('%s|owner=%s|security_definer=%s|search_path=%s|PUBLIC=%s|anon=%s|authenticated=%s|service_role=%s', p.proname, pg_catalog.pg_get_userbyid(p.proowner), p.prosecdef, coalesce((SELECT option FROM unnest(p.proconfig) option WHERE option LIKE 'search_path=%'), ''), EXISTS (SELECT 1 FROM pg_catalog.aclexplode(coalesce(p.proacl, pg_catalog.acldefault('f', p.proowner))) acl WHERE acl.grantee = 0 AND acl.privilege_type = 'EXECUTE'), has_function_privilege('anon', p.oid, 'EXECUTE'), has_function_privilege('authenticated', p.oid, 'EXECUTE'), has_function_privilege('service_role', p.oid, 'EXECUTE')), ';' ORDER BY p.proname)) FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'public' AND p.proname = ANY (ARRAY['product_mutation_claim_v1', 'product_mutation_complete_v1', 'import_product_v1', 'patch_product_operator_fields_v1', 'record_product_competition_v1', 'record_manual_competition_analysis_v1', 'record_automatic_competition_analysis_v1']); ROLLBACK;"
       - name: Stop and discard disposable stack
         if: always()
         run: supabase stop --no-backup

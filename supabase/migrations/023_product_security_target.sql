@@ -128,6 +128,7 @@ END $$;
 DO $$
 DECLARE
   v_function record;
+  v_function_oid oid;
   v_pre_state text := pg_catalog.current_setting('gonggamline.r2_pre_state');
 BEGIN
   FOR v_function IN
@@ -141,8 +142,7 @@ BEGIN
       ('record_automatic_competition_analysis_v1', 'bigint, timestamp with time zone, jsonb, text, text, uuid, uuid, text', true)
     ) AS expected(function_name, argument_types, canonical_service_execute)
   LOOP
-    IF NOT EXISTS (
-      SELECT 1
+    SELECT p.oid INTO v_function_oid
       FROM pg_catalog.pg_proc p
       JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
       WHERE n.nspname = 'public'
@@ -150,20 +150,18 @@ BEGIN
         AND pg_catalog.oidvectortypes(p.proargtypes) = v_function.argument_types
         AND pg_catalog.pg_get_userbyid(p.proowner) = 'postgres'
         AND p.prosecdef
-        AND p.proconfig @> ARRAY['search_path=pg_catalog, public']
-    ) THEN
+        AND p.proconfig @> ARRAY['search_path=pg_catalog, public'];
+
+    IF v_function_oid IS NULL THEN
       RAISE EXCEPTION 'R2 precondition failed: function contract drifted for %',
         v_function.function_name;
     END IF;
 
-    IF has_function_privilege('anon',
-         format('public.%I(%s)', v_function.function_name, v_function.argument_types), 'EXECUTE')
+    IF has_function_privilege('anon', v_function_oid, 'EXECUTE')
           IS DISTINCT FROM (v_pre_state = 'RESTORED_DRIFT')
-       OR has_function_privilege('authenticated',
-         format('public.%I(%s)', v_function.function_name, v_function.argument_types), 'EXECUTE')
+       OR has_function_privilege('authenticated', v_function_oid, 'EXECUTE')
           IS DISTINCT FROM (v_pre_state = 'RESTORED_DRIFT')
-       OR has_function_privilege('service_role',
-         format('public.%I(%s)', v_function.function_name, v_function.argument_types), 'EXECUTE')
+       OR has_function_privilege('service_role', v_function_oid, 'EXECUTE')
           IS DISTINCT FROM CASE WHEN v_pre_state = 'RESTORED_DRIFT'
             THEN true ELSE v_function.canonical_service_execute END
        OR EXISTS (
@@ -173,8 +171,7 @@ BEGIN
          CROSS JOIN LATERAL pg_catalog.aclexplode(
            coalesce(p.proacl, pg_catalog.acldefault('f', p.proowner))) acl
          WHERE n.nspname = 'public'
-           AND p.proname = v_function.function_name
-           AND pg_catalog.oidvectortypes(p.proargtypes) = v_function.argument_types
+           AND p.oid = v_function_oid
            AND acl.grantee = 0 AND acl.privilege_type = 'EXECUTE'
        )
     THEN

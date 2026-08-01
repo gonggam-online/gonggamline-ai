@@ -226,23 +226,7 @@ test("R2 candidate 023 accepts only restored drift or canonical 000-022 pre-stat
   assert.match(sql, /\('TRUNCATE', true\), \('REFERENCES', true\), \('TRIGGER', true\)/);
   assert.match(sql, /Product state is mixed or unapproved/);
   assert.match(sql, /current_setting\('gonggamline\.r2_pre_state'\)/);
+  assert.match(sql, /v_function_oid oid/);
+  assert.match(sql, /has_function_privilege\('anon', v_function_oid, 'EXECUTE'\)/);
   assert.doesNotMatch(sql, /v_pre_state\s*:=\s*coalesce/i);
-});
-
-test("temporary R1 CI diagnostic is failure-only, read-only, and contract-bounded", () => {
-  const workflow = read(".github/workflows/ci.yml");
-  const diagnostic = workflow.match(
-    /- name: Diagnose disposable R1 function contracts after replay failure[\s\S]+?(?=\n      - name: Stop and discard disposable stack)/,
-  )?.[0] ?? "";
-  assert.match(diagnostic, /if: failure\(\)/);
-  assert.match(diagnostic, /BEGIN READ ONLY/);
-  assert.match(diagnostic, /R2_CI_R1_FUNCTION_MATRIX/);
-  assert.match(diagnostic, /pg_get_userbyid/);
-  assert.match(diagnostic, /prosecdef/);
-  assert.match(diagnostic, /search_path=%/);
-  assert.match(diagnostic, /has_function_privilege/);
-  for (const functionName of functionSignatures.keys()) {
-    assert.match(diagnostic, new RegExp(`'${functionName}'`));
-  }
-  assert.doesNotMatch(diagnostic, /prosrc|pg_get_functiondef|SELECT\s+\*|DATABASE_URL|password|secret/i);
 });

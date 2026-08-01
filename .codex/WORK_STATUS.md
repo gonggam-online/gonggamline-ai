@@ -12,6 +12,14 @@
   cycle 1/cycle 2, and database writes are prohibited.
 - Exact next action: capture the sanitized matrix, remove the diagnostic and
   staging, correct candidate 023, and rerun the complete gates.
+- Diagnostic run `30689081955` proved all seven functions match the approved
+  owner/security-definer/search_path and execute matrix exactly. No function
+  body, row, secret, Production, or rehearsal target was accessed. The issue is
+  candidate-side signature-string reparsing, not database drift. The temporary
+  diagnostic and staging are removed; privilege checks now reuse the OID found
+  by the exact signature/contract query.
+- Corrected candidate SHA-256:
+  `10672edbdde345b654e76a94f949a275cb0e6194b2a85ee3d2d59fb98967c4ad`.
 
 ## 2026-08-01 - Temporary disposable-CI Product privilege diagnostic
 
