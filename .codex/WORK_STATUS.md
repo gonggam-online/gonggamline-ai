@@ -17,6 +17,12 @@
   variable in one DO block.
 - Revised candidate SHA-256:
   `3e93cb214bf796077e150194b58d09f887b2fb016361389833377d2a0e62f2ea`.
+- Run `30690047471` moved the failure into the combined statement, confirming
+  the setting boundary was removed. The remaining SQL type mismatch is fixed
+  by explicitly casting exact `regprocedure` identities to `oid` for
+  `has_function_privilege()` and catalog comparisons.
+- Revised candidate SHA-256:
+  `f513ffb2dd8586a2b670a413113ff1d186f47318719d7fe54dc004de8ca8cdf4`.
 
 ## 2026-08-01 - Temporary disposable-CI R1 function diagnostic
 

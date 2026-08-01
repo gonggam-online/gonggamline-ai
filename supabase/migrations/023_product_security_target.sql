@@ -146,11 +146,11 @@ BEGIN
         v_function.function_name;
     END IF;
 
-    IF has_function_privilege('anon', v_function.function_oid, 'EXECUTE')
+    IF has_function_privilege('anon', v_function.function_oid::oid, 'EXECUTE')
           IS DISTINCT FROM (v_pre_state = 'RESTORED_DRIFT')
-       OR has_function_privilege('authenticated', v_function.function_oid, 'EXECUTE')
+       OR has_function_privilege('authenticated', v_function.function_oid::oid, 'EXECUTE')
           IS DISTINCT FROM (v_pre_state = 'RESTORED_DRIFT')
-       OR has_function_privilege('service_role', v_function.function_oid, 'EXECUTE')
+       OR has_function_privilege('service_role', v_function.function_oid::oid, 'EXECUTE')
           IS DISTINCT FROM CASE WHEN v_pre_state = 'RESTORED_DRIFT'
             THEN true ELSE v_function.canonical_service_execute END
        OR EXISTS (
@@ -160,7 +160,7 @@ BEGIN
          CROSS JOIN LATERAL pg_catalog.aclexplode(
            coalesce(p.proacl, pg_catalog.acldefault('f', p.proowner))) acl
          WHERE n.nspname = 'public'
-           AND p.oid = v_function.function_oid
+           AND p.oid = v_function.function_oid::oid
            AND acl.grantee = 0 AND acl.privilege_type = 'EXECUTE'
        )
     THEN
