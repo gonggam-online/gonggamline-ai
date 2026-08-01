@@ -1,5 +1,48 @@
 # Work status
 
+## 2026-08-01 - R3 migration-history rehearsal implementation
+
+- Objective: implement the merged R3 Story's fail-closed two-cycle rehearsal
+  evidence contract so R2 Product security can advance toward migration 023.
+- Branch/base: `codex/feat/r3-history-rehearsal`, based on governance merge
+  `9e031bbece37eb0182726404bc9f6554cfe54bba` (`origin/main`).
+- Risk: high-risk/manual Database/history tooling; no auto-merge.
+- Revenue impact: removes the next deterministic blocker to eliminating
+  anonymous Product writes while preventing unsafe historical replay.
+- Root-cause class: database delivery/evidence gap plus execution-transport
+  conflict. The approved network-none target is unreachable by an external
+  Supabase CLI without weakening quarantine or exposing a connection URL.
+- Scope: offline evidence schema/validator, manifest hashes, exact 000-022
+  history, catalog/Product invariance, empty dry-run, deterministic two-cycle
+  replay, negative gates, sanitization, tests, runbook, and Draft PR.
+- Non-goals: repair runner or execution, DB/history/schema/RLS/Auth writes,
+  Production, candidate 023, PR #64 merge, secrets/config, or commerce writes.
+- Completed: latest main and merged R3 authority confirmed; R2 blocker and
+  existing artifacts audited; dedicated branch created; validator, tests,
+  runbook, Architecture Review, Decision Log, and changelog implemented.
+- Current work: local validation complete; final review and delivery pending.
+- Blocker / owner action: after this implementation is validated, approve one
+  exact non-Production transport design before any repair adapter or command.
+- Changed files: R3 validator, tests, implementation runbook, changelog,
+  Architecture Review, Decision Log, and this status record.
+- Local-only artifacts: no new dump, restore, evidence, credential, or database
+  was created. The previously approved dump/restore remains outside Git.
+- Validation: focused R3 implementation tests passed 4/4; full tests passed
+  390/390; lint passed with zero errors and four pre-existing warnings;
+  typecheck passed; Production build passed with 84 routes; diff check passed.
+  Local Playwright passed 33, skipped 2, and failed 7 only on the established
+  Supabase-unconfigured route group (`/listing`, `/market`, `/procurement`,
+  `/revenue`, `/sourcing`, `/workflow`, `/workspace`); R1 Product mutation
+  fail-close and revenue-critical checks passed.
+- Delivery: pending high-risk Draft PR with `manual-merge-required`.
+- Exact next action: review/stage the complete diff, commit/push, create the
+  high-risk Draft PR, verify exact-head CI/Preview, then present the exact
+  transport approval boundary.
+- Remaining risks: CLI connectivity under quarantine, logical-dump global-role
+  omissions, exact 021/022 semantic equivalence, and concurrent Production
+  drift remain unresolved. Production remains prohibited.
+
+
 ## 2026-08-01 - Revenue-speed, cloud portability, and autonomy governance
 
 - Objective: make fast measurable revenue, cross-PC cloud-portable state, and

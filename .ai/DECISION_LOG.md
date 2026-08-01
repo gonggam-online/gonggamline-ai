@@ -1,5 +1,37 @@
 # Decision log
 
+## 2026-08-01 — R3 rehearsal evidence validator and transport stop
+
+- Category: implementation decision under merged R3 Architecture Story PR #65.
+- Decision: implement the deterministic two-cycle evidence validator now, but
+  do not implement or execute a repair adapter until an approved transport can
+  connect the pinned official CLI to the quarantined restore without exposing
+  a database URL or weakening network isolation.
+- Evidence: the approved target has Docker network mode `none` and no published
+  ports. An external Supabase CLI cannot reach it; direct migration-history SQL
+  remains permanently prohibited.
+- Impact: manifest, quarantine, exact history, catalog/Product invariance,
+  dry-run, replay, sanitization, and negative gates become executable contracts.
+- Rollback: revert the validator, tests, runbook, and changelog. No database or
+  migration-history state is changed by this decision.
+
+
+## 2026-08-01 — R3 rehearsal evidence validator and transport stop
+
+- Category: implementation decision under merged R3 Architecture Story PR #65.
+- Decision: implement the deterministic two-cycle evidence validator now, but
+  do not implement or execute a repair adapter until an approved transport can
+  connect the pinned official CLI to the quarantined restore without exposing
+  a database URL or weakening network isolation.
+- Evidence: the approved target has Docker network mode `none` and no published
+  ports. An external Supabase CLI cannot reach it; direct migration-history SQL
+  remains permanently prohibited.
+- Impact: manifest, quarantine, exact history, catalog/Product invariance,
+  dry-run, replay, sanitization, and negative gates become executable contracts.
+- Rollback: revert the validator, tests, runbook, and changelog. No database or
+  migration-history state is changed by this decision.
+
+
 ## 2026-08-01 — Revenue-speed, cloud-portable autonomous delivery
 
 - Category: accepted governance amendment directed by the repository owner.
