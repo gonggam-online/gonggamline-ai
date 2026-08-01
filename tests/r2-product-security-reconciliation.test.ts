@@ -173,6 +173,7 @@ test("R2 candidate 023 is inventory-bound, transactional, and forward-only", () 
   assert.match(sql, /COMMIT;\s*$/);
   assert.match(sql, /dbf1c4daedf92a85f86513885d8daf4fa2905ca9d1e5e16d123c5697e75a3d56/);
   assert.match(sql, /Product state is mixed or unapproved/);
+  assert.match(sql, /R2 pre-state summary/);
   assert.match(sql, /v_restored_grants_match/);
   assert.match(sql, /public creator role inventory drifted/);
   assert.match(sql, /restored execute drift classification changed/);

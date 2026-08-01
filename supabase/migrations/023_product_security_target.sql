@@ -70,6 +70,11 @@ BEGIN
     WHERE has_table_privilege(role_name, 'public.products', privilege_name)
   ) INTO v_canonical_grants_match;
 
+  RAISE WARNING
+    'R2 pre-state summary: rls=%, policies=%, restored_grants=%, canonical_zero_grants=%',
+    v_rls_enabled, coalesce(array_length(v_policy_state, 1), 0),
+    v_restored_grants_match, v_canonical_grants_match;
+
   IF EXISTS (
     SELECT 1
     FROM pg_catalog.pg_class c
