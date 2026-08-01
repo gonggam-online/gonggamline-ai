@@ -65,8 +65,8 @@ BEGIN
     SELECT 1
     FROM unnest(ARRAY['anon', 'authenticated', 'service_role']) role_name
     CROSS JOIN (VALUES
-      ('SELECT', true), ('INSERT', true), ('UPDATE', true), ('DELETE', true),
-      ('TRUNCATE', false), ('REFERENCES', false), ('TRIGGER', false)
+      ('SELECT', false), ('INSERT', false), ('UPDATE', false), ('DELETE', false),
+      ('TRUNCATE', true), ('REFERENCES', true), ('TRIGGER', true)
     ) expected(privilege_name, is_granted)
     WHERE has_table_privilege(role_name, 'public.products',
       expected.privilege_name) IS DISTINCT FROM expected.is_granted

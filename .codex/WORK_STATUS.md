@@ -20,6 +20,16 @@
   diagnostic (`No such container`). No matrix or database data was emitted.
   The runner-only sequence will now start exact 000-022, restore the tracked
   023 file, and exercise 000-023 through `db reset` before the failure-only read.
+- Corrected diagnostic run `30688465822` captured the complete allowed matrix:
+  RLS false, zero policies, CRUD false and TRUNCATE/REFERENCES/TRIGGER true for
+  each of `anon`, `authenticated`, and `service_role`. It queried no row data
+  or secrets. The temporary workflow diagnostic and staging are now removed.
+- Corrected candidate SHA-256:
+  `3ee46f88f9e4f74ce5b97c163a0ac35085fd4d9754fb49f359eefd0d68b3b15f`.
+  Full local gates passed: lint zero errors/four pre-existing warnings,
+  typecheck, 408/408 tests, and Production build with 84 routes.
+  Exact next action: commit and push, then require the unmodified disposable
+  000-023 replay and exact-head Preview to pass.
 
 ## 2026-08-01 - R2 candidate 023 static implementation
 
