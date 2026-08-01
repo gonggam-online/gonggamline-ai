@@ -39,21 +39,30 @@
   DB/restore/RLS/Production actions remain stopped at their separate concrete
   approval gate. Grant/fingerprint hardening, delivery, and exact-head gates
   pass (14/15 revised checkpoints).
+- Restore checkpoint: the owner approved a read-only Production logical dump
+  and an exact local isolated restore. Custom archive
+  `r2-production-readonly-20260801-101257.dump` is 669,804 bytes with SHA-256
+  `E3EB20E15E481C5A959978E2AE18E972088E3E263019F50F943AF15CF3AF6FDB`,
+  PostgreSQL 17.6, and 1,232 listed entries. It was restored only into local
+  container `r2-rehearsal-db-0328e62`, volume
+  `r2_rehearsal_db_0328e62`, with Docker network `none`, no published ports,
+  and a read-only archive mount. The archive omitted global roles; its one
+  missing referenced built-in owner, `supabase_realtime_admin`, was synthesized
+  as a local `NOLOGIN` role and is a restore-fidelity limitation.
 - Blocker / owner action: Production project `sxvtznmoemrcwifungnb` is on the
   Supabase Free Plan, and its Dashboard explicitly reports that Free projects
   have no downloadable scheduled backups. The downloaded
   `db_cluster-31-07-2026@09-35-55.backup.gz` belongs to Preview project
   `nsmiostuibktcucfctey`, so it is not accepted Production evidence. The owner
-  approved a read-only Production logical dump and knows the DB password, but
-  the direct endpoint is IPv6-only from this Docker host and secure remote
-  password entry remains unresolved. The repository owner must therefore
-  provide local interactive access for the approved Session-pooler dump or
-  select a provider-approved sanitized clone, then approve restore into a new
-  isolated non-Production Supabase project, prove it has no Production domain,
-  marketplace credentials, webhooks, schedules, queues, outbound email, or
-  paid-provider access, and authorize read-only catalog inventory plus synthetic
-  namespaced Product rehearsal writes on that target. Target-specific secrets
-  remain only in the approved secret store and must not be pasted or committed.
+  completed the approved read-only Production Session-pooler dump and isolated
+  local restore. The restored archive and database both contain zero
+  `supabase_migrations` references; the schema and `schema_migrations` relation
+  are absent while `products`, `product_mutation_requests`, and
+  `security_audit_events` exist. The approved collector therefore failed closed
+  before emitting evidence. Candidate 023, replay, negative writes, and PR
+  merge are blocked by the mandatory exact 000-022 history gate. The
+  quarantined container is stopped with its dedicated volume retained for
+  evidence; Production remained read-only.
 - Changed files: read-only inventory SQL and collector, R2 static security
   tests, rehearsal runbook/changelog, and this status record. No migration SQL
   or runtime code.
@@ -82,12 +91,11 @@
 - Last commit: `09ac92b test: classify R2 privilege inventory`.
 - Delivery: branch pushed; Draft PR #64 targets `main`, has
   `manual-merge-required`, and has no auto-merge.
-- Exact next action: obtain the exact Session-pooler URI from the Production
-  Dashboard and enter the known password locally (never in chat) to create a
-  current logical dump; otherwise provision a separately approved sanitized
-  clone. Restore only to an isolated quarantined target, capture and validate
-  sanitized pre-inventory, stop on any drift/unknown authority, and generate
-  candidate 023 only if every inventory gate passes.
+- Exact next action: classify why deployed migration history is absent and
+  complete a separate owner-approved R3 migration-history reconciliation plan.
+  Do not synthesize 000-022 history from repository files or generate candidate
+  023. Resume R2 inventory only after an authoritative history repair or a
+  provider restore proves the exact deployed sequence.
 - Remaining risks: restore fidelity/quarantine; deployed 022/history/policy/
   grant/owner/default-ACL drift; service-role bypass scope; intentional public
   Product SELECT; future Production concurrency. Anonymous writes must never be
