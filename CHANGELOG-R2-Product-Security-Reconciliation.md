@@ -2,6 +2,9 @@
 
 ## Candidate 023 checkpoint - 2026-08-01
 
+- Classified the only two accepted pre-states: the exact restored inventory
+  drift and the canonical fresh 000-022 chain. Mixed or unknown Product and R1
+  privilege states fail closed; both converge to the same R2 postconditions.
 - Added the inventory-bound, forward-only `023_product_security_target.sql`
   candidate from sanitized restored inventory fingerprint
   `dbf1c4daedf92a85f86513885d8daf4fa2905ca9d1e5e16d123c5697e75a3d56`.

@@ -19,10 +19,12 @@
   two exact anon write policies, preserves anon read, denies direct Product
   writes, reasserts four service-role mutation entry points and helper denial,
   restricts owner-specific default privileges, and verifies postconditions.
-- Candidate SHA-256:
-  `1823c789c744ae5285c1e18189245d65ed5b6fdd82fec516480bc9d98daf3b2f`.
-- Verification: focused R2/baseline suites passed 19/19; full tests passed
-  407/407; lint passed with zero errors and four pre-existing warnings;
+- Candidate SHA-256 after exact dual-pre-state correction:
+  `b0b2fe6231283e0f147f1b24bd9aff17669215ff0873c659ca00572f7e8c8567`.
+- Verification: corrected focused R2/baseline suites passed 20/20; full tests
+  passed 408/408 after two unrelated Orchestrator timing failures were
+  reproduced as flaky and then passed both focused and full reruns. Lint passed
+  with zero errors and four pre-existing warnings;
   typecheck passed; Production build passed with 84 routes; diff check passed.
   The baseline manifest now pins all 24 migrations and the exact candidate
   hash. No database was started, connected to, or changed.
@@ -30,6 +32,12 @@
   trigger the repository's disposable database replay, so obtain exact approval
   for that isolated CI schema execution before push; restored cycle targets and
   Production remain prohibited.
+- First exact-head replay evidence: CI run `30686856094` proved the original
+  restored-only precondition correctly failed closed on the canonical fresh
+  000-022 chain; three disposable DB jobs stopped and cleaned up. Preview run
+  `30686856102` passed. The unrelated Orchestrator Phase 3 termination timing
+  test failed once in CI while passing locally. Owner approved the focused
+  dual-pre-state correction and another disposable replay.
 
 ## 2026-08-01 - R2 read-only restored inventory after cycle 2
 

@@ -172,8 +172,8 @@ test("R2 candidate 023 is inventory-bound, transactional, and forward-only", () 
   assert.match(sql, /^BEGIN;/);
   assert.match(sql, /COMMIT;\s*$/);
   assert.match(sql, /dbf1c4daedf92a85f86513885d8daf4fa2905ca9d1e5e16d123c5697e75a3d56/);
-  assert.match(sql, /Product policy inventory drifted/);
-  assert.match(sql, /Product effective grants drifted/);
+  assert.match(sql, /Product state is mixed or unapproved/);
+  assert.match(sql, /v_restored_grants_match/);
   assert.match(sql, /public creator role inventory drifted/);
   assert.match(sql, /restored execute drift classification changed/);
   assert.doesNotMatch(sql, /supabase_migrations|schema_migrations/);
@@ -182,9 +182,9 @@ test("R2 candidate 023 is inventory-bound, transactional, and forward-only", () 
 
 test("R2 candidate 023 removes anonymous Product writes by exact policy name", () => {
   const sql = read("supabase/migrations/023_product_security_target.sql");
-  assert.match(sql, /DROP POLICY "Allow public insert products" ON public\.products/);
-  assert.match(sql, /DROP POLICY "Allow public update products" ON public\.products/);
-  assert.match(sql, /DROP POLICY "Allow public read products" ON public\.products/);
+  assert.match(sql, /DROP POLICY IF EXISTS "Allow public insert products" ON public\.products/);
+  assert.match(sql, /DROP POLICY IF EXISTS "Allow public update products" ON public\.products/);
+  assert.match(sql, /DROP POLICY IF EXISTS "Allow public read products" ON public\.products/);
   assert.match(sql, /CREATE POLICY "Allow public read products"[\s\S]+FOR SELECT TO anon USING \(true\)/);
   assert.match(sql, /REVOKE ALL PRIVILEGES ON TABLE public\.products FROM PUBLIC, anon, authenticated/);
   assert.match(sql, /GRANT SELECT ON TABLE public\.products TO anon, service_role/);
@@ -213,4 +213,16 @@ test("R2 candidate 023 reasserts the exact R1 execute and default ACL matrix", (
   assert.match(sql, /ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public[\s\S]+ON SEQUENCES/);
   assert.match(sql, /ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public[\s\S]+ON FUNCTIONS/);
   assert.match(sql, /browser-facing default privileges remain/);
+});
+
+test("R2 candidate 023 accepts only restored drift or canonical 000-022 pre-state", () => {
+  const sql = read("supabase/migrations/023_product_security_target.sql");
+  assert.match(sql, /v_pre_state := 'RESTORED_DRIFT'/);
+  assert.match(sql, /v_pre_state := 'CANONICAL_000_022'/);
+  assert.match(sql, /v_policy_state IS NULL/);
+  assert.match(sql, /v_restored_grants_match/);
+  assert.match(sql, /v_canonical_grants_match/);
+  assert.match(sql, /Product state is mixed or unapproved/);
+  assert.match(sql, /current_setting\('gonggamline\.r2_pre_state'\)/);
+  assert.doesNotMatch(sql, /v_pre_state\s*:=\s*coalesce/i);
 });

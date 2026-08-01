@@ -6,6 +6,10 @@ DO $$
 DECLARE
   v_policy_state text[];
   v_creator_roles text[];
+  v_rls_enabled boolean;
+  v_restored_grants_match boolean;
+  v_canonical_grants_match boolean;
+  v_pre_state text;
 BEGIN
   IF to_regclass('public.products') IS NULL THEN
     RAISE EXCEPTION 'R2 precondition failed: public.products is absent';
@@ -19,11 +23,15 @@ BEGIN
       AND c.relname = 'products'
       AND c.relkind = 'r'
       AND pg_catalog.pg_get_userbyid(c.relowner) = 'postgres'
-      AND c.relrowsecurity
       AND NOT c.relforcerowsecurity
   ) THEN
-    RAISE EXCEPTION 'R2 precondition failed: Product owner or RLS state drifted';
+    RAISE EXCEPTION 'R2 precondition failed: Product owner or FORCE RLS state drifted';
   END IF;
+
+  SELECT c.relrowsecurity INTO v_rls_enabled
+  FROM pg_catalog.pg_class c
+  JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+  WHERE n.nspname = 'public' AND c.relname = 'products';
 
   SELECT array_agg(
     concat_ws('|', p.policyname, p.cmd, array_to_string(p.roles, ','),
@@ -33,15 +41,7 @@ BEGIN
   FROM pg_catalog.pg_policies p
   WHERE p.schemaname = 'public' AND p.tablename = 'products';
 
-  IF v_policy_state IS DISTINCT FROM ARRAY[
-    'Allow public insert products|INSERT|anon||true',
-    'Allow public read products|SELECT|anon|true|',
-    'Allow public update products|UPDATE|anon|true|true'
-  ]::text[] THEN
-    RAISE EXCEPTION 'R2 precondition failed: Product policy inventory drifted';
-  END IF;
-
-  IF EXISTS (
+  SELECT NOT EXISTS (
     SELECT 1
     FROM (VALUES
       ('anon', 'SELECT', true), ('anon', 'INSERT', true),
@@ -59,9 +59,16 @@ BEGIN
     ) expected(role_name, privilege_name, is_granted)
     WHERE has_table_privilege(expected.role_name, 'public.products',
       expected.privilege_name) IS DISTINCT FROM expected.is_granted
-  ) THEN
-    RAISE EXCEPTION 'R2 precondition failed: Product effective grants drifted';
-  END IF;
+  ) INTO v_restored_grants_match;
+
+  SELECT NOT EXISTS (
+    SELECT 1
+    FROM unnest(ARRAY['anon', 'authenticated', 'service_role']) role_name
+    CROSS JOIN unnest(ARRAY[
+      'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER'
+    ]) privilege_name
+    WHERE has_table_privilege(role_name, 'public.products', privilege_name)
+  ) INTO v_canonical_grants_match;
 
   IF EXISTS (
     SELECT 1
@@ -73,6 +80,27 @@ BEGIN
       AND acl.grantee = 0
   ) THEN
     RAISE EXCEPTION 'R2 precondition failed: PUBLIC Product grants drifted';
+  END IF;
+
+  IF v_rls_enabled
+     AND v_policy_state IS NOT DISTINCT FROM ARRAY[
+       'Allow public insert products|INSERT|anon||true',
+       'Allow public read products|SELECT|anon|true|',
+       'Allow public update products|UPDATE|anon|true|true'
+     ]::text[]
+     AND v_restored_grants_match
+  THEN
+    v_pre_state := 'RESTORED_DRIFT';
+  ELSIF NOT v_rls_enabled
+        AND v_policy_state IS NULL
+        AND v_canonical_grants_match
+  THEN
+    v_pre_state := 'CANONICAL_000_022';
+  ELSE
+    RAISE EXCEPTION
+      'R2 precondition failed: Product state is mixed or unapproved (rls=%, policies=%, restored_grants=%, canonical_zero_grants=%)',
+      v_rls_enabled, coalesce(array_length(v_policy_state, 1), 0),
+      v_restored_grants_match, v_canonical_grants_match;
   END IF;
 
   SELECT array_agg(role_name ORDER BY role_name) INTO v_creator_roles
@@ -91,22 +119,25 @@ BEGIN
   IF v_creator_roles IS DISTINCT FROM ARRAY['postgres']::text[] THEN
     RAISE EXCEPTION 'R2 precondition failed: public creator role inventory drifted';
   END IF;
+
+  PERFORM pg_catalog.set_config('gonggamline.r2_pre_state', v_pre_state, true);
 END $$;
 
 DO $$
 DECLARE
   v_function record;
+  v_pre_state text := pg_catalog.current_setting('gonggamline.r2_pre_state');
 BEGIN
   FOR v_function IN
     SELECT * FROM (VALUES
-      ('product_mutation_claim_v1', 'text, text, text, text, uuid'),
-      ('product_mutation_complete_v1', 'uuid, bigint, jsonb, uuid, text, text, uuid'),
-      ('import_product_v1', 'jsonb, text, text, uuid, uuid'),
-      ('patch_product_operator_fields_v1', 'bigint, timestamp with time zone, jsonb, text, text, uuid, uuid'),
-      ('record_product_competition_v1', 'bigint, timestamp with time zone, jsonb, text, text, text, uuid, uuid, text'),
-      ('record_manual_competition_analysis_v1', 'bigint, timestamp with time zone, jsonb, text, text, uuid, uuid'),
-      ('record_automatic_competition_analysis_v1', 'bigint, timestamp with time zone, jsonb, text, text, uuid, uuid, text')
-    ) AS expected(function_name, argument_types)
+      ('product_mutation_claim_v1', 'text, text, text, text, uuid', false),
+      ('product_mutation_complete_v1', 'uuid, bigint, jsonb, uuid, text, text, uuid', false),
+      ('import_product_v1', 'jsonb, text, text, uuid, uuid', true),
+      ('patch_product_operator_fields_v1', 'bigint, timestamp with time zone, jsonb, text, text, uuid, uuid', true),
+      ('record_product_competition_v1', 'bigint, timestamp with time zone, jsonb, text, text, text, uuid, uuid, text', false),
+      ('record_manual_competition_analysis_v1', 'bigint, timestamp with time zone, jsonb, text, text, uuid, uuid', true),
+      ('record_automatic_competition_analysis_v1', 'bigint, timestamp with time zone, jsonb, text, text, uuid, uuid, text', true)
+    ) AS expected(function_name, argument_types, canonical_service_execute)
   LOOP
     IF NOT EXISTS (
       SELECT 1
@@ -123,12 +154,16 @@ BEGIN
         v_function.function_name;
     END IF;
 
-    IF NOT has_function_privilege('anon',
+    IF has_function_privilege('anon',
          format('public.%I(%s)', v_function.function_name, v_function.argument_types), 'EXECUTE')
-       OR NOT has_function_privilege('authenticated',
+          IS DISTINCT FROM (v_pre_state = 'RESTORED_DRIFT')
+       OR has_function_privilege('authenticated',
          format('public.%I(%s)', v_function.function_name, v_function.argument_types), 'EXECUTE')
-       OR NOT has_function_privilege('service_role',
+          IS DISTINCT FROM (v_pre_state = 'RESTORED_DRIFT')
+       OR has_function_privilege('service_role',
          format('public.%I(%s)', v_function.function_name, v_function.argument_types), 'EXECUTE')
+          IS DISTINCT FROM CASE WHEN v_pre_state = 'RESTORED_DRIFT'
+            THEN true ELSE v_function.canonical_service_execute END
        OR EXISTS (
          SELECT 1
          FROM pg_catalog.pg_proc p
@@ -151,9 +186,9 @@ REVOKE ALL PRIVILEGES ON TABLE public.products FROM PUBLIC, anon, authenticated;
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER
   ON TABLE public.products FROM service_role;
 
-DROP POLICY "Allow public insert products" ON public.products;
-DROP POLICY "Allow public update products" ON public.products;
-DROP POLICY "Allow public read products" ON public.products;
+DROP POLICY IF EXISTS "Allow public insert products" ON public.products;
+DROP POLICY IF EXISTS "Allow public update products" ON public.products;
+DROP POLICY IF EXISTS "Allow public read products" ON public.products;
 
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read products"
