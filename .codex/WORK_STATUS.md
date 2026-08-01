@@ -1,5 +1,68 @@
 # Work status
 
+## 2026-08-01 - R3 Production history repair and security rollout preflight
+
+- Objective: after R2 merge, obtain a new verified Production backup, repeat
+  the exact read-only schema/history comparison, review the official CLI dry
+  run and rollback evidence, and apply only separately approved history repair
+  and migration 023 in the approved order.
+- Branch/base: `codex/chore/r3-production-rollout`, based on PR #64 merge
+  `28b8877534c27b53b891b7b6507b2e18cc60a691` at latest `origin/main`.
+- Risk: high-risk/manual Database, migration history, RLS/AuthZ, and Production.
+  Every Production/history/schema action requires its exact owner approval;
+  auto-merge is prohibited.
+- Revenue impact: completes removal of anonymous Product mutation authority
+  without replaying historical DDL or risking an unverified Production push.
+- Root-cause class: external configuration and backup readiness. Production is
+  Healthy but on the Supabase Free Plan with no scheduled downloadable backup.
+- Completed: verified the clean starting tree; confirmed PR #64 is merged at
+  the exact latest `origin/main` and its CI/Preview gates passed; created the
+  dedicated non-main branch; audited the merged candidate 023, R3 architecture,
+  pinned Supabase CLI 2.110.0 sidecar, two deterministic non-Production repair
+  cycles, rollback rules, and existing backup metadata.
+- Current work: the new restricted backup and direct Production read-only
+  preflight are complete. Preparing local validation and the exact owner packet;
+  no Production history/schema/RLS/Auth write has occurred.
+- Backup gate: the prior `2026-07-31-pre-migration-022` SQL artifacts predate
+  this rollout. Their directory ACL currently grants broader local
+  Authenticated Users modify and Users read/execute access, so it is not an
+  acceptable destination for new sensitive evidence. The previously rehearsed
+  custom archive is also not a new R3 Production backup.
+- Tooling: PATH has no `supabase`, `pg_dump`, or `pg_restore`; no Production
+  credential environment variable or local secret file is present. Verified
+  local images include `gonggamline/r3-supabase-cli:2.110.0` and
+  `public.ecr.aws/supabase/postgres:17.6.1.147`. The three rehearsal containers
+  are stopped, network `none`, with no published ports.
+- Backup evidence: restricted PostgreSQL 17.6 custom archive created at
+  `2026-08-01T18:21:12.9036635+09:00`, 669804 bytes, SHA-256
+  `2BC389088AA1FB085039AF97B0A5FB927A2395A6BAF907C6078DB9C5D2F3C164`;
+  `pg_restore --list` passed with 1,247 TOC lines and the ACL contains only the
+  current user, SYSTEM, and Administrators.
+- Read-only preflight: `BEGIN READ ONLY`/`ROLLBACK` evidence is 4,584 bytes,
+  24 rows, SHA-256
+  `DE6D2E2A68AC7DAF9D7FA8BEA23AE6DA104AB3C1FA8033A275C5568D2E5336C7`.
+  History is absent; 61 public tables, five named 021/022 relations, nine named
+  functions, the three classified historical Product policies, and five
+  expected extensions match the bounded R3 classification.
+- Credential incident: a reset Database password was exposed in a user-created
+  screenshot. It was treated as compromised, helper processes were stopped,
+  and the owner rotated it again. The replacement password was used only via a
+  local clipboard-to-memory channel and the clipboard was overwritten
+  immediately. No secret belongs in Git or this status.
+- Owner action / blocker: approve an exact Asia/Seoul maintenance window and a
+  short-lived Supabase access token for a pinned CLI `--linked` runner using
+  ephemeral `SUPABASE_ACCESS_TOKEN` and `SUPABASE_DB_PASSWORD`. Then separately
+  approve exactly the 000-022 official history repair. The 023 apply remains a
+  second explicit approval after the dry run lists only 023.
+- Exact next action: validate and deliver the approval-packet-only diff, then
+  stop for the exact Production history-repair approval. Do not link, repair,
+  dry-run, or push before that decision.
+- Remaining risks: logical dumps omit global role attributes; current
+  Production drift must match the approved R3/R2 classifications exactly;
+  any unexpected object, policy, grant, owner, function body, default ACL,
+  migration version, or dry-run output stops rollout. No rollback may restore
+  anonymous Product writes.
+
 ## 2026-08-01 - Temporary disposable-CI R1 predicate diagnostic
 
 - Owner approved a final failure-only, read-only diagnostic against PR #64's
