@@ -228,3 +228,18 @@ test("R2 candidate 023 accepts only restored drift or canonical 000-022 pre-stat
   assert.match(sql, /current_setting\('gonggamline\.r2_pre_state'\)/);
   assert.doesNotMatch(sql, /v_pre_state\s*:=\s*coalesce/i);
 });
+
+test("temporary R2 CI diagnostic is failure-only, read-only, and emits no row data", () => {
+  const workflow = read(".github/workflows/ci.yml");
+  const diagnostic = workflow.match(
+    /- name: Diagnose disposable Product privileges after replay failure[\s\S]+?(?=\n      - name: Stop and discard disposable stack)/,
+  )?.[0] ?? "";
+  assert.match(diagnostic, /if: failure\(\)/);
+  assert.match(diagnostic, /BEGIN READ ONLY/);
+  assert.match(diagnostic, /pg_catalog\.pg_policies/);
+  assert.match(diagnostic, /has_table_privilege/);
+  assert.match(diagnostic, /R2_CI_PRODUCT_PRIVILEGE_MATRIX/);
+  assert.match(diagnostic, /\['anon', 'authenticated', 'service_role'\]/);
+  assert.match(diagnostic, /\['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER'\]/);
+  assert.doesNotMatch(diagnostic, /SELECT\s+\*|SUPABASE_DB_URL|DATABASE_URL|password|secret/i);
+});

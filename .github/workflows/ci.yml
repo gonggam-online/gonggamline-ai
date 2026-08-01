@@ -54,6 +54,12 @@ jobs:
         run: supabase start
       - name: Replay the complete migration chain
         run: supabase db reset --local
+      - name: Diagnose disposable Product privileges after replay failure
+        if: failure()
+        run: |
+          docker exec -i supabase_db_gonggamline-ai-sprint-b0 \
+            psql -U postgres -d postgres --no-psqlrc --quiet --tuples-only --no-align --set ON_ERROR_STOP=1 \
+            --command "BEGIN READ ONLY; SELECT concat('R2_CI_PRODUCT_PRIVILEGE_MATRIX|rls=', (SELECT relrowsecurity::text FROM pg_catalog.pg_class WHERE oid = 'public.products'::regclass), '|policies=', (SELECT count(*)::text FROM pg_catalog.pg_policies WHERE schemaname = 'public' AND tablename = 'products'), '|grants=', (SELECT string_agg(format('%s/%s=%s', role_name, privilege_name, has_table_privilege(role_name, 'public.products', privilege_name)), ',' ORDER BY role_name, privilege_name) FROM unnest(ARRAY['anon', 'authenticated', 'service_role']) AS roles(role_name) CROSS JOIN unnest(ARRAY['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER']) AS privileges(privilege_name))); ROLLBACK;"
       - name: Stop and discard disposable stack
         if: always()
         run: supabase stop --no-backup

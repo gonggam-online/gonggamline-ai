@@ -1,5 +1,21 @@
 # Work status
 
+## 2026-08-01 - Temporary disposable-CI Product privilege diagnostic
+
+- Objective: resolve the remaining candidate 023 canonical pre-state mismatch
+  using one failure-only, read-only diagnostic in `ci-db-baseline-replay`.
+- Authority: owner approved the temporary diagnostic, exact matrix capture,
+  immediate diagnostic removal, candidate correction, verification, push, and
+  disposable replay. Production and cycle 1/cycle 2 access remain prohibited.
+- Scope: emit only Product RLS state, policy count, and the seven table
+  privilege booleans for `anon`, `authenticated`, and `service_role` from the
+  disposable GitHub Actions database. No secrets or row data are queried.
+- Current head before diagnostic: `4a479cbe91e2fddb4812318607a20f9d6cfa4c22`;
+  current candidate SHA-256:
+  `38e4fee2acf83d00cc941bb35bb04e2616894017da50ce8365d62b3179c2df5b`.
+- Exact next action: push the temporary diagnostic, capture the failed replay's
+  sanitized matrix, then remove the diagnostic and correct candidate 023.
+
 ## 2026-08-01 - R2 candidate 023 static implementation
 
 - Objective: generate and statically validate the inventory-derived
