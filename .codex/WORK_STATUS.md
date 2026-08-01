@@ -1,5 +1,49 @@
 # Work status
 
+## 2026-08-01 - Revenue-speed, cloud portability, and autonomy governance
+
+- Objective: make fast measurable revenue, cross-PC cloud-portable state, and
+  autonomous normal-risk continuation explicit permanent development rules.
+- Branch/base: `codex/docs/revenue-cloud-autonomy`, based on merged R3 PR #65
+  at `14f215e156708844d82f43945f89a178c22741c4` (`origin/main`).
+- Risk: normal-risk governance documentation; no runtime, schema, Auth,
+  Production, commerce, secret, or external configuration mutation.
+- Revenue impact: prevents speculative system-building from displacing the
+  shortest reliable path to a measurable first and next sale.
+- Root-cause class: process/governance gap. Existing rules stated the revenue
+  mission and GitHub source of truth but did not make revenue speed and local
+  data minimization explicit execution gates.
+- Scope: AGENTS and permanent governance rules for revenue-path admission,
+  approved-cloud-first state, local artifact retention/cleanup, cross-PC
+  recovery, autonomous continuation, progress, and preserved approval limits.
+- Non-goals: runtime code, architecture boundary, database/RLS/Auth,
+  Production, secrets/configuration, paid calls, commerce writes, or weakening
+  high-risk/manual merge controls.
+- Completed: latest main and clean worktree confirmed; governing documents
+  audited; dedicated branch created; policy amendments, changelog, and static
+  regression tests implemented; local repository gates completed.
+- Current work: final diff/secret review and normal-risk delivery.
+- Changed files: `AGENTS.md`, CTO directive, Constitution, business priority,
+  operating standard, autonomous development, Decision Log, changelog, and
+  this status record.
+- Local-only artifacts: none created for this Story beyond ordinary repository
+  tooling/cache; no dump, credential, or business dataset is in scope.
+- Validation: governance regression tests passed 3/3 as part of the full suite;
+  full tests passed 386/386; lint passed with zero errors and four pre-existing
+  warnings; typecheck passed; Production build passed with 84 routes; diff
+  check passed. Local Playwright passed 33, skipped 2, and failed 7 only on the
+  established Supabase-unconfigured route group (`/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, `/workspace`); R1
+  anonymous Product mutation fail-close and revenue-critical checks passed.
+- Delivery: pending normal-risk PR; native auto-merge only after all exact-head
+  gates pass.
+- Exact next action: review/stage the complete diff, commit/push, create the PR,
+  and validate exact-head CI/Preview before normal-risk auto-merge eligibility.
+- Remaining risks: cloud providers can add cost, residency, access, and outage
+  risk; approved service selection and secret/data classification remain
+  task-specific. Automation remains bounded by credentials and approvals.
+
+
 ## 2026-08-01 - R3 migration-history reconciliation architecture
 
 - Objective: design a safe official-CLI migration-history reconciliation that

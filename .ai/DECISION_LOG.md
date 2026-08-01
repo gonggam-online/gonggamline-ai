@@ -1,5 +1,47 @@
 # Decision log
 
+## 2026-08-01 — Revenue-speed, cloud-portable autonomous delivery
+
+- Category: accepted governance amendment directed by the repository owner.
+- Decision: make the shortest safe path to measurable revenue the first
+  planning gate; prefer approved cloud sources of truth and minimum ephemeral
+  local storage; continue authorized normal-risk delivery autonomously through
+  feedback and the next safe action.
+- Rationale: prevent prolonged system-building without sales, allow operations
+  and Codex work to resume from any authorized PC, and reduce routine owner
+  handoffs.
+- Safety boundary: cloud-first does not permit uploading secrets or sensitive
+  Production/business data to unapproved services. Autonomy does not weaken
+  Production, database, RLS/Auth, secrets/configuration, commerce, paid,
+  destructive, or high-risk manual-merge approvals.
+- Impact: Story admission and WORK_STATUS records must identify the earliest
+  blocked revenue step, measurable proof, remote source of truth, local-only
+  artifacts and cleanup, and the next autonomous action.
+- Rollback: revert this governance Story. Existing stricter safety and approval
+  controls remain independently binding.
+
+
+## 2026-08-01 — Revenue-speed, cloud-portable autonomous delivery
+
+- Category: accepted governance amendment directed by the repository owner.
+- Decision: make the shortest safe path to measurable revenue the first
+  planning gate; prefer approved cloud sources of truth and minimum ephemeral
+  local storage; continue authorized normal-risk delivery autonomously through
+  feedback and the next safe action.
+- Rationale: prevent prolonged system-building without sales, allow operations
+  and Codex work to resume from any authorized PC, and reduce routine owner
+  handoffs.
+- Safety boundary: cloud-first does not permit uploading secrets or sensitive
+  Production/business data to unapproved services. Autonomy does not weaken
+  Production, database, RLS/Auth, secrets/configuration, commerce, paid,
+  destructive, or high-risk manual-merge approvals.
+- Impact: Story admission and WORK_STATUS records must identify the earliest
+  blocked revenue step, measurable proof, remote source of truth, local-only
+  artifacts and cleanup, and the next autonomous action.
+- Rollback: revert this governance Story. Existing stricter safety and approval
+  controls remain independently binding.
+
+
 ## 2026-08-01 — R3 Migration History Reconciliation v1
 
 - Category: proposed architecture decision.
