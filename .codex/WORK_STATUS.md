@@ -1,5 +1,64 @@
 # Work status
 
+## 2026-08-01 - R3 migration-history reconciliation architecture
+
+- Objective: design a safe official-CLI migration-history reconciliation that
+  removes the R2/R3 circular gate without replaying historical DDL or writing
+  Production/history in this Story.
+- Branch/base: `codex/docs/r3-migration-history-reconciliation`, based on Stage
+  02 merge `9c3c82a6cbb4a78767231312a26d3d9fef9863d4` (`origin/main`).
+- Risk: high-risk/manual Database/history architecture; Draft PR,
+  `manual-merge-required`, no auto-merge.
+- Revenue impact: prevents an unsafe historical replay or false migration
+  certification while preserving the path to remove anonymous Product writes.
+- Root-cause class: database metadata drift. The deployed application schema
+  and 021/022 object surface exist, but application migration history is absent.
+- Scope: repository manifest audit, read-only isolated restored-catalog
+  evidence, per-version classification model, official CLI repair ordering,
+  stop conditions, rehearsal/Production gates, rollback, tests, and Draft PR.
+- Non-goals: `migration repair`, direct history writes, `db push`, candidate
+  023, schema/RLS/Auth changes, Production/config/secrets, commerce writes, or
+  merge.
+- Completed: preserved PR #64 as a separate all-green Draft/manual PR; created
+  this branch from latest `origin/main`; verified the stopped restore remains
+  network-none with no ports; audited the canonical 000-022 manifest and prior
+  Production classifications; collected sanitized read-only R3 catalog
+  evidence; identified and designed resolution of the R2/R3 circular gate.
+- Evidence: source archive SHA-256
+  `E3EB20E15E481C5A959978E2AE18E972088E3E263019F50F943AF15CF3AF6FDB`;
+  sanitized R3 CSV SHA-256
+  `3D229F91017856443390B669BE3F89C01D3409A2B98E248BEEAAFCCA64D0FA9B`.
+  The restore has 61 public tables, the named 021/022 relations and nine named
+  SECURITY DEFINER functions, three historical anonymous Product policies, and
+  no application migration-history relation. Raw evidence remains outside Git.
+- Current work: local implementation, read-only rehearsal inspection, and
+  validation are complete; delivery and exact-head gates remain.
+- Blocker / owner action: actual history repair and all Production actions need
+  a separately approved exact target, pinned CLI, versions, commands, backup,
+  dry-run expectation, monitoring, and rollback. This Story requires manual PR
+  acceptance and merge before such implementation.
+- Changed files: R3 architecture, runbook, read-only catalog SQL, static tests,
+  changelog, Architecture Review, Decision Log, and this status record.
+- Validation: R3 static tests passed 2/2; full tests passed 383/383; sequential
+  typecheck passed; Production build passed with 84 routes; source lint passed
+  with zero errors and four pre-existing warnings. Unscoped lint found only
+  generated Playwright trace bundles, so the source-only rerun excluded
+  `playwright-report` and `test-results`. Local Playwright passed 33, skipped 2,
+  and failed 7 only on the established Supabase-unconfigured page group
+  (`/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
+  `/workspace`); the R1 anonymous Product mutation fail-close smoke passed.
+  The R3 catalog SQL completed in a read-only transaction against the isolated
+  network-none restore, and the container was stopped afterward. A parallel
+  build/typecheck attempt raced on generated `.next/types`; the required
+  sequential build then typecheck both passed. Staged diff check passed.
+- Delivery: pending high-risk Draft PR; no auto-merge.
+- Exact next action: finish the staged scope/secret review, commit/push, create
+  the Draft PR with `manual-merge-required`, and verify exact-head CI/Preview.
+- Remaining risks: logical dumps omit global roles; exact 021/022 body,
+  constraint, ACL, default-ACL, and owner-attribute equivalence remains
+  execution-gated; CLI handling of short 000-style versions must be rehearsed;
+  concurrent Production drift can invalidate any earlier comparison.
+
 ## 2026-07-31 - R2 Product security target and non-Production rehearsal architecture
 
 - Objective: re-audit R1 compatibility and define the R2 Product RLS/grant/default-privilege target, forward-only migration design, and restore-based non-Production rehearsal before any implementation.

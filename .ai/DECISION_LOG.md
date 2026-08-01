@@ -1,5 +1,30 @@
 # Decision log
 
+## 2026-08-01 — R3 Migration History Reconciliation v1
+
+- Category: proposed architecture decision.
+- Story / PR: R3 Migration History Reconciliation v1 / pending.
+- Status: proposed; manual repository-owner acceptance required.
+- Owner / approver: Database / Security; repository owner pending.
+- Context and evidence: the current Production logical archive and isolated
+  restore have no `supabase_migrations.schema_migrations`, while the 000-020
+  schema groups and the named 021/022 relations/functions are present. The R2
+  inventory requires exact 000-022 history, exposing a circular dependency in
+  the earlier R2-before-R3 ordering.
+- Decision or issue: separate history metadata from schema state. First
+  rehearse official CLI repair for exactly 000-022 on a fresh isolated restore,
+  prove catalog equality and a no-historical-DDL dry run, then allow R2 to
+  derive and rehearse 023. Production later repairs 000-022 immediately before
+  an exact dry run that must list only approved 023.
+- Consequences and risks: object presence is not exact migration proof; 021/022
+  remain execution-gated. The logical restore omits global role definitions and
+  synthesized one local `NOLOGIN` owner. History repair, candidate 023, RLS,
+  Production, and merge remain unauthorized.
+- Rollback or supersession: revert this documentation PR. Later metadata-only
+  rollback may use only official CLI `--status reverted` for the exact approved
+  versions before any schema migration begins; never write history directly or
+  restore anonymous writes.
+
 ## 2026-07-31 - R2 Product security target proposed
 
 - Category: proposed high-risk Database / RLS Architecture Story.
