@@ -116,6 +116,11 @@
       "order": 22,
       "file": "022_atomic_product_mutation.sql",
       "sha256": "60519cd7f26a1de0e060030d61a25a0921d6edac9116b0e8babb8304f366632d"
+    },
+    {
+      "order": 23,
+      "file": "023_product_security_target.sql",
+      "sha256": "74e54a88a2c1dfe5ab6e45ec0d2385707de1b1bdb0f8125cf18aaf6ce564cb96"
     }
   ],
   "promotedSources": {

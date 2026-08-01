@@ -1,5 +1,315 @@
 # Work status
 
+## 2026-08-01 - Temporary disposable-CI R1 predicate diagnostic
+
+- Owner approved a final failure-only, read-only diagnostic against PR #64's
+  disposable exact 000-022 database after run `30690427729` remained
+  fail-closed in the combined assertion.
+- Output is restricted to calculated pre-state and seven functions' contract
+  match plus PUBLIC/anon/authenticated/service_role EXECUTE actual/expected
+  booleans. Bodies, rows, secrets, Production, cycle 1/cycle 2, and writes are
+  prohibited.
+- Exact next action: capture the failing predicate, remove diagnostic/staging,
+  correct candidate 023, and rerun all gates.
+- Diagnostic run `30690595713` proved `CANONICAL_000_022` and every one of the
+  seven contract/EXECUTE actual values exactly matched expected. No prohibited
+  data was queried. The failing construct is the PL/pgSQL anonymous-record
+  loop, not a database predicate. Diagnostic/staging are removed; the same
+  fail-closed matrix is now evaluated as one set query using catalog `p.oid`.
+- Revised candidate SHA-256:
+  `74e54a88a2c1dfe5ab6e45ec0d2385707de1b1bdb0f8125cf18aaf6ce564cb96`.
+
+## 2026-08-01 - Temporary disposable-CI R1 identity diagnostic
+
+- Owner approved a failure-only read-only diagnostic in PR #64's disposable
+  exact 000-022 database after run `30689601605` remained fail-closed.
+- Output is restricted to seven function names, catalog identity arguments,
+  and expected `to_regprocedure()` existence booleans. Function bodies, rows,
+  secrets, Production, cycle 1/cycle 2, and database writes are prohibited.
+- Exact next action: capture the sanitized signature difference, remove the
+  diagnostic/staging, correct candidate 023, and rerun all gates.
+- Diagnostic run `30689765977` proved all seven catalog identities exact and
+  every expected `to_regprocedure()` exists. No prohibited data was queried.
+  The remaining cause is statement-boundary loss of the transaction-local
+  custom setting between the two DO blocks. The temporary diagnostic/staging
+  are removed and both precondition phases now share the local `v_pre_state`
+  variable in one DO block.
+- Revised candidate SHA-256:
+  `3e93cb214bf796077e150194b58d09f887b2fb016361389833377d2a0e62f2ea`.
+- Run `30690047471` moved the failure into the combined statement, confirming
+  the setting boundary was removed. The remaining SQL type mismatch is fixed
+  by explicitly casting exact `regprocedure` identities to `oid` for
+  `has_function_privilege()` and catalog comparisons.
+- Revised candidate SHA-256:
+  `f513ffb2dd8586a2b670a413113ff1d186f47318719d7fe54dc004de8ca8cdf4`.
+- Run `30690252228` remained in the combined assertion. Exact identities are
+  now cast to `oid` inside the VALUES relation so the anonymous record field is
+  natively typed for privilege and catalog operations.
+- Revised candidate SHA-256:
+  `93a3766c9feb096c213f011856dec9d2b1547867078a1366c6bc70b90cd92102`.
+
+## 2026-08-01 - Temporary disposable-CI R1 function diagnostic
+
+- Exact-head `55966945aa075bcabb4152361d06ec22ed919be1` passed Product
+  pre-state classification but failed closed in the R1 function contract gate
+  on disposable CI run `30688704170`; Preview run `30688704136` passed.
+- Owner approved a failure-only read-only diagnostic against the disposable
+  exact 000-022 database. Output is restricted to the seven function names,
+  owner, security-definer, search_path, and PUBLIC/anon/authenticated/
+  service_role EXECUTE booleans. Function bodies, rows, secrets, Production,
+  cycle 1/cycle 2, and database writes are prohibited.
+- Exact next action: capture the sanitized matrix, remove the diagnostic and
+  staging, correct candidate 023, and rerun the complete gates.
+- Diagnostic run `30689081955` proved all seven functions match the approved
+  owner/security-definer/search_path and execute matrix exactly. No function
+  body, row, secret, Production, or rehearsal target was accessed. The issue is
+  candidate-side signature-string reparsing, not database drift. The temporary
+  diagnostic and staging are removed; privilege checks now reuse the OID found
+  by the exact signature/contract query.
+- Corrected candidate SHA-256:
+  `10672edbdde345b654e76a94f949a275cb0e6194b2a85ee3d2d59fb98967c4ad`.
+- Exact-head run `30689351065` still failed in statement 2 after Product
+  classification; the captured contract matrix rules out owner/search-path/ACL
+  drift. Candidate signature binding now uses exact `to_regprocedure` OIDs
+  rather than comparing `oidvectortypes()` display text.
+- Revised candidate SHA-256:
+  `f1296e6658535eb9b0131cb1ba3abbf1b27f8e5064515beeb2b9f14251d4b516`.
+
+## 2026-08-01 - Temporary disposable-CI Product privilege diagnostic
+
+- Objective: resolve the remaining candidate 023 canonical pre-state mismatch
+  using one failure-only, read-only diagnostic in `ci-db-baseline-replay`.
+- Authority: owner approved the temporary diagnostic, exact matrix capture,
+  immediate diagnostic removal, candidate correction, verification, push, and
+  disposable replay. Production and cycle 1/cycle 2 access remain prohibited.
+- Scope: emit only Product RLS state, policy count, and the seven table
+  privilege booleans for `anon`, `authenticated`, and `service_role` from the
+  disposable GitHub Actions database. No secrets or row data are queried.
+- Current head before diagnostic: `4a479cbe91e2fddb4812318607a20f9d6cfa4c22`;
+  current candidate SHA-256:
+  `38e4fee2acf83d00cc941bb35bb04e2616894017da50ce8365d62b3179c2df5b`.
+- Exact next action: push the temporary diagnostic, capture the failed replay's
+  sanitized matrix, then remove the diagnostic and correct candidate 023.
+- First diagnostic run `30688332274` reached the expected 023 precondition
+  failure, but `supabase start` cleaned the disposable container before the
+  diagnostic (`No such container`). No matrix or database data was emitted.
+  The runner-only sequence will now start exact 000-022, restore the tracked
+  023 file, and exercise 000-023 through `db reset` before the failure-only read.
+- Corrected diagnostic run `30688465822` captured the complete allowed matrix:
+  RLS false, zero policies, CRUD false and TRUNCATE/REFERENCES/TRIGGER true for
+  each of `anon`, `authenticated`, and `service_role`. It queried no row data
+  or secrets. The temporary workflow diagnostic and staging are now removed.
+- Corrected candidate SHA-256:
+  `3ee46f88f9e4f74ce5b97c163a0ac35085fd4d9754fb49f359eefd0d68b3b15f`.
+  Full local gates passed: lint zero errors/four pre-existing warnings,
+  typecheck, 408/408 tests, and Production build with 84 routes.
+  Exact next action: commit and push, then require the unmodified disposable
+  000-023 replay and exact-head Preview to pass.
+
+## 2026-08-01 - R2 candidate 023 static implementation
+
+- Objective: generate and statically validate the inventory-derived
+  `023_product_security_target.sql` candidate without applying it to a database.
+- Branch/head at start: `codex/feat/r2-product-security-reconciliation` at
+  `b578980f5000c82e5f5b69a6a7d56fe656073ac9`.
+- Risk: high-risk Database/RLS/AuthZ migration artifact; Draft PR #64 remains
+  `manual-merge-required`, with no auto-merge.
+- Authority: owner approved generation, static validation, and PR #64 push from
+  inventory SHA-256
+  `dbf1c4daedf92a85f86513885d8daf4fa2905ca9d1e5e16d123c5697e75a3d56`.
+  Database application, Production/history/Auth/commerce changes, and merge are
+  explicitly excluded.
+- Candidate: one forward-only transaction with fail-closed assertions for the
+  exact restored Product owner/RLS/policies/grants, seven R1 function contracts,
+  classified execute drift, and sole public creator `postgres`. It removes the
+  two exact anon write policies, preserves anon read, denies direct Product
+  writes, reasserts four service-role mutation entry points and helper denial,
+  restricts owner-specific default privileges, and verifies postconditions.
+- Candidate SHA-256 after exact dual-pre-state correction:
+  `38e4fee2acf83d00cc941bb35bb04e2616894017da50ce8365d62b3179c2df5b`.
+- Verification: corrected focused R2/baseline suites passed 20/20; full tests
+  passed 408/408 after two unrelated Orchestrator timing failures were
+  reproduced as flaky and then passed both focused and full reruns. Lint passed
+  with zero errors and four pre-existing warnings;
+  typecheck passed; Production build passed with 84 routes; diff check passed.
+  The baseline manifest now pins all 24 migrations and the exact candidate
+  hash. No database was started, connected to, or changed.
+- Exact next action: review and commit locally. PR push would automatically
+  trigger the repository's disposable database replay, so obtain exact approval
+  for that isolated CI schema execution before push; restored cycle targets and
+  Production remain prohibited.
+- First exact-head replay evidence: CI run `30686856094` proved the original
+  restored-only precondition correctly failed closed on the canonical fresh
+  000-022 chain; three disposable DB jobs stopped and cleaned up. Preview run
+  `30686856102` passed. The unrelated Orchestrator Phase 3 termination timing
+  test failed once in CI while passing locally. Owner approved the focused
+  dual-pre-state correction and another disposable replay.
+
+## 2026-08-01 - R2 read-only restored inventory after cycle 2
+
+- Objective: run the merged read-only R2 collector against the repaired cycle 2
+  restore and verify migration history, Product RLS/policies/grants, R1 function
+  owner/search-path/ACL, creator/default ACL, and extension inventory.
+- Exact target: `r3-rehearsal-cycle2-db-e3eb20e1`; it remained network `none`
+  with no published ports and was stopped immediately after collection.
+- Boundary: read-only catalog queries only. No database write, candidate 023,
+  schema/RLS/Auth/commerce/Production action, container deletion, or volume
+  deletion occurred.
+- Collector corrections: cast default-ACL object codes for the inventory UNION;
+  evaluate `PUBLIC` through ACL grantee OID zero instead of treating it as a
+  login role; normalize function identities to argument types; suppress psql
+  command tags from CSV; and emit the sanitized report even when validation
+  fails closed.
+- Evidence: the structurally valid sanitized report failed closed with
+  fingerprint
+  `dbf1c4daedf92a85f86513885d8daf4fa2905ca9d1e5e16d123c5697e75a3d56`.
+  Migration history was exactly 000-022; creator role was `postgres`; Product
+  row range was `100-999`; the three restored Product policies were the known
+  public insert/read/update policies.
+- Findings: 17 R1 function EXECUTE grants differ from migration 022's exact
+  matrix. Browser roles retain EXECUTE on protected mutation functions and
+  `service_role` retains EXECUTE on three helper functions. Migration 022
+  explicitly revokes these grants, so this is real restored security drift,
+  not a collector formatting error.
+- Classification: R3 permits known permissive ACL differences to be classified
+  `CLASSIFIED_FORWARD_FIX`, and R2 migration order later reasserts the exact R1
+  matrix. R2 also requires restored R1 compatibility to pass before candidate
+  023 generation, so the current inventory remains blocked pending an explicit
+  reviewed resolution; no candidate was generated.
+- Evidence hygiene: temporary CSV/report artifacts were deleted after the
+  sanitized fingerprint and findings were recorded. No secrets or catalog row
+  contents were committed.
+
+## 2026-08-01 - R3 deterministic fresh restore cycle 2
+
+- Objective: reproduce cycle 1 on an independent fresh restore and complete
+  the two-cycle R3 evidence contract.
+- Exact target: `r3-rehearsal-cycle2-db-e3eb20e1` with volume
+  `r3_rehearsal_cycle2_e3eb20e1`, network `none`, ports `{}`.
+- Restore: approved dump SHA-256
+  `E3EB20E15E481C5A959978E2AE18E972088E3E263019F50F943AF15CF3AF6FDB`;
+  documented `supabase_realtime_admin` synthesized as local `NOLOGIN`.
+- Pre: history absent; catalog SHA-256
+  `e977f6446b78fe5f0c39321055b4d9fb8b78c95ce23318fe939cea2ad770e728`;
+  Product-row SHA-256
+  `09b24a9a6b225e204ae30fbf8d02ea6d67a5d476388016bef21bce7f071614f9`.
+- Repair: pinned CLI 2.110.0 and plan
+  `fc37b1402c76fce8b807b925b8d74d81e66b8665e39f38bbced912d6ee85b34c`
+  marked exactly `000` through `022` applied. Temporary database `CREATE` for
+  `postgres` was revoked immediately and verified false.
+- Post: catalog and Product-row fingerprints equal pre and cycle 1; history is
+  exactly 23 versions `000`-`022`; `db push --dry-run` reports up to date.
+- Negative gates: wrong plan fingerprint and Production marker both failed
+  closed before database access. Schema/Product invariance passed.
+- Validator: the sanitized two-cycle
+  `gonggamline-r3-history-rehearsal-evidence-v1` bundle was accepted; its
+  temporary local file was deleted immediately.
+- Teardown: cycle 2, cycle 1, and the original repaired target are all exited,
+  network `none`, ports `{}`; no sidecar remains. No target/volume was deleted.
+- Boundary: no 023/schema/RLS/Auth/commerce/Production action occurred. R2
+  repaired-history inventory and candidate generation remain separate gates.
+
+
+## 2026-07-31 - R2 Product security reconciliation implementation
+
+- Objective: implement the accepted R2 Product security target as one
+  forward-only migration, remove anonymous Product writes, prove grants/RLS,
+  replay/negative behavior, and deliver a high-risk Draft PR and Preview.
+- Branch/base: `codex/feat/r2-product-security-reconciliation`, based on Stage
+  02 merge `9c3c82a6cbb4a78767231312a26d3d9fef9863d4` (`origin/main`).
+- Risk: high-risk/manual Database/RLS/AuthZ. `manual-merge-required`; no
+  auto-merge, Production, or commerce writes.
+- Revenue impact: closes direct anonymous mutation authority over Product
+  catalog, cost, profit, recommendation, operator, and competition state while
+  preserving the intentional public catalog read and protected R1 commands.
+- Root-cause class: external configuration/database evidence blocker. The
+  accepted architecture forbids candidate 023 generation until a current,
+  isolated, quarantined, owner-approved restore proves exact deployed 022
+  history, Product policies/grants, function owners/search paths, object
+  creators, and default ACLs.
+- Scope: exact restored inventory, inventory-derived candidate 023, synthetic
+  non-Production negative/R1 atomicity/default-ACL rehearsal, local gates,
+  high-risk Draft PR, and exact-head Preview.
+- Non-goals: Production restore/application, migration-history repair, real
+  Product/provider/commerce writes, other access-matrix groups, Auth/runtime
+  redesign, merge, or auto-merge.
+- Completed: confirmed a clean detached starting worktree; fetched and verified
+  the Stage 02 merge at latest `origin/main`; created the dedicated non-main
+  branch; read binding governance and accepted R1/R2 designs; audited available
+  migration/replay tooling and confirmed local migration-only reset is not
+  accepted restore evidence; implemented the read-only collector and a
+  fail-closed validator for complete migration history, known Product policies,
+  R1 function signatures/owners/security/search paths, creator/default-ACL
+  completeness, effective Product/RPC privilege matrices, unsafe external-work
+  extensions, malformed evidence, secret-like content, and deterministic
+  sanitized fingerprint reports.
+- Current work: resumed by `PROCEED_NOW`. Safe non-Production preparation and
+  local validation are complete; the preparation commit, push, high-risk Draft
+  PR, and exact-head CI/Preview delivery succeeded. Candidate migration and all
+  DB/restore/RLS/Production actions remain stopped at their separate concrete
+  approval gate. Grant/fingerprint hardening, delivery, and exact-head gates
+  pass (14/15 revised checkpoints).
+- Restore checkpoint: the owner approved a read-only Production logical dump
+  and an exact local isolated restore. Custom archive
+  `r2-production-readonly-20260801-101257.dump` is 669,804 bytes with SHA-256
+  `E3EB20E15E481C5A959978E2AE18E972088E3E263019F50F943AF15CF3AF6FDB`,
+  PostgreSQL 17.6, and 1,232 listed entries. It was restored only into local
+  container `r2-rehearsal-db-0328e62`, volume
+  `r2_rehearsal_db_0328e62`, with Docker network `none`, no published ports,
+  and a read-only archive mount. The archive omitted global roles; its one
+  missing referenced built-in owner, `supabase_realtime_admin`, was synthesized
+  as a local `NOLOGIN` role and is a restore-fidelity limitation.
+- Blocker / owner action: Production project `sxvtznmoemrcwifungnb` is on the
+  Supabase Free Plan, and its Dashboard explicitly reports that Free projects
+  have no downloadable scheduled backups. The downloaded
+  `db_cluster-31-07-2026@09-35-55.backup.gz` belongs to Preview project
+  `nsmiostuibktcucfctey`, so it is not accepted Production evidence. The owner
+  completed the approved read-only Production Session-pooler dump and isolated
+  local restore. The restored archive and database both contain zero
+  `supabase_migrations` references; the schema and `schema_migrations` relation
+  are absent while `products`, `product_mutation_requests`, and
+  `security_audit_events` exist. The approved collector therefore failed closed
+  before emitting evidence. Candidate 023, replay, negative writes, and PR
+  merge are blocked by the mandatory exact 000-022 history gate. The
+  quarantined container is stopped with its dedicated volume retained for
+  evidence; Production remained read-only.
+- Changed files: read-only inventory SQL and collector, R2 static security
+  tests, rehearsal runbook/changelog, and this status record. No migration SQL
+  or runtime code.
+- Validation: repository/branch/base safety and architecture stop-condition
+  review passed; grant/fingerprint checkpoint 390/390 tests passed; focused lint and
+  typecheck passed. Full lint passed with no errors; warnings include the four
+  established source warnings plus generated untracked `playwright-report/trace`
+  output. Production build passed with 84 generated routes; collector
+  PowerShell parsing and `git diff --check` passed.
+  Local Playwright passed 33, skipped 2, and failed the same seven established
+  Supabase-unconfigured routes (`/listing`, `/market`, `/procurement`,
+  `/revenue`, `/sourcing`, `/workflow`, `/workspace`); the R1 unauthenticated
+  mutation fail-close smoke passed. CI and Preview remain pending. Actual
+  restored inventory, candidate replay, and DB negative tests remain prohibited
+  until exact-target approval. Exact preparation head
+  `f07f99aadbdd77d000be91d971f19bff3e717b9b` passed CI run `30623427285`
+  after one failed-job retry for two unrelated existing Orchestrator Phase 3
+  timing flakes; all other CI jobs passed on the first attempt. Exact Preview
+  browser run `30623427349` passed. Validator checkpoint Playwright reproduced
+  the same baseline: 33 passed, 2 skipped, and the seven established
+  Supabase-unconfigured route failures; R1 mutation fail-close passed. Exact
+  validator head `87dbd75594b2603bebb02df3659093d37a58fde0` passed CI run
+  `30629640251` and Preview browser run `30629640262`. Exact privilege/report
+  head `09ac92b133981e9a3d4dc04584410d2ec6d36e98` passed CI run
+  `30631247194` and Preview browser run `30631247185`.
+- Last commit: `09ac92b test: classify R2 privilege inventory`.
+- Delivery: branch pushed; Draft PR #64 targets `main`, has
+  `manual-merge-required`, and has no auto-merge.
+- Exact next action: classify why deployed migration history is absent and
+  complete a separate owner-approved R3 migration-history reconciliation plan.
+  Do not synthesize 000-022 history from repository files or generate candidate
+  023. Resume R2 inventory only after an authoritative history repair or a
+  provider restore proves the exact deployed sequence.
+- Remaining risks: restore fidelity/quarantine; deployed 022/history/policy/
+  grant/owner/default-ACL drift; service-role bypass scope; intentional public
+  Product SELECT; future Production concurrency. Anonymous writes must never be
+  restored as rollback.
 ## 2026-08-01 - R3 deterministic fresh restore cycle 1
 
 - Objective: prove the first fresh non-Production restore/history-repair cycle
