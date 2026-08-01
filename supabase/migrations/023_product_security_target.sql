@@ -4,35 +4,6 @@ BEGIN;
 -- The deployment runner must independently prove a quarantined non-Production target.
 DO $$
 DECLARE
-  v_rls_enabled boolean;
-  v_policy_count integer;
-  v_grant_matrix text;
-BEGIN
-  SELECT c.relrowsecurity INTO v_rls_enabled
-  FROM pg_catalog.pg_class c
-  JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-  WHERE n.nspname = 'public' AND c.relname = 'products';
-
-  SELECT count(*) INTO v_policy_count
-  FROM pg_catalog.pg_policies p
-  WHERE p.schemaname = 'public' AND p.tablename = 'products';
-
-  SELECT string_agg(
-    format('%s/%s=%s', role_name, privilege_name,
-      has_table_privilege(role_name, 'public.products', privilege_name)),
-    ',' ORDER BY role_name, privilege_name
-  ) INTO v_grant_matrix
-  FROM unnest(ARRAY['anon', 'authenticated', 'service_role']) role_name
-  CROSS JOIN unnest(ARRAY[
-    'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER'
-  ]) privilege_name;
-
-  RAISE WARNING 'R2 standalone pre-state: rls=%, policies=%, grants=%',
-    v_rls_enabled, v_policy_count, v_grant_matrix;
-END $$;
-
-DO $$
-DECLARE
   v_policy_state text[];
   v_creator_roles text[];
   v_rls_enabled boolean;
@@ -93,16 +64,13 @@ BEGIN
   SELECT NOT EXISTS (
     SELECT 1
     FROM unnest(ARRAY['anon', 'authenticated', 'service_role']) role_name
-    CROSS JOIN unnest(ARRAY[
-      'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER'
-    ]) privilege_name
-    WHERE has_table_privilege(role_name, 'public.products', privilege_name)
+    CROSS JOIN (VALUES
+      ('SELECT', true), ('INSERT', true), ('UPDATE', true), ('DELETE', true),
+      ('TRUNCATE', false), ('REFERENCES', false), ('TRIGGER', false)
+    ) expected(privilege_name, is_granted)
+    WHERE has_table_privilege(role_name, 'public.products',
+      expected.privilege_name) IS DISTINCT FROM expected.is_granted
   ) INTO v_canonical_grants_match;
-
-  RAISE WARNING
-    'R2 pre-state summary: rls=%, policies=%, restored_grants=%, canonical_zero_grants=%',
-    v_rls_enabled, coalesce(array_length(v_policy_state, 1), 0),
-    v_restored_grants_match, v_canonical_grants_match;
 
   IF EXISTS (
     SELECT 1
@@ -132,7 +100,7 @@ BEGIN
     v_pre_state := 'CANONICAL_000_022';
   ELSE
     RAISE EXCEPTION
-      'R2 precondition failed: Product state is mixed or unapproved (rls=%, policies=%, restored_grants=%, canonical_zero_grants=%)',
+      'R2 precondition failed: Product state is mixed or unapproved (rls=%, policies=%, restored_grants=%, canonical_grants=%)',
       v_rls_enabled, coalesce(array_length(v_policy_state, 1), 0),
       v_restored_grants_match, v_canonical_grants_match;
   END IF;

@@ -20,8 +20,7 @@
   writes, reasserts four service-role mutation entry points and helper denial,
   restricts owner-specific default privileges, and verifies postconditions.
 - Candidate SHA-256 after exact dual-pre-state correction:
-  `b0a3d26f88cd7def47103e21e92642f73ae4bf371d1fa7f97ed5714cc5e8c75f`
-  including the standalone sanitized pre-state diagnostic.
+  `38e4fee2acf83d00cc941bb35bb04e2616894017da50ce8365d62b3179c2df5b`.
 - Verification: corrected focused R2/baseline suites passed 20/20; full tests
   passed 408/408 after two unrelated Orchestrator timing failures were
   reproduced as flaky and then passed both focused and full reruns. Lint passed

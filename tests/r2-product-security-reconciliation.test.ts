@@ -173,8 +173,6 @@ test("R2 candidate 023 is inventory-bound, transactional, and forward-only", () 
   assert.match(sql, /COMMIT;\s*$/);
   assert.match(sql, /dbf1c4daedf92a85f86513885d8daf4fa2905ca9d1e5e16d123c5697e75a3d56/);
   assert.match(sql, /Product state is mixed or unapproved/);
-  assert.match(sql, /R2 pre-state summary/);
-  assert.match(sql, /R2 standalone pre-state/);
   assert.match(sql, /v_restored_grants_match/);
   assert.match(sql, /public creator role inventory drifted/);
   assert.match(sql, /restored execute drift classification changed/);
@@ -224,6 +222,8 @@ test("R2 candidate 023 accepts only restored drift or canonical 000-022 pre-stat
   assert.match(sql, /v_policy_state IS NULL/);
   assert.match(sql, /v_restored_grants_match/);
   assert.match(sql, /v_canonical_grants_match/);
+  assert.match(sql, /\('SELECT', true\), \('INSERT', true\), \('UPDATE', true\), \('DELETE', true\)/);
+  assert.match(sql, /\('TRUNCATE', false\), \('REFERENCES', false\), \('TRIGGER', false\)/);
   assert.match(sql, /Product state is mixed or unapproved/);
   assert.match(sql, /current_setting\('gonggamline\.r2_pre_state'\)/);
   assert.doesNotMatch(sql, /v_pre_state\s*:=\s*coalesce/i);
