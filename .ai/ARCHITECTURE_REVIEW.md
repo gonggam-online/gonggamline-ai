@@ -1,5 +1,23 @@
 # Architecture review
 
+## Proposed R3 isolated CLI sidecar transport — 2026-08-01
+
+- Source Story: merged R3 architecture PR #65 and rehearsal validator PR #67.
+- Purpose: make the official CLI reachable without attaching the restored DB
+  to a Docker network or publishing a port.
+- Boundary: a one-shot sidecar shares only the target container network
+  namespace; host arguments contain no credential-bearing DSN; credentials and
+  CLI state use tmpfs and are destroyed at exit.
+- Controls: pinned release SHA, pinned glibc base digest, offline build,
+  read-only root/repository, fixed non-root UID, all capabilities dropped,
+  no-new-privileges, exact plan fingerprint, Production-marker refusal, and
+  target network/port/status preconditions.
+- Validation: sidecar image builds and reports CLI 2.110.0 under the intended
+  isolation. No database connection or history mutation was attempted.
+- Risk: high-risk/manual Database/history transport; separate Draft PR and
+  exact owner approval before any runner execution.
+
+
 ## R3 rehearsal implementation compliance — 2026-08-01
 
 - Approved source: merged R3 Architecture Story PR #65, merge
