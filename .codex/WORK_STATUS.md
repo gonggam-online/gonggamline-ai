@@ -1,5 +1,44 @@
 # Work status
 
+## 2026-08-01 - R3 deterministic fresh restore cycle 1
+
+- Objective: prove the first fresh non-Production restore/history-repair cycle
+  after merging the deterministic fingerprint collector.
+- Branch/base: `codex/docs/r3-cycle1-evidence`, based on PR #69 merge
+  `78ecec7e36e84e6c107dd8ab5c181b21c81cdbbf`.
+- Risk: high-risk Database/history rehearsal evidence; manual merge required.
+- Exact target: container `r3-rehearsal-cycle1-db-e3eb20e1`, volume
+  `r3_rehearsal_cycle1_e3eb20e1`, database `r2_rehearsal`; network `none`, no
+  published ports, non-Production.
+- Source: PostgreSQL 17.6 custom archive, 669804 bytes, SHA-256
+  `E3EB20E15E481C5A959978E2AE18E972088E3E263019F50F943AF15CF3AF6FDB`.
+  Restore synthesized only the documented `supabase_realtime_admin` NOLOGIN
+  owner missing from the logical dump.
+- Pre evidence: history absent; catalog SHA-256
+  `e977f6446b78fe5f0c39321055b4d9fb8b78c95ce23318fe939cea2ad770e728`;
+  Product-row SHA-256
+  `09b24a9a6b225e204ae30fbf8d02ea6d67a5d476388016bef21bce7f071614f9`.
+- Repair: pinned Supabase CLI 2.110.0 and approved plan
+  `fc37b1402c76fce8b807b925b8d74d81e66b8665e39f38bbced912d6ee85b34c`
+  marked exactly `000` through `022` applied. The restored DB was owned by
+  `supabase_admin`, so owner-approved `CREATE` on the database was granted to
+  CLI user `postgres` only for the repair and revoked immediately afterward.
+- Post evidence: history is exactly 23 versions `000` through `022`; catalog
+  and Product-row fingerprints exactly match pre state; `postgres` database
+  `CREATE` privilege is false; pinned CLI `db push --dry-run` reports the
+  remote database is up to date.
+- Teardown: cycle 1 and the prior repaired target are both `exited`, network
+  `none`, ports `{}`; no sidecar remains. No 023/schema/RLS/Auth/commerce or
+  Production change occurred.
+- Restore diagnostics: initial restore attempts failed closed on the expected
+  Supabase event-trigger owner boundary and missing logical-dump global role;
+  repair attempts failed closed until the exact temporary database privilege
+  was separately approved. No incomplete migration history was left behind.
+- Remaining gate: a separately approved fresh cycle 2 must reproduce the exact
+  pre/post fingerprints, history, empty dry-run, and negative gates before PR
+  #64 may advance. Neither cycle target nor volume is approved for deletion.
+
+
 ## 2026-08-01 - R3 first repair cycle and fingerprint correction
 
 - Objective: execute the approved isolated 000-022 history repair and preserve
