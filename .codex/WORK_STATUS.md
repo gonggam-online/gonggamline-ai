@@ -1,5 +1,17 @@
 # Work status
 
+## 2026-08-01 - Temporary disposable-CI R1 predicate diagnostic
+
+- Owner approved a final failure-only, read-only diagnostic against PR #64's
+  disposable exact 000-022 database after run `30690427729` remained
+  fail-closed in the combined assertion.
+- Output is restricted to calculated pre-state and seven functions' contract
+  match plus PUBLIC/anon/authenticated/service_role EXECUTE actual/expected
+  booleans. Bodies, rows, secrets, Production, cycle 1/cycle 2, and writes are
+  prohibited.
+- Exact next action: capture the failing predicate, remove diagnostic/staging,
+  correct candidate 023, and rerun all gates.
+
 ## 2026-08-01 - Temporary disposable-CI R1 identity diagnostic
 
 - Owner approved a failure-only read-only diagnostic in PR #64's disposable

@@ -51,9 +51,22 @@ jobs:
         with:
           version: 2.110.0
       - name: Start disposable Supabase stack
-        run: supabase start
+        run: |
+          diagnostic_migration=/tmp/023_product_security_target.sql
+          mv supabase/migrations/023_product_security_target.sql "$diagnostic_migration"
+          if ! supabase start; then
+            mv "$diagnostic_migration" supabase/migrations/023_product_security_target.sql
+            exit 1
+          fi
+          mv "$diagnostic_migration" supabase/migrations/023_product_security_target.sql
       - name: Replay the complete migration chain
         run: supabase db reset --local
+      - name: Diagnose disposable R1 predicates after replay failure
+        if: failure()
+        run: |
+          docker exec -i supabase_db_gonggamline-ai-sprint-b0 \
+            psql -U postgres -d postgres --no-psqlrc --quiet --tuples-only --no-align --set ON_ERROR_STOP=1 \
+            --command "BEGIN READ ONLY; WITH product_state AS (SELECT CASE WHEN NOT c.relrowsecurity AND (SELECT count(*) FROM pg_catalog.pg_policies WHERE schemaname='public' AND tablename='products')=0 THEN 'CANONICAL_000_022' WHEN c.relrowsecurity AND (SELECT count(*) FROM pg_catalog.pg_policies WHERE schemaname='public' AND tablename='products')=3 THEN 'RESTORED_DRIFT' ELSE 'UNKNOWN' END AS pre_state FROM pg_catalog.pg_class c WHERE c.oid='public.products'::regclass), expected(function_name,function_oid,canonical_service_execute) AS (VALUES ('product_mutation_claim_v1',to_regprocedure('public.product_mutation_claim_v1(text,text,text,text,uuid)')::oid,false),('product_mutation_complete_v1',to_regprocedure('public.product_mutation_complete_v1(uuid,bigint,jsonb,uuid,text,text,uuid)')::oid,false),('import_product_v1',to_regprocedure('public.import_product_v1(jsonb,text,text,uuid,uuid)')::oid,true),('patch_product_operator_fields_v1',to_regprocedure('public.patch_product_operator_fields_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid)')::oid,true),('record_product_competition_v1',to_regprocedure('public.record_product_competition_v1(bigint,timestamptz,jsonb,text,text,text,uuid,uuid,text)')::oid,false),('record_manual_competition_analysis_v1',to_regprocedure('public.record_manual_competition_analysis_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid)')::oid,true),('record_automatic_competition_analysis_v1',to_regprocedure('public.record_automatic_competition_analysis_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid,text)')::oid,true)) SELECT concat('R2_CI_R1_PREDICATE_MATRIX|pre_state=',ps.pre_state,'|',string_agg(format('%s|contract_match=%s|PUBLIC=%s/%s|anon=%s/%s|authenticated=%s/%s|service_role=%s/%s',e.function_name,(pg_catalog.pg_get_userbyid(p.proowner)='postgres' AND p.prosecdef AND p.proconfig @> ARRAY['search_path=pg_catalog, public']),EXISTS(SELECT 1 FROM pg_catalog.aclexplode(coalesce(p.proacl,pg_catalog.acldefault('f',p.proowner))) acl WHERE acl.grantee=0 AND acl.privilege_type='EXECUTE'),false,has_function_privilege('anon',p.oid,'EXECUTE'),ps.pre_state='RESTORED_DRIFT',has_function_privilege('authenticated',p.oid,'EXECUTE'),ps.pre_state='RESTORED_DRIFT',has_function_privilege('service_role',p.oid,'EXECUTE'),CASE WHEN ps.pre_state='RESTORED_DRIFT' THEN true ELSE e.canonical_service_execute END),';' ORDER BY e.function_name)) FROM expected e JOIN pg_catalog.pg_proc p ON p.oid=e.function_oid CROSS JOIN product_state ps GROUP BY ps.pre_state; ROLLBACK;"
       - name: Stop and discard disposable stack
         if: always()
         run: supabase stop --no-backup
