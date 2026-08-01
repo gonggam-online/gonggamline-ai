@@ -1,5 +1,49 @@
 # Work status
 
+## 2026-08-01 - R3 isolated CLI sidecar transport
+
+- Objective: solve the network-none/no-port R3 rehearsal blocker without
+  exposing the restored database or credentials.
+- Branch/base: `codex/feat/r3-isolated-cli-sidecar`, based on PR #67 merge
+  `8d69763328333ecaa5898afb78b9301a3cb550da` (`origin/main`).
+- Risk: high-risk/manual Database/history transport; no auto-merge.
+- Revenue impact: unlocks the exact rehearsal needed before R2 can remove
+  anonymous Product writes and advance the shortest safe Product revenue path.
+- Root-cause class: execution transport. External CLI could not reach a DB
+  container with network none and no published ports.
+- Scope: pinned sidecar builder, namespace-sharing repair runner, credential
+  tmpfs, non-root/read-only runtime, exact plan/target/Production gates, tests,
+  architecture decision, local image build, CLI version validation, and Draft
+  PR.
+- Non-goals: starting the DB, connecting to it, history repair, schema/RLS/Auth,
+  candidate 023, Production, PR #64 merge, or commerce writes.
+- Completed: PR #64 conflict resolved separately and merge commit `faf1ae5`
+  pushed; official CLI release digest inspected; sidecar scripts/docs/tests
+  implemented; Alpine and missing-user attempts failed closed before DB access;
+  final glibc/non-root image built and CLI 2.110.0 verified.
+- Image evidence: artifact SHA
+  `876f439e85d296bf095d906ca91cadeb5509d753b4d98ee823e5752d578ff92b`;
+  image ID
+  `13d9fe6fb6790d29c4f816b6cc14ec9271dc91a35f395c4315ecd09df5002128`;
+  repair plan
+  `fc37b1402c76fce8b807b925b8d74d81e66b8665e39f38bbced912d6ee85b34c`.
+- Safety evidence: DB remains `exited`, network mode `none`, ports `{}`; no
+  password, DB URL, connection, repair, or Production action occurred.
+- Current work: high-risk Draft PR delivery and exact-head gate monitoring.
+- Validation: focused sidecar tests passed 3/3; full tests passed 393/393;
+  PowerShell parsing, lint (zero errors/four pre-existing warnings), typecheck,
+  Production build (84 routes), and diff check passed. Local Playwright passed
+  33, skipped 2, and failed 7 only on the established Supabase-unconfigured
+  route group (`/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`,
+  `/workflow`, `/workspace`); R1 Product mutation fail-close and
+  revenue-critical checks passed.
+- Exact next action: run full local/Preview gates, deliver the Draft PR, verify
+  PR #64 exact-head checks, then request exact execution approval.
+- Remaining risks: actual pgpass/libpq behavior and CLI repair semantics must be
+  proven only against the approved isolated target; logical-dump role fidelity
+  and exact 021/022 comparison remain gates. Production is prohibited.
+
+
 ## 2026-08-01 - R3 migration-history rehearsal implementation
 
 - Objective: implement the merged R3 Story's fail-closed two-cycle rehearsal
