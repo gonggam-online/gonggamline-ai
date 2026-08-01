@@ -1,5 +1,29 @@
 # Work status
 
+## 2026-08-01 - R3 first repair cycle and fingerprint correction
+
+- Objective: execute the approved isolated 000-022 history repair and preserve
+  trustworthy pre/post evidence.
+- Branch/base: `codex/fix/r3-deterministic-catalog-fingerprint`, based on PR #68
+  merge `60fd43712cc74e3c3396531f2ce4e9f54af61b5f`.
+- Risk: high-risk Database/history evidence tooling; manual merge required.
+- Execution result: isolated local target repaired to exactly 23 versions
+  `000` through `022`; Product rows remained unchanged. Target was stopped and
+  remains network `none` with no published ports.
+- Evidence blocker: PostgreSQL 17 `pg_dump` generated random `\restrict` tokens,
+  so the raw pre/post catalog hashes were not comparable. No schema drift was
+  inferred and no further mutation was performed.
+- Correction: add a read-only collector that removes only those transport
+  tokens before SHA-256 calculation and retains target/Production gates.
+- Validation: focused tests passed 2/2; full tests passed 395/395; PowerShell
+  parse passed; lint passed with zero errors and four pre-existing warnings;
+  typecheck passed; Production build passed with 84 routes; diff check passed.
+- Remaining gate: restore a fresh cycle and collect deterministic pre/post
+  evidence before another repair. A second fresh restore cycle is still
+  required by the R3 evidence contract. Production and PR #64 merge remain
+  prohibited.
+
+
 ## 2026-08-01 - R3 isolated CLI sidecar transport
 
 - Objective: solve the network-none/no-port R3 rehearsal blocker without
