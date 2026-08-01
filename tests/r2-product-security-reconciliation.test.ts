@@ -226,7 +226,7 @@ test("R2 candidate 023 accepts only restored drift or canonical 000-022 pre-stat
   assert.match(sql, /\('TRUNCATE', true\), \('REFERENCES', true\), \('TRIGGER', true\)/);
   assert.match(sql, /Product state is mixed or unapproved/);
   assert.match(sql, /current_setting\('gonggamline\.r2_pre_state'\)/);
-  assert.match(sql, /v_function_oid oid/);
-  assert.match(sql, /has_function_privilege\('anon', v_function_oid, 'EXECUTE'\)/);
+  assert.match(sql, /to_regprocedure\('public\.product_mutation_claim_v1/);
+  assert.match(sql, /has_function_privilege\('anon', v_function\.function_oid, 'EXECUTE'\)/);
   assert.doesNotMatch(sql, /v_pre_state\s*:=\s*coalesce/i);
 });

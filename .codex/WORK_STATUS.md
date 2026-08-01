@@ -20,6 +20,12 @@
   by the exact signature/contract query.
 - Corrected candidate SHA-256:
   `10672edbdde345b654e76a94f949a275cb0e6194b2a85ee3d2d59fb98967c4ad`.
+- Exact-head run `30689351065` still failed in statement 2 after Product
+  classification; the captured contract matrix rules out owner/search-path/ACL
+  drift. Candidate signature binding now uses exact `to_regprocedure` OIDs
+  rather than comparing `oidvectortypes()` display text.
+- Revised candidate SHA-256:
+  `f1296e6658535eb9b0131cb1ba3abbf1b27f8e5064515beeb2b9f14251d4b516`.
 
 ## 2026-08-01 - Temporary disposable-CI Product privilege diagnostic
 
