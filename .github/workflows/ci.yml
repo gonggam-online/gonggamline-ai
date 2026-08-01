@@ -51,7 +51,14 @@ jobs:
         with:
           version: 2.110.0
       - name: Start disposable Supabase stack
-        run: supabase start
+        run: |
+          diagnostic_migration=/tmp/023_product_security_target.sql
+          mv supabase/migrations/023_product_security_target.sql "$diagnostic_migration"
+          if ! supabase start; then
+            mv "$diagnostic_migration" supabase/migrations/023_product_security_target.sql
+            exit 1
+          fi
+          mv "$diagnostic_migration" supabase/migrations/023_product_security_target.sql
       - name: Replay the complete migration chain
         run: supabase db reset --local
       - name: Diagnose disposable Product privileges after replay failure

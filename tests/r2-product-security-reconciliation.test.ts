@@ -242,4 +242,6 @@ test("temporary R2 CI diagnostic is failure-only, read-only, and emits no row da
   assert.match(diagnostic, /\['anon', 'authenticated', 'service_role'\]/);
   assert.match(diagnostic, /\['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER'\]/);
   assert.doesNotMatch(diagnostic, /SELECT\s+\*|SUPABASE_DB_URL|DATABASE_URL|password|secret/i);
+  assert.match(workflow, /mv supabase\/migrations\/023_product_security_target\.sql/);
+  assert.match(workflow, /supabase start[\s\S]+mv "\$diagnostic_migration" supabase\/migrations\/023_product_security_target\.sql/);
 });

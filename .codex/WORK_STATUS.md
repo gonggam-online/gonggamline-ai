@@ -15,6 +15,11 @@
   `38e4fee2acf83d00cc941bb35bb04e2616894017da50ce8365d62b3179c2df5b`.
 - Exact next action: push the temporary diagnostic, capture the failed replay's
   sanitized matrix, then remove the diagnostic and correct candidate 023.
+- First diagnostic run `30688332274` reached the expected 023 precondition
+  failure, but `supabase start` cleaned the disposable container before the
+  diagnostic (`No such container`). No matrix or database data was emitted.
+  The runner-only sequence will now start exact 000-022, restore the tracked
+  023 file, and exercise 000-023 through `db reset` before the failure-only read.
 
 ## 2026-08-01 - R2 candidate 023 static implementation
 
