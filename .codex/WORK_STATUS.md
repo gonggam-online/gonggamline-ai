@@ -23,6 +23,11 @@
   `has_function_privilege()` and catalog comparisons.
 - Revised candidate SHA-256:
   `f513ffb2dd8586a2b670a413113ff1d186f47318719d7fe54dc004de8ca8cdf4`.
+- Run `30690252228` remained in the combined assertion. Exact identities are
+  now cast to `oid` inside the VALUES relation so the anonymous record field is
+  natively typed for privilege and catalog operations.
+- Revised candidate SHA-256:
+  `93a3766c9feb096c213f011856dec9d2b1547867078a1366c6bc70b90cd92102`.
 
 ## 2026-08-01 - Temporary disposable-CI R1 function diagnostic
 

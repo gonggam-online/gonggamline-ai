@@ -125,13 +125,13 @@ BEGIN
 
   FOR v_function IN
     SELECT * FROM (VALUES
-      ('product_mutation_claim_v1', to_regprocedure('public.product_mutation_claim_v1(text,text,text,text,uuid)'), false),
-      ('product_mutation_complete_v1', to_regprocedure('public.product_mutation_complete_v1(uuid,bigint,jsonb,uuid,text,text,uuid)'), false),
-      ('import_product_v1', to_regprocedure('public.import_product_v1(jsonb,text,text,uuid,uuid)'), true),
-      ('patch_product_operator_fields_v1', to_regprocedure('public.patch_product_operator_fields_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid)'), true),
-      ('record_product_competition_v1', to_regprocedure('public.record_product_competition_v1(bigint,timestamptz,jsonb,text,text,text,uuid,uuid,text)'), false),
-      ('record_manual_competition_analysis_v1', to_regprocedure('public.record_manual_competition_analysis_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid)'), true),
-      ('record_automatic_competition_analysis_v1', to_regprocedure('public.record_automatic_competition_analysis_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid,text)'), true)
+      ('product_mutation_claim_v1', to_regprocedure('public.product_mutation_claim_v1(text,text,text,text,uuid)')::oid, false),
+      ('product_mutation_complete_v1', to_regprocedure('public.product_mutation_complete_v1(uuid,bigint,jsonb,uuid,text,text,uuid)')::oid, false),
+      ('import_product_v1', to_regprocedure('public.import_product_v1(jsonb,text,text,uuid,uuid)')::oid, true),
+      ('patch_product_operator_fields_v1', to_regprocedure('public.patch_product_operator_fields_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid)')::oid, true),
+      ('record_product_competition_v1', to_regprocedure('public.record_product_competition_v1(bigint,timestamptz,jsonb,text,text,text,uuid,uuid,text)')::oid, false),
+      ('record_manual_competition_analysis_v1', to_regprocedure('public.record_manual_competition_analysis_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid)')::oid, true),
+      ('record_automatic_competition_analysis_v1', to_regprocedure('public.record_automatic_competition_analysis_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid,text)')::oid, true)
     ) AS expected(function_name, function_oid, canonical_service_execute)
   LOOP
     IF v_function.function_oid IS NULL OR NOT EXISTS (
@@ -146,11 +146,11 @@ BEGIN
         v_function.function_name;
     END IF;
 
-    IF has_function_privilege('anon', v_function.function_oid::oid, 'EXECUTE')
+    IF has_function_privilege('anon', v_function.function_oid, 'EXECUTE')
           IS DISTINCT FROM (v_pre_state = 'RESTORED_DRIFT')
-       OR has_function_privilege('authenticated', v_function.function_oid::oid, 'EXECUTE')
+       OR has_function_privilege('authenticated', v_function.function_oid, 'EXECUTE')
           IS DISTINCT FROM (v_pre_state = 'RESTORED_DRIFT')
-       OR has_function_privilege('service_role', v_function.function_oid::oid, 'EXECUTE')
+       OR has_function_privilege('service_role', v_function.function_oid, 'EXECUTE')
           IS DISTINCT FROM CASE WHEN v_pre_state = 'RESTORED_DRIFT'
             THEN true ELSE v_function.canonical_service_execute END
        OR EXISTS (
@@ -160,7 +160,7 @@ BEGIN
          CROSS JOIN LATERAL pg_catalog.aclexplode(
            coalesce(p.proacl, pg_catalog.acldefault('f', p.proowner))) acl
          WHERE n.nspname = 'public'
-           AND p.oid = v_function.function_oid::oid
+           AND p.oid = v_function.function_oid
            AND acl.grantee = 0 AND acl.privilege_type = 'EXECUTE'
        )
     THEN
