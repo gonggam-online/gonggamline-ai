@@ -1,5 +1,18 @@
 # Work status
 
+## 2026-08-01 - Temporary disposable-CI R1 function diagnostic
+
+- Exact-head `55966945aa075bcabb4152361d06ec22ed919be1` passed Product
+  pre-state classification but failed closed in the R1 function contract gate
+  on disposable CI run `30688704170`; Preview run `30688704136` passed.
+- Owner approved a failure-only read-only diagnostic against the disposable
+  exact 000-022 database. Output is restricted to the seven function names,
+  owner, security-definer, search_path, and PUBLIC/anon/authenticated/
+  service_role EXECUTE booleans. Function bodies, rows, secrets, Production,
+  cycle 1/cycle 2, and database writes are prohibited.
+- Exact next action: capture the sanitized matrix, remove the diagnostic and
+  staging, correct candidate 023, and rerun the complete gates.
+
 ## 2026-08-01 - Temporary disposable-CI Product privilege diagnostic
 
 - Objective: resolve the remaining candidate 023 canonical pre-state mismatch
