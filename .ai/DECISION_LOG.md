@@ -1,5 +1,28 @@
 # Decision log
 
+## 2026-08-01 — R3 network-namespace CLI sidecar transport
+
+- Category: proposed high-risk Database/history transport amendment.
+- Decision: preserve the database container's network `none` and zero published
+  ports while attaching a one-shot pinned CLI sidecar with Docker network mode
+  `container:<target>`. Use only loopback inside the shared namespace.
+- Credential handling: host arguments contain no database URL or password. A
+  current-user-only temporary pgpass file is copied into sidecar tmpfs and
+  deleted in `finally`; CLI HOME is also tmpfs.
+- Evidence: official CLI 2.110.0 artifact SHA-256
+  `876f439e85d296bf095d906ca91cadeb5509d753b4d98ee823e5752d578ff92b`;
+  Debian base digest `7b140f374b289a7c2befc338f42ebe6441b7ea838a042bbd5acbfca6ec875818`;
+  verified local image ID
+  `13d9fe6fb6790d29c4f816b6cc14ec9271dc91a35f395c4315ecd09df5002128`.
+- Live validation: CLI reported `2.110.0` with network none/read-only/non-root
+  controls. Two earlier images failed closed before DB connection due to musl
+  incompatibility and missing OS user.
+- Approval boundary: image build and offline version validation are complete;
+  starting the DB and executing migration repair remain separately approved
+  history mutations. Production is prohibited.
+- Rollback: delete the local sidecar image. No database state was changed.
+
+
 ## 2026-08-01 — R3 rehearsal evidence validator and transport stop
 
 - Category: implementation decision under merged R3 Architecture Story PR #65.

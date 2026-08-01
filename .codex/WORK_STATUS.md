@@ -1,5 +1,35 @@
 # Work status
 
+## 2026-08-01 - R3 deterministic fresh restore cycle 2
+
+- Objective: reproduce cycle 1 on an independent fresh restore and complete
+  the two-cycle R3 evidence contract.
+- Exact target: `r3-rehearsal-cycle2-db-e3eb20e1` with volume
+  `r3_rehearsal_cycle2_e3eb20e1`, network `none`, ports `{}`.
+- Restore: approved dump SHA-256
+  `E3EB20E15E481C5A959978E2AE18E972088E3E263019F50F943AF15CF3AF6FDB`;
+  documented `supabase_realtime_admin` synthesized as local `NOLOGIN`.
+- Pre: history absent; catalog SHA-256
+  `e977f6446b78fe5f0c39321055b4d9fb8b78c95ce23318fe939cea2ad770e728`;
+  Product-row SHA-256
+  `09b24a9a6b225e204ae30fbf8d02ea6d67a5d476388016bef21bce7f071614f9`.
+- Repair: pinned CLI 2.110.0 and plan
+  `fc37b1402c76fce8b807b925b8d74d81e66b8665e39f38bbced912d6ee85b34c`
+  marked exactly `000` through `022` applied. Temporary database `CREATE` for
+  `postgres` was revoked immediately and verified false.
+- Post: catalog and Product-row fingerprints equal pre and cycle 1; history is
+  exactly 23 versions `000`-`022`; `db push --dry-run` reports up to date.
+- Negative gates: wrong plan fingerprint and Production marker both failed
+  closed before database access. Schema/Product invariance passed.
+- Validator: the sanitized two-cycle
+  `gonggamline-r3-history-rehearsal-evidence-v1` bundle was accepted; its
+  temporary local file was deleted immediately.
+- Teardown: cycle 2, cycle 1, and the original repaired target are all exited,
+  network `none`, ports `{}`; no sidecar remains. No target/volume was deleted.
+- Boundary: no 023/schema/RLS/Auth/commerce/Production action occurred. R2
+  repaired-history inventory and candidate generation remain separate gates.
+
+
 ## 2026-07-31 - R2 Product security reconciliation implementation
 
 - Objective: implement the accepted R2 Product security target as one
@@ -100,6 +130,113 @@
   grant/owner/default-ACL drift; service-role bypass scope; intentional public
   Product SELECT; future Production concurrency. Anonymous writes must never be
   restored as rollback.
+## 2026-08-01 - R3 deterministic fresh restore cycle 1
+
+- Objective: prove the first fresh non-Production restore/history-repair cycle
+  after merging the deterministic fingerprint collector.
+- Branch/base: `codex/docs/r3-cycle1-evidence`, based on PR #69 merge
+  `78ecec7e36e84e6c107dd8ab5c181b21c81cdbbf`.
+- Risk: high-risk Database/history rehearsal evidence; manual merge required.
+- Exact target: container `r3-rehearsal-cycle1-db-e3eb20e1`, volume
+  `r3_rehearsal_cycle1_e3eb20e1`, database `r2_rehearsal`; network `none`, no
+  published ports, non-Production.
+- Source: PostgreSQL 17.6 custom archive, 669804 bytes, SHA-256
+  `E3EB20E15E481C5A959978E2AE18E972088E3E263019F50F943AF15CF3AF6FDB`.
+  Restore synthesized only the documented `supabase_realtime_admin` NOLOGIN
+  owner missing from the logical dump.
+- Pre evidence: history absent; catalog SHA-256
+  `e977f6446b78fe5f0c39321055b4d9fb8b78c95ce23318fe939cea2ad770e728`;
+  Product-row SHA-256
+  `09b24a9a6b225e204ae30fbf8d02ea6d67a5d476388016bef21bce7f071614f9`.
+- Repair: pinned Supabase CLI 2.110.0 and approved plan
+  `fc37b1402c76fce8b807b925b8d74d81e66b8665e39f38bbced912d6ee85b34c`
+  marked exactly `000` through `022` applied. The restored DB was owned by
+  `supabase_admin`, so owner-approved `CREATE` on the database was granted to
+  CLI user `postgres` only for the repair and revoked immediately afterward.
+- Post evidence: history is exactly 23 versions `000` through `022`; catalog
+  and Product-row fingerprints exactly match pre state; `postgres` database
+  `CREATE` privilege is false; pinned CLI `db push --dry-run` reports the
+  remote database is up to date.
+- Teardown: cycle 1 and the prior repaired target are both `exited`, network
+  `none`, ports `{}`; no sidecar remains. No 023/schema/RLS/Auth/commerce or
+  Production change occurred.
+- Restore diagnostics: initial restore attempts failed closed on the expected
+  Supabase event-trigger owner boundary and missing logical-dump global role;
+  repair attempts failed closed until the exact temporary database privilege
+  was separately approved. No incomplete migration history was left behind.
+- Remaining gate: a separately approved fresh cycle 2 must reproduce the exact
+  pre/post fingerprints, history, empty dry-run, and negative gates before PR
+  #64 may advance. Neither cycle target nor volume is approved for deletion.
+
+
+## 2026-08-01 - R3 first repair cycle and fingerprint correction
+
+- Objective: execute the approved isolated 000-022 history repair and preserve
+  trustworthy pre/post evidence.
+- Branch/base: `codex/fix/r3-deterministic-catalog-fingerprint`, based on PR #68
+  merge `60fd43712cc74e3c3396531f2ce4e9f54af61b5f`.
+- Risk: high-risk Database/history evidence tooling; manual merge required.
+- Execution result: isolated local target repaired to exactly 23 versions
+  `000` through `022`; Product rows remained unchanged. Target was stopped and
+  remains network `none` with no published ports.
+- Evidence blocker: PostgreSQL 17 `pg_dump` generated random `\restrict` tokens,
+  so the raw pre/post catalog hashes were not comparable. No schema drift was
+  inferred and no further mutation was performed.
+- Correction: add a read-only collector that removes only those transport
+  tokens before SHA-256 calculation and retains target/Production gates.
+- Validation: focused tests passed 2/2; full tests passed 395/395; PowerShell
+  parse passed; lint passed with zero errors and four pre-existing warnings;
+  typecheck passed; Production build passed with 84 routes; diff check passed.
+- Remaining gate: restore a fresh cycle and collect deterministic pre/post
+  evidence before another repair. A second fresh restore cycle is still
+  required by the R3 evidence contract. Production and PR #64 merge remain
+  prohibited.
+
+
+## 2026-08-01 - R3 isolated CLI sidecar transport
+
+- Objective: solve the network-none/no-port R3 rehearsal blocker without
+  exposing the restored database or credentials.
+- Branch/base: `codex/feat/r3-isolated-cli-sidecar`, based on PR #67 merge
+  `8d69763328333ecaa5898afb78b9301a3cb550da` (`origin/main`).
+- Risk: high-risk/manual Database/history transport; no auto-merge.
+- Revenue impact: unlocks the exact rehearsal needed before R2 can remove
+  anonymous Product writes and advance the shortest safe Product revenue path.
+- Root-cause class: execution transport. External CLI could not reach a DB
+  container with network none and no published ports.
+- Scope: pinned sidecar builder, namespace-sharing repair runner, credential
+  tmpfs, non-root/read-only runtime, exact plan/target/Production gates, tests,
+  architecture decision, local image build, CLI version validation, and Draft
+  PR.
+- Non-goals: starting the DB, connecting to it, history repair, schema/RLS/Auth,
+  candidate 023, Production, PR #64 merge, or commerce writes.
+- Completed: PR #64 conflict resolved separately and merge commit `faf1ae5`
+  pushed; official CLI release digest inspected; sidecar scripts/docs/tests
+  implemented; Alpine and missing-user attempts failed closed before DB access;
+  final glibc/non-root image built and CLI 2.110.0 verified.
+- Image evidence: artifact SHA
+  `876f439e85d296bf095d906ca91cadeb5509d753b4d98ee823e5752d578ff92b`;
+  image ID
+  `13d9fe6fb6790d29c4f816b6cc14ec9271dc91a35f395c4315ecd09df5002128`;
+  repair plan
+  `fc37b1402c76fce8b807b925b8d74d81e66b8665e39f38bbced912d6ee85b34c`.
+- Safety evidence: DB remains `exited`, network mode `none`, ports `{}`; no
+  password, DB URL, connection, repair, or Production action occurred.
+- Current work: high-risk Draft PR delivery and exact-head gate monitoring.
+- Validation: focused sidecar tests passed 3/3; full tests passed 393/393;
+  PowerShell parsing, lint (zero errors/four pre-existing warnings), typecheck,
+  Production build (84 routes), and diff check passed. Local Playwright passed
+  33, skipped 2, and failed 7 only on the established Supabase-unconfigured
+  route group (`/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`,
+  `/workflow`, `/workspace`); R1 Product mutation fail-close and
+  revenue-critical checks passed.
+- Exact next action: run full local/Preview gates, deliver the Draft PR, verify
+  PR #64 exact-head checks, then request exact execution approval.
+- Remaining risks: actual pgpass/libpq behavior and CLI repair semantics must be
+  proven only against the approved isolated target; logical-dump role fidelity
+  and exact 021/022 comparison remain gates. Production is prohibited.
+
+
 ## 2026-08-01 - R3 migration-history rehearsal implementation
 
 - Objective: implement the merged R3 Story's fail-closed two-cycle rehearsal
