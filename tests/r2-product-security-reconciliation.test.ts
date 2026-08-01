@@ -166,3 +166,51 @@ test("R2 inventory never emits Product values or secret material", () => {
   const script = read("scripts/collect-r2-product-security-inventory.ps1");
   assert.doesNotMatch(script, /Write-Output\s+\$databaseUrl/);
 });
+
+test("R2 candidate 023 is inventory-bound, transactional, and forward-only", () => {
+  const sql = read("supabase/migrations/023_product_security_target.sql");
+  assert.match(sql, /^BEGIN;/);
+  assert.match(sql, /COMMIT;\s*$/);
+  assert.match(sql, /dbf1c4daedf92a85f86513885d8daf4fa2905ca9d1e5e16d123c5697e75a3d56/);
+  assert.match(sql, /Product policy inventory drifted/);
+  assert.match(sql, /Product effective grants drifted/);
+  assert.match(sql, /public creator role inventory drifted/);
+  assert.match(sql, /restored execute drift classification changed/);
+  assert.doesNotMatch(sql, /supabase_migrations|schema_migrations/);
+  assert.doesNotMatch(sql, /CREATE ROLE|ALTER ROLE|DROP ROLE/);
+});
+
+test("R2 candidate 023 removes anonymous Product writes by exact policy name", () => {
+  const sql = read("supabase/migrations/023_product_security_target.sql");
+  assert.match(sql, /DROP POLICY "Allow public insert products" ON public\.products/);
+  assert.match(sql, /DROP POLICY "Allow public update products" ON public\.products/);
+  assert.match(sql, /DROP POLICY "Allow public read products" ON public\.products/);
+  assert.match(sql, /CREATE POLICY "Allow public read products"[\s\S]+FOR SELECT TO anon USING \(true\)/);
+  assert.match(sql, /REVOKE ALL PRIVILEGES ON TABLE public\.products FROM PUBLIC, anon, authenticated/);
+  assert.match(sql, /GRANT SELECT ON TABLE public\.products TO anon, service_role/);
+  assert.doesNotMatch(sql, /GRANT\s+(?:INSERT|UPDATE|DELETE|ALL)[\s\S]+ON TABLE public\.products/i);
+  assert.doesNotMatch(sql, /FOR\s+(?:INSERT|UPDATE|DELETE|ALL)\s+TO\s+(?:PUBLIC|anon|authenticated)/i);
+});
+
+test("R2 candidate 023 reasserts the exact R1 execute and default ACL matrix", () => {
+  const sql = read("supabase/migrations/023_product_security_target.sql");
+  for (const functionName of functionSignatures.keys()) {
+    assert.match(sql, new RegExp(`REVOKE ALL ON FUNCTION public\\.${functionName}`));
+  }
+  for (const functionName of [
+    "import_product_v1", "patch_product_operator_fields_v1",
+    "record_manual_competition_analysis_v1", "record_automatic_competition_analysis_v1",
+  ]) {
+    assert.match(sql, new RegExp(`GRANT EXECUTE ON FUNCTION public\\.${functionName}`));
+  }
+  for (const functionName of [
+    "product_mutation_claim_v1", "product_mutation_complete_v1",
+    "record_product_competition_v1",
+  ]) {
+    assert.doesNotMatch(sql, new RegExp(`GRANT EXECUTE ON FUNCTION public\\.${functionName}`));
+  }
+  assert.match(sql, /ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public[\s\S]+ON TABLES/);
+  assert.match(sql, /ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public[\s\S]+ON SEQUENCES/);
+  assert.match(sql, /ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public[\s\S]+ON FUNCTIONS/);
+  assert.match(sql, /browser-facing default privileges remain/);
+});

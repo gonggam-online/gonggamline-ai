@@ -1,5 +1,36 @@
 # Work status
 
+## 2026-08-01 - R2 candidate 023 static implementation
+
+- Objective: generate and statically validate the inventory-derived
+  `023_product_security_target.sql` candidate without applying it to a database.
+- Branch/head at start: `codex/feat/r2-product-security-reconciliation` at
+  `b578980f5000c82e5f5b69a6a7d56fe656073ac9`.
+- Risk: high-risk Database/RLS/AuthZ migration artifact; Draft PR #64 remains
+  `manual-merge-required`, with no auto-merge.
+- Authority: owner approved generation, static validation, and PR #64 push from
+  inventory SHA-256
+  `dbf1c4daedf92a85f86513885d8daf4fa2905ca9d1e5e16d123c5697e75a3d56`.
+  Database application, Production/history/Auth/commerce changes, and merge are
+  explicitly excluded.
+- Candidate: one forward-only transaction with fail-closed assertions for the
+  exact restored Product owner/RLS/policies/grants, seven R1 function contracts,
+  classified execute drift, and sole public creator `postgres`. It removes the
+  two exact anon write policies, preserves anon read, denies direct Product
+  writes, reasserts four service-role mutation entry points and helper denial,
+  restricts owner-specific default privileges, and verifies postconditions.
+- Candidate SHA-256:
+  `1823c789c744ae5285c1e18189245d65ed5b6fdd82fec516480bc9d98daf3b2f`.
+- Verification: focused R2/baseline suites passed 19/19; full tests passed
+  407/407; lint passed with zero errors and four pre-existing warnings;
+  typecheck passed; Production build passed with 84 routes; diff check passed.
+  The baseline manifest now pins all 24 migrations and the exact candidate
+  hash. No database was started, connected to, or changed.
+- Exact next action: review and commit locally. PR push would automatically
+  trigger the repository's disposable database replay, so obtain exact approval
+  for that isolated CI schema execution before push; restored cycle targets and
+  Production remain prohibited.
+
 ## 2026-08-01 - R2 read-only restored inventory after cycle 2
 
 - Objective: run the merged read-only R2 collector against the repaired cycle 2

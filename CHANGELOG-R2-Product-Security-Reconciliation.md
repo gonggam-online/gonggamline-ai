@@ -1,5 +1,21 @@
 # R2 Product Security Reconciliation changelog
 
+## Candidate 023 checkpoint - 2026-08-01
+
+- Added the inventory-bound, forward-only `023_product_security_target.sql`
+  candidate from sanitized restored inventory fingerprint
+  `dbf1c4daedf92a85f86513885d8daf4fa2905ca9d1e5e16d123c5697e75a3d56`.
+- The candidate fails closed on Product owner/RLS/policy/grant drift, the exact
+  seven R1 function contracts and restored execute classification, or creator
+  role drift before changing authority.
+- It removes the two exact anonymous Product write policies, preserves only the
+  anon Product read policy, denies direct Product writes, reasserts the four
+  service-role mutation entry points, denies helper RPC execution, and applies
+  browser-facing default-privilege deny for the inventoried `postgres` creator.
+- This checkpoint generated and statically validates SQL only. It did not apply
+  the migration to a database and did not change Production, history, Auth, or
+  commerce state.
+
 ## 2026-07-31
 
 - Added a read-only, fail-closed restored-environment inventory collector for
