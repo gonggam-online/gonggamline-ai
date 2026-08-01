@@ -10,7 +10,6 @@ DECLARE
   v_restored_grants_match boolean;
   v_canonical_grants_match boolean;
   v_pre_state text;
-  v_function record;
 BEGIN
   IF to_regclass('public.products') IS NULL THEN
     RAISE EXCEPTION 'R2 precondition failed: public.products is absent';
@@ -123,8 +122,8 @@ BEGIN
     RAISE EXCEPTION 'R2 precondition failed: public creator role inventory drifted';
   END IF;
 
-  FOR v_function IN
-    SELECT * FROM (VALUES
+  IF EXISTS (
+    WITH expected(function_name, function_oid, canonical_service_execute) AS (VALUES
       ('product_mutation_claim_v1', to_regprocedure('public.product_mutation_claim_v1(text,text,text,text,uuid)')::oid, false),
       ('product_mutation_complete_v1', to_regprocedure('public.product_mutation_complete_v1(uuid,bigint,jsonb,uuid,text,text,uuid)')::oid, false),
       ('import_product_v1', to_regprocedure('public.import_product_v1(jsonb,text,text,uuid,uuid)')::oid, true),
@@ -132,42 +131,30 @@ BEGIN
       ('record_product_competition_v1', to_regprocedure('public.record_product_competition_v1(bigint,timestamptz,jsonb,text,text,text,uuid,uuid,text)')::oid, false),
       ('record_manual_competition_analysis_v1', to_regprocedure('public.record_manual_competition_analysis_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid)')::oid, true),
       ('record_automatic_competition_analysis_v1', to_regprocedure('public.record_automatic_competition_analysis_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid,text)')::oid, true)
-    ) AS expected(function_name, function_oid, canonical_service_execute)
-  LOOP
-    IF v_function.function_oid IS NULL OR NOT EXISTS (
-      SELECT 1
-      FROM pg_catalog.pg_proc p
-      WHERE p.oid = v_function.function_oid
-        AND pg_catalog.pg_get_userbyid(p.proowner) = 'postgres'
-        AND p.prosecdef
-        AND p.proconfig @> ARRAY['search_path=pg_catalog, public']
-    ) THEN
-      RAISE EXCEPTION 'R2 precondition failed: function contract drifted for %',
-        v_function.function_name;
-    END IF;
-
-    IF has_function_privilege('anon', v_function.function_oid, 'EXECUTE')
-          IS DISTINCT FROM (v_pre_state = 'RESTORED_DRIFT')
-       OR has_function_privilege('authenticated', v_function.function_oid, 'EXECUTE')
-          IS DISTINCT FROM (v_pre_state = 'RESTORED_DRIFT')
-       OR has_function_privilege('service_role', v_function.function_oid, 'EXECUTE')
-          IS DISTINCT FROM CASE WHEN v_pre_state = 'RESTORED_DRIFT'
-            THEN true ELSE v_function.canonical_service_execute END
+    )
+    SELECT 1
+    FROM expected e
+    LEFT JOIN pg_catalog.pg_proc p ON p.oid = e.function_oid
+    WHERE p.oid IS NULL
+       OR pg_catalog.pg_get_userbyid(p.proowner) <> 'postgres'
+       OR NOT p.prosecdef
+       OR NOT (p.proconfig @> ARRAY['search_path=pg_catalog, public'])
+       OR has_function_privilege('anon', p.oid, 'EXECUTE')
+            IS DISTINCT FROM (v_pre_state = 'RESTORED_DRIFT')
+       OR has_function_privilege('authenticated', p.oid, 'EXECUTE')
+            IS DISTINCT FROM (v_pre_state = 'RESTORED_DRIFT')
+       OR has_function_privilege('service_role', p.oid, 'EXECUTE')
+            IS DISTINCT FROM CASE WHEN v_pre_state = 'RESTORED_DRIFT'
+              THEN true ELSE e.canonical_service_execute END
        OR EXISTS (
          SELECT 1
-         FROM pg_catalog.pg_proc p
-         JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
-         CROSS JOIN LATERAL pg_catalog.aclexplode(
+         FROM pg_catalog.aclexplode(
            coalesce(p.proacl, pg_catalog.acldefault('f', p.proowner))) acl
-         WHERE n.nspname = 'public'
-           AND p.oid = v_function.function_oid
-           AND acl.grantee = 0 AND acl.privilege_type = 'EXECUTE'
+         WHERE acl.grantee = 0 AND acl.privilege_type = 'EXECUTE'
        )
-    THEN
-      RAISE EXCEPTION 'R2 precondition failed: restored execute drift classification changed for %',
-        v_function.function_name;
-    END IF;
-  END LOOP;
+  ) THEN
+    RAISE EXCEPTION 'R2 precondition failed: R1 function contract or execute matrix drifted';
+  END IF;
 END $$;
 
 REVOKE ALL PRIVILEGES ON TABLE public.products FROM PUBLIC, anon, authenticated;

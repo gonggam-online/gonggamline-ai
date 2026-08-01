@@ -11,6 +11,13 @@
   prohibited.
 - Exact next action: capture the failing predicate, remove diagnostic/staging,
   correct candidate 023, and rerun all gates.
+- Diagnostic run `30690595713` proved `CANONICAL_000_022` and every one of the
+  seven contract/EXECUTE actual values exactly matched expected. No prohibited
+  data was queried. The failing construct is the PL/pgSQL anonymous-record
+  loop, not a database predicate. Diagnostic/staging are removed; the same
+  fail-closed matrix is now evaluated as one set query using catalog `p.oid`.
+- Revised candidate SHA-256:
+  `74e54a88a2c1dfe5ab6e45ec0d2385707de1b1bdb0f8125cf18aaf6ce564cb96`.
 
 ## 2026-08-01 - Temporary disposable-CI R1 identity diagnostic
 

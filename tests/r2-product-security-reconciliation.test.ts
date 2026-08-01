@@ -175,7 +175,7 @@ test("R2 candidate 023 is inventory-bound, transactional, and forward-only", () 
   assert.match(sql, /Product state is mixed or unapproved/);
   assert.match(sql, /v_restored_grants_match/);
   assert.match(sql, /public creator role inventory drifted/);
-  assert.match(sql, /restored execute drift classification changed/);
+  assert.match(sql, /R1 function contract or execute matrix drifted/);
   assert.doesNotMatch(sql, /supabase_migrations|schema_migrations/);
   assert.doesNotMatch(sql, /CREATE ROLE|ALTER ROLE|DROP ROLE/);
 });
@@ -227,20 +227,7 @@ test("R2 candidate 023 accepts only restored drift or canonical 000-022 pre-stat
   assert.match(sql, /Product state is mixed or unapproved/);
   assert.match(sql, /to_regprocedure\('public\.product_mutation_claim_v1/);
   assert.match(sql, /to_regprocedure\('public\.product_mutation_claim_v1[^\n]+\)::oid/);
-  assert.match(sql, /has_function_privilege\('anon', v_function\.function_oid, 'EXECUTE'\)/);
+  assert.match(sql, /FROM expected e[\s\S]+has_function_privilege\('anon', p\.oid, 'EXECUTE'\)/);
   assert.doesNotMatch(sql, /current_setting\('gonggamline\.r2_pre_state'\)|set_config\('gonggamline\.r2_pre_state'/);
   assert.doesNotMatch(sql, /v_pre_state\s*:=\s*coalesce/i);
-});
-
-test("temporary R1 predicate diagnostic is failure-only and read-only", () => {
-  const workflow = read(".github/workflows/ci.yml");
-  const diagnostic = workflow.match(
-    /- name: Diagnose disposable R1 predicates after replay failure[\s\S]+?(?=\n      - name: Stop and discard disposable stack)/,
-  )?.[0] ?? "";
-  assert.match(diagnostic, /if: failure\(\)/);
-  assert.match(diagnostic, /BEGIN READ ONLY/);
-  assert.match(diagnostic, /R2_CI_R1_PREDICATE_MATRIX/);
-  assert.match(diagnostic, /contract_match/);
-  assert.match(diagnostic, /PUBLIC=%s\/%s\|anon=%s\/%s/);
-  assert.doesNotMatch(diagnostic, /prosrc|pg_get_functiondef|SELECT\s+\*|DATABASE_URL|password|secret/i);
 });
