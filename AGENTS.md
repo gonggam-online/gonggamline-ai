@@ -8,6 +8,21 @@ This version has breaking changes. Read the relevant guide in `node_modules/next
 
 Build the smallest reliable autonomous AI commerce system that accelerates real sales, measurable profit, operational automation, and the path to KRW 100,000,000 stable monthly revenue. System completion is a means, not the objective.
 
+For every task, first ask: "Is this the best next development step for producing
+revenue quickly?" Prefer the shortest safe path to a measurable first sale and
+connect the minimum required real services before expanding internal systems.
+Avoid building infrastructure without a near-term revenue or risk-removal gate.
+
+Keep device-local data and durable state to the minimum required for safe
+development. Prefer repository, CI artifact, managed database, approved secret
+store, and approved cloud-service sources of truth so work can resume from any
+PC. Never upload secrets, Production dumps, personal data, or sensitive business
+data merely to satisfy cloud-first operation; use approved encrypted storage,
+least privilege, retention limits, and deletion after the evidence is no longer
+needed. Local ephemeral build caches and isolated security rehearsals are
+allowed only when required, must remain untracked, and must be removed or
+explicitly recorded for cleanup.
+
 Read `.ai/README.md` and every relevant `.ai` document before implementation.
 Apply `.ai/CODEX_OPERATING_STANDARD.md` on every PC and in every Codex session.
 Work only in this repository and on a task-appropriate non-`main` branch. When
@@ -55,6 +70,10 @@ Every task begins conceptually with these requirements:
 - Identify revenue impact, technical dependencies, and risk before implementation.
 - Classify the task as normal-risk or high-risk using `.ai/risk-classification.md`.
 - Continue without routine implementation questions; if one part is blocked, continue independent work.
+- Default to an autonomous instruction -> execution -> verification -> feedback
+  loop. Use available authenticated tools to perform authorized routine branch,
+  push, PR, Preview, and site operations, while preserving every high-risk and
+  external-side-effect approval boundary.
 
 ## Mandatory task suffix
 

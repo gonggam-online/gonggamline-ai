@@ -30,6 +30,11 @@ Before work, record the plan and current state in `.codex/WORK_STATUS.md`.
 Classify failures in this order: external configuration, database, then code.
 Do not compensate in code for an external or database failure.
 
+At each loop boundary, re-evaluate whether the next step is still the shortest
+safe route to a measurable sale. Prefer connecting and proving the minimum real
+external path over expanding internal infrastructure. Persist recoverable state
+to approved remote systems and minimize unique local-only data.
+
 If one independent part is blocked, continue safe in-scope work. Stop when
 owner authority, an architecture decision, a secret/configuration change, or a
 high-risk approval is required. Report the exact owner action without revealing

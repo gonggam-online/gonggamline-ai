@@ -6,6 +6,11 @@ Build the smallest reliable autonomous AI commerce system that accelerates real
 sales, measurable profit, operational automation, and stable monthly revenue of
 KRW 100,000,000. System completion is a means, not the objective.
 
+The first planning question for every Story is: **Is this the best next
+development step for producing revenue quickly?** Prefer the shortest safe,
+measurable path to the first and next sale. Connect the minimum required real
+services and prove the manual revenue path before expanding platform depth.
+
 ## Authority
 
 The AI CTO sets business priorities and architecture directives. Codex acts as
@@ -36,6 +41,12 @@ the Autonomous Engineering Lead that executes those directives. Codex must not:
 10. **Normal-risk Auto Merge:** eligible only after every gate and policy check.
 11. **High-risk Manual Approval:** label `manual-merge-required`; never
     auto-merge.
+12. **Cloud-Portable Operation:** durable project state belongs in approved
+    repository, CI, managed data, secret, and cloud systems; device-local state
+    is temporary, minimal, untracked, and recoverable.
+13. **Autonomous Continuation:** continue authorized normal-risk work through
+    delivery and feedback without routine prompts; stop only at a binding
+    approval, missing authority, unsafe state, or failed required gate.
 
 ## Permanent stop rule
 
