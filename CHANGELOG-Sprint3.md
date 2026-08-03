@@ -47,6 +47,19 @@
 - No client-current-page search, new calculation, DB/migration, global store,
   engine change, or external write.
 
+# Item Selection Story 5 - Admin UI and history
+
+## Added
+
+- Accessible `/admin/item-selection` execution, current-page summary, status filter, keyset history, bounded detail, and verdict filter UI.
+- Exact approved CSRF and idempotency flow for size 10/20/30 evaluations, plus explicit retry linkage for partial and failed runs.
+- Desktop and narrow mocked operator E2E coverage without provider, database, Product, or marketplace writes.
+
+## Unchanged
+
+- Item Selection evaluator, profitability policy, persistence, workflow, and Admin API contracts.
+- Database, migrations, Auth/RLS, Product creation, listings, orders, inventory, supplier writes, and Production configuration.
+
 # Sprint 3 - Revenue Dashboard UI v1
 
 ## Added

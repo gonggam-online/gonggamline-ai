@@ -245,6 +245,70 @@ img { display: block; max-width: 100%; }
   .dashboard-foundation__pagination ol { justify-content: center; }
 }
 
+/* Item Selection Admin */
+.item-selection-admin__form {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) minmax(140px, 1fr) minmax(190px, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+.item-selection-admin label { display: grid; gap: 6px; color: #334155; font-size: 13px; font-weight: 750; }
+.item-selection-admin input, .item-selection-admin select, .item-selection-admin button {
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: white;
+  color: var(--text);
+  font: inherit;
+}
+.item-selection-admin button { border-color: var(--primary); background: var(--primary); color: white; font-weight: 800; cursor: pointer; }
+.item-selection-admin button:disabled { cursor: not-allowed; opacity: .6; }
+.item-selection-admin button:focus-visible, .item-selection-admin input:focus-visible, .item-selection-admin select:focus-visible, .item-selection-admin__run:focus-visible { outline: 3px solid rgba(37, 99, 235, .25); outline-offset: 2px; }
+.item-selection-admin__notice { margin: 14px 0 0; padding: 12px 14px; border-radius: 9px; background: #fffbeb; color: #854d0e; line-height: 1.55; }
+.item-selection-admin__retry { grid-column: 1 / -1; display: flex !important; grid-template-columns: none; align-items: center; }
+.item-selection-admin__retry input { width: 20px; min-height: 20px; padding: 0; }
+.item-selection-admin__live { min-height: 24px; margin-top: 8px; color: #166534; font-weight: 700; }
+.item-selection-admin__summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+.item-selection-admin__summary strong { display: block; font-size: 30px; }
+.item-selection-admin__summary span { color: var(--muted); font-size: 13px; }
+.item-selection-admin .dashboard-foundation__toolbar { margin-bottom: 14px; }
+.item-selection-admin .dashboard-foundation__toolbar button { align-self: end; }
+.item-selection-admin__history { display: grid; gap: 8px; }
+.item-selection-admin__run {
+  display: grid;
+  grid-template-columns: minmax(180px, 2fr) 100px minmax(160px, 1fr) 100px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border-color: var(--border) !important;
+  background: white !important;
+  color: var(--text) !important;
+  text-align: left;
+}
+.item-selection-admin__run[aria-pressed="true"] { border-color: var(--primary) !important; box-shadow: 0 0 0 2px rgba(37, 99, 235, .12); }
+.item-selection-admin__run strong, .item-selection-admin__run small { display: block; }
+.item-selection-admin__run small, .item-selection-admin__run time { margin-top: 3px; color: var(--muted); }
+.item-selection-admin__more { justify-self: center; margin-top: 8px; }
+.item-selection-admin__badge { display: inline-flex; width: fit-content; padding: 4px 8px; border-radius: 999px; background: #e2e8f0; color: #334155; font-size: 12px; font-weight: 850; }
+.item-selection-admin__badge--completed, .item-selection-admin__badge--recommend { background: #dcfce7; color: #166534; }
+.item-selection-admin__badge--partial, .item-selection-admin__badge--conditional, .item-selection-admin__badge--manual_review { background: #fef3c7; color: #92400e; }
+.item-selection-admin__badge--failed, .item-selection-admin__badge--reject { background: #fee2e2; color: #991b1b; }
+.item-selection-admin__badge--running { background: #dbeafe; color: #1d4ed8; }
+.item-selection-admin__detail, .item-selection-admin__evaluations { display: grid; gap: 14px; }
+.item-selection-admin__facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 10px; background: var(--border); }
+.item-selection-admin__facts div { padding: 11px 13px; background: white; }
+.item-selection-admin__facts dt { color: var(--muted); font-size: 12px; font-weight: 750; }
+.item-selection-admin__facts dd { margin: 5px 0 0; overflow-wrap: anywhere; font-weight: 750; }
+.item-selection-admin details { margin-top: 12px; color: var(--muted); }
+.item-selection-admin details code { display: block; margin-top: 7px; overflow-wrap: anywhere; font-size: 11px; }
+@media (max-width: 760px) {
+  .item-selection-admin__form, .item-selection-admin__summary, .item-selection-admin__facts { grid-template-columns: 1fr; }
+  .item-selection-admin__form button { width: 100%; }
+  .item-selection-admin__run { grid-template-columns: 1fr auto; }
+  .item-selection-admin__run time { grid-column: 1; }
+}
+
 /* Sprint 3 Revenue Dashboard */
 .revenue-dashboard__timestamps {
   display: grid;

@@ -1,5 +1,46 @@
 # Work status
 
+## 2026-08-03 — Item Selection Story 5 Admin UI and history
+
+- Objective: add the approved accessible Admin execution, summary, filters,
+  detail, and immutable history UI over the merged Story 4 API.
+- Branch/base: `codex/feat/item-selection-story-5-admin-ui`, based on exact
+  Stage 06 merge `fdcc08d7cb7ad57607229357dc008f2ec37d33aa`.
+- Risk: normal-risk presentation over approved APIs. No database, migration,
+  Auth/RLS, financial policy, Product, marketplace, supplier, or Production
+  change.
+- Revenue impact: lets an administrator execute bounded supplier screening and
+  review evidence/history without manual API calls or unsafe Product writes.
+- Root-cause class: code capability gap. External configuration and database
+  are unchanged; the approved workflow/API exists but lacked its Story 5 UI.
+- Scope: `/admin/item-selection`, CSRF/idempotent execution, sizes 10/20/30,
+  current-page summary, status/verdict filters, keyset history, capped detail,
+  accessible responsive states, focused tests, narrow/desktop E2E, Draft PR,
+  exact Preview validation.
+- Non-goals: API/DTO changes, migration 024 application, Auth/RLS changes,
+  Product creation, listings/orders/inventory, real supplier/commerce writes,
+  secrets, paid calls, and Production mutation.
+- Completed: governance/architecture audit; latest-main branch; existing UI,
+  API, DTO, Admin auth, Dashboard and test-pattern audit; UI implementation;
+  responsive styling; focused source-contract tests; mocked
+  desktop/narrow E2E fixtures; changelog.
+- Current work: final diff/security review, then commit and delivery.
+- Blockers / owner actions: none currently. Preview may lack live Admin and
+  migration 024 fixtures; fixture E2E remains the authorized validation path.
+- Changed files: Admin Item Selection page/component, global styles, unit/E2E
+  tests, Sprint 3 changelog, and this status.
+- Commands/results: focused UI 4/4; full unit 424/424; lint zero errors and
+  four established Revenue warnings; typecheck passed; production build passed
+  with 85 pages including `/admin/item-selection`; mocked production-mode
+  desktop/narrow E2E 2/2 passed. Final full local Playwright: 35 passed, two
+  intended skipped, and seven established missing-Supabase route failures.
+  The protected Admin route passed its mocked flow and the existing
+  unauthenticated API fail-close smoke.
+- Last commit: none for this Story yet.
+- Exact next action: commit, push, open Draft PR, and verify exact-head gates.
+- Remaining risks: instance-local rate limiter remains inherited from Story 4;
+  Production database remains at migrations 000-023 and must not be changed.
+
 ## 2026-08-03 — Item Selection Story 4 workflow and Admin API
 
 - Objective: implement the approved bounded Item Selection orchestration and
