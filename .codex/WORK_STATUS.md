@@ -27,17 +27,24 @@
   diff/security review; Next.js 16 Route Handler guide review. Local Playwright
   completed 33 passed, two intended skipped, and seven established
   Supabase-unconfigured failures; the Admin fail-close smoke passed.
-- Current work: commit/push and high-risk Draft PR; exact-head CI/Preview
-  evidence follows only after GitHub publication.
+- Delivery: implementation commit
+  `442b47d735e7c9c57272c955d1bfad2fb969d553` is pushed in Draft PR #73 with
+  `manual-merge-required`. Exact-head CI run `30791356698` passed every job,
+  including disposable 000-024 replay, Item Selection security behavior, R1
+  atomic Product regression, lint/tests/typecheck/build and secret audit.
+  Preview browser run `30791356497` passed and Vercel reported the exact
+  Preview Ready.
+- Current work: publish this evidence-only status checkpoint and verify the new
+  exact head retains every required gate.
 - Blockers / owner actions: final merge is manual after every exact-head gate.
   Production migration 024 and Production release are explicitly excluded.
 - Changed files: Admin Item Selection routes, workflow service, persistence
   repository read methods/caps, Story 4 tests, changelog, and this status.
-- Delivery blocker: `gh auth status` reports the active GitHub CLI token is
-  invalid. Git push will be attempted through the configured Git credential;
-  Draft PR creation requires restored GitHub authentication if that fails.
-- Exact next action: create the verified local commit, push it, then create the
-  high-risk Draft PR and observe exact-head gates if authentication permits.
+- Delivery note: `gh auth status` reports its CLI token invalid, but the Git
+  credential and connected GitHub app successfully handled push, PR, labels,
+  and gate observation.
+- Exact next action: push this evidence checkpoint, verify exact-head CI and
+  Preview, then stop at the mandatory owner review/merge boundary.
 - Remaining risks: Preview may lack Admin/provider/database fixtures, so live
   write validation must remain separately authorized and non-Production. The
   in-memory rate limiter is instance-local by the accepted existing boundary.
