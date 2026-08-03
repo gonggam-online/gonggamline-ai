@@ -28,15 +28,16 @@
   SHA-256 parity for all 25 migration manifest entries; confirmed only 024 was
   added after the prior Production 000–023 baseline; added the Story 6 runbook,
   changelog, and executable documentation checks.
-- Current: local gates passed; complete diff/secret/generated-output review and
-  Draft PR delivery are pending.
+- Current: preparation is delivered in Draft PR #75 with
+  `manual-merge-required`. Production/database/provider writes and manual merge
+  are stopped at the owner-approval boundary.
 - Blockers / owner actions: no Production write is authorized yet. Before 024,
   the owner must approve the exact Production target, current backup/restore
   proof, maintenance window/RPO/RTO, secret-free dry-run, and the separate
   one-run live-smoke write. High-risk PR merge remains manual.
 - Changed files: Story 6 Production release runbook, focused documentation
   test, Story 6 changelog, and this status record.
-- Commands/results: GitHub exact-head evidence and migration manifest 000–024
+- Commands/results: GitHub dependency exact-head evidence and migration manifest 000–024
   canonical LF hashes passed. After `npm ci` restored missing local
   dependencies, 427/427 tests passed; lint passed with zero errors and four
   established Revenue-test warnings; typecheck passed; Production build passed
@@ -45,10 +46,19 @@
   database write. Two earlier browser commands were invalid evidence only: one
   used a nonexistent spec filename, and one local webServer run discovered the
   two tests but timed out during Windows process shutdown; neither is counted
-  as a passing gate.
-- Last commit: none yet.
-- Exact next action: review the full diff and secret/generated-output scan,
-  then publish one high-risk Draft PR with `manual-merge-required`.
+  as a passing gate. Complete diff, secret-pattern, generated-output, and
+  rollback review passed. Preparation commit
+  `66d8bec612dfd7e889ff221aceb89670359e9f08` passed exact CI run
+  `30794738826`, Preview browser run `30794738749`, and Vercel Preview Ready.
+- Delivery: Draft PR #75,
+  `https://github.com/gonggam-online/gonggamline-ai/pull/75`; label
+  `manual-merge-required`; no Ready, auto-merge, merge, migration, Production
+  deployment, or live provider/database write.
+- Last implementation commit: `66d8bec docs: prepare item selection production release`.
+- Exact next action: require the final status-checkpoint head gates, then obtain
+  explicit owner decisions for exact target/backup/window, 024-only dry-run,
+  migration application, and the separate bounded live smoke. Do not merge or
+  write Production before those approvals.
 - Remaining risks: Production database evidence must be re-read immediately
   before any write; the rate limiter is instance-local; live provider behavior
   varies; an approved live smoke creates immutable Production history.
