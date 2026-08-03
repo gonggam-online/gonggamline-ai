@@ -22,7 +22,6 @@ const PURPOSES = new Set<AdminCsrfPurpose>([
   "admin-session",
   "admin-password-recovery",
   "item-selection-create",
-  "item-selection-finalize",
   "product-import",
   "product-operator-patch",
   "product-manual-competition",

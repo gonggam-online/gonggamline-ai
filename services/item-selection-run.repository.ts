@@ -97,7 +97,8 @@ async function mapRun(
       .select(EVALUATION_COLUMNS)
       .eq("run_id", text(row, "id"))
       .order("original_position", { ascending: true })
-      .order("provider_item_number", { ascending: true });
+      .order("provider_item_number", { ascending: true })
+      .limit(30);
     if (result.error) throw repositoryError(result.error);
     evaluations = Object.freeze(
       (result.data as unknown as DbRecord[]).map(mapEvaluation),
@@ -146,6 +147,29 @@ export async function getItemSelectionRunById(
   return result.data
     ? mapRun(client, result.data as unknown as DbRecord, true)
     : null;
+}
+
+export async function listItemSelectionRuns(
+  context: AdminGuardContext,
+  input: Readonly<{ limit: number; beforeStartedAt?: string; beforeId?: string }>,
+): Promise<readonly ItemSelectionRunDtoV1[]> {
+  const client = createGuardedServiceRoleClient(context);
+  let query = client
+    .from("item_selection_runs")
+    .select(RUN_COLUMNS)
+    .order("started_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(input.limit);
+  if (input.beforeStartedAt && input.beforeId) {
+    query = query.or(
+      `started_at.lt.${input.beforeStartedAt},and(started_at.eq.${input.beforeStartedAt},id.lt.${input.beforeId})`,
+    );
+  }
+  const result = await query;
+  if (result.error) throw repositoryError(result.error);
+  return Promise.all(
+    (result.data as unknown as DbRecord[]).map((row) => mapRun(client, row, false)),
+  );
 }
 
 export async function createItemSelectionRun(
