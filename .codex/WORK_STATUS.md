@@ -1,5 +1,58 @@
 # Work status
 
+## 2026-08-03 — Item Selection Story 6 Production release
+
+- Objective: reconfirm Stories 1–5 exact gates and prepare the approved,
+  bounded migration 024 / live-smoke / Production health / metrics / rollback
+  sequence without crossing the human approval boundary.
+- Branch: `codex/chore/item-selection-story-6-production-release`, based on
+  Story 5 merge `09b1bd3973a5f4cc35b20a83ada1b2575781c1e4`.
+- Risk: high-risk/manual. Production migration/data, authenticated provider
+  execution, deployment, and rollback actions require explicit owner approval;
+  auto-merge is prohibited.
+- Revenue impact: complete the smallest operator-safe supplier screening
+  release while preventing unknown rights/costs, stale runs, or unsafe release
+  verification from contaminating real sales decisions.
+- Scope: dependency gate audit, migration sequencing, stop conditions, bounded
+  fixture/live smoke, aggregate health/metrics, preservation-first rollback,
+  release evidence and tests.
+- Non-goals: bulk crawl, repeated live attempts, Product creation, marketplace,
+  supplier, order, inventory, fulfillment, settlement/payment writes, secrets,
+  raw payload capture, destructive rollback, or code compensation for DB drift.
+- Root-cause class: database. Production is reported at 000–023 while approved
+  migration 024 remains unapplied; code already contains Stories 1–5.
+- Completed: read mandatory governance and approved architectures; verified a
+  clean worktree; fetched latest `origin/main`; created the task branch at the
+  exact Story 5 merge; re-read GitHub PRs #36/#37/#72/#73/#74 and confirmed
+  every final-head CI and Preview browser run succeeded; verified canonical LF
+  SHA-256 parity for all 25 migration manifest entries; confirmed only 024 was
+  added after the prior Production 000–023 baseline; added the Story 6 runbook,
+  changelog, and executable documentation checks.
+- Current: local gates passed; complete diff/secret/generated-output review and
+  Draft PR delivery are pending.
+- Blockers / owner actions: no Production write is authorized yet. Before 024,
+  the owner must approve the exact Production target, current backup/restore
+  proof, maintenance window/RPO/RTO, secret-free dry-run, and the separate
+  one-run live-smoke write. High-risk PR merge remains manual.
+- Changed files: Story 6 Production release runbook, focused documentation
+  test, Story 6 changelog, and this status record.
+- Commands/results: GitHub exact-head evidence and migration manifest 000–024
+  canonical LF hashes passed. After `npm ci` restored missing local
+  dependencies, 427/427 tests passed; lint passed with zero errors and four
+  established Revenue-test warnings; typecheck passed; Production build passed
+  with 85 pages. Mocked desktop+narrow Item Selection browser validation
+  passed 2/2 against the current Production application without a provider or
+  database write. Two earlier browser commands were invalid evidence only: one
+  used a nonexistent spec filename, and one local webServer run discovered the
+  two tests but timed out during Windows process shutdown; neither is counted
+  as a passing gate.
+- Last commit: none yet.
+- Exact next action: review the full diff and secret/generated-output scan,
+  then publish one high-risk Draft PR with `manual-merge-required`.
+- Remaining risks: Production database evidence must be re-read immediately
+  before any write; the rate limiter is instance-local; live provider behavior
+  varies; an approved live smoke creates immutable Production history.
+
 ## 2026-08-03 — Item Selection Story 5 Admin UI and history
 
 - Objective: add the approved accessible Admin execution, summary, filters,
