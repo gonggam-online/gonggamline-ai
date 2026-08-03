@@ -111,6 +111,12 @@ export interface FinalizeItemSelectionRunWriteV1 {
   readonly requestedByPrincipalId: string;
 }
 
+export interface ReconcileStaleItemSelectionRunWriteV1 {
+  readonly runId: string;
+  readonly expectedRequestFingerprint: Sha256Hex;
+  readonly requestedByPrincipalId: string;
+}
+
 export interface ItemSelectionRunRecordV1 {
   readonly id: string;
   readonly provider: "domeggook";

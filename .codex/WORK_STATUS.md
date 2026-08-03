@@ -1,5 +1,36 @@
 # Work status
 
+## 2026-08-03 — Item Selection Story 3 residual persistence
+
+- Objective: audit migration 021/current aggregate and implement only the
+  remaining approved additive persistence and stale recovery.
+- Branch/base: `codex/feat/item-selection-story-3-persistence`, exact
+  `origin/main` `6d8a635451d94af4d246c3261298bc5bcc2d658a`.
+- Risk: high-risk/manual for migration and Auth-bound service-role persistence;
+  Draft PR, `manual-merge-required`, no auto-merge or Production execution.
+- Revenue impact: prevents interrupted supplier-selection work from remaining
+  permanently `RUNNING` and restores an auditable retry path without invented
+  or duplicated evaluations.
+- Root cause: approved database/code capability gap. Local disposable replay is
+  externally blocked by inaccessible Docker and absent Supabase CLI; local
+  route failures are caused by missing Supabase URL.
+- Scope: migration 024; one internal reconciliation RPC/repository contract;
+  manifest, static/disposable tests, verifier, compliance/changelog/status.
+- Non-goals: editing 000–023; reimplementing create/finalize/retry; public API,
+  UI, provider, Product/commerce writes, configuration, Production, or merge.
+- Completed: governance and architecture audit; exact-main branch; 021 audit;
+  DB-clock 30-minute fail-closed recovery; focused 18/18; full 412/412; lint
+  0 errors/4 established warnings; typecheck; build 84 routes; local browser
+  33 passed/2 intended skipped/7 existing Supabase-unconfigured failures.
+- Current: final review, commit/push, Draft PR, exact-head CI/disposable/Preview.
+- Blockers/owner action: exact-head CI disposable replay is binding. Manual
+  review/merge remains required. Production apply is outside this Story.
+- Changed files: migration/manifest, repository/contract, tests/verifier,
+  Architecture Review, changelog, and this status.
+- Exact next action: diff/secret checks, commit, push, Draft PR, remote gates.
+- Remaining risks: migration 024 lacks local disposable execution; CI must
+  prove it. Do not shorten 30 minutes without reviewed capacity evidence.
+
 ## 2026-08-03 - R3 Production history repair checkpoint
 
 - Owner-approved exact `000`-`022` Production migration-history repair completed

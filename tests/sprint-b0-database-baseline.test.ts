@@ -43,8 +43,8 @@ function verifyMigrationInventory(
   artifacts: MigrationArtifact[],
   readMigration: (fileName: string) => Buffer | string,
 ): void {
-  assert.equal(actualNames.length, 24, "migration directory must contain 24 SQL files");
-  assert.equal(artifacts.length, 24, "manifest must contain 24 migration artifacts");
+  assert.equal(actualNames.length, 25, "migration directory must contain 25 SQL files");
+  assert.equal(artifacts.length, 25, "manifest must contain 25 migration artifacts");
   assert.equal(
     new Set(artifacts.map(({ file }) => file)).size,
     artifacts.length,
@@ -151,7 +151,7 @@ test("migration inventory validation rejects every protected drift class", () =>
   );
   assert.throws(() =>
     verifyMigrationInventory(
-      [...names, "023_unapproved.sql"],
+      [...names, "025_unapproved.sql"],
       manifest.migrations,
       readMigration,
     ),
@@ -164,7 +164,7 @@ test("migration inventory validation rejects every protected drift class", () =>
       names,
       [
         ...manifest.migrations,
-        { order: 22, file: "022_manifest_only.sql", sha256: "0".repeat(64) },
+        { order: 25, file: "025_manifest_only.sql", sha256: "0".repeat(64) },
       ],
       readMigration,
     ),
