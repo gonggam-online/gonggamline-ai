@@ -22,16 +22,23 @@
   DB-clock 30-minute fail-closed recovery; focused 18/18; full 412/412; lint
   0 errors/4 established warnings; typecheck; build 84 routes; local browser
   33 passed/2 intended skipped/7 existing Supabase-unconfigured failures.
-- Current: exact-head R1 regression found migration 024 had replaced the 022
-  Product audit allowlist; the correction preserves the complete 022 allowlist
-  and adds only the stale event/route. Revalidation/push are pending.
+- Current: implementation and exact-head delivery gates passed. Draft PR #72
+  remains open for mandatory repository-owner review and manual merge.
 - Blockers/owner action: exact-head CI disposable replay is binding. Manual
   review/merge remains required. Production apply is outside this Story.
 - Changed files: migration/manifest, repository/contract, tests/verifier,
   Architecture Review, changelog, and this status.
-- Exact next action: diff/secret checks, commit, push, Draft PR, remote gates.
-- Remaining risks: migration 024 lacks local disposable execution; CI must
-  prove it. Do not shorten 30 minutes without reviewed capacity evidence.
+- Delivery: commits `570fc45701e57c4456f1cdd4ab98dd737d5841de` and
+  `a1b34590b9a38baeb37cb5f1920a14e4c9882a1e` are pushed in Draft PR #72
+  with `manual-merge-required`. Exact-head CI run `30788141258` passed all
+  jobs, including disposable 000–024 replay, Item Selection stale behavior,
+  and R1 regression. Exact-head Preview browser run `30788141273` passed;
+  Vercel deployment `4daVAQSKYn4eZW3Tvb1x11a9mZKh` is Ready.
+- Exact next action: repository-owner review and manual merge of PR #72. Do not
+  apply migration 024 to Production in this Story.
+- Remaining risks: local disposable execution remains unavailable, but the
+  binding exact-head CI replay/behavior gate passed. Do not shorten 30 minutes
+  without reviewed capacity evidence. Production remains 000–023.
 
 ## 2026-08-03 - R3 Production history repair checkpoint
 
