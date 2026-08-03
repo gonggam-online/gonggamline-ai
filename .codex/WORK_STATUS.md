@@ -22,7 +22,9 @@
   DB-clock 30-minute fail-closed recovery; focused 18/18; full 412/412; lint
   0 errors/4 established warnings; typecheck; build 84 routes; local browser
   33 passed/2 intended skipped/7 existing Supabase-unconfigured failures.
-- Current: final review, commit/push, Draft PR, exact-head CI/disposable/Preview.
+- Current: exact-head R1 regression found migration 024 had replaced the 022
+  Product audit allowlist; the correction preserves the complete 022 allowlist
+  and adds only the stale event/route. Revalidation/push are pending.
 - Blockers/owner action: exact-head CI disposable replay is binding. Manual
   review/merge remains required. Production apply is outside this Story.
 - Changed files: migration/manifest, repository/contract, tests/verifier,

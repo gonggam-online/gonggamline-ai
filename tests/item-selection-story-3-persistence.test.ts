@@ -40,6 +40,22 @@ test("stale recovery is identity-bound, idempotent, audited, and service-role-on
   assert.match(migration024, /GRANT EXECUTE ON FUNCTION[\s\S]+TO service_role/);
 });
 
+test("migration 024 preserves the complete R1 audit allowlist", () => {
+  for (const value of [
+    "PRODUCT_IMPORT",
+    "PRODUCT_OPERATOR_PATCH",
+    "PRODUCT_MANUAL_COMPETITION",
+    "PRODUCT_AUTOMATIC_COMPETITION",
+    "/api/admin/products/import",
+    "/api/products/[id]",
+    "/api/products/[id]/competition",
+    "/api/products/[id]/competition/auto",
+    "/api/competition/analyze-batch",
+  ]) {
+    assert.ok(migration024.includes(`'${value}'`), `missing preserved R1 audit value: ${value}`);
+  }
+});
+
 test("repository maps only the approved internal reconciliation RPC", () => {
   assert.match(repository, /export async function reconcileStaleItemSelectionRun/);
   assert.match(repository, /client\.rpc\("reconcile_stale_item_selection_run_v1"/);

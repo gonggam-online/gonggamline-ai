@@ -125,7 +125,7 @@
     {
       "order": 24,
       "file": "024_item_selection_stale_recovery.sql",
-      "sha256": "8e529ee5ef5a664aef7ca3b31789b64601bc2f2eed51533e15d7575b8b7555cf"
+      "sha256": "91db6288ffb64261a92cb9524cd33bec907b484b1a4e9ce05c7bf574a059fb5a"
     }
   ],
   "promotedSources": {

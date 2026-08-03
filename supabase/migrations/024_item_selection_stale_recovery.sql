@@ -7,7 +7,11 @@ ALTER TABLE public.security_audit_events
     event_code IN (
       'ITEM_SELECTION_CREATE',
       'ITEM_SELECTION_FINALIZE',
-      'ITEM_SELECTION_RECONCILE_STALE'
+      'ITEM_SELECTION_RECONCILE_STALE',
+      'PRODUCT_IMPORT',
+      'PRODUCT_OPERATOR_PATCH',
+      'PRODUCT_MANUAL_COMPETITION',
+      'PRODUCT_AUTOMATIC_COMPETITION'
     )
   ),
   DROP CONSTRAINT security_audit_events_route_check,
@@ -15,7 +19,12 @@ ALTER TABLE public.security_audit_events
     route IN (
       '/api/admin/item-selection/runs',
       '/api/admin/item-selection/runs/[id]/finalize',
-      '/internal/item-selection/reconcile-stale'
+      '/internal/item-selection/reconcile-stale',
+      '/api/admin/products/import',
+      '/api/products/[id]',
+      '/api/products/[id]/competition',
+      '/api/products/[id]/competition/auto',
+      '/api/competition/analyze-batch'
     )
   );
 
