@@ -1,5 +1,17 @@
 # Item Selection Security v1 changelog
 
+## 2026-08-03
+
+- Audited migration 021 and retained its existing create/finalize transaction,
+  idempotency, immutable aggregate, and retry-lineage implementation unchanged.
+- Added migration 024 with one service-role-only, audited stale-run recovery
+  RPC. It uses a database-clock 30-minute threshold, locks the run against
+  finalization, fails closed on identity/evaluation conflicts, and only turns
+  an empty abandoned `RUNNING` aggregate into `FAILED`.
+- Added the internal repository contract and Story 3 recovery tests. No public
+  route, UI, provider orchestration, Product/commerce write, or Production
+  execution is included.
+
 ## 2026-07-30
 
 - Added immutable Item Selection run/evaluation persistence and audited RPCs

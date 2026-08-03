@@ -9,6 +9,7 @@ import type {
   ItemSelectionEvaluationDtoV1,
   ItemSelectionRunDtoV1,
   ItemSelectionRunWriteV1,
+  ReconcileStaleItemSelectionRunWriteV1,
 } from "../shared/contracts/item-selection-persistence";
 
 class ItemSelectionRunRepositoryError extends Error {
@@ -220,4 +221,20 @@ export async function finalizeItemSelectionRun(
   });
   if (result.error) throw repositoryError(result.error);
   return mapRun(client, result.data as DbRecord, true);
+}
+
+export async function reconcileStaleItemSelectionRun(
+  context: AdminGuardContext,
+  input: ReconcileStaleItemSelectionRunWriteV1,
+): Promise<ItemSelectionRunDtoV1> {
+  const client = createGuardedServiceRoleClient(context);
+  const result = await client.rpc("reconcile_stale_item_selection_run_v1", {
+    p_run_id: input.runId,
+    p_expected_request_fingerprint: input.expectedRequestFingerprint,
+    p_requested_by_principal_id: context.administratorUserId,
+    p_route: "/internal/item-selection/reconcile-stale",
+    p_correlation_id: context.correlationId,
+  });
+  if (result.error) throw repositoryError(result.error);
+  return mapRun(client, result.data as DbRecord, false);
 }

@@ -98,11 +98,12 @@ BEGIN
    WHERE n.nspname = 'public'
      AND p.proname IN (
        'create_item_selection_run_v1',
-       'finalize_item_selection_run_v1'
+       'finalize_item_selection_run_v1',
+       'reconcile_stale_item_selection_run_v1'
      )
      AND p.prosecdef
      AND p.proconfig @> ARRAY['search_path=pg_catalog, public']::text[];
-  IF actual_function_count <> 2 THEN
+  IF actual_function_count <> 3 THEN
     RAISE EXCEPTION 'A11 function fingerprint mismatch';
   END IF;
 
@@ -143,9 +144,86 @@ $verify$;
   $catalogSql | docker exec -i $databaseContainer psql -v ON_ERROR_STOP=1 -U postgres -d postgres
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+  $staleRecoverySql = @'
+DO $verify$
+DECLARE
+  principal constant text := '11111111-1111-4111-8111-111111111111';
+  stale_run public.item_selection_runs;
+  replayed_run public.item_selection_runs;
+  recent_run_id uuid;
+BEGIN
+  INSERT INTO public.item_selection_runs (
+    provider, keyword, requested_size, ruleset_version, evaluator_version,
+    profitability_policy_version, profitability_calculation_contract_version,
+    request_fingerprint, idempotency_key_hash, requested_by_principal_id,
+    started_at
+  ) VALUES (
+    'domeggook', 'stale-fixture', 10, 'rules-v1', 'evaluator-v1',
+    'profit-v1', 'gonggamline-profitability-calculation-v1',
+    repeat('a', 64), repeat('b', 64), principal,
+    statement_timestamp() - interval '31 minutes'
+  ) RETURNING * INTO stale_run;
+
+  SELECT * INTO stale_run
+  FROM public.reconcile_stale_item_selection_run_v1(
+    stale_run.id, repeat('a', 64), principal,
+    '/internal/item-selection/reconcile-stale',
+    '22222222-2222-4222-8222-222222222222'
+  );
+  IF stale_run.status <> 'FAILED'
+    OR stale_run.failure_code <> 'STALE_RUN_RECOVERED'
+    OR stale_run.persisted_evaluation_count <> 0 THEN
+    RAISE EXCEPTION 'stale recovery state mismatch';
+  END IF;
+
+  SELECT * INTO replayed_run
+  FROM public.reconcile_stale_item_selection_run_v1(
+    stale_run.id, repeat('a', 64), principal,
+    '/internal/item-selection/reconcile-stale',
+    '33333333-3333-4333-8333-333333333333'
+  );
+  IF replayed_run IS DISTINCT FROM stale_run THEN
+    RAISE EXCEPTION 'stale recovery replay mismatch';
+  END IF;
+  IF (SELECT count(*) FROM public.security_audit_events
+      WHERE event_code = 'ITEM_SELECTION_RECONCILE_STALE'
+        AND administrator_user_id = principal::uuid) <> 1 THEN
+    RAISE EXCEPTION 'stale recovery audit mismatch';
+  END IF;
+
+  INSERT INTO public.item_selection_runs (
+    provider, keyword, requested_size, ruleset_version, evaluator_version,
+    profitability_policy_version, profitability_calculation_contract_version,
+    request_fingerprint, idempotency_key_hash, requested_by_principal_id
+  ) VALUES (
+    'domeggook', 'recent-fixture', 10, 'rules-v1', 'evaluator-v1',
+    'profit-v1', 'gonggamline-profitability-calculation-v1',
+    repeat('c', 64), repeat('d', 64), principal
+  ) RETURNING id INTO recent_run_id;
+
+  BEGIN
+    PERFORM public.reconcile_stale_item_selection_run_v1(
+      recent_run_id, repeat('c', 64), principal,
+      '/internal/item-selection/reconcile-stale',
+      '44444444-4444-4444-8444-444444444444'
+    );
+    RAISE EXCEPTION 'recent recovery unexpectedly succeeded';
+  EXCEPTION WHEN unique_violation THEN
+    NULL;
+  END;
+  IF (SELECT status FROM public.item_selection_runs WHERE id = recent_run_id) <> 'RUNNING' THEN
+    RAISE EXCEPTION 'recent recovery changed the run';
+  END IF;
+END
+$verify$;
+'@
+  $staleRecoverySql | docker exec -i $databaseContainer psql -v ON_ERROR_STOP=1 -U postgres -d postgres
+  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
   Write-Output "A01-A12 security evidence: PASS"
-  Write-Output "Disposable migrations 000-021 replay: PASS"
+  Write-Output "Disposable migrations 000-024 replay: PASS"
   Write-Output "Item Selection catalog fingerprint: PASS"
+  Write-Output "Item Selection stale recovery behavior: PASS"
 }
 finally {
   if ($Stop -or $startedHere) {

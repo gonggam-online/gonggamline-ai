@@ -121,6 +121,11 @@
       "order": 23,
       "file": "023_product_security_target.sql",
       "sha256": "c00f6e21d00e78fe112fd3d8369006b077daf49115b148392ae25481245126bd"
+    },
+    {
+      "order": 24,
+      "file": "024_item_selection_stale_recovery.sql",
+      "sha256": "91db6288ffb64261a92cb9524cd33bec907b484b1a4e9ce05c7bf574a059fb5a"
     }
   ],
   "promotedSources": {

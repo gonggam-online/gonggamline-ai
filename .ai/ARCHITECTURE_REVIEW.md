@@ -1,5 +1,49 @@
 # Architecture review
 
+## Item Selection Story 3 residual persistence compliance — 2026-08-03
+
+- Approved boundary: Supplier / Procurement Item Selection and the accepted
+  Database / Security persistence design. Revenue, provider, HTTP, and UI are
+  unchanged.
+- Audit result: migration 021 already implements create/finalize transactions,
+  immutable history, idempotent replay/conflict, and retry lineage; duplicate
+  implementation is excluded.
+- Residual scope: forward-only migration 024 adds only the approved stale
+  reconciliation RPC, its internal repository DTO, and verification. Because
+  Production contains 021–023, migration 021 remains immutable.
+- Security/failure contract: service-role only; requester and fingerprint
+  bound; row-locked against finalization; database-clock 30-minute threshold;
+  zero-evaluation proof; idempotent terminal replay; same-transaction audit.
+  Recovery never invents completion or evaluation rows.
+- Architecture gate: no new Domain, Queue, public API, UI, external integration,
+  or lifecycle. This completes the accepted `RUNNING -> FAILED` stale branch.
+- Risk/rollout: high-risk/manual, Draft PR, `manual-merge-required`, disposable
+  000–024 replay, exact-head gates, separate owner merge, no Production apply.
+- Rollback: revert before application. After application, disable callers and
+  retain additive history/data; never rewrite old migrations or delete runs.
+
+## Item Selection Story 3 residual persistence compliance — 2026-08-03
+
+- Approved boundary: Supplier / Procurement Item Selection and the accepted
+  Database / Security persistence design. Revenue, provider, HTTP, and UI are
+  unchanged.
+- Audit result: migration 021 already implements create/finalize transactions,
+  immutable history, idempotent replay/conflict, and retry lineage; duplicate
+  implementation is excluded.
+- Residual scope: forward-only migration 024 adds only the approved stale
+  reconciliation RPC, its internal repository DTO, and verification. Because
+  Production contains 021–023, migration 021 remains immutable.
+- Security/failure contract: service-role only; requester and fingerprint
+  bound; row-locked against finalization; database-clock 30-minute threshold;
+  zero-evaluation proof; idempotent terminal replay; same-transaction audit.
+  Recovery never invents completion or evaluation rows.
+- Architecture gate: no new Domain, Queue, public API, UI, external integration,
+  or lifecycle. This completes the accepted `RUNNING -> FAILED` stale branch.
+- Risk/rollout: high-risk/manual, Draft PR, `manual-merge-required`, disposable
+  000–024 replay, exact-head gates, separate owner merge, no Production apply.
+- Rollback: revert before application. After application, disable callers and
+  retain additive history/data; never rewrite old migrations or delete runs.
+
 ## Proposed R3 isolated CLI sidecar transport — 2026-08-01
 
 - Source Story: merged R3 architecture PR #65 and rehearsal validator PR #67.
