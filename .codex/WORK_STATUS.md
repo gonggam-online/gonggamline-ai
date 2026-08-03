@@ -28,13 +28,18 @@
   SHA-256 parity for all 25 migration manifest entries; confirmed only 024 was
   added after the prior Production 000–023 baseline; added the Story 6 runbook,
   changelog, and executable documentation checks.
-- Current: preparation is delivered in Draft PR #75 with
-  `manual-merge-required`. Production/database/provider writes and manual merge
-  are stopped at the owner-approval boundary.
-- Blockers / owner actions: no Production write is authorized yet. Before 024,
-  the owner must approve the exact Production target, current backup/restore
-  proof, maintenance window/RPO/RTO, secret-free dry-run, and the separate
-  one-run live-smoke write. High-risk PR merge remains manual.
+- Current: the owner approved release steps 1–7. Execution stopped before
+  database contact because the mandatory backup/credential/window preflight
+  failed closed.
+- Blockers / owner actions: Supabase Dashboard confirms the exact Production
+  project, but its Free plan has no managed scheduled backups. The newest local
+  logical dump was created before migration 023, so it is not the runbook's
+  required current 000–023 recovery point. This session also has no
+  `SUPABASE_ACCESS_TOKEN` or `SUPABASE_DB_PASSWORD`, and no exact Asia/Seoul
+  maintenance-window start/end was supplied. The owner must provide a current
+  restorable 000–023 backup plus isolated restore-check evidence, inject both
+  secrets into the approved local environment without sharing their values,
+  and name the maintenance window. High-risk PR merge remains manual.
 - Changed files: Story 6 Production release runbook, focused documentation
   test, Story 6 changelog, and this status record.
 - Commands/results: GitHub dependency exact-head evidence and migration manifest 000–024
@@ -50,15 +55,21 @@
   rollback review passed. Preparation commit
   `66d8bec612dfd7e889ff221aceb89670359e9f08` passed exact CI run
   `30794738826`, Preview browser run `30794738749`, and Vercel Preview Ready.
+  Final head `82ea94c68da37cd16121a98ecb044212397a332c`
+  passed exact CI `30795040898`, Preview browser `30795040822`, and Vercel
+  Preview Ready. Read-only Production preflight confirmed the Supabase project
+  and Free-plan backup limitation. No migration/list/dry-run database command
+  was attempted after the missing recovery point, credentials, and window were
+  found.
 - Delivery: Draft PR #75,
   `https://github.com/gonggam-online/gonggamline-ai/pull/75`; label
   `manual-merge-required`; no Ready, auto-merge, merge, migration, Production
   deployment, or live provider/database write.
 - Last implementation commit: `66d8bec docs: prepare item selection production release`.
-- Exact next action: require the final status-checkpoint head gates, then obtain
-  explicit owner decisions for exact target/backup/window, 024-only dry-run,
-  migration application, and the separate bounded live smoke. Do not merge or
-  write Production before those approvals.
+- Exact next action: after the owner supplies the missing recovery point,
+  secret environment, and exact window, rerun the read-only target/history
+  preflight and execute only the approved 024 dry-run. Do not merge or write
+  Production before those stop conditions pass.
 - Remaining risks: Production database evidence must be re-read immediately
   before any write; the rate limiter is instance-local; live provider behavior
   varies; an approved live smoke creates immutable Production history.
