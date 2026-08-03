@@ -17,7 +17,7 @@ and authorization are affected. Auto-merge is prohibited.
   `28b8877534c27b53b891b7b6507b2e18cc60a691`.
 - Candidate migration: `023_product_security_target.sql`.
 - Canonical LF SHA-256 from `supabase/baseline-manifest.json`:
-  `74e54a88a2c1dfe5ab6e45ec0d2385707de1b1bdb0f8125cf18aaf6ce564cb96`.
+  `c00f6e21d00e78fe112fd3d8369006b077daf49115b148392ae25481245126bd`.
 - Pinned CLI: Supabase CLI `2.110.0`.
 - Pinned local image digest:
   `sha256:13d9fe6fb6790d29c4f816b6cc14ec9271dc91a35f395c4315ecd09df5002128`.
@@ -41,6 +41,23 @@ and authorization are affected. Auto-merge is prohibited.
   or role-attribute uncertainty remains a stop condition.
 
 ## Production read-only preflight
+
+### 2026-08-03 fail-closed checkpoint
+
+The first approved 023 application stopped in its initial precondition block,
+before any DDL, RLS, Auth, or migration-history change. Follow-up read-only
+inventory proved a previously unmodelled but bounded mixed pre-state:
+
+- Product has the three classified restored public policies;
+- `anon`, `authenticated`, and `service_role` each effectively have all seven
+  Product table privileges, while PUBLIC has none; and
+- all seven R1 functions already have the canonical restricted execute matrix.
+
+The revised candidate accepts this exact Product matrix only with canonical
+function ACLs. It does not accept partial function ACLs or canonical Product
+state paired with permissive functions. Production retry remains prohibited
+until the revised candidate passes every gate, is manually merged, and receives
+a new explicit owner approval.
 
 - Executed only through `BEGIN READ ONLY` and `ROLLBACK`.
 - Raw restricted evidence:

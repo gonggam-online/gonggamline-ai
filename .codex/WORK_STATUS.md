@@ -1,5 +1,72 @@
 # Work status
 
+## 2026-08-03 - R3 Production history repair checkpoint
+
+- Owner-approved exact `000`-`022` Production migration-history repair completed
+  through official Supabase CLI 2.110.0. The CLI reported all 23 versions
+  repaired to `applied`; post-list proves Local=Remote for `000`-`022` and
+  leaves `023` remote blank.
+- Evidence SHA-256: repair
+  `8385EA0EB775FA4BAABB24C7FC4ABAA791A6355469910228D7775887F8D8D2C0`;
+  post-list
+  `B29ECFD2322C9C2BB24A70EF2F49A2BD182AC78077825F5A5D2C1186D841EB92`;
+  dry run
+  `FEAB31A04451A8073CD772E6BFBB239AE44AE56099DD8CEE97E21A160EAB704A`.
+- `db push --dry-run --linked` reports exactly
+  `023_product_security_target.sql`; it explicitly states migrations were not
+  pushed. Migration 023 is not applied.
+- Schema/RLS/Auth/commerce writes remain excluded. Temporary credentials were
+  removed, the clipboard was overwritten, and no secret value is recorded.
+- Current blocker: obtain a second explicit owner approval for the actual
+  Production application of exactly migration 023 at canonical LF SHA-256
+  `74e54a88a2c1dfe5ab6e45ec0d2385707de1b1bdb0f8125cf18aaf6ce564cb96`.
+  No apply command may run before that approval.
+- Exact next action after approval: authenticate ephemerally, recheck the
+  linked list/dry run, apply exactly 023, verify history/schema/RLS/function
+  contracts read-only, revoke the task token, and record rollback/monitoring
+  evidence. Any drift stops the rollout.
+- Owner approved actual migration 023 application. All pre-gates passed, but
+  the migration's first fail-closed DO block rejected Production before any
+  DDL/RLS/Auth change or migration-history insertion. Apply evidence SHA-256:
+  `464D4E5AFC118C897EC80C442693A07214A4EB48EB57D63C0B1AB2A8A9DE070B`.
+- Post-failure read-only inventory completed under `BEGIN READ ONLY` and
+  `ROLLBACK`; raw evidence SHA-256:
+  `B598380E125C8871765E6B4EEE8B04A9BEFF7C4E1A236D9BD4A46F99980E1FEA`.
+  The existing R2 validator accepts the sanitized inventory with fingerprint
+  `32258a4ec6b6d277251f3791b1c7f255a5d2b3eee44a28d97a5cf027afd47f2a`.
+- Root cause: Production is a bounded but previously unmodelled mixed
+  pre-state. Product retains the three restored public policies and all seven
+  effective Product privileges for `anon`, `authenticated`, and
+  `service_role`, while PUBLIC has none. The seven R1 functions already have
+  the canonical restricted execute matrix (only the four approved service-role
+  entry points execute). Candidate 023 did not classify this exact Product
+  grant matrix and coupled restored Product state to permissive restored
+  function ACLs, so its first precondition failed closed.
+- Current blocker: do not retry 023 and do not broaden Production function
+  grants. A revised candidate must independently classify this exact mixed
+  pre-state, preserve the canonical function ACL, pass disposable and restored
+  rehearsals plus exact-head CI/Preview, be merged manually, and receive a new
+  Production approval before application. Production history remains exactly
+  `000`-`022`; 023 is not applied.
+- Owner approved candidate correction and non-Production verification. Revised
+  023 independently classifies Product and function pre-states; exact
+  `PRODUCTION_MIXED` is accepted only with canonical function ACLs. Canonical
+  Product plus permissive functions and every partial function matrix remain
+  rejected. Revised canonical LF SHA-256:
+  `c00f6e21d00e78fe112fd3d8369006b077daf49115b148392ae25481245126bd`.
+- Disposable Supabase CLI 2.110.0 results: canonical 000-023 replay passed;
+  exact Production mixed 022-to-023 replay passed and read-only verification
+  proved history 000-023, sole anon read policy, anon/service SELECT only, and
+  canonical R1 ACLs; legacy restored-to-023 replay passed; a one-function
+  partial ACL negative replay failed closed at statement 1.
+- Local gates: focused R2/R3/baseline 24/24, full tests 408/408, typecheck,
+  Production build (84 routes), and lint with zero errors/four established
+  warnings passed. Disposable stack was stopped without backup and the
+  temporary local port override was removed.
+- Exact next action: review the complete diff, commit and push the revised
+  high-risk candidate, update Draft PR #71, and require exact-head CI/Preview.
+  Manual merge and a new explicit Production approval remain mandatory.
+
 ## 2026-08-01 - R3 Production history repair and security rollout preflight
 
 - Objective: after R2 merge, obtain a new verified Production backup, repeat

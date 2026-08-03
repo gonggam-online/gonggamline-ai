@@ -215,19 +215,28 @@ test("R2 candidate 023 reasserts the exact R1 execute and default ACL matrix", (
   assert.match(sql, /browser-facing default privileges remain/);
 });
 
-test("R2 candidate 023 accepts only restored drift or canonical 000-022 pre-state", () => {
+test("R2 candidate 023 accepts only approved Product and function pre-state combinations", () => {
   const sql = read("supabase/migrations/023_product_security_target.sql");
   assert.match(sql, /v_pre_state := 'RESTORED_DRIFT'/);
   assert.match(sql, /v_pre_state := 'CANONICAL_000_022'/);
   assert.match(sql, /v_policy_state IS NULL/);
   assert.match(sql, /v_restored_grants_match/);
   assert.match(sql, /v_canonical_grants_match/);
+  assert.match(sql, /v_restored_functions_match/);
+  assert.match(sql, /v_canonical_functions_match/);
+  assert.match(sql, /v_production_mixed_grants_match/);
+  assert.match(sql, /v_pre_state := 'PRODUCTION_MIXED'/);
   assert.match(sql, /\('SELECT', false\), \('INSERT', false\), \('UPDATE', false\), \('DELETE', false\)/);
   assert.match(sql, /\('TRUNCATE', true\), \('REFERENCES', true\), \('TRIGGER', true\)/);
   assert.match(sql, /Product state is mixed or unapproved/);
   assert.match(sql, /to_regprocedure\('public\.product_mutation_claim_v1/);
   assert.match(sql, /to_regprocedure\('public\.product_mutation_claim_v1[^\n]+\)::oid/);
-  assert.match(sql, /FROM expected e[\s\S]+has_function_privilege\('anon', p\.oid, 'EXECUTE'\)/);
+  assert.match(sql, /v_pre_state = 'RESTORED_DRIFT'[\s\S]+v_restored_functions_match OR v_canonical_functions_match/);
+  assert.match(sql, /v_pre_state = 'PRODUCTION_MIXED' AND v_canonical_functions_match/);
+  assert.match(sql, /v_pre_state = 'CANONICAL_000_022' AND v_canonical_functions_match/);
+  assert.doesNotMatch(sql, /v_pre_state = 'PRODUCTION_MIXED' AND v_restored_functions_match/);
+  assert.doesNotMatch(sql, /v_pre_state = 'CANONICAL_000_022' AND v_restored_functions_match/);
+  assert.match(sql, /FROM expected e[\s\S]+has_function_privilege\('anon', e\.function_oid, 'EXECUTE'\)/);
   assert.doesNotMatch(sql, /current_setting\('gonggamline\.r2_pre_state'\)|set_config\('gonggamline\.r2_pre_state'/);
   assert.doesNotMatch(sql, /v_pre_state\s*:=\s*coalesce/i);
 });
