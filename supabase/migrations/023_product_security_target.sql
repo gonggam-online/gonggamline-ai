@@ -8,7 +8,11 @@ DECLARE
   v_creator_roles text[];
   v_rls_enabled boolean;
   v_restored_grants_match boolean;
+  v_production_mixed_grants_match boolean;
   v_canonical_grants_match boolean;
+  v_function_contracts_match boolean;
+  v_restored_functions_match boolean;
+  v_canonical_functions_match boolean;
   v_pre_state text;
 BEGIN
   IF to_regclass('public.products') IS NULL THEN
@@ -64,6 +68,15 @@ BEGIN
   SELECT NOT EXISTS (
     SELECT 1
     FROM unnest(ARRAY['anon', 'authenticated', 'service_role']) role_name
+    CROSS JOIN unnest(ARRAY[
+      'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER'
+    ]) privilege_name
+    WHERE NOT has_table_privilege(role_name, 'public.products', privilege_name)
+  ) INTO v_production_mixed_grants_match;
+
+  SELECT NOT EXISTS (
+    SELECT 1
+    FROM unnest(ARRAY['anon', 'authenticated', 'service_role']) role_name
     CROSS JOIN (VALUES
       ('SELECT', false), ('INSERT', false), ('UPDATE', false), ('DELETE', false),
       ('TRUNCATE', true), ('REFERENCES', true), ('TRIGGER', true)
@@ -93,6 +106,15 @@ BEGIN
      AND v_restored_grants_match
   THEN
     v_pre_state := 'RESTORED_DRIFT';
+  ELSIF v_rls_enabled
+        AND v_policy_state IS NOT DISTINCT FROM ARRAY[
+          'Allow public insert products|INSERT|anon||true',
+          'Allow public read products|SELECT|anon|true|',
+          'Allow public update products|UPDATE|anon|true|true'
+        ]::text[]
+        AND v_production_mixed_grants_match
+  THEN
+    v_pre_state := 'PRODUCTION_MIXED';
   ELSIF NOT v_rls_enabled
         AND v_policy_state IS NULL
         AND v_canonical_grants_match
@@ -122,7 +144,7 @@ BEGIN
     RAISE EXCEPTION 'R2 precondition failed: public creator role inventory drifted';
   END IF;
 
-  IF EXISTS (
+  SELECT NOT EXISTS (
     WITH expected(function_name, function_oid, canonical_service_execute) AS (VALUES
       ('product_mutation_claim_v1', to_regprocedure('public.product_mutation_claim_v1(text,text,text,text,uuid)')::oid, false),
       ('product_mutation_complete_v1', to_regprocedure('public.product_mutation_complete_v1(uuid,bigint,jsonb,uuid,text,text,uuid)')::oid, false),
@@ -139,20 +161,55 @@ BEGIN
        OR pg_catalog.pg_get_userbyid(p.proowner) <> 'postgres'
        OR NOT p.prosecdef
        OR NOT (p.proconfig @> ARRAY['search_path=pg_catalog, public'])
-       OR has_function_privilege('anon', p.oid, 'EXECUTE')
-            IS DISTINCT FROM (v_pre_state = 'RESTORED_DRIFT')
-       OR has_function_privilege('authenticated', p.oid, 'EXECUTE')
-            IS DISTINCT FROM (v_pre_state = 'RESTORED_DRIFT')
-       OR has_function_privilege('service_role', p.oid, 'EXECUTE')
-            IS DISTINCT FROM CASE WHEN v_pre_state = 'RESTORED_DRIFT'
-              THEN true ELSE e.canonical_service_execute END
        OR EXISTS (
          SELECT 1
          FROM pg_catalog.aclexplode(
            coalesce(p.proacl, pg_catalog.acldefault('f', p.proowner))) acl
          WHERE acl.grantee = 0 AND acl.privilege_type = 'EXECUTE'
        )
-  ) THEN
+  ) INTO v_function_contracts_match;
+
+  SELECT NOT EXISTS (
+    WITH expected(function_oid) AS (VALUES
+      (to_regprocedure('public.product_mutation_claim_v1(text,text,text,text,uuid)')::oid),
+      (to_regprocedure('public.product_mutation_complete_v1(uuid,bigint,jsonb,uuid,text,text,uuid)')::oid),
+      (to_regprocedure('public.import_product_v1(jsonb,text,text,uuid,uuid)')::oid),
+      (to_regprocedure('public.patch_product_operator_fields_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid)')::oid),
+      (to_regprocedure('public.record_product_competition_v1(bigint,timestamptz,jsonb,text,text,text,uuid,uuid,text)')::oid),
+      (to_regprocedure('public.record_manual_competition_analysis_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid)')::oid),
+      (to_regprocedure('public.record_automatic_competition_analysis_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid,text)')::oid)
+    )
+    SELECT 1 FROM expected e
+    WHERE NOT has_function_privilege('anon', e.function_oid, 'EXECUTE')
+       OR NOT has_function_privilege('authenticated', e.function_oid, 'EXECUTE')
+       OR NOT has_function_privilege('service_role', e.function_oid, 'EXECUTE')
+  ) INTO v_restored_functions_match;
+
+  SELECT NOT EXISTS (
+    WITH expected(function_oid, canonical_service_execute) AS (VALUES
+      (to_regprocedure('public.product_mutation_claim_v1(text,text,text,text,uuid)')::oid, false),
+      (to_regprocedure('public.product_mutation_complete_v1(uuid,bigint,jsonb,uuid,text,text,uuid)')::oid, false),
+      (to_regprocedure('public.import_product_v1(jsonb,text,text,uuid,uuid)')::oid, true),
+      (to_regprocedure('public.patch_product_operator_fields_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid)')::oid, true),
+      (to_regprocedure('public.record_product_competition_v1(bigint,timestamptz,jsonb,text,text,text,uuid,uuid,text)')::oid, false),
+      (to_regprocedure('public.record_manual_competition_analysis_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid)')::oid, true),
+      (to_regprocedure('public.record_automatic_competition_analysis_v1(bigint,timestamptz,jsonb,text,text,uuid,uuid,text)')::oid, true)
+    )
+    SELECT 1 FROM expected e
+    WHERE has_function_privilege('anon', e.function_oid, 'EXECUTE')
+       OR has_function_privilege('authenticated', e.function_oid, 'EXECUTE')
+       OR has_function_privilege('service_role', e.function_oid, 'EXECUTE')
+            IS DISTINCT FROM e.canonical_service_execute
+  ) INTO v_canonical_functions_match;
+
+  IF NOT v_function_contracts_match
+     OR NOT (
+      (v_pre_state = 'RESTORED_DRIFT'
+         AND (v_restored_functions_match OR v_canonical_functions_match))
+       OR (v_pre_state = 'PRODUCTION_MIXED' AND v_canonical_functions_match)
+       OR (v_pre_state = 'CANONICAL_000_022' AND v_canonical_functions_match)
+     )
+  THEN
     RAISE EXCEPTION 'R2 precondition failed: R1 function contract or execute matrix drifted';
   END IF;
 END $$;
