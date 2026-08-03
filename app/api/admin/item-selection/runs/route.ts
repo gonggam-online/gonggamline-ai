@@ -8,74 +8,73 @@ import {
   requireJsonContentType,
 } from "../../../../../lib/auth/admin-request-guard.server";
 import { adminRateLimiter } from "../../../../../lib/auth/admin-rate-limit.server";
+import { AdminCsrfError, verifyAdminCsrfToken } from "../../../../../lib/auth/csrf.server";
+import { ITEM_SELECTION_PROFITABILITY_POLICY_VERSION } from "../../../../../lib/revenue/item-selection-profitability";
+import { listItemSelectionRuns } from "../../../../../services/item-selection-run.repository";
 import {
-  AdminCsrfError,
-  verifyAdminCsrfToken,
-} from "../../../../../lib/auth/csrf.server";
-import {
-  createItemSelectionRun,
-} from "../../../../../services/item-selection-run.repository";
-import {
-  ITEM_SELECTION_PROFITABILITY_CALCULATION_CONTRACT_VERSION,
-  type ItemSelectionRunCreateRequestV1,
-} from "../../../../../shared/contracts/item-selection-persistence";
+  ItemSelectionWorkflowError,
+  runItemSelection,
+  type RunItemSelectionRequestV1,
+} from "../../../../../services/item-selection-workflow.service";
 
 export const runtime = "nodejs";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const SHA256 = /^[0-9a-f]{64}$/;
-const KEYS = [
-  "provider", "keyword", "requestedSize", "rulesetVersion", "evaluatorVersion",
-  "profitabilityPolicyVersion", "profitabilityCalculationContractVersion",
-  "requestFingerprint", "retryOfRunId",
-] as const;
+const CURSOR = /^([A-Za-z0-9_-]+)$/;
+const BODY_KEYS = new Set([
+  "provider", "keyword", "size", "proposedSalePriceKrw", "costProfileVersion",
+  "retryOfRunId",
+]);
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+function record(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function boundedText(value: unknown, maximum: number): value is string {
-  return typeof value === "string" && value.length >= 1 &&
-    value.length <= maximum && value.trim() === value;
-}
-
-function parseBody(value: unknown): ItemSelectionRunCreateRequestV1 | null {
-  if (!isRecord(value) || Object.keys(value).length !== KEYS.length ||
-      KEYS.some((key) => !(key in value))) return null;
+function parseBody(value: unknown): RunItemSelectionRequestV1 | null {
+  if (!record(value) || Object.keys(value).some((key) => !BODY_KEYS.has(key))) return null;
+  const keyword = value.keyword;
+  const price = value.proposedSalePriceKrw;
+  const costProfile = value.costProfileVersion;
   const retry = value.retryOfRunId;
   if (
     value.provider !== "domeggook" ||
-    !boundedText(value.keyword, 200) ||
-    !Number.isInteger(value.requestedSize) ||
-    (value.requestedSize as number) < 1 ||
-    (value.requestedSize as number) > 50 ||
-    !boundedText(value.rulesetVersion, 128) ||
-    !boundedText(value.evaluatorVersion, 128) ||
-    !boundedText(value.profitabilityPolicyVersion, 128) ||
-    value.profitabilityCalculationContractVersion !==
-      ITEM_SELECTION_PROFITABILITY_CALCULATION_CONTRACT_VERSION ||
-    typeof value.requestFingerprint !== "string" ||
-    !SHA256.test(value.requestFingerprint) ||
-    (retry !== null && (typeof retry !== "string" || !UUID.test(retry)))
+    typeof keyword !== "string" || keyword.trim() !== keyword ||
+    keyword.length < 2 || keyword.length > 100 ||
+    ![10, 20, 30].includes(value.size as number) ||
+    (price !== undefined && (!Number.isSafeInteger(price) || (price as number) < 1)) ||
+    (costProfile !== undefined && costProfile !== ITEM_SELECTION_PROFITABILITY_POLICY_VERSION) ||
+    (retry !== undefined && (typeof retry !== "string" || !UUID.test(retry)))
   ) return null;
-  return value as unknown as ItemSelectionRunCreateRequestV1;
+  return value as RunItemSelectionRequestV1;
 }
 
 function errorResponse(error: unknown): Response {
   if (error instanceof AdminRequestGuardError ||
       error instanceof AdminUnsupportedMediaTypeError ||
       error instanceof AdminCsrfError) {
-    return Response.json({ code: error.code }, { status: error.status });
+    return Response.json({ error: { code: error.code } }, { status: error.status });
   }
-  if (isRecord(error) && error.name === "ItemSelectionRunRepositoryError") {
-    const status = error.kind === "CONFLICT" ? 409 :
-      error.kind === "INVALID" ? 400 : 500;
+  if (error instanceof ItemSelectionWorkflowError) {
     return Response.json(
-      { code: status === 409 ? "CONFLICT" : status === 400 ? "INVALID_REQUEST" : "INTERNAL_ERROR" },
+      { error: { code: error.code, retryable: error.code === "PROVIDER_UNAVAILABLE" } },
+      { status: error.code === "PROVIDER_UNAVAILABLE" ? 503 : 500 },
+    );
+  }
+  if (record(error) && error.name === "ItemSelectionRunRepositoryError") {
+    const status = error.kind === "CONFLICT" ? 409 : error.kind === "INVALID" ? 400 : 500;
+    return Response.json(
+      { error: { code: status === 409 ? "DUPLICATE_RUN_ACTIVE" : status === 400 ? "VALIDATION_FAILED" : "INTERNAL_ERROR" } },
       { status },
     );
   }
-  return Response.json({ code: "INTERNAL_ERROR" }, { status: 500 });
+  return Response.json({ error: { code: "INTERNAL_ERROR" } }, { status: 500 });
+}
+
+function rateLimited(retryAfterSeconds: number): Response {
+  return Response.json(
+    { error: { code: "RATE_LIMITED" } },
+    { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } },
+  );
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -85,33 +84,85 @@ export async function POST(request: Request): Promise<Response> {
     requireJsonContentType(request);
     verifyAdminCsrfToken(request, "item-selection-create", context);
     const rate = adminRateLimiter.consume(context.administratorUserId, "mutation");
-    if (!rate.allowed) {
-      return Response.json(
-        { code: "RATE_LIMITED" },
-        { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } },
-      );
-    }
+    if (!rate.allowed) return rateLimited(rate.retryAfterSeconds);
+    const globalRate = adminRateLimiter.consume("item-selection-global", "mutation");
+    if (!globalRate.allowed) return rateLimited(globalRate.retryAfterSeconds);
 
     const idempotencyKey = request.headers.get("idempotency-key");
     if (!idempotencyKey || idempotencyKey.trim() !== idempotencyKey ||
         idempotencyKey.length > 200 || /[\u0000-\u001f\u007f]/.test(idempotencyKey)) {
-      return Response.json({ code: "INVALID_REQUEST" }, { status: 400 });
+      return Response.json({ error: { code: "VALIDATION_FAILED" } }, { status: 400 });
     }
     let json: unknown;
     try {
       json = await request.json();
     } catch {
-      return Response.json({ code: "INVALID_REQUEST" }, { status: 400 });
+      return Response.json({ error: { code: "VALIDATION_FAILED" } }, { status: 400 });
     }
     const body = parseBody(json);
-    if (!body) return Response.json({ code: "INVALID_REQUEST" }, { status: 400 });
-
-    const result = await createItemSelectionRun(context, {
-      ...body,
-      idempotencyKeyHash: createHash("sha256").update(idempotencyKey, "utf8").digest("hex"),
-      requestedByPrincipalId: context.administratorUserId,
+    if (!body) return Response.json({ error: { code: "VALIDATION_FAILED" } }, { status: 400 });
+    const result = await runItemSelection(
+      context,
+      body,
+      createHash("sha256").update(idempotencyKey, "utf8").digest("hex"),
+    );
+    return Response.json({ data: result.run }, {
+      status: result.created ? 201 : 200,
+      headers: { "Cache-Control": "no-store" },
     });
-    return Response.json(result.run, { status: result.created ? 201 : 200 });
+  } catch (error) {
+    return errorResponse(error);
+  }
+}
+
+function decodeCursor(value: string): { startedAt: string; id: string } | null {
+  if (!CURSOR.test(value) || value.length > 256) return null;
+  try {
+    const parsed: unknown = JSON.parse(Buffer.from(value, "base64url").toString("utf8"));
+    if (!record(parsed) || Object.keys(parsed).length !== 2 ||
+        typeof parsed.startedAt !== "string" ||
+        !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(parsed.startedAt) ||
+        new Date(parsed.startedAt).toISOString() !== parsed.startedAt ||
+        typeof parsed.id !== "string" || !UUID.test(parsed.id)) return null;
+    return { startedAt: parsed.startedAt, id: parsed.id };
+  } catch {
+    return null;
+  }
+}
+
+export async function GET(request: Request): Promise<Response> {
+  try {
+    const context = await requireAdminRequest(request, "read");
+    if (request.body !== null) return Response.json({ error: { code: "VALIDATION_FAILED" } }, { status: 400 });
+    const rate = adminRateLimiter.consume(context.administratorUserId, "read");
+    if (!rate.allowed) return rateLimited(rate.retryAfterSeconds);
+    const url = new URL(request.url);
+    if ([...url.searchParams.keys()].some((key) => key !== "limit" && key !== "cursor")) {
+      return Response.json({ error: { code: "VALIDATION_FAILED" } }, { status: 400 });
+    }
+    const rawLimit = url.searchParams.get("limit") ?? "20";
+    if (!/^[1-9][0-9]?$/.test(rawLimit)) {
+      return Response.json({ error: { code: "VALIDATION_FAILED" } }, { status: 400 });
+    }
+    const limit = Number(rawLimit);
+    if (limit > 50) return Response.json({ error: { code: "VALIDATION_FAILED" } }, { status: 400 });
+    const rawCursor = url.searchParams.get("cursor");
+    const cursor = rawCursor === null ? null : decodeCursor(rawCursor);
+    if (rawCursor !== null && cursor === null) {
+      return Response.json({ error: { code: "VALIDATION_FAILED" } }, { status: 400 });
+    }
+    const runs = await listItemSelectionRuns(context, {
+      limit,
+      beforeStartedAt: cursor?.startedAt,
+      beforeId: cursor?.id,
+    });
+    const last = runs.at(-1);
+    const nextCursor = runs.length === limit && last
+      ? Buffer.from(JSON.stringify({ startedAt: last.startedAt, id: last.id }), "utf8").toString("base64url")
+      : null;
+    return Response.json({ data: runs, page: { nextCursor } }, {
+      headers: { "Cache-Control": "no-store" },
+    });
   } catch (error) {
     return errorResponse(error);
   }

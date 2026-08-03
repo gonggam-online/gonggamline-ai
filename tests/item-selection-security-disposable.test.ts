@@ -7,38 +7,28 @@ const root = path.resolve(import.meta.dirname, "..");
 const read = (relative: string): string =>
   readFileSync(path.join(root, relative), "utf8").replaceAll("\r\n", "\n");
 
-test("A01-A04: every business route authenticates before repository access", () => {
-  for (const [file, assurance] of [
-    ["app/api/admin/item-selection/runs/[id]/route.ts", "read"],
-    ["app/api/admin/item-selection/runs/route.ts", "mutation"],
-    ["app/api/admin/item-selection/runs/[id]/finalize/route.ts", "mutation"],
-  ] as const) {
-    const source = read(file);
-    const guard = source.indexOf(`requireAdminRequest(request, "${assurance}"`);
-    const repository = source.search(
-      /getItemSelectionRunById\(|createItemSelectionRun\(|finalizeItemSelectionRun\(/,
-    );
-    assert.ok(guard >= 0, `${file} must require ${assurance} assurance`);
-    assert.ok(repository > guard, `${file} must guard before repository access`);
-  }
+test("A01-A04: every business operation authenticates before service access", () => {
+  const detail = read("app/api/admin/item-selection/runs/[id]/route.ts");
+  assert.ok(detail.indexOf('requireAdminRequest(request, "read"') >= 0);
+  assert.ok(detail.indexOf("getItemSelectionRunById(") >
+    detail.indexOf('requireAdminRequest(request, "read"'));
+
+  const collection = read("app/api/admin/item-selection/runs/route.ts");
+  const mutationGuard = collection.indexOf('requireAdminRequest(request, "mutation"');
+  const readGuard = collection.indexOf('requireAdminRequest(request, "read"');
+  assert.ok(mutationGuard >= 0 && collection.indexOf("await runItemSelection(") > mutationGuard);
+  assert.ok(readGuard >= 0 && collection.indexOf("await listItemSelectionRuns(") > readGuard);
 });
 
-test("A05: both mutations fail closed before body parsing and repository access", () => {
-  for (const file of [
-    "app/api/admin/item-selection/runs/route.ts",
-    "app/api/admin/item-selection/runs/[id]/finalize/route.ts",
-  ]) {
-    const source = read(file);
-    const origin = source.indexOf("requireExactAdminOrigin(request)");
-    const contentType = source.indexOf("requireJsonContentType(request)");
-    const csrf = source.indexOf("verifyAdminCsrfToken(");
-    const body = source.indexOf("request.json()");
-    const repository = source.search(
-      /createItemSelectionRun\(|finalizeItemSelectionRun\(/,
-    );
-    assert.ok(origin >= 0 && contentType > origin && csrf > contentType);
-    assert.ok(body > csrf && repository > body);
-  }
+test("A05: the server-owned mutation fails closed before body and workflow access", () => {
+  const source = read("app/api/admin/item-selection/runs/route.ts");
+  const origin = source.indexOf("requireExactAdminOrigin(request)");
+  const contentType = source.indexOf("requireJsonContentType(request)");
+  const csrf = source.indexOf("verifyAdminCsrfToken(");
+  const body = source.indexOf("request.json()");
+  const workflow = source.indexOf("await runItemSelection(");
+  assert.ok(origin >= 0 && contentType > origin && csrf > contentType);
+  assert.ok(body > csrf && workflow > body);
 });
 
 test("A02, A03, A07 and A10: verified identity, UUID allowlist and fresh AAL2 are enforced", () => {
@@ -75,15 +65,12 @@ test("A05: CSRF is purpose, subject, session, expiry, cookie and MAC bound", () 
   assert.match(source, /ttlSeconds > 15 \* 60/);
 });
 
-test("A03/A04 rate boundaries are exact and create/finalize share mutation bucket", () => {
+test("A03/A04 rate boundaries are exact and workflow uses per-admin plus global buckets", () => {
   const source = read("lib/auth/admin-rate-limit.server.ts");
   assert.match(source, /read: 30/);
   assert.match(source, /mutation: 10/);
   assert.match(source, /active\.length >= limit/);
-  for (const file of [
-    "app/api/admin/item-selection/runs/route.ts",
-    "app/api/admin/item-selection/runs/[id]/finalize/route.ts",
-  ]) {
-    assert.match(read(file), /\.consume\(context\.administratorUserId, "mutation"\)/);
-  }
+  const route = read("app/api/admin/item-selection/runs/route.ts");
+  assert.match(route, /\.consume\(context\.administratorUserId, "mutation"\)/);
+  assert.match(route, /\.consume\("item-selection-global", "mutation"\)/);
 });

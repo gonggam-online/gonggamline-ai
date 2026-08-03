@@ -18,32 +18,32 @@ export async function GET(
   try {
     const context = await requireAdminRequest(request, "read");
     if (request.body !== null) {
-      return Response.json({ code: "INVALID_REQUEST" }, { status: 400 });
+      return Response.json({ error: { code: "VALIDATION_FAILED" } }, { status: 400 });
     }
     const rate = adminRateLimiter.consume(context.administratorUserId, "read");
     if (!rate.allowed) {
       return Response.json(
-        { code: "RATE_LIMITED" },
+        { error: { code: "RATE_LIMITED" } },
         { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } },
       );
     }
     const { id } = await params;
     if (!UUID.test(id)) {
-      return Response.json({ code: "INVALID_REQUEST" }, { status: 400 });
+      return Response.json({ error: { code: "VALIDATION_FAILED" } }, { status: 400 });
     }
     const run = await getItemSelectionRunById(context, id);
     return run
-      ? Response.json(run)
-      : Response.json({ code: "NOT_FOUND" }, { status: 404 });
+      ? Response.json({ data: run }, { headers: { "Cache-Control": "no-store" } })
+      : Response.json({ error: { code: "NOT_FOUND" } }, { status: 404 });
   } catch (error) {
     if (error instanceof AdminRequestGuardError) {
-      return Response.json({ code: error.code }, { status: error.status });
+      return Response.json({ error: { code: error.code } }, { status: error.status });
     }
     if (typeof error === "object" && error !== null &&
         "name" in error && error.name === "ItemSelectionRunRepositoryError" &&
         "kind" in error && error.kind === "INVALID") {
-      return Response.json({ code: "INVALID_REQUEST" }, { status: 400 });
+      return Response.json({ error: { code: "VALIDATION_FAILED" } }, { status: 400 });
     }
-    return Response.json({ code: "INTERNAL_ERROR" }, { status: 500 });
+    return Response.json({ error: { code: "INTERNAL_ERROR" } }, { status: 500 });
   }
 }

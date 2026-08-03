@@ -1,5 +1,47 @@
 # Work status
 
+## 2026-08-03 — Item Selection Story 4 workflow and Admin API
+
+- Objective: implement the approved bounded Item Selection orchestration and
+  three Admin API operations on the merged Stories 1-3 contracts.
+- Branch/base: `codex/feat/item-selection-story-4-workflow-api`, based on Stage
+  05 merge `bfd7b9a3c561d8eecbf4814e7ad5d59bdaf9ccde`.
+- Risk: high-risk/manual because the Story exercises Admin Auth/AAL2 and writes
+  immutable evaluation records. No auto-merge.
+- Revenue impact: turns the approved evaluator and persistence foundation into
+  an operator-callable candidate screening workflow while keeping uncertain
+  rights and costs out of automated recommendations.
+- Root-cause class: code capability gap. The required migration/Auth contracts
+  already exist and are reused; migration 024 remains unapplied to Production.
+- Scope: server-owned fingerprint/version/canonicalization, one bounded
+  provider list read for sizes 10/20/30, dedupe, evaluator/profitability reuse,
+  atomic finalize, partial/failed handling, collection POST/GET, detail GET,
+  keyset pagination, response caps, tests, Draft PR and exact Preview.
+- Non-goals: UI, queue, schema/migration, Production database/application,
+  provider detail fan-out, Product/listing/order/inventory/commerce writes,
+  secrets, or external configuration changes.
+- Completed: governance and architecture audit; latest-main branch; existing
+  implementation audit; workflow/API implementation; removed client-authored
+  finalize route; focused 51/51 and full 420/420 tests; lint with zero errors
+  and four established warnings; typecheck; 84-route Production build; final
+  diff/security review; Next.js 16 Route Handler guide review. Local Playwright
+  completed 33 passed, two intended skipped, and seven established
+  Supabase-unconfigured failures; the Admin fail-close smoke passed.
+- Current work: commit/push and high-risk Draft PR; exact-head CI/Preview
+  evidence follows only after GitHub publication.
+- Blockers / owner actions: final merge is manual after every exact-head gate.
+  Production migration 024 and Production release are explicitly excluded.
+- Changed files: Admin Item Selection routes, workflow service, persistence
+  repository read methods/caps, Story 4 tests, changelog, and this status.
+- Delivery blocker: `gh auth status` reports the active GitHub CLI token is
+  invalid. Git push will be attempted through the configured Git credential;
+  Draft PR creation requires restored GitHub authentication if that fails.
+- Exact next action: create the verified local commit, push it, then create the
+  high-risk Draft PR and observe exact-head gates if authentication permits.
+- Remaining risks: Preview may lack Admin/provider/database fixtures, so live
+  write validation must remain separately authorized and non-Production. The
+  in-memory rate limiter is instance-local by the accepted existing boundary.
+
 ## 2026-08-03 — Item Selection Story 3 residual persistence
 
 - Objective: audit migration 021/current aggregate and implement only the

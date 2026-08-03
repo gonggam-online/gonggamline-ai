@@ -2,6 +2,34 @@
 
 ## 2026-08-03
 
+- Added Story 4's server-owned bounded Item Selection workflow and the three
+  approved Admin operations: create/run, keyset-paginated history, and capped
+  detail. The workflow reuses Story 1-3 evaluator, profitability, Auth/AAL2,
+  CSRF, rate-limit, repository, transaction, and idempotency boundaries.
+- Removed the client-authored finalization route. Fingerprints, versions,
+  canonical hashes, provider reads, evaluation, and atomic finalization are
+  now owned by the application service. Size 30 uses one bounded list read,
+  response details stop at 30 evaluations, and missing provider evidence stays
+  UNKNOWN/INCOMPLETE/MANUAL_REVIEW.
+- Added contract and behavior tests for capacity, deduplication, partial and
+  failed runs, provider failure sanitization, idempotent replay, route count,
+  AAL2/CSRF/rate-limit ordering, and response caps. No migration, Production
+  execution, UI, Product mutation, or commerce write is included.
+
+- Added Story 4's server-owned bounded Item Selection workflow and the three
+  approved Admin operations: create/run, keyset-paginated history, and capped
+  detail. The workflow reuses Story 1-3 evaluator, profitability, Auth/AAL2,
+  CSRF, rate-limit, repository, transaction, and idempotency boundaries.
+- Removed the client-authored finalization route. Fingerprints, versions,
+  canonical hashes, provider reads, evaluation, and atomic finalization are
+  now owned by the application service. Size 30 uses one bounded list read,
+  response details stop at 30 evaluations, and missing provider evidence stays
+  UNKNOWN/INCOMPLETE/MANUAL_REVIEW.
+- Added contract and behavior tests for capacity, deduplication, partial and
+  failed runs, provider failure sanitization, idempotent replay, route count,
+  AAL2/CSRF/rate-limit ordering, and response caps. No migration, Production
+  execution, UI, Product mutation, or commerce write is included.
+
 - Audited migration 021 and retained its existing create/finalize transaction,
   idempotency, immutable aggregate, and retry-lineage implementation unchanged.
 - Added migration 024 with one service-role-only, audited stale-run recovery
