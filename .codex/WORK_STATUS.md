@@ -40,6 +40,13 @@
   restorable 000–023 backup plus isolated restore-check evidence, inject both
   secrets into the approved local environment without sharing their values,
   and name the maintenance window. High-risk PR merge remains manual.
+  Follow-up remote automation confirmed the DB password cannot be viewed and
+  that resetting it breaks existing direct Postgres connections. No reset was
+  performed. Process/User/Machine environments and repository-local env files
+  contain neither required secret. Safe continuation requires the owner to
+  inject the existing DB password through an approved secret channel; rotating
+  it additionally requires an inventory and coordinated update of every direct
+  DB consumer.
 - Changed files: Story 6 Production release runbook, focused documentation
   test, Story 6 changelog, and this status record.
 - Commands/results: GitHub dependency exact-head evidence and migration manifest 000–024
@@ -61,6 +68,12 @@
   and Free-plan backup limitation. No migration/list/dry-run database command
   was attempted after the missing recovery point, credentials, and window were
   found.
+  A one-hour access token was generated during the approved remote setup, but
+  the Supabase success page rendered its full value into browser automation
+  output. It was treated as exposed, never used, and immediately deleted; the
+  dashboard confirmed the token row was gone. No replacement token was created
+  because the available browser-to-shell path cannot transfer it without
+  exposing or persisting the secret.
 - Delivery: Draft PR #75,
   `https://github.com/gonggam-online/gonggamline-ai/pull/75`; label
   `manual-merge-required`; no Ready, auto-merge, merge, migration, Production
