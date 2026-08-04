@@ -15,17 +15,17 @@
 - Completed: boot/Architecture audit; branch from exact `origin/main`
   f032c6bd4d702a865e2191cc5ff474dba674297b; implementation; full unit suite
   435/435; typecheck; lint with 0 errors and 4 pre-existing warnings.
-- Current: diff/security review, commit, and delivery.
+- Current: push, Draft PR, exact CI/Preview gates, and post-merge smoke.
 - Blockers/owner actions: none for implementation delivery. Owner sample and
   thresholds remain prerequisites for future promotion beyond SHADOW.
 - Changed files: Decision Log, Work Status, Orchestrator changelog/report,
   shadow module/export, and tests.
-- Last commit: none yet.
+- Last implementation commit: `b794261` (`feat: add shadow orchestrator reviewer`).
 - Additional validation: production build passed (85 routes). Playwright local
   passed 35, skipped 2, and failed 7 existing data-backed page-health cases
   because local Supabase is unconfigured (`missing_url`); this external-config
   failure is unrelated to and unreachable from the new pure SHADOW module.
-- Exact next action: complete diff/security review, commit, push, and open PR.
+- Exact next action: commit this status checkpoint, push, and open the PR.
 - Remaining risks: initial weights are a ranking heuristic, not an approved KPI
   policy; no owner-labeled acceptance sample exists; dispatch stays forbidden.
 
