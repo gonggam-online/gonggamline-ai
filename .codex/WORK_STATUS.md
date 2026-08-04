@@ -119,17 +119,52 @@
   child-server shutdown; separating the server produced the binding clean exit.
   Current: complete-diff/security review, commit/push, and new exact-head
   CI/Preview validation.
-- Blockers / owner actions: migration 024 and the read-only release observation
-  are complete. Draft PR #75 remains high-risk/manual and cannot be merged
-  without explicit owner approval. The bounded size-10 live provider smoke is
-  also unperformed because it creates immutable Production run/evaluation/audit
-  history and requires a separate explicit approval. Production is on the
-  Supabase Free plan without managed scheduled backups; preserve the verified
-  logical archive until the release retention decision. Do not reset the DB
-  password or perform a destructive restore without a separate incident action.
-- Changed files: Story 6 Production release runbook, focused documentation
-  test, Story 6 changelog, Admin Item Selection client, focused UI tests,
-  mocked browser regression, Sprint 3 changelog, and this status record.
+- Post-merge release and finalization incident: CSRF correction head
+  `6ade327bdcba0a5265f4f6b4f96bcfe8bf1edf11` passed exact CI
+  `30879193755`, Preview browser `30879193746`, and Vercel Preview, then PR #75
+  was manually merged as `c2f4af619b760696d73c5740e1fb5b18a6cae89a` under explicit owner approval.
+  Exact-merge Vercel Production and browser smoke `30879457560` passed. After
+  two MFA-window failures with no DB/provider work, the separately approved
+  immediate attempt passed Auth and canonical CSRF, created run
+  `715c4e8e-b1f9-48e5-9b98-62ec16ee2d8d`, and made exactly one Domeggook list
+  call (2xx, 1,416 ms, no retry/detail fan-out). Finalization returned sanitized
+  HTTP 500, leaving one RUNNING run, zero evaluations, one CREATE audit, and no
+  FINALIZE audit or commerce write. No additional provider call was made.
+  Supabase CLI dry-run unexpectedly printed the then-current Production DB
+  password; the value was not reused or recorded in repository evidence, the
+  owner rotated it, and a negative connection check proved the old value is
+  rejected. A newly injected value passed a value-free `SELECT 1` check.
+- Follow-up root cause and fix: branch
+  `codex/fix/item-selection-finalization-500` starts at the exact PR #75 merge.
+  A local disposable Supabase RPC reproduced PostgreSQL SQLSTATE `42809` from
+  migration 021's scalar-style `(evaluation).attribute` notation over expanded
+  composite-array rows. Forward-only migration 025 preserves migration 021 and
+  the finalizer signature/security/transaction contract while using expanded
+  row aliases correctly. The same actual RPC path then passed with 10 persisted
+  synthetic evaluations and exact CREATE/FINALIZE audits. Baseline manifest and
+  disposable replay coverage now include 000-025. Focused/full tests passed
+  429/429; lint passed with zero errors and four established warnings;
+  typecheck and the 85-page Production build passed. Production migration 025
+  remains unapplied and manual/high-risk.
+- Recovery completion: the DB-authoritative preflight at
+  `2026-08-04 05:57:11 UTC` measured the affected run at 1,833 seconds old and
+  eligible. Migration 024 recovery was invoked exactly once and completed at
+  `2026-08-04 05:57:30.942233 UTC` as `FAILED / STALE_RUN_RECOVERED`, correlation
+  `df0bcd0e-2c17-4377-b217-6cbd586dc8cc`. Compact postflight proved all run and
+  stored evaluation counters zero, CREATE audit 1, FINALIZE audit 0, recovery
+  audit 1, exact recovery-correlation audit 1, and stale RUNNING 0. Production
+  runtime health was HTTP 200; application, Supabase, and runtime queue were
+  healthy, with only the established unconfigured Coupang degradation.
+- Blockers / owner actions: PR #75 and its Production application release are
+  complete. Production is on the Supabase Free plan without managed scheduled
+  backups; preserve the verified logical archive until the release retention
+  decision. The follow-up migration 025 PR remains high-risk/manual, and its
+  Production application requires a separate explicit approval after exact-head
+  CI/Preview gates. Do not reset the DB password or perform a destructive
+  restore without a separate incident action.
+- Changed files: forward migration 025, actual local Supabase RPC regression,
+  security-slice verifier, focused persistence/baseline tests, baseline manifest,
+  incident report, Item Selection/Sprint 3 changelogs, and this status record.
 - Commands/results: GitHub dependency exact-head evidence and migration manifest 000–024
   canonical LF hashes passed. After `npm ci` restored missing local
   dependencies, 427/427 tests passed; lint passed with zero errors and four
@@ -155,19 +190,27 @@
   dashboard confirmed the token row was gone. No replacement token was created
   because the available browser-to-shell path cannot transfer it without
   exposing or persisting the secret.
-- Delivery: Draft PR #75,
-  `https://github.com/gonggam-online/gonggamline-ai/pull/75`; label
-  `manual-merge-required`; no Ready, auto-merge, PR merge, application
-  redeployment, or live provider write. The separately approved Production
-  migration 024 application is complete.
-- Last implementation commit: `66d8bec docs: prepare item selection production release`.
-- Exact next action: commit and push the approved CSRF correction and require
-  its new exact-head CI/Preview gates. Production live smoke cannot validate
-  this fix until the fix has been merged and deployed; preserve the manual
-  high-risk deployment boundary and require an ordering decision before merge.
-- Remaining risks: Production database evidence must be re-read immediately
-  before any write; the rate limiter is instance-local; live provider behavior
-  varies; an approved live smoke creates immutable Production history.
+- Delivery: PR #75 merged manually at
+  `c2f4af619b760696d73c5740e1fb5b18a6cae89a`; exact Production deployment and
+  browser smoke passed. The bounded provider call succeeded, but finalization
+  exposed the migration 021 defect recorded above. No commerce write occurred.
+- Follow-up delivery: Draft PR #76,
+  `https://github.com/gonggam-online/gonggamline-ai/pull/76`; branch
+  `codex/fix/item-selection-finalization-500`; implementation commit
+  `ec0b724c658ab682679cfcc32806e40236d2193b`; label
+  `manual-merge-required`. Exact implementation-head CI run `30882735352`
+  passed after one same-head failed-job rerun of the established Orchestrator
+  shutdown-timing flake; all 429 tests, migration replay, actual RPC, lint,
+  typecheck, build, and security jobs passed. Preview browser run
+  `30882735344` and Vercel Preview passed. No Ready, auto-merge, merge,
+  Production migration 025 application, redeployment, or further live smoke.
+- Exact next action: obtain separate owner approval before manually merging PR
+  #76 or applying migration 025 to Production. After any merge, require the
+  exact Production deployment/health checks and a separately approved bounded
+  fresh-MFA smoke; do not infer those approvals from this Draft PR delivery.
+- Remaining risks: migration 025 remains unapplied to Production; the rate
+  limiter is instance-local; live provider behavior varies; any further live
+  smoke creates immutable Production history and requires separate approval.
 
 ## 2026-08-03 — Item Selection Story 5 Admin UI and history
 

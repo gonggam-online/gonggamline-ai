@@ -55,6 +55,27 @@ try {
   & $npmCommand test -- --test-name-pattern "A0|A1|Auth routes|baseline manifest|migration inventory|replay runner"
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+  $localStatus = @(& supabase status -o env)
+  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+  $apiLine = $localStatus | Where-Object { $_ -match '^API_URL=' } | Select-Object -First 1
+  $serviceRoleLine = $localStatus | Where-Object { $_ -match '^SERVICE_ROLE_KEY=' } | Select-Object -First 1
+  if (-not $apiLine -or -not $serviceRoleLine) {
+    throw "Local Supabase status did not return the RPC verification configuration."
+  }
+  $env:REPRO_SUPABASE_URL = ($apiLine -replace '^API_URL="?', '' -replace '"$', '')
+  $env:REPRO_SUPABASE_SERVICE_ROLE_KEY =
+    ($serviceRoleLine -replace '^SERVICE_ROLE_KEY="?', '' -replace '"$', '')
+  $rpcExitCode = 0
+  try {
+    & $npmCommand exec -- tsx scripts/verify-item-selection-finalization-rpc.ts
+    $rpcExitCode = $LASTEXITCODE
+  }
+  finally {
+    Remove-Item Env:REPRO_SUPABASE_URL, Env:REPRO_SUPABASE_SERVICE_ROLE_KEY `
+      -ErrorAction SilentlyContinue
+  }
+  if ($rpcExitCode -ne 0) { exit $rpcExitCode }
+
   $databaseContainer = "supabase_db_gonggamline-ai-sprint-b0"
   $catalogSql = @'
 DO $verify$
@@ -221,8 +242,9 @@ $verify$;
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
   Write-Output "A01-A12 security evidence: PASS"
-  Write-Output "Disposable migrations 000-024 replay: PASS"
+  Write-Output "Disposable migrations 000-025 replay: PASS"
   Write-Output "Item Selection catalog fingerprint: PASS"
+  Write-Output "Item Selection finalization RPC behavior: PASS"
   Write-Output "Item Selection stale recovery behavior: PASS"
 }
 finally {
