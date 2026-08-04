@@ -23,8 +23,8 @@
   Architecture; audited Phase 4 evidence and owner update; recorded the owner
   baseline; implemented a pure fail-closed admission evaluator and adversarial
   sample/cap/scope/incident/downgrade tests.
-- Current/blocker: local validation is complete and normal-risk delivery is in
-  progress. Operational dispatch remains blocked: the approved threshold policy
+- Current/blocker: local validation and Draft PR delivery are complete.
+  Operational dispatch remains blocked: the approved threshold policy
   is not an actual owner-labeled 60-case result, and numeric per-task token/time
   and daily task caps plus successful incident-drill evidence remain absent.
 - Owner action: after this admission-gate PR, provide a versioned approval with
@@ -39,9 +39,15 @@
   because local Supabase is unconfigured (`missing_url`); failure evidence is
   under ignored `test-results/`. The pure admission module cannot reach these
   routes or Supabase, so the failures are external configuration, not code.
-- Last commit: none on this branch.
-- Exact next action: complete final diff/security review, commit/push, and
-  deliver the normal-risk admission-gate Draft PR with exact CI/Preview gates.
+- Delivery: implementation commit
+  `7f26f54f8dad12f5124d97c151d17bb28fec6b78` is pushed. Normal-risk Draft PR
+  #80 is open, mergeable, and targets `main`. Exact implementation-head CI run
+  `30892768493` passed all jobs; Preview browser run `30892768549` passed; the
+  exact Vercel Preview is Ready.
+- Last commit: `7f26f54 feat: gate limited orchestrator autonomy`; this status
+  evidence will become the final PR head after its own exact gates pass.
+- Exact next action: validate the status-only head's CI/Preview gates, then wait
+  for owner review/merge and the missing operational admission evidence.
 - Remaining risks: test fixture caps and incident evidence are not standing
   approval; no operational sample result exists; dispatch remains unauthorized.
 
