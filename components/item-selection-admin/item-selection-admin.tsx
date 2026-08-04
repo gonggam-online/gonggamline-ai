@@ -47,6 +47,7 @@ function formatDate(value: string | null): string {
 
 function errorMessage(status: number, code?: string): string {
   if (status === 401) return "관리자 로그인이 필요합니다.";
+  if (code === "CSRF_DENIED") return "요청 검증에 실패했습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.";
   if (status === 403) return "실행에는 최근 MFA 인증이 필요합니다.";
   if (status === 429) return "요청이 많습니다. 잠시 후 다시 시도해 주세요.";
   if (code === "PROVIDER_UNAVAILABLE") return "공급처를 일시적으로 사용할 수 없습니다.";
@@ -142,7 +143,7 @@ export function ItemSelectionAdmin() {
         headers: {
           "Content-Type": "application/json",
           "Idempotency-Key": crypto.randomUUID(),
-          "X-CSRF-Token": csrf.token,
+          "X-GonggamLine-CSRF": csrf.token,
         },
         body: JSON.stringify({
           provider: "domeggook",

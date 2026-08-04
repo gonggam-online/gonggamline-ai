@@ -1,5 +1,174 @@
 # Work status
 
+## 2026-08-03 — Item Selection Story 6 Production release
+
+- Objective: reconfirm Stories 1–5 exact gates and prepare the approved,
+  bounded migration 024 / live-smoke / Production health / metrics / rollback
+  sequence without crossing the human approval boundary.
+- Branch: `codex/chore/item-selection-story-6-production-release`, based on
+  Story 5 merge `09b1bd3973a5f4cc35b20a83ada1b2575781c1e4`.
+- Risk: high-risk/manual. Production migration/data, authenticated provider
+  execution, deployment, and rollback actions require explicit owner approval;
+  auto-merge is prohibited.
+- Revenue impact: complete the smallest operator-safe supplier screening
+  release while preventing unknown rights/costs, stale runs, or unsafe release
+  verification from contaminating real sales decisions.
+- Scope: dependency gate audit, migration sequencing, stop conditions, bounded
+  fixture/live smoke, aggregate health/metrics, preservation-first rollback,
+  release evidence and tests.
+- Non-goals: bulk crawl, repeated live attempts, Product creation, marketplace,
+  supplier, order, inventory, fulfillment, settlement/payment writes, secrets,
+  raw payload capture, destructive rollback, or code compensation for DB drift.
+- Root-cause class: database. Production is reported at 000–023 while approved
+  migration 024 remains unapplied; code already contains Stories 1–5.
+- Completed: read mandatory governance and approved architectures; verified a
+  clean worktree; fetched latest `origin/main`; created the task branch at the
+  exact Story 5 merge; re-read GitHub PRs #36/#37/#72/#73/#74 and confirmed
+  every final-head CI and Preview browser run succeeded; verified canonical LF
+  SHA-256 parity for all 25 migration manifest entries; confirmed only 024 was
+  added after the prior Production 000–023 baseline; added the Story 6 runbook,
+  changelog, and executable documentation checks.
+- Current: the owner approved release steps 1–7. Execution stopped before
+  database contact because the mandatory backup/credential/window preflight
+  failed closed.
+- 2026-08-04 credential-injection retry: the owner reported injection complete,
+  and a fresh no-value probe checked Process, User, Machine, and repository
+  `.env*` key presence. Both `SUPABASE_ACCESS_TOKEN` and
+  `SUPABASE_DB_PASSWORD` remain absent in every checked source. Supabase CLI
+  2.110.0 is available and the worktree remains clean at exact head
+  `449686bec0dec96c09bef238af1902424709a351`, but no database command was
+  attempted. The provisional 09:57:39-10:57:39 Asia/Seoul window is cancelled;
+  establish a fresh window only after credentials are visible to this Codex
+  process.
+- 2026-08-04 successful pre-apply preflight: credentials were inherited by the
+  restarted Codex process, then removed from Windows User scope while remaining
+  process-local. The 10:31:55-11:31:55 Asia/Seoul window is active. CLI 2.110.0
+  linked exact Production `sxvtznmoemrcwifungnb`; Local/Remote 000-023 parity
+  passed and only local 024 is pending. The current PostgreSQL 17.6 archive is
+  696,310 bytes, SHA-256
+  `258ECE476C284B3AA0C5215E27DA3FCDF827E1417B389C8E293383D383E1533F`,
+  with 1,241 TOC entries and a successful full archive extraction. Manifest
+  parity passed 25/25. Dry-run lists exactly
+  `024_item_selection_stale_recovery.sql`, no seeds, and no roles. Production
+  remains unchanged at 000-023.
+- 2026-08-04 Production apply/postflight: owner explicitly approved one-time
+  application of migration 024 to project `sxvtznmoemrcwifungnb`. Exact head
+  `be6824d7dbd7d13b7bde5fc089a6ce848e404596` passed CI run `30869393666`,
+  Preview browser run `30869393652`, and Vercel Preview. The final 10:43 KST
+  preflight again proved 000-023 parity and a 024-only plan. CLI 2.110.0 applied
+  exactly `024_item_selection_stale_recovery.sql` once, with no seeds or roles.
+  Post-list proves Local/Remote 000-024 parity. A read-only catalog transaction
+  proved the recovery function exists with owner `postgres`, SECURITY DEFINER,
+  `search_path=pg_catalog, public`, service-role-only execute, and exact audit
+  constraints. Existing Item Selection runs and stale RUNNING counts were zero.
+  Production UI rendered the authenticated Admin form/history with zero
+  warning/error console entries; no execution control was used. Runtime health
+  was HTTP 200/degraded only because Coupang is unconfigured. Unauthenticated
+  history GET failed closed at 401; its response used Vercel's
+  `public, max-age=0, must-revalidate` rather than explicit `no-store`, recorded
+  as a remaining header-hardening risk. Thirty-minute monitoring from
+  10:46–11:16 KST collected seven five-minute samples; every runtime health
+  response succeeded, Item Selection total remained 0, and stale RUNNING
+  remained 0. No rollback threshold fired. Live provider execution and PR merge
+  remain unperformed and require their separate owner boundaries.
+- Final rollout evidence head
+  `bbf1216136a823ea87dc633f00151490d15b0d42` passed build, lint, typecheck,
+  security audit, disposable DB replay, Item Selection security, R1 regression,
+  Preview browser run `30871404499`, and Vercel Preview. CI run `30871404485`
+  initially had one unrelated existing Orchestrator shutdown-timing failure
+  (`PROCESS_SHUTDOWN_FAILED` versus `WALL_TIME_TIMEOUT`); its same-head failed
+  job rerun passed all 427 tests without a code change, classifying it as a
+  transient timing flake rather than a Stage 08 regression.
+- Owner-approved bounded live smoke outcome: the Production Admin UI submitted
+  keyword `텀블러`, size 10, and no proposed sale price exactly once. The request
+  failed closed at the fresh-AAL2 guard before provider/database execution; the
+  UI returned only the sanitized recent-MFA-required message and browser console
+  warning/errors remained zero. Read-only DB verification for the new window
+  proved all runs 0, runs in window 0, evaluations in window 0, and Item
+  Selection audit events in window 0. No retry, Product, marketplace, supplier,
+  order, inventory, fulfillment, settlement, or payment write occurred. Because
+  the owner conditioned PR #75 merge on live-smoke success, the PR remains Draft
+  and unmerged. A new live attempt requires another explicit owner decision.
+  While confirming the user's completed MFA state, the transient browser DOM
+  snapshot rendered the one-time TOTP into automation output. The value is not
+  recorded in repository evidence, was not reused, and expired normally; the
+  authenticator seed, password, and session tokens were not exposed.
+- Second explicitly approved attempt: the operator completed fresh MFA and the
+  prepared size-10 request was submitted immediately, but it failed with the
+  same sanitized 403. Source audit proved the code root cause: the Item
+  Selection client sends `X-CSRF-Token`, while `verifyAdminCsrfToken` reads only
+  the canonical `X-GonggamLine-CSRF` header. The request therefore fails with
+  `CSRF_DENIED` before workflow/provider/database execution, while the UI
+  incorrectly maps every 403 to the recent-MFA message. Read-only Production
+  verification again proved runs 0, evaluations 0, and Item Selection audit 0.
+  No third attempt or PR merge was performed. Fixing this Auth/CSRF contract and
+  its misleading error mapping is high-risk scope expansion requiring explicit
+  owner approval, focused tests, exact-head gates, Production deployment, fresh
+  MFA, and a newly approved smoke.
+- Owner-approved CSRF correction: the Admin execution client now sends the
+  canonical `X-GonggamLine-CSRF` header consumed by `verifyAdminCsrfToken`, and
+  `CSRF_DENIED` is mapped to a distinct sanitized refresh/retry instruction
+  before the generic 403 recent-MFA mapping. No server, API response, database,
+  migration, Auth/RLS, secret, provider, or commerce-write contract changed.
+  Focused Item Selection tests passed 5/5; the full suite passed 428/428; lint
+  passed with zero errors and four established Revenue warnings; typecheck and
+  the 85-page Production build passed. Production-mode mocked browser coverage
+  passed desktop+narrow 2/2 in 2.0 seconds with assertions for the canonical
+  header and absence of `X-CSRF-Token`. Two preceding local Playwright commands
+  completed both scenarios but timed out only while Playwright owned the Next
+  child-server shutdown; separating the server produced the binding clean exit.
+  Current: complete-diff/security review, commit/push, and new exact-head
+  CI/Preview validation.
+- Blockers / owner actions: migration 024 and the read-only release observation
+  are complete. Draft PR #75 remains high-risk/manual and cannot be merged
+  without explicit owner approval. The bounded size-10 live provider smoke is
+  also unperformed because it creates immutable Production run/evaluation/audit
+  history and requires a separate explicit approval. Production is on the
+  Supabase Free plan without managed scheduled backups; preserve the verified
+  logical archive until the release retention decision. Do not reset the DB
+  password or perform a destructive restore without a separate incident action.
+- Changed files: Story 6 Production release runbook, focused documentation
+  test, Story 6 changelog, Admin Item Selection client, focused UI tests,
+  mocked browser regression, Sprint 3 changelog, and this status record.
+- Commands/results: GitHub dependency exact-head evidence and migration manifest 000–024
+  canonical LF hashes passed. After `npm ci` restored missing local
+  dependencies, 427/427 tests passed; lint passed with zero errors and four
+  established Revenue-test warnings; typecheck passed; Production build passed
+  with 85 pages. Mocked desktop+narrow Item Selection browser validation
+  passed 2/2 against the current Production application without a provider or
+  database write. Two earlier browser commands were invalid evidence only: one
+  used a nonexistent spec filename, and one local webServer run discovered the
+  two tests but timed out during Windows process shutdown; neither is counted
+  as a passing gate. Complete diff, secret-pattern, generated-output, and
+  rollback review passed. Preparation commit
+  `66d8bec612dfd7e889ff221aceb89670359e9f08` passed exact CI run
+  `30794738826`, Preview browser run `30794738749`, and Vercel Preview Ready.
+  Final head `82ea94c68da37cd16121a98ecb044212397a332c`
+  passed exact CI `30795040898`, Preview browser `30795040822`, and Vercel
+  Preview Ready. Read-only Production preflight confirmed the Supabase project
+  and Free-plan backup limitation. No migration/list/dry-run database command
+  was attempted after the missing recovery point, credentials, and window were
+  found.
+  A one-hour access token was generated during the approved remote setup, but
+  the Supabase success page rendered its full value into browser automation
+  output. It was treated as exposed, never used, and immediately deleted; the
+  dashboard confirmed the token row was gone. No replacement token was created
+  because the available browser-to-shell path cannot transfer it without
+  exposing or persisting the secret.
+- Delivery: Draft PR #75,
+  `https://github.com/gonggam-online/gonggamline-ai/pull/75`; label
+  `manual-merge-required`; no Ready, auto-merge, PR merge, application
+  redeployment, or live provider write. The separately approved Production
+  migration 024 application is complete.
+- Last implementation commit: `66d8bec docs: prepare item selection production release`.
+- Exact next action: commit and push the approved CSRF correction and require
+  its new exact-head CI/Preview gates. Production live smoke cannot validate
+  this fix until the fix has been merged and deployed; preserve the manual
+  high-risk deployment boundary and require an ordering decision before merge.
+- Remaining risks: Production database evidence must be re-read immediately
+  before any write; the rate limiter is instance-local; live provider behavior
+  varies; an approved live smoke creates immutable Production history.
+
 ## 2026-08-03 — Item Selection Story 5 Admin UI and history
 
 - Objective: add the approved accessible Admin execution, summary, filters,

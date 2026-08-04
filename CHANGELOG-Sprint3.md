@@ -1,5 +1,23 @@
 # Sprint 3 - Runtime Stabilization
 
+# Item Selection Story 6 - Production CSRF contract correction
+
+## Fixed
+
+- Aligned the Admin Item Selection execution request with the server's canonical
+  `X-GonggamLine-CSRF` header contract.
+- Mapped `CSRF_DENIED` separately from the recent-MFA authorization failure so
+  operators receive the correct recovery action.
+- Added focused and desktop/narrow browser regression coverage for the canonical
+  header and rejection of the obsolete header.
+
+## Unchanged
+
+- Item Selection API response contracts, workflow, evaluator, profitability
+  policy, persistence schema, migration 024, Auth/RLS, and Production secrets.
+- Product creation and marketplace, supplier, order, inventory, fulfillment,
+  settlement, and payment writes.
+
 # Sprint 3 - Revenue Dashboard Release Hardening
 
 ## Added

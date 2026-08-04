@@ -12,7 +12,18 @@ test("admin page composes the bounded Item Selection UI", () => {
   assert.match(component, /\/api\/admin\/item-selection\/runs/);
   assert.match(component, /purpose=item-selection-create/);
   assert.match(component, /Idempotency-Key/);
+  assert.match(component, /"X-GonggamLine-CSRF": csrf\.token/);
+  assert.doesNotMatch(component, /X-CSRF-Token/);
   assert.doesNotMatch(component, /finalize/);
+});
+
+test("CSRF denial is distinct from fresh-MFA authorization failure", () => {
+  assert.match(
+    component,
+    /if \(code === "CSRF_DENIED"\)[\s\S]*if \(status === 403\)/,
+  );
+  assert.match(component, /요청 검증에 실패했습니다/);
+  assert.match(component, /최근 MFA 인증이 필요합니다/);
 });
 
 test("execution preserves exact provider and size choices", () => {
