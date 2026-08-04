@@ -9,6 +9,7 @@ export * from "./delivery-pipeline.ts";
 export * from "./execution.ts";
 export * from "./fake-worker.ts";
 export * from "./ledger.ts";
+export * from "./limited-autonomy.ts";
 export * from "./operator.ts";
 export * from "./policy.ts";
 export * from "./redaction.ts";
