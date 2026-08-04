@@ -298,6 +298,25 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 
 ## Proposed Architecture Stories
 
+### 2026-08-04 — Sales Learning Closed Loop and First Experiment v1
+
+- Status: proposed; repository-owner Architecture and experiment-cap approval
+  required.
+- Boundary: cross-domain sales evidence correlation from external candidate to
+  listing, order, settlement, and experiment-attributable actual net profit.
+- Decision: preserve immutable estimate snapshots; require accounting-final,
+  append-only evidence before actual net profit or forecast error is known.
+- Proposed experiment: one SKU/listing/account, 10 order lines, KRW 300,000
+  cash cap, KRW 50,000 advertising cap, KRW 10,000 daily advertising cap, and
+  KRW 100,000 loss cap. These are not execution authorization.
+- Implementation authorization: none. DB/Auth/RLS/privacy/Production,
+  marketplace, procurement, listing, price, advertising, order, return,
+  settlement, payment, paid, and destructive actions remain separately
+  approval-gated.
+- Story:
+  [Sales Learning Closed Loop and First Experiment v1](../docs/architecture/SALES-LEARNING-CLOSED-LOOP-V1.md).
+
+
 ### 2026-07-27 — Sprint B-0 Database Baseline Execution v1
 
 - Status: proposed; repository-owner manual approval required.

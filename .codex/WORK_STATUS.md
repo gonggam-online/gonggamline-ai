@@ -3368,3 +3368,52 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Live authenticated Codex smoke consumes the current Codex allowance and must
   not be conflated with hermetic CI.
 - Repository-owner manual merge remains required. Phase 4 is not authorized.
+# Current task snapshot — 2026-08-04 Stage 11
+
+- Objective: design the candidate -> listing -> order -> settlement -> actual
+  net profit closed loop and the first bounded sales-experiment approval packet.
+- Branch/base: `codex/docs/revenue-learning-closed-loop` from
+  `origin/main` `df624e57adb92fb810566e8a0710eea1fee0bb64`.
+- Risk: high-risk/manual Architecture because later implementation crosses
+  DB/Auth/RLS/privacy/financial/commerce/Production boundaries. Documentation
+  only; no implementation or external action authorized.
+- Revenue impact: enables the first auditable real-sales learning cycle while
+  bounding cash loss and preventing estimate/actual conflation.
+- Root-cause class: external provider/privacy questions followed by a Database
+  and approved data-contract gap; no code workaround is allowed.
+- Scope: current-state audit, identity/evidence/lifecycle contracts,
+  reconciliation semantics, privacy/security, metrics, proposed experiment
+  caps, ordered approval/implementation Stories, governance records.
+- Non-goals: migration, DB connection, Auth/RLS, API/UI/worker implementation,
+  Production data, listing, price, ads, procurement, inventory, order, return,
+  settlement, payment, paid call, or experiment execution.
+- Completed: confirmed clean detached worktree; verified the Stage 10 merge is
+  exact `origin/main`; created the dedicated branch; read binding governance;
+  audited existing Orchestrator, Revenue, Market feedback, Listing, Procurement,
+  schema-inspection, and Item Selection evidence; drafted the Architecture
+  Story; updated Architecture review, Decision Log, roadmap, and changelog.
+- Current: local validation complete; commit, push, Draft PR, and exact-head
+  remote gates remain.
+- Blocker/owner action: owner must accept or amend the proposed KRW 300,000
+  total, KRW 50,000 advertising, KRW 10,000 daily advertising, KRW 100,000
+  loss, 10-order, and duration caps. Exact SKU/account/price/stock/rights/privacy
+  and every commerce action remain later separately bound approvals.
+- Changed files: `docs/architecture/SALES-LEARNING-CLOSED-LOOP-V1.md`,
+  `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`,
+  `docs/orchestrator/implementation-roadmap.md`,
+  `docs/orchestrator/CHANGELOG.md`, and this file.
+- Verification: `git diff --check` passed; lint passed with 0 errors and four
+  pre-existing warnings; typecheck passed; unit tests 446/446 passed; production
+  build passed with 85 routes. Local Playwright: 35 passed, 2 skipped, 7 failed
+  only on the existing unconfigured Supabase `missing_url` condition for
+  `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
+  and `/workspace`. `npm ci` reported six existing dependency advisories (one
+  moderate, five high) and did not change the lockfile.
+- Last commit: none for this Story.
+- Exact next action: commit and push the documentation-only change, create a
+  high-risk/manual Draft PR, then wait for exact-head CI and Preview evidence.
+- Remaining risks: provider fields/terms, Production schema/security, privacy
+  basis/retention, exact profit attribution, and safe stop controls are not yet
+  verified. Proposed caps are not owner-approved execution authority.
+
+---

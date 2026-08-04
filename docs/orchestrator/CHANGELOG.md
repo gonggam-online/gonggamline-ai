@@ -1,5 +1,15 @@
 # Orchestrator changelog
 
+## 2026-08-04 — Phase 6 sales learning Architecture proposal
+
+- Defined immutable candidate/estimate identities and append-only listing,
+  order, settlement, cost, and accounting-final correlation semantics.
+- Kept estimated, observed actual, and accounting-final evidence distinct and
+  made incomplete actual net profit `UNKNOWN` rather than zero.
+- Proposed the first bounded owner-decision packet and metrics without
+  authorizing DB/privacy/Production, commerce, paid calls, or execution.
+
+
 ## 2026-08-04 — Phase 5 owner-sample structural correction
 
 - Removed prefilled predictions from the 60-case owner fixture and generated
