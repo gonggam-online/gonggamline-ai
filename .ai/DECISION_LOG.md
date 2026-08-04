@@ -1,5 +1,28 @@
 # Decision log
 
+## 2026-08-04 — Sales learning closed-loop Architecture proposal
+
+- Category: proposed high-risk/manual cross-domain Architecture Story.
+- Proposal: correlate immutable external candidate and estimate snapshots with
+  listing, order-line, settlement-line, cost, refund, and return evidence;
+  calculate experiment-attributable actual net profit only from reconciled
+  accounting-final facts.
+- First experiment packet proposed for owner decision: one SKU/listing/account,
+  10 paid order lines, 14 active days, KRW 300,000 total cash cap, KRW 50,000
+  advertising cap, KRW 10,000 daily advertising cap, and KRW 100,000 realized
+  plus committed attributable loss cap.
+- Status: **not approved**. The repository owner must accept or amend the caps
+  and later bind the exact SKU, account, price, stock/procurement, rights,
+  privacy basis, operator, dates, and stop procedure.
+- Authority boundary: no migration, DB/Auth/RLS, Production data, personal
+  data, listing, price, ads, inventory, procurement, order, return, settlement,
+  payment, paid call, or policy promotion is authorized.
+- Story:
+  [`SALES-LEARNING-CLOSED-LOOP-V1.md`](../docs/architecture/SALES-LEARNING-CLOSED-LOOP-V1.md).
+- Rollback: revert the documentation PR; no external or persistent state was
+  changed.
+
+
 ## 2026-08-04 — Phase 5 owner-sample review and structural correction
 
 - Category: repository-owner SHADOW evidence decision; normal-risk test and

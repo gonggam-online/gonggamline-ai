@@ -119,6 +119,10 @@ Schema/Auth/RLS/Production/commerce remain approval-gated.
 
 ## Phase 6 — sales learning integration
 
+Status: Architecture proposed in
+[Sales Learning Closed Loop and First Experiment v1](../architecture/SALES-LEARNING-CLOSED-LOOP-V1.md).
+No implementation or experiment execution is authorized.
+
 Purpose: connect external observed candidates and actual marketplace outcomes
 without autonomous commerce writes.
 
@@ -145,8 +149,8 @@ facts through actual net profit, with no estimate/actual conflation.
    allowed before Draft PR.
 6. Define SHADOW evaluation sample size and acceptable false-dispatch,
    duplicate, failure, and manual-intervention thresholds.
-7. Define the first actual sales experiment, budget, loss cap, and metrics;
-   real marketplace actions remain separately approved.
+7. Accept or amend the proposed first experiment packet in the Sales Learning
+   Architecture Story; real marketplace actions remain separately approved.
 
 ## Implementation task split
 
