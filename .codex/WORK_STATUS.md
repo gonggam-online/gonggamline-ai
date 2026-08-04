@@ -3392,8 +3392,8 @@ perform the documented read-only Supabase schema and completeness inspection.
   audited existing Orchestrator, Revenue, Market feedback, Listing, Procurement,
   schema-inspection, and Item Selection evidence; drafted the Architecture
   Story; updated Architecture review, Decision Log, roadmap, and changelog.
-- Current: local validation complete; commit, push, Draft PR, and exact-head
-  remote gates remain.
+- Current: delivery gates complete; Draft PR #82 awaits repository-owner
+  Architecture/cap review and manual merge decision.
 - Blocker/owner action: owner must accept or amend the proposed KRW 300,000
   total, KRW 50,000 advertising, KRW 10,000 daily advertising, KRW 100,000
   loss, 10-order, and duration caps. Exact SKU/account/price/stock/rights/privacy
@@ -3409,9 +3409,14 @@ perform the documented read-only Supabase schema and completeness inspection.
   `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
   and `/workspace`. `npm ci` reported six existing dependency advisories (one
   moderate, five high) and did not change the lockfile.
-- Last commit: none for this Story.
-- Exact next action: commit and push the documentation-only change, create a
-  high-risk/manual Draft PR, then wait for exact-head CI and Preview evidence.
+- Delivery: implementation commit `572012409d037d9e580403ce5fef826ab5101428`
+  pushed; Draft PR #82 targets `main` with `manual-merge-required`. Exact-head
+  CI run `30899679227` passed, Preview browser run `30899679709` passed, and
+  Vercel Preview reported success. Auto-merge and Production are prohibited.
+- Last commit: `5720124 docs: design sales learning closed loop`.
+- Exact next action: repository owner accepts or amends the Architecture and
+  proposed cap packet, then manually reviews/merges PR #82 if accepted. No
+  follow-on implementation or experiment may start from this Story alone.
 - Remaining risks: provider fields/terms, Production schema/security, privacy
   basis/retention, exact profit attribution, and safe stop controls are not yet
   verified. Proposed caps are not owner-approved execution authority.
