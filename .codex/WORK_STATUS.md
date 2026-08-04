@@ -1,5 +1,56 @@
 # Work status
 
+## 2026-08-04 — Stage 10 Orchestrator limited autonomy prerequisite audit
+
+- Objective: promote only an owner-approved, bounded class of normal-risk
+  documentation, test, and behavior-equivalent internal-refactor tasks to
+  automatic Draft PR dispatch.
+- Branch/base: `codex/feat/orchestrator-limited-autonomy` from exact
+  `origin/main` `f1e4757d73bb1164a9a56983b3822976f6fd5d4f`.
+- Risk: proposed implementation can be normal-risk only within the existing
+  Engineering Orchestration boundary. Autonomy expansion itself requires the
+  exact owner approval and evidence defined by Orchestrator policy.
+- Revenue impact: bounded Draft PR dispatch could remove repeatable engineering
+  work, but uncalibrated dispatch would consume time/cost and increase review
+  or incident load.
+- Root-cause class: external authority/configuration prerequisite, not a code or
+  database failure. Repository policy intentionally requires owner decisions.
+- Scope/non-goals: prerequisite audit only; no dispatch implementation, worker,
+  ledger transition, API/model spend, GitHub write, DB/Auth/RLS, Production,
+  commerce write, secret/configuration, paid, or destructive action.
+- Completed: verified clean worktree; fetched latest `origin/main`; created the
+  dedicated branch; read mandatory governance and approved Orchestrator
+  Architecture; audited Phase 4 evidence and owner update; recorded the owner
+  baseline; implemented a pure fail-closed admission evaluator and adversarial
+  sample/cap/scope/incident/downgrade tests.
+- Current/blocker: local validation and Draft PR delivery are complete.
+  Operational dispatch remains blocked: the approved threshold policy
+  is not an actual owner-labeled 60-case result, and numeric per-task token/time
+  and daily task caps plus successful incident-drill evidence remain absent.
+- Owner action: after this admission-gate PR, provide a versioned approval with
+  the actual sample result, numeric caps, incident-drill evidence, approval
+  expiry, and policy/config hash. Existing manual boundaries remain unchanged.
+- Changed files: limited-autonomy module/export/tests, Orchestrator report and
+  changelog, Decision Log, and this Work Status.
+- Commands/results: focused SHADOW/admission suite 11/11 and full unit suite
+  440/440 passed; typecheck passed; production build passed with 85 routes;
+  lint passed with zero errors and four pre-existing warnings. Local Playwright
+  passed 35, skipped 2, and failed the same 7 Supabase-backed page-health cases
+  because local Supabase is unconfigured (`missing_url`); failure evidence is
+  under ignored `test-results/`. The pure admission module cannot reach these
+  routes or Supabase, so the failures are external configuration, not code.
+- Delivery: implementation commit
+  `7f26f54f8dad12f5124d97c151d17bb28fec6b78` is pushed. Normal-risk Draft PR
+  #80 is open, mergeable, and targets `main`. Exact implementation-head CI run
+  `30892768493` passed all jobs; Preview browser run `30892768549` passed; the
+  exact Vercel Preview is Ready.
+- Last commit: `7f26f54 feat: gate limited orchestrator autonomy`; this status
+  evidence will become the final PR head after its own exact gates pass.
+- Exact next action: validate the status-only head's CI/Preview gates, then wait
+  for owner review/merge and the missing operational admission evidence.
+- Remaining risks: test fixture caps and incident evidence are not standing
+  approval; no operational sample result exists; dispatch remains unauthorized.
+
 ## 2026-08-04 — Stage 09 Orchestrator Phase 4 SHADOW planner/reviewer
 
 - Objective: verified context, revenue/time scoring, NEXT_TASK/RETRY/REPLAN,

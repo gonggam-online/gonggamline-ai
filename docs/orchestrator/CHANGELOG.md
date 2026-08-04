@@ -1,5 +1,15 @@
 # Orchestrator changelog
 
+## 2026-08-04 — Phase 5 limited-autonomy admission gate
+
+- Recorded the repository-owner SHADOW evaluation baseline and preserved all
+  high-risk/manual approval boundaries.
+- Added a pure fail-closed admission evaluator for owner evidence, numeric
+  token/time/task caps, zero paid cost, approved repository/path/task classes,
+  incident drill evidence, and Draft-PR-only delivery.
+- Added adversarial admission and downgrade tests. No worker, dispatch, paid
+  call, GitHub write, database, Production, or commerce effect was added.
+
 ## 2026-08-04 — Phase 4 SHADOW planner/reviewer
 
 - Added evidence-referenced context packs and deterministic revenue/time

@@ -1,5 +1,36 @@
 # Decision log
 
+## 2026-08-04 — Orchestrator limited-autonomy owner policy baseline
+
+- Category: repository-owner autonomy policy decision.
+- Status: accepted as the Phase 5 admission baseline; operational dispatch is
+  not yet admitted because actual sample, numeric token/time/task caps, and
+  successful incident-drill evidence remain absent.
+- Owner / approver: repository owner via `OWNER_POLICY_UPDATE` on 2026-08-04.
+- Decision: repeated normal-risk work may proceed automatically only inside a
+  pre-approved policy. High-risk approval requests should bind the exact diff,
+  target environment, applicable amount/quantity cap, rollback, and
+  verification as one change set at the real authority/cost/data boundary.
+- SHADOW baseline: 60 owner-labeled cases with 20 each for `NEXT_TASK`, `RETRY`,
+  and `REPLAN`; at least 15 adversarial cases; `NEXT_TASK` precision >= 95% and
+  recall >= 80%; `RETRY` precision >= 90% and recall >= 80%; `REPLAN`
+  precision/recall >= 90%; exact match >= 85%; zero forbidden/unverified
+  `NEXT_TASK` false positives, at most one general `NEXT_TASK` false positive,
+  and zero dispatch/external writes.
+- Allowed pre-Phase-5 candidate classes: documentation, tests, monitoring, and
+  behavior-equivalent internal refactors. Ranking remains SHADOW-only at
+  confidence-adjusted revenue 60, operator time 30, urgency 10; dependency-not-
+  ready, forbidden scope, and invalid contract always produce `REPLAN`.
+- Cost/delivery boundary: paid cost is KRW 0. Eligible automation stops at the
+  policy-approved branch/commit/push/Draft PR and normal-risk delivery gates.
+- Preserved manual boundaries: DB, Auth, RLS, Production, commerce, secrets,
+  paid work, destructive actions, high-risk work, and final merge.
+- Follow-up / admission blocker: approve actual owner-labeled sample results,
+  numeric per-task token/wall-time and daily task caps, expiry/config hash, and
+  evidence of a successful recovery/incident drill before dispatch activation.
+- Rollback: revert the admission module and policy records; no runtime dispatch
+  or external state exists from this decision.
+
 ## 2026-08-04 — Orchestrator Phase 4 SHADOW planner/reviewer implementation
 
 - Category: approved Architecture implementation
