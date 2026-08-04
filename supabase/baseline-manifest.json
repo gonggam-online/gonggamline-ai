@@ -126,6 +126,11 @@
       "order": 24,
       "file": "024_item_selection_stale_recovery.sql",
       "sha256": "91db6288ffb64261a92cb9524cd33bec907b484b1a4e9ce05c7bf574a059fb5a"
+    },
+    {
+      "order": 25,
+      "file": "025_item_selection_finalization_composite_fix.sql",
+      "sha256": "9e6b7efe8ca8476fcf9f378be7495037bb48940ad9a897cf593f7af09411ee2b"
     }
   ],
   "promotedSources": {

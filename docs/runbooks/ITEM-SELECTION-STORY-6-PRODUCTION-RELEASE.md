@@ -213,3 +213,25 @@ Keep this section `PENDING` until every binding gate and approval passes.
   read-only post-check again proved run/evaluation/Item Selection audit counts
   all zero. No third attempt or merge is allowed before an explicitly approved
   Auth/CSRF fix is reviewed, deployed, and receives a new smoke decision.
+
+### Final release addendum — 2026-08-04
+
+- CSRF correction head `6ade327bdcba0a5265f4f6b4f96bcfe8bf1edf11`
+  passed exact CI `30879193755`, Preview browser `30879193746`, and Vercel
+  Preview. PR #75 was manually merged as
+  `c2f4af619b760696d73c5740e1fb5b18a6cae89a`; exact Production browser smoke
+  `30879457560` passed.
+- The separately approved fresh-MFA size-10 `텀블러` attempt passed Auth and
+  canonical CSRF, created run `715c4e8e-b1f9-48e5-9b98-62ec16ee2d8d`, and
+  made exactly one Domeggook list call: HTTP 2xx in 1,416 ms, with no retry or
+  detail fan-out. Atomic finalization then failed closed with sanitized HTTP
+  500. No Product or other commerce write occurred.
+- Local actual-RPC reproduction identified PostgreSQL SQLSTATE `42809` in
+  migration 021's composite-array row notation. The forward-only migration 025
+  correction and actual-RPC regression are tracked in a separate high-risk,
+  manual-merge PR; migration 025 remains unapplied to Production.
+- After the DB-owned 30-minute threshold, migration 024 recovery was invoked
+  exactly once under explicit approval. The run completed as
+  `FAILED / STALE_RUN_RECOVERED` at `2026-08-04 05:57:30.942233 UTC`, with
+  zero evaluations, CREATE audit 1, FINALIZE audit 0, recovery audit 1, and
+  zero remaining stale RUNNING runs. Runtime health was HTTP 200 afterward.

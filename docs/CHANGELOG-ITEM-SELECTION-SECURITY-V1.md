@@ -1,5 +1,17 @@
 # Item Selection Security v1 changelog
 
+## 2026-08-04 — Finalization composite forward fix
+
+- Added migration 025 to replace only `finalize_item_selection_run_v1` after a
+  bounded Production smoke exposed SQLSTATE `42809` at the composite-array row
+  alias boundary.
+- Preserved the function signature, transaction, validation, idempotency,
+  audit, owner, fixed search path, and service-role-only execution contract.
+- Added an actual local Supabase RPC regression with 10 synthetic evaluations
+  and exact CREATE/FINALIZE audit cardinality.
+- Production migration application remains separately approved, manual, and
+  high-risk.
+
 ## 2026-08-03
 
 - Added Story 4's server-owned bounded Item Selection workflow and the three

@@ -1,5 +1,23 @@
 # Sprint 3 - Runtime Stabilization
 
+# Item Selection finalization RPC correction
+
+## Fixed
+
+- Added forward-only migration 025 to correct PostgreSQL composite-array field
+  access in the atomic Item Selection finalizer without changing its signature,
+  validation, locking, audit, owner, or grants.
+- Added a local-only Supabase RPC regression requiring one bounded synthetic run
+  to persist 10 evaluations and matching CREATE/FINALIZE audits.
+- Extended the baseline manifest and disposable 000-025 replay gate.
+
+## Preserved
+
+- Migration 021 and existing Production history remain immutable.
+- No Product, provider, marketplace, supplier, order, inventory, fulfillment,
+  settlement, payment, Auth/RLS, secret, or external configuration change.
+- Production application of migration 025 remains manual/high-risk.
+
 # Item Selection Story 6 - Production CSRF contract correction
 
 ## Fixed

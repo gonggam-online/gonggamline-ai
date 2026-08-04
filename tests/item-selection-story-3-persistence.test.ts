@@ -9,7 +9,9 @@ const read = (relative: string): string =>
 
 const migration021 = read("supabase/migrations/021_item_selection_security_vertical_slice.sql");
 const migration024 = read("supabase/migrations/024_item_selection_stale_recovery.sql");
+const migration025 = read("supabase/migrations/025_item_selection_finalization_composite_fix.sql");
 const repository = read("services/item-selection-run.repository.ts");
+const verificationScript = read("scripts/verify-item-selection-security-slice.ps1");
 
 test("Story 3 audit preserves the existing aggregate transaction and idempotency boundary", () => {
   assert.match(migration021, /CREATE FUNCTION public\.create_item_selection_run_v1/);
@@ -63,4 +65,23 @@ test("repository maps only the approved internal reconciliation RPC", () => {
   assert.match(repository, /p_requested_by_principal_id: context\.administratorUserId/);
   assert.match(repository, /p_route: "\/internal\/item-selection\/reconcile-stale"/);
   assert.doesNotMatch(repository, /STALE_RUN_RECOVERED/);
+});
+
+test("migration 025 forward-fixes composite finalization without changing its boundary", () => {
+  assert.match(
+    migration025,
+    /CREATE OR REPLACE FUNCTION public\.finalize_item_selection_run_v1/,
+  );
+  assert.match(migration025, /evaluation\.provider_item_number/);
+  assert.match(migration025, /evaluation\.original_position/);
+  assert.match(migration025, /submitted\.provider_item_number/);
+  assert.doesNotMatch(migration025, /\(evaluation\)\.|\(submitted\)\.|AS evaluation\(value, ordinal\)/);
+  assert.doesNotMatch(migration025, /CREATE TABLE|CREATE TYPE|DROP FUNCTION/);
+  assert.match(migration025, /SECURITY DEFINER/);
+  assert.match(migration025, /SET search_path = pg_catalog, public/);
+  assert.match(migration025, /OWNER TO postgres/);
+  assert.match(migration025, /FROM PUBLIC, anon, authenticated/);
+  assert.match(migration025, /TO service_role/);
+  assert.match(verificationScript, /verify-item-selection-finalization-rpc\.ts/);
+  assert.match(verificationScript, /Disposable migrations 000-025 replay: PASS/);
 });
