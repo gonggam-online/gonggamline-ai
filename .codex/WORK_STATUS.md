@@ -194,12 +194,20 @@
   `c2f4af619b760696d73c5740e1fb5b18a6cae89a`; exact Production deployment and
   browser smoke passed. The bounded provider call succeeded, but finalization
   exposed the migration 021 defect recorded above. No commerce write occurred.
-- Last implementation commit: pending on
-  `codex/fix/item-selection-finalization-500`.
-- Exact next action: complete diff/security review, commit/push the forward-only
-  migration 025 correction, open a Draft `manual-merge-required` high-risk PR,
-  and require new exact-head CI/Preview gates. Do not merge or apply migration
-  025 to Production without a separate owner approval.
+- Follow-up delivery: Draft PR #76,
+  `https://github.com/gonggam-online/gonggamline-ai/pull/76`; branch
+  `codex/fix/item-selection-finalization-500`; implementation commit
+  `ec0b724c658ab682679cfcc32806e40236d2193b`; label
+  `manual-merge-required`. Exact implementation-head CI run `30882735352`
+  passed after one same-head failed-job rerun of the established Orchestrator
+  shutdown-timing flake; all 429 tests, migration replay, actual RPC, lint,
+  typecheck, build, and security jobs passed. Preview browser run
+  `30882735344` and Vercel Preview passed. No Ready, auto-merge, merge,
+  Production migration 025 application, redeployment, or further live smoke.
+- Exact next action: obtain separate owner approval before manually merging PR
+  #76 or applying migration 025 to Production. After any merge, require the
+  exact Production deployment/health checks and a separately approved bounded
+  fresh-MFA smoke; do not infer those approvals from this Draft PR delivery.
 - Remaining risks: migration 025 remains unapplied to Production; the rate
   limiter is instance-local; live provider behavior varies; any further live
   smoke creates immutable Production history and requires separate approval.
