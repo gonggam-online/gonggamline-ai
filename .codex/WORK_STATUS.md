@@ -15,17 +15,23 @@
 - Completed: boot/Architecture audit; branch from exact `origin/main`
   f032c6bd4d702a865e2191cc5ff474dba674297b; implementation; full unit suite
   435/435; typecheck; lint with 0 errors and 4 pre-existing warnings.
-- Current: push, Draft PR, exact CI/Preview gates, and post-merge smoke.
-- Blockers/owner actions: none for implementation delivery. Owner sample and
+- Current: terminal; implementation PR #78 merged and Production smoke passed.
+- Blockers/owner actions: none. Owner sample and
   thresholds remain prerequisites for future promotion beyond SHADOW.
 - Changed files: Decision Log, Work Status, Orchestrator changelog/report,
   shadow module/export, and tests.
-- Last implementation commit: `b794261` (`feat: add shadow orchestrator reviewer`).
+- Commits: implementation `b794261`; PR head
+  `0e8df222692dc44d1e900c3e0f0880567654d8d8`; merge
+  `065959b42765d04f39c17815fb5a1f6f82dee53d`.
 - Additional validation: production build passed (85 routes). Playwright local
   passed 35, skipped 2, and failed 7 existing data-backed page-health cases
   because local Supabase is unconfigured (`missing_url`); this external-config
   failure is unrelated to and unreachable from the new pure SHADOW module.
-- Exact next action: commit this status checkpoint, push, and open the PR.
+- Delivery: normal-risk PR #78 merged; CI run `30890325964` passed; Preview
+  browser run `30890326058` passed; Vercel Preview Ready; exact-merge
+  Production browser smoke run `30890643064` passed.
+- Exact next action: preserve SHADOW mode and collect an owner-labeled offline
+  sample before proposing any promotion.
 - Remaining risks: initial weights are a ranking heuristic, not an approved KPI
   policy; no owner-labeled acceptance sample exists; dispatch stays forbidden.
 
