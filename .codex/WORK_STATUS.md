@@ -31,6 +31,15 @@
 - Current: the owner approved release steps 1–7. Execution stopped before
   database contact because the mandatory backup/credential/window preflight
   failed closed.
+- 2026-08-04 credential-injection retry: the owner reported injection complete,
+  and a fresh no-value probe checked Process, User, Machine, and repository
+  `.env*` key presence. Both `SUPABASE_ACCESS_TOKEN` and
+  `SUPABASE_DB_PASSWORD` remain absent in every checked source. Supabase CLI
+  2.110.0 is available and the worktree remains clean at exact head
+  `449686bec0dec96c09bef238af1902424709a351`, but no database command was
+  attempted. The provisional 09:57:39-10:57:39 Asia/Seoul window is cancelled;
+  establish a fresh window only after credentials are visible to this Codex
+  process.
 - Blockers / owner actions: Supabase Dashboard confirms the exact Production
   project, but its Free plan has no managed scheduled backups. The newest local
   logical dump was created before migration 023, so it is not the runbook's
