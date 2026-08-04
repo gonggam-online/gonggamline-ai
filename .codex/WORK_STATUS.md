@@ -1,5 +1,32 @@
 # Work status
 
+## 2026-08-04 — Phase 5 owner-sample structural correction
+
+- Objective: remove circular SHADOW metrics and make all 60 owner labels valid
+  promotion evidence through actual policy execution.
+- Branch/PR: `codex/test/orchestrator-shadow-admission-evidence`, Draft PR #81.
+- Risk/root cause: normal-risk tests/internal policy refactor. Root cause is
+  code/evidence structure: predictions were copied into the fixture and several
+  negative conditions existed only in prose.
+- Completed: independently reviewed all 60 semantic labels; removed stored
+  predictions; added structured input profiles; reused real SHADOW and candidate
+  admission code; added daily-task usage enforcement; verified generated 60/60
+  exact matches, all precision/recall 1.0, and zero dispatch/external writes.
+- Scope/non-goals: no worker, actual dispatch, external write, Production,
+  DB/Auth/RLS, commerce, secret, paid, destructive, or final merge action.
+- Commands/results: focused 11/11 pass; full unit first run 445/446 with the
+  existing Phase 3 late-mutation timing race, bounded rerun 446/446 pass; lint
+  0 errors/4 pre-existing warnings; typecheck pass; build pass with 85 routes.
+  Local Playwright passed 35, skipped 2, and failed the same 7 Supabase-backed
+  routes because local Supabase is unconfigured (`missing_url`); this is an
+  external-configuration failure unrelated to the changed evidence/policy code.
+- Current: complete diff review passed; commit/push and exact PR gates remain.
+- Fixture SHA-256:
+  `59DC29E92308DFE1F152862D640F9CA264F7DF015EB1EAB6F49EEBF2DE85FF42`.
+- Remaining risks: the sample is synthetic and balanced rather than sampled
+  from live operations; operational activation remains contingent on PR merge
+  and exact gates; all manual approval boundaries remain unchanged.
+
 ## 2026-08-04 — Phase 5 SHADOW sample and incident evidence
 
 - Objective: record the approved Phase 5 caps, prepare the balanced 60-case

@@ -1,13 +1,13 @@
 # Phase 5 SHADOW sample and no-external-write incident drill
 
-Status: locally verified; owner label review and PR merge remain required
+Status: owner-reviewed and locally verified; PR merge remains required
 
 Risk: normal-risk tests and evidence only
 
 ## Outcome
 
 The approved Phase 5 caps are recorded with an exact configuration hash, and a
-balanced 60-case SHADOW review set is ready for owner review. A hermetic
+balanced 60-case SHADOW review set is owner-reviewed. A hermetic
 incident drill verifies duplicate suppression, budget interruption, owned
 process recovery planning, and ledger audit integrity without performing an
 external write.
@@ -33,13 +33,16 @@ authorized by these evidence files.
 
 The fixture contains exactly 60 unique cases: 20 `NEXT_TASK`, 20 `RETRY`, and
 20 `REPLAN`, with 15 adversarial cases. Every case records a summary, task
-class, path scope, proposed outcome, proposed owner decision, and reason.
+class, path scope, independent owner decision, structured evaluator input
+profile, and reason. No prefilled proposed outcome is stored in the fixture.
 
-The proposed labels produce exact match, precision, and recall of 1.0 for each
-outcome. Those metrics demonstrate fixture consistency only. The fixture is
-explicitly `PROPOSED_FOR_OWNER_REVIEW`; it must not be converted to
-`OWNER_APPROVED` or `ownerLabeled: true` until the repository owner reviews all
-60 cases. The admission regression proves that proposed labels remain SHADOW.
+The tests pass every case through the real `reviewInShadow` implementation and
+the same bounded candidate-scope evaluator used by operational admission. The
+generated outcomes produce exact match, precision, and recall of 1.0 for each
+outcome. Forbidden paths, repository/risk/delivery/cost/expiry boundaries,
+unverified context, dependency state, invalid contracts, retry budgets, and
+daily task usage are machine inputs rather than prose assertions. Every result
+records zero dispatch or external writes.
 
 ## Incident drill
 
@@ -57,18 +60,14 @@ The drill uses only an in-memory SQLite ledger and synthetic process metadata:
 This validates the deterministic incident contracts. It is not a live process
 termination or an operational dispatch rehearsal.
 
-## Owner review action
+## Owner review result
 
-Review
-`docs/orchestrator/evidence/phase-5-shadow-owner-review.json`. For any disputed
-case, change `ownerDecision` and explain the reason. After reviewing every case,
-explicitly approve exact SHA-256
-`DBCE60F57A805E234E2C23163F539ACA403ED8FF16D1905F6023B70478235788` if the
-file is unchanged. The incident summary SHA-256 is
-`D68A4298E9796E65903A9D11178633E5FEF8F8104BA6F535097D8BCEE9A84AB2`.
-Only a later, separately
-verified change may mark the set `OWNER_APPROVED` and evaluate operational
-admission. Existing manual approval boundaries remain unchanged.
+All 60 owner decisions were reviewed and accepted after removing the circular
+prefilled predictions. The exact owner-reviewed fixture SHA-256 is
+`59DC29E92308DFE1F152862D640F9CA264F7DF015EB1EAB6F49EEBF2DE85FF42`.
+This evidence may satisfy the sample gate only after PR merge and exact gate
+verification. It does not authorize final merge or any existing manual
+approval boundary.
 
 ## Rollback
 

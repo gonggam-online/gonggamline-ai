@@ -1,5 +1,23 @@
 # Decision log
 
+## 2026-08-04 — Phase 5 owner-sample review and structural correction
+
+- Category: repository-owner SHADOW evidence decision; normal-risk test and
+  policy-code correction.
+- Decision: accept all 60 semantic `ownerDecision` labels after removing the
+  fixture's prefilled `proposed` values.
+- Evidence method: generate predictions with the real SHADOW reviewer and
+  bounded admission-scope evaluator from explicit machine inputs, then compare
+  those generated predictions with the independent owner labels.
+- Result: 20/20/20 balanced labels, 15 adversarial cases, exact match and all
+  outcome precision/recall 1.0, forbidden/unverified NEXT_TASK false positives
+  0, dispatch/external writes 0.
+- Boundary: this is not final-merge, Production, DB/Auth/RLS, commerce, secret,
+  paid, destructive, or high-risk approval. Activation remains contingent on
+  PR merge and exact delivery gates.
+- Fixture SHA-256:
+  `59DC29E92308DFE1F152862D640F9CA264F7DF015EB1EAB6F49EEBF2DE85FF42`.
+
 ## 2026-08-04 — Phase 5 caps approval and SHADOW evidence preparation
 
 - Category: repository-owner bounded-autonomy policy input and normal-risk

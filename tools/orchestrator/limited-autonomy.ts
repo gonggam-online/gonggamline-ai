@@ -59,6 +59,7 @@ export interface AdmissionCandidate {
   readonly risk: "normal-risk" | "high-risk";
   readonly deliveryTarget: "DRAFT_PR" | "FINAL_MERGE";
   readonly paidCostKrw: number;
+  readonly dailyTasksStarted: number;
 }
 
 export interface AdmissionDecision {
@@ -66,6 +67,12 @@ export interface AdmissionDecision {
   readonly mode: "BOUNDED_AUTONOMY" | "SHADOW";
   readonly reasons: readonly string[];
 }
+
+export type LimitedCandidatePolicy = Pick<
+  LimitedAutonomyPolicy,
+  "version" | "approvedBy" | "approvedAt" | "expiresAt" | "policyHash" |
+  "repositories" | "taskClasses" | "pathPolicy" | "caps"
+>;
 
 const requiredOutcomeCount = 20;
 
@@ -87,32 +94,7 @@ export function evaluateLimitedAutonomyAdmission(
   now: string,
 ): AdmissionDecision {
   const reasons: string[] = [];
-  const nowMs = Date.parse(now);
-  const approvedAtMs = Date.parse(policy.approvedAt);
-  const expiresAtMs = Date.parse(policy.expiresAt);
-
-  if (
-    policy.version !== LIMITED_AUTONOMY_POLICY_VERSION ||
-    !policy.approvedBy.trim() ||
-    !/^[a-f0-9]{64}$/.test(policy.policyHash) ||
-    !Number.isFinite(nowMs) ||
-    !Number.isFinite(approvedAtMs) ||
-    !Number.isFinite(expiresAtMs) ||
-    approvedAtMs > nowMs ||
-    expiresAtMs <= nowMs
-  ) {
-    reasons.push("Owner approval identity, hash, or validity window is invalid");
-  }
-
-  if (
-    !validPositiveInteger(policy.caps.perTaskTokenLimit) ||
-    !validPositiveInteger(policy.caps.perTaskWallTimeMinutes) ||
-    !validPositiveInteger(policy.caps.dailyTaskLimit) ||
-    policy.caps.perTaskPaidCostKrw !== 0 ||
-    policy.caps.dailyPaidCostKrw !== 0
-  ) {
-    reasons.push("Explicit token, wall-time, task-count, and zero-paid-cost caps are required");
-  }
+  reasons.push(...evaluateLimitedCandidateScope(policy, candidate, now).reasons);
 
   const shadow = policy.shadow;
   const recordedOutcomeTotal =
@@ -170,6 +152,44 @@ export function evaluateLimitedAutonomyAdmission(
     reasons.push("A complete evidence-referenced incident drill is required");
   }
 
+  return reasons.length === 0
+    ? { authorized: true, mode: "BOUNDED_AUTONOMY", reasons: [] }
+    : { authorized: false, mode: "SHADOW", reasons };
+}
+
+export function evaluateLimitedCandidateScope(
+  policy: LimitedCandidatePolicy,
+  candidate: AdmissionCandidate,
+  now: string,
+): AdmissionDecision {
+  const reasons: string[] = [];
+  const nowMs = Date.parse(now);
+  const approvedAtMs = Date.parse(policy.approvedAt);
+  const expiresAtMs = Date.parse(policy.expiresAt);
+
+  if (
+    policy.version !== LIMITED_AUTONOMY_POLICY_VERSION ||
+    !policy.approvedBy.trim() ||
+    !/^[a-f0-9]{64}$/.test(policy.policyHash) ||
+    !Number.isFinite(nowMs) ||
+    !Number.isFinite(approvedAtMs) ||
+    !Number.isFinite(expiresAtMs) ||
+    approvedAtMs > nowMs ||
+    expiresAtMs <= nowMs
+  ) {
+    reasons.push("Owner approval identity, hash, or validity window is invalid");
+  }
+
+  if (
+    !validPositiveInteger(policy.caps.perTaskTokenLimit) ||
+    !validPositiveInteger(policy.caps.perTaskWallTimeMinutes) ||
+    !validPositiveInteger(policy.caps.dailyTaskLimit) ||
+    policy.caps.perTaskPaidCostKrw !== 0 ||
+    policy.caps.dailyPaidCostKrw !== 0
+  ) {
+    reasons.push("Explicit token, wall-time, task-count, and zero-paid-cost caps are required");
+  }
+
   if (!policy.repositories.includes(candidate.repository)) {
     reasons.push("Repository is outside the approved autonomy scope");
   }
@@ -189,6 +209,12 @@ export function evaluateLimitedAutonomyAdmission(
   }
   if (!Number.isFinite(candidate.paidCostKrw) || candidate.paidCostKrw !== 0) {
     reasons.push("Paid execution is outside the approved zero-cost envelope");
+  }
+  if (
+    !validNonNegativeInteger(candidate.dailyTasksStarted) ||
+    candidate.dailyTasksStarted >= policy.caps.dailyTaskLimit
+  ) {
+    reasons.push("Daily task limit is exhausted or usage evidence is invalid");
   }
 
   return reasons.length === 0
