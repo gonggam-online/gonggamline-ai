@@ -79,6 +79,20 @@
   (`PROCESS_SHUTDOWN_FAILED` versus `WALL_TIME_TIMEOUT`); its same-head failed
   job rerun passed all 427 tests without a code change, classifying it as a
   transient timing flake rather than a Stage 08 regression.
+- Owner-approved bounded live smoke outcome: the Production Admin UI submitted
+  keyword `텀블러`, size 10, and no proposed sale price exactly once. The request
+  failed closed at the fresh-AAL2 guard before provider/database execution; the
+  UI returned only the sanitized recent-MFA-required message and browser console
+  warning/errors remained zero. Read-only DB verification for the new window
+  proved all runs 0, runs in window 0, evaluations in window 0, and Item
+  Selection audit events in window 0. No retry, Product, marketplace, supplier,
+  order, inventory, fulfillment, settlement, or payment write occurred. Because
+  the owner conditioned PR #75 merge on live-smoke success, the PR remains Draft
+  and unmerged. A new live attempt requires another explicit owner decision.
+  While confirming the user's completed MFA state, the transient browser DOM
+  snapshot rendered the one-time TOTP into automation output. The value is not
+  recorded in repository evidence, was not reused, and expired normally; the
+  authenticator seed, password, and session tokens were not exposed.
 - Blockers / owner actions: migration 024 and the read-only release observation
   are complete. Draft PR #75 remains high-risk/manual and cannot be merged
   without explicit owner approval. The bounded size-10 live provider smoke is

@@ -176,7 +176,13 @@ Keep this section `PENDING` until every binding gate and approval passes.
   seeds or roles; owner approved one-time apply; CLI 2.110.0 applied it once;
   post-list is 000–024 parity and read-only catalog verification passed owner,
   SECURITY DEFINER, fixed search path, grants, and audit constraints
-- fixture smoke / bounded live smoke: PENDING
+- fixture smoke / bounded live smoke: fixture PASS; owner-approved Production
+  size-10 attempt for keyword `텀블러` was invoked exactly once but failed
+  closed at the fresh-AAL2 guard before provider or database work. Browser
+  showed the sanitized recent-MFA-required message with zero console
+  warning/errors. Read-only verification proved run 0, evaluation 0, and Item
+  Selection audit 0 in the window. No retry was attempted; a new attempt needs
+  a new explicit decision under the retry prohibition.
 - Production deployment SHA and health: existing Story 5 Production application
   remains deployed; `/admin/item-selection` rendered the authenticated form and
   empty history with zero console warning/errors; runtime health was HTTP 200,
@@ -194,3 +200,8 @@ Keep this section `PENDING` until every binding gate and approval passes.
   merge remain pending separate owner approval. Final CI run `30871404485` had
   one unrelated Orchestrator shutdown-timing failure on its first ci-tests
   attempt; the same-head failed-job rerun passed 427/427 without a code change.
+  The one-time TOTP became visible in transient browser automation output while
+  confirming the user's completed verification; it was not persisted in Git,
+  its authenticator seed was never exposed, and the short-lived code was not
+  reused. PR merge was conditioned on live-smoke success and therefore remains
+  blocked.
