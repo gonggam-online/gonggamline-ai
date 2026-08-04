@@ -105,6 +105,20 @@
   its misleading error mapping is high-risk scope expansion requiring explicit
   owner approval, focused tests, exact-head gates, Production deployment, fresh
   MFA, and a newly approved smoke.
+- Owner-approved CSRF correction: the Admin execution client now sends the
+  canonical `X-GonggamLine-CSRF` header consumed by `verifyAdminCsrfToken`, and
+  `CSRF_DENIED` is mapped to a distinct sanitized refresh/retry instruction
+  before the generic 403 recent-MFA mapping. No server, API response, database,
+  migration, Auth/RLS, secret, provider, or commerce-write contract changed.
+  Focused Item Selection tests passed 5/5; the full suite passed 428/428; lint
+  passed with zero errors and four established Revenue warnings; typecheck and
+  the 85-page Production build passed. Production-mode mocked browser coverage
+  passed desktop+narrow 2/2 in 2.0 seconds with assertions for the canonical
+  header and absence of `X-CSRF-Token`. Two preceding local Playwright commands
+  completed both scenarios but timed out only while Playwright owned the Next
+  child-server shutdown; separating the server produced the binding clean exit.
+  Current: complete-diff/security review, commit/push, and new exact-head
+  CI/Preview validation.
 - Blockers / owner actions: migration 024 and the read-only release observation
   are complete. Draft PR #75 remains high-risk/manual and cannot be merged
   without explicit owner approval. The bounded size-10 live provider smoke is
@@ -114,7 +128,8 @@
   logical archive until the release retention decision. Do not reset the DB
   password or perform a destructive restore without a separate incident action.
 - Changed files: Story 6 Production release runbook, focused documentation
-  test, Story 6 changelog, and this status record.
+  test, Story 6 changelog, Admin Item Selection client, focused UI tests,
+  mocked browser regression, Sprint 3 changelog, and this status record.
 - Commands/results: GitHub dependency exact-head evidence and migration manifest 000–024
   canonical LF hashes passed. After `npm ci` restored missing local
   dependencies, 427/427 tests passed; lint passed with zero errors and four
@@ -146,9 +161,10 @@
   redeployment, or live provider write. The separately approved Production
   migration 024 application is complete.
 - Last implementation commit: `66d8bec docs: prepare item selection production release`.
-- Exact next action: commit and push final release evidence and require its new
-  exact-head CI/Preview gates. Then obtain separate owner decisions for the
-  bounded size-10 live provider smoke and manual merge of high-risk PR #75.
+- Exact next action: commit and push the approved CSRF correction and require
+  its new exact-head CI/Preview gates. Production live smoke cannot validate
+  this fix until the fix has been merged and deployed; preserve the manual
+  high-risk deployment boundary and require an ordering decision before merge.
 - Remaining risks: Production database evidence must be re-read immediately
   before any write; the rate limiter is instance-local; live provider behavior
   varies; an approved live smoke creates immutable Production history.

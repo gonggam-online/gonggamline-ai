@@ -25,6 +25,8 @@ for (const viewport of [{ name: "desktop", width: 1280, height: 900 }, { name: "
     await page.route("**/api/admin/auth/csrf?**", (route) => route.fulfill({ json: { token: "fixture-token", expiresAt: "2026-08-03T02:00:00.000Z" } }));
     await page.route("**/api/admin/item-selection/runs", async (route) => {
       expect(route.request().headers()["idempotency-key"]).toBeTruthy();
+      expect(route.request().headers()["x-gonggamline-csrf"]).toBe("fixture-token");
+      expect(route.request().headers()["x-csrf-token"]).toBeUndefined();
       expect(route.request().postDataJSON()).toMatchObject({ provider: "domeggook", keyword: "캠핑 의자", size: 10 });
       await route.fulfill({ status: 201, json: { data: detail } });
     });
