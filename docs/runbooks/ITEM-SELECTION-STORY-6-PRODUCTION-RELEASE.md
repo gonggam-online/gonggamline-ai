@@ -154,7 +154,8 @@ change requires its own Production approval.
 
 ## Completion record
 
-Keep this section `PENDING` until every binding gate and approval passes.
+Status: `COMPLETE` after the final addendum below. Earlier chronological entries
+are retained as incident evidence rather than rewritten.
 
 - Stage 08 PR/head: Draft PR #75; rollout evidence head
   `bbf1216136a823ea87dc633f00151490d15b0d42`; manual merge remains required
@@ -235,3 +236,16 @@ Keep this section `PENDING` until every binding gate and approval passes.
   `FAILED / STALE_RUN_RECOVERED` at `2026-08-04 05:57:30.942233 UTC`, with
   zero evaluations, CREATE audit 1, FINALIZE audit 0, recovery audit 1, and
   zero remaining stale RUNNING runs. Runtime health was HTTP 200 afterward.
+- Under a new explicit owner approval, PR #76 was manually merged as
+  `423a6fdb0d6da986481bc83d425e0cd91155b80e`; exact Production browser smoke
+  `30883772945` and Vercel Production passed. CLI 2.110.0 applied exactly
+  migration 025 once. Postflight proved migrations 000-025, exact 025
+  cardinality 1, corrected composite aliases, postgres owner, SECURITY DEFINER,
+  fixed search path, and service-role-only execution.
+- The final fresh-MFA bounded smoke created run
+  `1245d896-72d6-46a9-8b1d-52765d408fef` and completed 10/10 evaluations with
+  failure/skip 0, null failure code, and exact CREATE/FINALIZE audits 1/1. All
+  candidates remained `MANUAL_REVIEW`, as required when rights/cost evidence is
+  insufficient. Sanitized telemetry proved one Domeggook list call, 2xx in
+  1,058 ms, retry/detail/error 0. Product and other commerce writes were 0;
+  browser warning/errors were 0; final runtime health was HTTP 200.
