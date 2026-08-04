@@ -71,6 +71,14 @@
   response succeeded, Item Selection total remained 0, and stale RUNNING
   remained 0. No rollback threshold fired. Live provider execution and PR merge
   remain unperformed and require their separate owner boundaries.
+- Final rollout evidence head
+  `bbf1216136a823ea87dc633f00151490d15b0d42` passed build, lint, typecheck,
+  security audit, disposable DB replay, Item Selection security, R1 regression,
+  Preview browser run `30871404499`, and Vercel Preview. CI run `30871404485`
+  initially had one unrelated existing Orchestrator shutdown-timing failure
+  (`PROCESS_SHUTDOWN_FAILED` versus `WALL_TIME_TIMEOUT`); its same-head failed
+  job rerun passed all 427 tests without a code change, classifying it as a
+  transient timing flake rather than a Stage 08 regression.
 - Blockers / owner actions: migration 024 and the read-only release observation
   are complete. Draft PR #75 remains high-risk/manual and cannot be merged
   without explicit owner approval. The bounded size-10 live provider smoke is

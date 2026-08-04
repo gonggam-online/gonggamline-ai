@@ -156,11 +156,11 @@ change requires its own Production approval.
 
 Keep this section `PENDING` until every binding gate and approval passes.
 
-- Stage 08 PR/head: Draft PR #75; applied evidence head pending commit; manual
-  merge remains required
-- exact CI / Preview browser / Vercel Preview: head
-  `be6824d7dbd7d13b7bde5fc089a6ce848e404596` passed CI run `30869393666`,
-  Preview browser run `30869393652`, and Vercel Preview
+- Stage 08 PR/head: Draft PR #75; rollout evidence head
+  `bbf1216136a823ea87dc633f00151490d15b0d42`; manual merge remains required
+- exact CI / Preview browser / Vercel Preview: rollout evidence head passed CI
+  run `30871404485` after one same-head failed-job rerun, Preview browser run
+  `30871404499`, and Vercel Preview
 - owner approvals and maintenance window: steps 1–7 and the one-time step 8
   apply were explicitly approved; 2026-08-04 10:31:55–11:31:55 Asia/Seoul
   window completed without a rollback trigger; live smoke and PR merge remain
@@ -191,4 +191,6 @@ Keep this section `PENDING` until every binding gate and approval passes.
   immutable Production history created by an approved smoke; unauthenticated
   Admin error responses currently use Vercel `public, max-age=0,
   must-revalidate` instead of explicit `no-store`; live smoke and PR manual
-  merge remain pending separate owner approval.
+  merge remain pending separate owner approval. Final CI run `30871404485` had
+  one unrelated Orchestrator shutdown-timing failure on its first ci-tests
+  attempt; the same-head failed-job rerun passed 427/427 without a code change.
