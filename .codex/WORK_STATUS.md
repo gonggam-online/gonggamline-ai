@@ -204,13 +204,38 @@
   typecheck, build, and security jobs passed. Preview browser run
   `30882735344` and Vercel Preview passed. No Ready, auto-merge, merge,
   Production migration 025 application, redeployment, or further live smoke.
-- Exact next action: obtain separate owner approval before manually merging PR
-  #76 or applying migration 025 to Production. After any merge, require the
-  exact Production deployment/health checks and a separately approved bounded
-  fresh-MFA smoke; do not infer those approvals from this Draft PR delivery.
-- Remaining risks: migration 025 remains unapplied to Production; the rate
-  limiter is instance-local; live provider behavior varies; any further live
-  smoke creates immutable Production history and requires separate approval.
+- Final Production completion: under explicit owner approval PR #76 was manually
+  merged as `423a6fdb0d6da986481bc83d425e0cd91155b80e`. Exact-merge Vercel
+  Production completed and Production browser smoke `30883772945` passed.
+  Production DB preflight proved 25 migrations/latest 024, 025 absent, the old
+  finalizer security contract intact, stale RUNNING 0, and one preserved failed
+  run. The credential-risky CLI dry-run was deliberately not repeated; local
+  inventory was exactly 000-025 and the DB was exactly 000-024. Supabase CLI
+  2.110.0 then applied exactly
+  `025_item_selection_finalization_composite_fix.sql` once, with no seed or role
+  application. Postflight proved 26 migrations/latest 025/025 count 1, one
+  finalizer owned by postgres with SECURITY DEFINER, fixed search path,
+  service-role-only execute, and only the corrected expanded composite aliases.
+- Final bounded live smoke: one operator MFA verification aged beyond the
+  strict 60-second mutation window while diagnosing the non-redirecting login
+  UI; the request failed before provider/database work and DB deltas were all
+  zero. The immediately repeated, explicitly approved verification then ran
+  keyword `텀블러`, size 10, no proposed sale price. Production run
+  `1245d896-72d6-46a9-8b1d-52765d408fef` completed with 10 observed,
+  evaluated, and persisted candidates; failed/skipped 0; failure code null;
+  all 10 verdicts `MANUAL_REVIEW`; exact CREATE/FINALIZE audits 1/1; RUNNING 0.
+  Sanitized provider telemetry correlation
+  `68592284-28c3-49c0-9326-7cda40890c4d` proved one Domeggook `searchItems`
+  call, HTTP 2xx, 1,058 ms, retry 0, detail calls 0, errors 0. Product writes
+  were 0 and browser warning/errors were 0. Runtime health remained HTTP 200,
+  degraded only for the established unconfigured Coupang integration.
+- Exact next action: Story 6 is complete. Preserve immutable runs/audits and
+  start the next revenue-path stage only through the recorded chain handoff.
+- Remaining risks: the mutation freshness window is only 60 seconds and the MFA
+  page does not auto-redirect after successful verification; the rate limiter
+  is instance-local; all live candidates lacked sufficient rights/cost evidence
+  and therefore correctly remained `MANUAL_REVIEW`; Production is on the
+  Supabase Free plan without managed scheduled backups.
 
 ## 2026-08-03 — Item Selection Story 5 Admin UI and history
 
