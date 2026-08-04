@@ -1,5 +1,27 @@
 # Orchestrator changelog
 
+## 2026-08-04 — Phase 5 SHADOW evidence and incident drill
+
+- Recorded the repository-owner token/time/task/zero-cost caps with an exact
+  configuration hash and expiry.
+- Added a balanced 60-case owner-review fixture with 15 adversarial cases and
+  exact metric verification.
+- Added a hermetic no-external-write incident drill for duplicate suppression,
+  budget interruption, recovery planning, and audit-chain integrity.
+- Kept the sample proposed, not owner-approved; operational dispatch remains
+  SHADOW until exact labels are reviewed and this evidence PR is merged.
+
+## 2026-08-04 — Phase 5 SHADOW evidence and incident drill
+
+- Recorded the repository-owner token/time/task/zero-cost caps with an exact
+  configuration hash and expiry.
+- Added a balanced 60-case owner-review fixture with 15 adversarial cases and
+  exact metric verification.
+- Added a hermetic no-external-write incident drill for duplicate suppression,
+  budget interruption, recovery planning, and audit-chain integrity.
+- Kept the sample proposed, not owner-approved; operational dispatch remains
+  SHADOW until exact labels are reviewed and this evidence PR is merged.
+
 ## 2026-08-04 — Phase 5 limited-autonomy admission gate
 
 - Recorded the repository-owner SHADOW evaluation baseline and preserved all

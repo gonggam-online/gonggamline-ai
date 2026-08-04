@@ -1,5 +1,47 @@
 # Decision log
 
+## 2026-08-04 — Phase 5 caps approval and SHADOW evidence preparation
+
+- Category: repository-owner bounded-autonomy policy input and normal-risk
+  evidence implementation.
+- Owner decision: repository `gonggam-online/gonggamline-ai`; per-task 100,000
+  tokens and 120 minutes; daily task limit 1; paid cost KRW 0; expiry
+  `2026-09-04T23:59:59+09:00`.
+- Config binding: normalized expiry `2026-09-04T14:59:59.000Z`; SHA-256
+  `cff71fde7dc8d096927fbd7445f97337cff292238446dd04b91e6cdf606cfebf`.
+- Evidence decision: prepare 60 balanced cases and a hermetic no-external-write
+  drill. Proposed case decisions are not owner labels until the owner reviews
+  every case and approves the exact fixture hash.
+- Incident result: duplicate task/action suppression, one-shot budget interrupt,
+  synthetic owned-process recovery, and audit-chain verification pass locally;
+  external writes and paid cost remain zero.
+- Consequence: caps are approved, but automatic dispatch remains SHADOW pending
+  owner label approval, evidence PR merge, and a later exact admission decision.
+- Manual boundaries: DB/Auth/RLS/Production/commerce/secret/paid/destructive/
+  high-risk/final merge remain unchanged.
+- Rollback: revert the evidence/test/documentation PR; no external state exists.
+
+## 2026-08-04 — Phase 5 caps approval and SHADOW evidence preparation
+
+- Category: repository-owner bounded-autonomy policy input and normal-risk
+  evidence implementation.
+- Owner decision: repository `gonggam-online/gonggamline-ai`; per-task 100,000
+  tokens and 120 minutes; daily task limit 1; paid cost KRW 0; expiry
+  `2026-09-04T23:59:59+09:00`.
+- Config binding: normalized expiry `2026-09-04T14:59:59.000Z`; SHA-256
+  `cff71fde7dc8d096927fbd7445f97337cff292238446dd04b91e6cdf606cfebf`.
+- Evidence decision: prepare 60 balanced cases and a hermetic no-external-write
+  drill. Proposed case decisions are not owner labels until the owner reviews
+  every case and approves the exact fixture hash.
+- Incident result: duplicate task/action suppression, one-shot budget interrupt,
+  synthetic owned-process recovery, and audit-chain verification pass locally;
+  external writes and paid cost remain zero.
+- Consequence: caps are approved, but automatic dispatch remains SHADOW pending
+  owner label approval, evidence PR merge, and a later exact admission decision.
+- Manual boundaries: DB/Auth/RLS/Production/commerce/secret/paid/destructive/
+  high-risk/final merge remain unchanged.
+- Rollback: revert the evidence/test/documentation PR; no external state exists.
+
 ## 2026-08-04 — Orchestrator limited-autonomy owner policy baseline
 
 - Category: repository-owner autonomy policy decision.

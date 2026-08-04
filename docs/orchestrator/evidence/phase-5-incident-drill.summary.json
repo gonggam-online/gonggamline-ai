@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0.0",
+  "drillMode": "HERMETIC_NO_EXTERNAL_WRITE",
+  "test": "tests/orchestrator-shadow-admission-evidence.test.ts",
+  "duplicateTaskSuppressed": true,
+  "duplicateActionSuppressed": true,
+  "budgetKillSwitchInterruptedOnce": true,
+  "ownedProcessRecoveryReconciled": true,
+  "auditChainVerified": true,
+  "externalWrites": 0,
+  "paidCostKrw": 0,
+  "database": "IN_MEMORY_SQLITE_ONLY",
+  "notes": "The drill validates controller contracts with synthetic process identities. It does not terminate a real process or call GitHub, Vercel, Supabase, marketplace, or model APIs."
+}
