@@ -51,22 +51,34 @@
   parity passed 25/25. Dry-run lists exactly
   `024_item_selection_stale_recovery.sql`, no seeds, and no roles. Production
   remains unchanged at 000-023.
-- Blockers / owner actions: Supabase Dashboard confirms the exact Production
-  project, but its Free plan has no managed scheduled backups. The newest local
-  logical dump was created before migration 023, so it is not the runbook's
-  required current 000–023 recovery point. This session also has no
-  `SUPABASE_ACCESS_TOKEN` or `SUPABASE_DB_PASSWORD`, and no exact Asia/Seoul
-  maintenance-window start/end was supplied. The owner must provide a current
-  restorable 000–023 backup plus isolated restore-check evidence, inject both
-  secrets into the approved local environment without sharing their values,
-  and name the maintenance window. High-risk PR merge remains manual.
-  Follow-up remote automation confirmed the DB password cannot be viewed and
-  that resetting it breaks existing direct Postgres connections. No reset was
-  performed. Process/User/Machine environments and repository-local env files
-  contain neither required secret. Safe continuation requires the owner to
-  inject the existing DB password through an approved secret channel; rotating
-  it additionally requires an inventory and coordinated update of every direct
-  DB consumer.
+- 2026-08-04 Production apply/postflight: owner explicitly approved one-time
+  application of migration 024 to project `sxvtznmoemrcwifungnb`. Exact head
+  `be6824d7dbd7d13b7bde5fc089a6ce848e404596` passed CI run `30869393666`,
+  Preview browser run `30869393652`, and Vercel Preview. The final 10:43 KST
+  preflight again proved 000-023 parity and a 024-only plan. CLI 2.110.0 applied
+  exactly `024_item_selection_stale_recovery.sql` once, with no seeds or roles.
+  Post-list proves Local/Remote 000-024 parity. A read-only catalog transaction
+  proved the recovery function exists with owner `postgres`, SECURITY DEFINER,
+  `search_path=pg_catalog, public`, service-role-only execute, and exact audit
+  constraints. Existing Item Selection runs and stale RUNNING counts were zero.
+  Production UI rendered the authenticated Admin form/history with zero
+  warning/error console entries; no execution control was used. Runtime health
+  was HTTP 200/degraded only because Coupang is unconfigured. Unauthenticated
+  history GET failed closed at 401; its response used Vercel's
+  `public, max-age=0, must-revalidate` rather than explicit `no-store`, recorded
+  as a remaining header-hardening risk. Thirty-minute monitoring from
+  10:46–11:16 KST collected seven five-minute samples; every runtime health
+  response succeeded, Item Selection total remained 0, and stale RUNNING
+  remained 0. No rollback threshold fired. Live provider execution and PR merge
+  remain unperformed and require their separate owner boundaries.
+- Blockers / owner actions: migration 024 and the read-only release observation
+  are complete. Draft PR #75 remains high-risk/manual and cannot be merged
+  without explicit owner approval. The bounded size-10 live provider smoke is
+  also unperformed because it creates immutable Production run/evaluation/audit
+  history and requires a separate explicit approval. Production is on the
+  Supabase Free plan without managed scheduled backups; preserve the verified
+  logical archive until the release retention decision. Do not reset the DB
+  password or perform a destructive restore without a separate incident action.
 - Changed files: Story 6 Production release runbook, focused documentation
   test, Story 6 changelog, and this status record.
 - Commands/results: GitHub dependency exact-head evidence and migration manifest 000–024
@@ -96,13 +108,13 @@
   exposing or persisting the secret.
 - Delivery: Draft PR #75,
   `https://github.com/gonggam-online/gonggamline-ai/pull/75`; label
-  `manual-merge-required`; no Ready, auto-merge, merge, migration, Production
-  deployment, or live provider/database write.
+  `manual-merge-required`; no Ready, auto-merge, PR merge, application
+  redeployment, or live provider write. The separately approved Production
+  migration 024 application is complete.
 - Last implementation commit: `66d8bec docs: prepare item selection production release`.
-- Exact next action: commit and push the secret-free pre-apply evidence, require
-  its exact-head CI/Preview gates, and obtain the second explicit owner approval
-  for one-time Production application of exactly migration 024. Re-read history
-  and dry-run immediately before apply; any drift stops.
+- Exact next action: commit and push final release evidence and require its new
+  exact-head CI/Preview gates. Then obtain separate owner decisions for the
+  bounded size-10 live provider smoke and manual merge of high-risk PR #75.
 - Remaining risks: Production database evidence must be re-read immediately
   before any write; the rate limiter is instance-local; live provider behavior
   varies; an approved live smoke creates immutable Production history.

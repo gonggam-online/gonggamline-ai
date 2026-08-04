@@ -156,23 +156,39 @@ change requires its own Production approval.
 
 Keep this section `PENDING` until every binding gate and approval passes.
 
-- Stage 08 PR/head: Draft PR #75; pre-apply evidence head pending commit
-- exact CI / Preview browser / Vercel Preview: prior exact head passed; new
-  evidence-only head pending
-- owner approvals and maintenance window: steps 1–7 approved; 2026-08-04
-  10:31:55–11:31:55 Asia/Seoul window active; step 8 apply approval PENDING
+- Stage 08 PR/head: Draft PR #75; applied evidence head pending commit; manual
+  merge remains required
+- exact CI / Preview browser / Vercel Preview: head
+  `be6824d7dbd7d13b7bde5fc089a6ce848e404596` passed CI run `30869393666`,
+  Preview browser run `30869393652`, and Vercel Preview
+- owner approvals and maintenance window: steps 1–7 and the one-time step 8
+  apply were explicitly approved; 2026-08-04 10:31:55–11:31:55 Asia/Seoul
+  window completed without a rollback trigger; live smoke and PR merge remain
+  separate approval boundaries
 - backup and restore check: PASS — PostgreSQL 17.6 custom archive created at
   2026-08-04 01:35:16 UTC, 696,310 bytes, SHA-256
   `258ECE476C284B3AA0C5215E27DA3FCDF827E1417B389C8E293383D383E1533F`;
   1,241-entry TOC and full `/dev/null` archive extraction passed; backup remains
   outside Git under the approved restricted backup root
-- migration preflight/dry-run/apply/postflight: target
+- migration preflight/dry-run/apply/postflight: PASS — target
   `sxvtznmoemrcwifungnb`; 000–023 Local/Remote parity PASS; manifest 25/25
-  PASS; dry-run lists only `024_item_selection_stale_recovery.sql`, with no
-  seeds or roles; apply/postflight PENDING second owner approval
+  PASS; dry-run listed only `024_item_selection_stale_recovery.sql`, with no
+  seeds or roles; owner approved one-time apply; CLI 2.110.0 applied it once;
+  post-list is 000–024 parity and read-only catalog verification passed owner,
+  SECURITY DEFINER, fixed search path, grants, and audit constraints
 - fixture smoke / bounded live smoke: PENDING
-- Production deployment SHA and health: PENDING
-- 30-minute metrics observation: PENDING
-- rollback check: PENDING
+- Production deployment SHA and health: existing Story 5 Production application
+  remains deployed; `/admin/item-selection` rendered the authenticated form and
+  empty history with zero console warning/errors; runtime health was HTTP 200,
+  application/Supabase/runtime queue healthy, overall `degraded` only because
+  Coupang is unconfigured; no application redeploy was required for additive 024
+- 30-minute metrics observation: PASS — seven 5-minute samples from
+  10:46–11:16 Asia/Seoul; every sample returned health success, total runs 0,
+  and stale RUNNING 0
+- rollback check: PASS — no threshold fired, so no rollback action was invoked;
+  verified backup and preservation-first rollback remain available
 - remaining risks: instance-local rate limiter; live provider variability;
-  immutable Production history created by an approved smoke.
+  immutable Production history created by an approved smoke; unauthenticated
+  Admin error responses currently use Vercel `public, max-age=0,
+  must-revalidate` instead of explicit `no-store`; live smoke and PR manual
+  merge remain pending separate owner approval.
