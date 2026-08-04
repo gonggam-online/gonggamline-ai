@@ -1,5 +1,26 @@
 # Decision log
 
+## 2026-08-04 — Orchestrator Phase 4 SHADOW planner/reviewer implementation
+
+- Category: approved Architecture implementation
+- Story / PR: Orchestrator Phase 4 SHADOW planner/reviewer / pending
+- Status: implemented; delivery gates pending
+- Owner / approver: Engineering Orchestration; repository-owner Architecture
+  approval recorded by PR #41
+- Context and evidence: Accepted Architecture authorizes verified context,
+  value scoring, structured review outcomes, and owner-scored comparison in
+  SHADOW. The existing Phase 1–4 code had no planner/reviewer implementation.
+- Decision or issue: Add a pure deterministic boundary that emits only
+  `NEXT_TASK`, `RETRY`, or `REPLAN`, always denies dispatch, rejects
+  unverifiable context and forbidden scope, and measures precision/recall
+  against owner labels.
+- Consequences and risks: Recommendations have no task, GitHub, database,
+  Production, or commerce effect. Test fixtures are not owner acceptance.
+- Follow-up / due condition: owner defines and scores the offline sample and
+  approves thresholds before any Phase 5 work.
+- Rollback or supersession: revert the module, tests, export, report, changelog,
+  and this entry. No persistent or external state is affected.
+
 ## 2026-08-01 — R3 network-namespace CLI sidecar transport
 
 - Category: proposed high-risk Database/history transport amendment.

@@ -1,5 +1,14 @@
 # Orchestrator changelog
 
+## 2026-08-04 — Phase 4 SHADOW planner/reviewer
+
+- Added evidence-referenced context packs and deterministic revenue/time
+  candidate scoring.
+- Added `NEXT_TASK`, `RETRY`, and `REPLAN` proposals that always deny dispatch.
+- Added owner-sample precision/recall measurement and adversarial tests.
+- Kept paid calls, automatic dispatch, database, Production, and commerce
+  writes out of scope.
+
 ## 2026-07-30 — Phase 4.2 Windows verifier process boundary
 
 - Fixed the controller-owned verifier on Windows Node 24, where spawning

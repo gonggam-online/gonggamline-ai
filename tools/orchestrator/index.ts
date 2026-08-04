@@ -14,6 +14,7 @@ export * from "./policy.ts";
 export * from "./redaction.ts";
 export * from "./recovery.ts";
 export * from "./router.ts";
+export * from "./shadow-review.ts";
 export * from "./state-machine.ts";
 export * from "./verifier.ts";
 export * from "./worktree-guard.ts";
