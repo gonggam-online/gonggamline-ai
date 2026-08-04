@@ -1,5 +1,69 @@
 # Work status
 
+## 2026-08-04 — Phase 5 owner-sample structural correction
+
+- Objective: remove circular SHADOW metrics and make all 60 owner labels valid
+  promotion evidence through actual policy execution.
+- Branch/PR: `codex/test/orchestrator-shadow-admission-evidence`, Draft PR #81.
+- Risk/root cause: normal-risk tests/internal policy refactor. Root cause is
+  code/evidence structure: predictions were copied into the fixture and several
+  negative conditions existed only in prose.
+- Completed: independently reviewed all 60 semantic labels; removed stored
+  predictions; added structured input profiles; reused real SHADOW and candidate
+  admission code; added daily-task usage enforcement; verified generated 60/60
+  exact matches, all precision/recall 1.0, and zero dispatch/external writes.
+- Scope/non-goals: no worker, actual dispatch, external write, Production,
+  DB/Auth/RLS, commerce, secret, paid, destructive, or final merge action.
+- Commands/results: focused 11/11 pass; full unit first run 445/446 with the
+  existing Phase 3 late-mutation timing race, bounded rerun 446/446 pass; lint
+  0 errors/4 pre-existing warnings; typecheck pass; build pass with 85 routes.
+  Local Playwright passed 35, skipped 2, and failed the same 7 Supabase-backed
+  routes because local Supabase is unconfigured (`missing_url`); this is an
+  external-configuration failure unrelated to the changed evidence/policy code.
+- Current: complete diff review passed; commit/push and exact PR gates remain.
+- Fixture SHA-256:
+  `59DC29E92308DFE1F152862D640F9CA264F7DF015EB1EAB6F49EEBF2DE85FF42`.
+- Remaining risks: the sample is synthetic and balanced rather than sampled
+  from live operations; operational activation remains contingent on PR merge
+  and exact gates; all manual approval boundaries remain unchanged.
+
+## 2026-08-04 — Phase 5 SHADOW sample and incident evidence
+
+- Objective: record the approved Phase 5 caps, prepare the balanced 60-case
+  SHADOW owner-review set, and execute a no-external-write incident drill.
+- Branch/base: `codex/test/orchestrator-shadow-admission-evidence` from merged
+  PR #80 / `origin/main` `7c2c5c8efa9b182c7fd998b96302e1f6b258a4fe`.
+- Risk/root cause: normal-risk evidence/tests/docs. The remaining gap is owner
+  review evidence, not an external configuration, database, or product-code
+  failure.
+- Revenue impact: validates the narrow automation gate that can later remove
+  repeatable engineering work without adding paid or consequential writes.
+- Scope/non-goals: approved caps evidence, 60-case fixture, hermetic incident
+  drill, tests, and records only; no operational dispatch, external write,
+  Production, DB/Auth/RLS, commerce, secret, paid, or destructive action.
+- Completed: confirmed PR #80 merged; created the dedicated branch; recorded
+  caps and config hash; created 20/20/20 cases with 15 adversarial cases; added
+  metric, duplicate, audit, interrupt, recovery, and fail-closed admission tests.
+- Current: implementation and local validation are complete; final diff review
+  and Draft PR delivery are in progress.
+- Owner action: review all 60 `ownerDecision` values in
+  `phase-5-shadow-owner-review.json` after the Draft PR is ready; approve the
+  exact resulting fixture hash or request corrections.
+- Changed files: caps/sample/drill evidence, focused tests, Orchestrator report,
+  changelog, Decision Log, and this Work Status.
+- Commands/results: focused 17/17, full unit 446/446, typecheck, and build with
+  85 routes passed. Lint initially scanned an ignored prior Playwright report;
+  after removing that generated artifact and correcting the one new warning,
+  lint passed with zero errors and four pre-existing warnings. Local Playwright
+  passed 35, skipped 2, and failed the same 7 Supabase-backed routes because
+  local Supabase is unconfigured (`missing_url`); this external configuration
+  is unreachable from the evidence files/tests. Delivery gates remain pending.
+- Last commit: none on this branch.
+- Exact next action: stage and review the complete diff, then commit/push and
+  create the normal-risk validation Draft PR.
+- Remaining risks: proposed perfect metrics are not owner acceptance; the drill
+  is hermetic rather than live; automatic dispatch remains unauthorized.
+
 ## 2026-08-04 — Stage 10 Orchestrator limited autonomy prerequisite audit
 
 - Objective: promote only an owner-approved, bounded class of normal-risk

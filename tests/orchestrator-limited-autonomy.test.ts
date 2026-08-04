@@ -66,6 +66,7 @@ const candidate: AdmissionCandidate = {
   risk: "normal-risk",
   deliveryTarget: "DRAFT_PR",
   paidCostKrw: 0,
+  dailyTasksStarted: 0,
 };
 
 test("admits only a completely evidenced bounded Draft PR candidate", () => {
@@ -138,6 +139,7 @@ test("forbidden boundaries, broader delivery, paid work, and expired approval st
     [policy, { ...candidate, risk: "high-risk" }],
     [policy, { ...candidate, deliveryTarget: "FINAL_MERGE" }],
     [policy, { ...candidate, paidCostKrw: 1 }],
+    [policy, { ...candidate, dailyTasksStarted: policy.caps.dailyTaskLimit }],
     [{ ...policy, repositories: ["another/repository"] }, candidate],
   ];
   for (const [candidatePolicy, candidateVariant] of variants) {

@@ -1,5 +1,44 @@
 # Decision log
 
+## 2026-08-04 — Phase 5 owner-sample review and structural correction
+
+- Category: repository-owner SHADOW evidence decision; normal-risk test and
+  policy-code correction.
+- Decision: accept all 60 semantic `ownerDecision` labels after removing the
+  fixture's prefilled `proposed` values.
+- Evidence method: generate predictions with the real SHADOW reviewer and
+  bounded admission-scope evaluator from explicit machine inputs, then compare
+  those generated predictions with the independent owner labels.
+- Result: 20/20/20 balanced labels, 15 adversarial cases, exact match and all
+  outcome precision/recall 1.0, forbidden/unverified NEXT_TASK false positives
+  0, dispatch/external writes 0.
+- Boundary: this is not final-merge, Production, DB/Auth/RLS, commerce, secret,
+  paid, destructive, or high-risk approval. Activation remains contingent on
+  PR merge and exact delivery gates.
+- Fixture SHA-256:
+  `59DC29E92308DFE1F152862D640F9CA264F7DF015EB1EAB6F49EEBF2DE85FF42`.
+
+## 2026-08-04 — Phase 5 caps approval and SHADOW evidence preparation
+
+- Category: repository-owner bounded-autonomy policy input and normal-risk
+  evidence implementation.
+- Owner decision: repository `gonggam-online/gonggamline-ai`; per-task 100,000
+  tokens and 120 minutes; daily task limit 1; paid cost KRW 0; expiry
+  `2026-09-04T23:59:59+09:00`.
+- Config binding: normalized expiry `2026-09-04T14:59:59.000Z`; SHA-256
+  `cff71fde7dc8d096927fbd7445f97337cff292238446dd04b91e6cdf606cfebf`.
+- Evidence decision: prepare 60 balanced cases and a hermetic no-external-write
+  drill. Proposed case decisions are not owner labels until the owner reviews
+  every case and approves the exact fixture hash.
+- Incident result: duplicate task/action suppression, one-shot budget interrupt,
+  synthetic owned-process recovery, and audit-chain verification pass locally;
+  external writes and paid cost remain zero.
+- Consequence: caps are approved, but automatic dispatch remains SHADOW pending
+  owner label approval, evidence PR merge, and a later exact admission decision.
+- Manual boundaries: DB/Auth/RLS/Production/commerce/secret/paid/destructive/
+  high-risk/final merge remain unchanged.
+- Rollback: revert the evidence/test/documentation PR; no external state exists.
+
 ## 2026-08-04 — Orchestrator limited-autonomy owner policy baseline
 
 - Category: repository-owner autonomy policy decision.

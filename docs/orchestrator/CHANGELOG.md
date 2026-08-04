@@ -1,5 +1,27 @@
 # Orchestrator changelog
 
+## 2026-08-04 — Phase 5 owner-sample structural correction
+
+- Removed prefilled predictions from the 60-case owner fixture and generated
+  outcomes through the real SHADOW review and admission-scope code.
+- Added machine-verifiable context, dependency, retry-budget, repository,
+  risk, delivery, cost, daily-usage, and expiry profiles.
+- Added daily task usage to candidate admission and kept final merge and every
+  high-risk/manual boundary fail-closed.
+- Recorded the completed semantic owner review; operational activation still
+  requires this Draft PR to merge with all exact gates passing.
+
+## 2026-08-04 — Phase 5 SHADOW evidence and incident drill
+
+- Recorded the repository-owner token/time/task/zero-cost caps with an exact
+  configuration hash and expiry.
+- Added a balanced 60-case owner-review fixture with 15 adversarial cases and
+  exact metric verification.
+- Added a hermetic no-external-write incident drill for duplicate suppression,
+  budget interruption, recovery planning, and audit-chain integrity.
+- Initially kept the sample proposed; the later structural-correction entry
+  records the independent owner review and removes the circular metric design.
+
 ## 2026-08-04 — Phase 5 limited-autonomy admission gate
 
 - Recorded the repository-owner SHADOW evaluation baseline and preserved all
