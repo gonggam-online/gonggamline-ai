@@ -3,8 +3,9 @@
 ## 2026-08-04 — Orchestrator Phase 4 SHADOW planner/reviewer implementation
 
 - Category: approved Architecture implementation
-- Story / PR: Orchestrator Phase 4 SHADOW planner/reviewer / pending
-- Status: implemented; delivery gates pending
+- Story / PR: Orchestrator Phase 4 SHADOW planner/reviewer / PR #78
+- Status: merged as `065959b42765d04f39c17815fb5a1f6f82dee53d`;
+  exact CI/Preview/Production gates passed
 - Owner / approver: Engineering Orchestration; repository-owner Architecture
   approval recorded by PR #41
 - Context and evidence: Accepted Architecture authorizes verified context,
