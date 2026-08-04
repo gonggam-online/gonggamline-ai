@@ -40,6 +40,17 @@
   attempted. The provisional 09:57:39-10:57:39 Asia/Seoul window is cancelled;
   establish a fresh window only after credentials are visible to this Codex
   process.
+- 2026-08-04 successful pre-apply preflight: credentials were inherited by the
+  restarted Codex process, then removed from Windows User scope while remaining
+  process-local. The 10:31:55-11:31:55 Asia/Seoul window is active. CLI 2.110.0
+  linked exact Production `sxvtznmoemrcwifungnb`; Local/Remote 000-023 parity
+  passed and only local 024 is pending. The current PostgreSQL 17.6 archive is
+  696,310 bytes, SHA-256
+  `258ECE476C284B3AA0C5215E27DA3FCDF827E1417B389C8E293383D383E1533F`,
+  with 1,241 TOC entries and a successful full archive extraction. Manifest
+  parity passed 25/25. Dry-run lists exactly
+  `024_item_selection_stale_recovery.sql`, no seeds, and no roles. Production
+  remains unchanged at 000-023.
 - Blockers / owner actions: Supabase Dashboard confirms the exact Production
   project, but its Free plan has no managed scheduled backups. The newest local
   logical dump was created before migration 023, so it is not the runbook's
@@ -88,10 +99,10 @@
   `manual-merge-required`; no Ready, auto-merge, merge, migration, Production
   deployment, or live provider/database write.
 - Last implementation commit: `66d8bec docs: prepare item selection production release`.
-- Exact next action: after the owner supplies the missing recovery point,
-  secret environment, and exact window, rerun the read-only target/history
-  preflight and execute only the approved 024 dry-run. Do not merge or write
-  Production before those stop conditions pass.
+- Exact next action: commit and push the secret-free pre-apply evidence, require
+  its exact-head CI/Preview gates, and obtain the second explicit owner approval
+  for one-time Production application of exactly migration 024. Re-read history
+  and dry-run immediately before apply; any drift stops.
 - Remaining risks: Production database evidence must be re-read immediately
   before any write; the rate limiter is instance-local; live provider behavior
   varies; an approved live smoke creates immutable Production history.

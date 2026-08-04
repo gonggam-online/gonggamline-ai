@@ -156,11 +156,20 @@ change requires its own Production approval.
 
 Keep this section `PENDING` until every binding gate and approval passes.
 
-- Stage 08 PR/head: PENDING
-- exact CI / Preview browser / Vercel Preview: PENDING
-- owner approvals and maintenance window: PENDING
-- backup and restore check: PENDING
-- migration preflight/dry-run/apply/postflight: PENDING
+- Stage 08 PR/head: Draft PR #75; pre-apply evidence head pending commit
+- exact CI / Preview browser / Vercel Preview: prior exact head passed; new
+  evidence-only head pending
+- owner approvals and maintenance window: steps 1–7 approved; 2026-08-04
+  10:31:55–11:31:55 Asia/Seoul window active; step 8 apply approval PENDING
+- backup and restore check: PASS — PostgreSQL 17.6 custom archive created at
+  2026-08-04 01:35:16 UTC, 696,310 bytes, SHA-256
+  `258ECE476C284B3AA0C5215E27DA3FCDF827E1417B389C8E293383D383E1533F`;
+  1,241-entry TOC and full `/dev/null` archive extraction passed; backup remains
+  outside Git under the approved restricted backup root
+- migration preflight/dry-run/apply/postflight: target
+  `sxvtznmoemrcwifungnb`; 000–023 Local/Remote parity PASS; manifest 25/25
+  PASS; dry-run lists only `024_item_selection_stale_recovery.sql`, with no
+  seeds or roles; apply/postflight PENDING second owner approval
 - fixture smoke / bounded live smoke: PENDING
 - Production deployment SHA and health: PENDING
 - 30-minute metrics observation: PENDING
