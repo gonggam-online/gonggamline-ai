@@ -1,5 +1,34 @@
 # Work status
 
+## 2026-08-04 — Stage 09 Orchestrator Phase 4 SHADOW planner/reviewer
+
+- Objective: verified context, revenue/time scoring, NEXT_TASK/RETRY/REPLAN,
+  forbidden-scope tests, and owner-sample precision/recall without dispatch.
+- Branch: `codex/feat/orchestrator-phase-4-2-shadow-planner`
+- Risk: normal-risk; deterministic local tooling/tests/docs only.
+- Revenue impact: prioritizes measurable revenue and operator-time work while
+  preventing unverified or forbidden work from becoming executable.
+- Root-cause class: code capability gap inside approved Architecture.
+- Scope/non-goals: new pure SHADOW module, tests, and records; no model/API
+  calls, dispatch, ledger mutation, Supabase, Auth/RLS, secrets, Production, or
+  commerce writes.
+- Completed: boot/Architecture audit; branch from exact `origin/main`
+  f032c6bd4d702a865e2191cc5ff474dba674297b; implementation; full unit suite
+  435/435; typecheck; lint with 0 errors and 4 pre-existing warnings.
+- Current: push, Draft PR, exact CI/Preview gates, and post-merge smoke.
+- Blockers/owner actions: none for implementation delivery. Owner sample and
+  thresholds remain prerequisites for future promotion beyond SHADOW.
+- Changed files: Decision Log, Work Status, Orchestrator changelog/report,
+  shadow module/export, and tests.
+- Last implementation commit: `b794261` (`feat: add shadow orchestrator reviewer`).
+- Additional validation: production build passed (85 routes). Playwright local
+  passed 35, skipped 2, and failed 7 existing data-backed page-health cases
+  because local Supabase is unconfigured (`missing_url`); this external-config
+  failure is unrelated to and unreachable from the new pure SHADOW module.
+- Exact next action: commit this status checkpoint, push, and open the PR.
+- Remaining risks: initial weights are a ranking heuristic, not an approved KPI
+  policy; no owner-labeled acceptance sample exists; dispatch stays forbidden.
+
 ## 2026-08-03 — Item Selection Story 6 Production release
 
 - Objective: reconfirm Stories 1–5 exact gates and prepare the approved,
