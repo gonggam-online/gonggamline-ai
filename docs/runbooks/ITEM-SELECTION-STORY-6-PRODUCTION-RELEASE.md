@@ -205,3 +205,11 @@ Keep this section `PENDING` until every binding gate and approval passes.
   its authenticator seed was never exposed, and the short-lived code was not
   reused. PR merge was conditioned on live-smoke success and therefore remains
   blocked.
+- A separately approved immediate post-MFA attempt failed identically. Root
+  cause is the client/server CSRF header contract mismatch: the Item Selection
+  client emits `X-CSRF-Token`, while the server accepts only
+  `X-GonggamLine-CSRF`. The server fails closed before provider/workflow/DB
+  execution, but the UI currently mislabels every 403 as MFA freshness. A
+  read-only post-check again proved run/evaluation/Item Selection audit counts
+  all zero. No third attempt or merge is allowed before an explicitly approved
+  Auth/CSRF fix is reviewed, deployed, and receives a new smoke decision.

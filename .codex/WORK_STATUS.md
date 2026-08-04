@@ -93,6 +93,18 @@
   snapshot rendered the one-time TOTP into automation output. The value is not
   recorded in repository evidence, was not reused, and expired normally; the
   authenticator seed, password, and session tokens were not exposed.
+- Second explicitly approved attempt: the operator completed fresh MFA and the
+  prepared size-10 request was submitted immediately, but it failed with the
+  same sanitized 403. Source audit proved the code root cause: the Item
+  Selection client sends `X-CSRF-Token`, while `verifyAdminCsrfToken` reads only
+  the canonical `X-GonggamLine-CSRF` header. The request therefore fails with
+  `CSRF_DENIED` before workflow/provider/database execution, while the UI
+  incorrectly maps every 403 to the recent-MFA message. Read-only Production
+  verification again proved runs 0, evaluations 0, and Item Selection audit 0.
+  No third attempt or PR merge was performed. Fixing this Auth/CSRF contract and
+  its misleading error mapping is high-risk scope expansion requiring explicit
+  owner approval, focused tests, exact-head gates, Production deployment, fresh
+  MFA, and a newly approved smoke.
 - Blockers / owner actions: migration 024 and the read-only release observation
   are complete. Draft PR #75 remains high-risk/manual and cannot be merged
   without explicit owner approval. The bounded size-10 live provider smoke is
