@@ -51,3 +51,9 @@
   files, tmpfs credential material, and the container were removed, Production
   remained healthy, and a correct process-scoped credential plus a new explicit
   one-attempt approval are required.
+- Recorded the separately owner-approved retry after process-scoped credential
+  injection. The retry executed once, but its final sanitized result was not
+  preserved by the execution transport; cleanup and Production health passed,
+  while dump success and capacity metrics remain unknown. Both approvals are
+  consumed and no further retry, AWS provisioning, upload, restore, or schedule
+  is authorized.

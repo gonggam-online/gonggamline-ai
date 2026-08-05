@@ -14,9 +14,17 @@ type CapacityInput = Readonly<{
     succeeded: boolean;
     approvalConsumed: boolean;
     attemptCount: number;
+    retryApprovalConsumed: boolean;
     retryAuthorized: boolean;
     failureClass: string;
-    archiveCreated: boolean;
+    resultEvidenceAvailable: boolean;
+    attempts: readonly Readonly<{
+      attempt: number;
+      approvalConsumed: boolean;
+      outcome: string;
+      failureClass: string;
+    }>[];
+    archiveCreated: null;
     historicalReference: Readonly<{
       archiveBytes: number;
       satisfiesCurrentGate: boolean;
@@ -70,11 +78,11 @@ const inputSource = readFileSync(inputPath, "utf8");
 const input = JSON.parse(inputSource) as CapacityInput;
 const runbook = readFileSync(runbookPath, "utf8");
 
-test("capacity packet records one consumed fail-closed attempt", () => {
+test("capacity packet records two consumed attempts and unavailable retry evidence", () => {
   assert.equal(input.schemaVersion, "gonggamline-aws-backup-capacity-input-v1");
   assert.equal(
     input.status,
-    "MEASUREMENT_ATTEMPT_FAILED_CREDENTIAL_AUTHENTICATION_REAPPROVAL_REQUIRED",
+    "MEASUREMENT_RETRY_EXECUTED_RESULT_EVIDENCE_UNAVAILABLE_REAPPROVAL_REQUIRED",
   );
   assert.equal(input.risk, "HIGH");
   assert.equal(input.source.projectRef, "sxvtznmoemrcwifungnb");
@@ -83,13 +91,34 @@ test("capacity packet records one consumed fail-closed attempt", () => {
   assert.equal(input.measurement.executed, true);
   assert.equal(input.measurement.succeeded, false);
   assert.equal(input.measurement.approvalConsumed, true);
-  assert.equal(input.measurement.attemptCount, 1);
+  assert.equal(input.measurement.attemptCount, 2);
+  assert.equal(input.measurement.retryApprovalConsumed, true);
   assert.equal(input.measurement.retryAuthorized, false);
   assert.equal(
     input.measurement.failureClass,
-    "EXTERNAL_CONFIGURATION_DATABASE_CREDENTIAL_AUTHENTICATION",
+    "EXECUTION_RESULT_EVIDENCE_UNAVAILABLE",
   );
-  assert.equal(input.measurement.archiveCreated, false);
+  assert.equal(input.measurement.resultEvidenceAvailable, false);
+  assert.deepEqual(
+    input.measurement.attempts.map(({ attempt, outcome, failureClass }) => ({
+      attempt,
+      outcome,
+      failureClass,
+    })),
+    [
+      {
+        attempt: 1,
+        outcome: "FAILED_CLOSED_BEFORE_ARCHIVE",
+        failureClass: "EXTERNAL_CONFIGURATION_DATABASE_CREDENTIAL_AUTHENTICATION",
+      },
+      {
+        attempt: 2,
+        outcome: "RESULT_EVIDENCE_UNAVAILABLE",
+        failureClass: "EXECUTION_RESULT_EVIDENCE_UNAVAILABLE",
+      },
+    ],
+  );
+  assert.equal(input.measurement.archiveCreated, null);
   assert.equal(input.measurement.archiveBytes, null);
   assert.equal(input.measurement.dumpDurationSeconds, null);
   assert.equal(input.measurement.transientArchiveDeleted, true);
@@ -103,6 +132,7 @@ test("capacity packet records one consumed fail-closed attempt", () => {
   assert.equal(input.authorization.productionConnectionAuthorized, false);
   assert.equal(input.authorization.transientProductionArchiveAuthorized, false);
   assert.equal(input.authorization.priorOneAttemptAuthorizationConsumed, true);
+  assert.equal(input.authorization.oneRetryAuthorizationConsumed, true);
   assert.equal(input.authorization.retryAuthorized, false);
   for (const gate of [
     "awsProvisioningAuthorized",
@@ -166,6 +196,10 @@ test("runbook preserves Production, credential, cleanup, and approval boundaries
     "one attempt and is now consumed",
     "failed closed at database-password authentication",
     "new explicit one-attempt approval",
+    "two approvals consumed",
+    "result JSON",
+    "zero measurement containers remain",
+    "No further retry is authorized",
   ]) {
     assert.match(normalized, new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }

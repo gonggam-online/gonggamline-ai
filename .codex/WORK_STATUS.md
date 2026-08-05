@@ -1,5 +1,59 @@
 # Work status
 
+## 2026-08-05 — AWS Backup Production capacity measurement v1 retry 1
+
+- Objective: execute the owner-approved single retry after secure
+  process-scoped credential injection, preserve sanitized capacity evidence,
+  and delete every newly created transient artifact.
+- Branch/base: `codex/chore/aws-backup-capacity-measurement` continuing Draft PR
+  #97 from exact head `4680d493604fd67563317d0dc104da78e423e99f`.
+- Risk/root cause: high-risk/manual Production-data read. The retry execution
+  transport did not preserve the final sanitized result JSON. This is an
+  execution-evidence failure; dump success or failure must not be inferred.
+- Revenue impact: no customer or commerce behavior changed. Independent backup
+  capacity remains blocked, preserving recovery safety but not yet enabling AWS
+  provisioning.
+- Scope: exact Production/backup/load/tool/network/disk preflight, exactly one
+  PostgreSQL 17.6 custom-format read-only retry, offline archive-list validation
+  when available, cleanup, Production postflight, and sanitized evidence.
+- Non-goals preserved: AWS resource/paid use, upload, restore, schedule,
+  credential value inspection/rotation, database/RLS/Auth/environment or
+  commerce mutation, existing backup access, row inspection, further retry,
+  auto-merge, and Production deployment.
+- Completed: verified the process credential was present without outputting it;
+  confirmed exact Singapore target, current physical backup, Healthy state,
+  PostgreSQL 17.6, TLS reachability, adequate disk, and bounded execution
+  controls; executed the one authorized retry. The output transport truncated
+  the sanitized result and no attached terminal or retained Docker exit event
+  could recover it. The retry approval is consumed.
+- Cleanup/postflight: zero matching restricted temporary directories and zero
+  measurement containers remain. No AWS action occurred. The command was
+  read-only and performed no database mutation. Supabase remained `Healthy`
+  afterward with CPU 2%, disk 14%, RAM 59%, 12/60 connections, current backup,
+  and no Advisor issue.
+- Result/current: current archive creation, bytes, successful duration, TOC
+  entry count, warning count, and dump outcome are unknown. Historical 696,310
+  bytes remains reference-only. Calculator, Lambda capacity, provisioning,
+  upload, restore, and schedule stay blocked.
+- Owner action/blocker: no further retry is authorized. A new explicit
+  one-attempt approval is required and its execution must durably persist the
+  sanitized result independently before transient cleanup.
+- Changed files: capacity input/contract, measurement packet, backup
+  architecture, Decision Log, changelog, focused tests, and this status record.
+- Current validation: postflight and focused tests 14/14 passed; full tests
+  481/481 passed; typecheck passed; Production build passed with 85 generated
+  pages; source lint passed with zero errors and four established warnings.
+  Local Playwright reproduced the unchanged external-configuration baseline:
+  35 passed, 2 skipped, and 7 `missing_url` failures on `/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
+  Commit, push, and exact-head Draft PR #97 gates are pending.
+- Exact next action: run repository validation, commit and push the evidence,
+  update high-risk Draft PR #97, and verify exact-head CI/Preview gates. Never
+  auto-merge this PR.
+- Remaining risks: current dump capacity and AWS cost remain unknown; worker
+  capacity, provisioning, first upload, Storage object backup, and two-cycle
+  restore remain unproven.
+
 ## 2026-08-05 — AWS Backup Production capacity measurement v1 attempt
 
 - Objective: execute the owner-approved single bounded read-only Production

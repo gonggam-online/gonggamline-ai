@@ -137,7 +137,9 @@ Durable evidence is the sanitized JSON result and reviewed GitHub PR. Raw
 archive bytes, database credentials, connection strings, local paths, command
 transcripts containing secrets, and row values are prohibited.
 
-## 8. Execution record: one attempt consumed, measurement not completed
+## 8. Execution record: two approvals consumed, measurement not completed
+
+### 8.1 Initial attempt
 
 The owner supplied the exact approval text on 2026-08-05 after PR #96 was
 merged. That approval authorized one attempt and is now consumed.
@@ -168,6 +170,32 @@ Production upload, restore, and schedule gates therefore remain blocked. A new
 attempt requires both a correct process-scoped database credential and a new
 explicit one-attempt approval; this packet does not authorize credential reset
 or rotation.
+
+### 8.2 Owner-approved retry 1
+
+After the owner confirmed process-scoped credential injection, the owner
+explicitly approved exactly one retry on 2026-08-05. Preflight again confirmed
+the exact Singapore Production target, PostgreSQL 17.6, TLS port reachability,
+adequate restricted temporary storage, and a current provider backup. That
+single retry authority was executed once and is now consumed.
+
+The execution transport did not preserve the final sanitized result JSON, so
+the dump exit result, archive size, successful duration, archive-list count,
+warning count, and whether a transient archive was created cannot be verified.
+No terminal transcript was attached, and no matching Docker exit event remained
+after cleanup. Safety policy prohibits inferring success from cleanup or from
+historical size evidence.
+
+Postflight cleanup is verified: zero matching restricted temporary directories
+and zero measurement containers remain. No AWS resource, paid use, upload,
+restore, or schedule occurred; the dump command was read-only and could not
+mutate the database. Supabase Production remained `Healthy` with CPU 2%, disk
+14%, RAM 59%, 12/60 connections, and no Advisor issue after the retry.
+
+The current measurement and Calculator/Lambda gates remain blocked. No further
+retry is authorized. A new execution requires a new explicit one-attempt owner
+approval and must persist the sanitized result independently before deleting
+the transient archive.
 
 Official references:
 

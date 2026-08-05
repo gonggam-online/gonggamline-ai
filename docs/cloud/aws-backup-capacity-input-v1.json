@@ -1,6 +1,6 @@
 {
   "schemaVersion": "gonggamline-aws-backup-capacity-input-v1",
-  "status": "MEASUREMENT_ATTEMPT_FAILED_CREDENTIAL_AUTHENTICATION_REAPPROVAL_REQUIRED",
+  "status": "MEASUREMENT_RETRY_EXECUTED_RESULT_EVIDENCE_UNAVAILABLE_REAPPROVAL_REQUIRED",
   "risk": "HIGH",
   "source": {
     "service": "Supabase managed Postgres",
@@ -16,9 +16,28 @@
     "executed": true,
     "succeeded": false,
     "attemptedOn": "2026-08-05",
-    "attemptCount": 1,
+    "attemptCount": 2,
+    "retryApprovedOn": "2026-08-05",
+    "retryApprovalConsumed": true,
     "retryAuthorized": false,
-    "failureClass": "EXTERNAL_CONFIGURATION_DATABASE_CREDENTIAL_AUTHENTICATION",
+    "failureClass": "EXECUTION_RESULT_EVIDENCE_UNAVAILABLE",
+    "resultEvidenceAvailable": false,
+    "attempts": [
+      {
+        "attempt": 1,
+        "approvedOn": "2026-08-05",
+        "approvalConsumed": true,
+        "outcome": "FAILED_CLOSED_BEFORE_ARCHIVE",
+        "failureClass": "EXTERNAL_CONFIGURATION_DATABASE_CREDENTIAL_AUTHENTICATION"
+      },
+      {
+        "attempt": 2,
+        "approvedOn": "2026-08-05",
+        "approvalConsumed": true,
+        "outcome": "RESULT_EVIDENCE_UNAVAILABLE",
+        "failureClass": "EXECUTION_RESULT_EVIDENCE_UNAVAILABLE"
+      }
+    ],
     "historicalReference": {
       "createdAt": "2026-08-04T01:35:16Z",
       "archiveBytes": 696310,
@@ -26,7 +45,7 @@
     },
     "measuredAt": null,
     "pgDumpVersion": "17.6",
-    "archiveCreated": false,
+    "archiveCreated": null,
     "archiveBytes": null,
     "dumpDurationSeconds": null,
     "archiveListEntryCount": null,
@@ -88,6 +107,7 @@
     "productionConnectionAuthorized": false,
     "transientProductionArchiveAuthorized": false,
     "priorOneAttemptAuthorizationConsumed": true,
+    "oneRetryAuthorizationConsumed": true,
     "retryAuthorized": false,
     "awsProvisioningAuthorized": false,
     "awsPaidUseAuthorized": false,

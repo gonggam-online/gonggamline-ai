@@ -1,6 +1,6 @@
 {
   "schemaVersion": "gonggamline-encrypted-backup-contract-v1",
-  "status": "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CAPACITY_ATTEMPT_FAILED_AUTH_REAPPROVAL_REQUIRED_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
+  "status": "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CAPACITY_RETRY_RESULT_EVIDENCE_UNAVAILABLE_REAPPROVAL_REQUIRED_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
   "risk": "HIGH",
   "owner": "Database / Security",
   "source": {
@@ -129,7 +129,7 @@
     "lambdaMaximumEphemeralStorageMiB": 10240,
     "requireMeasuredDumpSizeAndDurationBeforeImplementation": true,
     "measurement": {
-      "status": "ONE_APPROVED_ATTEMPT_FAILED_CREDENTIAL_AUTHENTICATION_REAPPROVAL_REQUIRED",
+      "status": "TWO_APPROVED_ATTEMPTS_CONSUMED_LATEST_RESULT_EVIDENCE_UNAVAILABLE_REAPPROVAL_REQUIRED",
       "runbook": "docs/cloud/AWS-BACKUP-CAPACITY-MEASUREMENT-APPROVAL-V1.md",
       "inputTemplate": "docs/cloud/aws-backup-capacity-input-v1.json",
       "historicalReferenceBytes": 696310,
@@ -140,10 +140,13 @@
       "approvedOn": "2026-08-05",
       "approvalConsumed": true,
       "attemptedOn": "2026-08-05",
-      "attemptCount": 1,
+      "attemptCount": 2,
+      "retryApprovedOn": "2026-08-05",
+      "retryApprovalConsumed": true,
       "succeeded": false,
-      "failureClass": "EXTERNAL_CONFIGURATION_DATABASE_CREDENTIAL_AUTHENTICATION",
-      "archiveCreated": false,
+      "failureClass": "EXECUTION_RESULT_EVIDENCE_UNAVAILABLE",
+      "resultEvidenceAvailable": false,
+      "archiveCreated": null,
       "transientFilesDeleted": true,
       "containerDeleted": true,
       "databaseMutationPerformed": false,
@@ -189,7 +192,8 @@
     "AWS_ACCOUNT_OWNERSHIP_BILLING_MFA_AND_RECOVERY"
   ],
   "consumedOneTimeApprovals": [
-    "BOUNDED_PRODUCTION_CAPACITY_MEASUREMENT_ATTEMPT_2026_08_05"
+    "BOUNDED_PRODUCTION_CAPACITY_MEASUREMENT_ATTEMPT_2026_08_05",
+    "BOUNDED_PRODUCTION_CAPACITY_MEASUREMENT_RETRY_1_2026_08_05"
   ],
   "remainingOwnerDecisions": [
     "PRODUCTION_EXPORT_IDENTITY_AND_SECRET_BOUNDARY",
