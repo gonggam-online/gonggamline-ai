@@ -39,6 +39,7 @@ Integration, it requires a completed and approved Architecture Story first.
 | [`ENGINEERING_MANUAL.md`](ENGINEERING_MANUAL.md) | Structure, branches, tests, releases, and Definition of Done |
 | [`AUTONOMOUS_DEVELOPMENT.md`](AUTONOMOUS_DEVELOPMENT.md) | Codex Story execution loop |
 | [`CODEX_OPERATING_STANDARD.md`](CODEX_OPERATING_STANDARD.md) | Cross-PC branch, delivery, Korean progress, approval, and notification standard |
+| [`CLOUD_FIRST_POLICY.md`](CLOUD_FIRST_POLICY.md) | Mandatory durable-state placement, local-minimum, and cross-PC recovery gate |
 | [`MERGE_POLICY.md`](MERGE_POLICY.md) | PR, gate, merge, and rollback controls |
 | [`RISK_POLICY.md`](RISK_POLICY.md) | Normal/high-risk classification |
 | [`DOMAIN_GUIDELINES.md`](DOMAIN_GUIDELINES.md) | Domain ownership and dependency rules |

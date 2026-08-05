@@ -8,6 +8,9 @@
 - [ ] Stop if a new architectural boundary lacks an approved Architecture Story.
 - [ ] Classify failure root cause: external configuration -> database -> code.
 - [ ] Classify the whole change as normal-risk or high-risk.
+- [ ] Complete `.ai/CLOUD_FIRST_POLICY.md`: identify durable state, approved
+      remote owner, data class, recovery test, local temporary artifacts, and
+      cleanup. Stop on new local-only durable state.
 - [ ] Implement the smallest reliable authorized change.
 - [ ] Update tests, contracts, documentation, changelog, work status, and
       Decision Log as applicable.
@@ -21,3 +24,5 @@
       stricter-policy work.
 - [ ] After merge, validate Production and safely synchronize `main`.
 - [ ] Report completion, blockers, owner actions, revenue impact, and next work.
+- [ ] Confirm every durable result is pushed or stored in its approved remote
+      source and no unique local state is required on another PC.

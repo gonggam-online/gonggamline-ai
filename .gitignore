@@ -45,6 +45,14 @@ yarn-error.log*
 # Codex-downloaded user attachments remain local and must never be committed
 /.codex-remote-attachments/
 
+# temporary/migration-only local state; never an authoritative source
+/.local-state/
+/backups/
+/artifacts/private/
+*.sqlite
+*.sqlite3
+*.db
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

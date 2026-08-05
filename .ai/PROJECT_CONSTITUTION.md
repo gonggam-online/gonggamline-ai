@@ -50,6 +50,12 @@ owner/approver, and rollback.
 
 ## Article VII: Portable cloud operation
 
+The binding placement, Story gate, exception, and recovery requirements are in
+[`CLOUD_FIRST_POLICY.md`](CLOUD_FIRST_POLICY.md). A new local-only durable state
+is a constitutional stop condition, not debt that may be deferred silently.
+Existing local-authoritative state must be inventoried and migrated through an
+approved, verified, non-destructive Story.
+
 Durable code, task state, validation evidence, operational data, and secrets
 must use their approved repository or managed cloud source of truth whenever
 safe and practical. Local disks are for the minimum ephemeral checkout, cache,
