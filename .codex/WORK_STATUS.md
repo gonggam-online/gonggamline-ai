@@ -49,6 +49,12 @@
 - Remaining risks: external rights/category facts and KK946 physical evidence
   are unverified; future implementation may require separately approved
   Database, external-integration, paid-asset, pricing, or commerce Stories.
+- Owner review continuation: on 2026-08-05 the repository owner explicitly
+  authorized necessary corrections and acceptance of the evidence authority,
+  image-rights, category-contract, and implementation-order decisions. The
+  content is being corrected before recording acceptance against its exact
+  commit SHA. Scope remains documentation only; broad language does not waive
+  later exact-target DB/Production/price/listing approval boundaries.
 
 ## 2026-08-04 — Phase 5 owner-sample structural correction
 

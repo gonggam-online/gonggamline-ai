@@ -30,6 +30,10 @@ Root-cause class: code and contract gap after external evidence readiness. No co
 - `SupplierCatalogService` and `SupplierCatalogPort` already expose normalized, read-only catalog facts. They do not prove rights or physical properties.
 - the Item Selection contract already defines fail-closed resale and image rights gates. This Story consumes those decisions; it does not duplicate their policy.
 - `types/coupang.ts` and `lib/coupang/validator.ts` define the current registration payload shape and validation boundary.
+- `app/api/coupang/categories/meta/route.ts` and
+  `lib/coupang/category.ts` already call Coupang's read-only category metadata
+  endpoint. A later Story must audit and harden this boundary instead of adding
+  a duplicate adapter.
 
 ### Confirmed defects and gaps
 
@@ -40,6 +44,10 @@ Root-cause class: code and contract gap after external evidence readiness. No co
 5. `generateListingDraft` emits a generic `coupangPayload` containing fields such as `salePrice`, `categoryName`, `keywords`, and `options`, while the registration contract requires `displayCategoryCode`, sale dates, delivery and return fields, `vendorUserId`, and item-level images, attributes, contents, and prices. A generated draft is not registration-ready.
 6. `listing_drafts` stores content and input snapshots but has no approved claim-to-evidence, image-rights, category-metadata, inspection, or quarantine contract. Schema changes are explicitly deferred.
 7. Repository search found no authoritative KK946 catalog snapshot, 3PL inspection, category selection, product-notice data, image-rights grant, or approved image. `KK946` is an external business identifier only; all product facts remain `UNKNOWN` in this repository.
+8. The manual registration page currently copies a candidate thumbnail URL,
+   product name, price, and word-split search tags into a JSON draft. URL safety
+   and syntactic validation do not prove image rights, product facts, category
+   fitness, or registration readiness.
 
 The backlog item “Listing content fact and policy contract” is therefore not a request to add a second Listing engine. It is the prerequisite contract for a later correction of the existing boundary.
 
@@ -77,7 +85,7 @@ flowchart LR
   MAP --> WRITE["Separately approved marketplace write"]
 ```
 
-The Listing domain owns claim admission, output derivation, quarantine, and the review packet. Supplier / Procurement owns normalized commercial source facts. The 3PL inspection producer owns observations of the identified received unit or lot. Rights evidence is owned by the party or source that grants the right. The Coupang adapter owns category metadata acquisition and provider DTO translation. The Seller boundary alone owns a later live write.
+The Listing domain owns claim admission, output derivation, quarantine, and the review packet. Supplier / Procurement owns normalized catalog and transaction evidence, not the truth of every supplier claim. The 3PL inspection producer owns observations of the identified received unit or lot. Rights evidence is authoritative only when issued by a verified rights holder or authorized grantor. The existing Coupang adapter owns category metadata acquisition and provider DTO translation. The Seller boundary alone owns a later live write.
 
 Services orchestrate these contracts. The pure Listing policy must not access Supabase, HTTP, files, image generators, or Coupang. Routes and UI must not recalculate evidence status or convert `UNKNOWN` to a usable value.
 
@@ -95,15 +103,20 @@ Every fact and asset reference has:
 
 `UNKNOWN` is a first-class value, not an empty string, zero, generic default, or model prompt. An LLM may summarize admitted facts but cannot create a fact, evidence reference, rights grant, category attribute, or PASS decision.
 
-### Source priority is fact-specific
+### Authority is fact-, scope-, and time-specific
 
-| Fact class | Primary evidence | Secondary evidence | Conflict rule |
+There is no global “supplier first” or “3PL first” rule. The authoritative
+source is selected by the fact being asserted, the exact item/variant/lot/unit
+scope, and the observation/effective time.
+
+| Fact class | Authoritative evidence | Corroborating evidence | Conflict rule |
 |---|---|---|---|
-| Provider identity, catalog name, supplier price, MOQ, catalog availability | supplier catalog snapshot | purchase record | mismatched item identity quarantines the packet |
-| Received quantity, dimensions, weight, visible color/components/markings, packaging condition | timestamped 3PL inspection tied to lot/unit | supplier catalog claim | physical evidence describes only inspected scope; conflict is retained and quarantined |
-| Composition, origin, manufacturer, certification, safety, warranty | authoritative manufacturer/supplier document or registry evidence | physical label photo when readable | 3PL appearance alone cannot prove regulated/documentary facts |
-| Image use/edit permission | explicit rights grant tied to asset and operations | none | silence or image URL is `UNKNOWN`; conflict/prohibition blocks asset |
-| Coupang required attributes/notices | exact category metadata snapshot plus proven product facts | none | missing category field or fact blocks registration-ready output |
+| Supplier catalog identity, listed name, listed price/MOQ, and observed catalog availability | timestamped supplier catalog snapshot | supplier response | these remain catalog claims, not received-product facts |
+| Agreed SKU/option, actual unit price, quantity, and transaction terms | accepted purchase order, invoice, or supplier confirmation bound to KK946 | earlier catalog snapshot | transaction evidence supersedes the earlier offer only for the identified transaction; identity mismatch quarantines |
+| Received quantity, dimensions, weight, visible color/components/markings, and packaging condition | timestamped 3PL inspection tied to lot/unit and inspection method | supplier catalog claim | physical evidence applies only to inspected scope; mismatch is retained and quarantines dependent claims |
+| Composition, origin, manufacturer, certification, safety, and warranty | competent registry, issuer, manufacturer, importer, or supplier document tied to exact SKU/variant | readable physical label and transaction evidence | appearance alone cannot prove regulated or documentary facts; inconsistent sources quarantine |
+| Image use/edit permission | verified grant from rights holder or authorized grantor, bound to exact asset digest and intended operations | contract/order evidence that identifies the grant | silence, an image URL, or possession is `UNKNOWN`; conflict/prohibition blocks the asset |
+| Coupang-required attributes, notices, documents, certifications, offer condition, and channel-specific expiry fields | fresh exact category metadata plus admitted product evidence | official category validity result and applicable official policy snapshot | missing/invalid category or required product fact blocks registration-ready output |
 
 Physical evidence does not silently overwrite catalog history. Both values and their scopes remain visible. A conflict prevents any dependent claim until an authorized reviewer resolves it with new evidence. A sample unit never proves the entire lot unless the inspection protocol explicitly grants that scope.
 
@@ -149,12 +162,22 @@ Keywords must be derived from admitted names, approved synonyms, measured catego
 
 ### Images
 
-An image output is an asset manifest, not a prompt. Each source and derivative records digest, dimensions, MIME type, provenance, subject/lot, creator, use-right status, edit-right status, allowed channels, allowed operations, expiry, transformations, and reviewer.
+An image output is an asset manifest, not a prompt. Each source and derivative records digest, dimensions, MIME type, provenance, subject/lot, creator, asserted rights holder, grantor identity and authority, grant evidence, use-right status, edit-right status, permitted channels, territory, term/expiry, revocation state, permitted transformations, right to provide the asset to Coupang/CDN processors, transformations, and reviewer.
 
 - Supplier URLs alone grant no use or edit rights.
 - `USE_ALLOWED` does not imply crop, background removal, text overlay, compositing, color change, or generative expansion.
 - Supplier images with logos, watermarks, people, licensed characters, or third-party packaging remain quarantined unless the exact rights are proven.
-- 3PL photographs are preferred for physical accuracy only when their capture policy and marketplace-use/edit rights are explicit.
+- 3PL photographs are preferred for physical accuracy only when the inspection
+  identity is proven and the photography agreement establishes the
+  photographer/employer's authority, GonggamLine's marketplace-use/edit rights,
+  and handling of people, labels, facility information, and personal data.
+- Independent photography avoids relying on supplier-image copyright but does
+  not clear third-party trademarks, trade dress, designs, characters, privacy,
+  or publicity rights visible in the product or scene.
+- Generative or editing tools require approved provider terms and a retained
+  generation/transformation record. They may not supply missing product facts,
+  clear third-party rights, or create a product representation from an
+  unlicensed source asset.
 - Generated or edited assets must not alter count, dimensions, color, components, included accessories, labels, certifications, or condition.
 - Main-image and category-specific composition rules come only from the exact Coupang metadata/policy snapshot.
 
@@ -174,7 +197,31 @@ The following require explicit, scoped evidence and applicable policy support: b
 
 ## 9. Coupang category contract and payload boundary
 
-Before content generation, bind a `CoupangCategoryContract` containing the exact `displayCategoryCode`, provider metadata version/hash and retrieval time, required/allowed attributes, notice schema, certification rules, image rules, option constraints, title/keyword rules, and a freshness/revalidation result. Category name text is not a category contract.
+Before content generation, bind a `CoupangCategoryContract` containing the exact `displayCategoryCode`, category status/validity result, provider metadata response hash and retrieval time, sales channel (`MARKETPLACE`, `ROCKET_GROWTH`, or an explicitly supported hybrid), required/allowed attributes, the operator-selected applicable `noticeCategoryName` and all of its detail fields, required documents, certification rules, allowed offer conditions, option constraints, and channel-specific distribution/expiry requirements. Category name text is not a category contract.
+
+The contract consumes the existing read-only metadata boundary; it does not
+authorize a second Coupang integration. The current `CoupangCategoryMeta =
+Record<string, unknown>` and raw public error forwarding are audit findings,
+not an accepted typed contract. A later compatibility Story must add validated
+provider DTO mapping, sanitized failures, a category-validity read, and fixture
+tests without changing the existing public response shape silently.
+
+Coupang category metadata does not claim to own every content policy. Title,
+search keyword, image, prohibited-product, advertising-expression, and other
+seller rules that are absent from the metadata response belong in a separate
+`MarketplacePolicySnapshot` made only from applicable current official policy
+sources. The two snapshots are versioned and reviewed independently; neither
+may invent a rule that its source does not contain.
+
+Official evidence reviewed for this decision:
+
+- [Coupang Category Metadata Query](https://developers.coupang.com/en/api?ref=legacy#categories): the exact category code returns attributes, notice categories, required documents, certifications, and allowed offer conditions; product creation must match the category metadata.
+- [Coupang required notice FAQ](https://developers.coupang.com/ko/faq/there-is-an-error-that-says-check-required-product-info-cannot-find-legally-requ?ref=legacy): select the applicable notice category and provide all of its detail names.
+- [Coupang notice-category selection FAQ](https://developers.coupang.com/ko/faq/there-are-several-notice-category-names-exposed-which-one-should-i-use?ref=legacy): one display category can expose multiple notice categories, so selection is a product-evidence decision rather than “use the first result.”
+
+These URLs and the observation date (`2026-08-05`) are discovery evidence, not
+a permanent cache. Exact metadata and applicable policies must be re-read at
+approval/payload mapping because categories and requirements can change.
 
 The later mapper must transform only an approved Listing packet into the existing `CoupangProductPayload`. It must supply and validate category code, dates, delivery/return data, vendor user, and item-level price, images, attributes, and contents from their owning contracts. Listing generation must not invent Seller configuration or pricing. The mapper returns either:
 
@@ -238,15 +285,45 @@ Delivery tests retain lint, typecheck, full unit/integration tests, production b
 
 ## 13. Ordered implementation Stories
 
-1. **Evidence fixture and policy kernel** (normal-risk if pure types/tests): add immutable evidence/status types, claim admission, quarantine, encoding, and deterministic tests. No DB/API change.
-2. **KK946 evidence acquisition runbook** (documentation/owner operation): collect exact catalog, purchase/lot, 3PL inspection, rights, and category evidence outside secrets; keep KK946 quarantined until complete.
-3. **Category metadata read contract** (separate Architecture first if new API/external integration): implement a bounded read-only adapter and fixture mapper. Configuration changes remain separately approved.
-4. **Rights-cleared asset pipeline** (separate Architecture first): validate source manifests, permitted transforms, generated derivatives, and visual QA. Any paid generation or external upload needs explicit approval.
-5. **Listing generator v2 and review packet** (normal-risk only if pure and backwards compatible): replace mojibake/default claims and simple joining; generate provenance-linked text and rendered detail artifacts behind a fail-closed compatibility boundary.
-6. **Persistence and approval lifecycle** (high-risk/manual Architecture and implementation): only if durable evidence cannot use an already approved source of truth; define migration, RLS/Auth, immutable revisions, rollout, and rollback.
-7. **Coupang payload mapper compatibility** (high-risk if it affects listing or price flows): map the approved packet to the existing payload contract, validate in dry-run only, and prove quarantine cannot enqueue submission.
-8. **One-product KK946 readiness review** (manual evidence decision): approve exact evidence/ruleset/category/render digests. This still does not authorize a live listing.
-9. **Separate live listing approval** (high-risk/manual): bind exact account, SKU, category, price, quantity, payload digest, rollback/stop procedure, and operator before a single marketplace write.
+1. **KK946 evidence acquisition runbook and identity crosswalk**
+   (documentation/read-only owner operation): first bind supplier item,
+   purchased option, inbound lot, and inspected unit; collect catalog,
+   transaction, 3PL, rights, and candidate-category evidence. This runs in
+   parallel with Story 2 and never releases quarantine by itself.
+2. **Evidence fixture and policy kernel** (normal-risk if pure types/tests): add
+   immutable evidence/status types, authority/scope/conflict decisions,
+   quarantine, encoding checks, and deterministic KK946-shaped synthetic
+   fixtures. No DB/API change.
+3. **Existing category metadata compatibility audit** (documentation and tests
+   first): fixture-capture the current endpoint contract, provider fields,
+   public response, and failures. Do not call the real provider in CI.
+4. **Typed category and Marketplace Policy snapshots** (separate Architecture
+   only where a public API/external contract changes): reuse the existing
+   adapter, add validated mapping and category validity, and keep absent policy
+   rules in the separate official-policy snapshot. Configuration remains
+   separately approved.
+5. **Rights-cleared source-asset and inspection-photo intake** (separate
+   Architecture first): validate grantor authority, asset manifests, permitted
+   channels/operations, privacy/trademark flags, retention, and visual QA
+   inputs. No generation occurs in this Story.
+6. **Listing generator v2 and rendered review packet** (normal-risk only if
+   pure and backwards compatible): replace mojibake/default claims and simple
+   joining; generate provenance-linked text and rights-cleared render artifacts
+   behind a fail-closed compatibility boundary.
+7. **Persistence and approval lifecycle** (high-risk/manual Architecture and
+   implementation): only if durable evidence cannot use an already approved
+   source of truth; define migration, RLS/Auth, immutable revisions, rollout,
+   retention, and rollback.
+8. **Coupang payload mapper compatibility** (high-risk if it affects listing or
+   price flows): map the approved packet to the existing payload contract,
+   validate offline/dry-run only, and prove quarantine cannot enqueue
+   submission.
+9. **One-product KK946 readiness review** (manual evidence decision): approve
+   exact evidence/ruleset/category/policy/render digests. This still does not
+   authorize a live listing.
+10. **Separate live listing approval** (high-risk/manual): bind exact account,
+    SKU, category, price, quantity, payload digest, rollback/stop procedure, and
+    operator before a single marketplace write.
 
 No Story may collapse these gates or use this document as authority for a DB, secret, paid, Production, price, or marketplace action.
 

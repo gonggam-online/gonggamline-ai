@@ -16,3 +16,19 @@
 - Added an ordered, separately risk-classified implementation and test plan.
   No runtime, database, API, external, paid, Production, or commerce action was
   performed.
+
+## 2026-08-05 — Owner review corrections
+
+- Replaced global source priority with fact-, scope-, and time-specific
+  authority: actual transaction terms come from accepted transaction evidence,
+  while 3PL inspection observations remain limited to the identified sample,
+  unit, or lot.
+- Expanded image clearance to grantor authority, exact asset digest,
+  Coupang/CDN processing, territory/term/revocation, privacy, trademark/trade
+  dress, and generative/editing provenance.
+- Reused the existing Coupang category metadata integration and separated its
+  supported metadata fields from independently versioned marketplace content
+  policies.
+- Reordered work around immediate KK946 identity/evidence acquisition, a pure
+  fail-closed policy kernel, current-route compatibility audit, rights-cleared
+  asset intake, and only then generation/persistence/payload work.
