@@ -117,6 +117,27 @@
 - Non-goals: migration SQL, restore execution, Supabase/Production changes, Auth changes, runtime implementation, and commerce writes.
 - Gate: future implementation remains blocked until this Story is manually merged and an exact restored inventory satisfies every stop condition.
 
+## 2026-08-05 — Third-party-first inspection amendment
+
+- Approved boundary: existing Sales Learning, Supplier/Procurement, Listing,
+  and Revenue boundaries; no new runtime integration is implemented here.
+- Owner decision: remove routine owner sample handling from the default path.
+  A controlled 3PL supplies immutable inspection/preparation evidence before
+  Rocket Growth inbound readiness.
+- Failure contract: required evidence missing or conflicting produces
+  quarantine/human review, never an inferred pass. Catalog data cannot override
+  conflicting physical evidence.
+- Exception contract: core-product or bundle candidates may propose bounded
+  operator sampling or original-source contact, but remain separately approved
+  high-risk procurement/communication actions.
+- Risk/rollout: this amendment is normal-risk documentation. Later provider
+  integration, personal data, procurement, warehouse instruction, inbound,
+  listing, inventory, price, fulfillment, payment, and Production work retain
+  their existing approvals and tests.
+- Architecture gate: the amendment defines a provider-agnostic contract only.
+  An actual Gaemi Warehouse/3PL adapter is a new external integration and needs
+  provider discovery plus its own approved Architecture/implementation Story.
+
 ## Story compliance gate
 
 Answer before implementation:

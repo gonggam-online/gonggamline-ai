@@ -1,5 +1,31 @@
 # Decision log
 
+## 2026-08-05 — Third-party-first product inspection policy
+
+- Category: repository-owner operating-policy amendment to the accepted Sales
+  Learning Closed Loop Architecture.
+- Decision: the normal first-product route does not require owner sample
+  purchase or physical handling. Route approved Domeggook procurement through
+  Gaemi Warehouse or an equivalently controlled 3PL for receipt, inspection,
+  measurement, label/photo evidence, barcode/preparation, quarantine, and
+  Rocket Growth inbound readiness.
+- Evidence rule: Domeggook supplier fields seed the packet. Third-party physical
+  evidence supersedes conflicting catalog values. Unknown optional copy may be
+  omitted; missing mandatory listing, legal-label, safety, barcode, or inbound
+  evidence fails closed and quarantines the affected units.
+- Strategic exception: a separately accepted core single-product or bundle
+  proposal may use owner/operator sample inspection or bounded original-source
+  contact for lower landed cost and stronger supply/right evidence. It cannot
+  silently commit an MOQ, purchase, listing, payment, or broader SKU scope.
+- Authority boundary: this policy removes routine owner handling, not commerce
+  approvals. Each procurement, 3PL instruction, return, inbound, listing,
+  inventory, price, fulfillment, paid, or other external write remains an exact
+  idempotent action with target, quantity/amount cap, verification, stop, and
+  recovery controls.
+- Owner / approver: repository owner in the 2026-08-05 Codex task.
+- Rollback: disable the automated route, quarantine in-flight units, preserve
+  immutable evidence, and return to a separately approved supervised route.
+
 ## 2026-08-04 — Sales learning closed-loop Architecture proposal
 
 - Category: proposed high-risk/manual cross-domain Architecture Story.

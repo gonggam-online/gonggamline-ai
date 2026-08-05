@@ -1,5 +1,16 @@
 # Orchestrator changelog
 
+## 2026-08-05 — Third-party-first inspection policy
+
+- Amend the accepted Sales Learning Architecture so normal product experiments
+  do not depend on the owner purchasing or physically inspecting samples.
+- Define a provider-agnostic Domeggook-to-3PL-to-Rocket-Growth evidence route,
+  required inspection fields, quarantine outcomes, and fail-closed handling.
+- Preserve separately bounded commerce approvals and define a strategic-product
+  exception for operator sampling or original-source negotiation.
+- Documentation only: no provider call, purchase, warehouse instruction,
+  inbound, listing, DB/Auth/RLS, Production, personal-data, or paid action.
+
 ## 2026-08-04 — Phase 6 sales learning Architecture proposal
 
 - Defined immutable candidate/estimate identities and append-only listing,

@@ -1,5 +1,48 @@
 # Work status
 
+## 2026-08-05 — Third-party inspection policy
+
+- Objective: make third-party warehouse inspection/preparation the default
+  unattended path and reserve direct sampling/original-source negotiation for
+  separately accepted strategic-product exceptions.
+- Branch/base: `codex/docs/third-party-inspection-policy` from `origin/main`
+  `a6572b0` (merged PR #82).
+- Risk: normal-risk documentation only. No provider integration, procurement,
+  warehouse instruction, inbound, listing, DB/Auth/RLS, privacy/Production, or
+  paid action.
+- Revenue impact: removes routine owner handling from the first-sale path while
+  retaining physical evidence and enabling cost/supply escalation for likely
+  core products.
+- Root-cause class: approved operating-policy/Architecture clarification; no
+  external configuration, Database, or code failure is being masked.
+- Scope: amend the Sales Learning Architecture, Architecture Review, Decision
+  Log, roadmap, and changelog with the default 3PL route, evidence/quarantine
+  contract, and strategic exception.
+- Non-goals: actual Gaemi Warehouse adapter, provider terms/API discovery,
+  purchase, communication, shipment, listing, schema, runtime, or experiment.
+- Completed: read binding governance; verified merged Stage 11 base; created a
+  dedicated branch; audited the accepted Architecture; documented the owner
+  decision and preserved every external-write approval boundary.
+- Current: local validation complete; normal-risk delivery in progress.
+- Blockers/owner actions: none for this documentation PR. An actual provider
+  adapter requires provider discovery and a separate approved Story.
+- Changed files: `docs/architecture/SALES-LEARNING-CLOSED-LOOP-V1.md`,
+  `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`,
+  `docs/orchestrator/implementation-roadmap.md`,
+  `docs/orchestrator/CHANGELOG.md`, and this file.
+- Validation: `git diff --check` passed; lint passed with 0 errors and four
+  pre-existing warnings; typecheck passed; unit tests 446/446 passed; build
+  passed with 85 routes. Local Playwright passed 35, skipped 2, and failed the
+  seven existing Supabase-dependent routes because local Supabase is
+  unconfigured (`missing_url`); this documentation change has no runtime path.
+- Exact next action: commit, push, open the normal-risk Draft PR, and verify its
+  exact-head CI/Preview gates.
+- Remaining risks: Gaemi Warehouse contracts, API/export shape, service terms,
+  privacy roles, evidence retention, pricing, and exception thresholds are not
+  yet verified and must not be invented.
+
+---
+
 ## 2026-08-04 — Phase 5 owner-sample structural correction
 
 - Objective: remove circular SHADOW metrics and make all 60 owner labels valid
