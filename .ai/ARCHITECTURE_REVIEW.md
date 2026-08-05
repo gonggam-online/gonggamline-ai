@@ -117,9 +117,11 @@
 - Non-goals: migration SQL, restore execution, Supabase/Production changes, Auth changes, runtime implementation, and commerce writes.
 - Gate: future implementation remains blocked until this Story is manually merged and an exact restored inventory satisfies every stop condition.
 
-## Proposed Listing Content Fact and Policy Contract v1 — 2026-08-05
+## Approved Listing Content Fact and Policy Contract v1 — 2026-08-05
 
-- Status: proposed; repository-owner Architecture acceptance required.
+- Status: accepted by repository owner on 2026-08-05.
+- Approved content SHA:
+  `5b77af8baf39a769e8541b14fe52196b27fcde4f`.
 - Boundary: existing Listing domain consuming Supplier / Procurement, 3PL
   inspection, asset-rights, and exact Coupang category evidence.
 - Decision: every title token, keyword, image/derivative, detail-page claim,
@@ -127,8 +129,10 @@
   `UNKNOWN`, conflict, prohibited rights, stale category metadata, or encoding
   failure.
 - KK946: repository evidence is absent, so it remains explicitly quarantined.
-- Implementation authorization: none. No API, DB, migration, asset generation,
-  external integration, price, Production, or marketplace action is approved.
+- Implementation authorization: only the ordered normal-risk documentation and
+  pure policy/test Stories may start without a new Architecture decision. API,
+  external-contract, persistence, asset lifecycle, DB/Auth/RLS, paid, price,
+  Production, and marketplace actions remain separately gated.
 - Story:
   [Listing Content Fact and Policy Contract v1](../docs/architecture/LISTING-CONTENT-FACT-AND-POLICY-CONTRACT-V1.md).
 

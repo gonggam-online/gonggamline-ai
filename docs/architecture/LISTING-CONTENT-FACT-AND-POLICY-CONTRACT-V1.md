@@ -2,7 +2,9 @@
 
 ## 1. Decision status
 
-- Status: proposed; repository-owner Architecture acceptance required.
+- Status: accepted by the repository owner on 2026-08-05.
+- Approved content SHA:
+  `5b77af8baf39a769e8541b14fe52196b27fcde4f`.
 - Story type: Architecture, contract, and test plan only.
 - Owner: Listing domain, consuming Supplier / Procurement evidence and an owner-approved Coupang category contract.
 - Baseline: `origin/main` at `a6572b08b637313a298ca14dd5d1c38ffeb9d874`.
@@ -340,16 +342,22 @@ For this documentation PR, rollback is a Git revert. It changes no runtime, data
 - CTO directive: PASS. This is the smallest safe prerequisite to a truthful first listing and prohibits speculative platform work.
 - Constitution: PASS. Sources of truth, fail-closed truthfulness, and human approval are explicit.
 - Blueprint: PASS. Existing Listing, Supplier, Coupang, service, and domain boundaries are preserved; no duplicate engine/schema is implemented.
-- Architecture review: PASS for this proposed documentation. Future new API, external integration, persistence, asset lifecycle, or listing write remains stopped until its own approved Story.
+- Architecture review: PASS and accepted for the exact content SHA above.
+  Future new API, external integration, persistence, asset lifecycle, or
+  listing write remains stopped until its own approved Story.
 - Risk: normal-risk for this documentation-only diff. Later schema/Auth, pricing, configuration, paid, Production, or marketplace work is high-risk.
 
-## 16. Owner decisions required
+## 16. Owner decision
 
-The repository owner must accept or amend:
+On 2026-08-05 the repository owner explicitly accepted the corrected:
 
 1. the fact-specific supplier catalog/3PL precedence and conflict rule;
 2. the image use/edit-rights gates and permitted evidence standard;
 3. the exact category-contract requirement before content generation;
 4. the ordered implementation sequence and separate high-risk boundaries.
 
-Acceptance is a recorded owner decision with approved head SHA and date. A merge of this proposed document alone does not authorize implementation or a KK946 listing.
+The accepted Architecture authorizes only the ordered documentation, pure
+policy/test, and separately gated follow-up Stories described above. It does
+not approve credentials, database/schema/RLS/Auth, paid image work, pricing,
+Production, a KK946 readiness disposition, or a Coupang listing submission.
+Each such exact target retains its risk classification and approval boundary.

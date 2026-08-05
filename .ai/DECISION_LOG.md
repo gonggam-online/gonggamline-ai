@@ -1,23 +1,30 @@
 # Decision log
 
-## 2026-08-05 — Listing content fact and policy Architecture proposal
+## 2026-08-05 — Listing content fact and policy Architecture acceptance
 
-- Category: proposed normal-risk, documentation-only Listing Architecture
-  Story recorded on 2026-08-05.
+- Category: accepted normal-risk, documentation-only Listing Architecture
+  decision.
 - Proposal: preserve the existing Listing engine/service/schema boundaries but
   require evidence-linked title, keyword, image, detail-page, notice, and
   Coupang payload outputs with fail-closed quarantine.
-- Source priority: supplier catalog owns catalog/commercial facts; scoped 3PL
-  inspection owns observed physical facts; conflicts remain visible and block
-  dependent claims. Documentary and regulated facts require their authoritative
-  source. Neither source grants image rights by implication.
+- Evidence authority: there is no global supplier-first or 3PL-first rule.
+  Catalog claims remain catalog claims, accepted transaction evidence owns the
+  agreed transaction, scoped 3PL inspection owns physical observations, and
+  documentary/regulated facts require the competent issuer or registry.
+  Conflicts remain visible and block dependent claims. None grants image rights
+  by implication.
 - KK946 status: `UNKNOWN` and quarantined because the repository has no exact
   catalog, lot/inspection, rights, category, notice, or approved-asset packet.
-- Status: **not approved**. Owner acceptance must bind the approved head SHA and
-  date before any implementation Story begins.
-- Authority boundary: no code, API, schema, RLS/Auth, secret/configuration,
-  image generation/editing/upload, price, Production, or marketplace write is
-  authorized.
+- Owner decision: accepted on 2026-08-05 after correcting source authority,
+  image-rights coverage, reuse of the existing category metadata boundary, and
+  implementation order.
+- Approved content SHA:
+  `5b77af8baf39a769e8541b14fe52196b27fcde4f`.
+- Authority boundary: ordered documentation and pure policy/test work may
+  proceed within its own normal-risk Story. API/external-contract, schema,
+  RLS/Auth, secret/configuration, paid image generation/editing/upload, price,
+  Production, readiness approval, and marketplace writes remain separately
+  exact-target gated.
 - Story:
   [`LISTING-CONTENT-FACT-AND-POLICY-CONTRACT-V1.md`](../docs/architecture/LISTING-CONTENT-FACT-AND-POLICY-CONTRACT-V1.md).
 - Rollback: revert the documentation PR; no external or persistent state was

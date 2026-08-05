@@ -32,3 +32,6 @@
 - Reordered work around immediate KK946 identity/evidence acquisition, a pure
   fail-closed policy kernel, current-route compatibility audit, rights-cleared
   asset intake, and only then generation/persistence/payload work.
+- Repository owner accepted the corrected Architecture content at
+  `5b77af8baf39a769e8541b14fe52196b27fcde4f`; this acceptance does not authorize
+  a KK946 readiness decision or live marketplace action.

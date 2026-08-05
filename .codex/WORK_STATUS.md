@@ -19,11 +19,11 @@
   Supplier, schema, payload, and backlog audit; Architecture/decision/backlog/
   changelog draft. Confirmed mojibake, simple keyword/title joining, no images,
   outline-only details, payload mismatch, and no repository evidence for KK946.
-- Current: Architecture documentation and delivery are complete; Draft PR #86
-  awaits repository-owner Architecture review.
-- Blockers/owner actions: owner Architecture acceptance is required before any
-  implementation. KK946 remains quarantined pending exact catalog, order/lot,
-  3PL inspection, rights, category, notice, and approved-asset evidence.
+- Current: corrected Architecture accepted; local validation and Draft PR #86
+  delivery update are in progress.
+- Blockers/owner actions: Architecture acceptance is complete. KK946 remains
+  quarantined pending exact catalog, order/lot, 3PL inspection, rights,
+  category, notice, and approved-asset evidence; acceptance is not readiness.
 - Changed files: Architecture Story, Architecture Review, Decision Log, backlog,
   task changelog, and this Work Status.
 - Commands/results: repository audit and `git diff --check` passed; lint passed
@@ -42,19 +42,30 @@
   gates passed. Vercel Preview and `preview-browser-e2e` passed on the exact
   head; Preview deployment target was
   `https://vercel.com/gg-online/gonggamline-ai/AEamgW7pMaVktrT8adEdPyQfUSrQ`.
-- Last commit: `ea9c203 docs: define listing content fact contract`.
-- Exact next action: repository owner reviews and accepts or amends the four
-  decisions in the proposed Architecture Story. No implementation or KK946
-  listing work starts before that recorded acceptance.
+- Approved content commit:
+  `5b77af8 docs: refine listing evidence architecture`; the acceptance record
+  is the current documentation-only follow-up.
+- Exact next action: deliver the accepted Architecture update, then begin only
+  a separately scoped Story 1 (KK946 evidence runbook/identity crosswalk) or
+  Story 2 (pure evidence policy kernel). No KK946 listing action is authorized.
 - Remaining risks: external rights/category facts and KK946 physical evidence
   are unverified; future implementation may require separately approved
   Database, external-integration, paid-asset, pricing, or commerce Stories.
 - Owner review continuation: on 2026-08-05 the repository owner explicitly
   authorized necessary corrections and acceptance of the evidence authority,
   image-rights, category-contract, and implementation-order decisions. The
-  content is being corrected before recording acceptance against its exact
-  commit SHA. Scope remains documentation only; broad language does not waive
-  later exact-target DB/Production/price/listing approval boundaries.
+  corrected Architecture content is accepted at
+  `5b77af8baf39a769e8541b14fe52196b27fcde4f`. Scope remains documentation and
+  ordered follow-up Stories; broad language does not waive later exact-target
+  API/external-contract, DB/Auth/RLS, paid asset, Production, price, readiness,
+  or marketplace-write approval boundaries.
+- Owner-review validation: `git diff --check` passed; lint passed with zero
+  errors and the same four Revenue-test warnings after removing ignored prior
+  Playwright output; typecheck passed; unit/integration tests passed 446/446;
+  production build passed with 85 routes. Local Playwright again passed 35,
+  skipped 2, and failed only the same seven Supabase-backed routes on external
+  `missing_url`. The corrections introduce no runtime, API, DB, asset, or
+  commerce behavior.
 
 ## 2026-08-04 — Phase 5 owner-sample structural correction
 
