@@ -18,7 +18,8 @@
   commerce/marketplace writes.
 - Completed: worktree restoration; governance boot; exact-base and Listing/schema
   audit; implementation; changelog; focused tests 10/10; typecheck; focused lint.
-- Current: complete diff reviewed; prepare normal-risk commit, push, and Draft PR.
+- Current: implementation delivered to Draft PR #88; update exact delivery
+  evidence and revalidate the status-only head.
 - Blockers/owner actions: none. Real KK946 remains outside this synthetic Story
   and requires its separate admissible evidence packet and manual decisions.
 - Changed files: `shared/domain/listing-evidence.ts`,
@@ -31,8 +32,15 @@
   unconfigured (`missing_url`): `/listing`, `/market`, `/procurement`,
   `/revenue`, `/sourcing`, `/workflow`, and `/workspace`. Failure artifacts are
   in ignored `test-results/`.
-- Last commit: none for 13B yet.
-- Exact next action: commit and push the reviewed scope, then create a Draft PR.
+- Delivery: implementation commit
+  `00b409d21d09ce0a2212bb606b00b4fa284d81d3` pushed; Draft PR #88 targets
+  `main`, is labeled `normal-risk`, and Vercel reported Ready. Exact Preview
+  `https://gonggamline-ai-git-codex-featlisting-evidence-55d971-gg-online.vercel.app`
+  passed read-only browser checks for `/` and `/listing`: meaningful content,
+  main landmark/headings, no raw stack, and no console error/warn.
+- Last commit: `00b409d21d09ce0a2212bb606b00b4fa284d81d3`.
+- Exact next action: push this status-only checkpoint and verify its exact-head
+  Vercel/Preview evidence before reporting terminal delivery.
 - Remaining risks: pure rules cover only the accepted v1 evidence classes;
   persistence, category DTO compatibility, rendering, payload mapping, and any
   real listing action remain separately gated Stories.
