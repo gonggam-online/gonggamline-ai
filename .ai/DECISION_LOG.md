@@ -1,5 +1,31 @@
 # Decision log
 
+## 2026-08-05 — Proposed provider-agnostic 3PL evidence adapter
+
+- Category: proposed External Integration Architecture; documentation only.
+- Context: the shortest approved-purchase-to-sale path needs third-party
+  receipt and Rocket Growth preparation evidence without routine owner sample
+  handling. PR #83 proposes that policy but remains an unmerged Draft.
+- Decision: place a provider-neutral `WarehouseFulfillmentPort` in Supplier /
+  Procurement and keep Gaemi-specific portal/Excel/PDF mapping in a future
+  infrastructure adapter. Keep Coupang Wing in a separate boundary.
+- Evidence decision: quantity agreement and standard visual receipt never
+  imply product quality. Physical measurement provenance, inspection scope,
+  photos/documents, hashes, counts, disposition, shipment, and Coupang receipt
+  remain separately represented and reconciled.
+- Unknown decision: account, quote, customer code, API/webhook/export,
+  automation permission, Auth, privacy, retention, limits, and SLA remain
+  `OWNER_SUPPLIED_UNKNOWN`; no code fallback may invent them.
+- Authority: no implementation, account/contact, payment, purchase, inbound,
+  document upload, B2B outbound, provider write, secret, personal data, or
+  Production action is authorized.
+- Owner / approver: repository owner; acceptance pending.
+- Rollback: revert the documentation. If a future adapter is enabled, stop
+  commands, revoke credentials, quarantine ambiguous units, preserve evidence,
+  reconcile read-only, and use approved provider-specific compensation.
+- Story:
+  [Gaemi Warehouse to Rocket Growth Adapter v1](../docs/architecture/GAEMI-WAREHOUSE-ROCKET-GROWTH-ADAPTER-V1.md).
+
 ## 2026-08-04 — Sales learning closed-loop Architecture proposal
 
 - Category: proposed high-risk/manual cross-domain Architecture Story.

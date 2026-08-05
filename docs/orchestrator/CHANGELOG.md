@@ -1,5 +1,20 @@
 # Orchestrator changelog
 
+## 2026-08-05 — Gaemi Warehouse to Rocket Growth adapter Architecture
+
+- Audited Gaemi Warehouse's public 2025.06 rate card and 2025.07 Rocket Growth
+  manual from supplier delivery through inbound, photos, documents, B2B output,
+  and Coupang receipt evidence.
+- Defined a provider-neutral 3PL evidence port, lifecycle, identity and
+  artifact contracts, failure taxonomy, synthetic fixture/test plan, and
+  rollout/rollback gates.
+- Kept standard quantity inspection distinct from quality assurance; custom
+  exhaustive inspection and processing require an exact approved quote/scope.
+- Kept account, quote, customer code, API/webhook/export, Auth, privacy, limits,
+  and SLA owner-supplied and unknown.
+- Documentation only; no account, contact, payment, order, inbound, provider or
+  marketplace write, secret, personal data, or Production action.
+
 ## 2026-08-04 — Phase 6 sales learning Architecture proposal
 
 - Defined immutable candidate/estimate identities and append-only listing,

@@ -3422,3 +3422,60 @@ perform the documented read-only Supabase schema and completeness inspection.
   verified. Proposed caps are not owner-approved execution authority.
 
 ---
+# Current task snapshot — 2026-08-05 Gaemi Warehouse adapter Architecture
+
+- Objective: design a provider-agnostic 3PL evidence adapter connecting an
+  approved Domeggook supplier shipment through Gaemi Warehouse receipt,
+  inspection, measurement, barcode/documents, B2B output, and Rocket Growth
+  receipt evidence.
+- Branch/base: `codex/docs/gaemi-warehouse-rocket-growth-adapter` from latest
+  `origin/main` `a6572b0`.
+- Risk: normal-risk documentation. Every later external integration,
+  configuration/secret, privacy, paid, procurement, warehouse instruction,
+  inbound, inventory, fulfillment, marketplace, database, and Production
+  action remains high-risk/manual.
+- Revenue impact: removes routine owner physical handling from the shortest
+  controlled first-sale path while preventing quantity receipt from being
+  misclassified as quality assurance.
+- Root-cause class: external contract/capability discovery gap. Public manuals
+  establish the human workflow but not a supported API/export, automation
+  permission, account/customer code, privacy contract, or SLA. No code
+  compensation is allowed.
+- Dependency: PR #83 is an open Draft. It is not implementation authority; the
+  adapter implementation remains blocked until the policy dependency and this
+  Architecture Story are accepted plus a separate implementation Story exists.
+- Scope: official public-source audit; provider-neutral ownership, evidence,
+  identity, lifecycle, failure, security, observability, fixture/test,
+  rollout, and rollback contracts; governance/changelog/roadmap records.
+- Non-goals: implementation, account/signup/contact/quote request, payment,
+  purchase/order, supplier or warehouse shipment, inbound/outbound, Wing,
+  provider write, personal data, secrets, database, and Production.
+- Completed: read mandatory governance; confirmed clean detached worktree;
+  fetched latest `origin/main`; audited PR #83; created the dedicated branch;
+  audited official Gaemi 2025.06 rate card, 2025.07 Rocket Growth manual, and
+  official site; drafted the Architecture and governance records; reviewed the
+  diff and passed `git diff --check`.
+- Current: local gates are complete; commit/push, create the Draft PR, then
+  inspect exact-head CI/Preview without Production or commerce actions.
+- Owner-supplied unknowns: account/eligibility, quote, customer/company code,
+  API/webhook/SFTP/portal/export, automation permission, Auth/scopes, privacy,
+  retention, limits/SLA, inspection checklist, custom exhaustive inspection /
+  processing quote, barcode responsibility, and Coupang mechanism.
+- Changed files: Architecture Story, Architecture Review, Decision Log,
+  Orchestrator roadmap/changelog, task changelog, and this status file.
+- Commands/results: branch and source audit complete; `git diff --check`
+  passed; lint passed with zero errors and four pre-existing warnings;
+  typecheck passed; unit tests 446/446 passed; production build passed with 85
+  routes. Local Playwright passed 35, skipped 2, and failed 7 only on the
+  existing unconfigured Supabase `missing_url` condition for `/listing`,
+  `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and
+  `/workspace`. `npm ci` reported six existing advisories (one moderate, five
+  high) and did not change the lockfile.
+- Last commit: none on this branch.
+- Exact next action: review secrets/generated output; commit, push, and open a
+  normal-risk Draft PR, then wait for exact-head CI/Preview gates.
+- Remaining risks: provider contract/transport/privacy/quality scope is unknown;
+  PR #83 is unmerged; public pricing may change; no live provider capability or
+  Rocket Growth receipt path has been validated.
+
+---

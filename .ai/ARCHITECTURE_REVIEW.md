@@ -1,5 +1,27 @@
 # Architecture review
 
+## 2026-08-05 — Proposed Gaemi Warehouse to Rocket Growth Adapter v1
+
+- Document:
+  `docs/architecture/GAEMI-WAREHOUSE-ROCKET-GROWTH-ADAPTER-V1.md`.
+- Dependency: PR #83 is an open Draft. Its proposed third-party-first policy is
+  not merged and grants no implementation authority.
+- Boundary: provider-neutral 3PL evidence adapter in Supplier / Procurement;
+  Gaemi Warehouse is the initial provider candidate, while Coupang Wing remains
+  a separate external integration.
+- Official-source finding: standard quantity/visual inspection does not
+  guarantee packaging condition or quality. Custom exhaustive inspection and
+  processing require exact owner-approved scope and quote.
+- Unknowns: account, quote, customer code, API/webhook/export, automation
+  permission, authentication, privacy, and SLA are `OWNER_SUPPLIED_UNKNOWN`.
+- Failure contract: missing/conflicting identity, counts, scope, barcode,
+  document, or receipt evidence fails closed to quarantine/human review.
+- Risk: this PR is normal-risk documentation. Every later provider, privacy,
+  secret/configuration, paid, procurement, inbound, inventory, fulfillment,
+  marketplace, or Production action is high-risk/manual.
+- Implementation authorization: none. Acceptance and merge of both the policy
+  dependency and this Story plus a separate implementation Story are required.
+
 ## Item Selection Story 3 residual persistence compliance — 2026-08-03
 
 - Approved boundary: Supplier / Procurement Item Selection and the accepted

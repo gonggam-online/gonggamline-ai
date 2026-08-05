@@ -165,6 +165,7 @@ facts through actual net profit, with no estimate/actual conflation.
 | GitHub/Preview adapter | verifier | `codex/feat/orchestrator-github-preview` | duplicate-free Draft PR and exact-head evidence | GitHub auth; no merge | automates delivery wait |
 | Shadow planner/reviewer | evidence loop | `codex/feat/orchestrator-shadow-review` | owner-scored offline sample | API cost cap | prioritizes high-value work |
 | Sales evidence correlation | approved data Architecture | separate Architecture first | expected/actual contract tests | DB/privacy/manual | closes revenue learning loop |
+| Gaemi/3PL evidence adapter | accepted third-party policy + accepted adapter Architecture + owner-supplied provider contract | separate contract-discovery Story first | synthetic fixtures, fail-closed admission, document/hash and quarantine tests | provider/privacy/commerce/manual | removes routine owner handling before Rocket Growth |
 
 ## First MVP task-room instruction
 
