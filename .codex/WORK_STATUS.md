@@ -1,5 +1,77 @@
 # Work status
 
+## 2026-08-05 — Listing Content Fact and Policy Contract v1
+
+- Objective: complete the Architecture Story and implementation order for
+  evidence-only Coupang content, including first target identifier KK946.
+- Branch/base: `codex/docs/listing-content-fact-policy-contract` from exact
+  `origin/main` `a6572b08b637313a298ca14dd5d1c38ffeb9d874`.
+- Risk/root cause: normal-risk documentation only. Root cause is an existing
+  code/contract gap after external evidence readiness; code must not compensate
+  for absent supplier, 3PL, rights, or category evidence.
+- Revenue impact: unblocks the smallest safe path to a truthful first-product
+  listing packet while preventing rejection, rights exposure, and returns.
+- Scope: current-state audit, evidence precedence, UNKNOWN/quarantine, image
+  rights, no-exaggeration, category/payload contract, tests, and ordered Stories.
+- Non-goals: runtime/API/DB/migration/Auth/RLS, external calls, images, prices,
+  Production, or marketplace writes.
+- Completed: boot/governance review; clean latest-main branch; existing Listing,
+  Supplier, schema, payload, and backlog audit; Architecture/decision/backlog/
+  changelog draft. Confirmed mojibake, simple keyword/title joining, no images,
+  outline-only details, payload mismatch, and no repository evidence for KK946.
+- Current: corrected Architecture accepted and delivered; Draft PR #86 awaits
+  review/merge while KK946 remains quarantined.
+- Blockers/owner actions: Architecture acceptance is complete. KK946 remains
+  quarantined pending exact catalog, order/lot, 3PL inspection, rights,
+  category, notice, and approved-asset evidence; acceptance is not readiness.
+- Changed files: Architecture Story, Architecture Review, Decision Log, backlog,
+  task changelog, and this Work Status.
+- Commands/results: repository audit and `git diff --check` passed; lint passed
+  with zero errors and four pre-existing Revenue-test warnings; typecheck
+  passed; unit/integration tests passed 446/446; production build passed with
+  85 routes. Local Playwright passed 35, skipped 2, and failed the same seven
+  Supabase-backed routes because local Supabase is unconfigured (`missing_url`):
+  `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
+  and `/workspace`. Failure screenshots/traces/video are in ignored
+  `test-results/`. `npm ci` reported six existing dependency advisories (one
+  moderate, five high) and did not change the lockfile.
+- Delivery: implementation commit
+  `ea9c2038217d1d016a99dfc67b51a2b5b2d7df5f` pushed. Draft PR #86 targets
+  `main`, is conflict-free, and has `normal-risk`; auto-merge was not enabled.
+  Exact-head CI lint/typecheck/tests/build/security/DB replay/item-selection/R1
+  gates passed. Vercel Preview and `preview-browser-e2e` passed on the exact
+  head; Preview deployment target was
+  `https://vercel.com/gg-online/gonggamline-ai/AEamgW7pMaVktrT8adEdPyQfUSrQ`.
+- Approved content commit:
+  `5b77af8 docs: refine listing evidence architecture`; the acceptance record
+  is the current documentation-only follow-up.
+- Exact next action: deliver the accepted Architecture update, then begin only
+  a separately scoped Story 1 (KK946 evidence runbook/identity crosswalk) or
+  Story 2 (pure evidence policy kernel). No KK946 listing action is authorized.
+- Remaining risks: external rights/category facts and KK946 physical evidence
+  are unverified; future implementation may require separately approved
+  Database, external-integration, paid-asset, pricing, or commerce Stories.
+- Owner review continuation: on 2026-08-05 the repository owner explicitly
+  authorized necessary corrections and acceptance of the evidence authority,
+  image-rights, category-contract, and implementation-order decisions. The
+  corrected Architecture content is accepted at
+  `5b77af8baf39a769e8541b14fe52196b27fcde4f`. Scope remains documentation and
+  ordered follow-up Stories; broad language does not waive later exact-target
+  API/external-contract, DB/Auth/RLS, paid asset, Production, price, readiness,
+  or marketplace-write approval boundaries.
+- Owner-review validation: `git diff --check` passed; lint passed with zero
+  errors and the same four Revenue-test warnings after removing ignored prior
+  Playwright output; typecheck passed; unit/integration tests passed 446/446;
+  production build passed with 85 routes. Local Playwright again passed 35,
+  skipped 2, and failed only the same seven Supabase-backed routes on external
+  `missing_url`. The corrections introduce no runtime, API, DB, asset, or
+  commerce behavior.
+- Owner-review delivery: corrected content commit `5b77af8` and acceptance
+  record commit `3a184ee` are pushed to Draft PR #86. Exact `3a184ee` CI,
+  database replay, security suites, Vercel Preview, and
+  `preview-browser-e2e` all passed. PR remains Draft, `normal-risk`, open, and
+  conflict-free; auto-merge and Production were not attempted.
+
 ## 2026-08-04 — Phase 5 owner-sample structural correction
 
 - Objective: remove circular SHADOW metrics and make all 60 owner labels valid
