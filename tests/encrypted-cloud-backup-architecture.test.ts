@@ -23,11 +23,15 @@ type BackupContract = Readonly<{
     latestRecoveryPoint: null;
     currentRestoreEntitlement: boolean;
     proUpgradeApproved: boolean;
+    proPlanBaseMonthlyPriceUsdAtDecision: number;
+    proPlanActualProvisioningStatus: string;
+    proSpendCapRequired: boolean;
     pointInTimeRecoveryAddOnApproved: boolean;
   }>;
   independentTargetProposal: Readonly<{
     provider: string;
     region: string;
+    regionApproved: boolean;
     bucketName: null;
     publicAccess: string;
     versioning: string;
@@ -58,6 +62,8 @@ type BackupContract = Readonly<{
     approved: boolean;
   }>;
   requiredOwnerDecisions: readonly string[];
+  approvedOwnerDecisions: readonly string[];
+  remainingOwnerDecisions: readonly string[];
   forbiddenActionsInThisStory: readonly string[];
 }>;
 
@@ -73,14 +79,14 @@ const contractSource = readFileSync(contractPath, "utf8");
 const contract = JSON.parse(contractSource) as BackupContract;
 const architecture = readFileSync(architecturePath, "utf8");
 
-test("backup architecture remains proposed, high-risk, and non-executing", () => {
+test("backup architecture remains high-risk, manually merged, and non-executing", () => {
   assert.equal(contract.schemaVersion, "gonggamline-encrypted-backup-contract-v1");
-  assert.equal(contract.status, "PROPOSED_OWNER_APPROVAL_REQUIRED");
+  assert.equal(contract.status, "OWNER_POLICY_APPROVED_MANUAL_MERGE_REQUIRED");
   assert.equal(contract.risk, "HIGH");
   assert.equal(contract.providerBackup.verified, true);
-  assert.equal(contract.retentionProposal.accepted, false);
-  assert.equal(contract.recoveryProposal.accepted, false);
-  assert.equal(contract.costProposal.approved, false);
+  assert.equal(contract.retentionProposal.accepted, true);
+  assert.equal(contract.recoveryProposal.accepted, true);
+  assert.equal(contract.costProposal.approved, true);
   assert.ok(contract.requiredOwnerDecisions.length >= 10);
   assert.ok(contract.forbiddenActionsInThisStory.includes("AUTO_MERGE"));
   assert.ok(contract.forbiddenActionsInThisStory.includes("CONNECT_TO_OR_EXPORT_PRODUCTION"));
@@ -98,7 +104,10 @@ test("owner evidence records the current fail-closed Supabase recovery gap", () 
   assert.equal(contract.providerBackup.earliestRecoveryPoint, null);
   assert.equal(contract.providerBackup.latestRecoveryPoint, null);
   assert.equal(contract.providerBackup.currentRestoreEntitlement, false);
-  assert.equal(contract.providerBackup.proUpgradeApproved, false);
+  assert.equal(contract.providerBackup.proUpgradeApproved, true);
+  assert.equal(contract.providerBackup.proPlanBaseMonthlyPriceUsdAtDecision, 25);
+  assert.equal(contract.providerBackup.proPlanActualProvisioningStatus, "NOT_EXECUTED");
+  assert.equal(contract.providerBackup.proSpendCapRequired, true);
   assert.equal(contract.providerBackup.pointInTimeRecoveryAddOnApproved, false);
   assert.ok(
     contract.requiredOwnerDecisions.includes("SUPABASE_PRO_UPGRADE_FOR_DAILY_PROVIDER_BACKUPS"),
@@ -108,6 +117,7 @@ test("owner evidence records the current fail-closed Supabase recovery gap", () 
 test("independent target is private, immutable, encrypted, and separate from CI", () => {
   assert.equal(contract.independentTargetProposal.provider, "AWS");
   assert.equal(contract.independentTargetProposal.region, contract.source.region);
+  assert.equal(contract.independentTargetProposal.regionApproved, true);
   assert.equal(contract.independentTargetProposal.bucketName, null);
   assert.equal(contract.independentTargetProposal.publicAccess, "BLOCK_ALL");
   assert.equal(contract.independentTargetProposal.versioning, "ENABLED");
@@ -120,7 +130,7 @@ test("independent target is private, immutable, encrypted, and separate from CI"
   assert.equal(contract.independentTargetProposal.execution.ciBackupArtifact, "PROHIBITED");
 });
 
-test("retention, recovery, capacity, and cost proposals are exact but unapproved", () => {
+test("owner-approved retention, recovery, and cost policy remains execution-gated", () => {
   assert.equal(contract.retentionProposal.dailyRecoveryPointDays, 35);
   assert.equal(contract.retentionProposal.verifiedMonthlyArtifactMonths, 12);
   assert.equal(contract.recoveryProposal.rpoHoursMaximum, 24);
@@ -135,6 +145,22 @@ test("retention, recovery, capacity, and cost proposals are exact but unapproved
   assert.equal(contract.costProposal.initialMonthlyCeilingUsd, 10);
   assert.equal(contract.costProposal.ceilingScope, "AWS_INDEPENDENT_BACKUP_ONLY");
   assert.equal(contract.costProposal.supabasePlanCostExcluded, true);
+  for (const decision of [
+    "SUPABASE_PRO_UPGRADE_FOR_DAILY_PROVIDER_BACKUPS",
+    "SINGAPORE_DATA_RESIDENCY",
+    "USD_10_MONTHLY_COST_CEILING",
+    "RETENTION_RPO_AND_RTO",
+  ]) {
+    assert.ok(contract.approvedOwnerDecisions.includes(decision));
+  }
+  for (const decision of [
+    "AWS_ACCOUNT_OWNERSHIP_BILLING_MFA_AND_RECOVERY",
+    "INFRASTRUCTURE_PROVISIONING",
+    "FIRST_PRODUCTION_EXPORT",
+    "LOCAL_BACKUP_DELETION_AFTER_PARITY",
+  ]) {
+    assert.ok(contract.remainingOwnerDecisions.includes(decision));
+  }
 });
 
 test("architecture does not duplicate a local backup path or secret-like value", () => {
