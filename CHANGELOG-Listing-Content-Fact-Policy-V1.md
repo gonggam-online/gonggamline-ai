@@ -1,5 +1,14 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-05 — Evidence fixture and policy kernel
+
+- Added immutable evidence/status contracts and a pure, fact-specific
+  authority/scope/freshness/conflict evaluator.
+- Added fail-closed `UNKNOWN` quarantine and UTF-8/NFC/mojibake checks.
+- Added deterministic, explicitly synthetic KK946-shaped fixtures and negative
+  tests. No real KK946 fact, database/API, external integration, asset, price,
+  Production, or marketplace behavior was added.
+
 ## 2026-08-05 — Architecture proposal
 
 - Audited the existing Listing engine, service, domain types,
