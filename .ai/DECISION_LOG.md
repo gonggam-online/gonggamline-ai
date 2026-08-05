@@ -34,6 +34,13 @@
   daily backups and default Spend Cap availability. Actual checkout amount,
   payment method, plan transition, AWS account/billing/MFA, infrastructure,
   Production export, restore, deletion, and PR merge remain separate gates.
+- Provider execution evidence: sanitized Dashboard screenshots supplied later
+  on 2026-08-05 verify Pro active with seven physical daily backups spanning
+  2026-07-29 through 2026-08-04 and visible restore actions. Spend Cap is
+  enabled; PITR, Dedicated IPv4, and Custom Domain are disabled; no Log Drain
+  is configured. This verifies the provider-native layer only. Storage object
+  bodies and the independent 35-day/12-month AWS recovery boundary remain
+  outside this evidence.
 
 ## 2026-08-05 — Cloud Portability Baseline
 

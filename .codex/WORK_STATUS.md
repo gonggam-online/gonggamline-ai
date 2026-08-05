@@ -8,9 +8,9 @@
 - Branch/base: `codex/docs/cloud-backup-policy-approval` from exact merged
   Encrypted Cloud Backup Architecture main
   `387a98e19b87972d916fa408bb2ad3877f639c85`.
-- Risk/root cause: high-risk/manual Architecture Story. Existing backup
-  authority is device-local; owner-supplied Dashboard evidence now confirms
-  that Supabase Free provides no managed recovery point or restore entitlement.
+- Risk/root cause: high-risk/manual Architecture Story. The prior
+  provider-native gap is closed by verified Supabase Pro physical daily
+  backups; independent 35-day/12-month recovery remains unimplemented.
 - Revenue impact: reduces device-loss and unsafe-rollout recovery risk while
   feature work continues; no customer-facing behavior changes.
 - Scope: sanitized inventory, provider/target decision, machine-readable
@@ -30,12 +30,13 @@
   commit `0aa44b5`, and exact-head CI/Preview success. On 2026-08-05 the owner
   approved Supabase Pro daily backups without PITR, AWS Singapore, the USD 10
   AWS-only monthly ceiling, 35-day/12-month retention, and RPO <=24h/RTO <=8h.
-- Current: validate and deliver the owner-policy approval record in its own
-  high-risk Draft PR because Architecture PR #91 is already merged; then stop
-  at manual merge and external account execution.
-- Blockers/owner actions: manual Architecture merge; exact Supabase checkout
-  amount/payment method/Spend Cap; AWS account billing/MFA/recovery ownership;
-  and later infrastructure/Production export/restore/deletion gates.
+  Sanitized follow-up evidence verifies Pro active, seven physical daily
+  recovery points with restore actions, Spend Cap enabled, PITR/Dedicated
+  IPv4/Custom Domain disabled, and no configured Log Drain.
+- Current: validate and push provider execution evidence to high-risk Draft PR
+  #92, then stop at manual merge and AWS account execution.
+- Blockers/owner actions: manual PR #92 merge; AWS account billing/MFA/recovery
+  ownership; and later infrastructure/Production export/restore/deletion gates.
 - Changed files: Architecture, backup contract, manifest, tests, Decision Log,
   Architecture Review, changelog, and Work Status.
 - Commands/results: initial focused tests 14/14 plus evidence-amendment tests
@@ -46,12 +47,12 @@
   `/sourcing`, `/workflow`, `/workspace`).
 - Last merged checkpoint: Architecture PR #91 at main `387a98e`; owner-policy
   approval record is the current unmerged follow-up.
-- Exact next action: validate, push, and open a separate
-  `manual-merge-required` Draft PR; do not merge, upgrade a plan, or provision
-  anything.
+- Exact next action: validate, commit, and push the provider execution evidence
+  to `manual-merge-required` Draft PR #92; do not merge or provision AWS.
 - Remaining risks: current local backup remains a migration blocker; Supabase
-  has no managed recovery point; plan upgrade, AWS ownership/billing, secret
-  boundary, capacity, infrastructure, and restore parity remain unexecuted.
+  provider backups exclude Storage object bodies and retain only seven days;
+  AWS ownership/billing, secret boundary, capacity, infrastructure, and restore
+  parity remain unexecuted.
 
 ## 2026-08-05 — Cloud Portability Baseline
 

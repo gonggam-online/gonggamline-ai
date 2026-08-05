@@ -71,7 +71,7 @@
     {
       "id": "production-backups",
       "stateClass": "BACKUP",
-      "currentAuthority": "Supabase Free Plan with no managed recovery point plus access-restricted local backup evidence recorded by R3",
+      "currentAuthority": "Supabase Pro with seven verified physical daily recovery points plus access-restricted local backup evidence recorded by R3",
       "targetAuthority": "Approved encrypted off-device backup with independent restore evidence",
       "portabilityStatus": "LOCAL_MIGRATION_BLOCKER",
       "dataClassification": "PRODUCTION_BUSINESS_DATA",
@@ -80,7 +80,7 @@
         "docs/architecture/ENCRYPTED-CLOUD-BACKUP-AND-RESTORE-V1.md",
         "docs/cloud/encrypted-backup-contract-v1.json"
       ],
-      "nextAction": "Manually merge the owner-approved backup Architecture; then verify exact Supabase Pro checkout/Spend Cap and AWS account billing/MFA before a separate infrastructure provisioning Story. Do not copy or delete backup content.",
+      "nextAction": "Manually merge the verified Pro-backup evidence in PR #92; then establish AWS account billing/MFA before a separate independent-backup infrastructure Story. Do not copy or delete backup content.",
       "highRiskBoundary": true
     },
     {
