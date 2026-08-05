@@ -137,7 +137,7 @@ Durable evidence is the sanitized JSON result and reviewed GitHub PR. Raw
 archive bytes, database credentials, connection strings, local paths, command
 transcripts containing secrets, and row values are prohibited.
 
-## 8. Execution record: two approvals consumed, measurement not completed
+## 8. Execution record: three approvals consumed, current measurement completed
 
 ### 8.1 Initial attempt
 
@@ -196,6 +196,37 @@ The current measurement and Calculator/Lambda gates remain blocked. No further
 retry is authorized. A new execution requires a new explicit one-attempt owner
 approval and must persist the sanitized result independently before deleting
 the transient archive.
+
+### 8.3 Owner-approved final attempt
+
+The owner explicitly requested a new, reliable AWS capacity measurement on
+2026-08-05. Before consuming that one-attempt authority, the runner was changed
+to persist a sanitized result independently of terminal-output transport and
+was verified on a credential-absent failure path. Preflight confirmed the exact
+Singapore Production target, PostgreSQL 17.6, TLS reachability, adequate
+restricted temporary storage, a visible current physical provider backup, and
+`Healthy` Production status.
+
+The single complete custom-format `pg_dump` succeeded at
+`2026-08-05T11:00:45.4286736Z`. The archive was 715,071 bytes and the dump took
+34.125 seconds. Offline `pg_restore --list` validation found 1,251 entries and
+zero warnings. The result contains no credential, connection string, archive
+content, row content, or account identifier.
+
+Cleanup passed: the transient archive, process-scoped credential file,
+restricted temporary directory, dump container, and restore-list container
+were all removed. Independent postflight inspection found zero matching
+temporary artifacts and zero measurement containers. No database mutation,
+AWS resource, paid use, upload, restore, or schedule occurred. Supabase
+Production remained `Healthy` after the attempt with CPU 2%, disk 14%, RAM 58%,
+14/60 connections, and no Advisor issue.
+
+All three one-attempt approvals are consumed and no additional Production
+measurement is authorized. The current capacity-measurement gate is closed;
+Lambda eligibility remains undecided until a complete worker rehearsal. The
+next cost step is a manual public On-Demand AWS Pricing Calculator estimate for
+the observed and 2x-observed scenarios. Provisioning, Production upload,
+restore, and schedule remain separately blocked.
 
 Official references:
 

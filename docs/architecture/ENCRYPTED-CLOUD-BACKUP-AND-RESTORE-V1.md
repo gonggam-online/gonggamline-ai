@@ -222,6 +222,15 @@ cleanup. It must stop before implementation if the approved source cannot fit
 the configured encrypted ephemeral storage or finish within the approved
 margin.
 
+The owner-approved current measurement completed on 2026-08-05 with a
+715,071-byte custom archive, 34.125-second dump duration, 1,251 validated
+archive-list entries, and zero warnings. The transient archive and credential
+were deleted, Production remained healthy, and no database or AWS write
+occurred. This closes only the current dump-size/duration evidence gate.
+Lambda remains `UNDECIDED_PENDING_COMPLETE_WORKER_REHEARSAL` until dump,
+verification, upload, manifest, and cleanup are proven together within the
+900-second and 10,240-MiB limits.
+
 The fallback is not truncation, streaming an unverifiable partial result, or a
 local cron job. It is a new Fargate architecture decision preserving the same
 S3/KMS/retention contract.
@@ -331,20 +340,16 @@ explicitly approved by the owner before provisioning:
    initial ceiling, 35-day daily/12-month monthly retention, RPO <=24h, and RTO
    <=8h.
 5. The infrastructure plan was manually merged through PR #95 and the capacity
-   packet through PR #96. The owner-approved single Production measurement
-   attempt on 2026-08-05 failed closed at database-password authentication
-   before creating an archive; cleanup passed and Production remained healthy.
-   After the owner re-injected the process credential, one explicitly approved
-   retry was executed; its final sanitized result was not preserved by the
-   execution transport. Cleanup and Production health were verified, but dump
-   success, size, duration, TOC count, warning count, and archive creation
-   remain unknown. Both one-attempt approvals are consumed. A new explicit
-   one-attempt approval and independently persisted sanitized result are
-   required before another retry. Only
-   after a successful measurement may the observed and 2x-observed AWS Pricing
-   Calculator scenarios be recorded and the exact disabled-worker
-   CloudFormation change set be considered. First Production upload remains a
-   later gate.
+   packet through PR #96. The first Production measurement failed closed at
+   credential authentication and the second attempt lost final result evidence
+   in transport. After adding independent sanitized-result persistence, the
+   owner-approved third and final attempt succeeded on 2026-08-05: 715,071
+   bytes, 34.125 seconds, 1,251 archive-list entries, and zero warnings.
+   Cleanup and Production health passed. All three one-attempt approvals are
+   consumed. The observed and 2x-observed AWS Pricing Calculator scenarios are
+   now ready for manual public On-Demand estimation; the exact disabled-worker
+   CloudFormation change set still needs separate approval. First Production
+   upload remains a later gate.
 6. Approve the restore rehearsal and, only after parity, the exact local
    backup deletion.
 

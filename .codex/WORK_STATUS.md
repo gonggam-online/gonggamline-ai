@@ -1,5 +1,60 @@
 # Work status
 
+## 2026-08-05 — AWS Backup Production capacity measurement final attempt
+
+- Objective: execute exactly one owner-authorized, read-only current Production
+  capacity measurement with independently persisted sanitized evidence, then
+  close the capacity gate without creating AWS state.
+- Branch/base: `codex/chore/aws-backup-capacity-measurement-v2` from merged PR
+  #99 / `origin/main` `f0fc3f99542a19ad1f078a7ae979474a9f050d19`.
+- Risk/root cause: high-risk/manual Production-data read. Root cause was missing
+  current result evidence after an external execution-transport loss, not an
+  application, database-schema, or AWS defect.
+- Revenue impact: improves recovery continuity and removes a prerequisite for
+  the independent AWS cost decision; it does not directly create sales.
+- Scope: exact Singapore Production target, PostgreSQL 17.6 complete
+  custom-format dump, offline list validation, sanitized metrics, cleanup,
+  Production pre/post health, contract/tests/documentation.
+- Non-goals preserved: database write, row inspection, AWS resource/paid use,
+  upload, restore, schedule, RLS/auth/schema/env change, commerce write,
+  existing backup access, automatic retry, or auto-merge.
+- Completed: added a result-independent, fail-closed runner and five static
+  tests; credential-absent failure path passed without connecting to
+  Production. Preflight verified TLS target, current physical provider backup,
+  free disk, pinned client, Docker, and healthy Production.
+- Measurement: the single authorized attempt succeeded at
+  `2026-08-05T11:00:45.4286736Z`; archive 715,071 bytes, dump 34.125 seconds,
+  1,251 list entries, zero warnings. No database mutation or row inspection.
+- Cleanup/postflight: archive, credential file, restricted temp directory, and
+  both containers deleted; independent counts were zero. Supabase remained
+  `Healthy` with CPU 2%, disk 14%, RAM 58%, 14/60 connections, and no Advisor
+  issue.
+- Validation: focused capacity/architecture tests 19/19; full tests 486/486;
+  lint zero errors with four unrelated existing unused-variable warnings;
+  typecheck passed; Production build passed with 85 generated pages. Local
+  Playwright baseline was 35 passed, 2 skipped, 7 failed only because local
+  Supabase is intentionally unconfigured (`missing_url`) on `/listing`,
+  `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and
+  `/workspace`; this matches the existing environment baseline and none of the
+  changed files are application routes.
+- Current work: complete diff/secret review, remove the ignored sanitized local
+  result after durable evidence capture, commit/push, and open a high-risk
+  Draft PR with manual merge required.
+- Publication status 2026-08-06: `gh auth status` still reports its stored CLI
+  token invalid after owner reauthentication, but the installed GitHub app is
+  independently authenticated with repository admin/push access. Git remote
+  and exact `origin/main` base were reverified, so publication proceeds through
+  local Git plus the GitHub app without reading or replacing credentials.
+- Owner action/blocker: none for Draft PR delivery. AWS Pricing Calculator,
+  infrastructure provisioning/change set, first Production upload, restore,
+  and scheduling remain later approval boundaries.
+- Changed files: runner/test, capacity input/contract/tests, measurement
+  packet, backup architecture, decision log, changelog, and this checkpoint.
+- Exact next action: run focused tests and correct any contract drift.
+- Remaining risks: public On-Demand AWS cost estimate is not yet recorded;
+  Lambda remains undecided pending a complete worker rehearsal; no independent
+  AWS recovery point exists yet.
+
 ## 2026-08-05 — AWS Backup Production capacity measurement v1 retry 1
 
 - Objective: execute the owner-approved single retry after secure

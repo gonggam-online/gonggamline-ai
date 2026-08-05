@@ -2,6 +2,13 @@
 
 ## 2026-08-05
 
+- Added a transport-independent, secret-safe Production capacity runner and
+  recorded the owner-approved final measurement: 715,071 bytes, 34.125 seconds,
+  1,251 archive-list entries, and zero warnings. Verified complete transient
+  cleanup and healthy Production postflight without any database or AWS write.
+- Moved the AWS cost gate from missing capacity evidence to ready for a manual
+  observed/2x public On-Demand Pricing Calculator estimate. Lambda eligibility,
+  provisioning, upload, restore, and schedule remain separately gated.
 - Added the proposed independent Production backup and restore architecture.
 - Added a machine-readable, fail-closed owner-decision contract.
 - Recommended Supabase provider backups plus an independent Singapore AWS S3,
