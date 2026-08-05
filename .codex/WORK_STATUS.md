@@ -19,8 +19,8 @@
   Supplier, schema, payload, and backlog audit; Architecture/decision/backlog/
   changelog draft. Confirmed mojibake, simple keyword/title joining, no images,
   outline-only details, payload mismatch, and no repository evidence for KK946.
-- Current: local validation complete; commit, push, Draft PR, and exact-head
-  remote gates are in progress.
+- Current: Architecture documentation and delivery are complete; Draft PR #86
+  awaits repository-owner Architecture review.
 - Blockers/owner actions: owner Architecture acceptance is required before any
   implementation. KK946 remains quarantined pending exact catalog, order/lot,
   3PL inspection, rights, category, notice, and approved-asset evidence.
@@ -35,9 +35,17 @@
   and `/workspace`. Failure screenshots/traces/video are in ignored
   `test-results/`. `npm ci` reported six existing dependency advisories (one
   moderate, five high) and did not change the lockfile.
-- Last commit: none on this branch.
-- Exact next action: stage and review the complete diff, then commit/push and
-  create the normal-risk Draft PR for exact-head CI and Preview validation.
+- Delivery: implementation commit
+  `ea9c2038217d1d016a99dfc67b51a2b5b2d7df5f` pushed. Draft PR #86 targets
+  `main`, is conflict-free, and has `normal-risk`; auto-merge was not enabled.
+  Exact-head CI lint/typecheck/tests/build/security/DB replay/item-selection/R1
+  gates passed. Vercel Preview and `preview-browser-e2e` passed on the exact
+  head; Preview deployment target was
+  `https://vercel.com/gg-online/gonggamline-ai/AEamgW7pMaVktrT8adEdPyQfUSrQ`.
+- Last commit: `ea9c203 docs: define listing content fact contract`.
+- Exact next action: repository owner reviews and accepts or amends the four
+  decisions in the proposed Architecture Story. No implementation or KK946
+  listing work starts before that recorded acceptance.
 - Remaining risks: external rights/category facts and KK946 physical evidence
   are unverified; future implementation may require separately approved
   Database, external-integration, paid-asset, pricing, or commerce Stories.
