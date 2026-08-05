@@ -1,6 +1,6 @@
 {
   "schemaVersion": "gonggamline-encrypted-backup-contract-v1",
-  "status": "OWNER_POLICY_APPROVED_MANUAL_MERGE_REQUIRED",
+  "status": "PRO_PROVIDER_BACKUP_ACTIVE_INDEPENDENT_BACKUP_PENDING_MANUAL_MERGE_REQUIRED",
   "risk": "HIGH",
   "owner": "Database / Security",
   "source": {
@@ -21,22 +21,30 @@
     "verified": true,
     "verifiedAt": "2026-08-05",
     "evidenceSource": "OWNER_SUPPLIED_SANITIZED_DASHBOARD_SCREENSHOTS",
-    "plan": "FREE",
-    "scheduledBackups": "NOT_INCLUDED",
-    "scheduledRetentionDays": 0,
-    "pointInTimeRecovery": "NOT_ENABLED_PRO_ADD_ON",
+    "plan": "PRO",
+    "scheduledBackups": "ENABLED_VERIFIED",
+    "scheduledRetentionDays": 7,
+    "backupType": "PHYSICAL",
+    "storageObjectsIncluded": false,
+    "pointInTimeRecovery": "DISABLED_VERIFIED",
     "pointInTimeRecoveryDisplayedStartingUsdPerMonth": 100,
-    "restoreToNewProject": "NOT_ENTITLED_REQUIRES_PRO_AND_PHYSICAL_BACKUPS",
-    "earliestRecoveryPoint": null,
-    "latestRecoveryPoint": null,
-    "currentRestoreEntitlement": false,
+    "restoreToNewProject": "NOT_REVERIFIED_AFTER_UPGRADE",
+    "earliestRecoveryPoint": "2026-07-29T18:24:15Z",
+    "latestRecoveryPoint": "2026-08-04T18:24:40Z",
+    "currentRestoreEntitlement": true,
     "proUpgradeApproved": true,
     "proUpgradeApprovedAt": "2026-08-05",
     "proPlanBaseMonthlyPriceUsdAtDecision": 25,
-    "proPlanActualProvisioningStatus": "NOT_EXECUTED",
+    "proPlanActualProvisioningStatus": "ACTIVE_VERIFIED",
     "proSpendCapRequired": true,
+    "proSpendCapStatus": "ENABLED_VERIFIED",
     "pointInTimeRecoveryAddOnApproved": false,
-    "note": "The owner approved Pro daily backups with PITR excluded. Actual upgrade remains unexecuted and requires checkout-price review, active payment method, and Spend Cap verification."
+    "additionalPaidFeatures": {
+      "dedicatedIpv4": "DISABLED_VERIFIED",
+      "customDomain": "DISABLED_VERIFIED",
+      "logDrains": "NONE_CONFIGURED_VERIFIED"
+    },
+    "note": "Owner-supplied sanitized Dashboard evidence verifies Pro, seven physical daily recovery points, visible restore actions, Spend Cap enabled, PITR disabled, and no configured paid add-ons. Storage API objects are not included in database backups."
   },
   "independentTargetProposal": {
     "provider": "AWS",

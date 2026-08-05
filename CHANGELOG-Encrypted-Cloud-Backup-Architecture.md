@@ -17,3 +17,8 @@
 - Recorded owner approval for Supabase Pro daily backups without PITR, AWS
   Singapore, the USD 10/month AWS-only ceiling, 35-day/12-month retention, and
   RPO <=24h/RTO <=8h while preserving all execution and merge gates.
+- Recorded sanitized verification that Pro is active with seven physical daily
+  recovery points and restore actions, Spend Cap enabled, PITR and other paid
+  add-ons disabled, and no configured Log Drain.
+- Preserved the explicit limitation that database backups exclude Storage API
+  object bodies and do not satisfy the independent AWS retention target.
