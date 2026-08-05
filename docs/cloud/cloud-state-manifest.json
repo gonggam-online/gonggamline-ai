@@ -80,7 +80,7 @@
         "docs/architecture/ENCRYPTED-CLOUD-BACKUP-AND-RESTORE-V1.md",
         "docs/cloud/encrypted-backup-contract-v1.json"
       ],
-      "nextAction": "Manually merge the verified Pro-backup evidence in PR #92; then establish AWS account billing/MFA before a separate independent-backup infrastructure Story. Do not copy or delete backup content.",
+      "nextAction": "Manually merge the verified Pro-backup follow-up evidence PR; then establish AWS account billing/MFA before a separate independent-backup infrastructure Story. Do not copy or delete backup content.",
       "highRiskBoundary": true
     },
     {
