@@ -96,9 +96,11 @@ type BackupContract = Readonly<{
       currentDumpDurationSeconds: null;
       approvalConsumed: boolean;
       attemptCount: number;
+      retryApprovalConsumed: boolean;
       succeeded: boolean;
       failureClass: string;
-      archiveCreated: boolean;
+      resultEvidenceAvailable: boolean;
+      archiveCreated: null;
       transientFilesDeleted: boolean;
       containerDeleted: boolean;
       databaseMutationPerformed: boolean;
@@ -138,11 +140,11 @@ const contractSource = readFileSync(contractPath, "utf8");
 const contract = JSON.parse(contractSource) as BackupContract;
 const architecture = readFileSync(architecturePath, "utf8");
 
-test("backup architecture remains high-risk after one fail-closed read attempt", () => {
+test("backup architecture remains high-risk after unavailable retry evidence", () => {
   assert.equal(contract.schemaVersion, "gonggamline-encrypted-backup-contract-v1");
   assert.equal(
     contract.status,
-    "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CAPACITY_ATTEMPT_FAILED_AUTH_REAPPROVAL_REQUIRED_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
+    "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CAPACITY_RETRY_RESULT_EVIDENCE_UNAVAILABLE_REAPPROVAL_REQUIRED_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
   );
   assert.equal(contract.risk, "HIGH");
   assert.equal(contract.providerBackup.verified, true);
@@ -251,20 +253,22 @@ test("owner-approved retention, recovery, and cost policy remains execution-gate
   assert.equal(contract.capacityGate.lambdaMaximumEphemeralStorageMiB, 10240);
   assert.equal(
     contract.capacityGate.measurement.status,
-    "ONE_APPROVED_ATTEMPT_FAILED_CREDENTIAL_AUTHENTICATION_REAPPROVAL_REQUIRED",
+    "TWO_APPROVED_ATTEMPTS_CONSUMED_LATEST_RESULT_EVIDENCE_UNAVAILABLE_REAPPROVAL_REQUIRED",
   );
   assert.equal(contract.capacityGate.measurement.historicalReferenceBytes, 696310);
   assert.equal(contract.capacityGate.measurement.historicalReferenceSatisfiesCurrentGate, false);
   assert.equal(contract.capacityGate.measurement.currentArchiveBytes, null);
   assert.equal(contract.capacityGate.measurement.currentDumpDurationSeconds, null);
   assert.equal(contract.capacityGate.measurement.approvalConsumed, true);
-  assert.equal(contract.capacityGate.measurement.attemptCount, 1);
+  assert.equal(contract.capacityGate.measurement.attemptCount, 2);
+  assert.equal(contract.capacityGate.measurement.retryApprovalConsumed, true);
   assert.equal(contract.capacityGate.measurement.succeeded, false);
   assert.equal(
     contract.capacityGate.measurement.failureClass,
-    "EXTERNAL_CONFIGURATION_DATABASE_CREDENTIAL_AUTHENTICATION",
+    "EXECUTION_RESULT_EVIDENCE_UNAVAILABLE",
   );
-  assert.equal(contract.capacityGate.measurement.archiveCreated, false);
+  assert.equal(contract.capacityGate.measurement.resultEvidenceAvailable, false);
+  assert.equal(contract.capacityGate.measurement.archiveCreated, null);
   assert.equal(contract.capacityGate.measurement.transientFilesDeleted, true);
   assert.equal(contract.capacityGate.measurement.containerDeleted, true);
   assert.equal(contract.capacityGate.measurement.databaseMutationPerformed, false);
@@ -301,6 +305,7 @@ test("owner-approved retention, recovery, and cost policy remains execution-gate
   }
   assert.deepEqual(contract.consumedOneTimeApprovals, [
     "BOUNDED_PRODUCTION_CAPACITY_MEASUREMENT_ATTEMPT_2026_08_05",
+    "BOUNDED_PRODUCTION_CAPACITY_MEASUREMENT_RETRY_1_2026_08_05",
   ]);
 });
 
