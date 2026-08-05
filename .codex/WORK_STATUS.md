@@ -28,7 +28,8 @@
   before archive creation. The one-attempt approval is consumed and no retry was
   made. Archive bytes, successful duration, and TOC entry count remain unknown.
   Calculator, Lambda-capacity, provisioning, upload, restore, and schedule are
-  blocked.
+  blocked. Sanitized evidence is committed and pushed in high-risk Draft PR
+  #97 with `manual-merge-required`; auto-merge is not enabled.
 - Cleanup/postflight: zero matching temporary directories and zero measurement
   containers remain. The tmpfs credential file was destroyed with the removed
   container. No database write, AWS action, archive/row inspection, or existing
@@ -52,10 +53,15 @@
   Playwright reproduces the established external-configuration baseline: 35
   pass, 2 skip, and 7 `missing_url` failures on `/listing`, `/market`,
   `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
-- Last commit: none yet on this branch.
-- Exact next action: complete diff/secret review, commit/push the sanitized
-  failure record, open a high-risk Draft PR with `manual-merge-required`, and
-  wait for exact-head gates. Do not retry Production access.
+  Implementation head `5f491db2453844414e88bfc91ea6fac27210d0e7`
+  passed CI run `30996319239` after one same-head rerun of an unrelated existing
+  Orchestrator Phase 3 timing flake; Preview browser run `30996319191` and the
+  exact Vercel Preview passed.
+- Last commit: `5f491db2453844414e88bfc91ea6fac27210d0e7` (`docs: record failed AWS
+  capacity measurement`) before this status-only checkpoint.
+- Exact next action: push this status-only checkpoint and verify its exact-head
+  CI, Vercel, and Preview gates, then leave Draft PR #97 for repository-owner
+  manual review/merge. Do not retry Production access.
 - Remaining risks: current dump capacity and AWS cost remain unknown; the local
   process credential is stale/incorrect; future worker capacity, provisioning,
   first upload, Storage object backup, and two-cycle restore remain unproven.
