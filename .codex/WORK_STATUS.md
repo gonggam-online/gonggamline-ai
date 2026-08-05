@@ -3455,8 +3455,8 @@ perform the documented read-only Supabase schema and completeness inspection.
   audited official Gaemi 2025.06 rate card, 2025.07 Rocket Growth manual, and
   official site; drafted the Architecture and governance records; reviewed the
   diff and passed `git diff --check`.
-- Current: local gates are complete; commit/push, create the Draft PR, then
-  inspect exact-head CI/Preview without Production or commerce actions.
+- Current: Architecture draft and delivery are complete; Draft PR #85 awaits
+  repository-owner review. No implementation may begin from this Story.
 - Owner-supplied unknowns: account/eligibility, quote, customer/company code,
   API/webhook/SFTP/portal/export, automation permission, Auth/scopes, privacy,
   retention, limits/SLA, inspection checklist, custom exhaustive inspection /
@@ -3471,9 +3471,16 @@ perform the documented read-only Supabase schema and completeness inspection.
   `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and
   `/workspace`. `npm ci` reported six existing advisories (one moderate, five
   high) and did not change the lockfile.
-- Last commit: none on this branch.
-- Exact next action: review secrets/generated output; commit, push, and open a
-  normal-risk Draft PR, then wait for exact-head CI/Preview gates.
+- Delivery: commit `3a82fe73582d3051b8b99a02161dfa837d612d94`
+  pushed; Draft PR #85 is open, mergeable, and labeled `normal-risk`. Exact-head
+  CI (including security/database baselines), Vercel Preview, and
+  `preview-browser-e2e` passed. The PR remains Draft and unmerged; Production is
+  unchanged.
+- Last commit: `3a82fe7 docs: design Gaemi warehouse adapter` (followed by this
+  delivery-status checkpoint).
+- Exact next action: repository owner reviews PR #83 and PR #85 in dependency
+  order. If accepted, the next separate Story is contract discovery plus a
+  sanitized, network-free export fixture; no account/provider write.
 - Remaining risks: provider contract/transport/privacy/quality scope is unknown;
   PR #83 is unmerged; public pricing may change; no live provider capability or
   Rocket Growth receipt path has been validated.
