@@ -12,7 +12,7 @@
 | 8 | Generate Supabase types | M | Normal after schema verification | Baseline authoritative |
 | 9 | Supplier evidence/freshness audit | S | Normal | Sprint 01 decision contract stable |
 | 10 | Versioned landed-cost scenario engine | M | High | Financial assumptions approved |
-| 11 | Listing content fact and policy contract | S | Normal | Supplier/category evidence ready |
+| 11 | Listing content fact and policy contract | S | Normal | Architecture proposed; owner acceptance and KK946 supplier/3PL/rights/category evidence required |
 | 12 | Mutation endpoint idempotency inventory | M | High | No Production calls; domain keys proposed |
 | 13 | Unified audit/correlation design | L | High | Auth/actor requirements approved |
 | 14 | Collector/Coupang rate-limit contract tests | M | High | Fake adapters and documented limits |

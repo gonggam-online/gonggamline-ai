@@ -1,5 +1,47 @@
 # Work status
 
+## 2026-08-05 — Listing Content Fact and Policy Contract v1
+
+- Objective: complete the Architecture Story and implementation order for
+  evidence-only Coupang content, including first target identifier KK946.
+- Branch/base: `codex/docs/listing-content-fact-policy-contract` from exact
+  `origin/main` `a6572b08b637313a298ca14dd5d1c38ffeb9d874`.
+- Risk/root cause: normal-risk documentation only. Root cause is an existing
+  code/contract gap after external evidence readiness; code must not compensate
+  for absent supplier, 3PL, rights, or category evidence.
+- Revenue impact: unblocks the smallest safe path to a truthful first-product
+  listing packet while preventing rejection, rights exposure, and returns.
+- Scope: current-state audit, evidence precedence, UNKNOWN/quarantine, image
+  rights, no-exaggeration, category/payload contract, tests, and ordered Stories.
+- Non-goals: runtime/API/DB/migration/Auth/RLS, external calls, images, prices,
+  Production, or marketplace writes.
+- Completed: boot/governance review; clean latest-main branch; existing Listing,
+  Supplier, schema, payload, and backlog audit; Architecture/decision/backlog/
+  changelog draft. Confirmed mojibake, simple keyword/title joining, no images,
+  outline-only details, payload mismatch, and no repository evidence for KK946.
+- Current: local validation complete; commit, push, Draft PR, and exact-head
+  remote gates are in progress.
+- Blockers/owner actions: owner Architecture acceptance is required before any
+  implementation. KK946 remains quarantined pending exact catalog, order/lot,
+  3PL inspection, rights, category, notice, and approved-asset evidence.
+- Changed files: Architecture Story, Architecture Review, Decision Log, backlog,
+  task changelog, and this Work Status.
+- Commands/results: repository audit and `git diff --check` passed; lint passed
+  with zero errors and four pre-existing Revenue-test warnings; typecheck
+  passed; unit/integration tests passed 446/446; production build passed with
+  85 routes. Local Playwright passed 35, skipped 2, and failed the same seven
+  Supabase-backed routes because local Supabase is unconfigured (`missing_url`):
+  `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
+  and `/workspace`. Failure screenshots/traces/video are in ignored
+  `test-results/`. `npm ci` reported six existing dependency advisories (one
+  moderate, five high) and did not change the lockfile.
+- Last commit: none on this branch.
+- Exact next action: stage and review the complete diff, then commit/push and
+  create the normal-risk Draft PR for exact-head CI and Preview validation.
+- Remaining risks: external rights/category facts and KK946 physical evidence
+  are unverified; future implementation may require separately approved
+  Database, external-integration, paid-asset, pricing, or commerce Stories.
+
 ## 2026-08-04 — Phase 5 owner-sample structural correction
 
 - Objective: remove circular SHADOW metrics and make all 60 owner labels valid

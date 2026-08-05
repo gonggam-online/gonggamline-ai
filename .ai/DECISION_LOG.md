@@ -1,5 +1,28 @@
 # Decision log
 
+## 2026-08-05 — Listing content fact and policy Architecture proposal
+
+- Category: proposed normal-risk, documentation-only Listing Architecture
+  Story recorded on 2026-08-05.
+- Proposal: preserve the existing Listing engine/service/schema boundaries but
+  require evidence-linked title, keyword, image, detail-page, notice, and
+  Coupang payload outputs with fail-closed quarantine.
+- Source priority: supplier catalog owns catalog/commercial facts; scoped 3PL
+  inspection owns observed physical facts; conflicts remain visible and block
+  dependent claims. Documentary and regulated facts require their authoritative
+  source. Neither source grants image rights by implication.
+- KK946 status: `UNKNOWN` and quarantined because the repository has no exact
+  catalog, lot/inspection, rights, category, notice, or approved-asset packet.
+- Status: **not approved**. Owner acceptance must bind the approved head SHA and
+  date before any implementation Story begins.
+- Authority boundary: no code, API, schema, RLS/Auth, secret/configuration,
+  image generation/editing/upload, price, Production, or marketplace write is
+  authorized.
+- Story:
+  [`LISTING-CONTENT-FACT-AND-POLICY-CONTRACT-V1.md`](../docs/architecture/LISTING-CONTENT-FACT-AND-POLICY-CONTRACT-V1.md).
+- Rollback: revert the documentation PR; no external or persistent state was
+  changed.
+
 ## 2026-08-04 — Sales learning closed-loop Architecture proposal
 
 - Category: proposed high-risk/manual cross-domain Architecture Story.
