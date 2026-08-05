@@ -60,6 +60,14 @@ Production rollout. It does not add a customer-facing feature.
   backups. It presents PITR as a separate Pro add-on starting at USD 100/month,
   and states that restore-to-new-project requires Pro plus physical backups.
   These are displayed plan capabilities, not approved purchases.
+- Subsequent owner-supplied sanitized Dashboard evidence on 2026-08-05 verifies
+  that the upgrade is active: seven dated physical daily recovery points are
+  visible from 2026-07-29 through 2026-08-04, each with a restore action. Spend
+  Cap is enabled; PITR, Dedicated IPv4, and Custom Domain are disabled; no Log
+  Drain is configured.
+- Supabase explicitly warns that database backups contain Storage API metadata
+  but do not include the stored objects. Independent asset backup therefore
+  remains a separate future Story and is not implied by database recovery.
 - Supabase documents daily backups for paid plans with plan-dependent retention
   up to 30 days and optional PITR up to 28 days. Neither alone proves the
   repository's 35-day daily plus 12-month monthly independent-retention target.
@@ -300,11 +308,11 @@ explicitly approved by the owner before provisioning:
    no scheduled backup, no retained recovery point, PITR not enabled, and no
    restore-to-new-project entitlement. No credential or backup content was
    supplied.
-2. **Approved 2026-08-05, execution pending:** upgrade to Supabase Pro for
-   provider-native daily backups while leaving PITR disabled. Official pricing
-   at the decision date is from USD 25/month and the upgrade takes effect
-   immediately. Before the owner confirms checkout, verify the exact displayed
-   charge, active payment method, and that Spend Cap remains enabled.
+2. **Completed and verified 2026-08-05:** Supabase Pro is active with seven
+   physical daily recovery points and visible restore actions. Spend Cap is
+   enabled; PITR remains disabled. Official pricing at the decision date is
+   from USD 25/month. Exact invoice/tax evidence remains private billing data
+   and is not stored in this repository.
 3. Choose or create an owner-controlled AWS account, attach billing, enable
    MFA, and confirm account-recovery contacts/factors independent of this PC.
 4. **Approved 2026-08-05:** `ap-southeast-1` residency, USD 10/month AWS-only

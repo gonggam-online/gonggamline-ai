@@ -17,16 +17,24 @@ type BackupContract = Readonly<{
     plan: string;
     scheduledBackups: string;
     scheduledRetentionDays: number;
+    backupType: string;
+    storageObjectsIncluded: boolean;
     pointInTimeRecovery: string;
     restoreToNewProject: string;
-    earliestRecoveryPoint: null;
-    latestRecoveryPoint: null;
+    earliestRecoveryPoint: string;
+    latestRecoveryPoint: string;
     currentRestoreEntitlement: boolean;
     proUpgradeApproved: boolean;
     proPlanBaseMonthlyPriceUsdAtDecision: number;
     proPlanActualProvisioningStatus: string;
     proSpendCapRequired: boolean;
+    proSpendCapStatus: string;
     pointInTimeRecoveryAddOnApproved: boolean;
+    additionalPaidFeatures: Readonly<{
+      dedicatedIpv4: string;
+      customDomain: string;
+      logDrains: string;
+    }>;
   }>;
   independentTargetProposal: Readonly<{
     provider: string;
@@ -81,7 +89,10 @@ const architecture = readFileSync(architecturePath, "utf8");
 
 test("backup architecture remains high-risk, manually merged, and non-executing", () => {
   assert.equal(contract.schemaVersion, "gonggamline-encrypted-backup-contract-v1");
-  assert.equal(contract.status, "OWNER_POLICY_APPROVED_MANUAL_MERGE_REQUIRED");
+  assert.equal(
+    contract.status,
+    "PRO_PROVIDER_BACKUP_ACTIVE_INDEPENDENT_BACKUP_PENDING_MANUAL_MERGE_REQUIRED",
+  );
   assert.equal(contract.risk, "HIGH");
   assert.equal(contract.providerBackup.verified, true);
   assert.equal(contract.retentionProposal.accepted, true);
@@ -92,23 +103,29 @@ test("backup architecture remains high-risk, manually merged, and non-executing"
   assert.ok(contract.forbiddenActionsInThisStory.includes("CONNECT_TO_OR_EXPORT_PRODUCTION"));
 });
 
-test("owner evidence records the current fail-closed Supabase recovery gap", () => {
-  assert.equal(contract.providerBackup.plan, "FREE");
-  assert.equal(contract.providerBackup.scheduledBackups, "NOT_INCLUDED");
-  assert.equal(contract.providerBackup.scheduledRetentionDays, 0);
-  assert.equal(contract.providerBackup.pointInTimeRecovery, "NOT_ENABLED_PRO_ADD_ON");
+test("owner evidence records the active bounded Supabase recovery layer", () => {
+  assert.equal(contract.providerBackup.plan, "PRO");
+  assert.equal(contract.providerBackup.scheduledBackups, "ENABLED_VERIFIED");
+  assert.equal(contract.providerBackup.scheduledRetentionDays, 7);
+  assert.equal(contract.providerBackup.backupType, "PHYSICAL");
+  assert.equal(contract.providerBackup.storageObjectsIncluded, false);
+  assert.equal(contract.providerBackup.pointInTimeRecovery, "DISABLED_VERIFIED");
   assert.equal(
     contract.providerBackup.restoreToNewProject,
-    "NOT_ENTITLED_REQUIRES_PRO_AND_PHYSICAL_BACKUPS",
+    "NOT_REVERIFIED_AFTER_UPGRADE",
   );
-  assert.equal(contract.providerBackup.earliestRecoveryPoint, null);
-  assert.equal(contract.providerBackup.latestRecoveryPoint, null);
-  assert.equal(contract.providerBackup.currentRestoreEntitlement, false);
+  assert.equal(contract.providerBackup.earliestRecoveryPoint, "2026-07-29T18:24:15Z");
+  assert.equal(contract.providerBackup.latestRecoveryPoint, "2026-08-04T18:24:40Z");
+  assert.equal(contract.providerBackup.currentRestoreEntitlement, true);
   assert.equal(contract.providerBackup.proUpgradeApproved, true);
   assert.equal(contract.providerBackup.proPlanBaseMonthlyPriceUsdAtDecision, 25);
-  assert.equal(contract.providerBackup.proPlanActualProvisioningStatus, "NOT_EXECUTED");
+  assert.equal(contract.providerBackup.proPlanActualProvisioningStatus, "ACTIVE_VERIFIED");
   assert.equal(contract.providerBackup.proSpendCapRequired, true);
+  assert.equal(contract.providerBackup.proSpendCapStatus, "ENABLED_VERIFIED");
   assert.equal(contract.providerBackup.pointInTimeRecoveryAddOnApproved, false);
+  assert.equal(contract.providerBackup.additionalPaidFeatures.dedicatedIpv4, "DISABLED_VERIFIED");
+  assert.equal(contract.providerBackup.additionalPaidFeatures.customDomain, "DISABLED_VERIFIED");
+  assert.equal(contract.providerBackup.additionalPaidFeatures.logDrains, "NONE_CONFIGURED_VERIFIED");
   assert.ok(
     contract.requiredOwnerDecisions.includes("SUPABASE_PRO_UPGRADE_FOR_DAILY_PROVIDER_BACKUPS"),
   );

@@ -32,6 +32,11 @@
   <=8h. No plan upgrade, account/billing change, resource, credential,
   Production export, restore, deletion, or PR merge was executed by this
   approval record.
+- Provider execution evidence: later on 2026-08-05, sanitized Dashboard
+  screenshots verified Supabase Pro active, seven physical daily recovery
+  points with restore actions, Spend Cap enabled, PITR/Dedicated IPv4/Custom
+  Domain disabled, and no configured Log Drain. Database backups exclude
+  Storage API object bodies; AWS independent backup remains pending.
 
 ## Item Selection Story 3 residual persistence compliance — 2026-08-03
 
