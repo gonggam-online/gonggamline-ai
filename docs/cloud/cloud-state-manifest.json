@@ -75,8 +75,12 @@
       "targetAuthority": "Approved encrypted off-device backup with independent restore evidence",
       "portabilityStatus": "LOCAL_MIGRATION_BLOCKER",
       "dataClassification": "PRODUCTION_BUSINESS_DATA",
-      "evidence": ["docs/security/R3-PRODUCTION-ROLLOUT-APPROVAL-PACKET.md"],
-      "nextAction": "Approve backup target, region, encryption, retention, deletion and two-cycle restore Story before copying or deleting anything.",
+      "evidence": [
+        "docs/security/R3-PRODUCTION-ROLLOUT-APPROVAL-PACKET.md",
+        "docs/architecture/ENCRYPTED-CLOUD-BACKUP-AND-RESTORE-V1.md",
+        "docs/cloud/encrypted-backup-contract-v1.json"
+      ],
+      "nextAction": "Manually accept the proposed backup Architecture, verify Supabase entitlement, and approve the separate AWS account, Singapore residency, cost, retention, RPO/RTO and provisioning Story before copying or deleting anything.",
       "highRiskBoundary": true
     },
     {

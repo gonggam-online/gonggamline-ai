@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "gonggamline-encrypted-backup-contract-v1",
+  "status": "PROPOSED_OWNER_APPROVAL_REQUIRED",
+  "risk": "HIGH",
+  "owner": "Database / Security",
+  "source": {
+    "service": "Supabase managed Postgres",
+    "projectRef": "sxvtznmoemrcwifungnb",
+    "region": "ap-southeast-1",
+    "classification": [
+      "PRODUCTION_BUSINESS_DATA",
+      "PERSONAL_DATA_POSSIBLE",
+      "SECRET_METADATA_EXCLUDED"
+    ],
+    "exportFormat": "PostgreSQL custom logical archive",
+    "currentBackupAuthority": "RESTRICTED_DEVICE_LOCAL_EVIDENCE_UNMOVED"
+  },
+  "providerBackup": {
+    "required": true,
+    "authority": "Supabase Dashboard Database Backups",
+    "verified": false,
+    "note": "The current plan, daily-backup state, retention and restore entitlement require owner verification."
+  },
+  "independentTargetProposal": {
+    "provider": "AWS",
+    "accountOwner": "REPOSITORY_OWNER_ACCOUNT_PENDING",
+    "region": "ap-southeast-1",
+    "objectStore": "Amazon S3 general purpose bucket",
+    "bucketName": null,
+    "publicAccess": "BLOCK_ALL",
+    "versioning": "ENABLED",
+    "objectLock": {
+      "enabled": true,
+      "mode": "GOVERNANCE",
+      "automationCanBypass": false
+    },
+    "encryption": {
+      "atRest": "SSE-KMS_CUSTOMER_MANAGED_KEY",
+      "bucketKey": "ENABLED",
+      "inTransit": "TLS_REQUIRED",
+      "keyIdentifier": null
+    },
+    "execution": {
+      "scheduler": "Amazon EventBridge Scheduler",
+      "worker": "AWS Lambda container image",
+      "imageRegistry": "Amazon ECR",
+      "secretStore": "AWS Secrets Manager",
+      "deadLetterQueue": "Amazon SQS",
+      "logs": "Sanitized Amazon CloudWatch logs",
+      "ciBackupArtifact": "PROHIBITED"
+    }
+  },
+  "retentionProposal": {
+    "dailyRecoveryPointDays": 35,
+    "verifiedMonthlyArtifactMonths": 12,
+    "dailyObjectLockDays": 35,
+    "monthlyObjectLockDays": 365,
+    "deletionBeforeRetentionExpiry": "PROHIBITED",
+    "accepted": false
+  },
+  "recoveryProposal": {
+    "rpoHoursMaximum": 24,
+    "rtoHoursMaximum": 8,
+    "freshRestoreCycles": 2,
+    "restoreTarget": "OWNER_APPROVED_ISOLATED_NON_PRODUCTION",
+    "productionRestore": "SEPARATE_INCIDENT_APPROVAL_REQUIRED",
+    "accepted": false
+  },
+  "capacityGate": {
+    "lambdaMaximumRuntimeSeconds": 900,
+    "requireMeasuredDumpSizeAndDurationBeforeImplementation": true,
+    "fallback": "STOP_AND_PROPOSE_FARGATE_ARCHITECTURE",
+    "silentTruncationOrPartialSuccess": "PROHIBITED"
+  },
+  "costProposal": {
+    "pricingAsOf": "2026-08-05",
+    "initialMonthlyCeilingUsd": 10,
+    "billingAlertPercentages": [50, 80, 100],
+    "approved": false,
+    "requiresAwsCalculatorEstimateBeforeProvisioning": true
+  },
+  "requiredOwnerDecisions": [
+    "SUPABASE_PLAN_BACKUP_STATE_AND_RESTORE_ENTITLEMENT",
+    "AWS_ACCOUNT_OWNERSHIP_BILLING_MFA_AND_RECOVERY",
+    "SINGAPORE_DATA_RESIDENCY",
+    "USD_10_MONTHLY_COST_CEILING",
+    "RETENTION_RPO_AND_RTO",
+    "PRODUCTION_EXPORT_IDENTITY_AND_SECRET_BOUNDARY",
+    "INFRASTRUCTURE_PROVISIONING",
+    "FIRST_PRODUCTION_EXPORT",
+    "TWO_CYCLE_RESTORE_REHEARSAL",
+    "LOCAL_BACKUP_DELETION_AFTER_PARITY"
+  ],
+  "forbiddenActionsInThisStory": [
+    "READ_COPY_UPLOAD_OR_DELETE_LOCAL_BACKUP_CONTENT",
+    "PROVISION_AWS_OR_SUPABASE_RESOURCES",
+    "CREATE_OR_ROTATE_CREDENTIALS",
+    "CONNECT_TO_OR_EXPORT_PRODUCTION",
+    "RESTORE_ANY_DATABASE",
+    "CHANGE_SCHEMA_RLS_AUTH_OR_ENVIRONMENT",
+    "CREATE_PAID_USAGE",
+    "STORE_BACKUP_IN_GITHUB_ACTIONS_ARTIFACTS",
+    "AUTO_MERGE"
+  ]
+}

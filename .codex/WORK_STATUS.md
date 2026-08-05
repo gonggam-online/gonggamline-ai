@@ -1,5 +1,49 @@
 # Work status
 
+## 2026-08-05 — Encrypted Cloud Backup Architecture v1
+
+- Objective: remove the device-local Production backup authority with the
+  smallest independent encrypted cloud recovery design, without moving data or
+  provisioning services.
+- Branch/base: `codex/docs/encrypted-cloud-backup-architecture` from exact
+  Cloud Portability Baseline main
+  `e203d2b8aeade4cc74943b988dab945c2d9f8cf3`.
+- Risk/root cause: high-risk/manual Architecture Story. Existing backup
+  authority is device-local and the exact Supabase backup entitlement is an
+  external-configuration unknown.
+- Revenue impact: reduces device-loss and unsafe-rollout recovery risk while
+  feature work continues; no customer-facing behavior changes.
+- Scope: sanitized inventory, provider/target decision, machine-readable
+  contract, retention/RPO/RTO/cost/capacity/security design, two-cycle restore,
+  rollout/rollback, owner actions, tests, changelog, and status.
+- Non-goals: account/billing, provisioning, credentials, Production access or
+  export, backup content read/copy/upload/delete, restore, DB/RLS/Auth/env,
+  paid use, commerce writes, and merge.
+- Cloud-first gate: proposed authority is owner-controlled AWS Singapore
+  S3/KMS/Object Lock; local evidence stays unmoved until parity and restore
+  acceptance. Raw backup bytes never enter CI/Git/Vercel/chat.
+- Completed: exact-main branch, policy/R3 evidence review, official provider
+  research, decision matrix, proposed architecture, machine-readable contract,
+  manifest linkage, contract tests, and complete local repository gates.
+- Current: complete diff/security review, commit, push, high-risk Draft PR,
+  exact-head CI/Preview verification, then owner handoff without merge.
+- Blockers/owner actions: manual Architecture merge plus the exact decisions
+  listed in section 13 of the Architecture document. No purchase is required
+  before the Draft PR is complete.
+- Changed files: Architecture, backup contract, manifest, tests, Decision Log,
+  Architecture Review, changelog, and Work Status.
+- Commands/results: focused tests 14/14; typecheck pass; ESLint 0 errors and 4
+  pre-existing test warnings; full tests 466/466; Production build pass; local
+  Playwright 35 pass, 2 skip, 7 fail solely on the existing unconfigured
+  Supabase API routes (`/listing`, `/market`, `/procurement`, `/revenue`,
+  `/sourcing`, `/workflow`, `/workspace`).
+- Last commit: none.
+- Exact next action: review the complete diff and deliver a
+  `manual-merge-required` Draft PR; do not merge or provision anything.
+- Remaining risks: current local backup remains a migration blocker; Supabase
+  plan/restore entitlement, AWS ownership/billing, residency, cost, secret
+  boundary, capacity, and restore parity remain unapproved.
+
 ## 2026-08-05 — Cloud Portability Baseline
 
 - Objective: execute every normal-risk Cloud-first step possible before cloud

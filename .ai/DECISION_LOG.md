@@ -1,5 +1,27 @@
 # Decision log
 
+## 2026-08-05 — Proposed Encrypted Cloud Backup and Restore v1
+
+- Category: proposed Architecture decision.
+- Status: Draft only; repository-owner manual acceptance required.
+- Owner: Database / Security.
+- Proposal: retain verified Supabase provider backups and add an independent,
+  owner-controlled AWS `ap-southeast-1` recovery boundary using private S3,
+  versioning, Object Lock Governance, SSE-KMS, and a scheduled Lambda export
+  worker. Raw Production backup bytes are prohibited from CI, Git, Vercel, and
+  chat.
+- Rationale: the recorded logical archive remains device-local, while
+  Supabase's documented provider retention does not by itself prove the
+  repository's 35-day daily plus 12-month monthly independent-retention target.
+- Proposed gates: verify Supabase entitlement; approve AWS account/billing/MFA,
+  Singapore residency, USD 10 monthly ceiling, retention, RPO <=24h/RTO <=8h,
+  export identity, provisioning, first Production export, two-cycle restore,
+  and later exact local deletion.
+- Authority: this entry records a proposal, not approval. No external service,
+  credential, Production operation, backup copy/restore/delete, paid use, or
+  implementation is authorized.
+- Rollback: revert the documentation PR. No external state is changed.
+
 ## 2026-08-05 — Cloud Portability Baseline
 
 - Category: implementation decision
