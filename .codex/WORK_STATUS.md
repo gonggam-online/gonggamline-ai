@@ -29,9 +29,17 @@
   and uncertainty reserve USD 2.00; binding assessment USD 4.63/month; USD 5.37
   headroom below the USD 10 ceiling. Both public estimate links contain only
   sanitized planning inputs.
-- Current work: update structural tests, review the complete diff, run all
-  binding validation, and deliver a high-risk Draft PR with
-  `manual-merge-required`.
+- Delivery: evidence commit
+  `e1638cd9c9de0c79d7159ad3a97631ef9424566d` was pushed on
+  `codex/chore/aws-backup-cost-estimate`; high-risk Draft PR #101 targets
+  `main` with `manual-merge-required` and no auto-merge.
+- Remote gates on the evidence head: CI run 221 passed all eight jobs,
+  including lint, typecheck, build, complete tests, tracked-secret audit,
+  disposable database replay, R1 atomic mutation replay, and A01-A12 security
+  replay. Preview browser validation run 221 passed the exact Ready Vercel
+  deployment with no failed non-destructive check. Evidence artifact
+  `preview-browser-evidence` digest is
+  `sha256:9035a601b91e792c39331cdd1cfa2a5f51cf3d6ca90848e5ed0c6f128435dc31`.
 - Owner action/blocker: none for the evidence Draft PR. Lambda complete-worker
   rehearsal and the exact disabled-worker CloudFormation change set require
   later, separate high-risk decisions before provisioning.
@@ -44,6 +52,10 @@
   Local Playwright reproduced the unchanged external-configuration baseline:
   35 passed, 2 skipped, and 7 `missing_url` failures on `/listing`, `/market`,
   `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
+- Exact next action: owner manually reviews and merges Draft PR #101. After
+  merge, wait for the new Production deployment and run the required health,
+  API, console, failed-request, and browser smoke checks before any later AWS
+  provisioning decision.
 - Remaining risks: Lambda eligibility is unproven; sanitized log/transfer/tax
   values are covered by a planning reserve rather than measured billing; no
   independent AWS recovery point exists yet.
