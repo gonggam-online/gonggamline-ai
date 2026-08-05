@@ -27,8 +27,12 @@
   branch; reviewed accepted architecture/IaC; verified current official
   pg_dump, Lambda, ephemeral-storage, and Calculator contracts; recorded owner
   recovery confirmation; prepared measurement and cost input artifacts.
-- Current: local validation and diff/security review complete; delivery pending.
-- Blockers/owner actions: none for Draft PR delivery. Actual measurement needs
+- Current: implementation commit is pushed in high-risk Draft PR #96 with
+  `manual-merge-required`; exact implementation-head CI, Vercel, and Preview
+  browser gates pass. This status-only checkpoint must pass the same exact-head
+  gates before owner handoff.
+- Blockers/owner actions: repository-owner manual review/merge of PR #96.
+  Actual measurement needs
   the exact later approval text `AWS 백업 Production 용량 측정 v1 승인` and an
   authorized ephemeral Production credential. Do not send any secret value.
 - Changed files: backup Architecture/contract/plan, capacity runbook/input/test,
@@ -40,9 +44,13 @@
   unchanged environment baseline: 35 pass, 2 skip, 7 fail only because local
   Supabase is unconfigured (`missing_url`) on `/listing`, `/market`,
   `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
-- Last commit: none on this branch.
-- Exact next action: validate, commit, push, create a high-risk Draft PR with
-  `manual-merge-required`, and verify its exact-head CI/Preview.
+  Exact implementation-head CI run `30992193467` passed after one unrelated
+  pre-existing Orchestrator timing test failed once and passed on rerun;
+  Preview browser run `30992193162` and Vercel Preview passed.
+- Last commit: `f9f2970e266e17ba20e1b47f18b51dcbadd283a5` (`docs: prepare AWS
+  backup capacity approval`) in Draft PR #96.
+- Exact next action: push this status-only checkpoint, verify exact-head CI,
+  Vercel, and Preview, then repository owner manually reviews/merges PR #96.
 - Remaining risks: current size/duration and end-to-end worker margin are
   unknown; AWS prices/estimate, resources, Production upload, and restore parity
   remain unexecuted.
