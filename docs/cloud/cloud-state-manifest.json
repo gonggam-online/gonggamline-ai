@@ -80,7 +80,7 @@
         "docs/architecture/ENCRYPTED-CLOUD-BACKUP-AND-RESTORE-V1.md",
         "docs/cloud/encrypted-backup-contract-v1.json"
       ],
-      "nextAction": "Manually accept the proposed backup Architecture; separately decide the paid Supabase Pro daily-backup layer and approve the AWS account, Singapore residency, AWS-only cost ceiling, retention, RPO/RTO and provisioning Story before copying or deleting anything.",
+      "nextAction": "Manually merge the owner-approved backup Architecture; then verify exact Supabase Pro checkout/Spend Cap and AWS account billing/MFA before a separate infrastructure provisioning Story. Do not copy or delete backup content.",
       "highRiskBoundary": true
     },
     {

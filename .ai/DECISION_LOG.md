@@ -27,6 +27,13 @@
   provider-backup gate is resolved as a confirmed gap. Supabase Pro daily
   backups are a separate paid decision; PITR is not part of the initial
   proposal. The USD 10 ceiling applies only to the independent AWS boundary.
+- Owner policy decision: approved on 2026-08-05 — Supabase Pro daily backups
+  with PITR excluded; AWS Singapore `ap-southeast-1`; USD 10/month AWS-only
+  ceiling; daily 35-day and monthly 12-month retention; RPO <=24h; RTO <=8h.
+  Current official Supabase pricing shows Pro from USD 25/month with seven-day
+  daily backups and default Spend Cap availability. Actual checkout amount,
+  payment method, plan transition, AWS account/billing/MFA, infrastructure,
+  Production export, restore, deletion, and PR merge remain separate gates.
 
 ## 2026-08-05 — Cloud Portability Baseline
 
