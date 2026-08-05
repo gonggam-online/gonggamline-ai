@@ -38,3 +38,10 @@
   prohibited.
 - Routed both Scheduler delivery failure and exhausted Lambda asynchronous
   execution failure to the bounded encrypted DLQ and alarm.
+- Recorded sanitized owner confirmation that AWS recovery contacts and a
+  recovery method independent of this PC are verified. One Root MFA device is
+  active; a second factor is optional and not a v1 gate.
+- Added a high-risk, non-executing Production capacity-measurement approval
+  packet and machine-readable Singapore Calculator input template. Current
+  size/duration, costs, estimate URL, Production authority, and AWS provisioning
+  remain unset and blocked.

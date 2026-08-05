@@ -1,6 +1,6 @@
 {
   "schemaVersion": "gonggamline-encrypted-backup-contract-v1",
-  "status": "PRO_PROVIDER_BACKUP_ACTIVE_AWS_PREFLIGHT_PARTIAL_INFRASTRUCTURE_PLAN_IMPLEMENTED_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
+  "status": "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CAPACITY_APPROVAL_PREPARED_NOT_EXECUTED_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
   "risk": "HIGH",
   "owner": "Database / Security",
   "source": {
@@ -48,7 +48,7 @@
   },
   "independentTargetProposal": {
     "provider": "AWS",
-    "accountOwner": "OWNER_CONTROLLED_ACCOUNT_VERIFIED_RECOVERY_CONTACTS_PENDING",
+    "accountOwner": "OWNER_CONTROLLED_ACCOUNT_RECOVERY_CONTACTS_VERIFIED",
     "region": "ap-southeast-1",
     "regionApproved": true,
     "accountPreflight": {
@@ -57,8 +57,8 @@
       "accountIdentifierStored": false,
       "accountPlan": "PAID_VERIFIED",
       "paymentMethod": "REGISTERED_VERIFIED",
-      "rootMfa": "ENABLED_ONE_DEVICE_VERIFIED",
-      "recoveryContacts": "NOT_VERIFIED",
+      "rootMfa": "ENABLED_ONE_DEVICE_VERIFIED_ADDITIONAL_FACTOR_NOT_REQUIRED_BY_V1",
+      "recoveryContacts": "VERIFIED_OWNER_CONFIRMATION",
       "recurringBudget": "USD_10_VERIFIED_ALERT_ONLY_NOT_HARD_CAP",
       "singaporeRegion": "AP_SOUTHEAST_1_SELECTABLE_VERIFIED",
       "rootAccessKeys": "PROHIBITED_NOT_REQUESTED"
@@ -126,7 +126,20 @@
   },
   "capacityGate": {
     "lambdaMaximumRuntimeSeconds": 900,
+    "lambdaMaximumEphemeralStorageMiB": 10240,
     "requireMeasuredDumpSizeAndDurationBeforeImplementation": true,
+    "measurement": {
+      "status": "APPROVAL_PACKET_PREPARED_NOT_EXECUTED",
+      "runbook": "docs/cloud/AWS-BACKUP-CAPACITY-MEASUREMENT-APPROVAL-V1.md",
+      "inputTemplate": "docs/cloud/aws-backup-capacity-input-v1.json",
+      "historicalReferenceBytes": 696310,
+      "historicalReferenceCreatedAt": "2026-08-04T01:35:16Z",
+      "historicalReferenceSatisfiesCurrentGate": false,
+      "currentArchiveBytes": null,
+      "currentDumpDurationSeconds": null,
+      "productionConnectionAuthorized": false,
+      "transientProductionArchiveAuthorized": false
+    },
     "fallback": "STOP_AND_PROPOSE_FARGATE_ARCHITECTURE",
     "silentTruncationOrPartialSuccess": "PROHIBITED"
   },
@@ -138,7 +151,11 @@
     "billingAlertPercentages": [50, 80, 100],
     "approved": true,
     "approvedAt": "2026-08-05",
-    "requiresAwsCalculatorEstimateBeforeProvisioning": true
+    "requiresAwsCalculatorEstimateBeforeProvisioning": true,
+    "calculatorStatus": "INPUT_TEMPLATE_PREPARED_AWAITS_CURRENT_MEASUREMENT",
+    "calculatorEstimateUrl": null,
+    "expectedMonthlyUsd": null,
+    "twoTimesObservedMonthlyUsd": null
   },
   "requiredOwnerDecisions": [
     "SUPABASE_PRO_UPGRADE_FOR_DAILY_PROVIDER_BACKUPS",
@@ -156,11 +173,12 @@
     "SUPABASE_PRO_UPGRADE_FOR_DAILY_PROVIDER_BACKUPS",
     "SINGAPORE_DATA_RESIDENCY",
     "USD_10_MONTHLY_COST_CEILING",
-    "RETENTION_RPO_AND_RTO"
+    "RETENTION_RPO_AND_RTO",
+    "AWS_ACCOUNT_OWNERSHIP_BILLING_MFA_AND_RECOVERY"
   ],
   "remainingOwnerDecisions": [
-    "AWS_ACCOUNT_OWNERSHIP_BILLING_MFA_AND_RECOVERY",
     "PRODUCTION_EXPORT_IDENTITY_AND_SECRET_BOUNDARY",
+    "BOUNDED_PRODUCTION_CAPACITY_MEASUREMENT",
     "INFRASTRUCTURE_PROVISIONING",
     "FIRST_PRODUCTION_EXPORT",
     "TWO_CYCLE_RESTORE_REHEARSAL",

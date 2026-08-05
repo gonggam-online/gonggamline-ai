@@ -1,5 +1,23 @@
 # Decision log
 
+## 2026-08-05 — AWS account recovery gate complete; capacity measurement proposed
+
+- Category: high-risk/manual Production measurement approval preparation.
+- Status: repository packet prepared only; Production access, transient dump,
+  AWS Calculator estimate, provisioning, and paid use are not executed.
+- Authority: owner-confirmed recovery contacts and a recovery method
+  independent of this PC; one Root MFA device remains active. An additional
+  Root MFA factor is optional and not a v1 gate.
+- Decision: close only the AWS account recovery preflight. Use the exact
+  `AWS-BACKUP-CAPACITY-MEASUREMENT-APPROVAL-V1.md` packet for a later bounded
+  read-only current dump-size/duration measurement. The recorded 696,310-byte
+  historical archive is reference-only and cannot satisfy the current gate.
+- Cost gate: prepare observed and 2x-observed Singapore Calculator inputs, but
+  leave every price and estimate URL null until measurement. Provisioning
+  remains blocked by the USD 10/month ceiling and a separate exact change-set
+  approval.
+- Rollback: revert this repository packet. No Production or AWS state changed.
+
 ## 2026-08-05 — AWS independent backup infrastructure plan v1
 
 - Category: high-risk/manual infrastructure implementation plan.
@@ -15,8 +33,8 @@
   object-read permission (and KMS decrypt for SSE-KMS). The writer validates
   the upload response and Object Lock retention; a distinct restore role owns
   body verification in a later approved rehearsal.
-- Open gates: recovery contacts independent of this PC, sanitized archive
-  size/duration, 900-second/10-GiB capacity margin, AWS Pricing Calculator
+- Open gates: sanitized archive size/duration, 900-second/10-GiB capacity
+  margin, AWS Pricing Calculator
   estimate, exact disabled-worker change set, provisioning, worker image,
   secret/export identity, Production export, and two-cycle restore.
 - Rollback: revert the repository plan before provisioning. Later retained or

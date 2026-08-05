@@ -1,5 +1,60 @@
 # Work status
 
+## 2026-08-05 — AWS Backup Capacity Measurement Approval v1
+
+- Objective: close the sanitized AWS account-recovery preflight and prepare the
+  exact next Production capacity-measurement and Singapore cost-estimate gates
+  without connecting to Production or creating AWS state.
+- Branch/base: `codex/docs/aws-backup-capacity-approval` from PR #95 merge
+  `de6f124c01b09c9ada00c8d5138d36b843516eda`.
+- Risk/root cause: high-risk/manual Production-data read and future paid
+  infrastructure boundary. The immediate root cause is missing current logical
+  archive size/duration, not application code.
+- Revenue impact: removes the next independent-recovery planning blocker while
+  leaving customer and commerce behavior unchanged.
+- Scope: owner-confirmed recovery-contact state, exact measurement approval
+  packet, fail-closed capacity/Calculator input, contract tests, architecture,
+  decision, changelog, and task recovery evidence.
+- Non-goals: Production connection/export, credential creation/value, reading
+  or changing an existing local backup, AWS Calculator submission, stack/change
+  set, resource/paid use, upload, restore, schedule, DB/RLS/Auth/env, or commerce
+  write.
+- Cloud-first gate: GitHub owns only sanitized contracts and approvals. A later
+  approved measurement creates one restricted transient archive outside the
+  repository and must delete it on every terminal path; raw bytes never become
+  repository/CI/chat/OneDrive evidence.
+- Completed: verified #95 merge and Production smoke; created exact-main task
+  branch; reviewed accepted architecture/IaC; verified current official
+  pg_dump, Lambda, ephemeral-storage, and Calculator contracts; recorded owner
+  recovery confirmation; prepared measurement and cost input artifacts.
+- Current: implementation commit is pushed in high-risk Draft PR #96 with
+  `manual-merge-required`; exact implementation-head CI, Vercel, and Preview
+  browser gates pass. This status-only checkpoint must pass the same exact-head
+  gates before owner handoff.
+- Blockers/owner actions: repository-owner manual review/merge of PR #96.
+  Actual measurement needs
+  the exact later approval text `AWS 백업 Production 용량 측정 v1 승인` and an
+  authorized ephemeral Production credential. Do not send any secret value.
+- Changed files: backup Architecture/contract/plan, capacity runbook/input/test,
+  Decision Log, changelog, and this status.
+- Commands/results: focused backup/capacity tests 21/21; full tests 481/481;
+  typecheck pass; ESLint 0 errors with four pre-existing Revenue-test warnings;
+  Production build pass with 85 routes; `git diff --check`, JSON parse, and
+  changed-file credential/account/path scans pass. Local Playwright is the
+  unchanged environment baseline: 35 pass, 2 skip, 7 fail only because local
+  Supabase is unconfigured (`missing_url`) on `/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
+  Exact implementation-head CI run `30992193467` passed after one unrelated
+  pre-existing Orchestrator timing test failed once and passed on rerun;
+  Preview browser run `30992193162` and Vercel Preview passed.
+- Last commit: `f9f2970e266e17ba20e1b47f18b51dcbadd283a5` (`docs: prepare AWS
+  backup capacity approval`) in Draft PR #96.
+- Exact next action: push this status-only checkpoint, verify exact-head CI,
+  Vercel, and Preview, then repository owner manually reviews/merges PR #96.
+- Remaining risks: current size/duration and end-to-end worker margin are
+  unknown; AWS prices/estimate, resources, Production upload, and restore parity
+  remain unexecuted.
+
 ## 2026-08-05 — AWS Independent Backup Infrastructure Plan v1
 
 - Objective: implement the approved deployment-order stage 3 as reviewed,
