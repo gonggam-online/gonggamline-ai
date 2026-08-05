@@ -1,5 +1,25 @@
 # Decision log
 
+## 2026-08-05 — AWS capacity retry result evidence unavailable
+
+- Category: high-risk/manual Production read retry; execution-evidence failure.
+- Authority: after confirming secure process-scoped credential injection, the
+  owner approved exactly one retry of the AWS Production capacity measurement.
+  That retry was executed once and the authority is consumed.
+- Evidence: preflight passed for the exact Singapore Production target,
+  PostgreSQL 17.6, TLS reachability, disk capacity, current provider backup, and
+  healthy load. The execution transport did not preserve the final sanitized
+  JSON, and no attached terminal or retained Docker exit event could recover
+  it. Therefore success, archive size, duration, TOC count, warning count, and
+  archive creation are unknown and must not be inferred.
+- Safety result: zero matching temporary directories and zero measurement
+  containers remain. No AWS provisioning, paid use, upload, restore, or
+  schedule occurred; the measurement command was read-only. Supabase remained
+  `Healthy` after the retry.
+- Decision: keep capacity, Calculator, Lambda eligibility, provisioning, and
+  upload blocked. No further retry is authorized. A new explicit one-attempt
+  approval must require durable sanitized-result capture before cleanup.
+
 ## 2026-08-05 — AWS capacity measurement attempt failed closed
 
 - Category: high-risk/manual Production read attempt; external configuration

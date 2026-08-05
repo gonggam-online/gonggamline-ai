@@ -334,8 +334,13 @@ explicitly approved by the owner before provisioning:
    packet through PR #96. The owner-approved single Production measurement
    attempt on 2026-08-05 failed closed at database-password authentication
    before creating an archive; cleanup passed and Production remained healthy.
-   The one-attempt approval is consumed. A correct process-scoped credential
-   plus a new explicit one-attempt approval are required before retry. Only
+   After the owner re-injected the process credential, one explicitly approved
+   retry was executed; its final sanitized result was not preserved by the
+   execution transport. Cleanup and Production health were verified, but dump
+   success, size, duration, TOC count, warning count, and archive creation
+   remain unknown. Both one-attempt approvals are consumed. A new explicit
+   one-attempt approval and independently persisted sanitized result are
+   required before another retry. Only
    after a successful measurement may the observed and 2x-observed AWS Pricing
    Calculator scenarios be recorded and the exact disabled-worker
    CloudFormation change set be considered. First Production upload remains a
