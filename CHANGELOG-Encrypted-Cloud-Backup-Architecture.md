@@ -22,3 +22,19 @@
   add-ons disabled, and no configured Log Drain.
 - Preserved the explicit limitation that database backups exclude Storage API
   object bodies and do not satisfy the independent AWS retention target.
+- Added a Singapore-only, non-executing CloudFormation plan with retained
+  KMS/S3/ECR/SQS resources, conditional worker resources, and an always-disabled
+  schedule; no AWS stack operation or Production credential was performed.
+- Recorded sanitized AWS preflight evidence (Paid account, payment method, one
+  root MFA device, recurring USD 10 alert Budget, selectable Singapore region)
+  while keeping recovery contacts, capacity, Calculator, provisioning, secret,
+  export, and restore gates open.
+- Removed `GetObjectAttributes` and Lambda environment-key decrypt authority
+  from the writer after official AWS permission review showed they would
+  authorize backup-body read/decrypt; restore verification remains a separate
+  role and approval.
+- Enforced explicit monthly Object Lock retention and rejected missing or
+  shorter-than-365-day monthly retention while keeping Governance bypass
+  prohibited.
+- Routed both Scheduler delivery failure and exhausted Lambda asynchronous
+  execution failure to the bounded encrypted DLQ and alarm.

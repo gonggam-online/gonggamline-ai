@@ -78,9 +78,11 @@
       "evidence": [
         "docs/security/R3-PRODUCTION-ROLLOUT-APPROVAL-PACKET.md",
         "docs/architecture/ENCRYPTED-CLOUD-BACKUP-AND-RESTORE-V1.md",
-        "docs/cloud/encrypted-backup-contract-v1.json"
+        "docs/cloud/encrypted-backup-contract-v1.json",
+        "docs/cloud/AWS-INDEPENDENT-BACKUP-INFRASTRUCTURE-PLAN-V1.md",
+        "infra/aws-backup/cloudformation.json"
       ],
-      "nextAction": "Manually merge the verified Pro-backup follow-up evidence PR; then establish AWS account billing/MFA before a separate independent-backup infrastructure Story. Do not copy or delete backup content.",
+      "nextAction": "Manually review and merge the infrastructure-plan Draft PR; then verify account recovery contacts, capacity evidence, and an AWS Pricing Calculator estimate before separately approving an exact disabled-worker CloudFormation change set. Do not provision, copy, or delete backup content from this Story.",
       "highRiskBoundary": true
     },
     {

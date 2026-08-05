@@ -38,14 +38,37 @@ type BackupContract = Readonly<{
   }>;
   independentTargetProposal: Readonly<{
     provider: string;
+    accountOwner: string;
     region: string;
     regionApproved: boolean;
+    accountPreflight: Readonly<{
+      accountIdentifierStored: boolean;
+      accountPlan: string;
+      paymentMethod: string;
+      rootMfa: string;
+      recoveryContacts: string;
+      recurringBudget: string;
+      singaporeRegion: string;
+      rootAccessKeys: string;
+    }>;
     bucketName: null;
     publicAccess: string;
     versioning: string;
     objectLock: Readonly<{ enabled: boolean; mode: string; automationCanBypass: boolean }>;
     encryption: Readonly<{ atRest: string; keyIdentifier: null }>;
     execution: Readonly<{ worker: string; ciBackupArtifact: string }>;
+    infrastructurePlan: Readonly<{
+      status: string;
+      template: string;
+      regionRule: string;
+      workerResourcesDefault: string;
+      scheduleStateWhenWorkerCreated: string;
+      productionCredentials: string;
+      stackOperationAuthorized: boolean;
+      requiresSeparateChangeSetApproval: boolean;
+      requiresCapacityEvidence: boolean;
+      requiresAwsCalculatorEstimate: boolean;
+    }>;
   }>;
   retentionProposal: Readonly<{
     dailyRecoveryPointDays: number;
@@ -91,7 +114,7 @@ test("backup architecture remains high-risk, manually merged, and non-executing"
   assert.equal(contract.schemaVersion, "gonggamline-encrypted-backup-contract-v1");
   assert.equal(
     contract.status,
-    "PRO_PROVIDER_BACKUP_ACTIVE_INDEPENDENT_BACKUP_PENDING_MANUAL_MERGE_REQUIRED",
+    "PRO_PROVIDER_BACKUP_ACTIVE_AWS_PREFLIGHT_PARTIAL_INFRASTRUCTURE_PLAN_IMPLEMENTED_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
   );
   assert.equal(contract.risk, "HIGH");
   assert.equal(contract.providerBackup.verified, true);
@@ -133,6 +156,10 @@ test("owner evidence records the active bounded Supabase recovery layer", () => 
 
 test("independent target is private, immutable, encrypted, and separate from CI", () => {
   assert.equal(contract.independentTargetProposal.provider, "AWS");
+  assert.equal(
+    contract.independentTargetProposal.accountOwner,
+    "OWNER_CONTROLLED_ACCOUNT_VERIFIED_RECOVERY_CONTACTS_PENDING",
+  );
   assert.equal(contract.independentTargetProposal.region, contract.source.region);
   assert.equal(contract.independentTargetProposal.regionApproved, true);
   assert.equal(contract.independentTargetProposal.bucketName, null);
@@ -145,6 +172,35 @@ test("independent target is private, immutable, encrypted, and separate from CI"
   assert.equal(contract.independentTargetProposal.encryption.keyIdentifier, null);
   assert.equal(contract.independentTargetProposal.execution.worker, "AWS Lambda container image");
   assert.equal(contract.independentTargetProposal.execution.ciBackupArtifact, "PROHIBITED");
+});
+
+test("AWS preflight is sanitized and fails closed on unverified recovery contacts", () => {
+  const preflight = contract.independentTargetProposal.accountPreflight;
+  assert.equal(preflight.accountIdentifierStored, false);
+  assert.equal(preflight.accountPlan, "PAID_VERIFIED");
+  assert.equal(preflight.paymentMethod, "REGISTERED_VERIFIED");
+  assert.equal(preflight.rootMfa, "ENABLED_ONE_DEVICE_VERIFIED");
+  assert.equal(preflight.recoveryContacts, "NOT_VERIFIED");
+  assert.equal(preflight.recurringBudget, "USD_10_VERIFIED_ALERT_ONLY_NOT_HARD_CAP");
+  assert.equal(preflight.singaporeRegion, "AP_SOUTHEAST_1_SELECTABLE_VERIFIED");
+  assert.equal(preflight.rootAccessKeys, "PROHIBITED_NOT_REQUESTED");
+  assert.ok(
+    contract.remainingOwnerDecisions.includes("AWS_ACCOUNT_OWNERSHIP_BILLING_MFA_AND_RECOVERY"),
+  );
+});
+
+test("infrastructure plan remains non-provisioning and fail-closed", () => {
+  const plan = contract.independentTargetProposal.infrastructurePlan;
+  assert.equal(plan.status, "IMPLEMENTED_NOT_PROVISIONED");
+  assert.equal(plan.template, "infra/aws-backup/cloudformation.json");
+  assert.equal(plan.regionRule, "AP_SOUTHEAST_1_ONLY");
+  assert.equal(plan.workerResourcesDefault, "OMITTED");
+  assert.equal(plan.scheduleStateWhenWorkerCreated, "DISABLED");
+  assert.equal(plan.productionCredentials, "ABSENT");
+  assert.equal(plan.stackOperationAuthorized, false);
+  assert.equal(plan.requiresSeparateChangeSetApproval, true);
+  assert.equal(plan.requiresCapacityEvidence, true);
+  assert.equal(plan.requiresAwsCalculatorEstimate, true);
 });
 
 test("owner-approved retention, recovery, and cost policy remains execution-gated", () => {

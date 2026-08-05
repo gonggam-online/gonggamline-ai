@@ -2,8 +2,9 @@
 
 ## 1. Status, authority, and risk
 
-- Status: backup policy choices approved by the repository owner on 2026-08-05;
-  Architecture Story acceptance still requires manual merge of Draft PR #91.
+- Status: Architecture Story PR #91, policy PR #92, and verified Supabase Pro
+  evidence PR #94 are manually merged. Deployment-order stage 3 now has a
+  reviewed infrastructure plan and tests, but no AWS resource is provisioned.
 - Owner: Database / Security.
 - Risk: high-risk/manual because later work will access Production, introduce
   an external cloud integration and secrets, create paid resources, copy a
@@ -11,6 +12,8 @@
   backup.
 - Machine-readable contract:
   [`encrypted-backup-contract-v1.json`](../cloud/encrypted-backup-contract-v1.json).
+- Infrastructure plan/runbook:
+  [`AWS-INDEPENDENT-BACKUP-INFRASTRUCTURE-PLAN-V1.md`](../cloud/AWS-INDEPENDENT-BACKUP-INFRASTRUCTURE-PLAN-V1.md).
 - This Story authorizes documentation, sanitized inventory, contract tests,
   Draft PR, and Preview only.
 - It does not authorize account creation, billing, resource provisioning,
@@ -153,9 +156,13 @@ The worker produces:
 The manifest must never contain database URLs, passwords, access tokens, JWTs,
 keys, connection strings, row values, SQL dumps, object contents, customer
 data, or raw exception causes. An archive is `VERIFIED` only after a successful
-exit, finite non-zero size, SHA-256 generation, archive-list verification,
-S3 upload, server metadata read-back, expected KMS encryption, version ID, and
-Object Lock retain-until evidence.
+exit, finite non-zero size, SHA-256 generation, archive-list verification, an
+S3 upload response proving the requested checksum, expected KMS encryption and
+version ID, plus a separate Object Lock retain-until read-back. The scheduled
+writer must not use `GetObjectAttributes`: AWS requires `s3:GetObject` (and
+`kms:Decrypt` for an SSE-KMS object) for that API, which would also authorize
+backup-body reads. Independent body/checksum verification therefore belongs
+to the later, separately approved restore role and synthetic restore drill.
 
 ## 7. Security, privacy, and access
 
@@ -282,7 +289,8 @@ Every numbered stage is a separately reviewed high-risk action unless stated:
    RPO/RTO; separately verify AWS account, billing method, MFA, and recovery
    ownership;
 3. implement reviewed infrastructure-as-code and contract tests without
-   Production credentials or enabled schedule;
+   Production credentials or enabled schedule (**implemented in repository;
+   not provisioned**);
 4. provision the isolated AWS boundary with schedule disabled;
 5. verify IAM/KMS/S3/Object Lock/alerts using synthetic data only;
 6. approve the exact Production export identity and secret injection;
@@ -313,12 +321,17 @@ explicitly approved by the owner before provisioning:
    enabled; PITR remains disabled. Official pricing at the decision date is
    from USD 25/month. Exact invoice/tax evidence remains private billing data
    and is not stored in this repository.
-3. Choose or create an owner-controlled AWS account, attach billing, enable
-   MFA, and confirm account-recovery contacts/factors independent of this PC.
+3. **Partially verified 2026-08-05:** an owner-controlled Paid AWS account has
+   a registered payment method, one root MFA device, a recurring USD 10 Budget,
+   and selectable Singapore region. Account identifiers remain private and no
+   access key was requested. Account-recovery contacts/factors independent of
+   this PC are still unverified, so the account gate remains open.
 4. **Approved 2026-08-05:** `ap-southeast-1` residency, USD 10/month AWS-only
    initial ceiling, 35-day daily/12-month monthly retention, RPO <=24h, and RTO
    <=8h.
-5. Approve the later exact infrastructure plan and first Production export.
+5. Manually merge the infrastructure plan, then separately approve the exact
+   disabled-worker CloudFormation change set only after capacity evidence and
+   an AWS Pricing Calculator estimate. First Production export is a later gate.
 6. Approve the restore rehearsal and, only after parity, the exact local
    backup deletion.
 
