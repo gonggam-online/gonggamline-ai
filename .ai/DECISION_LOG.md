@@ -1,5 +1,29 @@
 # Decision log
 
+## 2026-08-05 — Cloud-first durable-state principle
+
+- Category: operating and architecture principle
+- Status: approved by repository owner on 2026-08-05
+- Owner / approver: AI CTO / repository owner
+- Context: GitHub, Vercel, Supabase, and CI provide partial cloud operation,
+  while local backups, automation state, unpushed work, and device setup can
+  remain unique dependencies.
+- Decision: local PCs are replaceable execution clients. Apply
+  `.ai/CLOUD_FIRST_POLICY.md` before every Story; each durable state requires an
+  approved remote owner and recovery path. New local-only durable state stops
+  implementation. Local checkout/cache/test/rehearsal state is temporary and
+  requires cleanup.
+- Safety boundary: cloud-first never authorizes uploading secrets, Production
+  dumps, personal data, or sensitive business data to an unapproved service.
+  Existing local-sensitive state remains until a separately approved encrypted
+  migration and restore test succeeds.
+- Consequences: Story/Task templates and Codex rules now require placement,
+  classification, retention, recovery, and cross-PC evidence. Database, secret,
+  backup, Production, object-storage, and automation-ledger moves remain
+  separate high-risk/manual Stories.
+- Rollback: revert this governance change. Reverting does not authorize local
+  data loss or deletion of cloud/local evidence.
+
 ## 2026-08-05 — Listing content fact and policy Architecture acceptance
 
 - Category: accepted normal-risk, documentation-only Listing Architecture

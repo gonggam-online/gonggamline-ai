@@ -1,5 +1,44 @@
 # Work status
 
+## 2026-08-05 — Cloud-first operating principle
+
+- Objective: make complete cloud portability the first durable-state decision
+  gate for future development, maintenance, and operations.
+- Branch/base: `codex/docs/cloud-first-operating-principle` from exact
+  `origin/main` `673b820ca0b312c0d8861264de2d0ef49caae52f`.
+- Risk/root cause: normal-risk governance/tests only. Local-only durable state
+  was discouraged rather than an explicit stop condition.
+- Revenue impact: prevents PC loss and setup drift from blocking revenue work
+  while keeping cloud migrations incremental and reviewable.
+- Scope: Cloud-first policy, boot/Story/Task/Codex rules, cross-PC runbook,
+  ignore safeguards, governance test, Decision Log, changelog, status.
+- Non-goals: no backup upload/deletion, secret/configuration change, database
+  or RLS migration, Production access, data movement, new bucket/account,
+  automation-ledger move, paid service, or commerce write.
+- Cloud-first gate: durable output is tracked repository policy/evidence in
+  GitHub after delivery. Local build/test output is replaceable; existing local
+  backups/state remain pending separate approved migration.
+- Completed: synchronized 108 remote commits, created the task branch, audited
+  existing policy, and implemented the mandatory durable-state gate.
+- Current: local validation is complete; prepare GitHub delivery.
+- Blockers/owner actions: none for this governance PR. Later backup, storage,
+  secrets, and automation-state moves require exact architecture and approval.
+- Changed files: policy, governance/operating/templates/runbook, gitignore,
+  test, Decision Log, changelog, and this status.
+- Commands/results: `git diff --check` and scope audit passed; 455/455
+  unit/integration tests passed; Production build passed with 85 routes;
+  typecheck passed after the generated `.next` cache was refreshed by build;
+  tracked-source lint passed with zero errors and four pre-existing Revenue-test
+  warnings. Local Playwright ran 44 cases: 35 passed, two skipped, and the same
+  seven Supabase-backed routes failed because local Supabase is unconfigured
+  (`missing_url`): `/listing`, `/market`, `/procurement`, `/revenue`,
+  `/sourcing`, `/workflow`, `/workspace`. No runtime, database, migration,
+  Production, secret, or external-write file changed.
+- Last commit: none.
+- Exact next action: review, test, commit, push, and deliver a Draft PR.
+- Remaining risks: policy cannot provision cloud accounts or credentials;
+  existing local durable dependencies still require migration Stories.
+
 ## 2026-08-05 — Listing evidence fixture and policy kernel (13B)
 
 - Objective: implement accepted Architecture Story 2 as a pure deterministic
