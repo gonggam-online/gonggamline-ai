@@ -29,9 +29,10 @@
   daily/monthly enforcement; exact writer/body-read separation; Scheduler and
   Lambda terminal-failure DLQ; sanitized contract/manifest; runbook; and local
   validation/diff/secret review.
-- Current: repository implementation and validation are complete; GitHub CLI
-  authentication was confirmed outside the network-restricted sandbox and
-  exact-scope delivery is in progress.
+- Current: implementation commit `e478c69` is pushed in high-risk Draft PR #95
+  with `manual-merge-required`; all implementation-head CI, Vercel, and Preview
+  browser gates passed. This status-only checkpoint will become the final head
+  and must pass the same exact-head gates before handoff.
 - Blockers/owner actions: none for Draft PR delivery. Before any later AWS
   change set, the owner must verify recovery contacts/factors independent of
   this PC; capacity evidence and an AWS Pricing Calculator estimate are also
@@ -48,10 +49,14 @@
   35 pass, 2 skip, and the same 7 external-configuration failures because
   local Supabase is unconfigured (`missing_url`) on `/listing`, `/market`,
   `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
-- Last commit: merged PR #94 main `6cb4876`.
-- Exact next action: stage the exact reviewed file set, commit and push it,
-  create a high-risk Draft PR with `manual-merge-required`, then verify
-  exact-head CI and Preview.
+  Implementation-head GitHub CI run `30990377709` and Preview browser run
+  `30990377701` passed; Vercel Preview deployment completed with no failed
+  exact-head check.
+- Last commit: `e478c6963fd6cf71e1122f75802e43f2d244a670` (`feat: plan independent AWS
+  backups`) in Draft PR #95.
+- Exact next action: push this status-only checkpoint, confirm its exact-head CI
+  and Preview, then repository owner manually reviews/merges PR #95. Do not
+  provision AWS in this Story.
 - Remaining risks: database dump size/duration and AWS Calculator estimate are
   unknown; infrastructure, recovery artifact, restore parity, and Storage
   object-body backup remain unimplemented.
