@@ -16,21 +16,24 @@ type CapacityInput = Readonly<{
     attemptCount: number;
     retryApprovalConsumed: boolean;
     retryAuthorized: boolean;
-    failureClass: string;
+    finalApprovalConsumed: boolean;
+    failureClass: string | null;
     resultEvidenceAvailable: boolean;
     attempts: readonly Readonly<{
       attempt: number;
       approvalConsumed: boolean;
       outcome: string;
-      failureClass: string;
+      failureClass: string | null;
     }>[];
-    archiveCreated: null;
+    archiveCreated: boolean;
     historicalReference: Readonly<{
       archiveBytes: number;
       satisfiesCurrentGate: boolean;
     }>;
-    archiveBytes: null;
-    dumpDurationSeconds: null;
+    archiveBytes: number;
+    dumpDurationSeconds: number;
+    archiveListEntryCount: number;
+    warningCount: number;
     transientArchiveDeleted: boolean;
     credentialFileDeleted: boolean;
     temporaryDirectoryDeleted: boolean;
@@ -52,6 +55,9 @@ type CapacityInput = Readonly<{
     monthlyRetentionMonths: number;
     steadyStateDailyObjects: number;
     steadyStateMonthlyObjects: number;
+    steadyStateTotalObjects: number;
+    observedSteadyStateStoredBytes: number;
+    stressSteadyStateStoredBytes: number;
     restoreCyclesPerYear: number;
   }>;
   calculator: Readonly<{
@@ -78,27 +84,25 @@ const inputSource = readFileSync(inputPath, "utf8");
 const input = JSON.parse(inputSource) as CapacityInput;
 const runbook = readFileSync(runbookPath, "utf8");
 
-test("capacity packet records two consumed attempts and unavailable retry evidence", () => {
+test("capacity packet records a successful current measurement and consumed authority", () => {
   assert.equal(input.schemaVersion, "gonggamline-aws-backup-capacity-input-v1");
   assert.equal(
     input.status,
-    "MEASUREMENT_RETRY_EXECUTED_RESULT_EVIDENCE_UNAVAILABLE_REAPPROVAL_REQUIRED",
+    "CURRENT_MEASUREMENT_SUCCEEDED_READY_FOR_MANUAL_PUBLIC_ON_DEMAND_ESTIMATE",
   );
   assert.equal(input.risk, "HIGH");
   assert.equal(input.source.projectRef, "sxvtznmoemrcwifungnb");
   assert.equal(input.source.region, "ap-southeast-1");
   assert.equal(input.measurement.approved, true);
   assert.equal(input.measurement.executed, true);
-  assert.equal(input.measurement.succeeded, false);
+  assert.equal(input.measurement.succeeded, true);
   assert.equal(input.measurement.approvalConsumed, true);
-  assert.equal(input.measurement.attemptCount, 2);
+  assert.equal(input.measurement.attemptCount, 3);
   assert.equal(input.measurement.retryApprovalConsumed, true);
   assert.equal(input.measurement.retryAuthorized, false);
-  assert.equal(
-    input.measurement.failureClass,
-    "EXECUTION_RESULT_EVIDENCE_UNAVAILABLE",
-  );
-  assert.equal(input.measurement.resultEvidenceAvailable, false);
+  assert.equal(input.measurement.finalApprovalConsumed, true);
+  assert.equal(input.measurement.failureClass, null);
+  assert.equal(input.measurement.resultEvidenceAvailable, true);
   assert.deepEqual(
     input.measurement.attempts.map(({ attempt, outcome, failureClass }) => ({
       attempt,
@@ -116,11 +120,18 @@ test("capacity packet records two consumed attempts and unavailable retry eviden
         outcome: "RESULT_EVIDENCE_UNAVAILABLE",
         failureClass: "EXECUTION_RESULT_EVIDENCE_UNAVAILABLE",
       },
+      {
+        attempt: 3,
+        outcome: "SUCCEEDED",
+        failureClass: null,
+      },
     ],
   );
-  assert.equal(input.measurement.archiveCreated, null);
-  assert.equal(input.measurement.archiveBytes, null);
-  assert.equal(input.measurement.dumpDurationSeconds, null);
+  assert.equal(input.measurement.archiveCreated, true);
+  assert.equal(input.measurement.archiveBytes, 715071);
+  assert.equal(input.measurement.dumpDurationSeconds, 34.125);
+  assert.equal(input.measurement.archiveListEntryCount, 1251);
+  assert.equal(input.measurement.warningCount, 0);
   assert.equal(input.measurement.transientArchiveDeleted, true);
   assert.equal(input.measurement.credentialFileDeleted, true);
   assert.equal(input.measurement.temporaryDirectoryDeleted, true);
@@ -133,6 +144,7 @@ test("capacity packet records two consumed attempts and unavailable retry eviden
   assert.equal(input.authorization.transientProductionArchiveAuthorized, false);
   assert.equal(input.authorization.priorOneAttemptAuthorizationConsumed, true);
   assert.equal(input.authorization.oneRetryAuthorizationConsumed, true);
+  assert.equal(input.authorization.finalOneAttemptAuthorizationConsumed, true);
   assert.equal(input.authorization.retryAuthorized, false);
   for (const gate of [
     "awsProvisioningAuthorized",
@@ -158,8 +170,8 @@ test("historical archive is reference-only and cannot satisfy current capacity",
   assert.equal(input.capacity.fallback, "STOP_AND_PROPOSE_FARGATE_ARCHITECTURE");
 });
 
-test("calculator stays blocked and covers every accepted cost surface", () => {
-  assert.equal(input.calculator.status, "BLOCKED_UNTIL_CURRENT_MEASUREMENT");
+test("calculator is ready for manual pricing and covers every accepted cost surface", () => {
+  assert.equal(input.calculator.status, "READY_FOR_MANUAL_PUBLIC_ON_DEMAND_ESTIMATE");
   assert.equal(input.calculator.monthlyCeilingUsdIncludingTaxAndMargin, 10);
   assert.equal(input.calculator.observedScenarioMonthlyUsd, null);
   assert.equal(input.calculator.stressScenarioMonthlyUsd, null);
@@ -169,6 +181,9 @@ test("calculator stays blocked and covers every accepted cost surface", () => {
   assert.equal(input.retentionAndFrequency.monthlyRetentionMonths, 12);
   assert.equal(input.retentionAndFrequency.steadyStateDailyObjects, 35);
   assert.equal(input.retentionAndFrequency.steadyStateMonthlyObjects, 12);
+  assert.equal(input.retentionAndFrequency.steadyStateTotalObjects, 47);
+  assert.equal(input.retentionAndFrequency.observedSteadyStateStoredBytes, 33608337);
+  assert.equal(input.retentionAndFrequency.stressSteadyStateStoredBytes, 67216674);
   assert.equal(input.retentionAndFrequency.restoreCyclesPerYear, 2);
   for (const service of [
     "Amazon S3",
@@ -196,10 +211,13 @@ test("runbook preserves Production, credential, cleanup, and approval boundaries
     "one attempt and is now consumed",
     "failed closed at database-password authentication",
     "new explicit one-attempt approval",
-    "two approvals consumed",
+    "three approvals consumed",
     "result JSON",
     "zero measurement containers remain",
     "No further retry is authorized",
+    "715,071 bytes",
+    "34.125 seconds",
+    "1,251 entries",
   ]) {
     assert.match(normalized, new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }

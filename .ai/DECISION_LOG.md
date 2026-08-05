@@ -1,5 +1,26 @@
 # Decision log
 
+## 2026-08-05 — AWS current Production capacity measurement succeeded
+
+- Category: high-risk/manual Production read; sanitized capacity evidence.
+- Authority: the owner explicitly requested one new reliable AWS Production
+  capacity measurement. The one-attempt authority was consumed exactly once.
+- Execution: PostgreSQL 17.6 complete custom-format `pg_dump` over required TLS
+  produced a 715,071-byte transient archive in 34.125 seconds. Offline
+  `pg_restore --list` validation found 1,251 entries and zero warnings.
+- Safety result: the archive, process-scoped credential, restricted temporary
+  directory, and both containers were removed. Independent inspection found
+  zero remaining artifacts/containers. No database mutation, row inspection,
+  AWS resource, paid use, upload, restore, or schedule occurred.
+- Postflight: Supabase Production remained `Healthy`; CPU 2%, disk 14%, RAM
+  58%, 14/60 connections, and no Advisor issue.
+- Decision: close the current dump-size/duration evidence gate and make the
+  observed/2x public On-Demand AWS Pricing Calculator input ready. Keep Lambda
+  eligibility undecided until a complete worker rehearsal. Provisioning,
+  Production upload, restore, and schedule retain separate approval gates.
+- Rollback: repository evidence can be reverted; there is no Production or AWS
+  state to roll back because the measurement was read-only and transient.
+
 ## 2026-08-05 — AWS capacity retry result evidence unavailable
 
 - Category: high-risk/manual Production read retry; execution-evidence failure.

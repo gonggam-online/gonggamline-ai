@@ -1,6 +1,6 @@
 {
   "schemaVersion": "gonggamline-aws-backup-capacity-input-v1",
-  "status": "MEASUREMENT_RETRY_EXECUTED_RESULT_EVIDENCE_UNAVAILABLE_REAPPROVAL_REQUIRED",
+  "status": "CURRENT_MEASUREMENT_SUCCEEDED_READY_FOR_MANUAL_PUBLIC_ON_DEMAND_ESTIMATE",
   "risk": "HIGH",
   "source": {
     "service": "Supabase managed Postgres",
@@ -14,14 +14,15 @@
     "approvedOn": "2026-08-05",
     "approvalConsumed": true,
     "executed": true,
-    "succeeded": false,
+    "succeeded": true,
     "attemptedOn": "2026-08-05",
-    "attemptCount": 2,
+    "attemptCount": 3,
     "retryApprovedOn": "2026-08-05",
     "retryApprovalConsumed": true,
     "retryAuthorized": false,
-    "failureClass": "EXECUTION_RESULT_EVIDENCE_UNAVAILABLE",
-    "resultEvidenceAvailable": false,
+    "finalApprovalConsumed": true,
+    "failureClass": null,
+    "resultEvidenceAvailable": true,
     "attempts": [
       {
         "attempt": 1,
@@ -36,6 +37,13 @@
         "approvalConsumed": true,
         "outcome": "RESULT_EVIDENCE_UNAVAILABLE",
         "failureClass": "EXECUTION_RESULT_EVIDENCE_UNAVAILABLE"
+      },
+      {
+        "attempt": 3,
+        "approvedOn": "2026-08-05",
+        "approvalConsumed": true,
+        "outcome": "SUCCEEDED",
+        "failureClass": null
       }
     ],
     "historicalReference": {
@@ -43,13 +51,13 @@
       "archiveBytes": 696310,
       "satisfiesCurrentGate": false
     },
-    "measuredAt": null,
+    "measuredAt": "2026-08-05T11:00:45.4286736Z",
     "pgDumpVersion": "17.6",
-    "archiveCreated": null,
-    "archiveBytes": null,
-    "dumpDurationSeconds": null,
-    "archiveListEntryCount": null,
-    "warningCount": null,
+    "archiveCreated": true,
+    "archiveBytes": 715071,
+    "dumpDurationSeconds": 34.125,
+    "archiveListEntryCount": 1251,
+    "warningCount": 0,
     "transientArchiveDeleted": true,
     "credentialFileDeleted": true,
     "temporaryDirectoryDeleted": true,
@@ -72,6 +80,9 @@
     "monthlyRetentionMonths": 12,
     "steadyStateDailyObjects": 35,
     "steadyStateMonthlyObjects": 12,
+    "steadyStateTotalObjects": 47,
+    "observedSteadyStateStoredBytes": 33608337,
+    "stressSteadyStateStoredBytes": 67216674,
     "estimatedDailyInvocationsPerMonth": 31,
     "estimatedMonthlyClassWritesPerMonth": 1,
     "restoreCyclesPerYear": 2,
@@ -79,7 +90,7 @@
     "s3ObjectLock": "GOVERNANCE"
   },
   "calculator": {
-    "status": "BLOCKED_UNTIL_CURRENT_MEASUREMENT",
+    "status": "READY_FOR_MANUAL_PUBLIC_ON_DEMAND_ESTIMATE",
     "pricingMode": "PUBLIC_ON_DEMAND",
     "region": "ap-southeast-1",
     "currency": "USD",
@@ -108,6 +119,7 @@
     "transientProductionArchiveAuthorized": false,
     "priorOneAttemptAuthorizationConsumed": true,
     "oneRetryAuthorizationConsumed": true,
+    "finalOneAttemptAuthorizationConsumed": true,
     "retryAuthorized": false,
     "awsProvisioningAuthorized": false,
     "awsPaidUseAuthorized": false,
