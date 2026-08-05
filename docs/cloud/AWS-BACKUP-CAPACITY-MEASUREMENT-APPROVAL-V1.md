@@ -137,6 +137,38 @@ Durable evidence is the sanitized JSON result and reviewed GitHub PR. Raw
 archive bytes, database credentials, connection strings, local paths, command
 transcripts containing secrets, and row values are prohibited.
 
+## 8. Execution record: one attempt consumed, measurement not completed
+
+The owner supplied the exact approval text on 2026-08-05 after PR #96 was
+merged. That approval authorized one attempt and is now consumed.
+
+Preflight passed before the attempt: the target was the exact Production
+project in `ap-southeast-1`; Supabase Pro showed a current physical backup and
+`Healthy` status; CPU was 2%, disk usage was 14%, and the Singapore Session
+pooler was reachable on TLS port 5432. The local client was PostgreSQL 17.6 and
+restricted temporary storage had adequate free capacity.
+
+The single `pg_dump` attempt failed closed at database-password
+authentication, before an archive was created. This is classified as
+`EXTERNAL_CONFIGURATION_DATABASE_CREDENTIAL_AUTHENTICATION`, not a code or
+schema defect. No retry was attempted, no database write occurred, no AWS
+resource or paid use was created, and no backup was uploaded, restored, or
+scheduled.
+
+Cleanup passed on the failure path. The newly created restricted temporary
+directory and its files were removed, the process-scoped credential file was
+destroyed with the removed container tmpfs, and no measurement container
+remained. The credential value, row contents, existing local backup contents,
+and existing provider backups were not read or changed. Production was
+`Healthy` after the attempt and the provider backup remained visible.
+
+The current archive size, successful dump duration, and archive-list entry
+count remain unknown. The Calculator, Lambda-capacity, AWS provisioning,
+Production upload, restore, and schedule gates therefore remain blocked. A new
+attempt requires both a correct process-scoped database credential and a new
+explicit one-attempt approval; this packet does not authorize credential reset
+or rotation.
+
 Official references:
 
 - [Supabase logical backups with physical backups enabled](https://supabase.com/docs/guides/troubleshooting/download-logical-backups)

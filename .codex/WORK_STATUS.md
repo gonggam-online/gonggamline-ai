@@ -1,5 +1,71 @@
 # Work status
 
+## 2026-08-05 — AWS Backup Production capacity measurement v1 attempt
+
+- Objective: execute the owner-approved single bounded read-only Production
+  logical-dump capacity measurement after PR #96 merge, record only sanitized
+  size/duration/list evidence, and delete all newly created transient material.
+- Branch/base: `codex/chore/aws-backup-capacity-measurement` from exact PR #96
+  merge `c5780074be56d525a734a5d913a93c2e57aa1828`.
+- Risk/root cause: high-risk/manual Production-data read. The attempt failed at
+  the external-configuration credential boundary; this is not a database schema
+  or application-code defect.
+- Revenue impact: no customer or commerce behavior changed. Independent backup
+  capacity remains blocked, so the work preserves recovery safety but does not
+  yet advance AWS provisioning.
+- Scope: exact-target/backup/load/tool/network/disk preflight, one PostgreSQL
+  17.6 custom-format dump attempt, mandatory failure cleanup, post-attempt
+  provider health check, and sanitized repository evidence.
+- Non-goals preserved: AWS resource/paid use, upload, restore, schedule,
+  credential reset/rotation/value inspection, database/RLS/Auth/environment or
+  commerce mutation, existing local/provider backup access, row inspection,
+  automatic retry, and auto-merge.
+- Completed: verified PR #96 merge and exact owner approval; created a non-main
+  task branch; confirmed Supabase Pro current physical backup, Singapore target,
+  healthy/low-load state, exact Session pooler contract, TLS port reachability,
+  PostgreSQL 17.6, and restricted storage. Executed exactly one attempt.
+- Result/current: the server rejected the process-scoped database credential
+  before archive creation. The one-attempt approval is consumed and no retry was
+  made. Archive bytes, successful duration, and TOC entry count remain unknown.
+  Calculator, Lambda-capacity, provisioning, upload, restore, and schedule are
+  blocked. Sanitized evidence is committed and pushed in high-risk Draft PR
+  #97 with `manual-merge-required`; auto-merge is not enabled.
+- Cleanup/postflight: zero matching temporary directories and zero measurement
+  containers remain. The tmpfs credential file was destroyed with the removed
+  container. No database write, AWS action, archive/row inspection, or existing
+  backup change occurred. Supabase Production was `Healthy` afterward, with CPU
+  2%, disk 14%, latest backup 16 hours earlier, and no Advisor issue.
+- Blocker/owner action: securely supply the correct current database password to
+  a new local process, or separately approve and coordinate a Supabase database
+  password reset if the current password is unavailable. Never send the value in
+  chat. Then provide a new explicit one-attempt approval; the prior approval does
+  not authorize retry.
+- Changed files: capacity input/contract, measurement packet, backup
+  architecture, Decision Log, changelog, focused tests, and this status record.
+- Commands/results: PostgreSQL 17.6 tool preflight pass; DNS/TCP 5432 pass;
+  dump attempt failed closed at password authentication; cleanup and Production
+  health postflight pass. Focused tests 14/14 and full tests 481/481 pass;
+  typecheck pass; Production build pass with 85 routes; source lint excluding
+  ignored generated browser evidence passes with zero errors and the four
+  established Revenue-test warnings. The ordinary lint script is locally
+  blocked only by ignored user-owned `playwright-report/trace` assets (189
+  generated-bundle errors); no changed repository file is named. Local
+  Playwright reproduces the established external-configuration baseline: 35
+  pass, 2 skip, and 7 `missing_url` failures on `/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
+  Implementation head `5f491db2453844414e88bfc91ea6fac27210d0e7`
+  passed CI run `30996319239` after one same-head rerun of an unrelated existing
+  Orchestrator Phase 3 timing flake; Preview browser run `30996319191` and the
+  exact Vercel Preview passed.
+- Last commit: `5f491db2453844414e88bfc91ea6fac27210d0e7` (`docs: record failed AWS
+  capacity measurement`) before this status-only checkpoint.
+- Exact next action: push this status-only checkpoint and verify its exact-head
+  CI, Vercel, and Preview gates, then leave Draft PR #97 for repository-owner
+  manual review/merge. Do not retry Production access.
+- Remaining risks: current dump capacity and AWS cost remain unknown; the local
+  process credential is stale/incorrect; future worker capacity, provisioning,
+  first upload, Storage object backup, and two-cycle restore remain unproven.
+
 ## 2026-08-05 — AWS Backup Capacity Measurement Approval v1
 
 - Objective: close the sanitized AWS account-recovery preflight and prepare the
