@@ -26,6 +26,12 @@
   enabled, and no restore-to-new-project entitlement. A Pro daily-backup
   upgrade is now an explicit separate paid decision; PITR is excluded from the
   initial proposal.
+- Owner policy approval: on 2026-08-05 the repository owner approved Supabase
+  Pro daily backups with PITR excluded, AWS `ap-southeast-1`, a USD 10/month
+  AWS-only ceiling, 35-day daily/12-month monthly retention, RPO <=24h, and RTO
+  <=8h. No plan upgrade, account/billing change, resource, credential,
+  Production export, restore, deletion, or PR merge was executed by this
+  approval record.
 
 ## Item Selection Story 3 residual persistence compliance — 2026-08-03
 

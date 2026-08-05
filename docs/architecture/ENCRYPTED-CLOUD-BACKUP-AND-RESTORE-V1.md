@@ -2,8 +2,8 @@
 
 ## 1. Status, authority, and risk
 
-- Status: proposed Architecture Story; repository-owner manual acceptance is
-  required.
+- Status: backup policy choices approved by the repository owner on 2026-08-05;
+  Architecture Story acceptance still requires manual merge of Draft PR #91.
 - Owner: Database / Security.
 - Risk: high-risk/manual because later work will access Production, introduce
   an external cloud integration and secrets, create paid resources, copy a
@@ -69,12 +69,12 @@ Production rollout. It does not add a customer-facing feature.
 
 ## 4. Decision and alternatives
 
-### Proposed decision
+### Owner-approved policy decision
 
 Retain two complementary recovery boundaries:
 
-1. **Provider-native:** require a separately approved Supabase Pro upgrade for
-   scheduled daily backups. Do not require the PITR add-on in v1; its displayed
+1. **Provider-native:** the owner approved Supabase Pro for scheduled daily
+   backups on 2026-08-05. Do not enable the PITR add-on in v1; its displayed
    starting cost is disproportionate to the initial RPO and independent-copy
    objective. Re-evaluate PITR only through a later cost/recovery decision.
 2. **Independent:** create a repository-owner-controlled AWS account boundary
@@ -84,9 +84,11 @@ Retain two complementary recovery boundaries:
    EventBridge Scheduler invokes it. Raw backup bytes never enter CI, Vercel,
    Git, chat, or an operator download folder.
 
-The AWS account, bucket name, KMS key identifier, IAM roles, secret identifier,
-schedule, and alarm destinations remain `null`/unprovisioned until separately
-approved. Implementation must generate identifiers from reviewed
+The owner also approved AWS Singapore residency, a USD 10/month AWS-only cost
+ceiling, 35-day daily/12-month monthly retention, RPO <=24h, and RTO <=8h on
+2026-08-05. The AWS account, bucket name, KMS key identifier, IAM roles, secret
+identifier, schedule, and alarm destinations remain `null`/unprovisioned until
+separately approved. Implementation must generate identifiers from reviewed
 infrastructure-as-code, not copy examples from this document.
 
 ### Alternatives considered
@@ -182,9 +184,9 @@ Proposed retention follows the accepted database baseline:
 - lifecycle expiration can act only after the applicable lock expires; and
 - the automation role never receives `s3:BypassGovernanceRetention`.
 
-Retention, Singapore residency, and a proposed USD 10 monthly AWS-only ceiling
-remain owner decisions. The ceiling excludes any Supabase plan upgrade. Before
-provisioning, an AWS Pricing Calculator estimate must
+Retention, Singapore residency, and the USD 10 monthly AWS-only ceiling were
+approved by the owner on 2026-08-05. The ceiling excludes the Supabase plan
+upgrade. Before provisioning, an AWS Pricing Calculator estimate must
 include S3 storage/requests/retrieval, KMS key/requests, Lambda, ECR, Secrets
 Manager, EventBridge Scheduler, SQS, CloudWatch, CloudTrail data events if
 enabled, tax, and growth assumptions. Billing alerts are proposed at 50%, 80%,
@@ -267,9 +269,10 @@ restored rows, database connection material, and provider credentials do not.
 Every numbered stage is a separately reviewed high-risk action unless stated:
 
 1. manually accept and merge this Architecture Story;
-2. record the verified Supabase Free/no-managed-backup state and separately
-   approve or reject Pro daily backups, Singapore residency, AWS account,
-   billing ceiling, retention, RPO/RTO, and account recovery ownership;
+2. record the verified Supabase Free/no-managed-backup state and the approved
+   Pro daily backups, Singapore residency, AWS billing ceiling, retention, and
+   RPO/RTO; separately verify AWS account, billing method, MFA, and recovery
+   ownership;
 3. implement reviewed infrastructure-as-code and contract tests without
    Production credentials or enabled schedule;
 4. provision the isolated AWS boundary with schedule disabled;
@@ -297,13 +300,15 @@ explicitly approved by the owner before provisioning:
    no scheduled backup, no retained recovery point, PITR not enabled, and no
    restore-to-new-project entitlement. No credential or backup content was
    supplied.
-2. Approve or reject a Supabase Pro upgrade for provider-native daily backups.
-   PITR remains excluded from the initial proposal and requires its own later
-   paid approval.
+2. **Approved 2026-08-05, execution pending:** upgrade to Supabase Pro for
+   provider-native daily backups while leaving PITR disabled. Official pricing
+   at the decision date is from USD 25/month and the upgrade takes effect
+   immediately. Before the owner confirms checkout, verify the exact displayed
+   charge, active payment method, and that Spend Cap remains enabled.
 3. Choose or create an owner-controlled AWS account, attach billing, enable
    MFA, and confirm account-recovery contacts/factors independent of this PC.
-4. Approve `ap-southeast-1` residency, the proposed USD 10/month AWS-only
-   initial ceiling, 35-day daily/12-month monthly retention, and RPO <=24h/RTO
+4. **Approved 2026-08-05:** `ap-southeast-1` residency, USD 10/month AWS-only
+   initial ceiling, 35-day daily/12-month monthly retention, RPO <=24h, and RTO
    <=8h.
 5. Approve the later exact infrastructure plan and first Production export.
 6. Approve the restore rehearsal and, only after parity, the exact local
@@ -328,6 +333,9 @@ separate Stories.
 ## 15. Official references
 
 - [Supabase Database Backups](https://supabase.com/docs/guides/platform/backups)
+- [Supabase Pricing](https://supabase.com/pricing)
+- [Supabase subscription management](https://supabase.com/docs/guides/platform/manage-your-subscription)
+- [Supabase cost controls](https://supabase.com/docs/guides/platform/cost-control)
 - [Supabase logical backup download guidance](https://supabase.com/docs/guides/troubleshooting/download-logical-backups)
 - [Amazon S3 pricing](https://aws.amazon.com/s3/pricing/)
 - [Amazon S3 Object Lock](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html)

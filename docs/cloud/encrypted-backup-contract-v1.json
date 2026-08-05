@@ -1,6 +1,6 @@
 {
   "schemaVersion": "gonggamline-encrypted-backup-contract-v1",
-  "status": "PROPOSED_OWNER_APPROVAL_REQUIRED",
+  "status": "OWNER_POLICY_APPROVED_MANUAL_MERGE_REQUIRED",
   "risk": "HIGH",
   "owner": "Database / Security",
   "source": {
@@ -30,14 +30,19 @@
     "earliestRecoveryPoint": null,
     "latestRecoveryPoint": null,
     "currentRestoreEntitlement": false,
-    "proUpgradeApproved": false,
+    "proUpgradeApproved": true,
+    "proUpgradeApprovedAt": "2026-08-05",
+    "proPlanBaseMonthlyPriceUsdAtDecision": 25,
+    "proPlanActualProvisioningStatus": "NOT_EXECUTED",
+    "proSpendCapRequired": true,
     "pointInTimeRecoveryAddOnApproved": false,
-    "note": "Current Production has no Supabase-managed recovery point. Pro daily backups require a separate paid owner approval; PITR is not an initial requirement."
+    "note": "The owner approved Pro daily backups with PITR excluded. Actual upgrade remains unexecuted and requires checkout-price review, active payment method, and Spend Cap verification."
   },
   "independentTargetProposal": {
     "provider": "AWS",
     "accountOwner": "REPOSITORY_OWNER_ACCOUNT_PENDING",
     "region": "ap-southeast-1",
+    "regionApproved": true,
     "objectStore": "Amazon S3 general purpose bucket",
     "bucketName": null,
     "publicAccess": "BLOCK_ALL",
@@ -69,7 +74,8 @@
     "dailyObjectLockDays": 35,
     "monthlyObjectLockDays": 365,
     "deletionBeforeRetentionExpiry": "PROHIBITED",
-    "accepted": false
+    "accepted": true,
+    "acceptedAt": "2026-08-05"
   },
   "recoveryProposal": {
     "rpoHoursMaximum": 24,
@@ -77,7 +83,8 @@
     "freshRestoreCycles": 2,
     "restoreTarget": "OWNER_APPROVED_ISOLATED_NON_PRODUCTION",
     "productionRestore": "SEPARATE_INCIDENT_APPROVAL_REQUIRED",
-    "accepted": false
+    "accepted": true,
+    "acceptedAt": "2026-08-05"
   },
   "capacityGate": {
     "lambdaMaximumRuntimeSeconds": 900,
@@ -91,7 +98,8 @@
     "ceilingScope": "AWS_INDEPENDENT_BACKUP_ONLY",
     "supabasePlanCostExcluded": true,
     "billingAlertPercentages": [50, 80, 100],
-    "approved": false,
+    "approved": true,
+    "approvedAt": "2026-08-05",
     "requiresAwsCalculatorEstimateBeforeProvisioning": true
   },
   "requiredOwnerDecisions": [
@@ -100,6 +108,20 @@
     "SINGAPORE_DATA_RESIDENCY",
     "USD_10_MONTHLY_COST_CEILING",
     "RETENTION_RPO_AND_RTO",
+    "PRODUCTION_EXPORT_IDENTITY_AND_SECRET_BOUNDARY",
+    "INFRASTRUCTURE_PROVISIONING",
+    "FIRST_PRODUCTION_EXPORT",
+    "TWO_CYCLE_RESTORE_REHEARSAL",
+    "LOCAL_BACKUP_DELETION_AFTER_PARITY"
+  ],
+  "approvedOwnerDecisions": [
+    "SUPABASE_PRO_UPGRADE_FOR_DAILY_PROVIDER_BACKUPS",
+    "SINGAPORE_DATA_RESIDENCY",
+    "USD_10_MONTHLY_COST_CEILING",
+    "RETENTION_RPO_AND_RTO"
+  ],
+  "remainingOwnerDecisions": [
+    "AWS_ACCOUNT_OWNERSHIP_BILLING_MFA_AND_RECOVERY",
     "PRODUCTION_EXPORT_IDENTITY_AND_SECRET_BOUNDARY",
     "INFRASTRUCTURE_PROVISIONING",
     "FIRST_PRODUCTION_EXPORT",
