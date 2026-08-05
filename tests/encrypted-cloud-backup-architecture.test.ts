@@ -84,6 +84,19 @@ type BackupContract = Readonly<{
   }>;
   capacityGate: Readonly<{
     lambdaMaximumRuntimeSeconds: number;
+    lambdaMaximumEphemeralStorageMiB: number;
+    measurement: Readonly<{
+      status: string;
+      runbook: string;
+      inputTemplate: string;
+      historicalReferenceBytes: number;
+      historicalReferenceCreatedAt: string;
+      historicalReferenceSatisfiesCurrentGate: boolean;
+      currentArchiveBytes: null;
+      currentDumpDurationSeconds: null;
+      productionConnectionAuthorized: boolean;
+      transientProductionArchiveAuthorized: boolean;
+    }>;
     fallback: string;
   }>;
   costProposal: Readonly<{
@@ -91,6 +104,10 @@ type BackupContract = Readonly<{
     ceilingScope: string;
     supabasePlanCostExcluded: boolean;
     approved: boolean;
+    calculatorStatus: string;
+    calculatorEstimateUrl: null;
+    expectedMonthlyUsd: null;
+    twoTimesObservedMonthlyUsd: null;
   }>;
   requiredOwnerDecisions: readonly string[];
   approvedOwnerDecisions: readonly string[];
@@ -114,7 +131,7 @@ test("backup architecture remains high-risk, manually merged, and non-executing"
   assert.equal(contract.schemaVersion, "gonggamline-encrypted-backup-contract-v1");
   assert.equal(
     contract.status,
-    "PRO_PROVIDER_BACKUP_ACTIVE_AWS_PREFLIGHT_PARTIAL_INFRASTRUCTURE_PLAN_IMPLEMENTED_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
+    "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CAPACITY_APPROVAL_PREPARED_NOT_EXECUTED_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
   );
   assert.equal(contract.risk, "HIGH");
   assert.equal(contract.providerBackup.verified, true);
@@ -158,7 +175,7 @@ test("independent target is private, immutable, encrypted, and separate from CI"
   assert.equal(contract.independentTargetProposal.provider, "AWS");
   assert.equal(
     contract.independentTargetProposal.accountOwner,
-    "OWNER_CONTROLLED_ACCOUNT_VERIFIED_RECOVERY_CONTACTS_PENDING",
+    "OWNER_CONTROLLED_ACCOUNT_RECOVERY_CONTACTS_VERIFIED",
   );
   assert.equal(contract.independentTargetProposal.region, contract.source.region);
   assert.equal(contract.independentTargetProposal.regionApproved, true);
@@ -174,18 +191,20 @@ test("independent target is private, immutable, encrypted, and separate from CI"
   assert.equal(contract.independentTargetProposal.execution.ciBackupArtifact, "PROHIBITED");
 });
 
-test("AWS preflight is sanitized and fails closed on unverified recovery contacts", () => {
+test("AWS account preflight is sanitized and complete without requiring a second root factor", () => {
   const preflight = contract.independentTargetProposal.accountPreflight;
   assert.equal(preflight.accountIdentifierStored, false);
   assert.equal(preflight.accountPlan, "PAID_VERIFIED");
   assert.equal(preflight.paymentMethod, "REGISTERED_VERIFIED");
-  assert.equal(preflight.rootMfa, "ENABLED_ONE_DEVICE_VERIFIED");
-  assert.equal(preflight.recoveryContacts, "NOT_VERIFIED");
+  assert.equal(preflight.rootMfa, "ENABLED_ONE_DEVICE_VERIFIED_ADDITIONAL_FACTOR_NOT_REQUIRED_BY_V1");
+  assert.equal(preflight.recoveryContacts, "VERIFIED_OWNER_CONFIRMATION");
   assert.equal(preflight.recurringBudget, "USD_10_VERIFIED_ALERT_ONLY_NOT_HARD_CAP");
   assert.equal(preflight.singaporeRegion, "AP_SOUTHEAST_1_SELECTABLE_VERIFIED");
   assert.equal(preflight.rootAccessKeys, "PROHIBITED_NOT_REQUESTED");
-  assert.ok(
+  assert.ok(contract.approvedOwnerDecisions.includes("AWS_ACCOUNT_OWNERSHIP_BILLING_MFA_AND_RECOVERY"));
+  assert.equal(
     contract.remainingOwnerDecisions.includes("AWS_ACCOUNT_OWNERSHIP_BILLING_MFA_AND_RECOVERY"),
+    false,
   );
 });
 
@@ -214,10 +233,25 @@ test("owner-approved retention, recovery, and cost policy remains execution-gate
     "SEPARATE_INCIDENT_APPROVAL_REQUIRED",
   );
   assert.equal(contract.capacityGate.lambdaMaximumRuntimeSeconds, 900);
+  assert.equal(contract.capacityGate.lambdaMaximumEphemeralStorageMiB, 10240);
+  assert.equal(contract.capacityGate.measurement.status, "APPROVAL_PACKET_PREPARED_NOT_EXECUTED");
+  assert.equal(contract.capacityGate.measurement.historicalReferenceBytes, 696310);
+  assert.equal(contract.capacityGate.measurement.historicalReferenceSatisfiesCurrentGate, false);
+  assert.equal(contract.capacityGate.measurement.currentArchiveBytes, null);
+  assert.equal(contract.capacityGate.measurement.currentDumpDurationSeconds, null);
+  assert.equal(contract.capacityGate.measurement.productionConnectionAuthorized, false);
+  assert.equal(contract.capacityGate.measurement.transientProductionArchiveAuthorized, false);
   assert.equal(contract.capacityGate.fallback, "STOP_AND_PROPOSE_FARGATE_ARCHITECTURE");
   assert.equal(contract.costProposal.initialMonthlyCeilingUsd, 10);
   assert.equal(contract.costProposal.ceilingScope, "AWS_INDEPENDENT_BACKUP_ONLY");
   assert.equal(contract.costProposal.supabasePlanCostExcluded, true);
+  assert.equal(
+    contract.costProposal.calculatorStatus,
+    "INPUT_TEMPLATE_PREPARED_AWAITS_CURRENT_MEASUREMENT",
+  );
+  assert.equal(contract.costProposal.calculatorEstimateUrl, null);
+  assert.equal(contract.costProposal.expectedMonthlyUsd, null);
+  assert.equal(contract.costProposal.twoTimesObservedMonthlyUsd, null);
   for (const decision of [
     "SUPABASE_PRO_UPGRADE_FOR_DAILY_PROVIDER_BACKUPS",
     "SINGAPORE_DATA_RESIDENCY",
@@ -227,7 +261,7 @@ test("owner-approved retention, recovery, and cost policy remains execution-gate
     assert.ok(contract.approvedOwnerDecisions.includes(decision));
   }
   for (const decision of [
-    "AWS_ACCOUNT_OWNERSHIP_BILLING_MFA_AND_RECOVERY",
+    "BOUNDED_PRODUCTION_CAPACITY_MEASUREMENT",
     "INFRASTRUCTURE_PROVISIONING",
     "FIRST_PRODUCTION_EXPORT",
     "LOCAL_BACKUP_DELETION_AFTER_PARITY",

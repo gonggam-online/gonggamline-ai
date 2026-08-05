@@ -71,9 +71,9 @@ encryption would require decrypt permission on the writer role.
 
 All items must be satisfied and recorded without secret values:
 
-1. confirm account recovery contacts/factors are independent of the
-   development PC; one root MFA device is verified, but recovery contacts are
-   not yet verified;
+1. **Complete 2026-08-05:** account recovery contacts and an independent
+   recovery method are owner-verified; one root MFA device is active, and a
+   second root factor is not required by v1;
 2. measure a sanitized logical archive size and `pg_dump` duration without
    copying Production bytes into Git, CI, Vercel, chat, or an unapproved store;
 3. prove the 900-second Lambda limit and 10 GiB ephemeral-storage limit have
@@ -87,6 +87,13 @@ All items must be satisfied and recorded without secret values:
 6. create no root access key and no long-lived developer access key; use a
    temporary/federated administrative session with MFA;
 7. preserve the existing Supabase Pro provider backup throughout rollout.
+
+The exact Production capacity-measurement boundary and sanitized Calculator
+input are prepared in
+[`AWS-BACKUP-CAPACITY-MEASUREMENT-APPROVAL-V1.md`](AWS-BACKUP-CAPACITY-MEASUREMENT-APPROVAL-V1.md)
+and
+[`aws-backup-capacity-input-v1.json`](aws-backup-capacity-input-v1.json).
+Their existence does not authorize the measurement.
 
 Template validation or tests do not satisfy these gates and do not authorize a
 stack operation.

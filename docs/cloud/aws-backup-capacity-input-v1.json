@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "gonggamline-aws-backup-capacity-input-v1",
+  "status": "AWAITING_EXPLICIT_PRODUCTION_MEASUREMENT_APPROVAL",
+  "risk": "HIGH",
+  "source": {
+    "service": "Supabase managed Postgres",
+    "projectRef": "sxvtznmoemrcwifungnb",
+    "region": "ap-southeast-1",
+    "classification": "PRODUCTION_BUSINESS_DATA_PERSONAL_DATA_POSSIBLE"
+  },
+  "measurement": {
+    "runbook": "docs/cloud/AWS-BACKUP-CAPACITY-MEASUREMENT-APPROVAL-V1.md",
+    "approved": false,
+    "executed": false,
+    "historicalReference": {
+      "createdAt": "2026-08-04T01:35:16Z",
+      "archiveBytes": 696310,
+      "satisfiesCurrentGate": false
+    },
+    "measuredAt": null,
+    "pgDumpVersion": null,
+    "archiveBytes": null,
+    "dumpDurationSeconds": null,
+    "archiveListEntryCount": null,
+    "warningCount": null,
+    "transientArchiveDeleted": null,
+    "credentialFileDeleted": null,
+    "rawArchiveStoredRemotely": false,
+    "rowContentInspected": false
+  },
+  "capacity": {
+    "lambdaMaximumRuntimeSeconds": 900,
+    "lambdaMaximumEphemeralStorageMiB": 10240,
+    "observedScenarioMultiplier": 1,
+    "stressScenarioMultiplier": 2,
+    "lambdaEligibility": "UNDECIDED_PENDING_COMPLETE_WORKER_REHEARSAL",
+    "fallback": "STOP_AND_PROPOSE_FARGATE_ARCHITECTURE"
+  },
+  "retentionAndFrequency": {
+    "dailyRetentionDays": 35,
+    "monthlyRetentionMonths": 12,
+    "steadyStateDailyObjects": 35,
+    "steadyStateMonthlyObjects": 12,
+    "estimatedDailyInvocationsPerMonth": 31,
+    "estimatedMonthlyClassWritesPerMonth": 1,
+    "restoreCyclesPerYear": 2,
+    "s3Versioning": true,
+    "s3ObjectLock": "GOVERNANCE"
+  },
+  "calculator": {
+    "status": "BLOCKED_UNTIL_CURRENT_MEASUREMENT",
+    "pricingMode": "PUBLIC_ON_DEMAND",
+    "region": "ap-southeast-1",
+    "currency": "USD",
+    "monthlyCeilingUsdIncludingTaxAndMargin": 10,
+    "services": [
+      "Amazon S3",
+      "AWS Key Management Service",
+      "Amazon Elastic Container Registry",
+      "AWS Lambda",
+      "AWS Secrets Manager",
+      "Amazon EventBridge Scheduler",
+      "Amazon Simple Queue Service",
+      "Amazon CloudWatch",
+      "Data Transfer and restore retrieval",
+      "AWS CloudTrail data events if enabled"
+    ],
+    "observedScenarioMonthlyUsd": null,
+    "stressScenarioMonthlyUsd": null,
+    "taxAndUncertaintyMarginUsd": null,
+    "estimateUrl": null,
+    "estimateExportSha256": null,
+    "withinCeiling": null
+  },
+  "authorization": {
+    "productionConnectionAuthorized": false,
+    "transientProductionArchiveAuthorized": false,
+    "awsProvisioningAuthorized": false,
+    "awsPaidUseAuthorized": false,
+    "productionUploadAuthorized": false,
+    "restoreAuthorized": false,
+    "scheduleAuthorized": false
+  }
+}

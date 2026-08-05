@@ -321,17 +321,21 @@ explicitly approved by the owner before provisioning:
    enabled; PITR remains disabled. Official pricing at the decision date is
    from USD 25/month. Exact invoice/tax evidence remains private billing data
    and is not stored in this repository.
-3. **Partially verified 2026-08-05:** an owner-controlled Paid AWS account has
+3. **Completed 2026-08-05:** an owner-controlled Paid AWS account has
    a registered payment method, one root MFA device, a recurring USD 10 Budget,
    and selectable Singapore region. Account identifiers remain private and no
-   access key was requested. Account-recovery contacts/factors independent of
-   this PC are still unverified, so the account gate remains open.
+   access key was requested. Account-recovery contacts and an independent
+   recovery method are owner-verified. A second root MFA factor remains
+   optional and is not a v1 gate.
 4. **Approved 2026-08-05:** `ap-southeast-1` residency, USD 10/month AWS-only
    initial ceiling, 35-day daily/12-month monthly retention, RPO <=24h, and RTO
    <=8h.
-5. Manually merge the infrastructure plan, then separately approve the exact
-   disabled-worker CloudFormation change set only after capacity evidence and
-   an AWS Pricing Calculator estimate. First Production export is a later gate.
+5. The infrastructure plan was manually merged through PR #95. The bounded
+   Production capacity-measurement packet is prepared but not authorized or
+   executed. After that measurement, record the observed and 2x-observed AWS
+   Pricing Calculator scenarios before separately approving the exact
+   disabled-worker CloudFormation change set. First Production upload remains
+   a later gate.
 6. Approve the restore rehearsal and, only after parity, the exact local
    backup deletion.
 
