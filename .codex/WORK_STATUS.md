@@ -45,12 +45,24 @@
   independently authenticated with repository admin/push access. Git remote
   and exact `origin/main` base were reverified, so publication proceeds through
   local Git plus the GitHub app without reading or replacing credentials.
+- Delivery: implementation commit
+  `44297d5012a6c0201848dc2e383adc67f0f24953` was pushed on
+  `codex/chore/aws-backup-capacity-measurement-v2`; high-risk Draft PR #100
+  targets `main` with `manual-merge-required` and no auto-merge.
+- Remote gates on exact implementation head: CI run 219 passed all jobs,
+  including build/tests/lint/typecheck, tracked-secret audit, complete disposable
+  DB baseline replay, R1 atomic mutation replay, and A01-A12 item-selection
+  security replay. Preview browser validation run 219 passed against the exact
+  Ready Vercel deployment with no failed non-destructive check. Evidence
+  artifact `preview-browser-evidence` digest is
+  `sha256:1f9bce34f02c6e01e51dd329ebf0443705cc84928b9debcd6e79de6b5306dd51`.
 - Owner action/blocker: none for Draft PR delivery. AWS Pricing Calculator,
   infrastructure provisioning/change set, first Production upload, restore,
   and scheduling remain later approval boundaries.
 - Changed files: runner/test, capacity input/contract/tests, measurement
   packet, backup architecture, decision log, changelog, and this checkpoint.
-- Exact next action: run focused tests and correct any contract drift.
+- Exact next action: owner manually reviews and merges Draft PR #100; after
+  merge, wait for Production and run the required health/API/browser smoke.
 - Remaining risks: public On-Demand AWS cost estimate is not yet recorded;
   Lambda remains undecided pending a complete worker rehearsal; no independent
   AWS recovery point exists yet.
