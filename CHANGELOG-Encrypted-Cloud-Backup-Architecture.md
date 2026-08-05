@@ -1,5 +1,22 @@
 # Changelog — Encrypted Cloud Backup Architecture
 
+## 2026-08-06
+
+- Verified the exact PR #100 merge commit in Production and recorded the
+  successful Product Ops live-data render plus exact-head Production browser
+  smoke run and evidence digest.
+- Completed separate public On-Demand Singapore AWS Calculator estimates:
+  USD 2.22/month observed and USD 2.63/month for the accepted 2x stress
+  boundary. Lambda free tier was excluded and low-volume Scheduler/SQS rows
+  were deliberately rounded up to the Calculator's one-million minimum.
+- Added a fixed USD 2.00 tax and uncertainty reserve. The binding USD 4.63/month
+  assessment is within the approved USD 10 AWS-only ceiling with USD 5.37
+  headroom.
+- Published sanitized one-year Calculator links and retained CloudTrail,
+  Lambda eligibility, provisioning, Production upload, restore, schedule, and
+  local deletion as separate approval gates. No AWS resource or paid use was
+  created.
+
 ## 2026-08-05
 
 - Added a transport-independent, secret-safe Production capacity runner and

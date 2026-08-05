@@ -1,6 +1,6 @@
 {
   "schemaVersion": "gonggamline-encrypted-backup-contract-v1",
-  "status": "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CURRENT_CAPACITY_MEASURED_CALCULATOR_READY_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
+  "status": "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CURRENT_CAPACITY_MEASURED_CALCULATOR_COMPLETE_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
   "risk": "HIGH",
   "owner": "Database / Security",
   "source": {
@@ -161,7 +161,7 @@
     "silentTruncationOrPartialSuccess": "PROHIBITED"
   },
   "costProposal": {
-    "pricingAsOf": "2026-08-05",
+    "pricingAsOf": "2026-08-06",
     "initialMonthlyCeilingUsd": 10,
     "ceilingScope": "AWS_INDEPENDENT_BACKUP_ONLY",
     "supabasePlanCostExcluded": true,
@@ -169,10 +169,17 @@
     "approved": true,
     "approvedAt": "2026-08-05",
     "requiresAwsCalculatorEstimateBeforeProvisioning": true,
-    "calculatorStatus": "READY_FOR_MANUAL_PUBLIC_ON_DEMAND_ESTIMATE",
-    "calculatorEstimateUrl": null,
-    "expectedMonthlyUsd": null,
-    "twoTimesObservedMonthlyUsd": null
+    "calculatorStatus": "COMPLETED_PUBLIC_ON_DEMAND_ESTIMATES",
+    "calculatorEstimateUrl": "https://calculator.aws/#/estimate?id=baaee22d4bbe558234a8b8e07d8a08c854e58a83",
+    "calculatorStressEstimateUrl": "https://calculator.aws/#/estimate?id=67720a4897977a644ddf0cbdbf7f43ee0bf99b48",
+    "expectedMonthlyUsd": 2.22,
+    "twoTimesObservedMonthlyUsd": 2.63,
+    "calculatorExcludesTax": true,
+    "taxAndUncertaintyMarginUsd": 2,
+    "ceilingAssessmentMonthlyUsd": 4.63,
+    "remainingHeadroomUsd": 5.37,
+    "withinCeiling": true,
+    "evidence": "docs/cloud/AWS-BACKUP-PRICING-ESTIMATE-V1.md"
   },
   "requiredOwnerDecisions": [
     "SUPABASE_PRO_UPGRADE_FOR_DAILY_PROVIDER_BACKUPS",

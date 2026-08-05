@@ -119,9 +119,16 @@ type BackupContract = Readonly<{
     supabasePlanCostExcluded: boolean;
     approved: boolean;
     calculatorStatus: string;
-    calculatorEstimateUrl: null;
-    expectedMonthlyUsd: null;
-    twoTimesObservedMonthlyUsd: null;
+    calculatorEstimateUrl: string;
+    calculatorStressEstimateUrl: string;
+    expectedMonthlyUsd: number;
+    twoTimesObservedMonthlyUsd: number;
+    calculatorExcludesTax: boolean;
+    taxAndUncertaintyMarginUsd: number;
+    ceilingAssessmentMonthlyUsd: number;
+    remainingHeadroomUsd: number;
+    withinCeiling: boolean;
+    evidence: string;
   }>;
   requiredOwnerDecisions: readonly string[];
   approvedOwnerDecisions: readonly string[];
@@ -146,7 +153,7 @@ test("backup architecture remains high-risk after successful current measurement
   assert.equal(contract.schemaVersion, "gonggamline-encrypted-backup-contract-v1");
   assert.equal(
     contract.status,
-    "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CURRENT_CAPACITY_MEASURED_CALCULATOR_READY_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
+    "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CURRENT_CAPACITY_MEASURED_CALCULATOR_COMPLETE_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
   );
   assert.equal(contract.risk, "HIGH");
   assert.equal(contract.providerBackup.verified, true);
@@ -283,11 +290,27 @@ test("owner-approved retention, recovery, and cost policy remains execution-gate
   assert.equal(contract.costProposal.supabasePlanCostExcluded, true);
   assert.equal(
     contract.costProposal.calculatorStatus,
-    "READY_FOR_MANUAL_PUBLIC_ON_DEMAND_ESTIMATE",
+    "COMPLETED_PUBLIC_ON_DEMAND_ESTIMATES",
   );
-  assert.equal(contract.costProposal.calculatorEstimateUrl, null);
-  assert.equal(contract.costProposal.expectedMonthlyUsd, null);
-  assert.equal(contract.costProposal.twoTimesObservedMonthlyUsd, null);
+  assert.match(
+    contract.costProposal.calculatorEstimateUrl,
+    /^https:\/\/calculator\.aws\/#\/estimate\?id=/,
+  );
+  assert.match(
+    contract.costProposal.calculatorStressEstimateUrl,
+    /^https:\/\/calculator\.aws\/#\/estimate\?id=/,
+  );
+  assert.equal(contract.costProposal.expectedMonthlyUsd, 2.22);
+  assert.equal(contract.costProposal.twoTimesObservedMonthlyUsd, 2.63);
+  assert.equal(contract.costProposal.calculatorExcludesTax, true);
+  assert.equal(contract.costProposal.taxAndUncertaintyMarginUsd, 2);
+  assert.equal(contract.costProposal.ceilingAssessmentMonthlyUsd, 4.63);
+  assert.equal(contract.costProposal.remainingHeadroomUsd, 5.37);
+  assert.equal(contract.costProposal.withinCeiling, true);
+  assert.equal(
+    contract.costProposal.evidence,
+    "docs/cloud/AWS-BACKUP-PRICING-ESTIMATE-V1.md",
+  );
   for (const decision of [
     "SUPABASE_PRO_UPGRADE_FOR_DAILY_PROVIDER_BACKUPS",
     "SINGAPORE_DATA_RESIDENCY",

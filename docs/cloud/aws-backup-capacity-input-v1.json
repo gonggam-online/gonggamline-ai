@@ -1,6 +1,6 @@
 {
   "schemaVersion": "gonggamline-aws-backup-capacity-input-v1",
-  "status": "CURRENT_MEASUREMENT_SUCCEEDED_READY_FOR_MANUAL_PUBLIC_ON_DEMAND_ESTIMATE",
+  "status": "CURRENT_MEASUREMENT_SUCCEEDED_PUBLIC_ON_DEMAND_ESTIMATES_COMPLETE",
   "risk": "HIGH",
   "source": {
     "service": "Supabase managed Postgres",
@@ -90,7 +90,8 @@
     "s3ObjectLock": "GOVERNANCE"
   },
   "calculator": {
-    "status": "READY_FOR_MANUAL_PUBLIC_ON_DEMAND_ESTIMATE",
+    "status": "COMPLETED_PUBLIC_ON_DEMAND_ESTIMATES",
+    "pricingAsOf": "2026-08-06",
     "pricingMode": "PUBLIC_ON_DEMAND",
     "region": "ap-southeast-1",
     "currency": "USD",
@@ -107,12 +108,30 @@
       "Data Transfer and restore retrieval",
       "AWS CloudTrail data events if enabled"
     ],
-    "observedScenarioMonthlyUsd": null,
-    "stressScenarioMonthlyUsd": null,
-    "taxAndUncertaintyMarginUsd": null,
-    "estimateUrl": null,
+    "observedScenarioMonthlyUsd": 2.22,
+    "stressScenarioMonthlyUsd": 2.63,
+    "taxIncludedByCalculator": false,
+    "taxAndUncertaintyMarginUsd": 2,
+    "ceilingAssessmentMonthlyUsd": 4.63,
+    "remainingHeadroomUsd": 5.37,
+    "marginPolicy": "FIXED_USD_2_RESERVE_FOR_TAX_ROUNDING_SANITIZED_LOGS_SMALL_TRANSFER_AND_RETRIEVAL",
+    "calculatorGranularity": {
+      "eventBridgeSchedulerActualMonthlyInvocations": 32,
+      "eventBridgeSchedulerModeledMonthlyInvocations": 1000000,
+      "sqsObservedActualMonthlyRequests": 100,
+      "sqsStressActualMonthlyRequests": 200,
+      "sqsModeledMonthlyRequests": 1000000,
+      "reason": "PUBLIC_CALCULATOR_FIELDS_ACCEPT_WHOLE_MILLIONS_ONLY_FOR_THESE_ROWS"
+    },
+    "conditionalExclusions": {
+      "cloudTrailDataEvents": "EXCLUDED_NOT_ENABLED",
+      "cloudWatchSanitizedLogVolume": "NOT_YET_MEASURED_COVERED_BY_MARGIN",
+      "restoreRetrievalAndSmallTransfer": "COVERED_BY_MARGIN"
+    },
+    "estimateUrl": "https://calculator.aws/#/estimate?id=baaee22d4bbe558234a8b8e07d8a08c854e58a83",
+    "stressEstimateUrl": "https://calculator.aws/#/estimate?id=67720a4897977a644ddf0cbdbf7f43ee0bf99b48",
     "estimateExportSha256": null,
-    "withinCeiling": null
+    "withinCeiling": true
   },
   "authorization": {
     "productionConnectionAuthorized": false,

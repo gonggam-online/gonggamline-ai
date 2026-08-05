@@ -201,12 +201,14 @@ Proposed retention follows the accepted database baseline:
 
 Retention, Singapore residency, and the USD 10 monthly AWS-only ceiling were
 approved by the owner on 2026-08-05. The ceiling excludes the Supabase plan
-upgrade. Before provisioning, an AWS Pricing Calculator estimate must
-include S3 storage/requests/retrieval, KMS key/requests, Lambda, ECR, Secrets
-Manager, EventBridge Scheduler, SQS, CloudWatch, CloudTrail data events if
-enabled, tax, and growth assumptions. Billing alerts are proposed at 50%, 80%,
-and 100% of the ceiling; reaching 100% alerts and pauses nonessential retries,
-but never deletes a retained recovery point.
+upgrade. The public On-Demand AWS Pricing Calculator gate completed on
+2026-08-06 with USD 2.22/month observed and USD 2.63/month 2x-stress estimates.
+The binding assessment adds a fixed USD 2.00 tax and uncertainty reserve for a
+USD 4.63/month planning total and USD 5.37 headroom. The sanitized inputs,
+public estimate links, granularity overstatements, and conditional exclusions
+are recorded in `docs/cloud/AWS-BACKUP-PRICING-ESTIMATE-V1.md`. Billing alerts
+remain proposed at 50%, 80%, and 100% of the ceiling; reaching 100% alerts and
+pauses nonessential retries, but never deletes a retained recovery point.
 
 Deleting the existing local backup is a separate destructive approval after
 remote parity and two-cycle restore evidence. Deletion must name the exact
@@ -346,10 +348,12 @@ explicitly approved by the owner before provisioning:
    owner-approved third and final attempt succeeded on 2026-08-05: 715,071
    bytes, 34.125 seconds, 1,251 archive-list entries, and zero warnings.
    Cleanup and Production health passed. All three one-attempt approvals are
-   consumed. The observed and 2x-observed AWS Pricing Calculator scenarios are
-   now ready for manual public On-Demand estimation; the exact disabled-worker
-   CloudFormation change set still needs separate approval. First Production
-   upload remains a later gate.
+   consumed. On 2026-08-06, the public On-Demand AWS Pricing Calculator
+   recorded USD 2.22/month observed and USD 2.63/month 2x-stress estimates in
+   Singapore. A fixed USD 2.00 tax/uncertainty reserve yields a USD 4.63/month
+   binding assessment, below the USD 10 ceiling. The exact disabled-worker
+   CloudFormation change set still needs separate approval. Lambda eligibility
+   and the first Production upload remain later gates.
 6. Approve the restore rehearsal and, only after parity, the exact local
    backup deletion.
 
@@ -383,3 +387,5 @@ separate Stories.
 - [AWS Lambda encryption at rest](https://docs.aws.amazon.com/lambda/latest/dg/security-encryption-at-rest.html)
 - [EventBridge Scheduler management](https://docs.aws.amazon.com/scheduler/latest/UserGuide/managing-schedule.html)
 - [AWS KMS pricing](https://aws.amazon.com/kms/pricing/)
+- [AWS Pricing Calculator getting started](https://docs.aws.amazon.com/pricing-calculator/latest/userguide/getting-started.html)
+- [AWS Pricing Calculator estimate sharing](https://docs.aws.amazon.com/pricing-calculator/latest/userguide/save-share-estimate.html)
