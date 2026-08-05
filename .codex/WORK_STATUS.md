@@ -1,5 +1,43 @@
 # Work status
 
+## 2026-08-05 - Coupang Seller Product Contract Audit
+
+- Objective: audit current Coupang creation contracts and define the exact
+  zero-write KK946 preflight gap and implementation Stories.
+- Branch/base: `codex/docs/coupang-seller-product-contract-audit` from
+  `origin/main` `a6572b08b637313a298ca14dd5d1c38ffeb9d874`.
+- Risk: normal-risk documentation. Future product creation, approval, Rocket
+  Growth, configuration/secret, or Production work remains high-risk/manual.
+- Revenue impact: prevents false-positive validation and rejected/duplicated
+  first-listing attempts.
+- Root cause: code/contract gap; generator and validator do not implement
+  official category-bound or Rocket schemas. No external/DB failure workaround.
+- Scope: official docs, routes, Coupang types/adapters, seller jobs, Listing
+  generator, metadata, idempotency/errors and KK946 preflight contract.
+- Non-goals: login/key/API calls, product/location/asset writes, secrets/config,
+  runtime/schema/Production, or merge.
+- Completed: boot/risk gates; clean latest-main branch; code audit; official
+  Product Creation, Metadata, Product Query, identity, guide and Rocket review;
+  architecture/contract report.
+- Current: commit, push and Draft PR delivery.
+- Blocker: `gh auth status` reports an invalid current token; use an authenticated
+  connector if available or re-authenticate before CLI PR creation.
+- Changed files: audit report and this status.
+- Results: `git diff --check` passed; lint passed with 0 errors and four
+  pre-existing warnings; typecheck passed; unit tests passed 446/446;
+  production build passed with 85 routes. Local Playwright passed 35, skipped
+  2, and failed 7 only on the existing unconfigured Supabase `missing_url`
+  condition (`/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`,
+  `/workflow`, `/workspace`). Coupang pages and API health checks passed.
+  `npm ci` changed no lockfile and reported six existing advisories (one
+  moderate, five high).
+- Last commit: none for this Story.
+- Next: review diff, run gates, commit, push, create normal-risk Draft PR.
+- Remaining risks: official docs can change; no account/category-specific
+  metadata or shipping/return evidence was queried; KK946 is not live-ready.
+
+---
+
 ## 2026-08-04 — Phase 5 owner-sample structural correction
 
 - Objective: remove circular SHADOW metrics and make all 60 owner labels valid
