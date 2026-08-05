@@ -1,5 +1,53 @@
 # Work status
 
+## 2026-08-06 — AWS Backup Production verification and pricing estimate
+
+- Objective: validate the merged PR #100 Production deployment and complete
+  the accepted observed/2x public On-Demand Singapore AWS pricing gate without
+  provisioning AWS state.
+- Branch/base: `codex/chore/aws-backup-cost-estimate` from PR #100 merge
+  `bb0e3715159cfe7f7d8c3bf049189f7e94c5918b`.
+- Risk/root cause: high-risk/manual pricing and Production verification. The
+  open prerequisite was missing external pricing evidence, not an application
+  or database defect.
+- Revenue impact: protects sales continuity by quantifying the independent
+  recovery layer while preserving the owner-approved USD 10 cost boundary; no
+  customer or commerce behavior changes.
+- Scope: exact merged Production deployment identification, non-destructive
+  Product Ops/browser/API/console/request smoke, observed and 2x-stress public
+  Calculator estimates, ceiling assessment, contract/tests/documentation.
+- Non-goals preserved: AWS provisioning or paid use, credentials, Production
+  export/upload, database mutation, restore, schedule, RLS/Auth/schema/env or
+  commerce writes, CloudTrail enablement, local backup access/deletion, and
+  auto-merge.
+- Production result: exact commit deployed successfully to
+  `https://gonggamline-ai.vercel.app`; Product Ops rendered 151 Supabase-backed
+  products. Production browser smoke run `31055725712` passed with artifact
+  digest
+  `sha256:dc187455eae7465f2c6d13f4c7c56876257e042ad929761cc60d1c764eb9de70`.
+- Pricing result: observed USD 2.22/month; 2x stress USD 2.63/month; fixed tax
+  and uncertainty reserve USD 2.00; binding assessment USD 4.63/month; USD 5.37
+  headroom below the USD 10 ceiling. Both public estimate links contain only
+  sanitized planning inputs.
+- Current work: update structural tests, review the complete diff, run all
+  binding validation, and deliver a high-risk Draft PR with
+  `manual-merge-required`.
+- Owner action/blocker: none for the evidence Draft PR. Lambda complete-worker
+  rehearsal and the exact disabled-worker CloudFormation change set require
+  later, separate high-risk decisions before provisioning.
+- Changed files: capacity input, backup contract, pricing evidence,
+  architecture, decision log, changelog, focused tests, and this checkpoint.
+- Validation: complete tests 486/486 passed; typecheck passed; Production build
+  generated 85 pages; source lint passed with zero errors and four established
+  Revenue-test unused-variable warnings. The unfiltered lint command remains
+  blocked only by existing ignored `playwright-report/trace` generated bundles.
+  Local Playwright reproduced the unchanged external-configuration baseline:
+  35 passed, 2 skipped, and 7 `missing_url` failures on `/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
+- Remaining risks: Lambda eligibility is unproven; sanitized log/transfer/tax
+  values are covered by a planning reserve rather than measured billing; no
+  independent AWS recovery point exists yet.
+
 ## 2026-08-05 — AWS Backup Production capacity measurement final attempt
 
 - Objective: execute exactly one owner-authorized, read-only current Production

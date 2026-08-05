@@ -62,12 +62,26 @@ type CapacityInput = Readonly<{
   }>;
   calculator: Readonly<{
     status: string;
+    pricingAsOf: string;
     monthlyCeilingUsdIncludingTaxAndMargin: number;
     services: readonly string[];
-    observedScenarioMonthlyUsd: null;
-    stressScenarioMonthlyUsd: null;
-    estimateUrl: null;
-    withinCeiling: null;
+    observedScenarioMonthlyUsd: number;
+    stressScenarioMonthlyUsd: number;
+    taxIncludedByCalculator: boolean;
+    taxAndUncertaintyMarginUsd: number;
+    ceilingAssessmentMonthlyUsd: number;
+    remainingHeadroomUsd: number;
+    calculatorGranularity: Readonly<{
+      eventBridgeSchedulerActualMonthlyInvocations: number;
+      eventBridgeSchedulerModeledMonthlyInvocations: number;
+      sqsObservedActualMonthlyRequests: number;
+      sqsStressActualMonthlyRequests: number;
+      sqsModeledMonthlyRequests: number;
+    }>;
+    conditionalExclusions: Readonly<Record<string, string>>;
+    estimateUrl: string;
+    stressEstimateUrl: string;
+    withinCeiling: boolean;
   }>;
   authorization: Readonly<Record<string, boolean>>;
 }>;
@@ -88,7 +102,7 @@ test("capacity packet records a successful current measurement and consumed auth
   assert.equal(input.schemaVersion, "gonggamline-aws-backup-capacity-input-v1");
   assert.equal(
     input.status,
-    "CURRENT_MEASUREMENT_SUCCEEDED_READY_FOR_MANUAL_PUBLIC_ON_DEMAND_ESTIMATE",
+    "CURRENT_MEASUREMENT_SUCCEEDED_PUBLIC_ON_DEMAND_ESTIMATES_COMPLETE",
   );
   assert.equal(input.risk, "HIGH");
   assert.equal(input.source.projectRef, "sxvtznmoemrcwifungnb");
@@ -170,13 +184,41 @@ test("historical archive is reference-only and cannot satisfy current capacity",
   assert.equal(input.capacity.fallback, "STOP_AND_PROPOSE_FARGATE_ARCHITECTURE");
 });
 
-test("calculator is ready for manual pricing and covers every accepted cost surface", () => {
-  assert.equal(input.calculator.status, "READY_FOR_MANUAL_PUBLIC_ON_DEMAND_ESTIMATE");
+test("calculator evidence is complete and remains below the accepted ceiling", () => {
+  assert.equal(input.calculator.status, "COMPLETED_PUBLIC_ON_DEMAND_ESTIMATES");
+  assert.equal(input.calculator.pricingAsOf, "2026-08-06");
   assert.equal(input.calculator.monthlyCeilingUsdIncludingTaxAndMargin, 10);
-  assert.equal(input.calculator.observedScenarioMonthlyUsd, null);
-  assert.equal(input.calculator.stressScenarioMonthlyUsd, null);
-  assert.equal(input.calculator.estimateUrl, null);
-  assert.equal(input.calculator.withinCeiling, null);
+  assert.equal(input.calculator.observedScenarioMonthlyUsd, 2.22);
+  assert.equal(input.calculator.stressScenarioMonthlyUsd, 2.63);
+  assert.equal(input.calculator.taxIncludedByCalculator, false);
+  assert.equal(input.calculator.taxAndUncertaintyMarginUsd, 2);
+  assert.equal(input.calculator.ceilingAssessmentMonthlyUsd, 4.63);
+  assert.equal(input.calculator.remainingHeadroomUsd, 5.37);
+  assert.equal(
+    input.calculator.stressScenarioMonthlyUsd + input.calculator.taxAndUncertaintyMarginUsd,
+    input.calculator.ceilingAssessmentMonthlyUsd,
+  );
+  assert.equal(
+    input.calculator.monthlyCeilingUsdIncludingTaxAndMargin -
+      input.calculator.ceilingAssessmentMonthlyUsd,
+    input.calculator.remainingHeadroomUsd,
+  );
+  assert.match(input.calculator.estimateUrl, /^https:\/\/calculator\.aws\/#\/estimate\?id=/);
+  assert.match(
+    input.calculator.stressEstimateUrl,
+    /^https:\/\/calculator\.aws\/#\/estimate\?id=/,
+  );
+  assert.notEqual(input.calculator.estimateUrl, input.calculator.stressEstimateUrl);
+  assert.equal(input.calculator.withinCeiling, true);
+  assert.equal(input.calculator.calculatorGranularity.eventBridgeSchedulerActualMonthlyInvocations, 32);
+  assert.equal(
+    input.calculator.calculatorGranularity.eventBridgeSchedulerModeledMonthlyInvocations,
+    1_000_000,
+  );
+  assert.equal(input.calculator.calculatorGranularity.sqsObservedActualMonthlyRequests, 100);
+  assert.equal(input.calculator.calculatorGranularity.sqsStressActualMonthlyRequests, 200);
+  assert.equal(input.calculator.calculatorGranularity.sqsModeledMonthlyRequests, 1_000_000);
+  assert.equal(input.calculator.conditionalExclusions.cloudTrailDataEvents, "EXCLUDED_NOT_ENABLED");
   assert.equal(input.retentionAndFrequency.dailyRetentionDays, 35);
   assert.equal(input.retentionAndFrequency.monthlyRetentionMonths, 12);
   assert.equal(input.retentionAndFrequency.steadyStateDailyObjects, 35);
@@ -224,7 +266,11 @@ test("runbook preserves Production, credential, cleanup, and approval boundaries
 });
 
 test("capacity artifacts contain no credential, local backup path, or account email", () => {
-  const combined = `${inputSource}\n${runbook}`;
+  const pricingEvidence = readFileSync(
+    path.join(root, "docs", "cloud", "AWS-BACKUP-PRICING-ESTIMATE-V1.md"),
+    "utf8",
+  );
+  const combined = `${inputSource}\n${runbook}\n${pricingEvidence}`;
   assert.equal(/[A-Z]:\\Dev\\backups\\/i.test(combined), false);
   assert.equal(/gonggamline1@/i.test(combined), false);
   assert.equal(/(?:gh[opsu]_|sbp_|AKIA|ASIA)[A-Za-z0-9_.-]{12,}/.test(combined), false);

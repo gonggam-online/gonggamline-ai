@@ -1,5 +1,34 @@
 # Decision log
 
+## 2026-08-06 — AWS backup Production verification and cost gate complete
+
+- Category: high-risk/manual Production verification and public pricing
+  evidence; no provisioning.
+- Dependency: PR #100 merged as
+  `bb0e3715159cfe7f7d8c3bf049189f7e94c5918b`.
+- Production evidence: the exact merged commit deployed successfully to
+  `https://gonggamline-ai.vercel.app`; Product Ops rendered the Supabase
+  live-data path with 151 products. Production browser smoke run
+  `31055725712` passed pages, APIs, console, page-error, and failed-request
+  assertions and retained artifact digest
+  `sha256:dc187455eae7465f2c6d13f4c7c56876257e042ad929761cc60d1c764eb9de70`.
+- Pricing decision: public On-Demand Singapore estimates are USD 2.22/month
+  observed and USD 2.63/month at the accepted 2x stress boundary. Add a fixed
+  USD 2.00 tax/rounding/log/transfer/retrieval uncertainty reserve; the binding
+  assessment is USD 4.63/month with USD 5.37 remaining below the approved USD
+  10 AWS-only ceiling.
+- Conservative inputs: Lambda excludes free-tier discounts. EventBridge
+  Scheduler and SQS use the Calculator's one-million minimum even though the
+  planned volumes are 32 Scheduler calls and 100/200 SQS requests. CloudTrail
+  data events remain excluded because they are not enabled.
+- Decision: mark only the Calculator prerequisite complete. Lambda eligibility,
+  disabled-worker change-set approval, provisioning, credentials, first
+  Production export/upload, restore, schedule, and local deletion remain
+  separately gated. No AWS resource or paid usage was created.
+- Rollback: revert the evidence commit and refresh both public estimates if an
+  input or price is found incorrect. Existing Production and AWS state are
+  unchanged.
+
 ## 2026-08-05 — AWS current Production capacity measurement succeeded
 
 - Category: high-risk/manual Production read; sanitized capacity evidence.
