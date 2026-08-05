@@ -5,9 +5,8 @@
 - Objective: remove the device-local Production backup authority with the
   smallest independent encrypted cloud recovery design, without moving data or
   provisioning services.
-- Branch/base: `codex/docs/cloud-backup-policy-approval` from exact merged
-  Encrypted Cloud Backup Architecture main
-  `387a98e19b87972d916fa408bb2ad3877f639c85`.
+- Branch/base: `codex/docs/supabase-pro-backup-evidence` from exact merged
+  owner-policy approval main `9f4b2005e6cfb52922412546afb4dbae548dd64e`.
 - Risk/root cause: high-risk/manual Architecture Story. The prior
   provider-native gap is closed by verified Supabase Pro physical daily
   backups; independent 35-day/12-month recovery remains unimplemented.
@@ -33,9 +32,9 @@
   Sanitized follow-up evidence verifies Pro active, seven physical daily
   recovery points with restore actions, Spend Cap enabled, PITR/Dedicated
   IPv4/Custom Domain disabled, and no configured Log Drain.
-- Current: publish provider execution evidence in a new high-risk Draft PR
-  because approval-record PR #92 was already merged before the evidence commit.
-- Blockers/owner actions: manual follow-up PR merge; AWS account billing/MFA/recovery
+- Current: exact-head delivery is complete; high-risk Draft PR #94 awaits
+  repository-owner review and manual merge.
+- Blockers/owner actions: manual PR #94 merge; AWS account billing/MFA/recovery
   ownership; and later infrastructure/Production export/restore/deletion gates.
 - Changed files: Architecture, backup contract, manifest, tests, Decision Log,
   Architecture Review, changelog, and Work Status.
@@ -44,12 +43,13 @@
   tests 467/467; Production build pass; local
   Playwright 35 pass, 2 skip, 7 fail solely on the existing unconfigured
   Supabase API routes (`/listing`, `/market`, `/procurement`, `/revenue`,
-  `/sourcing`, `/workflow`, `/workspace`).
+  `/sourcing`, `/workflow`, `/workspace`). Exact-head GitHub CI run
+  `30983474498` and Preview browser run `30983474389` passed for `f4b416d`.
 - Last merged checkpoint: owner-policy approval PR #92 at merge commit
-  `9f4b200`; provider execution evidence commit `0072e0a` is the unmerged
+  `9f4b200`; provider execution evidence head `f4b416d` is the unmerged
   follow-up.
-- Exact next action: open the pushed provider execution evidence as a new
-  `manual-merge-required` Draft PR; do not merge or provision AWS.
+- Exact next action: repository owner reviews and manually merges Draft PR
+  #94; do not provision AWS in this Story.
 - Remaining risks: current local backup remains a migration blocker; Supabase
   provider backups exclude Storage object bodies and retain only seven days;
   AWS ownership/billing, secret boundary, capacity, infrastructure, and restore
