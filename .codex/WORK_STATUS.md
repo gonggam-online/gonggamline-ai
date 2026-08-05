@@ -19,8 +19,8 @@
   Supplier, schema, payload, and backlog audit; Architecture/decision/backlog/
   changelog draft. Confirmed mojibake, simple keyword/title joining, no images,
   outline-only details, payload mismatch, and no repository evidence for KK946.
-- Current: corrected Architecture accepted; local validation and Draft PR #86
-  delivery update are in progress.
+- Current: corrected Architecture accepted and delivered; Draft PR #86 awaits
+  review/merge while KK946 remains quarantined.
 - Blockers/owner actions: Architecture acceptance is complete. KK946 remains
   quarantined pending exact catalog, order/lot, 3PL inspection, rights,
   category, notice, and approved-asset evidence; acceptance is not readiness.
@@ -66,6 +66,11 @@
   skipped 2, and failed only the same seven Supabase-backed routes on external
   `missing_url`. The corrections introduce no runtime, API, DB, asset, or
   commerce behavior.
+- Owner-review delivery: corrected content commit `5b77af8` and acceptance
+  record commit `3a184ee` are pushed to Draft PR #86. Exact `3a184ee` CI,
+  database replay, security suites, Vercel Preview, and
+  `preview-browser-e2e` all passed. PR remains Draft, `normal-risk`, open, and
+  conflict-free; auto-merge and Production were not attempted.
 
 ## 2026-08-04 — Phase 5 owner-sample structural correction
 
