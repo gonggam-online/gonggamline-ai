@@ -1,0 +1,16 @@
+# Changelog — Encrypted Cloud Backup Architecture
+
+## 2026-08-05
+
+- Added the proposed independent Production backup and restore architecture.
+- Added a machine-readable, fail-closed owner-decision contract.
+- Recommended Supabase provider backups plus an independent Singapore AWS S3,
+  KMS, Object Lock, and scheduled Lambda boundary.
+- Defined retention, capacity, two-cycle restore, cost, security, rollout,
+  rollback, and exact owner gates.
+- Performed no account creation, billing, provisioning, credential operation,
+  Production access/export, restore, backup movement, or deletion.
+- Recorded owner-supplied sanitized evidence that Production is on Supabase
+  Free with no managed recovery point or restore entitlement.
+- Split the optional paid Supabase Pro daily-backup decision from the proposed
+  USD 10/month AWS-only ceiling and excluded PITR from the initial proposal.

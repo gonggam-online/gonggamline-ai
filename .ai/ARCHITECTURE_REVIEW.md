@@ -1,5 +1,32 @@
 # Architecture review
 
+## Proposed Encrypted Cloud Backup and Restore Architecture v1 — 2026-08-05
+
+- Document:
+  `docs/architecture/ENCRYPTED-CLOUD-BACKUP-AND-RESTORE-V1.md`.
+- Status: proposed; repository-owner manual acceptance is required.
+- Boundary: Database / Security disaster recovery, preserving Supabase
+  provider backups and proposing an independent owner-controlled Singapore AWS
+  S3/KMS/Object Lock copy created by a scheduled AWS Lambda worker.
+- Architecture gate: this is the required Architecture Story for a new
+  external integration and backup lifecycle. No implementation or external
+  action is authorized before manual acceptance and a separate exact
+  provisioning Story.
+- Security/failure contract: Production data never enters CI/Git/Vercel/chat;
+  immutable objects, least privilege, separate export/restore roles, bounded
+  retries, fail-closed verification, two fresh restore cycles, and no automated
+  Production restore.
+- Risk/non-goals: high-risk/manual; account/billing, resources, credentials,
+  Production access/export, restore, DB/RLS/Auth/environment change, local
+  backup access/deletion, paid use, and auto-merge are excluded.
+- Rollback: revert documentation before acceptance. Later immutable backup
+  objects and KMS keys require a separate retention/decommission approval.
+- Owner evidence amendment: sanitized Production Dashboard screenshots dated
+  2026-08-05 verify Free Plan, no scheduled backup/recovery point, PITR not
+  enabled, and no restore-to-new-project entitlement. A Pro daily-backup
+  upgrade is now an explicit separate paid decision; PITR is excluded from the
+  initial proposal.
+
 ## Item Selection Story 3 residual persistence compliance — 2026-08-03
 
 - Approved boundary: Supplier / Procurement Item Selection and the accepted
