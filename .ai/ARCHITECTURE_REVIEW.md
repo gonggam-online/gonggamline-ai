@@ -21,6 +21,11 @@
   backup access/deletion, paid use, and auto-merge are excluded.
 - Rollback: revert documentation before acceptance. Later immutable backup
   objects and KMS keys require a separate retention/decommission approval.
+- Owner evidence amendment: sanitized Production Dashboard screenshots dated
+  2026-08-05 verify Free Plan, no scheduled backup/recovery point, PITR not
+  enabled, and no restore-to-new-project entitlement. A Pro daily-backup
+  upgrade is now an explicit separate paid decision; PITR is excluded from the
+  initial proposal.
 
 ## Item Selection Story 3 residual persistence compliance — 2026-08-03
 

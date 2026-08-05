@@ -52,9 +52,14 @@ Production rollout. It does not add a customer-facing feature.
 - A logical dump can preserve schema and rows needed for application recovery,
   but it does not by itself prove global role attributes or provider-managed
   Auth/storage state. Restore evidence must state these limits.
-- The active Supabase plan, daily-backup state, recovery entitlement, and
-  retained recovery range are unknown repository facts and require an owner
-  Dashboard check.
+- Owner-supplied sanitized Dashboard evidence dated 2026-08-05 verifies that
+  Production is on the Supabase Free Plan. Scheduled backups are not included,
+  there is no earliest/latest managed recovery point, PITR is not enabled, and
+  restore-to-new-project is not entitled.
+- The Dashboard states that Pro includes up to seven days of scheduled daily
+  backups. It presents PITR as a separate Pro add-on starting at USD 100/month,
+  and states that restore-to-new-project requires Pro plus physical backups.
+  These are displayed plan capabilities, not approved purchases.
 - Supabase documents daily backups for paid plans with plan-dependent retention
   up to 30 days and optional PITR up to 28 days. Neither alone proves the
   repository's 35-day daily plus 12-month monthly independent-retention target.
@@ -68,8 +73,10 @@ Production rollout. It does not add a customer-facing feature.
 
 Retain two complementary recovery boundaries:
 
-1. **Provider-native:** keep the accepted Supabase automated backup/restore
-   feature enabled and verify its actual plan entitlement.
+1. **Provider-native:** require a separately approved Supabase Pro upgrade for
+   scheduled daily backups. Do not require the PITR add-on in v1; its displayed
+   starting cost is disproportionate to the initial RPO and independent-copy
+   objective. Re-evaluate PITR only through a later cost/recovery decision.
 2. **Independent:** create a repository-owner-controlled AWS account boundary
    in Singapore and store verified logical archives in one private S3 bucket
    using versioning, S3 Object Lock Governance mode, and a customer-managed KMS
@@ -175,8 +182,9 @@ Proposed retention follows the accepted database baseline:
 - lifecycle expiration can act only after the applicable lock expires; and
 - the automation role never receives `s3:BypassGovernanceRetention`.
 
-Retention, Singapore residency, and a proposed USD 10 monthly ceiling remain
-owner decisions. Before provisioning, an AWS Pricing Calculator estimate must
+Retention, Singapore residency, and a proposed USD 10 monthly AWS-only ceiling
+remain owner decisions. The ceiling excludes any Supabase plan upgrade. Before
+provisioning, an AWS Pricing Calculator estimate must
 include S3 storage/requests/retrieval, KMS key/requests, Lambda, ECR, Secrets
 Manager, EventBridge Scheduler, SQS, CloudWatch, CloudTrail data events if
 enabled, tax, and growth assumptions. Billing alerts are proposed at 50%, 80%,
@@ -259,7 +267,8 @@ restored rows, database connection material, and provider credentials do not.
 Every numbered stage is a separately reviewed high-risk action unless stated:
 
 1. manually accept and merge this Architecture Story;
-2. verify Supabase plan/backups and approve Singapore residency, AWS account,
+2. record the verified Supabase Free/no-managed-backup state and separately
+   approve or reject Pro daily backups, Singapore residency, AWS account,
    billing ceiling, retention, RPO/RTO, and account recovery ownership;
 3. implement reviewed infrastructure-as-code and contract tests without
    Production credentials or enabled schedule;
@@ -283,16 +292,21 @@ separately approved retention/decommission procedure.
 The following cannot be completed by repository code and must be performed or
 explicitly approved by the owner before provisioning:
 
-1. In Supabase Dashboard, open the Production project and inspect
-   **Database > Backups** plus organization billing/plan. Record only the plan
-   name, backup type, earliest/latest recovery point, and restore entitlement;
-   never copy credentials or backup content.
-2. Choose or create an owner-controlled AWS account, attach billing, enable
+1. **Completed 2026-08-05:** the owner inspected Production **Database >
+   Backups** and supplied sanitized evidence. The verified state is Free Plan,
+   no scheduled backup, no retained recovery point, PITR not enabled, and no
+   restore-to-new-project entitlement. No credential or backup content was
+   supplied.
+2. Approve or reject a Supabase Pro upgrade for provider-native daily backups.
+   PITR remains excluded from the initial proposal and requires its own later
+   paid approval.
+3. Choose or create an owner-controlled AWS account, attach billing, enable
    MFA, and confirm account-recovery contacts/factors independent of this PC.
-3. Approve `ap-southeast-1` residency, the proposed USD 10/month initial
-   ceiling, 35-day daily/12-month monthly retention, and RPO <=24h/RTO <=8h.
-4. Approve the later exact infrastructure plan and first Production export.
-5. Approve the restore rehearsal and, only after parity, the exact local
+4. Approve `ap-southeast-1` residency, the proposed USD 10/month AWS-only
+   initial ceiling, 35-day daily/12-month monthly retention, and RPO <=24h/RTO
+   <=8h.
+5. Approve the later exact infrastructure plan and first Production export.
+6. Approve the restore rehearsal and, only after parity, the exact local
    backup deletion.
 
 Do not send passwords, access keys, database URLs, recovery codes, or MFA

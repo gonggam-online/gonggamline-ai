@@ -18,8 +18,21 @@
   "providerBackup": {
     "required": true,
     "authority": "Supabase Dashboard Database Backups",
-    "verified": false,
-    "note": "The current plan, daily-backup state, retention and restore entitlement require owner verification."
+    "verified": true,
+    "verifiedAt": "2026-08-05",
+    "evidenceSource": "OWNER_SUPPLIED_SANITIZED_DASHBOARD_SCREENSHOTS",
+    "plan": "FREE",
+    "scheduledBackups": "NOT_INCLUDED",
+    "scheduledRetentionDays": 0,
+    "pointInTimeRecovery": "NOT_ENABLED_PRO_ADD_ON",
+    "pointInTimeRecoveryDisplayedStartingUsdPerMonth": 100,
+    "restoreToNewProject": "NOT_ENTITLED_REQUIRES_PRO_AND_PHYSICAL_BACKUPS",
+    "earliestRecoveryPoint": null,
+    "latestRecoveryPoint": null,
+    "currentRestoreEntitlement": false,
+    "proUpgradeApproved": false,
+    "pointInTimeRecoveryAddOnApproved": false,
+    "note": "Current Production has no Supabase-managed recovery point. Pro daily backups require a separate paid owner approval; PITR is not an initial requirement."
   },
   "independentTargetProposal": {
     "provider": "AWS",
@@ -75,12 +88,14 @@
   "costProposal": {
     "pricingAsOf": "2026-08-05",
     "initialMonthlyCeilingUsd": 10,
+    "ceilingScope": "AWS_INDEPENDENT_BACKUP_ONLY",
+    "supabasePlanCostExcluded": true,
     "billingAlertPercentages": [50, 80, 100],
     "approved": false,
     "requiresAwsCalculatorEstimateBeforeProvisioning": true
   },
   "requiredOwnerDecisions": [
-    "SUPABASE_PLAN_BACKUP_STATE_AND_RESTORE_ENTITLEMENT",
+    "SUPABASE_PRO_UPGRADE_FOR_DAILY_PROVIDER_BACKUPS",
     "AWS_ACCOUNT_OWNERSHIP_BILLING_MFA_AND_RECOVERY",
     "SINGAPORE_DATA_RESIDENCY",
     "USD_10_MONTHLY_COST_CEILING",

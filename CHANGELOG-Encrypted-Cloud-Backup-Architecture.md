@@ -10,3 +10,7 @@
   rollback, and exact owner gates.
 - Performed no account creation, billing, provisioning, credential operation,
   Production access/export, restore, backup movement, or deletion.
+- Recorded owner-supplied sanitized evidence that Production is on Supabase
+  Free with no managed recovery point or restore entitlement.
+- Split the optional paid Supabase Pro daily-backup decision from the proposed
+  USD 10/month AWS-only ceiling and excluded PITR from the initial proposal.

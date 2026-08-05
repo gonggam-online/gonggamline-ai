@@ -9,8 +9,8 @@
   Cloud Portability Baseline main
   `e203d2b8aeade4cc74943b988dab945c2d9f8cf3`.
 - Risk/root cause: high-risk/manual Architecture Story. Existing backup
-  authority is device-local and the exact Supabase backup entitlement is an
-  external-configuration unknown.
+  authority is device-local; owner-supplied Dashboard evidence now confirms
+  that Supabase Free provides no managed recovery point or restore entitlement.
 - Revenue impact: reduces device-loss and unsafe-rollout recovery risk while
   feature work continues; no customer-facing behavior changes.
 - Scope: sanitized inventory, provider/target decision, machine-readable
@@ -24,25 +24,28 @@
   acceptance. Raw backup bytes never enter CI/Git/Vercel/chat.
 - Completed: exact-main branch, policy/R3 evidence review, official provider
   research, decision matrix, proposed architecture, machine-readable contract,
-  manifest linkage, contract tests, and complete local repository gates.
-- Current: complete diff/security review, commit, push, high-risk Draft PR,
-  exact-head CI/Preview verification, then owner handoff without merge.
-- Blockers/owner actions: manual Architecture merge plus the exact decisions
-  listed in section 13 of the Architecture document. No purchase is required
-  before the Draft PR is complete.
+  manifest linkage, contract tests, complete local repository gates, commit
+  `25720e1`, push, Draft PR #91, exact-head CI/Preview success, and sanitized
+  owner evidence confirming Free/no-managed-backup state.
+- Current: validate and push the owner-evidence amendment to Draft PR #91,
+  then return to the manual Architecture merge and paid-service decisions.
+- Blockers/owner actions: manual Architecture merge, a separate Supabase Pro
+  daily-backup decision, and the AWS/account/cost/retention/RPO/RTO decisions
+  listed in section 13. PITR is not proposed for initial purchase.
 - Changed files: Architecture, backup contract, manifest, tests, Decision Log,
   Architecture Review, changelog, and Work Status.
-- Commands/results: focused tests 14/14; typecheck pass; ESLint 0 errors and 4
-  pre-existing test warnings; full tests 466/466; Production build pass; local
+- Commands/results: initial focused tests 14/14 plus evidence-amendment tests
+  7/7; typecheck pass; ESLint 0 errors and 4 pre-existing test warnings; full
+  tests 467/467; Production build pass; local
   Playwright 35 pass, 2 skip, 7 fail solely on the existing unconfigured
   Supabase API routes (`/listing`, `/market`, `/procurement`, `/revenue`,
   `/sourcing`, `/workflow`, `/workspace`).
-- Last commit: none.
-- Exact next action: review the complete diff and deliver a
-  `manual-merge-required` Draft PR; do not merge or provision anything.
+- Last remote checkpoint: `25720e1` on Draft PR #91; evidence amendment pending.
+- Exact next action: validate, commit, and push the sanitized evidence
+  amendment; do not merge, upgrade a plan, or provision anything.
 - Remaining risks: current local backup remains a migration blocker; Supabase
-  plan/restore entitlement, AWS ownership/billing, residency, cost, secret
-  boundary, capacity, and restore parity remain unapproved.
+  has no managed recovery point; Pro upgrade, AWS ownership/billing, residency,
+  cost, secret boundary, capacity, and restore parity remain unapproved.
 
 ## 2026-08-05 — Cloud Portability Baseline
 
