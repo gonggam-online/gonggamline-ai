@@ -19,9 +19,9 @@
 - Completed: boot/risk gates; clean latest-main branch; code audit; official
   Product Creation, Metadata, Product Query, identity, guide and Rocket review;
   architecture/contract report.
-- Current: commit, push and Draft PR delivery.
-- Blocker: `gh auth status` reports an invalid current token; use an authenticated
-  connector if available or re-authenticate before CLI PR creation.
+- Current: delivery complete; Draft PR #84 awaits review.
+- Blockers: none. The GitHub connector created the PR despite the unrelated
+  local `gh` token being invalid.
 - Changed files: audit report and this status.
 - Results: `git diff --check` passed; lint passed with 0 errors and four
   pre-existing warnings; typecheck passed; unit tests passed 446/446;
@@ -31,8 +31,15 @@
   `/workflow`, `/workspace`). Coupang pages and API health checks passed.
   `npm ci` changed no lockfile and reported six existing advisories (one
   moderate, five high).
-- Last commit: none for this Story.
-- Next: review diff, run gates, commit, push, create normal-risk Draft PR.
+- Delivery: implementation commit `701be02d4eabc4ee816ff523add1b710b313fd3e`
+  was pushed. Draft PR #84 targets `main`, is mergeable, and remains unmerged.
+  Exact-head CI run `30968015722` and Preview browser validation run
+  `30968015716` passed. No Ready transition, auto-merge, merge, or Production
+  action was performed.
+- Last commit: `701be02 docs: audit Coupang product contract` (followed by this
+  delivery-status-only update).
+- Next: review Draft PR #84; implement Story 1 separately if the contract audit
+  is accepted.
 - Remaining risks: official docs can change; no account/category-specific
   metadata or shipping/return evidence was queried; KK946 is not live-ready.
 
