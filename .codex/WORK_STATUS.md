@@ -1,5 +1,66 @@
 # Work status
 
+## 2026-08-05 — AWS Independent Backup Infrastructure Plan v1
+
+- Objective: implement the approved deployment-order stage 3 as reviewed,
+  fail-closed AWS infrastructure-as-code and contract tests without creating a
+  resource, credential, Production connection, export, restore, or paid use.
+- Branch/base: `codex/feat/aws-backup-infrastructure-plan` from exact merged
+  PR #94 main `6cb4876c75c130ff44fe7f2e981986ba4ff4ff51`.
+- Risk/root cause: high-risk/manual external-integration and future IAM/secret/
+  paid-resource boundary. The prior external-configuration prerequisites are
+  sanitized as owner-verified: Paid plan, payment method, one root MFA device,
+  USD 10 recurring Budget, and Singapore `ap-southeast-1` selectable.
+- Revenue impact: removes the next device-loss recovery blocker while keeping
+  feature work independent; no customer or commerce behavior changes.
+- Scope: non-executing CloudFormation plan, Singapore-only and schedule-off
+  gates, S3/KMS/Object Lock/IAM/ECR/Lambda/Scheduler/DLQ safety contracts,
+  structural tests, cost/capacity/provisioning runbook, decision/changelog, and
+  delivery evidence.
+- Non-goals: AWS deployment/change set execution, account ID or root email,
+  Access Key, secret creation/value, worker image publication, Production DB
+  access/dump/upload, schedule enablement, restore, local backup access/delete,
+  DB/RLS/Auth/environment change, and auto-merge.
+- Cloud-first gate: GitHub owns reviewed IaC and sanitized decisions. AWS will
+  own later durable backup resources; raw backup bytes and secrets remain
+  prohibited from GitHub/CI/Vercel/Codex/local durable storage.
+- Completed: PR #94 merge verified at `6cb4876`; mandatory boot/Architecture/
+  risk review; exact task branch; Singapore-only CloudFormation; Object Lock
+  daily/monthly enforcement; exact writer/body-read separation; Scheduler and
+  Lambda terminal-failure DLQ; sanitized contract/manifest; runbook; and local
+  validation/diff/secret review.
+- Current: implementation commit `e478c69` is pushed in high-risk Draft PR #95
+  with `manual-merge-required`; all implementation-head CI, Vercel, and Preview
+  browser gates passed. This status-only checkpoint will become the final head
+  and must pass the same exact-head gates before handoff.
+- Blockers/owner actions: none for Draft PR delivery. Before any later AWS
+  change set, the owner must verify recovery contacts/factors independent of
+  this PC; capacity evidence and an AWS Pricing Calculator estimate are also
+  required. Provisioning, export identity/secret, first export, restore drill,
+  and local deletion retain separate manual approvals.
+- Changed files: `infra/aws-backup/cloudformation.json`,
+  `tests/aws-backup-infrastructure-plan.test.ts`, backup Architecture/contract/
+  manifest tests, infrastructure runbook, Architecture Review, Decision Log,
+  changelog, and Work Status.
+- Commands/results: focused tests 16/16; JSON parse and `git diff --check`
+  pass; added-sensitive-pattern and prohibited-writer-action scans clean;
+  typecheck pass; ESLint 0 errors and 4 pre-existing Revenue-test warnings;
+  full tests 476/476; Production build pass with 85 routes. Local Playwright
+  35 pass, 2 skip, and the same 7 external-configuration failures because
+  local Supabase is unconfigured (`missing_url`) on `/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
+  Implementation-head GitHub CI run `30990377709` and Preview browser run
+  `30990377701` passed; Vercel Preview deployment completed with no failed
+  exact-head check.
+- Last commit: `e478c6963fd6cf71e1122f75802e43f2d244a670` (`feat: plan independent AWS
+  backups`) in Draft PR #95.
+- Exact next action: push this status-only checkpoint, confirm its exact-head CI
+  and Preview, then repository owner manually reviews/merges PR #95. Do not
+  provision AWS in this Story.
+- Remaining risks: database dump size/duration and AWS Calculator estimate are
+  unknown; infrastructure, recovery artifact, restore parity, and Storage
+  object-body backup remain unimplemented.
+
 ## 2026-08-05 — Encrypted Cloud Backup Architecture v1
 
 - Objective: remove the device-local Production backup authority with the

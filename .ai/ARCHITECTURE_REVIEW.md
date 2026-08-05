@@ -1,5 +1,38 @@
 # Architecture review
 
+## AWS Independent Backup Infrastructure Plan v1 — 2026-08-05
+
+- Approved source: manually merged Encrypted Cloud Backup and Restore
+  Architecture PR #91, policy approval PR #92, and provider evidence PR #94.
+- Boundary owner: Database / Security. Existing source of truth is
+  `docs/cloud/encrypted-backup-contract-v1.json`; this Story implements only
+  deployment-order stage 3.
+- Architecture compliance: no new Domain, Database, Migration, Queue,
+  Lifecycle, Public API, or unapproved External Integration is introduced.
+  The accepted AWS S3/KMS/Object Lock + disabled Scheduler/Lambda boundary is
+  represented as non-executing infrastructure-as-code and structural tests.
+- Dependency/security: application, Revenue, Product, Listing, marketplace,
+  and Supabase runtime code remain unchanged. Singapore-only placement,
+  immutable retention, least privilege, no root/long-lived key, no secret
+  value, disabled schedule, and fail-closed capacity/cost gates are mandatory.
+- AWS permission correction: the writer excludes `GetObjectAttributes`
+  because AWS couples it to `s3:GetObject` and, for SSE-KMS, `kms:Decrypt`.
+  Writer verification uses the upload response plus retention read-back;
+  independent body verification remains isolated in the later restore role.
+- Retention/principal enforcement: bucket policy denies writes outside the
+  daily/monthly prefixes, any writer except the exact named worker role, daily
+  retention below 35 days, monthly retention without an explicit date, and
+  monthly retention below 365 days. Governance bypass remains globally denied.
+- Durable state: reviewed source and sanitized evidence belong in GitHub; later
+  backup objects belong only in the approved owner-controlled AWS boundary.
+  Local artifacts are replaceable build/test output and contain no backup data.
+- Risk: high-risk/manual because the plan defines future IAM, secret, paid AWS,
+  and Production-export boundaries. Apply `manual-merge-required`; never
+  auto-merge or execute a CloudFormation change set in this Story.
+- Rollout/rollback: repository validation and Draft PR only. Revert the plan
+  before provisioning; after any future immutable object exists, use the
+  separately approved decommission path rather than ordinary deletion.
+
 ## Proposed Encrypted Cloud Backup and Restore Architecture v1 — 2026-08-05
 
 - Document:

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "gonggamline-encrypted-backup-contract-v1",
-  "status": "PRO_PROVIDER_BACKUP_ACTIVE_INDEPENDENT_BACKUP_PENDING_MANUAL_MERGE_REQUIRED",
+  "status": "PRO_PROVIDER_BACKUP_ACTIVE_AWS_PREFLIGHT_PARTIAL_INFRASTRUCTURE_PLAN_IMPLEMENTED_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
   "risk": "HIGH",
   "owner": "Database / Security",
   "source": {
@@ -48,9 +48,21 @@
   },
   "independentTargetProposal": {
     "provider": "AWS",
-    "accountOwner": "REPOSITORY_OWNER_ACCOUNT_PENDING",
+    "accountOwner": "OWNER_CONTROLLED_ACCOUNT_VERIFIED_RECOVERY_CONTACTS_PENDING",
     "region": "ap-southeast-1",
     "regionApproved": true,
+    "accountPreflight": {
+      "verifiedAt": "2026-08-05",
+      "evidenceSource": "OWNER_SUPPLIED_SANITIZED_CONSOLE_CONFIRMATION",
+      "accountIdentifierStored": false,
+      "accountPlan": "PAID_VERIFIED",
+      "paymentMethod": "REGISTERED_VERIFIED",
+      "rootMfa": "ENABLED_ONE_DEVICE_VERIFIED",
+      "recoveryContacts": "NOT_VERIFIED",
+      "recurringBudget": "USD_10_VERIFIED_ALERT_ONLY_NOT_HARD_CAP",
+      "singaporeRegion": "AP_SOUTHEAST_1_SELECTABLE_VERIFIED",
+      "rootAccessKeys": "PROHIBITED_NOT_REQUESTED"
+    },
     "objectStore": "Amazon S3 general purpose bucket",
     "bucketName": null,
     "publicAccess": "BLOCK_ALL",
@@ -74,6 +86,24 @@
       "deadLetterQueue": "Amazon SQS",
       "logs": "Sanitized Amazon CloudWatch logs",
       "ciBackupArtifact": "PROHIBITED"
+    },
+    "infrastructurePlan": {
+      "status": "IMPLEMENTED_NOT_PROVISIONED",
+      "template": "infra/aws-backup/cloudformation.json",
+      "format": "AWS_CLOUDFORMATION_JSON",
+      "regionRule": "AP_SOUTHEAST_1_ONLY",
+      "workerResourcesDefault": "OMITTED",
+      "scheduleStateWhenWorkerCreated": "DISABLED",
+      "productionCredentials": "ABSENT",
+      "writerBodyRead": "PROHIBITED",
+      "writerVerification": "UPLOAD_RESPONSE_CHECKSUM_VERSION_ENCRYPTION_PLUS_OBJECT_LOCK_RETENTION_READBACK",
+      "monthlyImmutableRetention": "EXPLICIT_MINIMUM_365_DAYS_BUCKET_POLICY_ENFORCED",
+      "getObjectAttributes": "PROHIBITED_REQUIRES_BODY_READ_AND_KMS_DECRYPT_PERMISSIONS",
+      "stackOperationAuthorized": false,
+      "requiresSeparateChangeSetApproval": true,
+      "requiresCapacityEvidence": true,
+      "requiresAwsCalculatorEstimate": true,
+      "runbook": "docs/cloud/AWS-INDEPENDENT-BACKUP-INFRASTRUCTURE-PLAN-V1.md"
     }
   },
   "retentionProposal": {

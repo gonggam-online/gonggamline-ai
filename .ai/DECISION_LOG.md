@@ -1,5 +1,28 @@
 # Decision log
 
+## 2026-08-05 — AWS independent backup infrastructure plan v1
+
+- Category: high-risk/manual infrastructure implementation plan.
+- Status: implemented in repository only; not provisioned; manual merge and
+  all later AWS/Production gates remain required.
+- Authority: accepted Architecture PR #91, policy PR #92, verified provider
+  evidence PR #94, and the owner's sanitized AWS preflight confirmation.
+- Decision: represent the Singapore KMS/S3 Object Lock/ECR/SQS boundary in
+  CloudFormation, omit worker resources by default, and keep the conditional
+  Scheduler disabled. No secret value, account identifier, backup content, or
+  external operation is part of the Story.
+- Permission correction: exclude `GetObjectAttributes` because AWS requires
+  object-read permission (and KMS decrypt for SSE-KMS). The writer validates
+  the upload response and Object Lock retention; a distinct restore role owns
+  body verification in a later approved rehearsal.
+- Open gates: recovery contacts independent of this PC, sanitized archive
+  size/duration, 900-second/10-GiB capacity margin, AWS Pricing Calculator
+  estimate, exact disabled-worker change set, provisioning, worker image,
+  secret/export identity, Production export, and two-cycle restore.
+- Rollback: revert the repository plan before provisioning. Later retained or
+  immutable AWS resources require an exact decommission plan, not ordinary
+  deletion.
+
 ## 2026-08-05 — Proposed Encrypted Cloud Backup and Restore v1
 
 - Category: proposed Architecture decision.
