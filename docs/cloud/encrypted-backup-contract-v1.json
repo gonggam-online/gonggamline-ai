@@ -1,6 +1,6 @@
 {
   "schemaVersion": "gonggamline-encrypted-backup-contract-v1",
-  "status": "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CAPACITY_APPROVAL_PREPARED_NOT_EXECUTED_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
+  "status": "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CAPACITY_ATTEMPT_FAILED_AUTH_REAPPROVAL_REQUIRED_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
   "risk": "HIGH",
   "owner": "Database / Security",
   "source": {
@@ -129,7 +129,7 @@
     "lambdaMaximumEphemeralStorageMiB": 10240,
     "requireMeasuredDumpSizeAndDurationBeforeImplementation": true,
     "measurement": {
-      "status": "APPROVAL_PACKET_PREPARED_NOT_EXECUTED",
+      "status": "ONE_APPROVED_ATTEMPT_FAILED_CREDENTIAL_AUTHENTICATION_REAPPROVAL_REQUIRED",
       "runbook": "docs/cloud/AWS-BACKUP-CAPACITY-MEASUREMENT-APPROVAL-V1.md",
       "inputTemplate": "docs/cloud/aws-backup-capacity-input-v1.json",
       "historicalReferenceBytes": 696310,
@@ -137,6 +137,18 @@
       "historicalReferenceSatisfiesCurrentGate": false,
       "currentArchiveBytes": null,
       "currentDumpDurationSeconds": null,
+      "approvedOn": "2026-08-05",
+      "approvalConsumed": true,
+      "attemptedOn": "2026-08-05",
+      "attemptCount": 1,
+      "succeeded": false,
+      "failureClass": "EXTERNAL_CONFIGURATION_DATABASE_CREDENTIAL_AUTHENTICATION",
+      "archiveCreated": false,
+      "transientFilesDeleted": true,
+      "containerDeleted": true,
+      "databaseMutationPerformed": false,
+      "productionStatusAfterAttempt": "HEALTHY",
+      "retryAuthorized": false,
       "productionConnectionAuthorized": false,
       "transientProductionArchiveAuthorized": false
     },
@@ -152,7 +164,7 @@
     "approved": true,
     "approvedAt": "2026-08-05",
     "requiresAwsCalculatorEstimateBeforeProvisioning": true,
-    "calculatorStatus": "INPUT_TEMPLATE_PREPARED_AWAITS_CURRENT_MEASUREMENT",
+    "calculatorStatus": "BLOCKED_PENDING_SUCCESSFUL_CURRENT_MEASUREMENT",
     "calculatorEstimateUrl": null,
     "expectedMonthlyUsd": null,
     "twoTimesObservedMonthlyUsd": null
@@ -176,6 +188,9 @@
     "RETENTION_RPO_AND_RTO",
     "AWS_ACCOUNT_OWNERSHIP_BILLING_MFA_AND_RECOVERY"
   ],
+  "consumedOneTimeApprovals": [
+    "BOUNDED_PRODUCTION_CAPACITY_MEASUREMENT_ATTEMPT_2026_08_05"
+  ],
   "remainingOwnerDecisions": [
     "PRODUCTION_EXPORT_IDENTITY_AND_SECRET_BOUNDARY",
     "BOUNDED_PRODUCTION_CAPACITY_MEASUREMENT",
@@ -188,7 +203,7 @@
     "READ_COPY_UPLOAD_OR_DELETE_LOCAL_BACKUP_CONTENT",
     "PROVISION_AWS_OR_SUPABASE_RESOURCES",
     "CREATE_OR_ROTATE_CREDENTIALS",
-    "CONNECT_TO_OR_EXPORT_PRODUCTION",
+    "RETRY_PRODUCTION_CONNECTION_OR_EXPORT_WITHOUT_NEW_APPROVAL",
     "RESTORE_ANY_DATABASE",
     "CHANGE_SCHEMA_RLS_AUTH_OR_ENVIRONMENT",
     "CREATE_PAID_USAGE",

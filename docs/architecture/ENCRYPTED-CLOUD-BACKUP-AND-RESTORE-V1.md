@@ -330,12 +330,16 @@ explicitly approved by the owner before provisioning:
 4. **Approved 2026-08-05:** `ap-southeast-1` residency, USD 10/month AWS-only
    initial ceiling, 35-day daily/12-month monthly retention, RPO <=24h, and RTO
    <=8h.
-5. The infrastructure plan was manually merged through PR #95. The bounded
-   Production capacity-measurement packet is prepared but not authorized or
-   executed. After that measurement, record the observed and 2x-observed AWS
-   Pricing Calculator scenarios before separately approving the exact
-   disabled-worker CloudFormation change set. First Production upload remains
-   a later gate.
+5. The infrastructure plan was manually merged through PR #95 and the capacity
+   packet through PR #96. The owner-approved single Production measurement
+   attempt on 2026-08-05 failed closed at database-password authentication
+   before creating an archive; cleanup passed and Production remained healthy.
+   The one-attempt approval is consumed. A correct process-scoped credential
+   plus a new explicit one-attempt approval are required before retry. Only
+   after a successful measurement may the observed and 2x-observed AWS Pricing
+   Calculator scenarios be recorded and the exact disabled-worker
+   CloudFormation change set be considered. First Production upload remains a
+   later gate.
 6. Approve the restore rehearsal and, only after parity, the exact local
    backup deletion.
 

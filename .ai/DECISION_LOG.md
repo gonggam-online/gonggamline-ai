@@ -1,5 +1,23 @@
 # Decision log
 
+## 2026-08-05 — AWS capacity measurement attempt failed closed
+
+- Category: high-risk/manual Production read attempt; external configuration
+  failure.
+- Authority: the owner merged PR #96 and approved exactly `AWS 백업 Production
+  용량 측정 v1 승인`. That single-attempt authority is consumed.
+- Result: preflight passed, but PostgreSQL 17.6 stopped at database-password
+  authentication before creating an archive. No automatic retry was made.
+- Safety evidence: the restricted temporary directory, transient files,
+  container tmpfs credential file, and container were removed. No database
+  write, AWS operation, upload, restore, schedule, existing-backup access, or
+  row inspection occurred. Supabase Production was healthy after the attempt.
+- Decision: keep current capacity, Calculator, Lambda eligibility, provisioning,
+  first export, and restore gates blocked. A correct process-scoped database
+  credential and a new explicit one-attempt approval are both required.
+- Rollback: no Production or AWS state was created to roll back; preserve the
+  provider backups and this sanitized failure record.
+
 ## 2026-08-05 — AWS account recovery gate complete; capacity measurement proposed
 
 - Category: high-risk/manual Production measurement approval preparation.

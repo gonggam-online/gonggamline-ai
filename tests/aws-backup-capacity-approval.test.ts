@@ -11,12 +11,24 @@ type CapacityInput = Readonly<{
   measurement: Readonly<{
     approved: boolean;
     executed: boolean;
+    succeeded: boolean;
+    approvalConsumed: boolean;
+    attemptCount: number;
+    retryAuthorized: boolean;
+    failureClass: string;
+    archiveCreated: boolean;
     historicalReference: Readonly<{
       archiveBytes: number;
       satisfiesCurrentGate: boolean;
     }>;
     archiveBytes: null;
     dumpDurationSeconds: null;
+    transientArchiveDeleted: boolean;
+    credentialFileDeleted: boolean;
+    temporaryDirectoryDeleted: boolean;
+    containerDeleted: boolean;
+    databaseMutationPerformed: boolean;
+    productionStatusAfterAttempt: string;
     rawArchiveStoredRemotely: boolean;
     rowContentInspected: boolean;
   }>;
@@ -58,19 +70,49 @@ const inputSource = readFileSync(inputPath, "utf8");
 const input = JSON.parse(inputSource) as CapacityInput;
 const runbook = readFileSync(runbookPath, "utf8");
 
-test("capacity packet remains high-risk and non-executing", () => {
+test("capacity packet records one consumed fail-closed attempt", () => {
   assert.equal(input.schemaVersion, "gonggamline-aws-backup-capacity-input-v1");
-  assert.equal(input.status, "AWAITING_EXPLICIT_PRODUCTION_MEASUREMENT_APPROVAL");
+  assert.equal(
+    input.status,
+    "MEASUREMENT_ATTEMPT_FAILED_CREDENTIAL_AUTHENTICATION_REAPPROVAL_REQUIRED",
+  );
   assert.equal(input.risk, "HIGH");
   assert.equal(input.source.projectRef, "sxvtznmoemrcwifungnb");
   assert.equal(input.source.region, "ap-southeast-1");
-  assert.equal(input.measurement.approved, false);
-  assert.equal(input.measurement.executed, false);
+  assert.equal(input.measurement.approved, true);
+  assert.equal(input.measurement.executed, true);
+  assert.equal(input.measurement.succeeded, false);
+  assert.equal(input.measurement.approvalConsumed, true);
+  assert.equal(input.measurement.attemptCount, 1);
+  assert.equal(input.measurement.retryAuthorized, false);
+  assert.equal(
+    input.measurement.failureClass,
+    "EXTERNAL_CONFIGURATION_DATABASE_CREDENTIAL_AUTHENTICATION",
+  );
+  assert.equal(input.measurement.archiveCreated, false);
   assert.equal(input.measurement.archiveBytes, null);
   assert.equal(input.measurement.dumpDurationSeconds, null);
+  assert.equal(input.measurement.transientArchiveDeleted, true);
+  assert.equal(input.measurement.credentialFileDeleted, true);
+  assert.equal(input.measurement.temporaryDirectoryDeleted, true);
+  assert.equal(input.measurement.containerDeleted, true);
+  assert.equal(input.measurement.databaseMutationPerformed, false);
+  assert.equal(input.measurement.productionStatusAfterAttempt, "HEALTHY");
   assert.equal(input.measurement.rawArchiveStoredRemotely, false);
   assert.equal(input.measurement.rowContentInspected, false);
-  assert.equal(Object.values(input.authorization).every((value) => value === false), true);
+  assert.equal(input.authorization.productionConnectionAuthorized, false);
+  assert.equal(input.authorization.transientProductionArchiveAuthorized, false);
+  assert.equal(input.authorization.priorOneAttemptAuthorizationConsumed, true);
+  assert.equal(input.authorization.retryAuthorized, false);
+  for (const gate of [
+    "awsProvisioningAuthorized",
+    "awsPaidUseAuthorized",
+    "productionUploadAuthorized",
+    "restoreAuthorized",
+    "scheduleAuthorized",
+  ]) {
+    assert.equal(input.authorization[gate], false);
+  }
 });
 
 test("historical archive is reference-only and cannot satisfy current capacity", () => {
@@ -121,6 +163,9 @@ test("runbook preserves Production, credential, cleanup, and approval boundaries
     "secure deletion of the new transient measurement archive",
     "cannot authorize worker implementation or provisioning",
     "2x observed",
+    "one attempt and is now consumed",
+    "failed closed at database-password authentication",
+    "new explicit one-attempt approval",
   ]) {
     assert.match(normalized, new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }

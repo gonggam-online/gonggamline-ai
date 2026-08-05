@@ -45,3 +45,9 @@
   packet and machine-readable Singapore Calculator input template. Current
   size/duration, costs, estimate URL, Production authority, and AWS provisioning
   remain unset and blocked.
+- Recorded the owner-approved single Production measurement attempt. It failed
+  closed at database-password authentication before archive creation; no retry,
+  database write, AWS use, upload, restore, or schedule occurred. Transient
+  files, tmpfs credential material, and the container were removed, Production
+  remained healthy, and a correct process-scoped credential plus a new explicit
+  one-attempt approval are required.

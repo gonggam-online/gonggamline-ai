@@ -94,6 +94,16 @@ type BackupContract = Readonly<{
       historicalReferenceSatisfiesCurrentGate: boolean;
       currentArchiveBytes: null;
       currentDumpDurationSeconds: null;
+      approvalConsumed: boolean;
+      attemptCount: number;
+      succeeded: boolean;
+      failureClass: string;
+      archiveCreated: boolean;
+      transientFilesDeleted: boolean;
+      containerDeleted: boolean;
+      databaseMutationPerformed: boolean;
+      productionStatusAfterAttempt: string;
+      retryAuthorized: boolean;
       productionConnectionAuthorized: boolean;
       transientProductionArchiveAuthorized: boolean;
     }>;
@@ -111,6 +121,7 @@ type BackupContract = Readonly<{
   }>;
   requiredOwnerDecisions: readonly string[];
   approvedOwnerDecisions: readonly string[];
+  consumedOneTimeApprovals: readonly string[];
   remainingOwnerDecisions: readonly string[];
   forbiddenActionsInThisStory: readonly string[];
 }>;
@@ -127,11 +138,11 @@ const contractSource = readFileSync(contractPath, "utf8");
 const contract = JSON.parse(contractSource) as BackupContract;
 const architecture = readFileSync(architecturePath, "utf8");
 
-test("backup architecture remains high-risk, manually merged, and non-executing", () => {
+test("backup architecture remains high-risk after one fail-closed read attempt", () => {
   assert.equal(contract.schemaVersion, "gonggamline-encrypted-backup-contract-v1");
   assert.equal(
     contract.status,
-    "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CAPACITY_APPROVAL_PREPARED_NOT_EXECUTED_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
+    "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CAPACITY_ATTEMPT_FAILED_AUTH_REAPPROVAL_REQUIRED_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
   );
   assert.equal(contract.risk, "HIGH");
   assert.equal(contract.providerBackup.verified, true);
@@ -140,7 +151,11 @@ test("backup architecture remains high-risk, manually merged, and non-executing"
   assert.equal(contract.costProposal.approved, true);
   assert.ok(contract.requiredOwnerDecisions.length >= 10);
   assert.ok(contract.forbiddenActionsInThisStory.includes("AUTO_MERGE"));
-  assert.ok(contract.forbiddenActionsInThisStory.includes("CONNECT_TO_OR_EXPORT_PRODUCTION"));
+  assert.ok(
+    contract.forbiddenActionsInThisStory.includes(
+      "RETRY_PRODUCTION_CONNECTION_OR_EXPORT_WITHOUT_NEW_APPROVAL",
+    ),
+  );
 });
 
 test("owner evidence records the active bounded Supabase recovery layer", () => {
@@ -234,11 +249,27 @@ test("owner-approved retention, recovery, and cost policy remains execution-gate
   );
   assert.equal(contract.capacityGate.lambdaMaximumRuntimeSeconds, 900);
   assert.equal(contract.capacityGate.lambdaMaximumEphemeralStorageMiB, 10240);
-  assert.equal(contract.capacityGate.measurement.status, "APPROVAL_PACKET_PREPARED_NOT_EXECUTED");
+  assert.equal(
+    contract.capacityGate.measurement.status,
+    "ONE_APPROVED_ATTEMPT_FAILED_CREDENTIAL_AUTHENTICATION_REAPPROVAL_REQUIRED",
+  );
   assert.equal(contract.capacityGate.measurement.historicalReferenceBytes, 696310);
   assert.equal(contract.capacityGate.measurement.historicalReferenceSatisfiesCurrentGate, false);
   assert.equal(contract.capacityGate.measurement.currentArchiveBytes, null);
   assert.equal(contract.capacityGate.measurement.currentDumpDurationSeconds, null);
+  assert.equal(contract.capacityGate.measurement.approvalConsumed, true);
+  assert.equal(contract.capacityGate.measurement.attemptCount, 1);
+  assert.equal(contract.capacityGate.measurement.succeeded, false);
+  assert.equal(
+    contract.capacityGate.measurement.failureClass,
+    "EXTERNAL_CONFIGURATION_DATABASE_CREDENTIAL_AUTHENTICATION",
+  );
+  assert.equal(contract.capacityGate.measurement.archiveCreated, false);
+  assert.equal(contract.capacityGate.measurement.transientFilesDeleted, true);
+  assert.equal(contract.capacityGate.measurement.containerDeleted, true);
+  assert.equal(contract.capacityGate.measurement.databaseMutationPerformed, false);
+  assert.equal(contract.capacityGate.measurement.productionStatusAfterAttempt, "HEALTHY");
+  assert.equal(contract.capacityGate.measurement.retryAuthorized, false);
   assert.equal(contract.capacityGate.measurement.productionConnectionAuthorized, false);
   assert.equal(contract.capacityGate.measurement.transientProductionArchiveAuthorized, false);
   assert.equal(contract.capacityGate.fallback, "STOP_AND_PROPOSE_FARGATE_ARCHITECTURE");
@@ -247,7 +278,7 @@ test("owner-approved retention, recovery, and cost policy remains execution-gate
   assert.equal(contract.costProposal.supabasePlanCostExcluded, true);
   assert.equal(
     contract.costProposal.calculatorStatus,
-    "INPUT_TEMPLATE_PREPARED_AWAITS_CURRENT_MEASUREMENT",
+    "BLOCKED_PENDING_SUCCESSFUL_CURRENT_MEASUREMENT",
   );
   assert.equal(contract.costProposal.calculatorEstimateUrl, null);
   assert.equal(contract.costProposal.expectedMonthlyUsd, null);
@@ -268,6 +299,9 @@ test("owner-approved retention, recovery, and cost policy remains execution-gate
   ]) {
     assert.ok(contract.remainingOwnerDecisions.includes(decision));
   }
+  assert.deepEqual(contract.consumedOneTimeApprovals, [
+    "BOUNDED_PRODUCTION_CAPACITY_MEASUREMENT_ATTEMPT_2026_08_05",
+  ]);
 });
 
 test("architecture does not duplicate a local backup path or secret-like value", () => {
