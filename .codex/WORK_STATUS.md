@@ -1,5 +1,42 @@
 # Work status
 
+## 2026-08-05 — Listing evidence fixture and policy kernel (13B)
+
+- Objective: implement the accepted Story 2 pure types/tests kernel for
+  immutable evidence, fact-specific authority/scope/conflict decisions,
+  quarantine, encoding validation, and deterministic KK946-shaped fixtures.
+- Branch/base: `codex/feat/listing-evidence-policy-kernel-13b` from verified
+  `origin/main` `f71c37b6756b674c4099a132e30fcce8f4f4323d` (PR #86 merge).
+- Risk/root cause: normal-risk pure domain code and tests. Root cause is the
+  approved Listing evidence contract's unimplemented code/test boundary.
+- Revenue impact: removes the next truthfulness gate for a reviewable first
+  listing packet while preventing unsupported claims and rights/category drift.
+- Scope: immutable evidence/status types, pure deterministic evaluator,
+  fail-closed issues, UTF-8/NFC/mojibake checks, and synthetic fixtures/tests.
+- Non-goals: real KK946 facts/readiness; 13A runbook/crosswalk; DB/API/Auth/RLS,
+  external integration, secrets, paid calls, assets, pricing, Production, or
+  commerce/marketplace writes.
+- Completed: worktree restoration; governance boot; exact-base and Listing/schema
+  audit; implementation; changelog; focused tests 10/10; typecheck; focused lint.
+- Current: complete diff reviewed; prepare normal-risk commit, push, and Draft PR.
+- Blockers/owner actions: none. Real KK946 remains outside this synthetic Story
+  and requires its separate admissible evidence packet and manual decisions.
+- Changed files: `shared/domain/listing-evidence.ts`,
+  `engines/listing/evidence-policy.ts`, `tests/fixtures/listing-evidence.ts`,
+  `tests/listing-evidence-policy.test.ts`, task changelog, and this status.
+- Commands/results: `npm ci` passed with six pre-existing advisories; focused
+  tests 10/10, typecheck, full tests 456/456, build (85 routes), and lint passed
+  with four pre-existing warnings. Local Playwright passed 35, skipped 2, and
+  failed the same seven Supabase-backed routes because local Supabase is
+  unconfigured (`missing_url`): `/listing`, `/market`, `/procurement`,
+  `/revenue`, `/sourcing`, `/workflow`, and `/workspace`. Failure artifacts are
+  in ignored `test-results/`.
+- Last commit: none for 13B yet.
+- Exact next action: commit and push the reviewed scope, then create a Draft PR.
+- Remaining risks: pure rules cover only the accepted v1 evidence classes;
+  persistence, category DTO compatibility, rendering, payload mapping, and any
+  real listing action remain separately gated Stories.
+
 ## 2026-08-05 — Listing Content Fact and Policy Contract v1
 
 - Objective: complete the Architecture Story and implementation order for
