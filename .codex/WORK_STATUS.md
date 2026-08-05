@@ -5,8 +5,8 @@
 - Objective: execute the owner-approved single retry after secure
   process-scoped credential injection, preserve sanitized capacity evidence,
   and delete every newly created transient artifact.
-- Branch/base: `codex/chore/aws-backup-capacity-measurement` continuing Draft PR
-  #97 from exact head `4680d493604fd67563317d0dc104da78e423e99f`.
+- Branch/base: `codex/chore/aws-backup-capacity-retry-evidence` from exact PR
+  #97 squash merge `e8bfe50cf1bf6713563e4cebd74c7693cc574409`.
 - Risk/root cause: high-risk/manual Production-data read. The retry execution
   transport did not preserve the final sanitized result JSON. This is an
   execution-evidence failure; dump success or failure must not be inferred.
@@ -46,9 +46,12 @@
   Local Playwright reproduced the unchanged external-configuration baseline:
   35 passed, 2 skipped, and 7 `missing_url` failures on `/listing`, `/market`,
   `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
-  Commit, push, and exact-head Draft PR #97 gates are pending.
-- Exact next action: run repository validation, commit and push the evidence,
-  update high-risk Draft PR #97, and verify exact-head CI/Preview gates. Never
+  Evidence commit `dee9345bb6ff3b61957d3689b2f1f0e1629ff646` is pushed in
+  high-risk Draft PR #99 with `manual-merge-required`; exact-head CI and Preview
+  gates are pending. PR #98 was closed unmerged as superseded because its
+  pre-squash branch duplicated the already merged PR #97 diff.
+- Exact next action: commit and push this final status checkpoint, then verify
+  exact-head CI, Vercel, and Preview browser gates for Draft PR #99. Never
   auto-merge this PR.
 - Remaining risks: current dump capacity and AWS cost remain unknown; worker
   capacity, provisioning, first upload, Storage object backup, and two-cycle
