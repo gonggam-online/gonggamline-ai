@@ -1,5 +1,22 @@
 # Decision log
 
+## 2026-08-05 — Cloud Portability Baseline
+
+- Category: implementation decision
+- Status: implemented for repository inventory and local readiness only
+- Owner / approver: Engineering Operations / repository owner directive
+- Decision: maintain `docs/cloud/cloud-state-manifest.json` as the
+  machine-readable authority inventory and use `npm run cloud:readiness` to
+  fail closed on missing new-PC prerequisites. Remote authorities and local
+  migration blockers remain explicitly distinct.
+- Safety boundary: the checker reads no secret values, database rows, cookies,
+  Production data, or local backup contents. This decision provisions no
+  service and moves/deletes no data.
+- Consequences: source/task/deployment/data authorities are visible and three
+  unresolved durable areas become ordered high-risk Stories: backups,
+  Orchestrator ledger, and business assets.
+- Rollback: revert the baseline commit. No external state is changed.
+
 ## 2026-08-05 — Cloud-first durable-state principle
 
 - Category: operating and architecture principle

@@ -1,5 +1,43 @@
 # Work status
 
+## 2026-08-05 — Cloud Portability Baseline
+
+- Objective: execute every normal-risk Cloud-first step possible before cloud
+  provisioning or sensitive data movement requires owner action.
+- Branch/base: `codex/feat/cloud-portability-baseline` from exact merged
+  Cloud-first main `87ac16af6605f6950dc71d10870c1cd7142226fc`.
+- Risk/root cause: normal-risk repository tooling/docs/tests. Durable
+  authorities and blockers were prose only.
+- Revenue impact: reduces device-loss/setup interruption and gives cloud
+  migrations a deterministic order without pausing feature development.
+- Scope: durable-state manifest, readiness CLI, fail-closed tests, baseline
+  runbook, ordered backlog, Decision Log, changelog, status.
+- Non-goals: provisioning, account/bucket purchase, backup copy/delete, secret
+  change, DB/RLS/Auth migration, Production/data movement, ledger migration,
+  paid action, or commerce write.
+- Cloud-first gate: artifacts become durable through GitHub PR; local build/test
+  output is disposable. The checker emits no secret or business data.
+- Completed: exact-main branch, dependency audit, authority manifest, readiness
+  implementation, tests, runbook, ordered Stories, and local repository gates.
+- Current: commit, push, PR, exact-head checks, merge, and Production smoke.
+- Blockers/owner actions: GitHub CLI reports the saved token for
+  `gonggam-online` is invalid. Git remote and connected-app delivery are checked
+  independently before requesting reauthentication. Exact service decisions
+  remain deferred until their high-risk Architecture packets are ready.
+- Changed files: manifest/runbook, readiness script/tests, package script,
+  backlog, Decision Log, changelog, status.
+- Commands/results: focused tests 8/8; typecheck pass; ESLint 0 errors and 4
+  pre-existing test warnings; full tests 460/460; Production build pass; local
+  Playwright 35 pass, 2 skip, 7 fail solely on the existing unconfigured
+  Supabase API routes (`/listing`, `/market`, `/procurement`, `/revenue`,
+  `/sourcing`, `/workflow`, `/workspace`); readiness manifest passes and the
+  local command correctly fails on dirty worktree plus invalid GitHub CLI auth.
+- Last commit: none.
+- Exact next action: commit and attempt exact-head delivery without weakening
+  the GitHub authentication gate.
+- Remaining risks: backups and Orchestrator ledger remain local migration
+  blockers; business asset authority remains undecided.
+
 ## 2026-08-05 — Cloud-first operating principle
 
 - Objective: make complete cloud portability the first durable-state decision
