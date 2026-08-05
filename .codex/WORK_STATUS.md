@@ -1,5 +1,48 @@
 # Work status
 
+## 2026-08-05 — Listing evidence fixture and policy kernel (13B)
+
+- Objective: implement accepted Architecture Story 2 as a pure deterministic
+  evidence policy kernel without asserting any real fact about KK946.
+- Branch/base: `codex/feat/listing-evidence-policy-kernel` from exact
+  `origin/main` `f71c37b6756b674c4099a132e30fcce8f4f4323d`.
+- Risk/root cause: normal-risk internal types/tests. Root cause is the approved
+  Listing code/contract gap; missing external evidence remains external and is
+  never compensated for in code.
+- Revenue impact: provides the smallest fail-closed decision boundary needed
+  to prepare a truthful first listing packet while reducing rejection, rights,
+  and return risk.
+- Scope: immutable evidence/status types; fact-specific authority and scope;
+  freshness/conflict/UNKNOWN quarantine; UTF-8/NFC/mojibake checks; explicitly
+  synthetic deterministic KK946-shaped fixtures and unit tests.
+- Non-goals: 13A runbook/evidence collection, real KK946 facts, DB/schema/
+  migration/Auth/RLS, API/service/UI, external integration, image/asset work,
+  pricing, Production, paid calls, or commerce writes.
+- Completed: governance boot; clean exact-main branch; Listing/schema/contract
+  audit; implementation; focused tests; lint; typecheck; full tests; build;
+  complete diff review.
+- Current: local validation and diff review complete; commit/push/PR and exact
+  CI/Preview delivery remain.
+- Blockers/owner actions: none for pure kernel delivery. Real KK946 remains
+  quarantined pending separately governed admissible evidence.
+- Changed files: `shared/domain/listing-evidence.ts`,
+  `engines/listing/evidence-policy.ts`, fixture/tests, task changelog, and this
+  status record.
+- Commands/results: focused policy tests 9/9; lint zero errors and four
+  pre-existing Revenue-test warnings; typecheck pass; full tests 455/455; build
+  pass with 85 routes; `npm ci` unchanged lockfile and reported six existing
+  advisories (one moderate, five high).
+- Browser validation: 35 passed, 2 skipped, and 7 failed only on the same
+  Supabase-backed routes (`/listing`, `/market`, `/procurement`, `/revenue`,
+  `/sourcing`, `/workflow`, `/workspace`) because local Supabase is
+  unconfigured (`missing_url`). Ignored failure evidence remains in
+  `test-results/`; no changed code participates in these routes.
+- Exact next action: commit, push, create normal-risk PR, and wait for
+  exact-head CI/Preview.
+- Remaining risks: compile-time readonly does not create persistence; no
+  persistence is authorized. Synthetic fixtures are not product evidence and
+  cannot release KK946 quarantine or authorize payload mapping/submission.
+
 ## 2026-08-05 — Listing Content Fact and Policy Contract v1
 
 - Objective: complete the Architecture Story and implementation order for
