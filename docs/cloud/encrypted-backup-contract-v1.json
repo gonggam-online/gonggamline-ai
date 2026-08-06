@@ -1,6 +1,6 @@
 {
   "schemaVersion": "gonggamline-encrypted-backup-contract-v1",
-  "status": "PRO_PROVIDER_BACKUP_ACTIVE_CAPACITY_CALCULATOR_AND_SYNTHETIC_WORKER_REHEARSAL_COMPLETE_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
+  "status": "PRO_PROVIDER_BACKUP_ACTIVE_DISABLED_WORKER_CHANGE_SET_PACKET_READY_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
   "risk": "HIGH",
   "owner": "Database / Security",
   "source": {
@@ -105,6 +105,11 @@
       "requiresAwsCalculatorEstimate": true,
       "workerRehearsalStatus": "SUCCEEDED_SYNTHETIC_ONLY",
       "workerRehearsalEvidence": "docs/cloud/aws-backup-worker-rehearsal-v1.json",
+      "disabledWorkerChangeSetPacket": "docs/cloud/aws-backup-disabled-worker-change-set-v1.json",
+      "disabledWorkerChangeSetStatus": "READY_FOR_NO_EXECUTE_CHANGE_SET_CREATION_NOT_AUTHORIZED",
+      "disabledWorkerStackName": "gonggamline-independent-backup-v1",
+      "disabledWorkerChangeSetName": "base-boundary-review-v1",
+      "temporaryFederatedAdminSessionVerified": false,
       "runbook": "docs/cloud/AWS-INDEPENDENT-BACKUP-INFRASTRUCTURE-PLAN-V1.md"
     }
   },
