@@ -43,18 +43,28 @@
   while the installed GitHub app remains independently authenticated for PR
   operations and Git remote credentials are tested separately before push. No
   credential value is read or changed.
-- Current work: complete repository validation, commit/push, high-risk Draft
-  PR delivery, and exact-head CI/Preview verification.
-- Owner action/blocker: none for Draft PR preparation. Manual merge remains
-  required. The next external action is a separately reviewed exact Singapore
+- Delivery: implementation commit
+  `b13ad658ac2171694f41546ed971eeb3cb054309` is pushed in high-risk Draft PR
+  #102 with `manual-merge-required` and `high-risk`. CI run `31059780939`
+  passed all eight jobs, including complete migration replay, R1 atomic Product
+  mutation, and A01-A12 security replay. Preview browser run `31059780935`
+  passed against exact deployment
+  `https://gonggamline-fts05a30c-gg-online.vercel.app`; evidence artifact
+  digest is
+  `sha256:46cbe53d6ee7ba3bde14c85299716f27a3d2f3901b45e99eabe340234e8816f1`.
+  Manual browser inspection also rendered 151 Supabase-backed Products.
+- Current work: record delivery evidence on the task branch and revalidate the
+  exact status-only head.
+- Owner action/blocker: manual review and merge of Draft PR #102 is required.
+  The next external action after merge is a separately reviewed exact Singapore
   CloudFormation change set with `EnableWorkerResources=false` and named-IAM
   capability acknowledgement.
 - Changed files: worker pipeline and rehearsal runner; focused tests; sanitized
   rehearsal evidence; capacity/backup/cloud-state contracts; Architecture
   Review, Decision Log, architecture/runbooks, changelog, and this checkpoint.
-- Exact next action: finish all local gates, push the checkpoint, create a
-  high-risk Draft PR with `manual-merge-required`, then validate exact-head CI
-  and Preview. Do not provision AWS.
+- Exact next action: commit and push this delivery checkpoint, revalidate its
+  exact CI/Preview head, then leave Draft PR #102 for repository-owner manual
+  review and merge. Do not provision AWS.
 - Remaining risks: the rehearsal uses synthetic local object semantics rather
   than AWS S3; no deployable immutable Lambda image, scoped Production secret,
   real immutable recovery point, or restore parity exists yet.
