@@ -33,12 +33,22 @@
 - AWS preflight: AWS CLI not installed; inferred CloudFormation console target
   redirects to AWS sign-in. No AWS call was attempted. Root and long-lived
   access keys remain prohibited.
-- Current work: complete repository validation, publish a high-risk Draft PR,
-  and verify the exact Preview.
-- Owner action/blocker: after Draft PR merge, configure an IAM Identity Center
-  or equivalent federated administrator with MFA and AWS CLI v2. Then approve
-  creation of the exact **unexecuted** change set. Execution/provisioning is a
-  later separate approval.
+- Delivery: implementation commit
+  `1eb551345a726edd962c676409f337ed97b6e2a8` is pushed in high-risk Draft PR
+  #103 with `manual-merge-required` and `high-risk`; no auto-merge.
+- Remote gates: CI run `31062568006` passed all eight jobs, including complete
+  migration replay, R1 atomic Product mutation, and A01-A12 security replay.
+  Preview run `31062568040` passed 42 browser checks against exact deployment
+  `https://gonggamline-ipjhmi2k7-gg-online.vercel.app`; artifact `8952686698`
+  has digest
+  `sha256:a9ca81e0fc9145c98cb1360bf985a6352a2f1d8def85f647ec1fa98c17662b39`.
+  Manual inspection rendered 151 Supabase-backed Products.
+- Current work: record delivery evidence, push the checkpoint, and revalidate
+  the exact status-only head.
+- Owner action/blocker: manually review and merge Draft PR #103. After merge,
+  configure an IAM Identity Center or equivalent federated administrator with
+  MFA and AWS CLI v2. Then approve creation of the exact **unexecuted** change
+  set. Execution/provisioning is a later separate approval.
 - Changed files: change-set plan generator/script/tests; exact JSON/runbook;
   package command; backup contract/cloud manifest; Architecture Review,
   Decision Log, changelog, and this checkpoint.
@@ -50,9 +60,9 @@
   reproduced the established unconfigured-Supabase baseline: 35 passed, two
   skipped, and seven `missing_url` route failures. CI and Preview remain
   pending.
-- Exact next action: run all local gates, commit/push, open the high-risk Draft
-  PR with `manual-merge-required`, and validate exact-head Preview. Do not
-  create or execute an AWS change set.
+- Exact next action: push this delivery checkpoint, revalidate CI/Preview on
+  the exact head, then leave Draft PR #103 for repository-owner manual review
+  and merge. Do not create or execute an AWS change set.
 - Remaining risks: the packet is not an AWS service-generated change set; base
   resources do not yet exist; no writer image/secret/restore proof exists; an
   executed stack would create paid retained resources whose cleanup requires a
