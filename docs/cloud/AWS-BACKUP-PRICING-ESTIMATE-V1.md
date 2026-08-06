@@ -93,9 +93,10 @@ material backup growth, cross-region transfer, or Calculator total above USD
 
 ## Remaining gates
 
-1. Keep Lambda eligibility `UNDECIDED_PENDING_COMPLETE_WORKER_REHEARSAL` until
-   dump, verification, encryption, upload, and cleanup complete within the
-   accepted runtime and ephemeral-storage boundary.
+1. The 2026-08-06 synthetic complete-worker rehearsal closed the Lambda
+   capacity prerequisite with a 6,351,131-byte archive, 7.901-second complete
+   workflow, and 6,351,837-byte peak ephemeral use. Eligibility is limited to
+   `ELIGIBLE_FOR_DISABLED_WORKER_CHANGE_SET_REVIEW_ONLY`.
 2. Review the exact disabled-worker CloudFormation change set under a separate
    high-risk owner approval.
 3. Approve first Production export/upload separately.

@@ -68,6 +68,8 @@ type BackupContract = Readonly<{
       requiresSeparateChangeSetApproval: boolean;
       requiresCapacityEvidence: boolean;
       requiresAwsCalculatorEstimate: boolean;
+      workerRehearsalStatus: string;
+      workerRehearsalEvidence: string;
     }>;
   }>;
   retentionProposal: Readonly<{
@@ -112,6 +114,21 @@ type BackupContract = Readonly<{
       transientProductionArchiveAuthorized: boolean;
     }>;
     fallback: string;
+    lambdaEligibility: string;
+    workerRehearsal: Readonly<{
+      status: string;
+      evidence: string;
+      requiredStressArchiveBytes: number;
+      rehearsalArchiveBytes: number;
+      peakEphemeralBytes: number;
+      workerMeasuredTotalMs: number;
+      runtimeMarginMs: number;
+      ephemeralMarginBytes: number;
+      productionConnected: boolean;
+      awsConnected: boolean;
+      paidUsageCreated: boolean;
+      temporaryStateDeleted: boolean;
+    }>;
   }>;
   costProposal: Readonly<{
     initialMonthlyCeilingUsd: number;
@@ -153,7 +170,7 @@ test("backup architecture remains high-risk after successful current measurement
   assert.equal(contract.schemaVersion, "gonggamline-encrypted-backup-contract-v1");
   assert.equal(
     contract.status,
-    "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CURRENT_CAPACITY_MEASURED_CALCULATOR_COMPLETE_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
+    "PRO_PROVIDER_BACKUP_ACTIVE_CAPACITY_CALCULATOR_AND_SYNTHETIC_WORKER_REHEARSAL_COMPLETE_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
   );
   assert.equal(contract.risk, "HIGH");
   assert.equal(contract.providerBackup.verified, true);
@@ -246,6 +263,8 @@ test("infrastructure plan remains non-provisioning and fail-closed", () => {
   assert.equal(plan.requiresSeparateChangeSetApproval, true);
   assert.equal(plan.requiresCapacityEvidence, true);
   assert.equal(plan.requiresAwsCalculatorEstimate, true);
+  assert.equal(plan.workerRehearsalStatus, "SUCCEEDED_SYNTHETIC_ONLY");
+  assert.equal(plan.workerRehearsalEvidence, "docs/cloud/aws-backup-worker-rehearsal-v1.json");
 });
 
 test("owner-approved retention, recovery, and cost policy remains execution-gated", () => {
@@ -284,6 +303,21 @@ test("owner-approved retention, recovery, and cost policy remains execution-gate
   assert.equal(contract.capacityGate.measurement.retryAuthorized, false);
   assert.equal(contract.capacityGate.measurement.productionConnectionAuthorized, false);
   assert.equal(contract.capacityGate.measurement.transientProductionArchiveAuthorized, false);
+  assert.equal(
+    contract.capacityGate.lambdaEligibility,
+    "ELIGIBLE_FOR_DISABLED_WORKER_CHANGE_SET_REVIEW_ONLY",
+  );
+  assert.equal(contract.capacityGate.workerRehearsal.status, "SUCCEEDED_SYNTHETIC_ONLY");
+  assert.equal(contract.capacityGate.workerRehearsal.requiredStressArchiveBytes, 1430142);
+  assert.equal(contract.capacityGate.workerRehearsal.rehearsalArchiveBytes, 6351131);
+  assert.equal(contract.capacityGate.workerRehearsal.peakEphemeralBytes, 6351837);
+  assert.equal(contract.capacityGate.workerRehearsal.workerMeasuredTotalMs, 7901);
+  assert.equal(contract.capacityGate.workerRehearsal.runtimeMarginMs, 892099);
+  assert.equal(contract.capacityGate.workerRehearsal.ephemeralMarginBytes, 10731066403);
+  assert.equal(contract.capacityGate.workerRehearsal.productionConnected, false);
+  assert.equal(contract.capacityGate.workerRehearsal.awsConnected, false);
+  assert.equal(contract.capacityGate.workerRehearsal.paidUsageCreated, false);
+  assert.equal(contract.capacityGate.workerRehearsal.temporaryStateDeleted, true);
   assert.equal(contract.capacityGate.fallback, "STOP_AND_PROPOSE_FARGATE_ARCHITECTURE");
   assert.equal(contract.costProposal.initialMonthlyCeilingUsd, 10);
   assert.equal(contract.costProposal.ceilingScope, "AWS_INDEPENDENT_BACKUP_ONLY");

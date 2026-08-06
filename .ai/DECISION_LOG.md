@@ -1,5 +1,33 @@
 # Decision log
 
+## 2026-08-06 — AWS synthetic complete-worker rehearsal succeeded
+
+- Category: high-risk/manual backup-worker implementation and synthetic
+  capacity evidence; no external or Production action.
+- Dependency: PR #101 merged as
+  `434eccdf92815d6546d8839662f60884c0a59728` after the Production and public
+  Singapore pricing gates passed.
+- Execution: an internal Docker network with no host port and a disposable
+  PostgreSQL 17.6 data directory generated a 6,351,131-byte custom archive.
+  The complete worker performed offline list inspection, SHA-256, immutable
+  archive upload contract, manifest, SSE-KMS/version assertions, Object Lock
+  retention read-back, and exact cleanup in 7.901 seconds.
+- Capacity decision: the archive exceeded the required 1,430,142-byte 2x
+  boundary. Peak ephemeral use was 6,351,837 bytes, leaving 10,731,066,403
+  bytes below the 10-GiB ceiling and 892.099 seconds below the 900-second
+  runtime ceiling including cleanup.
+- Safety result: no Production or AWS connection, resource, credential, paid
+  usage, restore, schedule, raw backup retention, host port, or durable local
+  database was created. The container, network, archive, manifest, and
+  simulated object bodies were removed.
+- Decision: mark Lambda
+  `ELIGIBLE_FOR_DISABLED_WORKER_CHANGE_SET_REVIEW_ONLY`. This authorizes only
+  repository review of the next exact `EnableWorkerResources=false` change
+  set. Provisioning, worker image/secret, Production export/upload, restore,
+  schedule, and local-backup deletion retain separate approvals.
+- Rollback: revert the pipeline and sanitized evidence before any AWS action;
+  there is no external state to roll back.
+
 ## 2026-08-06 — AWS backup Production verification and cost gate complete
 
 - Category: high-risk/manual Production verification and public pricing

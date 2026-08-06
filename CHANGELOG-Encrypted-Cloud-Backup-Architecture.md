@@ -2,6 +2,16 @@
 
 ## 2026-08-06
 
+- Added the fail-closed complete backup-worker pipeline and an isolated Docker
+  rehearsal using only disposable synthetic PostgreSQL data and a synthetic
+  immutable object writer.
+- Proved a 6,351,131-byte archive, above the accepted 2x Production boundary,
+  through dump, offline list verification, SHA-256, archive/manifest upload
+  contracts, SSE-KMS/version assertions, Object Lock retention read-back, and
+  complete cleanup in 7.901 seconds with 6,351,837 peak ephemeral bytes.
+- Marked Lambda eligible only for review of the exact disabled-worker change
+  set. No AWS resource, Production connection/export, secret, paid use,
+  restore, or schedule was created or authorized.
 - Verified the exact PR #100 merge commit in Production and recorded the
   successful Product Ops live-data render plus exact-head Production browser
   smoke run and evidence digest.

@@ -48,6 +48,19 @@ type CapacityInput = Readonly<{
     lambdaMaximumEphemeralStorageMiB: number;
     stressScenarioMultiplier: number;
     lambdaEligibility: string;
+    workerRehearsal: Readonly<{
+      evidence: string;
+      status: string;
+      requiredStressArchiveBytes: number;
+      rehearsalArchiveBytes: number;
+      peakEphemeralBytes: number;
+      workerMeasuredTotalMs: number;
+      runtimeMarginMs: number;
+      ephemeralMarginBytes: number;
+      productionConnected: boolean;
+      awsConnected: boolean;
+      temporaryStateDeleted: boolean;
+    }>;
     fallback: string;
   }>;
   retentionAndFrequency: Readonly<{
@@ -102,7 +115,7 @@ test("capacity packet records a successful current measurement and consumed auth
   assert.equal(input.schemaVersion, "gonggamline-aws-backup-capacity-input-v1");
   assert.equal(
     input.status,
-    "CURRENT_MEASUREMENT_SUCCEEDED_PUBLIC_ON_DEMAND_ESTIMATES_COMPLETE",
+    "CURRENT_MEASUREMENT_AND_CALCULATOR_COMPLETE_SYNTHETIC_WORKER_REHEARSAL_SUCCEEDED",
   );
   assert.equal(input.risk, "HIGH");
   assert.equal(input.source.projectRef, "sxvtznmoemrcwifungnb");
@@ -171,7 +184,7 @@ test("capacity packet records a successful current measurement and consumed auth
   }
 });
 
-test("historical archive is reference-only and cannot satisfy current capacity", () => {
+test("historical archive is reference-only while synthetic rehearsal closes Lambda capacity", () => {
   assert.equal(input.measurement.historicalReference.archiveBytes, 696310);
   assert.equal(input.measurement.historicalReference.satisfiesCurrentGate, false);
   assert.equal(input.capacity.lambdaMaximumRuntimeSeconds, 900);
@@ -179,7 +192,22 @@ test("historical archive is reference-only and cannot satisfy current capacity",
   assert.equal(input.capacity.stressScenarioMultiplier, 2);
   assert.equal(
     input.capacity.lambdaEligibility,
-    "UNDECIDED_PENDING_COMPLETE_WORKER_REHEARSAL",
+    "ELIGIBLE_FOR_DISABLED_WORKER_CHANGE_SET_REVIEW_ONLY",
+  );
+  assert.equal(input.capacity.workerRehearsal.status, "SUCCEEDED_SYNTHETIC_ONLY");
+  assert.equal(input.capacity.workerRehearsal.requiredStressArchiveBytes, 1430142);
+  assert.equal(input.capacity.workerRehearsal.rehearsalArchiveBytes, 6351131);
+  assert.equal(input.capacity.workerRehearsal.peakEphemeralBytes, 6351837);
+  assert.equal(input.capacity.workerRehearsal.workerMeasuredTotalMs, 7901);
+  assert.equal(input.capacity.workerRehearsal.runtimeMarginMs, 892099);
+  assert.equal(input.capacity.workerRehearsal.ephemeralMarginBytes, 10731066403);
+  assert.equal(input.capacity.workerRehearsal.productionConnected, false);
+  assert.equal(input.capacity.workerRehearsal.awsConnected, false);
+  assert.equal(input.capacity.workerRehearsal.temporaryStateDeleted, true);
+  assert.equal(
+    input.capacity.workerRehearsal.rehearsalArchiveBytes >=
+      input.capacity.workerRehearsal.requiredStressArchiveBytes,
+    true,
   );
   assert.equal(input.capacity.fallback, "STOP_AND_PROPOSE_FARGATE_ARCHITECTURE");
 });

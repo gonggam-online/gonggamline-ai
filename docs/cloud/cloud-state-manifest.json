@@ -80,9 +80,10 @@
         "docs/architecture/ENCRYPTED-CLOUD-BACKUP-AND-RESTORE-V1.md",
         "docs/cloud/encrypted-backup-contract-v1.json",
         "docs/cloud/AWS-INDEPENDENT-BACKUP-INFRASTRUCTURE-PLAN-V1.md",
+        "docs/cloud/aws-backup-worker-rehearsal-v1.json",
         "infra/aws-backup/cloudformation.json"
       ],
-      "nextAction": "Manually review and merge the infrastructure-plan Draft PR; then verify account recovery contacts, capacity evidence, and an AWS Pricing Calculator estimate before separately approving an exact disabled-worker CloudFormation change set. Do not provision, copy, or delete backup content from this Story.",
+      "nextAction": "After manual merge of the synthetic worker-rehearsal Story, separately review the exact Singapore CloudFormation change set with EnableWorkerResources=false and named-IAM capabilities before any provisioning. Do not copy or delete backup content.",
       "highRiskBoundary": true
     },
     {
