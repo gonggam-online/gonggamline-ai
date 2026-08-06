@@ -1,5 +1,63 @@
 # Work status
 
+## 2026-08-06 — AWS Backup Disabled-Worker Change Set Packet v1
+
+- Objective: convert the merged worker/capacity/cost evidence into the exact
+  first Singapore CloudFormation no-execute review target without provisioning
+  AWS resources.
+- Branch/base: `codex/chore/aws-disabled-worker-change-set` from PR #102 merge
+  `50cce601e2e1085a001ca3feaff6760d13c07ff0`.
+- Risk/root cause: high-risk/manual external AWS boundary. The remaining stop
+  condition is external configuration: no AWS CLI and no verified non-root
+  temporary/federated administrator session, not an application or database
+  defect.
+- Revenue impact: advances independent disaster recovery for sales continuity
+  while keeping worker, Production export, scheduling, and paid provisioning
+  disabled.
+- Scope: exact stack/change-set names, template digest/size, Singapore region,
+  `CREATE`, `EnableWorkerResources=false`, empty secret/image defaults,
+  `CAPABILITY_NAMED_IAM`, expected six-add/eight-omitted boundary, generator,
+  negative tests, runbook, decisions, and cloud-state recovery evidence.
+- Non-goals preserved: AWS change-set creation/execution, resource/paid use,
+  root or long-lived access key, credential/secret creation, Production
+  connection/export/upload, restore, schedule, Supabase/DB/RLS/Auth/env or
+  commerce mutation, local-backup access/deletion, and auto-merge.
+- Cloud-first state: the reproducible packet and sanitized evidence are tracked
+  for GitHub. No account identifier, secret, backup content, AWS metadata, or
+  unique local state is stored.
+- GitHub/Production verification: `gh` and Git remote succeed through the
+  Windows keyring in the permitted network context. PR #102 is merged and
+  Production smoke run `31061723638` passed 42/44 with two intentional skips;
+  artifact `8952383780` has digest
+  `sha256:ee7f1dfce742523fd3b0c662fdb39647726796e88f950fc460d8000a801f097d`.
+- AWS preflight: AWS CLI not installed; inferred CloudFormation console target
+  redirects to AWS sign-in. No AWS call was attempted. Root and long-lived
+  access keys remain prohibited.
+- Current work: complete repository validation, publish a high-risk Draft PR,
+  and verify the exact Preview.
+- Owner action/blocker: after Draft PR merge, configure an IAM Identity Center
+  or equivalent federated administrator with MFA and AWS CLI v2. Then approve
+  creation of the exact **unexecuted** change set. Execution/provisioning is a
+  later separate approval.
+- Changed files: change-set plan generator/script/tests; exact JSON/runbook;
+  package command; backup contract/cloud manifest; Architecture Review,
+  Decision Log, changelog, and this checkpoint.
+- Validation so far: complete tests passed 504/504; deterministic plan command
+  reproduced the committed packet; typecheck and 85-route Production build
+  passed; changed-file lint passed; repository lint excluding ignored generated
+  browser reports passed with zero errors and four established Revenue-test
+  warnings; diff check and tracked-secret pattern scan passed. Local Playwright
+  reproduced the established unconfigured-Supabase baseline: 35 passed, two
+  skipped, and seven `missing_url` route failures. CI and Preview remain
+  pending.
+- Exact next action: run all local gates, commit/push, open the high-risk Draft
+  PR with `manual-merge-required`, and validate exact-head Preview. Do not
+  create or execute an AWS change set.
+- Remaining risks: the packet is not an AWS service-generated change set; base
+  resources do not yet exist; no writer image/secret/restore proof exists; an
+  executed stack would create paid retained resources whose cleanup requires a
+  separate plan.
+
 ## 2026-08-06 — AWS Backup Complete Worker Rehearsal v1
 
 - Objective: close the Lambda eligibility prerequisite with a complete

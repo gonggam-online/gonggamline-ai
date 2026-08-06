@@ -1,5 +1,32 @@
 # Decision log
 
+## 2026-08-06 — AWS disabled-worker change-set review target fixed
+
+- Category: high-risk/manual CloudFormation review preparation; no external
+  AWS action or resource provisioning.
+- Dependency: PR #102 merged as
+  `50cce601e2e1085a001ca3feaff6760d13c07ff0`; its Production browser smoke
+  passed 42 tests with two intentional skips.
+- Decision: fix the first target as stack
+  `gonggamline-independent-backup-v1`, change set
+  `base-boundary-review-v1`, type `CREATE`, region `ap-southeast-1`, template
+  SHA-256 `86cf98974aacee218b57ec4c66697393b4e9d932f589d95ef4f3a202bad9460b`,
+  `EnableWorkerResources=false`, empty worker image/Production secret defaults,
+  and `CAPABILITY_NAMED_IAM`.
+- Expected boundary: exactly six base resources may appear as `Add`; all eight
+  worker-conditioned resources must be absent. The KMS key, S3 bucket, ECR
+  repository, and SQS queue are retained resources if later executed.
+- Identity gate: do not use root or long-lived access keys. AWS CLI v2 plus a
+  temporary/federated administrative session with MFA is required. The current
+  workstation has no AWS CLI and its available console session is signed out,
+  so no AWS operation was attempted.
+- Authorization: repository review only. Creating the no-execute change set,
+  executing it, provisioning paid resources, Production export, restore,
+  scheduling, and local-backup deletion remain separate approvals.
+- Rollback: revert this repository packet before AWS action. An unexecuted
+  change set, once separately approved and created, requires an exact metadata
+  cleanup review; retained resources do not yet exist.
+
 ## 2026-08-06 — AWS synthetic complete-worker rehearsal succeeded
 
 - Category: high-risk/manual backup-worker implementation and synthetic

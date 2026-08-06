@@ -2,6 +2,17 @@
 
 ## 2026-08-06
 
+- Fixed the exact first Singapore CloudFormation review target as
+  `gonggamline-independent-backup-v1` / `base-boundary-review-v1`, type
+  `CREATE`, with the reviewed template digest, `EnableWorkerResources=false`,
+  empty secret/image defaults, and `CAPABILITY_NAMED_IAM`.
+- Added a deterministic no-AWS plan generator and fail-closed tests proving
+  exactly six base resources are expected and all eight worker resources remain
+  omitted.
+- Recorded that this PC has no AWS CLI and the available console session is
+  signed out. No AWS action, resource, credential, Production access, paid use,
+  or schedule occurred; root and long-lived access keys remain prohibited.
+
 - Added the fail-closed complete backup-worker pipeline and an isolated Docker
   rehearsal using only disposable synthetic PostgreSQL data and a synthetic
   immutable object writer.

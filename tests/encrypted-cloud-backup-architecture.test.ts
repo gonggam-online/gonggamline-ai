@@ -70,6 +70,11 @@ type BackupContract = Readonly<{
       requiresAwsCalculatorEstimate: boolean;
       workerRehearsalStatus: string;
       workerRehearsalEvidence: string;
+      disabledWorkerChangeSetPacket: string;
+      disabledWorkerChangeSetStatus: string;
+      disabledWorkerStackName: string;
+      disabledWorkerChangeSetName: string;
+      temporaryFederatedAdminSessionVerified: boolean;
     }>;
   }>;
   retentionProposal: Readonly<{
@@ -170,7 +175,7 @@ test("backup architecture remains high-risk after successful current measurement
   assert.equal(contract.schemaVersion, "gonggamline-encrypted-backup-contract-v1");
   assert.equal(
     contract.status,
-    "PRO_PROVIDER_BACKUP_ACTIVE_CAPACITY_CALCULATOR_AND_SYNTHETIC_WORKER_REHEARSAL_COMPLETE_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
+    "PRO_PROVIDER_BACKUP_ACTIVE_DISABLED_WORKER_CHANGE_SET_PACKET_READY_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
   );
   assert.equal(contract.risk, "HIGH");
   assert.equal(contract.providerBackup.verified, true);
@@ -306,6 +311,18 @@ test("owner-approved retention, recovery, and cost policy remains execution-gate
   assert.equal(
     contract.capacityGate.lambdaEligibility,
     "ELIGIBLE_FOR_DISABLED_WORKER_CHANGE_SET_REVIEW_ONLY",
+  );
+  assert.equal(
+    contract.independentTargetProposal.infrastructurePlan.disabledWorkerChangeSetPacket,
+    "docs/cloud/aws-backup-disabled-worker-change-set-v1.json",
+  );
+  assert.equal(
+    contract.independentTargetProposal.infrastructurePlan.disabledWorkerChangeSetStatus,
+    "READY_FOR_NO_EXECUTE_CHANGE_SET_CREATION_NOT_AUTHORIZED",
+  );
+  assert.equal(
+    contract.independentTargetProposal.infrastructurePlan.temporaryFederatedAdminSessionVerified,
+    false,
   );
   assert.equal(contract.capacityGate.workerRehearsal.status, "SUCCEEDED_SYNTHETIC_ONLY");
   assert.equal(contract.capacityGate.workerRehearsal.requiredStressArchiveBytes, 1430142);

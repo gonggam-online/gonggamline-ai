@@ -1,5 +1,31 @@
 # Architecture review
 
+## AWS Backup Disabled-Worker Change Set Packet v1 — 2026-08-06
+
+- Approved source: merged infrastructure/capacity/cost/complete-worker evidence
+  through PR #102 and the owner directive to continue the next Cloud-first
+  stage.
+- Boundary owner: Database / Security. The accepted AWS Singapore backup
+  architecture, CloudFormation template, retention lifecycle, and external
+  integration are unchanged.
+- Scope: deterministic no-AWS generation of the exact first change-set target,
+  template digest, `EnableWorkerResources=false` inputs,
+  `CAPABILITY_NAMED_IAM`, six expected base resources, eight omitted worker
+  resources, retained-resource warning, and fail-closed negative tests.
+- Cloud-first placement: source, exact packet, decision, and sanitized delivery
+  evidence belong in GitHub. No AWS account identifier, credential, secret,
+  backup body, or device-local durable state is created.
+- External preflight: this workstation has no AWS CLI and the available AWS
+  console is signed out. No AWS call was attempted. Root and long-lived access
+  keys remain prohibited; a temporary/federated administrative session with
+  MFA is required.
+- Risk: high-risk/manual because the packet gates later paid retained AWS
+  resources. Apply `manual-merge-required`; never auto-merge or execute the
+  change set.
+- Rollout/rollback: Draft PR and Preview validation only. Revert the packet
+  before any AWS action. Creating the no-execute change set and executing it
+  remain two separate explicit owner approvals.
+
 ## AWS Backup Complete Worker Rehearsal v1 — 2026-08-06
 
 - Approved source: manually accepted Encrypted Cloud Backup and Restore

@@ -81,9 +81,11 @@
         "docs/cloud/encrypted-backup-contract-v1.json",
         "docs/cloud/AWS-INDEPENDENT-BACKUP-INFRASTRUCTURE-PLAN-V1.md",
         "docs/cloud/aws-backup-worker-rehearsal-v1.json",
+        "docs/cloud/AWS-BACKUP-DISABLED-WORKER-CHANGE-SET-V1.md",
+        "docs/cloud/aws-backup-disabled-worker-change-set-v1.json",
         "infra/aws-backup/cloudformation.json"
       ],
-      "nextAction": "After manual merge of the synthetic worker-rehearsal Story, separately review the exact Singapore CloudFormation change set with EnableWorkerResources=false and named-IAM capabilities before any provisioning. Do not copy or delete backup content.",
+      "nextAction": "Review and manually merge the exact disabled-worker change-set packet, then establish an MFA-protected temporary or federated AWS administrator session before separately approving creation of the no-execute change set. Do not execute it, provision resources, or copy/delete backup content.",
       "highRiskBoundary": true
     },
     {
