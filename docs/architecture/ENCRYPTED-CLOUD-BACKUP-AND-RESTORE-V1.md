@@ -229,9 +229,15 @@ The owner-approved current measurement completed on 2026-08-05 with a
 archive-list entries, and zero warnings. The transient archive and credential
 were deleted, Production remained healthy, and no database or AWS write
 occurred. This closes only the current dump-size/duration evidence gate.
-Lambda remains `UNDECIDED_PENDING_COMPLETE_WORKER_REHEARSAL` until dump,
-verification, upload, manifest, and cleanup are proven together within the
-900-second and 10,240-MiB limits.
+The complete synthetic worker rehearsal succeeded on 2026-08-06. A disposable
+PostgreSQL 17.6 archive of 6,351,131 bytes exceeded the required 1,430,142-byte
+2x boundary and completed dump, offline inspection, SHA-256, immutable upload
+contract, manifest, retention read-back, and cleanup in 7.901 seconds. Peak
+ephemeral use was 6,351,837 bytes. The measured margins were 892.099 seconds
+and 10,731,066,403 bytes. Production, AWS, paid usage, and scheduling were not
+contacted. Lambda is therefore
+`ELIGIBLE_FOR_DISABLED_WORKER_CHANGE_SET_REVIEW_ONLY`; this is not provisioning,
+Production export, credential, restore, or schedule authority.
 
 The fallback is not truncation, streaming an unverifiable partial result, or a
 local cron job. It is a new Fargate architecture decision preserving the same
@@ -351,9 +357,10 @@ explicitly approved by the owner before provisioning:
    consumed. On 2026-08-06, the public On-Demand AWS Pricing Calculator
    recorded USD 2.22/month observed and USD 2.63/month 2x-stress estimates in
    Singapore. A fixed USD 2.00 tax/uncertainty reserve yields a USD 4.63/month
-   binding assessment, below the USD 10 ceiling. The exact disabled-worker
-   CloudFormation change set still needs separate approval. Lambda eligibility
-   and the first Production upload remain later gates.
+   binding assessment, below the USD 10 ceiling. The synthetic complete-worker
+   rehearsal then passed the accepted runtime and ephemeral-storage margins.
+   The exact disabled-worker CloudFormation change set still needs separate
+   approval; provisioning and the first Production upload remain later gates.
 6. Approve the restore rehearsal and, only after parity, the exact local
    backup deletion.
 

@@ -76,8 +76,11 @@ All items must be satisfied and recorded without secret values:
    second root factor is not required by v1;
 2. measure a sanitized logical archive size and `pg_dump` duration without
    copying Production bytes into Git, CI, Vercel, chat, or an unapproved store;
-3. prove the 900-second Lambda limit and 10 GiB ephemeral-storage limit have
-   adequate safety margin, or propose a different reviewed worker architecture;
+3. **Complete 2026-08-06:** a synthetic complete-worker rehearsal processed
+   6,351,131 bytes through dump, verification, upload contract, manifest,
+   retention read-back, and cleanup in 7.901 seconds with 6,351,837 peak
+   ephemeral bytes, proving margin against 900 seconds and 10 GiB without
+   Production or AWS access;
 4. produce a Singapore AWS Pricing Calculator estimate at expected and
    two-times observed size, including S3 versions/Object Lock, KMS, ECR,
    Lambda, Scheduler, SQS, CloudWatch, transfer, requests, and restore drill;

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "gonggamline-aws-backup-capacity-input-v1",
-  "status": "CURRENT_MEASUREMENT_SUCCEEDED_PUBLIC_ON_DEMAND_ESTIMATES_COMPLETE",
+  "status": "CURRENT_MEASUREMENT_AND_CALCULATOR_COMPLETE_SYNTHETIC_WORKER_REHEARSAL_SUCCEEDED",
   "risk": "HIGH",
   "source": {
     "service": "Supabase managed Postgres",
@@ -72,7 +72,21 @@
     "lambdaMaximumEphemeralStorageMiB": 10240,
     "observedScenarioMultiplier": 1,
     "stressScenarioMultiplier": 2,
-    "lambdaEligibility": "UNDECIDED_PENDING_COMPLETE_WORKER_REHEARSAL",
+    "lambdaEligibility": "ELIGIBLE_FOR_DISABLED_WORKER_CHANGE_SET_REVIEW_ONLY",
+    "workerRehearsal": {
+      "evidence": "docs/cloud/aws-backup-worker-rehearsal-v1.json",
+      "status": "SUCCEEDED_SYNTHETIC_ONLY",
+      "requiredStressArchiveBytes": 1430142,
+      "rehearsalArchiveBytes": 6351131,
+      "rehearsalEntryCount": 3,
+      "peakEphemeralBytes": 6351837,
+      "workerMeasuredTotalMs": 7901,
+      "runtimeMarginMs": 892099,
+      "ephemeralMarginBytes": 10731066403,
+      "productionConnected": false,
+      "awsConnected": false,
+      "temporaryStateDeleted": true
+    },
     "fallback": "STOP_AND_PROPOSE_FARGATE_ARCHITECTURE"
   },
   "retentionAndFrequency": {

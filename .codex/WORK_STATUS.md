@@ -1,5 +1,64 @@
 # Work status
 
+## 2026-08-06 — AWS Backup Complete Worker Rehearsal v1
+
+- Objective: close the Lambda eligibility prerequisite with a complete
+  synthetic worker rehearsal before any AWS change set or Production export.
+- Branch/base: `codex/feat/aws-backup-worker-rehearsal` from PR #101 merge
+  `434eccdf92815d6546d8839662f60884c0a59728`.
+- Risk/root cause: high-risk/manual Database / Security backup boundary. The
+  remaining blocker was unproven end-to-end worker runtime and ephemeral-space
+  margin, not Production, AWS, or application failure.
+- Revenue impact: reduces catastrophic sales-data recovery risk while keeping
+  the approved USD 10 boundary and avoiding premature infrastructure spend.
+- Scope: typed fail-closed worker pipeline; isolated synthetic PostgreSQL 17.6
+  dump; offline list verification; SHA-256; immutable archive/manifest upload
+  contract; SSE-KMS/version/retention assertions; replay, deadline, space,
+  warning, checksum, and cleanup negatives; sanitized evidence.
+- Non-goals preserved: AWS stack/change set, resource or paid use, Production
+  connection/export/upload, credential/secret, Supabase change, restore,
+  schedule, local backup access/deletion, RLS/Auth/schema/env, and commerce
+  write.
+- Cloud-first state: source, contract, decisions, and sanitized metrics are
+  tracked for GitHub delivery. Disposable database, archive, simulated object
+  bodies, Docker container/network, and local result are non-authoritative and
+  removed after evidence capture.
+- Rehearsal result: `SUCCEEDED_SYNTHETIC_ONLY`; 6,351,131-byte archive versus
+  1,430,142-byte required stress floor; three list entries; 7.901-second
+  complete workflow including cleanup; 6,351,837 peak ephemeral bytes;
+  892.099-second and 10,731,066,403-byte margins.
+- Safety result: Production/AWS connections, paid usage, schedule, raw archive
+  retention, and durable local state were all absent. Postflight found no
+  matching container, network, or temporary directory.
+- Validation: focused backup/architecture tests 34/34 passed; complete tests
+  499/499 passed; typecheck passed; Production build passed with 85 generated
+  routes; all changed TypeScript files passed lint. The ordinary repository
+  lint exited successfully with warnings only from ignored generated
+  `playwright-report/trace` assets. Local full Playwright reached the 10-minute
+  wrapper limit while reproducing the seven established unconfigured-Supabase
+  API 500 paths on `/listing`, `/market`, `/procurement`, `/revenue`,
+  `/sourcing`, `/workflow`, and `/workspace`; no process remained afterward.
+  Exact-head Preview validation remains the binding browser gate.
+- Delivery transport: `gh auth status` reports its stored CLI token invalid,
+  while the installed GitHub app remains independently authenticated for PR
+  operations and Git remote credentials are tested separately before push. No
+  credential value is read or changed.
+- Current work: complete repository validation, commit/push, high-risk Draft
+  PR delivery, and exact-head CI/Preview verification.
+- Owner action/blocker: none for Draft PR preparation. Manual merge remains
+  required. The next external action is a separately reviewed exact Singapore
+  CloudFormation change set with `EnableWorkerResources=false` and named-IAM
+  capability acknowledgement.
+- Changed files: worker pipeline and rehearsal runner; focused tests; sanitized
+  rehearsal evidence; capacity/backup/cloud-state contracts; Architecture
+  Review, Decision Log, architecture/runbooks, changelog, and this checkpoint.
+- Exact next action: finish all local gates, push the checkpoint, create a
+  high-risk Draft PR with `manual-merge-required`, then validate exact-head CI
+  and Preview. Do not provision AWS.
+- Remaining risks: the rehearsal uses synthetic local object semantics rather
+  than AWS S3; no deployable immutable Lambda image, scoped Production secret,
+  real immutable recovery point, or restore parity exists yet.
+
 ## 2026-08-06 — AWS Backup Production verification and pricing estimate
 
 - Objective: validate the merged PR #100 Production deployment and complete

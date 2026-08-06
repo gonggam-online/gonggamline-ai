@@ -223,10 +223,13 @@ Production remained `Healthy` after the attempt with CPU 2%, disk 14%, RAM 58%,
 
 All three one-attempt approvals are consumed and no additional Production
 measurement is authorized. The current capacity-measurement gate is closed;
-Lambda eligibility remains undecided until a complete worker rehearsal. The
-next cost step is a manual public On-Demand AWS Pricing Calculator estimate for
-the observed and 2x-observed scenarios. Provisioning, Production upload,
-restore, and schedule remain separately blocked.
+The later 2026-08-06 synthetic complete-worker rehearsal processed a
+6,351,131-byte archive through dump, offline inspection, SHA-256, immutable
+upload contract, manifest, retention read-back, and cleanup in 7.901 seconds
+with 6,351,837 peak ephemeral bytes. Lambda is now eligible only for review of
+an exact disabled-worker change set. Public On-Demand estimates are also
+complete. Provisioning, Production upload, restore, and schedule remain
+separately blocked.
 
 Official references:
 

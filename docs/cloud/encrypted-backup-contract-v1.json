@@ -1,6 +1,6 @@
 {
   "schemaVersion": "gonggamline-encrypted-backup-contract-v1",
-  "status": "PRO_PROVIDER_BACKUP_ACTIVE_AWS_ACCOUNT_PREFLIGHT_COMPLETE_CURRENT_CAPACITY_MEASURED_CALCULATOR_COMPLETE_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
+  "status": "PRO_PROVIDER_BACKUP_ACTIVE_CAPACITY_CALCULATOR_AND_SYNTHETIC_WORKER_REHEARSAL_COMPLETE_INFRASTRUCTURE_NOT_PROVISIONED_MANUAL_MERGE_REQUIRED",
   "risk": "HIGH",
   "owner": "Database / Security",
   "source": {
@@ -103,6 +103,8 @@
       "requiresSeparateChangeSetApproval": true,
       "requiresCapacityEvidence": true,
       "requiresAwsCalculatorEstimate": true,
+      "workerRehearsalStatus": "SUCCEEDED_SYNTHETIC_ONLY",
+      "workerRehearsalEvidence": "docs/cloud/aws-backup-worker-rehearsal-v1.json",
       "runbook": "docs/cloud/AWS-INDEPENDENT-BACKUP-INFRASTRUCTURE-PLAN-V1.md"
     }
   },
@@ -158,7 +160,23 @@
       "transientProductionArchiveAuthorized": false
     },
     "fallback": "STOP_AND_PROPOSE_FARGATE_ARCHITECTURE",
-    "silentTruncationOrPartialSuccess": "PROHIBITED"
+    "silentTruncationOrPartialSuccess": "PROHIBITED",
+    "lambdaEligibility": "ELIGIBLE_FOR_DISABLED_WORKER_CHANGE_SET_REVIEW_ONLY",
+    "workerRehearsal": {
+      "status": "SUCCEEDED_SYNTHETIC_ONLY",
+      "executedAt": "2026-08-06T00:23:27.538Z",
+      "evidence": "docs/cloud/aws-backup-worker-rehearsal-v1.json",
+      "requiredStressArchiveBytes": 1430142,
+      "rehearsalArchiveBytes": 6351131,
+      "peakEphemeralBytes": 6351837,
+      "workerMeasuredTotalMs": 7901,
+      "runtimeMarginMs": 892099,
+      "ephemeralMarginBytes": 10731066403,
+      "productionConnected": false,
+      "awsConnected": false,
+      "paidUsageCreated": false,
+      "temporaryStateDeleted": true
+    }
   },
   "costProposal": {
     "pricingAsOf": "2026-08-06",

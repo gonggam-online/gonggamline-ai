@@ -1,5 +1,31 @@
 # Architecture review
 
+## AWS Backup Complete Worker Rehearsal v1 — 2026-08-06
+
+- Approved source: manually accepted Encrypted Cloud Backup and Restore
+  Architecture plus merged infrastructure, capacity, and cost evidence through
+  PR #101.
+- Boundary owner: Database / Security. The existing source of truth is
+  `docs/cloud/encrypted-backup-contract-v1.json`; no new Domain, Database,
+  Migration, Queue, Lifecycle, Public API, or External Integration is added.
+- Scope: a fail-closed worker pipeline and disposable synthetic PostgreSQL
+  rehearsal for custom dump, offline inspection, SHA-256, immutable archive and
+  manifest writes, SSE-KMS/version assertions, retention read-back, exact
+  replay, deadline/space limits, sanitized events, and complete cleanup.
+- Cloud-first placement: source, sanitized evidence, and decisions belong in
+  GitHub. The synthetic database, archive, simulated object bodies, containers,
+  network, and local result are temporary and deleted after evidence capture.
+- Result: 6,351,131 bytes completed in 7.901 seconds with 6,351,837 peak
+  ephemeral bytes, leaving 892.099 seconds and 10,731,066,403 bytes of margin.
+  Production and AWS were not contacted.
+- Risk: high-risk/manual because the pipeline is a gate for later Production
+  export and AWS backup infrastructure. Apply `manual-merge-required`; never
+  auto-merge. No provisioning, credentials, Production connection/export,
+  paid usage, restore, or schedule is authorized.
+- Rollout/rollback: repository and Preview validation plus Draft PR only.
+  Revert before provisioning. The next action is a separately approved exact
+  CloudFormation change set with `EnableWorkerResources=false`.
+
 ## AWS Independent Backup Infrastructure Plan v1 — 2026-08-05
 
 - Approved source: manually merged Encrypted Cloud Backup and Restore
