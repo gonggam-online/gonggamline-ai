@@ -1,5 +1,21 @@
 # Decision log
 
+## 2026-08-08 — Bridge only the validated category contract into Listing evidence
+
+- Dependency: owner-approved Architecture PR #107 and merged implementation
+  PR #108.
+- Decision: a validated category snapshot may create exactly one proven,
+  catalog-item-scoped `coupangCategoryContract` fact. It may not create product
+  attribute, certification, document, or notice facts.
+- Fail-closed conditions: quarantined snapshot, absent notice selection,
+  malformed digest or identity, invalid time ordering, and snapshot age beyond
+  seven days all produce no evidence fact.
+- Durable state: GitHub owns source, tests, review evidence, and recovery. No
+  new local-only or runtime durable state is introduced.
+- Risk and exclusions: normal-risk additive pure code; no API/database/Auth/RLS,
+  environment, secret, Production, external call, paid action, or commerce
+  mutation authority.
+
 ## 2026-08-08 — Listing category snapshots fail closed before integration
 
 - The mapper accepts only bounded known collections and enums, digests the

@@ -1,5 +1,43 @@
 # Work status
 
+## 2026-08-08 Listing Category Evidence Bridge implementation
+
+- Objective: connect the merged typed category snapshot to the existing
+  Listing evidence policy through the smallest fail-closed pure bridge.
+- Branch/base: `codex/feat/listing-category-evidence-bridge` from merged PR #108
+  on `origin/main` `6b36bf1a392fee58a9d5d6bf2009c9f0a7b0ba1e`.
+- Risk: normal-risk additive pure implementation.
+- Revenue impact: removes the next safe integration gap toward evidence-backed
+  Listing generation without manufacturing product claims.
+- Root-cause class: approved code integration gap; no external configuration or
+  database failure is being compensated for.
+- Scope: deterministic category-contract evidence promotion plus fail-closed
+  identity/digest/notice/time validation and negative tests.
+- Non-goals: API/database/Auth/RLS, secrets, live Coupang calls, Production,
+  product-fact inference, pricing, listing registration, or commerce writes.
+- Cloud-first gate: durable source/tests/review evidence live in GitHub; no
+  durable runtime state is created. Local checkout/test output is disposable.
+- Completed: inspected merged contracts; implemented the bridge; added six
+  integration/negative tests; focused checks passed; full tests passed 519/519;
+  typecheck passed; production build passed with 85 routes; changed-file lint
+  passed.
+- Browser validation: 35 passed and 2 skipped. The established seven page-health
+  failures remain limited to unconfigured local Supabase (`missing_url`) on
+  `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
+  and `/workspace`; this bridge has no route, API, or Supabase dependency.
+- Full-repository lint caveat: user-owned untracked generated `dist/` and
+  `playwright-report/` assets are included by the broad lint command and report
+  generated-code errors. They are preserved and excluded from this change.
+- Current: complete diff/secret review and delivery gates.
+- Changed files: `engines/listing/category-evidence-bridge.ts`,
+  `tests/listing-category-evidence-bridge.test.ts`, Architecture Review,
+  Decision Log, Listing changelog, and this status file.
+- Exact next action: review the complete diff, then commit, push, and open the
+  normal-risk PR.
+- Remaining risk: the bridge proves only the category contract. Real product
+  identity/facts, Production configuration, and marketplace writes remain
+  separately gated.
+
 ## 2026-08-08 Listing Category Snapshot implementation
 
 - Objective: implement the approved PR #107 typed category snapshot without
