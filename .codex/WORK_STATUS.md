@@ -1,47 +1,859 @@
 # Work status
 
-## 2026-08-05 — Third-party inspection policy
+## 2026-08-08 Listing Category Evidence Bridge implementation
 
-- Objective: make third-party warehouse inspection/preparation the default
-  unattended path and reserve direct sampling/original-source negotiation for
-  separately accepted strategic-product exceptions.
-- Branch/base: `codex/docs/third-party-inspection-policy` from `origin/main`
-  `a6572b0` (merged PR #82).
-- Risk: normal-risk documentation only. No provider integration, procurement,
-  warehouse instruction, inbound, listing, DB/Auth/RLS, privacy/Production, or
-  paid action.
-- Revenue impact: removes routine owner handling from the first-sale path while
-  retaining physical evidence and enabling cost/supply escalation for likely
-  core products.
-- Root-cause class: approved operating-policy/Architecture clarification; no
-  external configuration, Database, or code failure is being masked.
-- Scope: amend the Sales Learning Architecture, Architecture Review, Decision
-  Log, roadmap, and changelog with the default 3PL route, evidence/quarantine
-  contract, and strategic exception.
-- Non-goals: actual Gaemi Warehouse adapter, provider terms/API discovery,
-  purchase, communication, shipment, listing, schema, runtime, or experiment.
-- Completed: read binding governance; verified merged Stage 11 base; created a
-  dedicated branch; audited the accepted Architecture; documented the owner
-  decision and preserved every external-write approval boundary.
-- Current: local validation complete; normal-risk delivery in progress.
-- Blockers/owner actions: none for this documentation PR. An actual provider
-  adapter requires provider discovery and a separate approved Story.
-- Changed files: `docs/architecture/SALES-LEARNING-CLOSED-LOOP-V1.md`,
-  `.ai/ARCHITECTURE_REVIEW.md`, `.ai/DECISION_LOG.md`,
-  `docs/orchestrator/implementation-roadmap.md`,
-  `docs/orchestrator/CHANGELOG.md`, and this file.
-- Validation: `git diff --check` passed; lint passed with 0 errors and four
-  pre-existing warnings; typecheck passed; unit tests 446/446 passed; build
-  passed with 85 routes. Local Playwright passed 35, skipped 2, and failed the
-  seven existing Supabase-dependent routes because local Supabase is
-  unconfigured (`missing_url`); this documentation change has no runtime path.
-- Exact next action: commit, push, open the normal-risk Draft PR, and verify its
-  exact-head CI/Preview gates.
-- Remaining risks: Gaemi Warehouse contracts, API/export shape, service terms,
-  privacy roles, evidence retention, pricing, and exception thresholds are not
-  yet verified and must not be invented.
+- Objective: connect the merged typed category snapshot to the existing
+  Listing evidence policy through the smallest fail-closed pure bridge.
+- Branch/base: `codex/feat/listing-category-evidence-bridge` from merged PR #108
+  on `origin/main` `6b36bf1a392fee58a9d5d6bf2009c9f0a7b0ba1e`.
+- Risk: normal-risk additive pure implementation.
+- Revenue impact: removes the next safe integration gap toward evidence-backed
+  Listing generation without manufacturing product claims.
+- Root-cause class: approved code integration gap; no external configuration or
+  database failure is being compensated for.
+- Scope: deterministic category-contract evidence promotion plus fail-closed
+  identity/digest/notice/time validation and negative tests.
+- Non-goals: API/database/Auth/RLS, secrets, live Coupang calls, Production,
+  product-fact inference, pricing, listing registration, or commerce writes.
+- Cloud-first gate: durable source/tests/review evidence live in GitHub; no
+  durable runtime state is created. Local checkout/test output is disposable.
+- Completed: inspected merged contracts; implemented the bridge; added six
+  integration/negative tests; focused checks passed; full tests passed 519/519;
+  typecheck passed; production build passed with 85 routes; changed-file lint
+  passed.
+- Browser validation: 35 passed and 2 skipped. The established seven page-health
+  failures remain limited to unconfigured local Supabase (`missing_url`) on
+  `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
+  and `/workspace`; this bridge has no route, API, or Supabase dependency.
+- Full-repository lint caveat: user-owned untracked generated `dist/` and
+  `playwright-report/` assets are included by the broad lint command and report
+  generated-code errors. They are preserved and excluded from this change.
+- Current: complete diff/secret review and delivery gates.
+- Changed files: `engines/listing/category-evidence-bridge.ts`,
+  `tests/listing-category-evidence-bridge.test.ts`, Architecture Review,
+  Decision Log, Listing changelog, and this status file.
+- Exact next action: review the complete diff, then commit, push, and open the
+  normal-risk PR.
+- Remaining risk: the bridge proves only the category contract. Real product
+  identity/facts, Production configuration, and marketplace writes remain
+  separately gated.
 
----
+## 2026-08-08 Listing Category Snapshot implementation
+
+- Objective: implement the approved PR #107 typed category snapshot without
+  changing the legacy API or making a Coupang write.
+- Branch/base: `codex/feat/listing-category-snapshot` from Architecture merge
+  `ad9a0819ecb12c34da6a75b220d036d65d33a6c1`.
+- Risk/root cause: normal-risk additive code; code/contract gap.
+- Completed: bounded contracts, pure canonical digest/mapper, separate
+  read-only validity adapter, quarantine issues, and synthetic tests.
+- Validation: focused category tests 9/9, full tests 513/513, typecheck,
+  changed-file lint, and the 85-route Production build pass. Local Playwright
+  is at the established unconfigured-Supabase baseline: 35 passed, 2 skipped,
+  and 7 unrelated `missing_url` API failures.
+- Cloud-first: source/fixtures/evidence target GitHub; no Production response,
+  secret, database, or local durable state.
+- Current step: full repository/build/browser verification, delivery, CI, and
+  Preview validation.
+- Remaining risk: the new contracts are deliberately not wired into the
+  legacy route or a Production workflow; that integration is a later Story.
+
+## 2026-08-08 Listing Category Snapshot Architecture
+
+- Objective: define the smallest safe typed category input for a truthful
+  first listing after PR #106 merged.
+- Branch: `codex/docs/listing-category-snapshot-architecture` from merge
+  `207ae47e115a381b998ebaaa2b203cfaf5e658e2`.
+- Risk/root cause: normal-risk architecture; code/contract gap. The current raw
+  `Record<string, unknown>` response cannot be Listing evidence.
+- Scope: typed snapshot, separate validity proof, digests, bounds, failures,
+  compatibility, tests, rollout, and rollback. No API/DB/config/Production or
+  marketplace write.
+- Cloud-first: GitHub owns all durable state; fixtures are sanitized and local
+  artifacts are disposable.
+- Current step: validate and deliver the Architecture Story for manual owner
+  acceptance before implementation.
+
+## 2026-08-08 AWS independent backup base boundary deployed
+
+- Objective: finish the owner-approved Singapore independent-backup base
+  boundary and stop treating AWS SSO automation as a separate project goal.
+- Branch/base: `codex/chore/aws-disabled-worker-change-set`.
+- Risk/root cause: high-risk/manual external AWS boundary. Repeated failures
+  were caused by expired SSO sessions and local PowerShell orchestration, not
+  application or database logic.
+- Revenue impact: the encrypted off-device recovery boundary now exists; work
+  can return to the shortest measurable-sales development path.
+- Cloud-first evidence: region `ap-southeast-1`, stack
+  `gonggamline-independent-backup-v1`, and change set
+  `base-boundary-review-v1` are the remote recovery pointers. Sanitized source
+  and verification status remain Git-tracked; SSO tokens remain temporary.
+- Completed: the stack reached `CREATE_COMPLETE`. `BackupBucket`,
+  `BackupBucketPolicy`, `BackupDeadLetterQueue`, `BackupImageRepository`,
+  `BackupKey`, and `BackupKeyAlias` each reached `CREATE_COMPLETE`.
+- Safety evidence: `EnableWorkerResources=false`, `BackupWorkerImageUri=""`,
+  and `ProductionDatabaseSecretArn=""`; no worker, schedule, Production export,
+  database write, restore, or commerce write was enabled.
+- Repetition guard: the recovery script no longer changes `HOME` or
+  `USERPROFILE` and refuses to delete an existing stack unless the separately
+  approved `-RecreateExistingStack` switch is supplied.
+- Owner action/blocker: none for the base boundary. Worker enablement,
+  Production secret injection, scheduled export, real backup, and restore drill
+  remain separately approved high-risk operations.
+- Exact next action: deliver this sanitized checkpoint to GitHub, then resume
+  the highest-value real sales-system development Story.
+- Remaining risk: RPO/RTO are not achieved until a real backup and restore
+  drill are separately approved and verified.
+
+## 2026-08-06 — AWS Backup Disabled-Worker Change Set Packet v1
+
+- Objective: convert the merged worker/capacity/cost evidence into the exact
+  first Singapore CloudFormation no-execute review target without provisioning
+  AWS resources.
+- Branch/base: `codex/chore/aws-disabled-worker-change-set` from PR #102 merge
+  `50cce601e2e1085a001ca3feaff6760d13c07ff0`.
+- Risk/root cause: high-risk/manual external AWS boundary. The remaining stop
+  condition is external configuration: no AWS CLI and no verified non-root
+  temporary/federated administrator session, not an application or database
+  defect.
+- Revenue impact: advances independent disaster recovery for sales continuity
+  while keeping worker, Production export, scheduling, and paid provisioning
+  disabled.
+- Scope: exact stack/change-set names, template digest/size, Singapore region,
+  `CREATE`, `EnableWorkerResources=false`, empty secret/image defaults,
+  `CAPABILITY_NAMED_IAM`, expected six-add/eight-omitted boundary, generator,
+  negative tests, runbook, decisions, and cloud-state recovery evidence.
+- Non-goals preserved: AWS change-set creation/execution, resource/paid use,
+  root or long-lived access key, credential/secret creation, Production
+  connection/export/upload, restore, schedule, Supabase/DB/RLS/Auth/env or
+  commerce mutation, local-backup access/deletion, and auto-merge.
+- Cloud-first state: the reproducible packet and sanitized evidence are tracked
+  for GitHub. No account identifier, secret, backup content, AWS metadata, or
+  unique local state is stored.
+- GitHub/Production verification: `gh` and Git remote succeed through the
+  Windows keyring in the permitted network context. PR #102 is merged and
+  Production smoke run `31061723638` passed 42/44 with two intentional skips;
+  artifact `8952383780` has digest
+  `sha256:ee7f1dfce742523fd3b0c662fdb39647726796e88f950fc460d8000a801f097d`.
+- AWS preflight: AWS CLI not installed; inferred CloudFormation console target
+  redirects to AWS sign-in. No AWS call was attempted. Root and long-lived
+  access keys remain prohibited.
+- Delivery: implementation commit
+  `1eb551345a726edd962c676409f337ed97b6e2a8` is pushed in high-risk Draft PR
+  #103 with `manual-merge-required` and `high-risk`; no auto-merge.
+- Remote gates: CI run `31062568006` passed all eight jobs, including complete
+  migration replay, R1 atomic Product mutation, and A01-A12 security replay.
+  Preview run `31062568040` passed 42 browser checks against exact deployment
+  `https://gonggamline-ipjhmi2k7-gg-online.vercel.app`; artifact `8952686698`
+  has digest
+  `sha256:a9ca81e0fc9145c98cb1360bf985a6352a2f1d8def85f647ec1fa98c17662b39`.
+  Manual inspection rendered 151 Supabase-backed Products.
+- Current work: record delivery evidence, push the checkpoint, and revalidate
+  the exact status-only head.
+- Owner action/blocker: manually review and merge Draft PR #103. After merge,
+  configure an IAM Identity Center or equivalent federated administrator with
+  MFA and AWS CLI v2. Then approve creation of the exact **unexecuted** change
+  set. Execution/provisioning is a later separate approval.
+- Changed files: change-set plan generator/script/tests; exact JSON/runbook;
+  package command; backup contract/cloud manifest; Architecture Review,
+  Decision Log, changelog, and this checkpoint.
+- Validation so far: complete tests passed 504/504; deterministic plan command
+  reproduced the committed packet; typecheck and 85-route Production build
+  passed; changed-file lint passed; repository lint excluding ignored generated
+  browser reports passed with zero errors and four established Revenue-test
+  warnings; diff check and tracked-secret pattern scan passed. Local Playwright
+  reproduced the established unconfigured-Supabase baseline: 35 passed, two
+  skipped, and seven `missing_url` route failures. CI and Preview remain
+  pending.
+- Exact next action: push this delivery checkpoint, revalidate CI/Preview on
+  the exact head, then leave Draft PR #103 for repository-owner manual review
+  and merge. Do not create or execute an AWS change set.
+- Remaining risks: the packet is not an AWS service-generated change set; base
+  resources do not yet exist; no writer image/secret/restore proof exists; an
+  executed stack would create paid retained resources whose cleanup requires a
+  separate plan.
+
+## 2026-08-06 — AWS Backup Complete Worker Rehearsal v1
+
+- Objective: close the Lambda eligibility prerequisite with a complete
+  synthetic worker rehearsal before any AWS change set or Production export.
+- Branch/base: `codex/feat/aws-backup-worker-rehearsal` from PR #101 merge
+  `434eccdf92815d6546d8839662f60884c0a59728`.
+- Risk/root cause: high-risk/manual Database / Security backup boundary. The
+  remaining blocker was unproven end-to-end worker runtime and ephemeral-space
+  margin, not Production, AWS, or application failure.
+- Revenue impact: reduces catastrophic sales-data recovery risk while keeping
+  the approved USD 10 boundary and avoiding premature infrastructure spend.
+- Scope: typed fail-closed worker pipeline; isolated synthetic PostgreSQL 17.6
+  dump; offline list verification; SHA-256; immutable archive/manifest upload
+  contract; SSE-KMS/version/retention assertions; replay, deadline, space,
+  warning, checksum, and cleanup negatives; sanitized evidence.
+- Non-goals preserved: AWS stack/change set, resource or paid use, Production
+  connection/export/upload, credential/secret, Supabase change, restore,
+  schedule, local backup access/deletion, RLS/Auth/schema/env, and commerce
+  write.
+- Cloud-first state: source, contract, decisions, and sanitized metrics are
+  tracked for GitHub delivery. Disposable database, archive, simulated object
+  bodies, Docker container/network, and local result are non-authoritative and
+  removed after evidence capture.
+- Rehearsal result: `SUCCEEDED_SYNTHETIC_ONLY`; 6,351,131-byte archive versus
+  1,430,142-byte required stress floor; three list entries; 7.901-second
+  complete workflow including cleanup; 6,351,837 peak ephemeral bytes;
+  892.099-second and 10,731,066,403-byte margins.
+- Safety result: Production/AWS connections, paid usage, schedule, raw archive
+  retention, and durable local state were all absent. Postflight found no
+  matching container, network, or temporary directory.
+- Validation: focused backup/architecture tests 34/34 passed; complete tests
+  499/499 passed; typecheck passed; Production build passed with 85 generated
+  routes; all changed TypeScript files passed lint. The ordinary repository
+  lint exited successfully with warnings only from ignored generated
+  `playwright-report/trace` assets. Local full Playwright reached the 10-minute
+  wrapper limit while reproducing the seven established unconfigured-Supabase
+  API 500 paths on `/listing`, `/market`, `/procurement`, `/revenue`,
+  `/sourcing`, `/workflow`, and `/workspace`; no process remained afterward.
+  Exact-head Preview validation remains the binding browser gate.
+- Delivery transport: `gh auth status` reports its stored CLI token invalid,
+  while the installed GitHub app remains independently authenticated for PR
+  operations and Git remote credentials are tested separately before push. No
+  credential value is read or changed.
+- Delivery: implementation commit
+  `b13ad658ac2171694f41546ed971eeb3cb054309` is pushed in high-risk Draft PR
+  #102 with `manual-merge-required` and `high-risk`. CI run `31059780939`
+  passed all eight jobs, including complete migration replay, R1 atomic Product
+  mutation, and A01-A12 security replay. Preview browser run `31059780935`
+  passed against exact deployment
+  `https://gonggamline-fts05a30c-gg-online.vercel.app`; evidence artifact
+  digest is
+  `sha256:46cbe53d6ee7ba3bde14c85299716f27a3d2f3901b45e99eabe340234e8816f1`.
+  Manual browser inspection also rendered 151 Supabase-backed Products.
+- Current work: record delivery evidence on the task branch and revalidate the
+  exact status-only head.
+- Owner action/blocker: manual review and merge of Draft PR #102 is required.
+  The next external action after merge is a separately reviewed exact Singapore
+  CloudFormation change set with `EnableWorkerResources=false` and named-IAM
+  capability acknowledgement.
+- Changed files: worker pipeline and rehearsal runner; focused tests; sanitized
+  rehearsal evidence; capacity/backup/cloud-state contracts; Architecture
+  Review, Decision Log, architecture/runbooks, changelog, and this checkpoint.
+- Exact next action: commit and push this delivery checkpoint, revalidate its
+  exact CI/Preview head, then leave Draft PR #102 for repository-owner manual
+  review and merge. Do not provision AWS.
+- Remaining risks: the rehearsal uses synthetic local object semantics rather
+  than AWS S3; no deployable immutable Lambda image, scoped Production secret,
+  real immutable recovery point, or restore parity exists yet.
+
+## 2026-08-06 — AWS Backup Production verification and pricing estimate
+
+- Objective: validate the merged PR #100 Production deployment and complete
+  the accepted observed/2x public On-Demand Singapore AWS pricing gate without
+  provisioning AWS state.
+- Branch/base: `codex/chore/aws-backup-cost-estimate` from PR #100 merge
+  `bb0e3715159cfe7f7d8c3bf049189f7e94c5918b`.
+- Risk/root cause: high-risk/manual pricing and Production verification. The
+  open prerequisite was missing external pricing evidence, not an application
+  or database defect.
+- Revenue impact: protects sales continuity by quantifying the independent
+  recovery layer while preserving the owner-approved USD 10 cost boundary; no
+  customer or commerce behavior changes.
+- Scope: exact merged Production deployment identification, non-destructive
+  Product Ops/browser/API/console/request smoke, observed and 2x-stress public
+  Calculator estimates, ceiling assessment, contract/tests/documentation.
+- Non-goals preserved: AWS provisioning or paid use, credentials, Production
+  export/upload, database mutation, restore, schedule, RLS/Auth/schema/env or
+  commerce writes, CloudTrail enablement, local backup access/deletion, and
+  auto-merge.
+- Production result: exact commit deployed successfully to
+  `https://gonggamline-ai.vercel.app`; Product Ops rendered 151 Supabase-backed
+  products. Production browser smoke run `31055725712` passed with artifact
+  digest
+  `sha256:dc187455eae7465f2c6d13f4c7c56876257e042ad929761cc60d1c764eb9de70`.
+- Pricing result: observed USD 2.22/month; 2x stress USD 2.63/month; fixed tax
+  and uncertainty reserve USD 2.00; binding assessment USD 4.63/month; USD 5.37
+  headroom below the USD 10 ceiling. Both public estimate links contain only
+  sanitized planning inputs.
+- Delivery: evidence commit
+  `e1638cd9c9de0c79d7159ad3a97631ef9424566d` was pushed on
+  `codex/chore/aws-backup-cost-estimate`; high-risk Draft PR #101 targets
+  `main` with `manual-merge-required` and no auto-merge.
+- Remote gates on the evidence head: CI run 221 passed all eight jobs,
+  including lint, typecheck, build, complete tests, tracked-secret audit,
+  disposable database replay, R1 atomic mutation replay, and A01-A12 security
+  replay. Preview browser validation run 221 passed the exact Ready Vercel
+  deployment with no failed non-destructive check. Evidence artifact
+  `preview-browser-evidence` digest is
+  `sha256:9035a601b91e792c39331cdd1cfa2a5f51cf3d6ca90848e5ed0c6f128435dc31`.
+- Owner action/blocker: none for the evidence Draft PR. Lambda complete-worker
+  rehearsal and the exact disabled-worker CloudFormation change set require
+  later, separate high-risk decisions before provisioning.
+- Changed files: capacity input, backup contract, pricing evidence,
+  architecture, decision log, changelog, focused tests, and this checkpoint.
+- Validation: complete tests 486/486 passed; typecheck passed; Production build
+  generated 85 pages; source lint passed with zero errors and four established
+  Revenue-test unused-variable warnings. The unfiltered lint command remains
+  blocked only by existing ignored `playwright-report/trace` generated bundles.
+  Local Playwright reproduced the unchanged external-configuration baseline:
+  35 passed, 2 skipped, and 7 `missing_url` failures on `/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
+- Exact next action: owner manually reviews and merges Draft PR #101. After
+  merge, wait for the new Production deployment and run the required health,
+  API, console, failed-request, and browser smoke checks before any later AWS
+  provisioning decision.
+- Remaining risks: Lambda eligibility is unproven; sanitized log/transfer/tax
+  values are covered by a planning reserve rather than measured billing; no
+  independent AWS recovery point exists yet.
+
+## 2026-08-05 — AWS Backup Production capacity measurement final attempt
+
+- Objective: execute exactly one owner-authorized, read-only current Production
+  capacity measurement with independently persisted sanitized evidence, then
+  close the capacity gate without creating AWS state.
+- Branch/base: `codex/chore/aws-backup-capacity-measurement-v2` from merged PR
+  #99 / `origin/main` `f0fc3f99542a19ad1f078a7ae979474a9f050d19`.
+- Risk/root cause: high-risk/manual Production-data read. Root cause was missing
+  current result evidence after an external execution-transport loss, not an
+  application, database-schema, or AWS defect.
+- Revenue impact: improves recovery continuity and removes a prerequisite for
+  the independent AWS cost decision; it does not directly create sales.
+- Scope: exact Singapore Production target, PostgreSQL 17.6 complete
+  custom-format dump, offline list validation, sanitized metrics, cleanup,
+  Production pre/post health, contract/tests/documentation.
+- Non-goals preserved: database write, row inspection, AWS resource/paid use,
+  upload, restore, schedule, RLS/auth/schema/env change, commerce write,
+  existing backup access, automatic retry, or auto-merge.
+- Completed: added a result-independent, fail-closed runner and five static
+  tests; credential-absent failure path passed without connecting to
+  Production. Preflight verified TLS target, current physical provider backup,
+  free disk, pinned client, Docker, and healthy Production.
+- Measurement: the single authorized attempt succeeded at
+  `2026-08-05T11:00:45.4286736Z`; archive 715,071 bytes, dump 34.125 seconds,
+  1,251 list entries, zero warnings. No database mutation or row inspection.
+- Cleanup/postflight: archive, credential file, restricted temp directory, and
+  both containers deleted; independent counts were zero. Supabase remained
+  `Healthy` with CPU 2%, disk 14%, RAM 58%, 14/60 connections, and no Advisor
+  issue.
+- Validation: focused capacity/architecture tests 19/19; full tests 486/486;
+  lint zero errors with four unrelated existing unused-variable warnings;
+  typecheck passed; Production build passed with 85 generated pages. Local
+  Playwright baseline was 35 passed, 2 skipped, 7 failed only because local
+  Supabase is intentionally unconfigured (`missing_url`) on `/listing`,
+  `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and
+  `/workspace`; this matches the existing environment baseline and none of the
+  changed files are application routes.
+- Current work: complete diff/secret review, remove the ignored sanitized local
+  result after durable evidence capture, commit/push, and open a high-risk
+  Draft PR with manual merge required.
+- Publication status 2026-08-06: `gh auth status` still reports its stored CLI
+  token invalid after owner reauthentication, but the installed GitHub app is
+  independently authenticated with repository admin/push access. Git remote
+  and exact `origin/main` base were reverified, so publication proceeds through
+  local Git plus the GitHub app without reading or replacing credentials.
+- Delivery: implementation commit
+  `44297d5012a6c0201848dc2e383adc67f0f24953` was pushed on
+  `codex/chore/aws-backup-capacity-measurement-v2`; high-risk Draft PR #100
+  targets `main` with `manual-merge-required` and no auto-merge.
+- Remote gates on exact implementation head: CI run 219 passed all jobs,
+  including build/tests/lint/typecheck, tracked-secret audit, complete disposable
+  DB baseline replay, R1 atomic mutation replay, and A01-A12 item-selection
+  security replay. Preview browser validation run 219 passed against the exact
+  Ready Vercel deployment with no failed non-destructive check. Evidence
+  artifact `preview-browser-evidence` digest is
+  `sha256:1f9bce34f02c6e01e51dd329ebf0443705cc84928b9debcd6e79de6b5306dd51`.
+- Owner action/blocker: none for Draft PR delivery. AWS Pricing Calculator,
+  infrastructure provisioning/change set, first Production upload, restore,
+  and scheduling remain later approval boundaries.
+- Changed files: runner/test, capacity input/contract/tests, measurement
+  packet, backup architecture, decision log, changelog, and this checkpoint.
+- Exact next action: owner manually reviews and merges Draft PR #100; after
+  merge, wait for Production and run the required health/API/browser smoke.
+- Remaining risks: public On-Demand AWS cost estimate is not yet recorded;
+  Lambda remains undecided pending a complete worker rehearsal; no independent
+  AWS recovery point exists yet.
+
+## 2026-08-05 — AWS Backup Production capacity measurement v1 retry 1
+
+- Objective: execute the owner-approved single retry after secure
+  process-scoped credential injection, preserve sanitized capacity evidence,
+  and delete every newly created transient artifact.
+- Branch/base: `codex/chore/aws-backup-capacity-retry-evidence` from exact PR
+  #97 squash merge `e8bfe50cf1bf6713563e4cebd74c7693cc574409`.
+- Risk/root cause: high-risk/manual Production-data read. The retry execution
+  transport did not preserve the final sanitized result JSON. This is an
+  execution-evidence failure; dump success or failure must not be inferred.
+- Revenue impact: no customer or commerce behavior changed. Independent backup
+  capacity remains blocked, preserving recovery safety but not yet enabling AWS
+  provisioning.
+- Scope: exact Production/backup/load/tool/network/disk preflight, exactly one
+  PostgreSQL 17.6 custom-format read-only retry, offline archive-list validation
+  when available, cleanup, Production postflight, and sanitized evidence.
+- Non-goals preserved: AWS resource/paid use, upload, restore, schedule,
+  credential value inspection/rotation, database/RLS/Auth/environment or
+  commerce mutation, existing backup access, row inspection, further retry,
+  auto-merge, and Production deployment.
+- Completed: verified the process credential was present without outputting it;
+  confirmed exact Singapore target, current physical backup, Healthy state,
+  PostgreSQL 17.6, TLS reachability, adequate disk, and bounded execution
+  controls; executed the one authorized retry. The output transport truncated
+  the sanitized result and no attached terminal or retained Docker exit event
+  could recover it. The retry approval is consumed.
+- Cleanup/postflight: zero matching restricted temporary directories and zero
+  measurement containers remain. No AWS action occurred. The command was
+  read-only and performed no database mutation. Supabase remained `Healthy`
+  afterward with CPU 2%, disk 14%, RAM 59%, 12/60 connections, current backup,
+  and no Advisor issue.
+- Result/current: current archive creation, bytes, successful duration, TOC
+  entry count, warning count, and dump outcome are unknown. Historical 696,310
+  bytes remains reference-only. Calculator, Lambda capacity, provisioning,
+  upload, restore, and schedule stay blocked.
+- Owner action/blocker: no further retry is authorized. A new explicit
+  one-attempt approval is required and its execution must durably persist the
+  sanitized result independently before transient cleanup.
+- Changed files: capacity input/contract, measurement packet, backup
+  architecture, Decision Log, changelog, focused tests, and this status record.
+- Current validation: postflight and focused tests 14/14 passed; full tests
+  481/481 passed; typecheck passed; Production build passed with 85 generated
+  pages; source lint passed with zero errors and four established warnings.
+  Local Playwright reproduced the unchanged external-configuration baseline:
+  35 passed, 2 skipped, and 7 `missing_url` failures on `/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
+  Evidence commit `dee9345bb6ff3b61957d3689b2f1f0e1629ff646` is pushed in
+  high-risk Draft PR #99 with `manual-merge-required`; exact-head CI and Preview
+  gates are pending. PR #98 was closed unmerged as superseded because its
+  pre-squash branch duplicated the already merged PR #97 diff.
+- Exact next action: commit and push this final status checkpoint, then verify
+  exact-head CI, Vercel, and Preview browser gates for Draft PR #99. Never
+  auto-merge this PR.
+- Remaining risks: current dump capacity and AWS cost remain unknown; worker
+  capacity, provisioning, first upload, Storage object backup, and two-cycle
+  restore remain unproven.
+
+## 2026-08-05 — AWS Backup Production capacity measurement v1 attempt
+
+- Objective: execute the owner-approved single bounded read-only Production
+  logical-dump capacity measurement after PR #96 merge, record only sanitized
+  size/duration/list evidence, and delete all newly created transient material.
+- Branch/base: `codex/chore/aws-backup-capacity-measurement` from exact PR #96
+  merge `c5780074be56d525a734a5d913a93c2e57aa1828`.
+- Risk/root cause: high-risk/manual Production-data read. The attempt failed at
+  the external-configuration credential boundary; this is not a database schema
+  or application-code defect.
+- Revenue impact: no customer or commerce behavior changed. Independent backup
+  capacity remains blocked, so the work preserves recovery safety but does not
+  yet advance AWS provisioning.
+- Scope: exact-target/backup/load/tool/network/disk preflight, one PostgreSQL
+  17.6 custom-format dump attempt, mandatory failure cleanup, post-attempt
+  provider health check, and sanitized repository evidence.
+- Non-goals preserved: AWS resource/paid use, upload, restore, schedule,
+  credential reset/rotation/value inspection, database/RLS/Auth/environment or
+  commerce mutation, existing local/provider backup access, row inspection,
+  automatic retry, and auto-merge.
+- Completed: verified PR #96 merge and exact owner approval; created a non-main
+  task branch; confirmed Supabase Pro current physical backup, Singapore target,
+  healthy/low-load state, exact Session pooler contract, TLS port reachability,
+  PostgreSQL 17.6, and restricted storage. Executed exactly one attempt.
+- Result/current: the server rejected the process-scoped database credential
+  before archive creation. The one-attempt approval is consumed and no retry was
+  made. Archive bytes, successful duration, and TOC entry count remain unknown.
+  Calculator, Lambda-capacity, provisioning, upload, restore, and schedule are
+  blocked. Sanitized evidence is committed and pushed in high-risk Draft PR
+  #97 with `manual-merge-required`; auto-merge is not enabled.
+- Cleanup/postflight: zero matching temporary directories and zero measurement
+  containers remain. The tmpfs credential file was destroyed with the removed
+  container. No database write, AWS action, archive/row inspection, or existing
+  backup change occurred. Supabase Production was `Healthy` afterward, with CPU
+  2%, disk 14%, latest backup 16 hours earlier, and no Advisor issue.
+- Blocker/owner action: securely supply the correct current database password to
+  a new local process, or separately approve and coordinate a Supabase database
+  password reset if the current password is unavailable. Never send the value in
+  chat. Then provide a new explicit one-attempt approval; the prior approval does
+  not authorize retry.
+- Changed files: capacity input/contract, measurement packet, backup
+  architecture, Decision Log, changelog, focused tests, and this status record.
+- Commands/results: PostgreSQL 17.6 tool preflight pass; DNS/TCP 5432 pass;
+  dump attempt failed closed at password authentication; cleanup and Production
+  health postflight pass. Focused tests 14/14 and full tests 481/481 pass;
+  typecheck pass; Production build pass with 85 routes; source lint excluding
+  ignored generated browser evidence passes with zero errors and the four
+  established Revenue-test warnings. The ordinary lint script is locally
+  blocked only by ignored user-owned `playwright-report/trace` assets (189
+  generated-bundle errors); no changed repository file is named. Local
+  Playwright reproduces the established external-configuration baseline: 35
+  pass, 2 skip, and 7 `missing_url` failures on `/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
+  Implementation head `5f491db2453844414e88bfc91ea6fac27210d0e7`
+  passed CI run `30996319239` after one same-head rerun of an unrelated existing
+  Orchestrator Phase 3 timing flake; Preview browser run `30996319191` and the
+  exact Vercel Preview passed.
+- Last commit: `5f491db2453844414e88bfc91ea6fac27210d0e7` (`docs: record failed AWS
+  capacity measurement`) before this status-only checkpoint.
+- Exact next action: push this status-only checkpoint and verify its exact-head
+  CI, Vercel, and Preview gates, then leave Draft PR #97 for repository-owner
+  manual review/merge. Do not retry Production access.
+- Remaining risks: current dump capacity and AWS cost remain unknown; the local
+  process credential is stale/incorrect; future worker capacity, provisioning,
+  first upload, Storage object backup, and two-cycle restore remain unproven.
+
+## 2026-08-05 — AWS Backup Capacity Measurement Approval v1
+
+- Objective: close the sanitized AWS account-recovery preflight and prepare the
+  exact next Production capacity-measurement and Singapore cost-estimate gates
+  without connecting to Production or creating AWS state.
+- Branch/base: `codex/docs/aws-backup-capacity-approval` from PR #95 merge
+  `de6f124c01b09c9ada00c8d5138d36b843516eda`.
+- Risk/root cause: high-risk/manual Production-data read and future paid
+  infrastructure boundary. The immediate root cause is missing current logical
+  archive size/duration, not application code.
+- Revenue impact: removes the next independent-recovery planning blocker while
+  leaving customer and commerce behavior unchanged.
+- Scope: owner-confirmed recovery-contact state, exact measurement approval
+  packet, fail-closed capacity/Calculator input, contract tests, architecture,
+  decision, changelog, and task recovery evidence.
+- Non-goals: Production connection/export, credential creation/value, reading
+  or changing an existing local backup, AWS Calculator submission, stack/change
+  set, resource/paid use, upload, restore, schedule, DB/RLS/Auth/env, or commerce
+  write.
+- Cloud-first gate: GitHub owns only sanitized contracts and approvals. A later
+  approved measurement creates one restricted transient archive outside the
+  repository and must delete it on every terminal path; raw bytes never become
+  repository/CI/chat/OneDrive evidence.
+- Completed: verified #95 merge and Production smoke; created exact-main task
+  branch; reviewed accepted architecture/IaC; verified current official
+  pg_dump, Lambda, ephemeral-storage, and Calculator contracts; recorded owner
+  recovery confirmation; prepared measurement and cost input artifacts.
+- Current: implementation commit is pushed in high-risk Draft PR #96 with
+  `manual-merge-required`; exact implementation-head CI, Vercel, and Preview
+  browser gates pass. This status-only checkpoint must pass the same exact-head
+  gates before owner handoff.
+- Blockers/owner actions: repository-owner manual review/merge of PR #96.
+  Actual measurement needs
+  the exact later approval text `AWS 백업 Production 용량 측정 v1 승인` and an
+  authorized ephemeral Production credential. Do not send any secret value.
+- Changed files: backup Architecture/contract/plan, capacity runbook/input/test,
+  Decision Log, changelog, and this status.
+- Commands/results: focused backup/capacity tests 21/21; full tests 481/481;
+  typecheck pass; ESLint 0 errors with four pre-existing Revenue-test warnings;
+  Production build pass with 85 routes; `git diff --check`, JSON parse, and
+  changed-file credential/account/path scans pass. Local Playwright is the
+  unchanged environment baseline: 35 pass, 2 skip, 7 fail only because local
+  Supabase is unconfigured (`missing_url`) on `/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
+  Exact implementation-head CI run `30992193467` passed after one unrelated
+  pre-existing Orchestrator timing test failed once and passed on rerun;
+  Preview browser run `30992193162` and Vercel Preview passed.
+- Last commit: `f9f2970e266e17ba20e1b47f18b51dcbadd283a5` (`docs: prepare AWS
+  backup capacity approval`) in Draft PR #96.
+- Exact next action: push this status-only checkpoint, verify exact-head CI,
+  Vercel, and Preview, then repository owner manually reviews/merges PR #96.
+- Remaining risks: current size/duration and end-to-end worker margin are
+  unknown; AWS prices/estimate, resources, Production upload, and restore parity
+  remain unexecuted.
+
+## 2026-08-05 — AWS Independent Backup Infrastructure Plan v1
+
+- Objective: implement the approved deployment-order stage 3 as reviewed,
+  fail-closed AWS infrastructure-as-code and contract tests without creating a
+  resource, credential, Production connection, export, restore, or paid use.
+- Branch/base: `codex/feat/aws-backup-infrastructure-plan` from exact merged
+  PR #94 main `6cb4876c75c130ff44fe7f2e981986ba4ff4ff51`.
+- Risk/root cause: high-risk/manual external-integration and future IAM/secret/
+  paid-resource boundary. The prior external-configuration prerequisites are
+  sanitized as owner-verified: Paid plan, payment method, one root MFA device,
+  USD 10 recurring Budget, and Singapore `ap-southeast-1` selectable.
+- Revenue impact: removes the next device-loss recovery blocker while keeping
+  feature work independent; no customer or commerce behavior changes.
+- Scope: non-executing CloudFormation plan, Singapore-only and schedule-off
+  gates, S3/KMS/Object Lock/IAM/ECR/Lambda/Scheduler/DLQ safety contracts,
+  structural tests, cost/capacity/provisioning runbook, decision/changelog, and
+  delivery evidence.
+- Non-goals: AWS deployment/change set execution, account ID or root email,
+  Access Key, secret creation/value, worker image publication, Production DB
+  access/dump/upload, schedule enablement, restore, local backup access/delete,
+  DB/RLS/Auth/environment change, and auto-merge.
+- Cloud-first gate: GitHub owns reviewed IaC and sanitized decisions. AWS will
+  own later durable backup resources; raw backup bytes and secrets remain
+  prohibited from GitHub/CI/Vercel/Codex/local durable storage.
+- Completed: PR #94 merge verified at `6cb4876`; mandatory boot/Architecture/
+  risk review; exact task branch; Singapore-only CloudFormation; Object Lock
+  daily/monthly enforcement; exact writer/body-read separation; Scheduler and
+  Lambda terminal-failure DLQ; sanitized contract/manifest; runbook; and local
+  validation/diff/secret review.
+- Current: implementation commit `e478c69` is pushed in high-risk Draft PR #95
+  with `manual-merge-required`; all implementation-head CI, Vercel, and Preview
+  browser gates passed. This status-only checkpoint will become the final head
+  and must pass the same exact-head gates before handoff.
+- Blockers/owner actions: none for Draft PR delivery. Before any later AWS
+  change set, the owner must verify recovery contacts/factors independent of
+  this PC; capacity evidence and an AWS Pricing Calculator estimate are also
+  required. Provisioning, export identity/secret, first export, restore drill,
+  and local deletion retain separate manual approvals.
+- Changed files: `infra/aws-backup/cloudformation.json`,
+  `tests/aws-backup-infrastructure-plan.test.ts`, backup Architecture/contract/
+  manifest tests, infrastructure runbook, Architecture Review, Decision Log,
+  changelog, and Work Status.
+- Commands/results: focused tests 16/16; JSON parse and `git diff --check`
+  pass; added-sensitive-pattern and prohibited-writer-action scans clean;
+  typecheck pass; ESLint 0 errors and 4 pre-existing Revenue-test warnings;
+  full tests 476/476; Production build pass with 85 routes. Local Playwright
+  35 pass, 2 skip, and the same 7 external-configuration failures because
+  local Supabase is unconfigured (`missing_url`) on `/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`.
+  Implementation-head GitHub CI run `30990377709` and Preview browser run
+  `30990377701` passed; Vercel Preview deployment completed with no failed
+  exact-head check.
+- Last commit: `e478c6963fd6cf71e1122f75802e43f2d244a670` (`feat: plan independent AWS
+  backups`) in Draft PR #95.
+- Exact next action: push this status-only checkpoint, confirm its exact-head CI
+  and Preview, then repository owner manually reviews/merges PR #95. Do not
+  provision AWS in this Story.
+- Remaining risks: database dump size/duration and AWS Calculator estimate are
+  unknown; infrastructure, recovery artifact, restore parity, and Storage
+  object-body backup remain unimplemented.
+
+## 2026-08-05 — Encrypted Cloud Backup Architecture v1
+
+- Objective: remove the device-local Production backup authority with the
+  smallest independent encrypted cloud recovery design, without moving data or
+  provisioning services.
+- Branch/base: `codex/docs/supabase-pro-backup-evidence` from exact merged
+  owner-policy approval main `9f4b2005e6cfb52922412546afb4dbae548dd64e`.
+- Risk/root cause: high-risk/manual Architecture Story. The prior
+  provider-native gap is closed by verified Supabase Pro physical daily
+  backups; independent 35-day/12-month recovery remains unimplemented.
+- Revenue impact: reduces device-loss and unsafe-rollout recovery risk while
+  feature work continues; no customer-facing behavior changes.
+- Scope: sanitized inventory, provider/target decision, machine-readable
+  contract, retention/RPO/RTO/cost/capacity/security design, two-cycle restore,
+  rollout/rollback, owner actions, tests, changelog, and status.
+- Non-goals: account/billing, provisioning, credentials, Production access or
+  export, backup content read/copy/upload/delete, restore, DB/RLS/Auth/env,
+  paid use, commerce writes, and merge.
+- Cloud-first gate: proposed authority is owner-controlled AWS Singapore
+  S3/KMS/Object Lock; local evidence stays unmoved until parity and restore
+  acceptance. Raw backup bytes never enter CI/Git/Vercel/chat.
+- Completed: exact-main branch, policy/R3 evidence review, official provider
+  research, decision matrix, proposed architecture, machine-readable contract,
+  manifest linkage, contract tests, complete local repository gates, commit
+  `25720e1`, push, Draft PR #91, exact-head CI/Preview success, and sanitized
+  owner evidence confirming Free/no-managed-backup state, evidence amendment
+  commit `0aa44b5`, and exact-head CI/Preview success. On 2026-08-05 the owner
+  approved Supabase Pro daily backups without PITR, AWS Singapore, the USD 10
+  AWS-only monthly ceiling, 35-day/12-month retention, and RPO <=24h/RTO <=8h.
+  Sanitized follow-up evidence verifies Pro active, seven physical daily
+  recovery points with restore actions, Spend Cap enabled, PITR/Dedicated
+  IPv4/Custom Domain disabled, and no configured Log Drain.
+- Current: exact-head delivery is complete; high-risk Draft PR #94 awaits
+  repository-owner review and manual merge.
+- Blockers/owner actions: manual PR #94 merge; AWS account billing/MFA/recovery
+  ownership; and later infrastructure/Production export/restore/deletion gates.
+- Changed files: Architecture, backup contract, manifest, tests, Decision Log,
+  Architecture Review, changelog, and Work Status.
+- Commands/results: initial focused tests 14/14 plus evidence-amendment tests
+  7/7; typecheck pass; ESLint 0 errors and 4 pre-existing test warnings; full
+  tests 467/467; Production build pass; local
+  Playwright 35 pass, 2 skip, 7 fail solely on the existing unconfigured
+  Supabase API routes (`/listing`, `/market`, `/procurement`, `/revenue`,
+  `/sourcing`, `/workflow`, `/workspace`). Exact-head GitHub CI run
+  `30983474498` and Preview browser run `30983474389` passed for `f4b416d`.
+- Last merged checkpoint: owner-policy approval PR #92 at merge commit
+  `9f4b200`; provider execution evidence head `f4b416d` is the unmerged
+  follow-up.
+- Exact next action: repository owner reviews and manually merges Draft PR
+  #94; do not provision AWS in this Story.
+- Remaining risks: current local backup remains a migration blocker; Supabase
+  provider backups exclude Storage object bodies and retain only seven days;
+  AWS ownership/billing, secret boundary, capacity, infrastructure, and restore
+  parity remain unexecuted.
+
+## 2026-08-05 — Cloud Portability Baseline
+
+- Objective: execute every normal-risk Cloud-first step possible before cloud
+  provisioning or sensitive data movement requires owner action.
+- Branch/base: `codex/feat/cloud-portability-baseline` from exact merged
+  Cloud-first main `87ac16af6605f6950dc71d10870c1cd7142226fc`.
+- Risk/root cause: normal-risk repository tooling/docs/tests. Durable
+  authorities and blockers were prose only.
+- Revenue impact: reduces device-loss/setup interruption and gives cloud
+  migrations a deterministic order without pausing feature development.
+- Scope: durable-state manifest, readiness CLI, fail-closed tests, baseline
+  runbook, ordered backlog, Decision Log, changelog, status.
+- Non-goals: provisioning, account/bucket purchase, backup copy/delete, secret
+  change, DB/RLS/Auth migration, Production/data movement, ledger migration,
+  paid action, or commerce write.
+- Cloud-first gate: artifacts become durable through GitHub PR; local build/test
+  output is disposable. The checker emits no secret or business data.
+- Completed: exact-main branch, dependency audit, authority manifest, readiness
+  implementation, tests, runbook, ordered Stories, and local repository gates.
+- Current: commit, push, PR, exact-head checks, merge, and Production smoke.
+- Blockers/owner actions: GitHub CLI reports the saved token for
+  `gonggam-online` is invalid. Git remote and connected-app delivery are checked
+  independently before requesting reauthentication. Exact service decisions
+  remain deferred until their high-risk Architecture packets are ready.
+- Changed files: manifest/runbook, readiness script/tests, package script,
+  backlog, Decision Log, changelog, status.
+- Commands/results: focused tests 8/8; typecheck pass; ESLint 0 errors and 4
+  pre-existing test warnings; full tests 460/460; Production build pass; local
+  Playwright 35 pass, 2 skip, 7 fail solely on the existing unconfigured
+  Supabase API routes (`/listing`, `/market`, `/procurement`, `/revenue`,
+  `/sourcing`, `/workflow`, `/workspace`); readiness manifest passes and the
+  local command correctly fails on dirty worktree plus invalid GitHub CLI auth.
+- Last commit: none.
+- Exact next action: commit and attempt exact-head delivery without weakening
+  the GitHub authentication gate.
+- Remaining risks: backups and Orchestrator ledger remain local migration
+  blockers; business asset authority remains undecided.
+
+## 2026-08-05 — Cloud-first operating principle
+
+- Objective: make complete cloud portability the first durable-state decision
+  gate for future development, maintenance, and operations.
+- Branch/base: `codex/docs/cloud-first-operating-principle` from exact
+  `origin/main` `673b820ca0b312c0d8861264de2d0ef49caae52f`.
+- Risk/root cause: normal-risk governance/tests only. Local-only durable state
+  was discouraged rather than an explicit stop condition.
+- Revenue impact: prevents PC loss and setup drift from blocking revenue work
+  while keeping cloud migrations incremental and reviewable.
+- Scope: Cloud-first policy, boot/Story/Task/Codex rules, cross-PC runbook,
+  ignore safeguards, governance test, Decision Log, changelog, status.
+- Non-goals: no backup upload/deletion, secret/configuration change, database
+  or RLS migration, Production access, data movement, new bucket/account,
+  automation-ledger move, paid service, or commerce write.
+- Cloud-first gate: durable output is tracked repository policy/evidence in
+  GitHub after delivery. Local build/test output is replaceable; existing local
+  backups/state remain pending separate approved migration.
+- Completed: synchronized 108 remote commits, created the task branch, audited
+  existing policy, and implemented the mandatory durable-state gate.
+- Current: local validation is complete; prepare GitHub delivery.
+- Blockers/owner actions: none for this governance PR. Later backup, storage,
+  secrets, and automation-state moves require exact architecture and approval.
+- Changed files: policy, governance/operating/templates/runbook, gitignore,
+  test, Decision Log, changelog, and this status.
+- Commands/results: `git diff --check` and scope audit passed; 455/455
+  unit/integration tests passed; Production build passed with 85 routes;
+  typecheck passed after the generated `.next` cache was refreshed by build;
+  tracked-source lint passed with zero errors and four pre-existing Revenue-test
+  warnings. Local Playwright ran 44 cases: 35 passed, two skipped, and the same
+  seven Supabase-backed routes failed because local Supabase is unconfigured
+  (`missing_url`): `/listing`, `/market`, `/procurement`, `/revenue`,
+  `/sourcing`, `/workflow`, `/workspace`. No runtime, database, migration,
+  Production, secret, or external-write file changed.
+- Last commit: none.
+- Exact next action: review, test, commit, push, and deliver a Draft PR.
+- Remaining risks: policy cannot provision cloud accounts or credentials;
+  existing local durable dependencies still require migration Stories.
+
+## 2026-08-05 — Listing evidence fixture and policy kernel (13B)
+
+- Objective: implement accepted Architecture Story 2 as a pure deterministic
+  evidence policy kernel without asserting any real fact about KK946.
+- Branch/base: `codex/feat/listing-evidence-policy-kernel` from exact
+  `origin/main` `f71c37b6756b674c4099a132e30fcce8f4f4323d`.
+- Risk/root cause: normal-risk internal types/tests. Root cause is the approved
+  Listing code/contract gap; missing external evidence remains external and is
+  never compensated for in code.
+- Revenue impact: provides the smallest fail-closed decision boundary needed
+  to prepare a truthful first listing packet while reducing rejection, rights,
+  and return risk.
+- Scope: immutable evidence/status types; fact-specific authority and scope;
+  freshness/conflict/UNKNOWN quarantine; UTF-8/NFC/mojibake checks; explicitly
+  synthetic deterministic KK946-shaped fixtures and unit tests.
+- Non-goals: 13A runbook/evidence collection, real KK946 facts, DB/schema/
+  migration/Auth/RLS, API/service/UI, external integration, image/asset work,
+  pricing, Production, paid calls, or commerce writes.
+- Completed: governance boot; clean exact-main branch; Listing/schema/contract
+  audit; implementation; focused tests; lint; typecheck; full tests; build;
+  complete diff review.
+- Current: local validation and diff review complete; commit/push/PR and exact
+  CI/Preview delivery remain.
+- Blockers/owner actions: none for pure kernel delivery. Real KK946 remains
+  quarantined pending separately governed admissible evidence.
+- Changed files: `shared/domain/listing-evidence.ts`,
+  `engines/listing/evidence-policy.ts`, fixture/tests, task changelog, and this
+  status record.
+- Commands/results: focused policy tests 9/9; lint zero errors and four
+  pre-existing Revenue-test warnings; typecheck pass; full tests 455/455; build
+  pass with 85 routes; `npm ci` unchanged lockfile and reported six existing
+  advisories (one moderate, five high).
+- Browser validation: 35 passed, 2 skipped, and 7 failed only on the same
+  Supabase-backed routes (`/listing`, `/market`, `/procurement`, `/revenue`,
+  `/sourcing`, `/workflow`, `/workspace`) because local Supabase is
+  unconfigured (`missing_url`). Ignored failure evidence remains in
+  `test-results/`; no changed code participates in these routes.
+- Exact next action: commit, push, create normal-risk PR, and wait for
+  exact-head CI/Preview.
+- Remaining risks: compile-time readonly does not create persistence; no
+  persistence is authorized. Synthetic fixtures are not product evidence and
+  cannot release KK946 quarantine or authorize payload mapping/submission.
+
+## 2026-08-05 — Listing Content Fact and Policy Contract v1
+
+- Objective: complete the Architecture Story and implementation order for
+  evidence-only Coupang content, including first target identifier KK946.
+- Branch/base: `codex/docs/listing-content-fact-policy-contract` from exact
+  `origin/main` `a6572b08b637313a298ca14dd5d1c38ffeb9d874`.
+- Risk/root cause: normal-risk documentation only. Root cause is an existing
+  code/contract gap after external evidence readiness; code must not compensate
+  for absent supplier, 3PL, rights, or category evidence.
+- Revenue impact: unblocks the smallest safe path to a truthful first-product
+  listing packet while preventing rejection, rights exposure, and returns.
+- Scope: current-state audit, evidence precedence, UNKNOWN/quarantine, image
+  rights, no-exaggeration, category/payload contract, tests, and ordered Stories.
+- Non-goals: runtime/API/DB/migration/Auth/RLS, external calls, images, prices,
+  Production, or marketplace writes.
+- Completed: boot/governance review; clean latest-main branch; existing Listing,
+  Supplier, schema, payload, and backlog audit; Architecture/decision/backlog/
+  changelog draft. Confirmed mojibake, simple keyword/title joining, no images,
+  outline-only details, payload mismatch, and no repository evidence for KK946.
+- Current: corrected Architecture accepted and delivered; Draft PR #86 awaits
+  review/merge while KK946 remains quarantined.
+- Blockers/owner actions: Architecture acceptance is complete. KK946 remains
+  quarantined pending exact catalog, order/lot, 3PL inspection, rights,
+  category, notice, and approved-asset evidence; acceptance is not readiness.
+- Changed files: Architecture Story, Architecture Review, Decision Log, backlog,
+  task changelog, and this Work Status.
+- Commands/results: repository audit and `git diff --check` passed; lint passed
+  with zero errors and four pre-existing Revenue-test warnings; typecheck
+  passed; unit/integration tests passed 446/446; production build passed with
+  85 routes. Local Playwright passed 35, skipped 2, and failed the same seven
+  Supabase-backed routes because local Supabase is unconfigured (`missing_url`):
+  `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
+  and `/workspace`. Failure screenshots/traces/video are in ignored
+  `test-results/`. `npm ci` reported six existing dependency advisories (one
+  moderate, five high) and did not change the lockfile.
+- Delivery: implementation commit
+  `ea9c2038217d1d016a99dfc67b51a2b5b2d7df5f` pushed. Draft PR #86 targets
+  `main`, is conflict-free, and has `normal-risk`; auto-merge was not enabled.
+  Exact-head CI lint/typecheck/tests/build/security/DB replay/item-selection/R1
+  gates passed. Vercel Preview and `preview-browser-e2e` passed on the exact
+  head; Preview deployment target was
+  `https://vercel.com/gg-online/gonggamline-ai/AEamgW7pMaVktrT8adEdPyQfUSrQ`.
+- Approved content commit:
+  `5b77af8 docs: refine listing evidence architecture`; the acceptance record
+  is the current documentation-only follow-up.
+- Exact next action: deliver the accepted Architecture update, then begin only
+  a separately scoped Story 1 (KK946 evidence runbook/identity crosswalk) or
+  Story 2 (pure evidence policy kernel). No KK946 listing action is authorized.
+- Remaining risks: external rights/category facts and KK946 physical evidence
+  are unverified; future implementation may require separately approved
+  Database, external-integration, paid-asset, pricing, or commerce Stories.
+- Owner review continuation: on 2026-08-05 the repository owner explicitly
+  authorized necessary corrections and acceptance of the evidence authority,
+  image-rights, category-contract, and implementation-order decisions. The
+  corrected Architecture content is accepted at
+  `5b77af8baf39a769e8541b14fe52196b27fcde4f`. Scope remains documentation and
+  ordered follow-up Stories; broad language does not waive later exact-target
+  API/external-contract, DB/Auth/RLS, paid asset, Production, price, readiness,
+  or marketplace-write approval boundaries.
+- Owner-review validation: `git diff --check` passed; lint passed with zero
+  errors and the same four Revenue-test warnings after removing ignored prior
+  Playwright output; typecheck passed; unit/integration tests passed 446/446;
+  production build passed with 85 routes. Local Playwright again passed 35,
+  skipped 2, and failed only the same seven Supabase-backed routes on external
+  `missing_url`. The corrections introduce no runtime, API, DB, asset, or
+  commerce behavior.
+- Owner-review delivery: corrected content commit `5b77af8` and acceptance
+  record commit `3a184ee` are pushed to Draft PR #86. Exact `3a184ee` CI,
+  database replay, security suites, Vercel Preview, and
+  `preview-browser-e2e` all passed. PR remains Draft, `normal-risk`, open, and
+  conflict-free; auto-merge and Production were not attempted.
 
 ## 2026-08-04 — Phase 5 owner-sample structural correction
 

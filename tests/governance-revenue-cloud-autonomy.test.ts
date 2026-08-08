@@ -22,11 +22,19 @@ test("governance makes measurable revenue the first planning gate", () => {
 test("cloud portability preserves secrecy and local cleanup", () => {
   const standard = read(".ai/CODEX_OPERATING_STANDARD.md");
   const constitution = read(".ai/PROJECT_CONSTITUTION.md");
+  const policy = read(".ai/CLOUD_FIRST_POLICY.md");
+  const story = read(".ai/STORY_TEMPLATE.md");
+  const task = read(".ai/TASK_TEMPLATE.md");
 
   assert.match(standard, /Do not use a local disk as the only source of truth/i);
   assert.match(standard, /Cloud-first never overrides secrecy/i);
   assert.match(constitution, /approved repository or managed cloud source of truth/i);
   assert.match(constitution, /retention limits, and auditable cleanup/i);
+  assert.match(policy, /Local PCs are execution clients, not durable system hosts/i);
+  assert.match(policy, /new local-only durable state/i);
+  assert.match(policy, /fresh authorized PC/i);
+  assert.match(story, /Cloud-first durable-state gate/i);
+  assert.match(task, /Stop on new local-only durable state/i);
 });
 
 test("autonomy cannot weaken high-risk approval boundaries", () => {

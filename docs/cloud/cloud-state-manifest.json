@@ -1,0 +1,125 @@
+{
+  "schemaVersion": "gonggamline-cloud-state-manifest-v1",
+  "repository": "gonggam-online/gonggamline-ai",
+  "entries": [
+    {
+      "id": "source-and-schema-history",
+      "stateClass": "SOURCE",
+      "currentAuthority": "GitHub repository and protected main history",
+      "targetAuthority": "GitHub repository and protected main history",
+      "portabilityStatus": "REMOTE_AUTHORITATIVE",
+      "dataClassification": "INTERNAL",
+      "evidence": ["AGENTS.md", "supabase/baseline-manifest.json"],
+      "nextAction": "Keep every durable source change on a pushed task branch and reviewed PR.",
+      "highRiskBoundary": false
+    },
+    {
+      "id": "task-recovery-and-decisions",
+      "stateClass": "TASK_STATE",
+      "currentAuthority": "Tracked Work Status, Decision Log, GitHub branches and PRs",
+      "targetAuthority": "Tracked Work Status, Decision Log, GitHub branches and PRs",
+      "portabilityStatus": "REMOTE_AUTHORITATIVE",
+      "dataClassification": "INTERNAL",
+      "evidence": [".codex/WORK_STATUS.md", ".ai/DECISION_LOG.md"],
+      "nextAction": "Push coherent checkpoints before stopping or changing PC.",
+      "highRiskBoundary": false
+    },
+    {
+      "id": "validation-and-delivery-evidence",
+      "stateClass": "ENGINEERING_EVIDENCE",
+      "currentAuthority": "GitHub Actions, PR checks, approved CI artifacts and Vercel Preview",
+      "targetAuthority": "GitHub Actions, PR checks, approved CI artifacts and Vercel Preview",
+      "portabilityStatus": "REMOTE_AUTHORITATIVE",
+      "dataClassification": "INTERNAL",
+      "evidence": [".github/workflows/ci.yml", ".github/workflows/preview-e2e.yml"],
+      "nextAction": "Keep artifacts sanitized and bounded by workflow retention.",
+      "highRiskBoundary": false
+    },
+    {
+      "id": "application-deployment",
+      "stateClass": "DEPLOYMENT",
+      "currentAuthority": "Vercel linked to the GitHub repository",
+      "targetAuthority": "Vercel linked to the GitHub repository",
+      "portabilityStatus": "REMOTE_AUTHORITATIVE",
+      "dataClassification": "INTERNAL",
+      "evidence": [".github/workflows/production-browser-smoke.yml"],
+      "nextAction": "Preserve exact-head Preview and post-merge Production smoke gates.",
+      "highRiskBoundary": false
+    },
+    {
+      "id": "operational-database-and-auth",
+      "stateClass": "OPERATIONAL_DATA",
+      "currentAuthority": "Supabase managed Postgres and Auth within accepted boundaries",
+      "targetAuthority": "Supabase managed Postgres and Auth within accepted boundaries",
+      "portabilityStatus": "REMOTE_AUTHORITATIVE",
+      "dataClassification": "PRODUCTION_BUSINESS_DATA",
+      "evidence": ["supabase/baseline-manifest.json", ".ai/DATABASE_POLICY.md"],
+      "nextAction": "Use only separately approved migration, RLS, Auth and Production Stories.",
+      "highRiskBoundary": true
+    },
+    {
+      "id": "secrets-and-environment",
+      "stateClass": "SECRETS",
+      "currentAuthority": "Environment-scoped GitHub, Vercel and Supabase secret stores",
+      "targetAuthority": "Environment-scoped approved secret stores",
+      "portabilityStatus": "REMOTE_AUTHORITATIVE",
+      "dataClassification": "SECRET",
+      "evidence": [".env.local.example", ".ai/CLOUD_FIRST_POLICY.md"],
+      "nextAction": "Inventory names and ownership without exporting values; verify access on each authorized PC.",
+      "highRiskBoundary": true
+    },
+    {
+      "id": "production-backups",
+      "stateClass": "BACKUP",
+      "currentAuthority": "Supabase Pro with seven verified physical daily recovery points plus access-restricted local backup evidence recorded by R3",
+      "targetAuthority": "Approved encrypted off-device backup with independent restore evidence",
+      "portabilityStatus": "LOCAL_MIGRATION_BLOCKER",
+      "dataClassification": "PRODUCTION_BUSINESS_DATA",
+      "evidence": [
+        "docs/security/R3-PRODUCTION-ROLLOUT-APPROVAL-PACKET.md",
+        "docs/architecture/ENCRYPTED-CLOUD-BACKUP-AND-RESTORE-V1.md",
+        "docs/cloud/encrypted-backup-contract-v1.json",
+        "docs/cloud/AWS-INDEPENDENT-BACKUP-INFRASTRUCTURE-PLAN-V1.md",
+        "docs/cloud/aws-backup-worker-rehearsal-v1.json",
+        "docs/cloud/AWS-BACKUP-DISABLED-WORKER-CHANGE-SET-V1.md",
+        "docs/cloud/aws-backup-disabled-worker-change-set-v1.json",
+        "infra/aws-backup/cloudformation.json"
+      ],
+      "nextAction": "Review and manually merge the exact disabled-worker change-set packet, then establish an MFA-protected temporary or federated AWS administrator session before separately approving creation of the no-execute change set. Do not execute it, provision resources, or copy/delete backup content.",
+      "highRiskBoundary": true
+    },
+    {
+      "id": "orchestrator-ledger",
+      "stateClass": "AUTOMATION_STATE",
+      "currentAuthority": "Device-local Phase 4 SQLite ledger",
+      "targetAuthority": "Approved managed transactional store with lease, idempotency and audit semantics",
+      "portabilityStatus": "LOCAL_MIGRATION_BLOCKER",
+      "dataClassification": "CONFIDENTIAL",
+      "evidence": ["docs/orchestrator/reports/phase-4-github-preview-delivery.md"],
+      "nextAction": "Approve a separate Orchestrator cloud-ledger Architecture Story and migration rehearsal.",
+      "highRiskBoundary": true
+    },
+    {
+      "id": "product-assets-and-business-evidence",
+      "stateClass": "BINARY_ASSETS",
+      "currentAuthority": "No complete approved repository-wide authority",
+      "targetAuthority": "Approved encrypted object storage with rights, retention and deletion metadata",
+      "portabilityStatus": "OWNER_DECISION_REQUIRED",
+      "dataClassification": "CONFIDENTIAL",
+      "evidence": ["docs/architecture/LISTING-CONTENT-FACT-AND-POLICY-CONTRACT-V1.md"],
+      "nextAction": "Inventory exact asset types and rights before selecting or provisioning storage.",
+      "highRiskBoundary": true
+    },
+    {
+      "id": "local-checkout-caches-and-test-output",
+      "stateClass": "EPHEMERAL_EXECUTION",
+      "currentAuthority": "Reproducible local checkout, dependencies, build cache and ignored test output",
+      "targetAuthority": "No durable target; regenerate from approved remote state",
+      "portabilityStatus": "EPHEMERAL_LOCAL",
+      "dataClassification": "INTERNAL",
+      "evidence": [".gitignore", "package-lock.json"],
+      "nextAction": "Keep untracked, bounded and disposable; never sync as system state.",
+      "highRiskBoundary": false
+    }
+  ]
+}

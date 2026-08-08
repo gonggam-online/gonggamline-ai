@@ -97,8 +97,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .codex/notify.ps1 -Event com
 - GitHub is the code and branch source of truth.
 - `AGENTS.md`, `.ai/`, `.codex/`, and tracked operating documentation are the
   instruction source of truth.
-- Secrets remain in approved secret stores or local untracked environment
-  files, never in repository instructions.
+- Secrets remain in approved secret stores and are injected only into an
+  authorized environment. A local untracked environment file is a temporary
+  projection, never the sole authoritative secret/configuration record, and
+  never enters repository instructions.
 - Before switching PCs, commit/push coherent work or record the exact safe
   recovery state in `.codex/WORK_STATUS.md`.
 - Never work on the same branch concurrently from two PCs.
@@ -106,6 +108,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .codex/notify.ps1 -Event com
   required runtime/tooling, and project validation are confirmed.
 
 ### Cloud-first, local-minimum state
+
+Apply [`CLOUD_FIRST_POLICY.md`](CLOUD_FIRST_POLICY.md) as a mandatory task gate,
+not a preference. Before implementation, record durable state, approved remote
+source and owner, classification, recovery evidence, local temporary artifacts,
+and cleanup. New local-only durable state stops implementation.
 
 - Prefer GitHub for code, branches, PRs, issues, and durable task evidence; CI
   and approved cloud services for reproducible validation artifacts; managed

@@ -13,7 +13,9 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts tests/*.test.tsx",
     "test:e2e": "playwright test",
-    "test:e2e:local": "playwright test"
+    "test:e2e:local": "playwright test",
+    "cloud:readiness": "tsx scripts/check-cloud-portability.ts",
+    "cloud:aws-backup:change-set-plan": "tsx scripts/prepare-aws-backup-change-set.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",

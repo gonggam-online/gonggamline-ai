@@ -41,9 +41,10 @@ the Autonomous Engineering Lead that executes those directives. Codex must not:
 10. **Normal-risk Auto Merge:** eligible only after every gate and policy check.
 11. **High-risk Manual Approval:** label `manual-merge-required`; never
     auto-merge.
-12. **Cloud-Portable Operation:** durable project state belongs in approved
-    repository, CI, managed data, secret, and cloud systems; device-local state
-    is temporary, minimal, untracked, and recoverable.
+12. **Cloud-Portable Operation:** apply
+    [`CLOUD_FIRST_POLICY.md`](CLOUD_FIRST_POLICY.md) before feature and storage
+    decisions. Durable state belongs in an approved remote source of truth with
+    tested recovery; new device-local-only durable state stops implementation.
 13. **Autonomous Continuation:** continue authorized normal-risk work through
     delivery and feedback without routine prompts; stop only at a binding
     approval, missing authority, unsafe state, or failed required gate.

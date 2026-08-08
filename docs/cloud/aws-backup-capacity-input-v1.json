@@ -1,0 +1,163 @@
+{
+  "schemaVersion": "gonggamline-aws-backup-capacity-input-v1",
+  "status": "CURRENT_MEASUREMENT_AND_CALCULATOR_COMPLETE_SYNTHETIC_WORKER_REHEARSAL_SUCCEEDED",
+  "risk": "HIGH",
+  "source": {
+    "service": "Supabase managed Postgres",
+    "projectRef": "sxvtznmoemrcwifungnb",
+    "region": "ap-southeast-1",
+    "classification": "PRODUCTION_BUSINESS_DATA_PERSONAL_DATA_POSSIBLE"
+  },
+  "measurement": {
+    "runbook": "docs/cloud/AWS-BACKUP-CAPACITY-MEASUREMENT-APPROVAL-V1.md",
+    "approved": true,
+    "approvedOn": "2026-08-05",
+    "approvalConsumed": true,
+    "executed": true,
+    "succeeded": true,
+    "attemptedOn": "2026-08-05",
+    "attemptCount": 3,
+    "retryApprovedOn": "2026-08-05",
+    "retryApprovalConsumed": true,
+    "retryAuthorized": false,
+    "finalApprovalConsumed": true,
+    "failureClass": null,
+    "resultEvidenceAvailable": true,
+    "attempts": [
+      {
+        "attempt": 1,
+        "approvedOn": "2026-08-05",
+        "approvalConsumed": true,
+        "outcome": "FAILED_CLOSED_BEFORE_ARCHIVE",
+        "failureClass": "EXTERNAL_CONFIGURATION_DATABASE_CREDENTIAL_AUTHENTICATION"
+      },
+      {
+        "attempt": 2,
+        "approvedOn": "2026-08-05",
+        "approvalConsumed": true,
+        "outcome": "RESULT_EVIDENCE_UNAVAILABLE",
+        "failureClass": "EXECUTION_RESULT_EVIDENCE_UNAVAILABLE"
+      },
+      {
+        "attempt": 3,
+        "approvedOn": "2026-08-05",
+        "approvalConsumed": true,
+        "outcome": "SUCCEEDED",
+        "failureClass": null
+      }
+    ],
+    "historicalReference": {
+      "createdAt": "2026-08-04T01:35:16Z",
+      "archiveBytes": 696310,
+      "satisfiesCurrentGate": false
+    },
+    "measuredAt": "2026-08-05T11:00:45.4286736Z",
+    "pgDumpVersion": "17.6",
+    "archiveCreated": true,
+    "archiveBytes": 715071,
+    "dumpDurationSeconds": 34.125,
+    "archiveListEntryCount": 1251,
+    "warningCount": 0,
+    "transientArchiveDeleted": true,
+    "credentialFileDeleted": true,
+    "temporaryDirectoryDeleted": true,
+    "containerDeleted": true,
+    "databaseMutationPerformed": false,
+    "productionStatusAfterAttempt": "HEALTHY",
+    "rawArchiveStoredRemotely": false,
+    "rowContentInspected": false
+  },
+  "capacity": {
+    "lambdaMaximumRuntimeSeconds": 900,
+    "lambdaMaximumEphemeralStorageMiB": 10240,
+    "observedScenarioMultiplier": 1,
+    "stressScenarioMultiplier": 2,
+    "lambdaEligibility": "ELIGIBLE_FOR_DISABLED_WORKER_CHANGE_SET_REVIEW_ONLY",
+    "workerRehearsal": {
+      "evidence": "docs/cloud/aws-backup-worker-rehearsal-v1.json",
+      "status": "SUCCEEDED_SYNTHETIC_ONLY",
+      "requiredStressArchiveBytes": 1430142,
+      "rehearsalArchiveBytes": 6351131,
+      "rehearsalEntryCount": 3,
+      "peakEphemeralBytes": 6351837,
+      "workerMeasuredTotalMs": 7901,
+      "runtimeMarginMs": 892099,
+      "ephemeralMarginBytes": 10731066403,
+      "productionConnected": false,
+      "awsConnected": false,
+      "temporaryStateDeleted": true
+    },
+    "fallback": "STOP_AND_PROPOSE_FARGATE_ARCHITECTURE"
+  },
+  "retentionAndFrequency": {
+    "dailyRetentionDays": 35,
+    "monthlyRetentionMonths": 12,
+    "steadyStateDailyObjects": 35,
+    "steadyStateMonthlyObjects": 12,
+    "steadyStateTotalObjects": 47,
+    "observedSteadyStateStoredBytes": 33608337,
+    "stressSteadyStateStoredBytes": 67216674,
+    "estimatedDailyInvocationsPerMonth": 31,
+    "estimatedMonthlyClassWritesPerMonth": 1,
+    "restoreCyclesPerYear": 2,
+    "s3Versioning": true,
+    "s3ObjectLock": "GOVERNANCE"
+  },
+  "calculator": {
+    "status": "COMPLETED_PUBLIC_ON_DEMAND_ESTIMATES",
+    "pricingAsOf": "2026-08-06",
+    "pricingMode": "PUBLIC_ON_DEMAND",
+    "region": "ap-southeast-1",
+    "currency": "USD",
+    "monthlyCeilingUsdIncludingTaxAndMargin": 10,
+    "services": [
+      "Amazon S3",
+      "AWS Key Management Service",
+      "Amazon Elastic Container Registry",
+      "AWS Lambda",
+      "AWS Secrets Manager",
+      "Amazon EventBridge Scheduler",
+      "Amazon Simple Queue Service",
+      "Amazon CloudWatch",
+      "Data Transfer and restore retrieval",
+      "AWS CloudTrail data events if enabled"
+    ],
+    "observedScenarioMonthlyUsd": 2.22,
+    "stressScenarioMonthlyUsd": 2.63,
+    "taxIncludedByCalculator": false,
+    "taxAndUncertaintyMarginUsd": 2,
+    "ceilingAssessmentMonthlyUsd": 4.63,
+    "remainingHeadroomUsd": 5.37,
+    "marginPolicy": "FIXED_USD_2_RESERVE_FOR_TAX_ROUNDING_SANITIZED_LOGS_SMALL_TRANSFER_AND_RETRIEVAL",
+    "calculatorGranularity": {
+      "eventBridgeSchedulerActualMonthlyInvocations": 32,
+      "eventBridgeSchedulerModeledMonthlyInvocations": 1000000,
+      "sqsObservedActualMonthlyRequests": 100,
+      "sqsStressActualMonthlyRequests": 200,
+      "sqsModeledMonthlyRequests": 1000000,
+      "reason": "PUBLIC_CALCULATOR_FIELDS_ACCEPT_WHOLE_MILLIONS_ONLY_FOR_THESE_ROWS"
+    },
+    "conditionalExclusions": {
+      "cloudTrailDataEvents": "EXCLUDED_NOT_ENABLED",
+      "cloudWatchSanitizedLogVolume": "NOT_YET_MEASURED_COVERED_BY_MARGIN",
+      "restoreRetrievalAndSmallTransfer": "COVERED_BY_MARGIN"
+    },
+    "estimateUrl": "https://calculator.aws/#/estimate?id=baaee22d4bbe558234a8b8e07d8a08c854e58a83",
+    "stressEstimateUrl": "https://calculator.aws/#/estimate?id=67720a4897977a644ddf0cbdbf7f43ee0bf99b48",
+    "estimateExportSha256": null,
+    "withinCeiling": true
+  },
+  "authorization": {
+    "productionConnectionAuthorized": false,
+    "transientProductionArchiveAuthorized": false,
+    "priorOneAttemptAuthorizationConsumed": true,
+    "oneRetryAuthorizationConsumed": true,
+    "finalOneAttemptAuthorizationConsumed": true,
+    "retryAuthorized": false,
+    "awsProvisioningAuthorized": false,
+    "awsPaidUseAuthorized": false,
+    "productionUploadAuthorized": false,
+    "restoreAuthorized": false,
+    "scheduleAuthorized": false
+  }
+}
