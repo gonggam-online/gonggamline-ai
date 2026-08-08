@@ -1,31 +1,78 @@
 # Work status
 
-## 2026-08-08 AWS deployable backup worker automation
+## 2026-08-08 Listing Category Evidence Bridge implementation
 
-- Objective: complete minimum automatic independent-backup and cross-PC
-  recovery conditions, then return priority to measurable sales.
-- Branch/base: `codex/feat/aws-backup-worker-automation` from merged PR #104.
-- Risk/root cause: high-risk/manual external AWS and Production read-only
-  export boundary. The missing component was a deployable worker adapter, not
-  AWS SSO or application logic.
-- Completed: strict handler/secret contracts, PostgreSQL 17 dump/list,
-  conditional S3 upload, checksum/KMS/Object Lock verification, deterministic
-  schedule identity, Lambda bundle, linux/amd64 image, local handler/tool
-  loading, GitHub Draft PR #105, and immutable ECR image publication. Complete
-  repository suite passes 508/508 and the Production build passes 85 routes.
-- Current work: paused at the ECR vulnerability gate and returned priority to
-  the revenue path. The image scan completed with CRITICAL=0 and HIGH=5 in
-  Amazon Linux 2023 base packages; the worker was not deployed.
-- Cloud-first state: GitHub owns source/evidence; ECR owns image; Secrets
-  Manager owns credential; S3 owns future backup objects. Local `dist/`, Docker
-  layers, and SSO sessions are replaceable caches.
-- Owner action/blocker: no immediate owner action. Recheck the ECR scan only
-  after Amazon publishes fixed base packages; do not waive the HIGH gate.
-- Remaining risk: the secret was not created, Lambda/worker was not enabled,
-  no Production export or restore was run, and Scheduler remains disabled.
-- Exact next action: continue Item Selection Story 5 Admin UI/history as the
-  smallest normal-risk step from the completed protected Story 4 workflow
-  toward a reviewable listing-ready product.
+- Objective: connect the merged typed category snapshot to the existing
+  Listing evidence policy through the smallest fail-closed pure bridge.
+- Branch/base: `codex/feat/listing-category-evidence-bridge` from merged PR #108
+  on `origin/main` `6b36bf1a392fee58a9d5d6bf2009c9f0a7b0ba1e`.
+- Risk: normal-risk additive pure implementation.
+- Revenue impact: removes the next safe integration gap toward evidence-backed
+  Listing generation without manufacturing product claims.
+- Root-cause class: approved code integration gap; no external configuration or
+  database failure is being compensated for.
+- Scope: deterministic category-contract evidence promotion plus fail-closed
+  identity/digest/notice/time validation and negative tests.
+- Non-goals: API/database/Auth/RLS, secrets, live Coupang calls, Production,
+  product-fact inference, pricing, listing registration, or commerce writes.
+- Cloud-first gate: durable source/tests/review evidence live in GitHub; no
+  durable runtime state is created. Local checkout/test output is disposable.
+- Completed: inspected merged contracts; implemented the bridge; added six
+  integration/negative tests; focused checks passed; full tests passed 519/519;
+  typecheck passed; production build passed with 85 routes; changed-file lint
+  passed.
+- Browser validation: 35 passed and 2 skipped. The established seven page-health
+  failures remain limited to unconfigured local Supabase (`missing_url`) on
+  `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
+  and `/workspace`; this bridge has no route, API, or Supabase dependency.
+- Full-repository lint caveat: user-owned untracked generated `dist/` and
+  `playwright-report/` assets are included by the broad lint command and report
+  generated-code errors. They are preserved and excluded from this change.
+- Current: complete diff/secret review and delivery gates.
+- Changed files: `engines/listing/category-evidence-bridge.ts`,
+  `tests/listing-category-evidence-bridge.test.ts`, Architecture Review,
+  Decision Log, Listing changelog, and this status file.
+- Exact next action: review the complete diff, then commit, push, and open the
+  normal-risk PR.
+- Remaining risk: the bridge proves only the category contract. Real product
+  identity/facts, Production configuration, and marketplace writes remain
+  separately gated.
+
+## 2026-08-08 Listing Category Snapshot implementation
+
+- Objective: implement the approved PR #107 typed category snapshot without
+  changing the legacy API or making a Coupang write.
+- Branch/base: `codex/feat/listing-category-snapshot` from Architecture merge
+  `ad9a0819ecb12c34da6a75b220d036d65d33a6c1`.
+- Risk/root cause: normal-risk additive code; code/contract gap.
+- Completed: bounded contracts, pure canonical digest/mapper, separate
+  read-only validity adapter, quarantine issues, and synthetic tests.
+- Validation: focused category tests 9/9, full tests 513/513, typecheck,
+  changed-file lint, and the 85-route Production build pass. Local Playwright
+  is at the established unconfigured-Supabase baseline: 35 passed, 2 skipped,
+  and 7 unrelated `missing_url` API failures.
+- Cloud-first: source/fixtures/evidence target GitHub; no Production response,
+  secret, database, or local durable state.
+- Current step: full repository/build/browser verification, delivery, CI, and
+  Preview validation.
+- Remaining risk: the new contracts are deliberately not wired into the
+  legacy route or a Production workflow; that integration is a later Story.
+
+## 2026-08-08 Listing Category Snapshot Architecture
+
+- Objective: define the smallest safe typed category input for a truthful
+  first listing after PR #106 merged.
+- Branch: `codex/docs/listing-category-snapshot-architecture` from merge
+  `207ae47e115a381b998ebaaa2b203cfaf5e658e2`.
+- Risk/root cause: normal-risk architecture; code/contract gap. The current raw
+  `Record<string, unknown>` response cannot be Listing evidence.
+- Scope: typed snapshot, separate validity proof, digests, bounds, failures,
+  compatibility, tests, rollout, and rollback. No API/DB/config/Production or
+  marketplace write.
+- Cloud-first: GitHub owns all durable state; fixtures are sanitized and local
+  artifacts are disposable.
+- Current step: validate and deliver the Architecture Story for manual owner
+  acceptance before implementation.
 
 ## 2026-08-08 AWS independent backup base boundary deployed
 

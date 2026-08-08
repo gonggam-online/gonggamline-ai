@@ -1,21 +1,59 @@
 # Decision log
 
-## 2026-08-08 — Deployable AWS backup worker boundary fixed
+## 2026-08-08 — Prepare but do not auto-merge the AWS backup worker
 
-- Category: high-risk/manual Cloud-first disaster-recovery implementation.
-- Decision: use Lambda Node.js 22 with the Amazon Linux 2023 `postgresql17`
-  package, bundled AWS SDK v3 clients, digest-pinned immutable ECR images, and
-  the preverified Supabase session pooler. Scheduler remains disabled until
-  synthetic and bounded Production gates pass.
-- Secret contract: Secrets Manager stores only host, port, database, username,
-  password, and `sslmode=require`; source, CLI arguments, logs, CI, and local
-  files never contain the value.
-- Idempotency: retries share one Singapore calendar-day request ID; S3
-  `If-None-Match: *` plus a digest-bearing key prevents duplicate bodies, and
-  Object Lock retention is checked without body access.
-- Rollback: before the first Production archive, leave the schedule disabled
-  and remove only worker resources through an approved change set. After the
-  first archive, retained recovery resources are not ordinary rollback targets.
+- Decision: the deployable worker may be kept merge-ready on PR #105 after
+  latest-main reconciliation and complete CI/Preview verification.
+- Safety: credentials are resolved only from Secrets Manager; the scheduler,
+  Production export, resource deployment, and first archive remain disabled or
+  separately approval-gated.
+- Risk: high-risk/manual with `manual-merge-required`; repository automation
+  must not merge it even when every technical check passes.
+
+## 2026-08-08 — Bridge only the validated category contract into Listing evidence
+
+- Dependency: owner-approved Architecture PR #107 and merged implementation
+  PR #108.
+- Decision: a validated category snapshot may create exactly one proven,
+  catalog-item-scoped `coupangCategoryContract` fact. It may not create product
+  attribute, certification, document, or notice facts.
+- Fail-closed conditions: quarantined snapshot, absent notice selection,
+  malformed digest or identity, invalid time ordering, and snapshot age beyond
+  seven days all produce no evidence fact.
+- Durable state: GitHub owns source, tests, review evidence, and recovery. No
+  new local-only or runtime durable state is introduced.
+- Risk and exclusions: normal-risk additive pure code; no API/database/Auth/RLS,
+  environment, secret, Production, external call, paid action, or commerce
+  mutation authority.
+
+## 2026-08-08 — Listing category snapshots fail closed before integration
+
+- The mapper accepts only bounded known collections and enums, digests the
+  complete JSON response canonically, and quarantines malformed, stale,
+  invalid-category, unknown-enum, or notice-selection mismatches.
+- `NOT_REQUIRED` remains a provider option, never an admitted product fact.
+- The validity endpoint is added as a read-only adapter only; no live smoke or
+  runtime consumer is enabled in this implementation.
+
+## 2026-08-08 — Category metadata and validity remain separate evidence
+
+- Decision: a successful category-metadata response never proves current
+  category validity. Listing admission requires a typed metadata snapshot and
+  a separately digested validity result.
+- Compatibility: preserve the current public route shape; validate behind the
+  adapter boundary and fail closed on malformed or stale data.
+- Safety: provider certification options and notice choices are not automatic
+  product facts. Persistence and live provider verification remain separate.
+
+## 2026-08-08 — Category metadata and validity remain separate evidence
+
+- Decision: a successful category-metadata response never proves current
+  category validity. Listing admission requires a typed metadata snapshot and
+  a separately digested validity result.
+- Compatibility: preserve the current public route shape; validate behind the
+  adapter boundary and fail closed on malformed or stale data.
+- Safety: provider certification options and notice choices are not automatic
+  product facts. Persistence and live provider verification remain separate.
 
 ## 2026-08-06 — AWS disabled-worker change-set review target fixed
 

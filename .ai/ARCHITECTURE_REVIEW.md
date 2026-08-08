@@ -1,31 +1,81 @@
 # Architecture review
 
-## AWS Backup Deployable Worker Automation v1 — 2026-08-08
+## AWS Backup Worker Automation v1 — 2026-08-08
 
-- Approved source: the accepted encrypted backup architecture, merged base
-  boundary PR #104, and the owner directive to finish minimum Cloud-first
-  automation before returning to sales development.
-- Boundary owner: Database / Security. This implements the already approved
-  Lambda/S3/KMS/Secrets Manager adapter without a new Domain, Queue, Lifecycle,
-  public API, or provider.
-- Scope: Node.js 22 handler, PostgreSQL 17 dump/inspection, runtime-only secret
-  retrieval, conditional immutable S3 writes, checksum/KMS/Object Lock
-  verification, deterministic daily/monthly identity, digest-pinned ECR
-  publishing, and scan fail-close.
-- Cloud-first placement: source/evidence are in GitHub, image in immutable
-  Singapore ECR, credential only in Secrets Manager, and future archives only
-  in the encrypted Object Lock bucket. Local bundle/layers are disposable.
-- Security/failure: no credential or backup body enters logs, arguments, Git,
-  CI, or local files; the writer has no body-read/delete or KMS decrypt; it
-  fails closed on warning, checksum, or retention drift. Scheduler stays
-  disabled through worker deployment and synthetic verification.
-- Risk: high-risk/manual because later stages create a secret, publish an
-  image, enable Lambda/IAM, and perform a Production read-only export. Apply
-  `manual-merge-required`; never auto-merge.
-- Rollout/rollback: publish and scan an exact-commit image; create the exact
-  secret; review a disabled-schedule UPDATE; run synthetic verification before
-  one bounded Production export. After a Production archive exists, preserve
-  the retained bucket, key, versions, and recovery evidence.
+- Boundary: deployable Lambda Node.js 22/PostgreSQL 17 backup worker using
+  Secrets Manager, immutable checksum/KMS/Object Lock writes, and deterministic
+  replay.
+- Cloud-first state: source and delivery evidence remain in GitHub; encrypted
+  backup objects, manifests, and secrets remain in the approved Singapore AWS
+  services. No credential or Production dump belongs in Git or local durable
+  storage.
+- Risk: high-risk/manual. Merging code does not authorize secret creation,
+  worker-resource deployment, schedule enablement, Production database access,
+  or the first Production archive.
+- Delivery rule: retain `manual-merge-required`; never auto-merge. Every AWS,
+  secret, Production-read, and paid-resource action remains separately gated.
+- Rollback: keep scheduling disabled and remove only worker resources through a
+  separately reviewed CloudFormation change set while retaining the recovery
+  boundary.
+
+## Listing Category Evidence Bridge v1 — 2026-08-08
+
+- Approved sources: owner-approved Architecture PR #107 and merged typed
+  category snapshot implementation PR #108.
+- Boundary: a pure, additive Listing-domain bridge from one validated category
+  snapshot to one `coupangCategoryContract` evidence fact.
+- Decision: admit no evidence unless the snapshot is validated, explicitly
+  selects a notice category, has valid canonical digests and bounded identity,
+  preserves observation/capture/evaluation ordering, and remains within the
+  seven-day validity window.
+- Non-escalation rule: metadata attributes, certifications, documents, and
+  notice items remain category requirements; the bridge never promotes them
+  into product facts.
+- Cloud-first gate: GitHub source, tests, PR, and CI are the durable source of
+  truth and recovery path. The bridge creates no durable runtime state; local
+  checkout and test output are disposable.
+- Risk: normal-risk pure implementation. No API, database, RLS/Auth, secret,
+  Production, live Coupang request, paid service, or commerce write changes.
+- Rollback: revert the bridge implementation commit; existing snapshot and
+  Listing evidence contracts remain independently usable.
+
+## Listing Category Snapshot implementation — 2026-08-08
+
+- Approved source: owner-approved and merged Architecture PR #107.
+- Scope: bounded DTO contracts, canonical SHA-256, pure fail-closed mapper,
+  separate read-only validity adapter, and synthetic positive/negative tests.
+- Compatibility: existing route and response body remain unchanged; no live
+  call, configuration, database, persistence, pricing, or commerce write.
+- Risk: normal-risk while the implementation remains additive and unused by
+  Production orchestration.
+- Cloud-first: GitHub owns source and synthetic evidence; no durable runtime or
+  local-only state is introduced.
+
+## Listing Category Snapshot v1 — 2026-08-08
+
+- Business gate: validate one exact category before truthful listing content.
+- Boundary: Listing owns admission/quarantine; the Coupang adapter owns only
+  read-only provider translation.
+- Architecture: typed metadata plus separate validity result, canonical
+  digests, bounded fixtures, stable failures, and unchanged legacy API shape.
+- Cloud-first: GitHub owns source/contracts/test evidence; no runtime durable
+  state, secret, Production response, database, or local authority is added.
+- Risk: normal-risk documentation. Implementation, configuration, provider
+  smoke, persistence, and commerce writes require their applicable gates.
+- Rollback: Git revert; no external state changes.
+
+## Listing Category Snapshot v1 — 2026-08-08
+
+- Business gate: validate one exact category before truthful listing content.
+- Boundary: Listing owns admission/quarantine; the Coupang adapter owns only
+  read-only provider translation.
+- Architecture: typed metadata plus separate validity result, canonical
+  digests, bounded fixtures, stable failures, and unchanged legacy API shape.
+- Cloud-first: GitHub owns source/contracts/test evidence; no runtime durable
+  state, secret, Production response, database, or local authority is added.
+- Risk: normal-risk documentation. Implementation, configuration, provider
+  smoke, persistence, and commerce writes require their applicable gates.
+- Rollback: Git revert; no external state changes.
 
 ## AWS Backup Disabled-Worker Change Set Packet v1 — 2026-08-06
 
