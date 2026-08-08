@@ -119,9 +119,10 @@ Schema/Auth/RLS/Production/commerce remain approval-gated.
 
 ## Phase 6 — sales learning integration
 
-Status: Architecture proposed in
+Status: Architecture accepted and amended with a third-party-first inspection
+policy in
 [Sales Learning Closed Loop and First Experiment v1](../architecture/SALES-LEARNING-CLOSED-LOOP-V1.md).
-No implementation or experiment execution is authorized.
+Provider integration and experiment execution remain separately gated.
 
 Purpose: connect external observed candidates and actual marketplace outcomes
 without autonomous commerce writes.
@@ -133,6 +134,10 @@ Scope:
 - expected-vs-actual dashboards;
 - policy-change proposals in SHADOW;
 - buy/connect/build assessment for ERP/WMS/accounting.
+- unattended Domeggook -> controlled 3PL inspection/preparation -> Rocket
+  Growth readiness, with fail-closed evidence and quarantine;
+- separately approved strategic-product sampling or original-source negotiation
+  proposals.
 
 Done: at least one owner-approved product experiment is traceable from external
 facts through actual net profit, with no estimate/actual conflation.
@@ -165,6 +170,8 @@ facts through actual net profit, with no estimate/actual conflation.
 | GitHub/Preview adapter | verifier | `codex/feat/orchestrator-github-preview` | duplicate-free Draft PR and exact-head evidence | GitHub auth; no merge | automates delivery wait |
 | Shadow planner/reviewer | evidence loop | `codex/feat/orchestrator-shadow-review` | owner-scored offline sample | API cost cap | prioritizes high-value work |
 | Sales evidence correlation | approved data Architecture | separate Architecture first | expected/actual contract tests | DB/privacy/manual | closes revenue learning loop |
+| Gaemi/3PL evidence adapter | accepted third-party policy + accepted adapter Architecture + owner-supplied provider contract | separate contract-discovery Story first | synthetic fixtures, fail-closed admission, document/hash and quarantine tests | provider/privacy/commerce/manual | removes routine owner handling before Rocket Growth |
+| Third-party inspection adapter | provider discovery and approved contract | separate Architecture first | hermetic provider fixtures + quarantine/idempotency tests | external integration/commerce/manual | removes routine owner sample handling |
 
 ## First MVP task-room instruction
 
