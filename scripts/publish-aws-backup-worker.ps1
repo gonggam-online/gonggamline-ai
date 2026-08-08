@@ -52,12 +52,17 @@ if ($LASTEXITCODE -ne 0 -or $digest -notmatch '^sha256:[a-f0-9]{64}$') {
 }
 
 Write-Host "3) Wait for scan and reject critical/high findings"
-& $AwsExe ecr start-image-scan --profile $Profile --region $Region `
-  --repository-name $repositoryName --image-id "imageDigest=$digest" | Out-Null
-if ($LASTEXITCODE -ne 0) { throw "ECR image scan could not be started." }
-& $AwsExe ecr wait image-scan-complete --profile $Profile --region $Region `
-  --repository-name $repositoryName --image-id "imageDigest=$digest"
-if ($LASTEXITCODE -ne 0) { throw "ECR image scan did not complete." }
+$scanStatus = (& $AwsExe ecr describe-image-scan-findings --profile $Profile --region $Region `
+  --repository-name $repositoryName --image-id "imageDigest=$digest" `
+  --query "imageScanStatus.status" --output text 2>$null).Trim()
+if ($scanStatus -ne "COMPLETE") {
+  & $AwsExe ecr start-image-scan --profile $Profile --region $Region `
+    --repository-name $repositoryName --image-id "imageDigest=$digest" | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw "ECR image scan could not be started." }
+  & $AwsExe ecr wait image-scan-complete --profile $Profile --region $Region `
+    --repository-name $repositoryName --image-id "imageDigest=$digest"
+  if ($LASTEXITCODE -ne 0) { throw "ECR image scan did not complete." }
+}
 $findings = & $AwsExe ecr describe-image-scan-findings --profile $Profile --region $Region `
   --repository-name $repositoryName --image-id "imageDigest=$digest" --output json | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0) { throw "ECR scan findings unavailable." }
