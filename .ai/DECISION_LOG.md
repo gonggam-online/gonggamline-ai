@@ -1,5 +1,24 @@
 # Decision log
 
+## 2026-08-08 - Implement accepted Coupang read-only preflight evidence
+
+- Approval: repository owner explicitly authorized the Architecture Story;
+  PR #111 was merged before implementation began.
+- Decision: add exactly the fixed category, outbound, and return-center GET
+  readers, strict minimal decoders, canonical fingerprints, and pure KK946
+  evidence mapping described by the accepted Story.
+- Privacy: return source provenance uses a `{vendorId}` template; normalized
+  results exclude raw vendor identity, contacts, addresses, fees, courier
+  data, provider messages, and raw response bodies.
+- Failure boundary: missing configuration, transport/provider failure,
+  malformed response, conflict, absence, and bounded exhaustion remain
+  distinct; no failure triggers a retry, product assertion, or write.
+- Cloud-first: GitHub owns source/tests/decision/CI evidence. Provider data is
+  request-memory only and the implementation has no public or Production
+  caller.
+- Risk/rollback: normal-risk additive unused internal code; rollback is a Git
+  revert with no external or database action.
+
 ## 2026-08-08 — Propose bounded Coupang read-only preflight evidence
 
 - Dependency: accepted Coupang audit and merged PR #110 pure Marketplace preflight.
