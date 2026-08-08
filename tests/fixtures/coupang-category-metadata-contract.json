@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "gonggamline-coupang-category-metadata-fixture-v1",
+  "fixtureKind": "SYNTHETIC_OFFICIAL_SHAPE",
+  "observedAt": "2026-08-08",
+  "displayCategoryCode": "78877",
+  "response": {
+    "code": "SUCCESS",
+    "message": "",
+    "data": {
+      "isAllowSingleItem": true,
+      "attributes": [{
+        "attributeTypeName": "수량",
+        "required": "OPTIONAL",
+        "dataType": "NUMBER",
+        "basicUnit": "개",
+        "inputType": "INPUT",
+        "inputValues": [],
+        "usableUnits": ["개"],
+        "groupNumber": "NONE",
+        "exposed": "EXPOSED"
+      }],
+      "noticeCategories": [{
+        "noticeCategoryName": "기타 재화",
+        "noticeCategoryDetailNames": [{
+          "noticeCategoryDetailName": "품명 및 모델명",
+          "required": "MANDATORY"
+        }]
+      }],
+      "requiredDocumentNames": [{
+        "templateName": "기타인증서류",
+        "required": "OPTIONAL"
+      }],
+      "certifications": [{
+        "certificationType": "NOT_REQUIRED",
+        "name": "인증대상아님",
+        "dataType": "NONE",
+        "required": "OPTIONAL"
+      }],
+      "allowedOfferConditions": ["NEW"]
+    }
+  }
+}
