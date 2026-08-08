@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "gonggamline-aws-backup-disabled-worker-change-set-v1",
+  "status": "READY_FOR_NO_EXECUTE_CHANGE_SET_CREATION",
+  "risk": "HIGH_MANUAL",
+  "target": {
+    "provider": "AWS_CLOUDFORMATION",
+    "region": "ap-southeast-1",
+    "stackName": "gonggamline-independent-backup-v1",
+    "changeSetName": "base-boundary-review-v1",
+    "changeSetType": "CREATE"
+  },
+  "template": {
+    "repositoryPath": "infra/aws-backup/cloudformation.json",
+    "sha256": "86cf98974aacee218b57ec4c66697393b4e9d932f589d95ef4f3a202bad9460b",
+    "bytes": 24141,
+    "inlineTemplateBodyEligible": true,
+    "inlineTemplateBodyMaximumBytes": 51200
+  },
+  "parameters": {
+    "EnableWorkerResources": "false",
+    "BackupWorkerImageUri": "",
+    "ProductionDatabaseSecretArn": ""
+  },
+  "capabilities": [
+    "CAPABILITY_NAMED_IAM"
+  ],
+  "expectedChanges": {
+    "action": "Add",
+    "createdResourceLogicalIds": [
+      "BackupBucket",
+      "BackupBucketPolicy",
+      "BackupDeadLetterQueue",
+      "BackupImageRepository",
+      "BackupKey",
+      "BackupKeyAlias"
+    ],
+    "omittedResourceLogicalIds": [
+      "BackupDeadLetterAlarm",
+      "BackupDeadLetterQueuePolicy",
+      "BackupLogGroup",
+      "BackupSchedule",
+      "BackupSchedulerRole",
+      "BackupWorker",
+      "BackupWorkerAsyncFailure",
+      "BackupWorkerRole"
+    ],
+    "retainedResourceLogicalIds": [
+      "BackupBucket",
+      "BackupDeadLetterQueue",
+      "BackupImageRepository",
+      "BackupKey"
+    ],
+    "workerResourcesCreated": false,
+    "scheduleCreated": false,
+    "productionSecretReferenced": false
+  },
+  "safety": {
+    "requiresTemporaryOrFederatedAdministrativeSessionWithMfa": true,
+    "rootIdentityProhibited": true,
+    "longLivedAccessKeyProhibited": true,
+    "createChangeSetCreatesCloudFormationMetadataOnly": true,
+    "createChangeSetProvisionsResources": false,
+    "executeChangeSetAuthorized": false,
+    "infrastructureProvisioningAuthorized": false,
+    "productionExportAuthorized": false,
+    "paidResourceCreationAuthorized": false,
+    "rollbackBeforeExecution": "DELETE_UNEXECUTED_CHANGE_SET_AND_REVIEW_IN_PROGRESS_STACK_ONLY"
+  },
+  "exactAwsCliArguments": [
+    "cloudformation",
+    "create-change-set",
+    "--region",
+    "ap-southeast-1",
+    "--stack-name",
+    "gonggamline-independent-backup-v1",
+    "--change-set-name",
+    "base-boundary-review-v1",
+    "--change-set-type",
+    "CREATE",
+    "--template-body",
+    "file://infra/aws-backup/cloudformation.json",
+    "--parameters",
+    "ParameterKey=EnableWorkerResources,ParameterValue=false",
+    "--capabilities",
+    "CAPABILITY_NAMED_IAM",
+    "--description",
+    "GonggamLine Singapore independent backup base boundary; worker omitted; do not execute"
+  ],
+  "forbiddenAwsCliOperations": [
+    "cloudformation execute-change-set",
+    "cloudformation create-stack",
+    "cloudformation deploy",
+    "cloudformation update-stack"
+  ]
+}

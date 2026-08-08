@@ -10,7 +10,8 @@ Codex conversations. Permanent behavior comes from the Git repository.
 - ChatGPT project: `[HQ]쿠팡월1억매출프로젝트`
 - GitHub repository: `gonggam-online/gonggamline-ai`
 - Codex project display name: `gonggamline-ai-git`
-- recommended local checkout: `D:\Dev\gonggamline-ai`
+- local checkout: any safe non-synchronized path on an authorized PC; its path
+  is not system identity or durable configuration
 
 The display name may differ from the repository folder without affecting Git,
 GitHub, Vercel, Supabase, or marketplace integrations.
@@ -32,6 +33,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .codex/notify.ps1 -Event app
 powershell -NoProfile -ExecutionPolicy Bypass -File .codex/notify.ps1 -Event complete
 ```
 
+9. Run repository lint, typecheck, tests, build, and applicable remote readiness
+   gates before treating the PC as equivalent.
+10. Confirm no active task depends on a file, database, secret, approval, or
+    checkpoint that exists only on the previous PC.
+
 ## Daily operating rule
 
 Codex selects or creates a task branch automatically under the permanent
@@ -41,6 +47,13 @@ paid calls, and destructive operations retain manual approval.
 
 Use one branch on one PC at a time. Before moving work to another PC, push a
 coherent checkpoint and synchronize the destination PC from GitHub.
+
+All work follows
+[Cloud-first durable-state policy](../.ai/CLOUD_FIRST_POLICY.md). Local paths,
+Codex conversations, browser sessions, and untracked files are not durable task
+state. Existing local backups and automation databases remain migration
+blockers until an approved encrypted target and recovery test exist; do not
+delete them prematurely.
 
 ## Troubleshooting
 

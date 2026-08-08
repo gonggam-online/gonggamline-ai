@@ -1,0 +1,716 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "GonggamLine independent encrypted backup boundary. Review-only source: provisioning and Production export require separate manual approval.",
+  "Metadata": {
+    "GonggamLine": {
+      "schemaVersion": "aws-independent-backup-infrastructure-plan-v1",
+      "risk": "HIGH_MANUAL",
+      "executionBoundary": "NO_STACK_OPERATION_FROM_THIS_STORY",
+      "approvedRegion": "ap-southeast-1",
+      "approvedMonthlyCeilingUsd": 10
+    }
+  },
+  "Parameters": {
+    "EnableWorkerResources": {
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues": ["false", "true"],
+      "Description": "Must remain false until a separate worker image, secret identity, capacity, cost, and provisioning approval is recorded."
+    },
+    "BackupWorkerImageUri": {
+      "Type": "String",
+      "Default": "",
+      "AllowedPattern": "^$|^[0-9]{12}\\.dkr\\.ecr\\.ap-southeast-1\\.amazonaws\\.com/[a-z0-9][a-z0-9._/-]*@sha256:[a-f0-9]{64}$",
+      "Description": "Digest-pinned Singapore ECR image URI. Tags are prohibited."
+    },
+    "ProductionDatabaseSecretArn": {
+      "Type": "String",
+      "Default": "",
+      "AllowedPattern": "^$|^arn:aws:secretsmanager:ap-southeast-1:[0-9]{12}:secret:[A-Za-z0-9/_+=.@-]+$",
+      "Description": "Exact Secrets Manager ARN only. Never place a secret value in this template."
+    }
+  },
+  "Rules": {
+    "SingaporeOnly": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Equals": [
+              { "Ref": "AWS::Region" },
+              "ap-southeast-1"
+            ]
+          },
+          "AssertDescription": "This stack is approved only for Asia Pacific (Singapore), ap-southeast-1."
+        }
+      ]
+    },
+    "WorkerInputsRequiredWhenEnabled": {
+      "RuleCondition": {
+        "Fn::Equals": [
+          { "Ref": "EnableWorkerResources" },
+          "true"
+        ]
+      },
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Equals": [
+                  { "Ref": "BackupWorkerImageUri" },
+                  ""
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "Worker resources require an immutable digest-pinned Singapore ECR image URI."
+        },
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Equals": [
+                  { "Ref": "ProductionDatabaseSecretArn" },
+                  ""
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "Worker resources require a separately approved exact Secrets Manager ARN."
+        }
+      ]
+    }
+  },
+  "Conditions": {
+    "CreateWorkerResources": {
+      "Fn::Equals": [
+        { "Ref": "EnableWorkerResources" },
+        "true"
+      ]
+    }
+  },
+  "Resources": {
+    "BackupKey": {
+      "Type": "AWS::KMS::Key",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "Description": "GonggamLine independent backup encryption key",
+        "EnableKeyRotation": true,
+        "KeySpec": "SYMMETRIC_DEFAULT",
+        "KeyUsage": "ENCRYPT_DECRYPT",
+        "MultiRegion": false,
+        "PendingWindowInDays": 30,
+        "KeyPolicy": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "EnableAccountAdministrationViaIAM",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
+                }
+              },
+              "Action": "kms:*",
+              "Resource": "*"
+            }
+          ]
+        },
+        "Tags": [
+          { "Key": "gonggamline:system", "Value": "independent-backup" },
+          { "Key": "gonggamline:data-class", "Value": "production-business-data" },
+          { "Key": "gonggamline:managed-by", "Value": "cloudformation" }
+        ]
+      }
+    },
+    "BackupKeyAlias": {
+      "Type": "AWS::KMS::Alias",
+      "Properties": {
+        "AliasName": {
+          "Fn::Sub": "alias/${AWS::StackName}-backup"
+        },
+        "TargetKeyId": {
+          "Ref": "BackupKey"
+        }
+      }
+    },
+    "BackupBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "BucketKeyEnabled": true,
+              "ServerSideEncryptionByDefault": {
+                "KMSMasterKeyID": {
+                  "Fn::GetAtt": ["BackupKey", "Arn"]
+                },
+                "SSEAlgorithm": "aws:kms"
+              }
+            }
+          ]
+        },
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "Id": "ExpireDailyAfterRetention",
+              "Status": "Enabled",
+              "Prefix": "daily/",
+              "ExpirationInDays": 36,
+              "NoncurrentVersionExpiration": {
+                "NoncurrentDays": 36
+              },
+              "AbortIncompleteMultipartUpload": {
+                "DaysAfterInitiation": 1
+              }
+            },
+            {
+              "Id": "ExpireMonthlyAfterRetention",
+              "Status": "Enabled",
+              "Prefix": "monthly/",
+              "ExpirationInDays": 366,
+              "NoncurrentVersionExpiration": {
+                "NoncurrentDays": 366
+              },
+              "AbortIncompleteMultipartUpload": {
+                "DaysAfterInitiation": 1
+              }
+            }
+          ]
+        },
+        "ObjectLockEnabled": true,
+        "ObjectLockConfiguration": {
+          "ObjectLockEnabled": "Enabled",
+          "Rule": {
+            "DefaultRetention": {
+              "Mode": "GOVERNANCE",
+              "Days": 35
+            }
+          }
+        },
+        "OwnershipControls": {
+          "Rules": [
+            { "ObjectOwnership": "BucketOwnerEnforced" }
+          ]
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        },
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        },
+        "Tags": [
+          { "Key": "gonggamline:system", "Value": "independent-backup" },
+          { "Key": "gonggamline:retention", "Value": "daily-35-monthly-365" },
+          { "Key": "gonggamline:managed-by", "Value": "cloudformation" }
+        ]
+      }
+    },
+    "BackupBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "BackupBucket"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "DenyInsecureTransport",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:*",
+              "Resource": [
+                { "Fn::GetAtt": ["BackupBucket", "Arn"] },
+                { "Fn::Sub": "${BackupBucket.Arn}/*" }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false"
+                }
+              }
+            },
+            {
+              "Sid": "DenyUnencryptedObjectWrites",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:PutObject",
+              "Resource": { "Fn::Sub": "${BackupBucket.Arn}/*" },
+              "Condition": {
+                "StringNotEquals": {
+                  "s3:x-amz-server-side-encryption": "aws:kms"
+                }
+              }
+            },
+            {
+              "Sid": "DenyMissingKmsKey",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:PutObject",
+              "Resource": { "Fn::Sub": "${BackupBucket.Arn}/*" },
+              "Condition": {
+                "Null": {
+                  "s3:x-amz-server-side-encryption-aws-kms-key-id": "true"
+                }
+              }
+            },
+            {
+              "Sid": "DenyWrongKmsKey",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:PutObject",
+              "Resource": { "Fn::Sub": "${BackupBucket.Arn}/*" },
+              "Condition": {
+                "ArnNotEqualsIfExists": {
+                  "s3:x-amz-server-side-encryption-aws-kms-key-id": {
+                    "Fn::GetAtt": ["BackupKey", "Arn"]
+                  }
+                }
+              }
+            },
+            {
+              "Sid": "DenyWritesOutsideApprovedPrefixes",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": [
+                "s3:PutObject",
+                "s3:PutObjectRetention"
+              ],
+              "NotResource": [
+                { "Fn::Sub": "${BackupBucket.Arn}/daily/*" },
+                { "Fn::Sub": "${BackupBucket.Arn}/monthly/*" }
+              ]
+            },
+            {
+              "Sid": "DenyUnapprovedBackupWriter",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": [
+                "s3:PutObject",
+                "s3:PutObjectRetention"
+              ],
+              "Resource": { "Fn::Sub": "${BackupBucket.Arn}/*" },
+              "Condition": {
+                "ArnNotEquals": {
+                  "aws:PrincipalArn": {
+                    "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/gonggamline-backup-worker"
+                  }
+                }
+              }
+            },
+            {
+              "Sid": "DenyDailyRetentionBelow35Days",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:PutObjectRetention",
+              "Resource": { "Fn::Sub": "${BackupBucket.Arn}/daily/*" },
+              "Condition": {
+                "NumericLessThan": {
+                  "s3:object-lock-remaining-retention-days": 35
+                }
+              }
+            },
+            {
+              "Sid": "DenyMonthlyRetentionWithoutDate",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:PutObjectRetention",
+              "Resource": { "Fn::Sub": "${BackupBucket.Arn}/monthly/*" },
+              "Condition": {
+                "Null": {
+                  "s3:object-lock-retain-until-date": "true"
+                }
+              }
+            },
+            {
+              "Sid": "DenyMonthlyRetentionBelow365Days",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:PutObjectRetention",
+              "Resource": { "Fn::Sub": "${BackupBucket.Arn}/monthly/*" },
+              "Condition": {
+                "NumericLessThan": {
+                  "s3:object-lock-remaining-retention-days": 365
+                }
+              }
+            },
+            {
+              "Sid": "DenyGovernanceBypass",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:BypassGovernanceRetention",
+              "Resource": { "Fn::Sub": "${BackupBucket.Arn}/*" }
+            }
+          ]
+        }
+      }
+    },
+    "BackupImageRepository": {
+      "Type": "AWS::ECR::Repository",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "EmptyOnDelete": false,
+        "EncryptionConfiguration": {
+          "EncryptionType": "KMS",
+          "KmsKey": {
+            "Fn::GetAtt": ["BackupKey", "Arn"]
+          }
+        },
+        "ImageScanningConfiguration": {
+          "ScanOnPush": true
+        },
+        "ImageTagMutability": "IMMUTABLE",
+        "LifecyclePolicy": {
+          "LifecyclePolicyText": "{\"rules\":[{\"rulePriority\":1,\"description\":\"Retain ten most recent worker images\",\"selection\":{\"tagStatus\":\"any\",\"countType\":\"imageCountMoreThan\",\"countNumber\":10},\"action\":{\"type\":\"expire\"}}]}"
+        },
+        "RepositoryPolicyText": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "AllowLambdaDigestPull",
+              "Effect": "Allow",
+              "Principal": { "Service": "lambda.amazonaws.com" },
+              "Action": [
+                "ecr:BatchGetImage",
+                "ecr:GetDownloadUrlForLayer"
+              ],
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Sub": "arn:${AWS::Partition}:lambda:ap-southeast-1:${AWS::AccountId}:function:${AWS::StackName}-worker"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "Tags": [
+          { "Key": "gonggamline:system", "Value": "independent-backup" },
+          { "Key": "gonggamline:managed-by", "Value": "cloudformation" }
+        ]
+      }
+    },
+    "BackupDeadLetterQueue": {
+      "Type": "AWS::SQS::Queue",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "SqsManagedSseEnabled": true,
+        "Tags": [
+          { "Key": "gonggamline:system", "Value": "independent-backup" },
+          { "Key": "gonggamline:managed-by", "Value": "cloudformation" }
+        ]
+      }
+    },
+    "BackupLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Condition": "CreateWorkerResources",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${AWS::StackName}-worker"
+        },
+        "RetentionInDays": 30,
+        "Tags": [
+          { "Key": "gonggamline:system", "Value": "independent-backup" },
+          { "Key": "gonggamline:managed-by", "Value": "cloudformation" }
+        ]
+      }
+    },
+    "BackupWorkerRole": {
+      "Type": "AWS::IAM::Role",
+      "Condition": "CreateWorkerResources",
+      "Properties": {
+        "Description": "Non-interactive least-privilege GonggamLine backup worker",
+        "RoleName": "gonggamline-backup-worker",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": { "Service": "lambda.amazonaws.com" },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": { "Ref": "AWS::AccountId" }
+                },
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Sub": "arn:${AWS::Partition}:lambda:ap-southeast-1:${AWS::AccountId}:function:${AWS::StackName}-worker"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "MaxSessionDuration": 3600,
+        "Policies": [
+          {
+            "PolicyName": "WriteExactBackupPrefixes",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "ListExactPrefixesOnly",
+                  "Effect": "Allow",
+                  "Action": "s3:ListBucket",
+                  "Resource": { "Fn::GetAtt": ["BackupBucket", "Arn"] },
+                  "Condition": {
+                    "StringLike": {
+                      "s3:prefix": ["daily/*", "monthly/*"]
+                    }
+                  }
+                },
+                {
+                  "Sid": "WriteAndInspectRetentionOnly",
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:AbortMultipartUpload",
+                    "s3:GetObjectRetention",
+                    "s3:PutObject",
+                    "s3:PutObjectRetention"
+                  ],
+                  "Resource": [
+                    { "Fn::Sub": "${BackupBucket.Arn}/daily/*" },
+                    { "Fn::Sub": "${BackupBucket.Arn}/monthly/*" }
+                  ]
+                },
+                {
+                  "Sid": "UseBackupKeyWithoutDecrypt",
+                  "Effect": "Allow",
+                  "Action": [
+                    "kms:DescribeKey",
+                    "kms:Encrypt",
+                    "kms:GenerateDataKey"
+                  ],
+                  "Resource": { "Fn::GetAtt": ["BackupKey", "Arn"] }
+                },
+                {
+                  "Sid": "ReadExactApprovedDatabaseSecret",
+                  "Effect": "Allow",
+                  "Action": "secretsmanager:GetSecretValue",
+                  "Resource": { "Ref": "ProductionDatabaseSecretArn" }
+                },
+                {
+                  "Sid": "SendTerminalFailureToExactQueue",
+                  "Effect": "Allow",
+                  "Action": "sqs:SendMessage",
+                  "Resource": { "Fn::GetAtt": ["BackupDeadLetterQueue", "Arn"] }
+                },
+                {
+                  "Sid": "WriteSanitizedLogs",
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": { "Fn::Sub": "${BackupLogGroup.Arn}:*" }
+                }
+              ]
+            }
+          }
+        ],
+        "Tags": [
+          { "Key": "gonggamline:system", "Value": "independent-backup" },
+          { "Key": "gonggamline:managed-by", "Value": "cloudformation" }
+        ]
+      }
+    },
+    "BackupWorker": {
+      "Type": "AWS::Lambda::Function",
+      "Condition": "CreateWorkerResources",
+      "DependsOn": ["BackupLogGroup"],
+      "Properties": {
+        "Architectures": ["x86_64"],
+        "Code": {
+          "ImageUri": { "Ref": "BackupWorkerImageUri" }
+        },
+        "Description": "Disabled-by-default independent logical backup worker",
+        "Environment": {
+          "Variables": {
+            "BACKUP_BUCKET_NAME": { "Ref": "BackupBucket" },
+            "BACKUP_KMS_KEY_ARN": { "Fn::GetAtt": ["BackupKey", "Arn"] },
+            "DAILY_RETENTION_DAYS": "35",
+            "MONTHLY_RETENTION_DAYS": "365",
+            "PRODUCTION_DATABASE_SECRET_ARN": { "Ref": "ProductionDatabaseSecretArn" },
+            "SOURCE_PROJECT_REF": "sxvtznmoemrcwifungnb",
+            "SOURCE_REGION": "ap-southeast-1"
+          }
+        },
+        "EphemeralStorage": { "Size": 10240 },
+        "FunctionName": { "Fn::Sub": "${AWS::StackName}-worker" },
+        "MemorySize": 2048,
+        "PackageType": "Image",
+        "ReservedConcurrentExecutions": 1,
+        "Role": { "Fn::GetAtt": ["BackupWorkerRole", "Arn"] },
+        "Timeout": 900,
+        "TracingConfig": { "Mode": "Active" },
+        "Tags": [
+          { "Key": "gonggamline:system", "Value": "independent-backup" },
+          { "Key": "gonggamline:managed-by", "Value": "cloudformation" }
+        ]
+      }
+    },
+    "BackupWorkerAsyncFailure": {
+      "Type": "AWS::Lambda::EventInvokeConfig",
+      "Condition": "CreateWorkerResources",
+      "Properties": {
+        "DestinationConfig": {
+          "OnFailure": {
+            "Destination": { "Fn::GetAtt": ["BackupDeadLetterQueue", "Arn"] }
+          }
+        },
+        "FunctionName": { "Ref": "BackupWorker" },
+        "MaximumEventAgeInSeconds": 3600,
+        "MaximumRetryAttempts": 2,
+        "Qualifier": "$LATEST"
+      }
+    },
+    "BackupSchedulerRole": {
+      "Type": "AWS::IAM::Role",
+      "Condition": "CreateWorkerResources",
+      "Properties": {
+        "Description": "Invokes only the disabled-by-default backup worker schedule target",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": { "Service": "scheduler.amazonaws.com" },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": { "Ref": "AWS::AccountId" }
+                },
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Sub": "arn:${AWS::Partition}:scheduler:ap-southeast-1:${AWS::AccountId}:schedule/default/${AWS::StackName}-daily"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "InvokeExactBackupWorker",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "lambda:InvokeFunction",
+                  "Resource": { "Fn::GetAtt": ["BackupWorker", "Arn"] }
+                }
+              ]
+            }
+          }
+        ],
+        "Tags": [
+          { "Key": "gonggamline:system", "Value": "independent-backup" },
+          { "Key": "gonggamline:managed-by", "Value": "cloudformation" }
+        ]
+      }
+    },
+    "BackupSchedule": {
+      "Type": "AWS::Scheduler::Schedule",
+      "Condition": "CreateWorkerResources",
+      "Properties": {
+        "Description": "Daily Singapore backup schedule; deliberately disabled until separate approval",
+        "FlexibleTimeWindow": { "Mode": "OFF" },
+        "Name": { "Fn::Sub": "${AWS::StackName}-daily" },
+        "ScheduleExpression": "cron(0 2 * * ? *)",
+        "ScheduleExpressionTimezone": "Asia/Singapore",
+        "State": "DISABLED",
+        "Target": {
+          "Arn": { "Fn::GetAtt": ["BackupWorker", "Arn"] },
+          "DeadLetterConfig": {
+            "Arn": { "Fn::GetAtt": ["BackupDeadLetterQueue", "Arn"] }
+          },
+          "Input": "{\"mode\":\"scheduled\",\"version\":1}",
+          "RetryPolicy": {
+            "MaximumEventAgeInSeconds": 3600,
+            "MaximumRetryAttempts": 2
+          },
+          "RoleArn": { "Fn::GetAtt": ["BackupSchedulerRole", "Arn"] }
+        }
+      }
+    },
+    "BackupDeadLetterQueuePolicy": {
+      "Type": "AWS::SQS::QueuePolicy",
+      "Condition": "CreateWorkerResources",
+      "Properties": {
+        "Queues": [{ "Ref": "BackupDeadLetterQueue" }],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "AllowExactSchedulerDeliveryFailure",
+              "Effect": "Allow",
+              "Principal": { "Service": "scheduler.amazonaws.com" },
+              "Action": "sqs:SendMessage",
+              "Resource": { "Fn::GetAtt": ["BackupDeadLetterQueue", "Arn"] },
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": { "Fn::GetAtt": ["BackupSchedule", "Arn"] }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "BackupDeadLetterAlarm": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Condition": "CreateWorkerResources",
+      "Properties": {
+        "AlarmDescription": "Backup scheduler delivery failure requires owner review",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": { "Fn::GetAtt": ["BackupDeadLetterQueue", "QueueName"] }
+          }
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching"
+      }
+    }
+  },
+  "Outputs": {
+    "BackupBucketName": {
+      "Description": "Generated private immutable backup bucket name",
+      "Value": { "Ref": "BackupBucket" }
+    },
+    "BackupKeyArn": {
+      "Description": "Customer-managed backup KMS key ARN",
+      "Value": { "Fn::GetAtt": ["BackupKey", "Arn"] }
+    },
+    "BackupImageRepositoryUri": {
+      "Description": "Immutable ECR repository for a later approved worker image",
+      "Value": { "Fn::GetAtt": ["BackupImageRepository", "RepositoryUri"] }
+    },
+    "BackupDeadLetterQueueArn": {
+      "Description": "Scheduler failure queue ARN",
+      "Value": { "Fn::GetAtt": ["BackupDeadLetterQueue", "Arn"] }
+    },
+    "WorkerResourcesDefault": {
+      "Description": "Safety evidence: worker resources are omitted unless separately enabled",
+      "Value": { "Ref": "EnableWorkerResources" }
+    }
+  }
+}
