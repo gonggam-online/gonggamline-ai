@@ -1,5 +1,14 @@
 # Decision log
 
+## 2026-08-08 — Propose bounded Coupang read-only preflight evidence
+
+- Dependency: accepted Coupang audit and merged PR #110 pure Marketplace preflight.
+- Proposal: use the existing server HMAC boundary for exactly category metadata, outbound-code, and return-code GET reads; normalize only selected codes, usability/existence, source, observation time, and fingerprints.
+- Privacy: never retain or expose raw responses, addresses, phone numbers, fees, credentials, vendor IDs, Wing identities, or provider messages.
+- Failure: configuration/provider unavailability means evidence is `INCOMPLETE`, never that KK946 is invalid. Unknown shapes and contradictory identities fail closed.
+- Cloud-first: GitHub owns source/approval/CI evidence; runtime evidence is request-memory only and reacquired. No local or database durable state.
+- Status: proposed. Implementation and live evidence reads are not authorized until the repository owner accepts this Story.
+
 ## 2026-08-08 — Separate Coupang Product Creation intent from Listing drafts
 
 - Dependency: owner-approved Coupang Seller Product Contract Audit v1 and Listing Content Fact and Policy Contract v1.

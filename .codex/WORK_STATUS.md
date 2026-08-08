@@ -1,5 +1,23 @@
 # Work status
 
+## 2026-08-08 Coupang Read-only Preflight Evidence Architecture
+
+- Objective: define the smallest safe Story 2 boundary that can prove the category, outbound location, and return center for a KK946 local preflight.
+- Branch/base: `codex/docs/coupang-readonly-evidence-architecture` from merged PR #110 on `origin/main` `35ffc7abe9c9ce5a5fbc86c75bd5da3c18a8f59e`.
+- Risk/root cause: normal-risk architecture/test; new read-only external contract and request-memory lifecycle require owner approval before code.
+- Revenue impact: removes the next contract blocker toward a truthful first listing without expanding into marketplace writes or infrastructure.
+- Scope: three fixed official GET boundaries, sanitized DTOs, freshness, fingerprinting, failures, privacy, capacity, KK946 mapper, tests, rollout, and rollback.
+- Non-goals: runtime implementation, live Coupang call, new config/secret, public API, persistence/database/Auth/RLS, Production, real asset/product assertions, price, Product Creation, approval, or commerce writes.
+- Cloud-first: GitHub owns durable architecture, tests, approval and CI evidence. Provider raw responses are discarded; normalized runtime evidence is request-memory only. Local build/test output is disposable.
+- Completed: latest-main/open-PR recovery; repository and current official contract audit; proposed Architecture Story; four contract tests; governance and recovery records; focused tests, typecheck, changed-file lint, and 85-route Production build pass.
+- Validation baseline: full tests retain two pre-existing AWS ChangeSet packet failures from merged main. Broad repository lint traverses existing generated artifacts and retains unrelated errors; the changed test file passes lint.
+- Browser baseline: 35 passed, 2 skipped, and the established seven local Supabase `missing_url` page-health failures remain on `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace`; this documentation/test Story changes no route.
+- Current: complete diff/secret review and delivery to a Draft Architecture PR.
+- Changed files: Architecture Story and tests, Architecture Review, Decision Log, Listing changelog, and this status.
+- Exact next action: validate, commit, push, and open a normal-risk Draft PR; request owner acceptance before implementation.
+- Owner action/blocker: explicitly approve the exact Architecture Story or manually merge its PR. No runtime implementation may start beforehand.
+- Remaining risk: official schemas may change; credentials/account scope and real KK946 facts/assets remain unverified; every live read/config/write is separately gated.
+
 ## 2026-08-08 Coupang Marketplace Product Creation preflight
 
 - Objective: implement Story 1 of the accepted Coupang contract audit so an internal Listing draft cannot be mistaken for a registration-ready request.
