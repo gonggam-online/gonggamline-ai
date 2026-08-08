@@ -1,6 +1,7 @@
 # Sales Learning Closed Loop and First Experiment v1
 
-Status: Proposed Architecture Story; repository-owner approval required
+Status: Accepted Architecture Story; amended by repository-owner decision on
+2026-08-05. Exact external commerce actions remain bounded and approval-gated.
 
 Risk: high-risk/manual because later implementation crosses Database, privacy,
 financial calculation, marketplace, order, settlement, and real-loss boundaries
@@ -213,6 +214,75 @@ provenance, supplier/brand/content rights, cap values, dates, responsible human,
 stop procedure, privacy basis, and evidence-access method. Secret values must
 remain in approved stores.
 
+### 8.1 Default unattended inspection and inbound route
+
+The default operating path must not require the repository owner to buy, receive,
+measure, photograph, or inspect a sample personally:
+
+```text
+Domeggook supplier evidence
+  -> bounded procurement approval/action
+  -> approved third-party inspection/preparation warehouse
+  -> structured inspection evidence and exception report
+  -> Coupang Rocket Growth inbound readiness decision
+  -> bounded inbound/listing approval/action
+```
+
+Gaemi Warehouse (`개미창고`) is the initial intended provider class, not a
+hard-coded exclusive dependency. A later adapter may use another approved 3PL
+when it provides equivalent evidence, access control, retention, failure
+handling, and stop capability. Direct supplier-to-Rocket-Growth inbound is not
+the default for a first-seen SKU and is allowed only when equivalent inspection
+and preparation evidence exists before the item can become saleable.
+
+The third-party inspection contract must capture or explicitly mark `UNKNOWN`:
+
+- received SKU/model/option and quantity versus the approved purchase;
+- unit and carton dimensions and weight using declared units;
+- product, package, barcode, country-of-origin, manufacturer/importer, care,
+  warning, and legally required label photographs;
+- visible damage, contamination, option mismatch, count mismatch, and packaging
+  suitability;
+- barcode creation/application and Rocket Growth preparation result;
+- inspector/provider identity alias, observation time, evidence hashes, and an
+  immutable source reference;
+- pass, quarantine, rework, return-request, or human-review disposition.
+
+Missing optional marketplace copy may remain unshown. Missing required listing,
+legal-label, safety, barcode, or inbound data is not converted to success: the
+unit remains quarantined and the listing/inbound transition stops. Supplier
+catalog values may seed the inspection request but never overwrite conflicting
+physical evidence. No automation may invent a value or treat `UNKNOWN` as zero,
+empty, compliant, or passed.
+
+Every procurement, warehouse instruction, return, inbound, listing, price,
+inventory, fulfillment, and paid action remains an explicit idempotent commerce
+action with the approved target, quantity, amount, account/environment, stop
+condition, verification, and rollback or recovery procedure. The unattended
+route removes owner handling work; it does not remove those authority gates.
+
+### 8.2 Strategic-product exception route
+
+A single product or bundle may be proposed as a strategic/core-product
+candidate when evidence indicates material repeatable profit, differentiation,
+bundle potential, supply leverage, or a credible path to direct sourcing. This
+classification is SHADOW-only until an owner accepts the exact proposal.
+
+An accepted exception may authorize either:
+
+1. an owner/operator sample purchase and direct inspection; or
+2. contact with the original manufacturer/importer/supplier to obtain a lower
+   landed cost, documented content/brand rights, capacity, lead time, MOQ,
+   quality controls, and invoice terms.
+
+The exception must be a separate bounded change set. It records the evidence
+that triggered escalation, exact SKU or bundle, contact/purchase target, maximum
+quantity and cash, permitted communication and data, operator, due date,
+verification, stop condition, and recovery. It must not silently replace the
+default warehouse route, expand to other SKUs, commit to an MOQ, disclose
+sensitive business data, or create a listing/order/payment without its own
+applicable approval.
+
 ## 9. Metrics and decision rule
 
 Primary metric:
@@ -317,10 +387,13 @@ Ordered Stories, each with separate approval and PR:
 2. Database/Auth/RLS Architecture amendment and forward-only migration design.
 3. High-risk persistence/import implementation against disposable data only.
 4. Read-only reconciliation and expected-vs-actual UI/API.
-5. Owner acceptance of the exact experiment packet and SKU-specific economics.
-6. Separate commerce execution approvals for listing, stock, price, ads, and
-   stop controls.
-7. Supervised launch, reconciliation, owner learning review, and closure.
+5. Third-party inspection/preparation provider discovery and a read-only,
+   sanitized evidence contract; no procurement or warehouse instruction.
+6. Owner acceptance of the exact experiment packet and SKU-specific economics.
+7. Separate commerce execution approvals for procurement, warehouse inspection,
+   inbound, listing, stock, price, ads, and stop controls.
+8. Unattended launch with exception monitoring, reconciliation, owner learning
+   review, and closure.
 
 Rollout starts with synthetic fixtures, then an owner-supplied sanitized export,
 then read-only Production shadow correlation. Real exposure follows only after
