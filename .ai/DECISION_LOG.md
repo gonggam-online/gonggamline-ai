@@ -1,5 +1,14 @@
 # Decision log
 
+## 2026-08-08 — Listing category snapshots fail closed before integration
+
+- The mapper accepts only bounded known collections and enums, digests the
+  complete JSON response canonically, and quarantines malformed, stale,
+  invalid-category, unknown-enum, or notice-selection mismatches.
+- `NOT_REQUIRED` remains a provider option, never an admitted product fact.
+- The validity endpoint is added as a read-only adapter only; no live smoke or
+  runtime consumer is enabled in this implementation.
+
 ## 2026-08-08 — Category metadata and validity remain separate evidence
 
 - Decision: a successful category-metadata response never proves current
