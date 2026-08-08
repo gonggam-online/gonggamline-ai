@@ -1,5 +1,16 @@
 # Changelog — Encrypted Cloud Backup Architecture
 
+## 2026-08-08
+
+- Implemented the deployable Node.js 22 Lambda adapter for the accepted backup
+  pipeline with PostgreSQL 17 dump/list verification, runtime-only Secrets
+  Manager retrieval, conditional S3 writes, SHA-256, SSE-KMS, Object Lock
+  retention read-back, deterministic retry identity, and sanitized logs.
+- Added a reproducible linux/amd64 container build, immutable ECR publish and
+  scan gate, and a no-file/no-command-line secret bootstrap.
+- Kept EventBridge Scheduler disabled and retained separate approval gates for
+  the first Production export, isolated restore cycles, and schedule enablement.
+
 ## 2026-08-06
 
 - Fixed the exact first Singapore CloudFormation review target as

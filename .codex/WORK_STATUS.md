@@ -1,5 +1,29 @@
 # Work status
 
+## 2026-08-08 AWS deployable backup worker automation
+
+- Objective: complete minimum automatic independent-backup and cross-PC
+  recovery conditions, then return priority to measurable sales.
+- Branch/base: `codex/feat/aws-backup-worker-automation` from merged PR #104.
+- Risk/root cause: high-risk/manual external AWS and Production read-only
+  export boundary. The missing component was a deployable worker adapter, not
+  AWS SSO or application logic.
+- Completed: strict handler/secret contracts, PostgreSQL 17 dump/list,
+  conditional S3 upload, checksum/KMS/Object Lock verification, deterministic
+  schedule identity, Lambda bundle, linux/amd64 image, and local handler/tool
+  loading. Focused repository suite passes 507/507.
+- Current work: commit exact source, publish/scan immutable ECR image, create
+  the exact secret without exposing its value, and prepare a disabled-schedule
+  worker UPDATE change set.
+- Cloud-first state: GitHub owns source/evidence; ECR owns image; Secrets
+  Manager owns credential; S3 owns future backup objects. Local `dist/`, Docker
+  layers, and SSO sessions are replaceable caches.
+- Owner action/blocker: none for implementation. Exact Production export and
+  isolated restore execution remain manual high-risk gates after synthetic AWS
+  validation.
+- Remaining risk: no real independent archive or restore evidence exists yet;
+  Scheduler must remain disabled until both are verified.
+
 ## 2026-08-08 AWS independent backup base boundary deployed
 
 - Objective: finish the owner-approved Singapore independent-backup base

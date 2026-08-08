@@ -1,5 +1,22 @@
 # Decision log
 
+## 2026-08-08 — Deployable AWS backup worker boundary fixed
+
+- Category: high-risk/manual Cloud-first disaster-recovery implementation.
+- Decision: use Lambda Node.js 22 with the Amazon Linux 2023 `postgresql17`
+  package, bundled AWS SDK v3 clients, digest-pinned immutable ECR images, and
+  the preverified Supabase session pooler. Scheduler remains disabled until
+  synthetic and bounded Production gates pass.
+- Secret contract: Secrets Manager stores only host, port, database, username,
+  password, and `sslmode=require`; source, CLI arguments, logs, CI, and local
+  files never contain the value.
+- Idempotency: retries share one Singapore calendar-day request ID; S3
+  `If-None-Match: *` plus a digest-bearing key prevents duplicate bodies, and
+  Object Lock retention is checked without body access.
+- Rollback: before the first Production archive, leave the schedule disabled
+  and remove only worker resources through an approved change set. After the
+  first archive, retained recovery resources are not ordinary rollback targets.
+
 ## 2026-08-06 — AWS disabled-worker change-set review target fixed
 
 - Category: high-risk/manual CloudFormation review preparation; no external

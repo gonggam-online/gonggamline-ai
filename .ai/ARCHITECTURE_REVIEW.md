@@ -1,5 +1,32 @@
 # Architecture review
 
+## AWS Backup Deployable Worker Automation v1 — 2026-08-08
+
+- Approved source: the accepted encrypted backup architecture, merged base
+  boundary PR #104, and the owner directive to finish minimum Cloud-first
+  automation before returning to sales development.
+- Boundary owner: Database / Security. This implements the already approved
+  Lambda/S3/KMS/Secrets Manager adapter without a new Domain, Queue, Lifecycle,
+  public API, or provider.
+- Scope: Node.js 22 handler, PostgreSQL 17 dump/inspection, runtime-only secret
+  retrieval, conditional immutable S3 writes, checksum/KMS/Object Lock
+  verification, deterministic daily/monthly identity, digest-pinned ECR
+  publishing, and scan fail-close.
+- Cloud-first placement: source/evidence are in GitHub, image in immutable
+  Singapore ECR, credential only in Secrets Manager, and future archives only
+  in the encrypted Object Lock bucket. Local bundle/layers are disposable.
+- Security/failure: no credential or backup body enters logs, arguments, Git,
+  CI, or local files; the writer has no body-read/delete or KMS decrypt; it
+  fails closed on warning, checksum, or retention drift. Scheduler stays
+  disabled through worker deployment and synthetic verification.
+- Risk: high-risk/manual because later stages create a secret, publish an
+  image, enable Lambda/IAM, and perform a Production read-only export. Apply
+  `manual-merge-required`; never auto-merge.
+- Rollout/rollback: publish and scan an exact-commit image; create the exact
+  secret; review a disabled-schedule UPDATE; run synthetic verification before
+  one bounded Production export. After a Production archive exists, preserve
+  the retained bucket, key, versions, and recovery evidence.
+
 ## AWS Backup Disabled-Worker Change Set Packet v1 — 2026-08-06
 
 - Approved source: merged infrastructure/capacity/cost/complete-worker evidence
