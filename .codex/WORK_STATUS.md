@@ -1,5 +1,44 @@
 # Work status
 
+## 2026-08-09 KK946 first-sale read-only assessment
+
+- Objective: advance KK946 through the shortest safe first-sale path while
+  keeping purchase, paid inspection, Coupang registration, and Rocket Growth
+  inbound behind separate exact approvals.
+- Branch/base: `codex/chore/kk946-first-sale` from current `origin/main`
+  `96bb4399ed70863d9425307ed92e13fef14541da`.
+- Risk/root cause: high-risk/manual whole project; current blocker is missing
+  external business evidence, not database or code.
+- Revenue impact: rejects an unprofitable low-price launch before cash spend
+  and identifies the evidence/cost threshold for a controlled first SKU.
+- Scope: read-only public supplier/market review, profitability screen, rights
+  and proof gate, sample decision, Gaemi inspection plan, and quarantined
+  Listing draft. No provider write or raw evidence movement.
+- Completed: governance/latest-main audit; dedicated branch; KK946 runbook and
+  merged contract audit; public Domeggook read; public Coupang market search;
+  sanitized assessment; supplier binding changed from `UNKNOWN` to
+  `AMBIGUOUS`.
+- Current disposition: `QUARANTINED`; sample order `HOLD`; paid inspection,
+  listing, and Rocket Growth inbound not authorized.
+- Browser evidence: exact KK946 search returned three supplier listings. The
+  strongest public candidate is Domeggook item `56288849`, but authenticated
+  terms, exact option, rights, documents, and physical facts remain unproven.
+- Changed files: sanitized status manifest, acquisition contract test, this
+  status, and `docs/evidence/KK946-FIRST-SALE-READONLY-ASSESSMENT-V1.md`.
+- Validation: focused KK946 tests passed 5/5; typecheck and changed-test lint
+  passed; Production build passed with 85 routes. Full tests retained the two
+  pre-existing AWS disabled-worker packet drift failures (544/546 passed).
+  Local Playwright retained the established unconfigured-Supabase baseline:
+  35 passed, 2 skipped, and 7 failed page-health routes (`/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow`, `/workspace`). Diff,
+  security review, commit/push/PR, and exact remote gates remain.
+- Exact next action: validate the sanitized assessment, then obtain an
+  authenticated read-only exact supplier/option selection. Stop before a
+  sample purchase until an exact approval packet is available.
+- Remaining risks: supplier identity ambiguity; unknown all-in costs,
+  category/fee, rights, certification/documentary facts, inspection scope,
+  demand, and seller logistics.
+
 ## 2026-08-08 KK946 evidence acquisition runbook
 
 - Objective: make the exact real-world evidence needed for KK946 executable
