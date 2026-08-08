@@ -10,19 +10,22 @@
   AWS SSO or application logic.
 - Completed: strict handler/secret contracts, PostgreSQL 17 dump/list,
   conditional S3 upload, checksum/KMS/Object Lock verification, deterministic
-  schedule identity, Lambda bundle, linux/amd64 image, and local handler/tool
-  loading. Focused repository suite passes 507/507.
-- Current work: commit exact source, publish/scan immutable ECR image, create
-  the exact secret without exposing its value, and prepare a disabled-schedule
-  worker UPDATE change set.
+  schedule identity, Lambda bundle, linux/amd64 image, local handler/tool
+  loading, GitHub Draft PR #105, and immutable ECR image publication. Complete
+  repository suite passes 508/508 and the Production build passes 85 routes.
+- Current work: paused at the ECR vulnerability gate and returned priority to
+  the revenue path. The image scan completed with CRITICAL=0 and HIGH=5 in
+  Amazon Linux 2023 base packages; the worker was not deployed.
 - Cloud-first state: GitHub owns source/evidence; ECR owns image; Secrets
   Manager owns credential; S3 owns future backup objects. Local `dist/`, Docker
   layers, and SSO sessions are replaceable caches.
-- Owner action/blocker: none for implementation. Exact Production export and
-  isolated restore execution remain manual high-risk gates after synthetic AWS
-  validation.
-- Remaining risk: no real independent archive or restore evidence exists yet;
-  Scheduler must remain disabled until both are verified.
+- Owner action/blocker: no immediate owner action. Recheck the ECR scan only
+  after Amazon publishes fixed base packages; do not waive the HIGH gate.
+- Remaining risk: the secret was not created, Lambda/worker was not enabled,
+  no Production export or restore was run, and Scheduler remains disabled.
+- Exact next action: continue Item Selection Story 5 Admin UI/history as the
+  smallest normal-risk step from the completed protected Story 4 workflow
+  toward a reviewable listing-ready product.
 
 ## 2026-08-08 AWS independent backup base boundary deployed
 

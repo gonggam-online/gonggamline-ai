@@ -66,11 +66,15 @@ if ($scanStatus -ne "COMPLETE") {
     --repository-name $repositoryName --image-id "imageDigest=$digest"
   if ($LASTEXITCODE -ne 0) { throw "ECR image scan did not complete." }
 }
-$findings = & $AwsExe ecr describe-image-scan-findings --profile $Profile --region $Region `
-  --repository-name $repositoryName --image-id "imageDigest=$digest" --output json | ConvertFrom-Json
-if ($LASTEXITCODE -ne 0) { throw "ECR scan findings unavailable." }
-$critical = [int]$findings.imageScanFindings.findingSeverityCounts.CRITICAL
-$high = [int]$findings.imageScanFindings.findingSeverityCounts.HIGH
+$severityCounts = (& $AwsExe ecr describe-image-scan-findings --profile $Profile --region $Region `
+  --repository-name $repositoryName --image-id "imageDigest=$digest" `
+  --query "[imageScanFindings.findingSeverityCounts.CRITICAL,imageScanFindings.findingSeverityCounts.HIGH]" `
+  --output text).Trim().Split()
+if ($LASTEXITCODE -ne 0 -or $severityCounts.Count -ne 2) {
+  throw "ECR scan findings unavailable."
+}
+$critical = if ($severityCounts[0] -eq "None") { 0 } else { [int]$severityCounts[0] }
+$high = if ($severityCounts[1] -eq "None") { 0 } else { [int]$severityCounts[1] }
 Write-Host "   Scan CRITICAL=$critical HIGH=$high"
 if ($critical -gt 0 -or $high -gt 0) { throw "Image scan rejected the worker image." }
 
