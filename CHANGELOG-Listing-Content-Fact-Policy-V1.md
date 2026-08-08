@@ -1,5 +1,15 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-08 — Typed category snapshot implementation
+
+- Added bounded Coupang category metadata contracts and canonical response
+  digests.
+- Added a fail-closed Listing mapper requiring separate category validity,
+  freshness, known enums, and explicit notice-category selection.
+- Added the read-only category-validity adapter and offline fixtures/tests.
+- Preserved the legacy API response and excluded live calls, persistence,
+  configuration, pricing, and marketplace writes.
+
 ## 2026-08-05 — Evidence fixture and policy kernel
 
 - Added immutable evidence/status contracts and a pure, fact-specific

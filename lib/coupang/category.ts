@@ -1,5 +1,5 @@
 import { coupangRequest } from "@/lib/coupang/client";
-import type { CoupangCategoryMeta } from "@/types/coupang";
+import type { CoupangCategoryMeta, CoupangCategoryValidity } from "@/types/coupang";
 
 export function normalizeDisplayCategoryCode(value: unknown): string | null {
   const code = String(value ?? "").trim();
@@ -10,6 +10,15 @@ export async function getCoupangCategoryMeta(displayCategoryCode: string) {
   const path = `/v2/providers/seller_api/apis/api/v1/marketplace/meta/category-related-metas/display-category-codes/${displayCategoryCode}`;
 
   return coupangRequest<CoupangCategoryMeta>({
+    method: "GET",
+    path,
+  });
+}
+
+export async function getCoupangCategoryValidity(displayCategoryCode: string) {
+  const path = `/v2/providers/seller_api/apis/api/v1/marketplace/meta/display-categories/${displayCategoryCode}/status`;
+
+  return coupangRequest<CoupangCategoryValidity>({
     method: "GET",
     path,
   });

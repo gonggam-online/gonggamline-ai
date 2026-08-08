@@ -1,5 +1,25 @@
 # Work status
 
+## 2026-08-08 Listing Category Snapshot implementation
+
+- Objective: implement the approved PR #107 typed category snapshot without
+  changing the legacy API or making a Coupang write.
+- Branch/base: `codex/feat/listing-category-snapshot` from Architecture merge
+  `ad9a0819ecb12c34da6a75b220d036d65d33a6c1`.
+- Risk/root cause: normal-risk additive code; code/contract gap.
+- Completed: bounded contracts, pure canonical digest/mapper, separate
+  read-only validity adapter, quarantine issues, and synthetic tests.
+- Validation: focused category tests 9/9, full tests 513/513, typecheck,
+  changed-file lint, and the 85-route Production build pass. Local Playwright
+  is at the established unconfigured-Supabase baseline: 35 passed, 2 skipped,
+  and 7 unrelated `missing_url` API failures.
+- Cloud-first: source/fixtures/evidence target GitHub; no Production response,
+  secret, database, or local durable state.
+- Current step: full repository/build/browser verification, delivery, CI, and
+  Preview validation.
+- Remaining risk: the new contracts are deliberately not wired into the
+  legacy route or a Production workflow; that integration is a later Story.
+
 ## 2026-08-08 Listing Category Snapshot Architecture
 
 - Objective: define the smallest safe typed category input for a truthful

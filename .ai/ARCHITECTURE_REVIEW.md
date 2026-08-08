@@ -1,5 +1,17 @@
 # Architecture review
 
+## Listing Category Snapshot implementation — 2026-08-08
+
+- Approved source: owner-approved and merged Architecture PR #107.
+- Scope: bounded DTO contracts, canonical SHA-256, pure fail-closed mapper,
+  separate read-only validity adapter, and synthetic positive/negative tests.
+- Compatibility: existing route and response body remain unchanged; no live
+  call, configuration, database, persistence, pricing, or commerce write.
+- Risk: normal-risk while the implementation remains additive and unused by
+  Production orchestration.
+- Cloud-first: GitHub owns source and synthetic evidence; no durable runtime or
+  local-only state is introduced.
+
 ## Listing Category Snapshot v1 — 2026-08-08
 
 - Business gate: validate one exact category before truthful listing content.
