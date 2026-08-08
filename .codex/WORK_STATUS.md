@@ -1,5 +1,38 @@
 # Work status
 
+## 2026-08-08 KK946 evidence acquisition runbook
+
+- Objective: make the exact real-world evidence needed for KK946 executable
+  without guessing facts or expanding into provider writes.
+- Branch/base: `codex/docs/kk946-evidence-acquisition` from merged PR #112 on
+  `origin/main` `87ba373f9b273b9d872665d7c2d0f36a4558b2bd`.
+- Risk/root cause: normal-risk documentation/tests; the active blocker is
+  missing external business evidence, not database or product code.
+- Revenue impact: exposes the shortest operator path to bind one sellable
+  product while keeping unsupported content and assets quarantined.
+- Scope: identity crosswalk, acquisition sequence, authority/scope matrix,
+  sanitized return packet, all-UNKNOWN status manifest, stop/recovery rules,
+  and contract tests.
+- Non-goals: external login or live read, purchase, paid inspection, raw-file
+  collection, asset storage, category choice, configuration, DB/Auth/RLS,
+  Production, price/stock, Product Creation, approval, or commerce write.
+- Cloud-first: GitHub owns sanitized instructions/status/tests/PR evidence.
+  Raw evidence remains in authoritative systems. Confidential evidence storage
+  is not approved; no local-only copy is created.
+- Completed: latest-main branch; approved-boundary audit; runbook; machine
+  status; five contract/privacy tests; Architecture Review, Decision Log, and
+  changelog updates.
+- Validation: focused runbook tests 5/5, typecheck, changed-file lint, diff
+  check, and 85-route build passed. Full tests retain the two pre-existing AWS
+  backup packet drift failures. Local Playwright retains the established
+  unconfigured-Supabase baseline: 35 passed, 2 skipped, 7 failed routes.
+- Current: complete diff review, delivery, CI, Preview, merge, and Production
+  smoke.
+- Owner action after delivery: perform the runbook's read-only checks and return
+  only its sanitized packet. Do not attach raw files or place an order.
+- Remaining risk: all real KK946 bindings are still UNKNOWN; rights-cleared
+  asset/inspection-photo intake requires a separate Architecture Story.
+
 ## 2026-08-08 Coupang Read-only Preflight Evidence implementation
 
 - Objective: implement accepted PR #111 as the smallest safe step toward an

@@ -1,5 +1,22 @@
 # Decision log
 
+## 2026-08-08 - Keep KK946 quarantined pending exact evidence binding
+
+- Dependency: accepted Listing Content Fact and Policy Contract v1 and merged
+  Coupang preflight/evidence PRs #110-#112.
+- Decision: complete Story 1 as a read-only acquisition runbook and sanitized
+  status contract. Every real KK946 identity, transaction, lot, inspection,
+  documentary, rights, category, and logistics binding remains `UNKNOWN`.
+- Data boundary: do not copy raw invoices, supplier messages, 3PL photos,
+  personal data, or rights documents into Git, Codex chat, OneDrive, or a new
+  local folder. Leave them in authoritative source systems until a confidential
+  evidence/asset store is separately approved.
+- Revenue consequence: the runbook makes the shortest owner actions explicit
+  without manufacturing listing readiness. Quarantine cannot be released by
+  the runbook or synthetic fixtures.
+- Risk/rollback: normal-risk documentation/tests; Git revert only and no
+  external rollback.
+
 ## 2026-08-08 - Implement accepted Coupang read-only preflight evidence
 
 - Approval: repository owner explicitly authorized the Architecture Story;
