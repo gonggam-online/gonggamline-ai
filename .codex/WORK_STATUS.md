@@ -35,6 +35,14 @@
 - Exact next action: validate the sanitized assessment, then obtain an
   authenticated read-only exact supplier/option selection. Stop before a
   sample purchase until an exact approval packet is available.
+- Delivery: commit `558ba79c918ba059e76e058c3ec0619107d4d75b` pushed;
+  Draft PR #114 targets `main` with `manual-merge-required`. Exact-head CI run
+  `31282770600` and Preview browser run `31282770567` are in progress; no
+  auto-merge or merge is authorized.
+- Owner action: sign in to the authorized Domeggook business account in the
+  retained KK946 product tab, review the three exact supplier listings/options
+  without ordering or messaging, and tell Codex when the read-only session is
+  ready. Do not send credentials or raw evidence in chat.
 - Remaining risks: supplier identity ambiguity; unknown all-in costs,
   category/fee, rights, certification/documentary facts, inspection scope,
   demand, and seller logistics.
