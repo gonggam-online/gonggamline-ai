@@ -1,5 +1,22 @@
 # Architecture review
 
+## KK946 evidence acquisition runbook - 2026-08-08
+
+- Approved boundary: Listing Content Fact and Policy Contract v1, ordered
+  implementation Story 1.
+- Result: read-only operator sequence, exact identity crosswalk, authoritative
+  evidence matrix, sanitized return packet, stop conditions, and an all-unknown
+  quarantine manifest.
+- External boundary: no external tool is invoked. Raw evidence remains in its
+  authoritative source system and no new storage destination is invented.
+- Cloud-first: GitHub owns only internal sanitized status, instructions, tests,
+  and recovery history. Confidential evidence/asset storage remains
+  `NOT_APPROVED` and is a future Architecture gate.
+- Risk: normal-risk documentation and contract tests. No purchase, 3PL order,
+  live API call, database, configuration, Production, asset movement, pricing,
+  or marketplace write.
+- Rollback: Git revert only.
+
 ## Coupang Read-only Preflight Evidence implementation - 2026-08-08
 
 - Acceptance: repository owner approved the Architecture Story and PR #111

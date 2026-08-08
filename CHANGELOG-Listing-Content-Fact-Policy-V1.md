@@ -1,5 +1,14 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-08 - KK946 evidence acquisition runbook
+
+- Added the exact supplier-item to purchased-SKU to inbound-lot to inspected-
+  unit identity chain and authoritative evidence checks.
+- Added a machine-readable all-`UNKNOWN` quarantine status so synthetic data
+  or guessed identifiers cannot be mistaken for real KK946 evidence.
+- Added privacy, cloud-first, stop, sanitized return, recovery, and future
+  asset-intake gates. No raw evidence, external action, or write was performed.
+
 ## 2026-08-08 - Coupang read-only preflight evidence implementation
 
 - Implemented fixed GET-only category, outbound-location, and bounded
