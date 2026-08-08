@@ -1,5 +1,21 @@
 # Work status
 
+## 2026-08-08 Coupang Marketplace Product Creation preflight
+
+- Objective: implement Story 1 of the accepted Coupang contract audit so an internal Listing draft cannot be mistaken for a registration-ready request.
+- Branch/base: `codex/feat/coupang-product-preflight` from `origin/main` `1dc0b313a70c70285dcacfbbb7272d2561da1728`.
+- Risk/root cause: normal-risk additive pure code; approved code/contract gap.
+- Revenue impact: removes the next safe blocker to a truthful KK946 listing rehearsal while preventing an accidental approval-requesting payload.
+- Scope: immutable Marketplace intent, evidence envelope, deterministic local preflight/fingerprints, and synthetic positive/negative tests.
+- Non-goals: route/UI wiring, API/database/Auth/RLS, secrets, Production, pricing, real assets, live Coupang calls, Product Creation, or approval.
+- Cloud-first: GitHub owns all durable source, decisions, tests, CI and PR evidence. Local checkout/build/test artifacts are disposable; no runtime durable state is created.
+- Completed: branch/governance recovery; boundary audit; contract, fail-closed validator, canonical fingerprints, and six focused tests; focused tests, typecheck, changed-file lint, and the 85-route Production build pass.
+- Validation baseline: full tests expose two pre-existing AWS backup ChangeSet packet failures caused by the merged template digest/resource-boundary drift. Full repository lint also traverses existing generated artifacts and reports unrelated errors. Local browser validation retains the established unconfigured-Supabase API 500 baseline; this pure module adds no route or browser behavior.
+- Current: complete diff/secret review and delivery.
+- Changed files: Product preflight contract/engine/tests, Architecture Review, Decision Log, Listing changelog, and this status.
+- Exact next action: run complete tests/lint/build and browser baseline, review the diff, then commit/push/open a normal-risk PR and enable native auto-merge only after all remote gates pass.
+- Remaining risk: real KK946 evidence and assets are absent; a later adapter and every marketplace write remain separately gated.
+
 ## 2026-08-08 Listing Category Evidence Bridge implementation
 
 - Objective: connect the merged typed category snapshot to the existing
