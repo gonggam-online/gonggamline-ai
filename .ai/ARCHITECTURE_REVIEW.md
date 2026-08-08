@@ -1,5 +1,15 @@
 # Architecture review
 
+## Proposed Coupang Read-only Preflight Evidence v1 — 2026-08-08
+
+- Document: `docs/architecture/COUPANG-READONLY-PREFLIGHT-EVIDENCE-V1.md`.
+- Revenue gate: prove the exact Marketplace category, outbound location, and return center before KK946 can reach a meaningful local preflight.
+- Boundary: existing server HMAC client plus three fixed official GET operations; strict sanitized normalization and a pure KK946 mapper.
+- New boundary: vendor-scoped logistics evidence acquisition and a bounded request-memory evidence lifecycle. Owner approval is required before code.
+- Cloud-first: GitHub owns architecture/tests/review evidence; provider raw responses are discarded and normalized evidence is request-memory only.
+- Risk: normal-risk documentation/test. No credential/config change, live call, public API, persistence, Production, Product Creation, or commerce write is authorized.
+- Rollback: Git revert only.
+
 ## AWS Backup Worker Automation v1 — 2026-08-08
 
 - Boundary: deployable Lambda Node.js 22/PostgreSQL 17 backup worker using

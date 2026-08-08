@@ -77,3 +77,10 @@
 - Added a pure zero-network preflight with deterministic intent and evidence fingerprints.
 - Added fail-closed gates for unsupported variants, approval requests, category/vendor evidence, required metadata decisions, real assets, placeholders, and SKU/option uniqueness.
 - `READY` means local contract readiness only; Coupang acceptance, Production, pricing, database, and marketplace writes remain excluded.
+
+# 2026-08-08 — Proposed Coupang read-only preflight evidence architecture
+
+- Defined the bounded server-only category, outbound, and return evidence GET boundary needed by the merged Marketplace preflight.
+- Defined minimal sanitized evidence, seven-day freshness, canonical fingerprints, bounded pagination, failure taxonomy, and a pure KK946 mapper.
+- Excluded raw-response retention, public API, new configuration, persistence, live calls, Product Creation, approval, pricing, and all commerce writes.
+- Implementation remains stopped pending repository-owner Architecture acceptance.
