@@ -2,7 +2,7 @@
 
 ## 1. Decision status
 
-- Status: proposed; repository-owner approval required before implementation.
+- Status: accepted by repository owner; Architecture PR #111 merged before implementation.
 - Date: 2026-08-08.
 - Owner: Coupang adapter for acquisition; Listing domain for normalized
   preflight consumption.
@@ -312,7 +312,7 @@ must still make no write.
 Rollback is a Git revert. Because there is no schema, config, persistence,
 external write, or Production action, no provider or database rollback exists.
 
-## 17. Decision requested
+## 17. Accepted decision
 
 Repository owner acceptance authorizes only the ordered normal-risk
 implementation in section 14. It does not authorize credentials/configuration,

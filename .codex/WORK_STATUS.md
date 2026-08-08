@@ -1,5 +1,41 @@
 # Work status
 
+## 2026-08-08 Coupang Read-only Preflight Evidence implementation
+
+- Objective: implement accepted PR #111 as the smallest safe step toward an
+  evidence-backed KK946 local Product Creation preflight.
+- Branch/base: `codex/feat/coupang-readonly-evidence` from merged Architecture
+  PR #111 on `origin/main` `3aaa43ebe03a450431ffa2423627dedb0c9e4e8e`.
+- Risk/root cause: normal-risk additive unused internal code; approved external
+  read-contract/code gap, with no database or configuration workaround.
+- Revenue impact: removes the category/logistics evidence adapter blocker while
+  preserving separate real-product facts, assets, price, and write approvals.
+- Scope: minimal contracts, strict decoders, fixed GET adapters, bounded return
+  pagination, opaque vendor reference, fingerprints, pure KK946 mapper, and
+  synthetic security/negative tests.
+- Non-goals: routes/UI, live calls, environment/secrets, database/Auth/RLS,
+  persistence, Production, real KK946 assertions, price, stock, Product
+  Creation, approval request, or commerce writes.
+- Cloud-first: GitHub owns durable source, decision, tests, PR, and CI evidence.
+  Provider data is not persisted; local output is disposable. Existing
+  user-owned untracked AWS helper files remain excluded.
+- Completed: Architecture approval/merge and implementation branch; contracts;
+  strict decoders; fixed GET reader; ten-page/500-row cap; sanitized source;
+  pure mapper; eight focused tests; typecheck and changed-file lint.
+- Validation: new focused suite 8/8 and combined preflight suite 14/14 passed;
+  typecheck, changed-file lint, diff check, secret scan, and the 85-route
+  Production build passed. Full tests retain the two pre-existing AWS backup
+  packet drift failures (539 passed). Broad lint retains generated
+  `playwright-report` findings. Local Playwright retains the established
+  unconfigured-Supabase baseline: 35 passed, 2 skipped, 7 failed routes.
+- Current: complete diff/security review and normal-risk delivery.
+- Exact next action: complete tests/lint/build/browser baselines, then
+  commit/push/open PR and use native auto-merge only after remote gates pass.
+- Owner action/blocker: none. Live acquisition and commerce writes remain
+  separately approval-gated.
+- Remaining risk: official response shape and seller scope remain unverified
+  without a separately authorized live read; real KK946 evidence is absent.
+
 ## 2026-08-08 Coupang Read-only Preflight Evidence Architecture
 
 - Objective: define the smallest safe Story 2 boundary that can prove the category, outbound location, and return center for a KK946 local preflight.

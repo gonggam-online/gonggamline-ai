@@ -1,5 +1,17 @@
 # Architecture review
 
+## Coupang Read-only Preflight Evidence implementation - 2026-08-08
+
+- Acceptance: repository owner approved the Architecture Story and PR #111
+  merged before the implementation branch was created.
+- Result: internal unused GET-only adapters, strict sanitized decoders,
+  bounded return pagination, and a pure KK946 mapper.
+- Cloud-first: GitHub owns durable source, tests, decision, and CI evidence;
+  provider responses remain request-memory only and are discarded.
+- Risk: normal-risk. No route, runtime invocation, configuration, persistence,
+  Production, Product Creation, or write path changed.
+- Rollback: Git revert only.
+
 ## Proposed Coupang Read-only Preflight Evidence v1 — 2026-08-08
 
 - Document: `docs/architecture/COUPANG-READONLY-PREFLIGHT-EVIDENCE-V1.md`.

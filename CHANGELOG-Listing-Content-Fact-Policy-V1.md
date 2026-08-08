@@ -1,5 +1,16 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-08 - Coupang read-only preflight evidence implementation
+
+- Implemented fixed GET-only category, outbound-location, and bounded
+  return-center evidence readers using the existing Coupang transport.
+- Added strict sanitized DTOs, canonical fingerprints, opaque vendor
+  references, explicit failure taxonomy, and synthetic privacy/negative tests.
+- Added a pure KK946 mapper that conservatively uses the oldest logistics
+  observation for the existing Marketplace preflight.
+- No route invokes these adapters. Live calls, configuration, persistence,
+  Production, Product Creation, price, stock, and writes remain excluded.
+
 ## 2026-08-08 — Category snapshot evidence bridge
 
 - Added a pure bridge that turns a validated, fresh Coupang category snapshot
