@@ -1,5 +1,25 @@
 # Decision log
 
+## 2026-08-08 — Category metadata and validity remain separate evidence
+
+- Decision: a successful category-metadata response never proves current
+  category validity. Listing admission requires a typed metadata snapshot and
+  a separately digested validity result.
+- Compatibility: preserve the current public route shape; validate behind the
+  adapter boundary and fail closed on malformed or stale data.
+- Safety: provider certification options and notice choices are not automatic
+  product facts. Persistence and live provider verification remain separate.
+
+## 2026-08-08 — Category metadata and validity remain separate evidence
+
+- Decision: a successful category-metadata response never proves current
+  category validity. Listing admission requires a typed metadata snapshot and
+  a separately digested validity result.
+- Compatibility: preserve the current public route shape; validate behind the
+  adapter boundary and fail closed on malformed or stale data.
+- Safety: provider certification options and notice choices are not automatic
+  product facts. Persistence and live provider verification remain separate.
+
 ## 2026-08-06 — AWS disabled-worker change-set review target fixed
 
 - Category: high-risk/manual CloudFormation review preparation; no external
