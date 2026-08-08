@@ -1,5 +1,26 @@
 # Architecture review
 
+## Listing Category Evidence Bridge v1 — 2026-08-08
+
+- Approved sources: owner-approved Architecture PR #107 and merged typed
+  category snapshot implementation PR #108.
+- Boundary: a pure, additive Listing-domain bridge from one validated category
+  snapshot to one `coupangCategoryContract` evidence fact.
+- Decision: admit no evidence unless the snapshot is validated, explicitly
+  selects a notice category, has valid canonical digests and bounded identity,
+  preserves observation/capture/evaluation ordering, and remains within the
+  seven-day validity window.
+- Non-escalation rule: metadata attributes, certifications, documents, and
+  notice items remain category requirements; the bridge never promotes them
+  into product facts.
+- Cloud-first gate: GitHub source, tests, PR, and CI are the durable source of
+  truth and recovery path. The bridge creates no durable runtime state; local
+  checkout and test output are disposable.
+- Risk: normal-risk pure implementation. No API, database, RLS/Auth, secret,
+  Production, live Coupang request, paid service, or commerce write changes.
+- Rollback: revert the bridge implementation commit; existing snapshot and
+  Listing evidence contracts remain independently usable.
+
 ## Listing Category Snapshot implementation — 2026-08-08
 
 - Approved source: owner-approved and merged Architecture PR #107.

@@ -1,5 +1,16 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-08 — Category snapshot evidence bridge
+
+- Added a pure bridge that turns a validated, fresh Coupang category snapshot
+  into exactly one catalog-item-scoped `coupangCategoryContract` evidence fact.
+- Rechecks identity, digest, notice-selection, ordering, and seven-day freshness
+  at the integration boundary and fails closed without partial evidence.
+- Kept attributes, certifications, documents, and notice items as category
+  requirements rather than unsupported product facts.
+- Added deterministic and negative integration tests; no live request,
+  persistence, configuration, Production, or commerce write was added.
+
 ## 2026-08-08 — Typed category snapshot implementation
 
 - Added bounded Coupang category metadata contracts and canonical response
