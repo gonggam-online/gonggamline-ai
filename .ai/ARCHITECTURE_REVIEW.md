@@ -1,5 +1,31 @@
 # Architecture review
 
+## Listing Category Snapshot v1 — 2026-08-08
+
+- Business gate: validate one exact category before truthful listing content.
+- Boundary: Listing owns admission/quarantine; the Coupang adapter owns only
+  read-only provider translation.
+- Architecture: typed metadata plus separate validity result, canonical
+  digests, bounded fixtures, stable failures, and unchanged legacy API shape.
+- Cloud-first: GitHub owns source/contracts/test evidence; no runtime durable
+  state, secret, Production response, database, or local authority is added.
+- Risk: normal-risk documentation. Implementation, configuration, provider
+  smoke, persistence, and commerce writes require their applicable gates.
+- Rollback: Git revert; no external state changes.
+
+## Listing Category Snapshot v1 — 2026-08-08
+
+- Business gate: validate one exact category before truthful listing content.
+- Boundary: Listing owns admission/quarantine; the Coupang adapter owns only
+  read-only provider translation.
+- Architecture: typed metadata plus separate validity result, canonical
+  digests, bounded fixtures, stable failures, and unchanged legacy API shape.
+- Cloud-first: GitHub owns source/contracts/test evidence; no runtime durable
+  state, secret, Production response, database, or local authority is added.
+- Risk: normal-risk documentation. Implementation, configuration, provider
+  smoke, persistence, and commerce writes require their applicable gates.
+- Rollback: Git revert; no external state changes.
+
 ## AWS Backup Disabled-Worker Change Set Packet v1 — 2026-08-06
 
 - Approved source: merged infrastructure/capacity/cost/complete-worker evidence

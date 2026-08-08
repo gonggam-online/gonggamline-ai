@@ -1,5 +1,21 @@
 # Work status
 
+## 2026-08-08 Listing Category Snapshot Architecture
+
+- Objective: define the smallest safe typed category input for a truthful
+  first listing after PR #106 merged.
+- Branch: `codex/docs/listing-category-snapshot-architecture` from merge
+  `207ae47e115a381b998ebaaa2b203cfaf5e658e2`.
+- Risk/root cause: normal-risk architecture; code/contract gap. The current raw
+  `Record<string, unknown>` response cannot be Listing evidence.
+- Scope: typed snapshot, separate validity proof, digests, bounds, failures,
+  compatibility, tests, rollout, and rollback. No API/DB/config/Production or
+  marketplace write.
+- Cloud-first: GitHub owns all durable state; fixtures are sanitized and local
+  artifacts are disposable.
+- Current step: validate and deliver the Architecture Story for manual owner
+  acceptance before implementation.
+
 ## 2026-08-08 AWS independent backup base boundary deployed
 
 - Objective: finish the owner-approved Singapore independent-backup base
