@@ -52,9 +52,12 @@ if ($LASTEXITCODE -ne 0 -or $digest -notmatch '^sha256:[a-f0-9]{64}$') {
 }
 
 Write-Host "3) Wait for scan and reject critical/high findings"
+$savedErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
 $scanStatus = (& $AwsExe ecr describe-image-scan-findings --profile $Profile --region $Region `
   --repository-name $repositoryName --image-id "imageDigest=$digest" `
   --query "imageScanStatus.status" --output text 2>$null).Trim()
+$ErrorActionPreference = $savedErrorActionPreference
 if ($scanStatus -ne "COMPLETE") {
   & $AwsExe ecr start-image-scan --profile $Profile --region $Region `
     --repository-name $repositoryName --image-id "imageDigest=$digest" | Out-Null
