@@ -65,3 +65,4 @@ export type CoupangRegisterRequest = {
 };
 
 export type CoupangCategoryMeta = Record<string, unknown>;
+export type CoupangCategoryValidity = Record<string, unknown>;

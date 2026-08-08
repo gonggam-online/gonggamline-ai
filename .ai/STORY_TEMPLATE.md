@@ -40,3 +40,16 @@ If any new boundary is listed without approval, stop implementation.
 - Rollback:
 - Decision-log entries required:
 - Definition of Done:
+
+## Cloud-first durable-state gate
+
+- Durable state created/read/changed/removed:
+- Approved remote source of truth and owner:
+- Data classification:
+- Encryption / least privilege / retention / deletion:
+- Backup and recovery evidence:
+- Cross-PC bootstrap/recovery test:
+- Local temporary artifacts and cleanup condition:
+- Cloud cost / outage / vendor-exit behavior:
+- New local-only durable state: none / STOP
+- Separate high-risk migration or configuration approval required:

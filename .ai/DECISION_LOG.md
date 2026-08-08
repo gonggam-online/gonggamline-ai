@@ -1,5 +1,347 @@
 # Decision log
 
+## 2026-08-08 — Bridge only the validated category contract into Listing evidence
+
+- Dependency: owner-approved Architecture PR #107 and merged implementation
+  PR #108.
+- Decision: a validated category snapshot may create exactly one proven,
+  catalog-item-scoped `coupangCategoryContract` fact. It may not create product
+  attribute, certification, document, or notice facts.
+- Fail-closed conditions: quarantined snapshot, absent notice selection,
+  malformed digest or identity, invalid time ordering, and snapshot age beyond
+  seven days all produce no evidence fact.
+- Durable state: GitHub owns source, tests, review evidence, and recovery. No
+  new local-only or runtime durable state is introduced.
+- Risk and exclusions: normal-risk additive pure code; no API/database/Auth/RLS,
+  environment, secret, Production, external call, paid action, or commerce
+  mutation authority.
+
+## 2026-08-08 — Listing category snapshots fail closed before integration
+
+- The mapper accepts only bounded known collections and enums, digests the
+  complete JSON response canonically, and quarantines malformed, stale,
+  invalid-category, unknown-enum, or notice-selection mismatches.
+- `NOT_REQUIRED` remains a provider option, never an admitted product fact.
+- The validity endpoint is added as a read-only adapter only; no live smoke or
+  runtime consumer is enabled in this implementation.
+
+## 2026-08-08 — Category metadata and validity remain separate evidence
+
+- Decision: a successful category-metadata response never proves current
+  category validity. Listing admission requires a typed metadata snapshot and
+  a separately digested validity result.
+- Compatibility: preserve the current public route shape; validate behind the
+  adapter boundary and fail closed on malformed or stale data.
+- Safety: provider certification options and notice choices are not automatic
+  product facts. Persistence and live provider verification remain separate.
+
+## 2026-08-08 — Category metadata and validity remain separate evidence
+
+- Decision: a successful category-metadata response never proves current
+  category validity. Listing admission requires a typed metadata snapshot and
+  a separately digested validity result.
+- Compatibility: preserve the current public route shape; validate behind the
+  adapter boundary and fail closed on malformed or stale data.
+- Safety: provider certification options and notice choices are not automatic
+  product facts. Persistence and live provider verification remain separate.
+
+## 2026-08-06 — AWS disabled-worker change-set review target fixed
+
+- Category: high-risk/manual CloudFormation review preparation; no external
+  AWS action or resource provisioning.
+- Dependency: PR #102 merged as
+  `50cce601e2e1085a001ca3feaff6760d13c07ff0`; its Production browser smoke
+  passed 42 tests with two intentional skips.
+- Decision: fix the first target as stack
+  `gonggamline-independent-backup-v1`, change set
+  `base-boundary-review-v1`, type `CREATE`, region `ap-southeast-1`, template
+  SHA-256 `86cf98974aacee218b57ec4c66697393b4e9d932f589d95ef4f3a202bad9460b`,
+  `EnableWorkerResources=false`, empty worker image/Production secret defaults,
+  and `CAPABILITY_NAMED_IAM`.
+- Expected boundary: exactly six base resources may appear as `Add`; all eight
+  worker-conditioned resources must be absent. The KMS key, S3 bucket, ECR
+  repository, and SQS queue are retained resources if later executed.
+- Identity gate: do not use root or long-lived access keys. AWS CLI v2 plus a
+  temporary/federated administrative session with MFA is required. The current
+  workstation has no AWS CLI and its available console session is signed out,
+  so no AWS operation was attempted.
+- Authorization: repository review only. Creating the no-execute change set,
+  executing it, provisioning paid resources, Production export, restore,
+  scheduling, and local-backup deletion remain separate approvals.
+- Rollback: revert this repository packet before AWS action. An unexecuted
+  change set, once separately approved and created, requires an exact metadata
+  cleanup review; retained resources do not yet exist.
+
+## 2026-08-06 — AWS synthetic complete-worker rehearsal succeeded
+
+- Category: high-risk/manual backup-worker implementation and synthetic
+  capacity evidence; no external or Production action.
+- Dependency: PR #101 merged as
+  `434eccdf92815d6546d8839662f60884c0a59728` after the Production and public
+  Singapore pricing gates passed.
+- Execution: an internal Docker network with no host port and a disposable
+  PostgreSQL 17.6 data directory generated a 6,351,131-byte custom archive.
+  The complete worker performed offline list inspection, SHA-256, immutable
+  archive upload contract, manifest, SSE-KMS/version assertions, Object Lock
+  retention read-back, and exact cleanup in 7.901 seconds.
+- Capacity decision: the archive exceeded the required 1,430,142-byte 2x
+  boundary. Peak ephemeral use was 6,351,837 bytes, leaving 10,731,066,403
+  bytes below the 10-GiB ceiling and 892.099 seconds below the 900-second
+  runtime ceiling including cleanup.
+- Safety result: no Production or AWS connection, resource, credential, paid
+  usage, restore, schedule, raw backup retention, host port, or durable local
+  database was created. The container, network, archive, manifest, and
+  simulated object bodies were removed.
+- Decision: mark Lambda
+  `ELIGIBLE_FOR_DISABLED_WORKER_CHANGE_SET_REVIEW_ONLY`. This authorizes only
+  repository review of the next exact `EnableWorkerResources=false` change
+  set. Provisioning, worker image/secret, Production export/upload, restore,
+  schedule, and local-backup deletion retain separate approvals.
+- Rollback: revert the pipeline and sanitized evidence before any AWS action;
+  there is no external state to roll back.
+
+## 2026-08-06 — AWS backup Production verification and cost gate complete
+
+- Category: high-risk/manual Production verification and public pricing
+  evidence; no provisioning.
+- Dependency: PR #100 merged as
+  `bb0e3715159cfe7f7d8c3bf049189f7e94c5918b`.
+- Production evidence: the exact merged commit deployed successfully to
+  `https://gonggamline-ai.vercel.app`; Product Ops rendered the Supabase
+  live-data path with 151 products. Production browser smoke run
+  `31055725712` passed pages, APIs, console, page-error, and failed-request
+  assertions and retained artifact digest
+  `sha256:dc187455eae7465f2c6d13f4c7c56876257e042ad929761cc60d1c764eb9de70`.
+- Pricing decision: public On-Demand Singapore estimates are USD 2.22/month
+  observed and USD 2.63/month at the accepted 2x stress boundary. Add a fixed
+  USD 2.00 tax/rounding/log/transfer/retrieval uncertainty reserve; the binding
+  assessment is USD 4.63/month with USD 5.37 remaining below the approved USD
+  10 AWS-only ceiling.
+- Conservative inputs: Lambda excludes free-tier discounts. EventBridge
+  Scheduler and SQS use the Calculator's one-million minimum even though the
+  planned volumes are 32 Scheduler calls and 100/200 SQS requests. CloudTrail
+  data events remain excluded because they are not enabled.
+- Decision: mark only the Calculator prerequisite complete. Lambda eligibility,
+  disabled-worker change-set approval, provisioning, credentials, first
+  Production export/upload, restore, schedule, and local deletion remain
+  separately gated. No AWS resource or paid usage was created.
+- Rollback: revert the evidence commit and refresh both public estimates if an
+  input or price is found incorrect. Existing Production and AWS state are
+  unchanged.
+
+## 2026-08-05 — AWS current Production capacity measurement succeeded
+
+- Category: high-risk/manual Production read; sanitized capacity evidence.
+- Authority: the owner explicitly requested one new reliable AWS Production
+  capacity measurement. The one-attempt authority was consumed exactly once.
+- Execution: PostgreSQL 17.6 complete custom-format `pg_dump` over required TLS
+  produced a 715,071-byte transient archive in 34.125 seconds. Offline
+  `pg_restore --list` validation found 1,251 entries and zero warnings.
+- Safety result: the archive, process-scoped credential, restricted temporary
+  directory, and both containers were removed. Independent inspection found
+  zero remaining artifacts/containers. No database mutation, row inspection,
+  AWS resource, paid use, upload, restore, or schedule occurred.
+- Postflight: Supabase Production remained `Healthy`; CPU 2%, disk 14%, RAM
+  58%, 14/60 connections, and no Advisor issue.
+- Decision: close the current dump-size/duration evidence gate and make the
+  observed/2x public On-Demand AWS Pricing Calculator input ready. Keep Lambda
+  eligibility undecided until a complete worker rehearsal. Provisioning,
+  Production upload, restore, and schedule retain separate approval gates.
+- Rollback: repository evidence can be reverted; there is no Production or AWS
+  state to roll back because the measurement was read-only and transient.
+
+## 2026-08-05 — AWS capacity retry result evidence unavailable
+
+- Category: high-risk/manual Production read retry; execution-evidence failure.
+- Authority: after confirming secure process-scoped credential injection, the
+  owner approved exactly one retry of the AWS Production capacity measurement.
+  That retry was executed once and the authority is consumed.
+- Evidence: preflight passed for the exact Singapore Production target,
+  PostgreSQL 17.6, TLS reachability, disk capacity, current provider backup, and
+  healthy load. The execution transport did not preserve the final sanitized
+  JSON, and no attached terminal or retained Docker exit event could recover
+  it. Therefore success, archive size, duration, TOC count, warning count, and
+  archive creation are unknown and must not be inferred.
+- Safety result: zero matching temporary directories and zero measurement
+  containers remain. No AWS provisioning, paid use, upload, restore, or
+  schedule occurred; the measurement command was read-only. Supabase remained
+  `Healthy` after the retry.
+- Decision: keep capacity, Calculator, Lambda eligibility, provisioning, and
+  upload blocked. No further retry is authorized. A new explicit one-attempt
+  approval must require durable sanitized-result capture before cleanup.
+
+## 2026-08-05 — AWS capacity measurement attempt failed closed
+
+- Category: high-risk/manual Production read attempt; external configuration
+  failure.
+- Authority: the owner merged PR #96 and approved exactly `AWS 백업 Production
+  용량 측정 v1 승인`. That single-attempt authority is consumed.
+- Result: preflight passed, but PostgreSQL 17.6 stopped at database-password
+  authentication before creating an archive. No automatic retry was made.
+- Safety evidence: the restricted temporary directory, transient files,
+  container tmpfs credential file, and container were removed. No database
+  write, AWS operation, upload, restore, schedule, existing-backup access, or
+  row inspection occurred. Supabase Production was healthy after the attempt.
+- Decision: keep current capacity, Calculator, Lambda eligibility, provisioning,
+  first export, and restore gates blocked. A correct process-scoped database
+  credential and a new explicit one-attempt approval are both required.
+- Rollback: no Production or AWS state was created to roll back; preserve the
+  provider backups and this sanitized failure record.
+
+## 2026-08-05 — AWS account recovery gate complete; capacity measurement proposed
+
+- Category: high-risk/manual Production measurement approval preparation.
+- Status: repository packet prepared only; Production access, transient dump,
+  AWS Calculator estimate, provisioning, and paid use are not executed.
+- Authority: owner-confirmed recovery contacts and a recovery method
+  independent of this PC; one Root MFA device remains active. An additional
+  Root MFA factor is optional and not a v1 gate.
+- Decision: close only the AWS account recovery preflight. Use the exact
+  `AWS-BACKUP-CAPACITY-MEASUREMENT-APPROVAL-V1.md` packet for a later bounded
+  read-only current dump-size/duration measurement. The recorded 696,310-byte
+  historical archive is reference-only and cannot satisfy the current gate.
+- Cost gate: prepare observed and 2x-observed Singapore Calculator inputs, but
+  leave every price and estimate URL null until measurement. Provisioning
+  remains blocked by the USD 10/month ceiling and a separate exact change-set
+  approval.
+- Rollback: revert this repository packet. No Production or AWS state changed.
+
+## 2026-08-05 — AWS independent backup infrastructure plan v1
+
+- Category: high-risk/manual infrastructure implementation plan.
+- Status: implemented in repository only; not provisioned; manual merge and
+  all later AWS/Production gates remain required.
+- Authority: accepted Architecture PR #91, policy PR #92, verified provider
+  evidence PR #94, and the owner's sanitized AWS preflight confirmation.
+- Decision: represent the Singapore KMS/S3 Object Lock/ECR/SQS boundary in
+  CloudFormation, omit worker resources by default, and keep the conditional
+  Scheduler disabled. No secret value, account identifier, backup content, or
+  external operation is part of the Story.
+- Permission correction: exclude `GetObjectAttributes` because AWS requires
+  object-read permission (and KMS decrypt for SSE-KMS). The writer validates
+  the upload response and Object Lock retention; a distinct restore role owns
+  body verification in a later approved rehearsal.
+- Open gates: sanitized archive size/duration, 900-second/10-GiB capacity
+  margin, AWS Pricing Calculator
+  estimate, exact disabled-worker change set, provisioning, worker image,
+  secret/export identity, Production export, and two-cycle restore.
+- Rollback: revert the repository plan before provisioning. Later retained or
+  immutable AWS resources require an exact decommission plan, not ordinary
+  deletion.
+
+## 2026-08-05 — Proposed Encrypted Cloud Backup and Restore v1
+
+- Category: proposed Architecture decision.
+- Status: Draft only; repository-owner manual acceptance required.
+- Owner: Database / Security.
+- Proposal: retain verified Supabase provider backups and add an independent,
+  owner-controlled AWS `ap-southeast-1` recovery boundary using private S3,
+  versioning, Object Lock Governance, SSE-KMS, and a scheduled Lambda export
+  worker. Raw Production backup bytes are prohibited from CI, Git, Vercel, and
+  chat.
+- Rationale: the recorded logical archive remains device-local, while
+  Supabase's documented provider retention does not by itself prove the
+  repository's 35-day daily plus 12-month monthly independent-retention target.
+- Proposed gates: verify Supabase entitlement; approve AWS account/billing/MFA,
+  Singapore residency, USD 10 monthly ceiling, retention, RPO <=24h/RTO <=8h,
+  export identity, provisioning, first Production export, two-cycle restore,
+  and later exact local deletion.
+- Authority: this entry records a proposal, not approval. No external service,
+  credential, Production operation, backup copy/restore/delete, paid use, or
+  implementation is authorized.
+- Rollback: revert the documentation PR. No external state is changed.
+- Owner evidence: sanitized Production Dashboard screenshots supplied on
+  2026-08-05 verify Free Plan, no scheduled backups or retained recovery point,
+  PITR not enabled, and no restore-to-new-project entitlement. The unknown
+  provider-backup gate is resolved as a confirmed gap. Supabase Pro daily
+  backups are a separate paid decision; PITR is not part of the initial
+  proposal. The USD 10 ceiling applies only to the independent AWS boundary.
+- Owner policy decision: approved on 2026-08-05 — Supabase Pro daily backups
+  with PITR excluded; AWS Singapore `ap-southeast-1`; USD 10/month AWS-only
+  ceiling; daily 35-day and monthly 12-month retention; RPO <=24h; RTO <=8h.
+  Current official Supabase pricing shows Pro from USD 25/month with seven-day
+  daily backups and default Spend Cap availability. Actual checkout amount,
+  payment method, plan transition, AWS account/billing/MFA, infrastructure,
+  Production export, restore, deletion, and PR merge remain separate gates.
+- Provider execution evidence: sanitized Dashboard screenshots supplied later
+  on 2026-08-05 verify Pro active with seven physical daily backups spanning
+  2026-07-29 through 2026-08-04 and visible restore actions. Spend Cap is
+  enabled; PITR, Dedicated IPv4, and Custom Domain are disabled; no Log Drain
+  is configured. This verifies the provider-native layer only. Storage object
+  bodies and the independent 35-day/12-month AWS recovery boundary remain
+  outside this evidence.
+
+## 2026-08-05 — Cloud Portability Baseline
+
+- Category: implementation decision
+- Status: implemented for repository inventory and local readiness only
+- Owner / approver: Engineering Operations / repository owner directive
+- Decision: maintain `docs/cloud/cloud-state-manifest.json` as the
+  machine-readable authority inventory and use `npm run cloud:readiness` to
+  fail closed on missing new-PC prerequisites. Remote authorities and local
+  migration blockers remain explicitly distinct.
+- Safety boundary: the checker reads no secret values, database rows, cookies,
+  Production data, or local backup contents. This decision provisions no
+  service and moves/deletes no data.
+- Consequences: source/task/deployment/data authorities are visible and three
+  unresolved durable areas become ordered high-risk Stories: backups,
+  Orchestrator ledger, and business assets.
+- Rollback: revert the baseline commit. No external state is changed.
+
+## 2026-08-05 — Cloud-first durable-state principle
+
+- Category: operating and architecture principle
+- Status: approved by repository owner on 2026-08-05
+- Owner / approver: AI CTO / repository owner
+- Context: GitHub, Vercel, Supabase, and CI provide partial cloud operation,
+  while local backups, automation state, unpushed work, and device setup can
+  remain unique dependencies.
+- Decision: local PCs are replaceable execution clients. Apply
+  `.ai/CLOUD_FIRST_POLICY.md` before every Story; each durable state requires an
+  approved remote owner and recovery path. New local-only durable state stops
+  implementation. Local checkout/cache/test/rehearsal state is temporary and
+  requires cleanup.
+- Safety boundary: cloud-first never authorizes uploading secrets, Production
+  dumps, personal data, or sensitive business data to an unapproved service.
+  Existing local-sensitive state remains until a separately approved encrypted
+  migration and restore test succeeds.
+- Consequences: Story/Task templates and Codex rules now require placement,
+  classification, retention, recovery, and cross-PC evidence. Database, secret,
+  backup, Production, object-storage, and automation-ledger moves remain
+  separate high-risk/manual Stories.
+- Rollback: revert this governance change. Reverting does not authorize local
+  data loss or deletion of cloud/local evidence.
+
+## 2026-08-05 — Listing content fact and policy Architecture acceptance
+
+- Category: accepted normal-risk, documentation-only Listing Architecture
+  decision.
+- Proposal: preserve the existing Listing engine/service/schema boundaries but
+  require evidence-linked title, keyword, image, detail-page, notice, and
+  Coupang payload outputs with fail-closed quarantine.
+- Evidence authority: there is no global supplier-first or 3PL-first rule.
+  Catalog claims remain catalog claims, accepted transaction evidence owns the
+  agreed transaction, scoped 3PL inspection owns physical observations, and
+  documentary/regulated facts require the competent issuer or registry.
+  Conflicts remain visible and block dependent claims. None grants image rights
+  by implication.
+- KK946 status: `UNKNOWN` and quarantined because the repository has no exact
+  catalog, lot/inspection, rights, category, notice, or approved-asset packet.
+- Owner decision: accepted on 2026-08-05 after correcting source authority,
+  image-rights coverage, reuse of the existing category metadata boundary, and
+  implementation order.
+- Approved content SHA:
+  `5b77af8baf39a769e8541b14fe52196b27fcde4f`.
+- Authority boundary: ordered documentation and pure policy/test work may
+  proceed within its own normal-risk Story. API/external-contract, schema,
+  RLS/Auth, secret/configuration, paid image generation/editing/upload, price,
+  Production, readiness approval, and marketplace writes remain separately
+  exact-target gated.
+- Story:
+  [`LISTING-CONTENT-FACT-AND-POLICY-CONTRACT-V1.md`](../docs/architecture/LISTING-CONTENT-FACT-AND-POLICY-CONTRACT-V1.md).
+- Rollback: revert the documentation PR; no external or persistent state was
+  changed.
+
 ## 2026-08-04 — Sales learning closed-loop Architecture proposal
 
 - Category: proposed high-risk/manual cross-domain Architecture Story.

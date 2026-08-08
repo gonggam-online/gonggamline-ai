@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "gonggamline-aws-backup-worker-rehearsal-result-v1",
+  "status": "SUCCEEDED_SYNTHETIC_ONLY",
+  "executedAt": "2026-08-06T00:23:27.538Z",
+  "productionConnected": false,
+  "awsConnected": false,
+  "paidUsageCreated": false,
+  "scheduleEnabled": false,
+  "source": {
+    "kind": "DISPOSABLE_LOCAL_POSTGRESQL_SYNTHETIC_DATA",
+    "image": "postgres@sha256:00bc86618629af00d2937fdc5a5d63db3ff8450acf52f0636ec813c7f4902929",
+    "network": "INTERNAL_NO_HOST_PORT"
+  },
+  "workflow": {
+    "dumpComplete": true,
+    "archiveInspectionComplete": true,
+    "sha256Complete": true,
+    "immutableUploadContractComplete": true,
+    "manifestComplete": true,
+    "retentionReadbackComplete": true,
+    "cleanupComplete": true
+  },
+  "capacity": {
+    "productionObservedArchiveBytes": 715071,
+    "requiredStressArchiveBytes": 1430142,
+    "rehearsalArchiveBytes": 6351131,
+    "rehearsalEntryCount": 3,
+    "peakEphemeralBytes": 6351837,
+    "maximumEphemeralBytes": 10737418240,
+    "workerMeasuredTotalMs": 7901,
+    "maximumRuntimeMs": 900000,
+    "cleanupReserveMs": 60000,
+    "runtimeMarginMs": 892099,
+    "ephemeralMarginBytes": 10731066403
+  },
+  "immutableObjects": [
+    {
+      "keyClass": "ARCHIVE",
+      "bytes": 6351131,
+      "checksumAlgorithm": "SHA256",
+      "versionIdPresent": true,
+      "serverSideEncryption": "aws:kms",
+      "kmsKeyMatchesSyntheticContract": true,
+      "retentionMode": "GOVERNANCE",
+      "retentionReadbackAtOrBeyondMinimum": true
+    },
+    {
+      "keyClass": "MANIFEST",
+      "bytes": 706,
+      "checksumAlgorithm": "SHA256",
+      "versionIdPresent": true,
+      "serverSideEncryption": "aws:kms",
+      "kmsKeyMatchesSyntheticContract": true,
+      "retentionMode": "GOVERNANCE",
+      "retentionReadbackAtOrBeyondMinimum": true
+    }
+  ],
+  "cleanup": {
+    "rawArchiveRetained": false,
+    "syntheticObjectBodiesRetained": false,
+    "temporaryDatabaseRetained": false,
+    "temporaryNetworkRetained": false
+  },
+  "decision": "LAMBDA_ELIGIBLE_FOR_DISABLED_WORKER_CHANGE_SET_REVIEW_ONLY",
+  "authorization": {
+    "awsProvisioningAuthorized": false,
+    "productionExportAuthorized": false,
+    "productionSecretAuthorized": false,
+    "restoreAuthorized": false,
+    "scheduleAuthorized": false
+  }
+}

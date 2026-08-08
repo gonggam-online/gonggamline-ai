@@ -1,5 +1,187 @@
 # Architecture review
 
+## Listing Category Evidence Bridge v1 — 2026-08-08
+
+- Approved sources: owner-approved Architecture PR #107 and merged typed
+  category snapshot implementation PR #108.
+- Boundary: a pure, additive Listing-domain bridge from one validated category
+  snapshot to one `coupangCategoryContract` evidence fact.
+- Decision: admit no evidence unless the snapshot is validated, explicitly
+  selects a notice category, has valid canonical digests and bounded identity,
+  preserves observation/capture/evaluation ordering, and remains within the
+  seven-day validity window.
+- Non-escalation rule: metadata attributes, certifications, documents, and
+  notice items remain category requirements; the bridge never promotes them
+  into product facts.
+- Cloud-first gate: GitHub source, tests, PR, and CI are the durable source of
+  truth and recovery path. The bridge creates no durable runtime state; local
+  checkout and test output are disposable.
+- Risk: normal-risk pure implementation. No API, database, RLS/Auth, secret,
+  Production, live Coupang request, paid service, or commerce write changes.
+- Rollback: revert the bridge implementation commit; existing snapshot and
+  Listing evidence contracts remain independently usable.
+
+## Listing Category Snapshot implementation — 2026-08-08
+
+- Approved source: owner-approved and merged Architecture PR #107.
+- Scope: bounded DTO contracts, canonical SHA-256, pure fail-closed mapper,
+  separate read-only validity adapter, and synthetic positive/negative tests.
+- Compatibility: existing route and response body remain unchanged; no live
+  call, configuration, database, persistence, pricing, or commerce write.
+- Risk: normal-risk while the implementation remains additive and unused by
+  Production orchestration.
+- Cloud-first: GitHub owns source and synthetic evidence; no durable runtime or
+  local-only state is introduced.
+
+## Listing Category Snapshot v1 — 2026-08-08
+
+- Business gate: validate one exact category before truthful listing content.
+- Boundary: Listing owns admission/quarantine; the Coupang adapter owns only
+  read-only provider translation.
+- Architecture: typed metadata plus separate validity result, canonical
+  digests, bounded fixtures, stable failures, and unchanged legacy API shape.
+- Cloud-first: GitHub owns source/contracts/test evidence; no runtime durable
+  state, secret, Production response, database, or local authority is added.
+- Risk: normal-risk documentation. Implementation, configuration, provider
+  smoke, persistence, and commerce writes require their applicable gates.
+- Rollback: Git revert; no external state changes.
+
+## Listing Category Snapshot v1 — 2026-08-08
+
+- Business gate: validate one exact category before truthful listing content.
+- Boundary: Listing owns admission/quarantine; the Coupang adapter owns only
+  read-only provider translation.
+- Architecture: typed metadata plus separate validity result, canonical
+  digests, bounded fixtures, stable failures, and unchanged legacy API shape.
+- Cloud-first: GitHub owns source/contracts/test evidence; no runtime durable
+  state, secret, Production response, database, or local authority is added.
+- Risk: normal-risk documentation. Implementation, configuration, provider
+  smoke, persistence, and commerce writes require their applicable gates.
+- Rollback: Git revert; no external state changes.
+
+## AWS Backup Disabled-Worker Change Set Packet v1 — 2026-08-06
+
+- Approved source: merged infrastructure/capacity/cost/complete-worker evidence
+  through PR #102 and the owner directive to continue the next Cloud-first
+  stage.
+- Boundary owner: Database / Security. The accepted AWS Singapore backup
+  architecture, CloudFormation template, retention lifecycle, and external
+  integration are unchanged.
+- Scope: deterministic no-AWS generation of the exact first change-set target,
+  template digest, `EnableWorkerResources=false` inputs,
+  `CAPABILITY_NAMED_IAM`, six expected base resources, eight omitted worker
+  resources, retained-resource warning, and fail-closed negative tests.
+- Cloud-first placement: source, exact packet, decision, and sanitized delivery
+  evidence belong in GitHub. No AWS account identifier, credential, secret,
+  backup body, or device-local durable state is created.
+- External preflight: this workstation has no AWS CLI and the available AWS
+  console is signed out. No AWS call was attempted. Root and long-lived access
+  keys remain prohibited; a temporary/federated administrative session with
+  MFA is required.
+- Risk: high-risk/manual because the packet gates later paid retained AWS
+  resources. Apply `manual-merge-required`; never auto-merge or execute the
+  change set.
+- Rollout/rollback: Draft PR and Preview validation only. Revert the packet
+  before any AWS action. Creating the no-execute change set and executing it
+  remain two separate explicit owner approvals.
+
+## AWS Backup Complete Worker Rehearsal v1 — 2026-08-06
+
+- Approved source: manually accepted Encrypted Cloud Backup and Restore
+  Architecture plus merged infrastructure, capacity, and cost evidence through
+  PR #101.
+- Boundary owner: Database / Security. The existing source of truth is
+  `docs/cloud/encrypted-backup-contract-v1.json`; no new Domain, Database,
+  Migration, Queue, Lifecycle, Public API, or External Integration is added.
+- Scope: a fail-closed worker pipeline and disposable synthetic PostgreSQL
+  rehearsal for custom dump, offline inspection, SHA-256, immutable archive and
+  manifest writes, SSE-KMS/version assertions, retention read-back, exact
+  replay, deadline/space limits, sanitized events, and complete cleanup.
+- Cloud-first placement: source, sanitized evidence, and decisions belong in
+  GitHub. The synthetic database, archive, simulated object bodies, containers,
+  network, and local result are temporary and deleted after evidence capture.
+- Result: 6,351,131 bytes completed in 7.901 seconds with 6,351,837 peak
+  ephemeral bytes, leaving 892.099 seconds and 10,731,066,403 bytes of margin.
+  Production and AWS were not contacted.
+- Risk: high-risk/manual because the pipeline is a gate for later Production
+  export and AWS backup infrastructure. Apply `manual-merge-required`; never
+  auto-merge. No provisioning, credentials, Production connection/export,
+  paid usage, restore, or schedule is authorized.
+- Rollout/rollback: repository and Preview validation plus Draft PR only.
+  Revert before provisioning. The next action is a separately approved exact
+  CloudFormation change set with `EnableWorkerResources=false`.
+
+## AWS Independent Backup Infrastructure Plan v1 — 2026-08-05
+
+- Approved source: manually merged Encrypted Cloud Backup and Restore
+  Architecture PR #91, policy approval PR #92, and provider evidence PR #94.
+- Boundary owner: Database / Security. Existing source of truth is
+  `docs/cloud/encrypted-backup-contract-v1.json`; this Story implements only
+  deployment-order stage 3.
+- Architecture compliance: no new Domain, Database, Migration, Queue,
+  Lifecycle, Public API, or unapproved External Integration is introduced.
+  The accepted AWS S3/KMS/Object Lock + disabled Scheduler/Lambda boundary is
+  represented as non-executing infrastructure-as-code and structural tests.
+- Dependency/security: application, Revenue, Product, Listing, marketplace,
+  and Supabase runtime code remain unchanged. Singapore-only placement,
+  immutable retention, least privilege, no root/long-lived key, no secret
+  value, disabled schedule, and fail-closed capacity/cost gates are mandatory.
+- AWS permission correction: the writer excludes `GetObjectAttributes`
+  because AWS couples it to `s3:GetObject` and, for SSE-KMS, `kms:Decrypt`.
+  Writer verification uses the upload response plus retention read-back;
+  independent body verification remains isolated in the later restore role.
+- Retention/principal enforcement: bucket policy denies writes outside the
+  daily/monthly prefixes, any writer except the exact named worker role, daily
+  retention below 35 days, monthly retention without an explicit date, and
+  monthly retention below 365 days. Governance bypass remains globally denied.
+- Durable state: reviewed source and sanitized evidence belong in GitHub; later
+  backup objects belong only in the approved owner-controlled AWS boundary.
+  Local artifacts are replaceable build/test output and contain no backup data.
+- Risk: high-risk/manual because the plan defines future IAM, secret, paid AWS,
+  and Production-export boundaries. Apply `manual-merge-required`; never
+  auto-merge or execute a CloudFormation change set in this Story.
+- Rollout/rollback: repository validation and Draft PR only. Revert the plan
+  before provisioning; after any future immutable object exists, use the
+  separately approved decommission path rather than ordinary deletion.
+
+## Proposed Encrypted Cloud Backup and Restore Architecture v1 — 2026-08-05
+
+- Document:
+  `docs/architecture/ENCRYPTED-CLOUD-BACKUP-AND-RESTORE-V1.md`.
+- Status: proposed; repository-owner manual acceptance is required.
+- Boundary: Database / Security disaster recovery, preserving Supabase
+  provider backups and proposing an independent owner-controlled Singapore AWS
+  S3/KMS/Object Lock copy created by a scheduled AWS Lambda worker.
+- Architecture gate: this is the required Architecture Story for a new
+  external integration and backup lifecycle. No implementation or external
+  action is authorized before manual acceptance and a separate exact
+  provisioning Story.
+- Security/failure contract: Production data never enters CI/Git/Vercel/chat;
+  immutable objects, least privilege, separate export/restore roles, bounded
+  retries, fail-closed verification, two fresh restore cycles, and no automated
+  Production restore.
+- Risk/non-goals: high-risk/manual; account/billing, resources, credentials,
+  Production access/export, restore, DB/RLS/Auth/environment change, local
+  backup access/deletion, paid use, and auto-merge are excluded.
+- Rollback: revert documentation before acceptance. Later immutable backup
+  objects and KMS keys require a separate retention/decommission approval.
+- Owner evidence amendment: sanitized Production Dashboard screenshots dated
+  2026-08-05 verify Free Plan, no scheduled backup/recovery point, PITR not
+  enabled, and no restore-to-new-project entitlement. A Pro daily-backup
+  upgrade is now an explicit separate paid decision; PITR is excluded from the
+  initial proposal.
+- Owner policy approval: on 2026-08-05 the repository owner approved Supabase
+  Pro daily backups with PITR excluded, AWS `ap-southeast-1`, a USD 10/month
+  AWS-only ceiling, 35-day daily/12-month monthly retention, RPO <=24h, and RTO
+  <=8h. No plan upgrade, account/billing change, resource, credential,
+  Production export, restore, deletion, or PR merge was executed by this
+  approval record.
+- Provider execution evidence: later on 2026-08-05, sanitized Dashboard
+  screenshots verified Supabase Pro active, seven physical daily recovery
+  points with restore actions, Spend Cap enabled, PITR/Dedicated IPv4/Custom
+  Domain disabled, and no configured Log Drain. Database backups exclude
+  Storage API object bodies; AWS independent backup remains pending.
+
 ## Item Selection Story 3 residual persistence compliance — 2026-08-03
 
 - Approved boundary: Supplier / Procurement Item Selection and the accepted
@@ -116,6 +298,25 @@
 - Risk: high-risk/manual for all future RLS/database/restore/Production work.
 - Non-goals: migration SQL, restore execution, Supabase/Production changes, Auth changes, runtime implementation, and commerce writes.
 - Gate: future implementation remains blocked until this Story is manually merged and an exact restored inventory satisfies every stop condition.
+
+## Approved Listing Content Fact and Policy Contract v1 — 2026-08-05
+
+- Status: accepted by repository owner on 2026-08-05.
+- Approved content SHA:
+  `5b77af8baf39a769e8541b14fe52196b27fcde4f`.
+- Boundary: existing Listing domain consuming Supplier / Procurement, 3PL
+  inspection, asset-rights, and exact Coupang category evidence.
+- Decision: every title token, keyword, image/derivative, detail-page claim,
+  notice, and payload field must be evidence-linked and fail closed on
+  `UNKNOWN`, conflict, prohibited rights, stale category metadata, or encoding
+  failure.
+- KK946: repository evidence is absent, so it remains explicitly quarantined.
+- Implementation authorization: only the ordered normal-risk documentation and
+  pure policy/test Stories may start without a new Architecture decision. API,
+  external-contract, persistence, asset lifecycle, DB/Auth/RLS, paid, price,
+  Production, and marketplace actions remain separately gated.
+- Story:
+  [Listing Content Fact and Policy Contract v1](../docs/architecture/LISTING-CONTENT-FACT-AND-POLICY-CONTRACT-V1.md).
 
 ## Story compliance gate
 
