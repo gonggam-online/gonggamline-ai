@@ -1,5 +1,15 @@
 # Decision log
 
+## 2026-08-08 — Prepare but do not auto-merge the AWS backup worker
+
+- Decision: the deployable worker may be kept merge-ready on PR #105 after
+  latest-main reconciliation and complete CI/Preview verification.
+- Safety: credentials are resolved only from Secrets Manager; the scheduler,
+  Production export, resource deployment, and first archive remain disabled or
+  separately approval-gated.
+- Risk: high-risk/manual with `manual-merge-required`; repository automation
+  must not merge it even when every technical check passes.
+
 ## 2026-08-08 — Bridge only the validated category contract into Listing evidence
 
 - Dependency: owner-approved Architecture PR #107 and merged implementation

@@ -1,0 +1,15 @@
+.git
+.github
+.aws
+.aws-*
+.codex-aws
+.env*
+.next
+AppData
+node_modules
+playwright-report
+test-results
+tmp*
+*.dump
+*.sql
+*.sqlite*

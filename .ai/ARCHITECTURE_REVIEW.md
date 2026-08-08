@@ -1,5 +1,23 @@
 # Architecture review
 
+## AWS Backup Worker Automation v1 — 2026-08-08
+
+- Boundary: deployable Lambda Node.js 22/PostgreSQL 17 backup worker using
+  Secrets Manager, immutable checksum/KMS/Object Lock writes, and deterministic
+  replay.
+- Cloud-first state: source and delivery evidence remain in GitHub; encrypted
+  backup objects, manifests, and secrets remain in the approved Singapore AWS
+  services. No credential or Production dump belongs in Git or local durable
+  storage.
+- Risk: high-risk/manual. Merging code does not authorize secret creation,
+  worker-resource deployment, schedule enablement, Production database access,
+  or the first Production archive.
+- Delivery rule: retain `manual-merge-required`; never auto-merge. Every AWS,
+  secret, Production-read, and paid-resource action remains separately gated.
+- Rollback: keep scheduling disabled and remove only worker resources through a
+  separately reviewed CloudFormation change set while retaining the recovery
+  boundary.
+
 ## Listing Category Evidence Bridge v1 — 2026-08-08
 
 - Approved sources: owner-approved Architecture PR #107 and merged typed

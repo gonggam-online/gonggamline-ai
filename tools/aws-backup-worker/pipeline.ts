@@ -153,11 +153,19 @@ function addUtcDays(date: Date, days: number): Date {
   return result;
 }
 
-function objectPrefix(invocation: BackupInvocation): string {
+export function invocationObjectPrefix(invocation: BackupInvocation): string {
   const scheduled = new Date(invocation.scheduledAt);
-  const year = scheduled.getUTCFullYear().toString().padStart(4, "0");
-  const month = (scheduled.getUTCMonth() + 1).toString().padStart(2, "0");
-  const day = scheduled.getUTCDate().toString().padStart(2, "0");
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Singapore",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(scheduled);
+  const part = (type: Intl.DateTimeFormatPartTypes): string =>
+    parts.find((candidate) => candidate.type === type)?.value ?? "";
+  const year = part("year");
+  const month = part("month");
+  const day = part("day");
   return `${invocation.backupClass}/${year}/${month}/${day}/${invocation.requestId}`;
 }
 
@@ -253,7 +261,7 @@ export async function runBackupWorker(
     }
 
     const archiveDigest = await digestFile(archivePath);
-    const prefix = objectPrefix(invocation);
+    const prefix = invocationObjectPrefix(invocation);
     const retentionDays = invocation.backupClass === "monthly"
       ? dependencies.limits.monthlyRetentionDays
       : dependencies.limits.dailyRetentionDays;

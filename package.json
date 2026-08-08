@@ -15,9 +15,13 @@
     "test:e2e": "playwright test",
     "test:e2e:local": "playwright test",
     "cloud:readiness": "tsx scripts/check-cloud-portability.ts",
-    "cloud:aws-backup:change-set-plan": "tsx scripts/prepare-aws-backup-change-set.ts"
+    "cloud:aws-backup:change-set-plan": "tsx scripts/prepare-aws-backup-change-set.ts",
+    "cloud:aws-backup:worker-build": "node scripts/build-aws-backup-worker.mjs",
+    "cloud:aws-backup:secret": "node scripts/upsert-aws-backup-secret.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1106.0",
+    "@aws-sdk/client-secrets-manager": "^3.1106.0",
     "@supabase/ssr": "0.12.3",
     "@supabase/supabase-js": "2.110.7",
     "next": "16.2.11",
@@ -27,11 +31,13 @@
   "devDependencies": {
     "@playwright/test": "^1.55.0",
     "@tailwindcss/postcss": "^4",
+    "@types/aws-lambda": "^8.10.162",
     "@types/node": "^24.0.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
+    "esbuild": "^0.28.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
     "tailwindcss": "^4",
