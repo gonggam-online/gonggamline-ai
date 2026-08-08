@@ -1,5 +1,36 @@
 # Work status
 
+## 2026-08-08 AWS independent backup base boundary deployed
+
+- Objective: finish the owner-approved Singapore independent-backup base
+  boundary and stop treating AWS SSO automation as a separate project goal.
+- Branch/base: `codex/chore/aws-disabled-worker-change-set`.
+- Risk/root cause: high-risk/manual external AWS boundary. Repeated failures
+  were caused by expired SSO sessions and local PowerShell orchestration, not
+  application or database logic.
+- Revenue impact: the encrypted off-device recovery boundary now exists; work
+  can return to the shortest measurable-sales development path.
+- Cloud-first evidence: region `ap-southeast-1`, stack
+  `gonggamline-independent-backup-v1`, and change set
+  `base-boundary-review-v1` are the remote recovery pointers. Sanitized source
+  and verification status remain Git-tracked; SSO tokens remain temporary.
+- Completed: the stack reached `CREATE_COMPLETE`. `BackupBucket`,
+  `BackupBucketPolicy`, `BackupDeadLetterQueue`, `BackupImageRepository`,
+  `BackupKey`, and `BackupKeyAlias` each reached `CREATE_COMPLETE`.
+- Safety evidence: `EnableWorkerResources=false`, `BackupWorkerImageUri=""`,
+  and `ProductionDatabaseSecretArn=""`; no worker, schedule, Production export,
+  database write, restore, or commerce write was enabled.
+- Repetition guard: the recovery script no longer changes `HOME` or
+  `USERPROFILE` and refuses to delete an existing stack unless the separately
+  approved `-RecreateExistingStack` switch is supplied.
+- Owner action/blocker: none for the base boundary. Worker enablement,
+  Production secret injection, scheduled export, real backup, and restore drill
+  remain separately approved high-risk operations.
+- Exact next action: deliver this sanitized checkpoint to GitHub, then resume
+  the highest-value real sales-system development Story.
+- Remaining risk: RPO/RTO are not achieved until a real backup and restore
+  drill are separately approved and verified.
+
 ## 2026-08-06 — AWS Backup Disabled-Worker Change Set Packet v1
 
 - Objective: convert the merged worker/capacity/cost evidence into the exact
