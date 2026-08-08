@@ -546,3 +546,17 @@ Architecture approval does not waive [`RISK_POLICY.md`](RISK_POLICY.md).
 - Implementation authorization: none until this Story is manually approved.
 - Story:
   [Sprint B-0 Database Baseline Execution v1](../docs/architecture/SPRINT-B0-DATABASE-BASELINE-EXECUTION-V1.md).
+# 2026-08-08 — Coupang Marketplace Product Creation local preflight
+
+- Status: implementation within the accepted Coupang Seller Product Contract Audit Story 1 boundary.
+- Boundary: additive pure Listing-domain contract and deterministic preflight; the legacy registration route and DTO remain unchanged.
+- Compliance: preserves separate Listing draft, category snapshot, evidence, and Seller write ownership. No new Domain, API, persistence, lifecycle, or external integration is introduced.
+- Risk: normal-risk. `READY` is explicitly not provider acceptance and every real listing/approval operation remains high-risk/manual.
+- Recovery: source, fixtures, decisions, CI and PR evidence are GitHub-owned; local build/test output is disposable.
+# 2026-08-08 — Coupang Marketplace Product Creation local preflight
+
+- Status: implementation within the accepted Coupang Seller Product Contract Audit Story 1 boundary.
+- Boundary: additive pure Listing-domain contract and deterministic preflight; the legacy registration route and DTO remain unchanged.
+- Compliance: preserves separate Listing draft, category snapshot, evidence, and Seller write ownership. No new Domain, API, persistence, lifecycle, or external integration is introduced.
+- Risk: normal-risk. `READY` is explicitly not provider acceptance and every real listing/approval operation remains high-risk/manual.
+- Recovery: source, fixtures, decisions, CI and PR evidence are GitHub-owned; local build/test output is disposable.

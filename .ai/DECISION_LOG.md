@@ -1,5 +1,23 @@
 # Decision log
 
+## 2026-08-08 — Separate Coupang Product Creation intent from Listing drafts
+
+- Dependency: owner-approved Coupang Seller Product Contract Audit v1 and Listing Content Fact and Policy Contract v1.
+- Decision: a Listing marketing draft is never a Coupang Product Creation request. The first supported intent is an immutable Marketplace-only contract evaluated by a pure local preflight.
+- Fail-closed boundary: Rocket Growth/Hybrid, `requested: true`, mismatched or stale evidence, placeholder assets, duplicate SKUs/options, and unmet category requirements cannot produce `READY`.
+- `READY` means only that supplied local evidence satisfies the captured contract. It never proves Coupang acceptance and performs no call.
+- Durable state: GitHub owns source, tests, decision and delivery evidence. No runtime state, credential, provider response, or local-only durable state is introduced.
+- Risk/exclusions: normal-risk pure contract and tests; no API, database, Auth/RLS, environment, Production, pricing, or marketplace write.
+
+## 2026-08-08 — Separate Coupang Product Creation intent from Listing drafts
+
+- Dependency: owner-approved Coupang Seller Product Contract Audit v1 and Listing Content Fact and Policy Contract v1.
+- Decision: a Listing marketing draft is never a Coupang Product Creation request. The first supported intent is an immutable Marketplace-only contract evaluated by a pure local preflight.
+- Fail-closed boundary: Rocket Growth/Hybrid, `requested: true`, mismatched or stale evidence, placeholder assets, duplicate SKUs/options, and unmet category requirements cannot produce `READY`.
+- `READY` means only that supplied local evidence satisfies the captured contract. It never proves Coupang acceptance and performs no call.
+- Durable state: GitHub owns source, tests, decision and delivery evidence. No runtime state, credential, provider response, or local-only durable state is introduced.
+- Risk/exclusions: normal-risk pure contract and tests; no API, database, Auth/RLS, environment, Production, pricing, or marketplace write.
+
 ## 2026-08-08 — Prepare but do not auto-merge the AWS backup worker
 
 - Decision: the deployable worker may be kept merge-ready on PR #105 after

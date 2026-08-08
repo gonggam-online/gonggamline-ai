@@ -65,3 +65,15 @@
 - Repository owner accepted the corrected Architecture content at
   `5b77af8baf39a769e8541b14fe52196b27fcde4f`; this acceptance does not authorize
   a KK946 readiness decision or live marketplace action.
+# 2026-08-08 — Marketplace Product Creation preflight
+
+- Added a strict, immutable Marketplace Product Creation intent distinct from the existing Listing marketing draft.
+- Added a pure zero-network preflight with deterministic intent and evidence fingerprints.
+- Added fail-closed gates for unsupported variants, approval requests, category/vendor evidence, required metadata decisions, real assets, placeholders, and SKU/option uniqueness.
+- `READY` means local contract readiness only; Coupang acceptance, Production, pricing, database, and marketplace writes remain excluded.
+# 2026-08-08 — Marketplace Product Creation preflight
+
+- Added a strict, immutable Marketplace Product Creation intent distinct from the existing Listing marketing draft.
+- Added a pure zero-network preflight with deterministic intent and evidence fingerprints.
+- Added fail-closed gates for unsupported variants, approval requests, category/vendor evidence, required metadata decisions, real assets, placeholders, and SKU/option uniqueness.
+- `READY` means local contract readiness only; Coupang acceptance, Production, pricing, database, and marketplace writes remain excluded.
