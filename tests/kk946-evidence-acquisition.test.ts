@@ -13,10 +13,15 @@ const status = JSON.parse(statusText) as {
   confidentialEvidenceStore: string;
 };
 
-test("KK946 remains quarantined with every real identity and evidence binding unknown", () => {
+test("KK946 remains quarantined when the supplier catalog identity is ambiguous", () => {
   assert.equal(status.subjectId, "KK946");
   assert.equal(status.disposition, "QUARANTINED");
-  assert.ok(Object.values(status.bindings).every((value) => value === "UNKNOWN"));
+  assert.equal(status.bindings.supplierCatalogItem, "AMBIGUOUS");
+  assert.ok(
+    Object.entries(status.bindings)
+      .filter(([key]) => key !== "supplierCatalogItem")
+      .every(([, value]) => value === "UNKNOWN"),
+  );
 });
 
 test("status manifest proves no raw evidence movement or commerce write", () => {
