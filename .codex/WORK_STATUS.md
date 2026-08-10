@@ -22,7 +22,8 @@
   tests 5/5; full tests 546/546; lint with zero errors and four existing
   warnings; typecheck; production build with 85 routes; local Playwright with
   the existing Supabase-unconfigured baseline (35 passed, 2 skipped, 7 failed).
-- Current: diff/security review, delivery, exact-head CI, and Preview.
+- Current: implementation and delivery are complete; Draft PR #116 awaits an
+  owner merge decision because this task explicitly prohibits Production.
 - Blockers/owner actions: none currently.
 - Changed files: `tools/aws-backup-change-set/plan.ts`,
   `tests/aws-backup-change-set-plan.test.ts`,
@@ -31,10 +32,16 @@
   now passes all five AWS packet tests. Its current `ci-tests` failure is two
   unrelated Orchestrator Phase 3 timing assertions, while every other check and
   Preview passes.
-- Exact next action: review and commit this isolated cross-platform fix, push a
-  separate PR, then inspect its exact-head checks. PR #115 should rerun its
-  current `ci-tests`; it does not need to copy this branch into its Stage 13A
-  evidence commit unless the AWS failures recur on the exact head.
+- Delivery: commit `00ad67e4bc73f54ce881cc9c5a0efd666620a35a` is pushed;
+  Draft PR #116 targets `main`, is mergeable, and has `normal-risk`. Its first
+  exact head passed all CI, Vercel, and Preview browser checks. Production and
+  merge remain untouched by explicit task boundary.
+- PR #115 follow-up: reran failed jobs on unchanged exact head
+  `c2667de6225cfaf1f1c092371a30882bcc40b33b`; `ci-tests` passed in 43 seconds
+  and all PR checks now pass. No cherry-pick or Stage 13A evidence change is
+  required for the current head.
+- Exact next action: validate the final status-only head for PR #116, then leave
+  the Draft PR for review without merge or Production deployment.
 - Remaining risk: packet generation must remain identical to the committed LF
   Git source on both Windows and Linux; AWS execution remains prohibited.
 
