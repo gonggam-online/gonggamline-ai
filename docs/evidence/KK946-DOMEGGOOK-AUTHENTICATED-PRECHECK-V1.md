@@ -8,8 +8,10 @@
 - Intended option: black was visible and selectable, but a distinct provider
   option/SKU code was not exposed. Purchased-option binding remains `UNKNOWN`.
 - Disposition: `QUARANTINED`.
-- Order, supplier contact, paid inspection, warehouse instruction, listing, and
-  fulfillment: `NOT_AUTHORIZED`.
+- Supplier inquiry is not required for ordinary resale when the catalog facts
+  are internally consistent and the page explicitly permits detail-image use.
+- Order, payment, paid inspection, warehouse instruction, listing, and
+  fulfillment remain separately approval-gated.
 
 Only sanitized visible facts are recorded below. No account identity, supplier
 contact details, address, business registration number, raw page capture,
@@ -37,12 +39,13 @@ image, credential, cookie, private message, or provider payload was retained.
 | remote-area surcharge | Jeju `+3,000 KRW`; island/mountain `+10,000 KRW` | catalog term |
 | combined shipping | allowed only from the same origin | catalog term |
 | tax status | general taxable seller / taxable product | seller catalog classification |
-| VAT inclusion | not stated | `UNKNOWN` |
-| tax-invoice issuance/path | not stated | `UNKNOWN` |
+| VAT/tax | taxable product; checkout states that VAT-included prices support input-tax credit | transaction document remains authoritative |
+| tax evidence path | cash-receipt options are shown at checkout | select the approved evidence path during payment |
 
-For six units, the visible pre-payment arithmetic is `5,100 KRW` merchandise
-plus `3,000 KRW` base shipping, or `8,100 KRW`. This is not a quote, payment
-authorization, or confirmed VAT treatment; the checkout total was not opened.
+For six units, the authenticated checkout fixes `5,100 KRW` merchandise plus
+`3,000 KRW` prepaid shipping, or `8,100 KRW` total before any payment-provider
+adjustment. No point or e-money deduction was applied. This is an approval
+packet, not an order or payment authorization.
 
 ## Product, notice, and return claims
 
@@ -65,14 +68,29 @@ authorization, or confirmed VAT treatment; the checkout total was not opened.
   stated statutory exception window. This is a platform statement, not a
   supplier-specific defect acceptance or inspection agreement.
 
-## Image rights
+## Default resale and image-use rule
 
-The authenticated page displays detail-image use as `allowed`. That statement
-does not prove the policy-required exact asset bytes, grantor authority,
-Coupang/marketplace and CDN/processor sharing, editing/derivative permission,
-territory, term, expiry, revocation, trademarks/trade dress, or privacy status.
-Therefore image use and edit rights remain `UNKNOWN`, and no supplier image may
-be copied, downloaded, transformed, or published.
+Ordinary resale does not require a supplier inquiry when the authenticated
+catalog supplies a clear purchasable option, price, MOQ, stock, shipping, and
+return terms. The authenticated page explicitly displays detail-image use as
+`allowed`; that is admitted as permission to reuse those images for an
+unchanged, truthful listing of this exact product. It does not authorize
+material alteration, removal of marks, unsupported claims, unrelated use, or
+continued use after the catalog permission is withdrawn. Missing or conflicting
+permission, regulated-category evidence, option identity, or product facts
+must fail closed to own photography, inspection, or exceptional inquiry.
+
+## Checkout review
+
+- Checkout line: black, `6` units, `5,100 KRW`.
+- Prepaid shipping: `3,000 KRW`.
+- Exact displayed payment total: `8,100 KRW`.
+- The Domeggook Rocket Growth helper populated the approved Gaemi Warehouse
+  receiving destination in the checkout UI. The repository retains no address,
+  phone, email, or account identifier.
+- Opening checkout created one provider-side cart/draft item. No terms were
+  accepted and no order, payment, supplier message, warehouse instruction, or
+  download occurred.
 
 ## Sanitized return packet
 
@@ -91,15 +109,15 @@ assetRights: INCOMPLETE
 categorySelection: NOT_CHECKED
 sellerLogistics: NOT_CHECKED
 rawEvidenceMoved: false
+externalDraftWritePerformed: true
 commerceWritePerformed: false
-notes: OPTION_CODE_VAT_INVOICE_DIMENSIONS_MARKINGS_RIGHTS_SCOPE_UNKNOWN
+notes: CHECKOUT_TOTAL_AND_GAEMI_DESTINATION_VERIFIED_ORDER_NOT_SUBMITTED
 ```
 
 ## Next approval boundary
 
-The shortest next action is a supplier inquiry limited to the exact black
-option/SKU code, VAT inclusion and tax-invoice path, exact dimensions/weight,
-packaging and required markings, defect exchange terms, and image-rights scope.
-Sending that inquiry is an external write and requires separate owner approval.
-Purchase, payment, paid inspection, and Gaemi Warehouse instructions remain
-later, separately approved actions.
+The shortest next action is owner approval of the exact `8,100 KRW` black-six
+order to the checkout-populated Gaemi Warehouse destination. Supplier inquiry
+is reserved for exceptions and is not required here. Payment execution, paid
+inspection, and Gaemi Warehouse instructions remain separately approved
+actions.

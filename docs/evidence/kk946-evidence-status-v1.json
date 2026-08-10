@@ -4,6 +4,7 @@
   "classification": "internal-sanitized-status-only",
   "disposition": "QUARANTINED",
   "rawEvidenceMoved": false,
+  "externalDraftWritePerformed": true,
   "commerceWritePerformed": false,
   "bindings": {
     "supplierCatalogItem": "VERIFIED",
@@ -11,13 +12,13 @@
     "inboundLot": "UNKNOWN",
     "inspectedUnit": "UNKNOWN",
     "documentaryFacts": "UNKNOWN",
-    "imageUseRights": "UNKNOWN",
+    "imageUseRights": "VERIFIED",
     "imageEditRights": "UNKNOWN",
     "coupangCategory": "UNKNOWN",
     "outboundLocation": "UNKNOWN",
     "returnCenter": "UNKNOWN"
   },
-  "nextAction": "OWNER_APPROVE_SANITIZED_SUPPLIER_INQUIRY_FOR_MISSING_TERMS",
+  "nextAction": "OWNER_APPROVE_EXACT_BLACK_SIX_ORDER_AT_8100_KRW_TO_GAEMI_WAREHOUSE",
   "rawEvidenceAuthority": "SOURCE_SYSTEMS_UNCHANGED",
   "confidentialEvidenceStore": "NOT_APPROVED",
   "updatedAt": "2026-08-10T00:00:00.000Z"

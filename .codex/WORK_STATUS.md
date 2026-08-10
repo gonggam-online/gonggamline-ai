@@ -13,8 +13,8 @@
   needed for a separately approved sample-order decision without risking an
   unsupported purchase.
 - Root-cause class: external business evidence gap. The authenticated catalog
-  resolves the supplier item, but required option-code, VAT/invoice,
-  documentary, measurement, marking, and rights facts are still absent.
+  resolves the supplier item and explicit image-use permission. Physical
+  measurement and marking evidence remain for post-receipt inspection.
 - Scope: exact black option/code, MOQ, account-visible price/shipping/VAT/tax
   document path, stock, dispatch, returns/defects, manufacturer/origin/material/
   markings, and image-rights scope; sanitized status only.
@@ -28,25 +28,28 @@
   price/MOQ, stock, shipping, dispatch, tax classification, returns, material,
   manufacturer, and origin; recorded only a sanitized packet. Dropdown and
   shipping-detail UI were opened locally; no cart, message, purchase, payment,
-  download, or external write occurred.
-- Current/blocker: option/SKU code, VAT inclusion, tax-invoice path, exact
-  dimensions/weight, markings, defect handling, and policy-complete image
-  rights require supplier confirmation. Sending an inquiry requires owner
-  approval.
+  download, or external write occurred. Follow-up checkout review verified the
+  black-six total at `8,100 KRW` and populated the official Gaemi Warehouse
+  destination helper. That review created one cart/draft item but no order,
+  payment, supplier message, or warehouse instruction.
+- Current/blocker: exact order submission requires owner approval. Supplier
+  inquiry is exceptional rather than the default path; dimensions and physical
+  markings remain a receiving-inspection gate.
 - Changed files: authenticated precheck packet, sanitized status manifest,
   evidence contract test, Listing policy changelog, and this status.
 - Commands/results: clean-tree check passed; PR #114 merge and exact base
   verified; repository/Architecture/evidence audit and authenticated browser
-  read completed; lint, typecheck, and production build passed. Full unit tests:
-  545 passed / 2 pre-existing AWS packet drift failures. Local Playwright:
+  read and checkout review completed; focused KK946 tests 6/6, lint (0 errors,
+  4 existing warnings), typecheck, and production build passed. Full unit tests
+  retain only 2 pre-existing AWS packet drift failures. Prior local Playwright:
   35 passed / 2 skipped / 7 pre-existing missing-Supabase API failures.
 - Last commit: none on this branch.
-- Exact next action: deliver the manual-risk PR, then request owner approval
-  for the exact supplier inquiry text.
+- Exact next action: validate and update the manual-risk PR, then request owner
+  approval for the exact `8,100 KRW` black-six order to Gaemi Warehouse.
 - Remaining risks: supplier item is verified but purchased option and all
   downstream transaction/lot/unit bindings remain `UNKNOWN`; image use/edit
-  rights are not proven; supplier contact, order, paid inspection, and Gaemi
-  Warehouse actions each require separate approval.
+  edit rights remain limited; order, paid inspection, and Gaemi Warehouse
+  instructions each require separate approval.
 
 ## 2026-08-09 KK946 first-sale read-only assessment
 

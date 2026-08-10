@@ -2,6 +2,12 @@
 
 ## 2026-08-10 - KK946 authenticated Domeggook precheck
 
+- Replaced per-item supplier inquiry with a default catalog-order path: clear
+  catalog terms and explicit image-use permission proceed without inquiry;
+  conflicts, regulated evidence gaps, and absent permissions fail closed.
+- Verified the black-six checkout total at `8,100 KRW` and the built-in Gaemi
+  Warehouse destination helper. Checkout created one cart/draft item; no order,
+  payment, message, instruction, or download occurred.
 - Verified owner-selected supplier item `56288849` and observed the black
   option, MOQ, price, stock, shipping, tax classification, dispatch, return,
   material, manufacturer, and origin claims in an authenticated read-only view.
