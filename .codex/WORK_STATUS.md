@@ -24,7 +24,7 @@
   the existing Supabase-unconfigured baseline (35 passed, 2 skipped, 7 failed).
 - Current: merged PR #115 commit
   `6a90390cd2246151eb8862090058019d4bb169f8` into the branch, preserving both
-  work-status records; PR #116 delivery revalidation is in progress.
+  work-status records; PR #116 is conflict-free and delivery-complete.
 - Blockers/owner actions: none currently.
 - Changed files: `tools/aws-backup-change-set/plan.ts`,
   `tests/aws-backup-change-set-plan.test.ts`,
@@ -46,9 +46,10 @@
   disposable Playwright output, with four existing Revenue-test warnings;
   Playwright retained the expected unconfigured-Supabase baseline of 35 passed,
   2 skipped, and 7 failed routes.
-- Exact next action: commit and push the conflict-free latest-main merge, then
-  validate the new exact head and leave PR #116 for review without merge or
-  Production deployment.
+- Latest-main delivery: merge commit `a036e32` is pushed. Its exact-head CI,
+  Vercel Preview, and `preview-browser-e2e` all passed; PR #116 is mergeable.
+- Exact next action: validate the final status-only head, mark PR #116 Ready for
+  Review, and leave merge and Production deployment untouched.
 - Remaining risk: packet generation must remain identical to the committed LF
   Git source on both Windows and Linux; AWS execution remains prohibited.
 ## 2026-08-10 — KK946 Domeggook payment complete
