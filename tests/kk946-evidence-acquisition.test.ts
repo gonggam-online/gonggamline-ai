@@ -21,6 +21,8 @@ const status = JSON.parse(statusText) as {
   confidentialEvidenceStore: string;
   monitoring: {
     domeggookOrderStatus: string;
+    carrier: string;
+    trackingReference: string;
     gaemiInboundStatus: string;
     externalWritePerformed: boolean;
   };
@@ -45,12 +47,15 @@ test("KK946 remains quarantined after catalog and warehouse setup are verified",
     .every(([, value]) => value === "UNKNOWN"));
 });
 
-test("read-only monitor distinguishes authentication gaps from shipment evidence", () => {
-  assert.equal(status.monitoring.domeggookOrderStatus, "NOT_CHECKED_AUTH_REQUIRED");
+test("read-only monitor records exact shipment evidence without advancing receipt", () => {
+  assert.equal(status.monitoring.domeggookOrderStatus, "VERIFIED_IN_TRANSIT");
+  assert.equal(status.monitoring.carrier, "CJ_LOGISTICS");
+  assert.equal(status.monitoring.trackingReference, "540939262870");
   assert.equal(status.monitoring.gaemiInboundStatus, "VERIFIED_PENDING");
   assert.equal(status.monitoring.externalWritePerformed, false);
   assert.match(inboundInspectionPacket, /public item-page promise[\s\S]+not order-level shipment evidence/i);
-  assert.match(inboundInspectionPacket, /DOMEGGOOK_AUTH_REQUIRED_FOR_ORDER_STATUS/);
+  assert.match(inboundInspectionPacket, /VERIFIED_CJ_LOGISTICS_540939262870/);
+  assert.match(inboundInspectionPacket, /warehouse receipt[\s\S]+`UNKNOWN`/i);
 });
 
 test("inbound packet binds receipt and full inspection without moving raw evidence", () => {

@@ -23,9 +23,12 @@
   tests 8/8; full tests 549/549; lint with zero errors and four existing
   warnings; typecheck; production build with 85 routes; local Playwright with
   the existing unconfigured-Supabase baseline (35 passed, 2 skipped, 7 failed).
-- Current/blocker: Domeggook order detail was not checked because the current
-  session is logged out. Public same-day dispatch is explicitly rejected as
-  order evidence. Authenticated retry is the exact external dependency.
+- Current: authenticated read-only monitoring verified order `OR75260192` as
+  in transit with CJ Logistics tracking `540939262870`. No address, contact,
+  account identity, or raw provider capture was retained. Gaemi remains pending
+  inbound, so warehouse receipt is the next external evidence dependency.
+  Updated focused tests pass 8/8; full tests pass 549/549; lint remains at zero
+  errors/four existing warnings; typecheck and 85-route build pass.
 - Changed files: inbound/inspection packet, sanitized status manifest, KK946
   contract test, Listing policy changelog, and this recovery record.
 - Delivery: commit `5a1a7986f35ed5bceb813aa2260f45f7a4ee49f0` is pushed;
@@ -33,12 +36,12 @@
   Preview browser validation passed. The first CI attempt had one unrelated
   Orchestrator Phase 3 timing failure (`PROCESS_SHUTDOWN_FAILED` versus
   `TOKENS`); the unchanged exact head passed all CI after failed-job rerun.
-- Exact next action: validate the status-only final head, then mark PR #117
-  Ready for Review when every exact-head gate remains green. Do not merge or
-  touch Production in this task.
-- Remaining risks: supplier confirmation, shipment/tracking, receipt, inbound
-  lot, six inspected units, physical/documentary facts, and category/logistics
-  evidence remain unknown; KK946 stays quarantined.
+- Exact next action: commit/push the verified shipment checkpoint, validate the
+  new exact head, then mark PR #117 Ready for Review. After merge, monitor Gaemi
+  receipt read-only; do not touch Production in this task.
+- Remaining risks: warehouse receipt, inbound lot, six inspected units,
+  physical/documentary facts, and category/logistics evidence remain unknown;
+  KK946 stays quarantined.
 
 ## 2026-08-10 AWS disabled-worker packet cross-platform reproducibility
 

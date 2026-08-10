@@ -2,11 +2,14 @@
 
 ## 2026-08-10 - KK946 inbound and inspection packet
 
+- Authenticated read-only monitoring advanced Domeggook order `OR75260192` to
+  verified in transit with CJ Logistics tracking bound to the exact order.
+- Kept Gaemi receipt, inbound lot, and inspection evidence unknown; the next
+  observation gate is warehouse receipt, not another supplier action.
 - Re-observed Gaemi application `A1296915119go` as inbound pending for
   `PJ1491663`, black, six units, without creating an external write.
-- Recorded Domeggook order shipment as `NOT_CHECKED`, not shipped: the current
-  session requires authentication and the public dispatch promise is not
-  order-level evidence.
+- Preserved the rule that a public dispatch promise is not order-level evidence;
+  only the later authenticated order observation advanced shipment state.
 - Added the exact order-to-tracking-to-application-to-lot-to-six-units receipt
   and full-inspection checklist, with conflicts and missing scope failing closed.
 - Kept raw labels, invoices, images, personal data, and provider payloads in

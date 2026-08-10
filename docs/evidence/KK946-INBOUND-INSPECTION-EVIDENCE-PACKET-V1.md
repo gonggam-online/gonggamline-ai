@@ -2,10 +2,11 @@
 
 ## Current read-only checkpoint
 
-- Observed at: `2026-08-10 13:52 KST`.
-- Domeggook order: `OR75260192` remains bound only through the previously
-  verified payment-complete record. The current browser session was logged out,
-  so supplier confirmation, shipment, carrier, and tracking were `NOT_CHECKED`.
+- Observed at: `2026-08-10 14:13 KST`.
+- Domeggook order `OR75260192` was re-observed in the authenticated order list
+  as `in transit`, using CJ Logistics with tracking reference `540939262870`.
+  This verifies supplier dispatch and the order-to-tracking binding, but not
+  warehouse receipt, inbound lot, or inspected units.
 - A public item-page promise such as same-day dispatch or average dispatch time
   is not order-level shipment evidence and must never advance the order state.
 - Gaemi application `A1296915119go` was re-observed in the authenticated
@@ -40,9 +41,9 @@ these sanitized outcomes:
 
 | Signal | Admissible authority | Current result | Next action |
 |---|---|---|---|
-| supplier confirmation | exact Domeggook order detail | `NOT_CHECKED` | retry only after owner-authenticated access exists |
-| shipment state | exact Domeggook order detail | `NOT_CHECKED` | do not infer from catalog dispatch promise |
-| carrier and tracking | exact Domeggook order detail | `UNKNOWN` | bind to the order and Gaemi application when visible |
+| supplier confirmation | exact Domeggook authenticated order list | `VERIFIED_DISPATCHED` | no supplier action required |
+| shipment state | exact Domeggook authenticated order list | `VERIFIED_IN_TRANSIT` | monitor warehouse receipt |
+| carrier and tracking | exact Domeggook authenticated order list | `VERIFIED` | CJ Logistics / `540939262870` |
 | warehouse receipt | exact Gaemi application/detail | `UNKNOWN` | wait; current state is `inbound pending` |
 | inspection result | exact Gaemi inspection record | `UNKNOWN` | wait for receipt and completed full inspection |
 
@@ -109,16 +110,16 @@ refund, supplier contact, or any provider-side mutation.
 ```text
 subjectId: KK946
 supplierOrder: VERIFIED_OR75260192_PAYMENT_COMPLETE
-supplierConfirmation: NOT_CHECKED
-shipment: NOT_CHECKED
-carrierTracking: UNKNOWN
+supplierConfirmation: VERIFIED_DISPATCHED
+shipment: VERIFIED_IN_TRANSIT
+carrierTracking: VERIFIED_CJ_LOGISTICS_540939262870
 warehouseInboundApplication: VERIFIED_A1296915119GO_PENDING
 inboundLot: UNKNOWN
 inspectedUnits: UNKNOWN
 documentaryFacts: UNKNOWN
 rawEvidenceMoved: false
 externalWritePerformedByThisMonitor: false
-notes: DOMEGGOOK_AUTH_REQUIRED_FOR_ORDER_STATUS
+notes: MONITOR_GAEMI_RECEIPT
 ```
 
 Rollback is a Git revert. There is no provider rollback because this packet and
