@@ -3,6 +3,10 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const runbook = readFileSync("docs/runbooks/KK946-EVIDENCE-ACQUISITION-V1.md", "utf8");
+const authenticatedPrecheck = readFileSync(
+  "docs/evidence/KK946-DOMEGGOOK-AUTHENTICATED-PRECHECK-V1.md",
+  "utf8",
+);
 const statusText = readFileSync("docs/evidence/kk946-evidence-status-v1.json", "utf8");
 const status = JSON.parse(statusText) as {
   subjectId: string;
@@ -13,10 +17,10 @@ const status = JSON.parse(statusText) as {
   confidentialEvidenceStore: string;
 };
 
-test("KK946 remains quarantined when the supplier catalog identity is ambiguous", () => {
+test("KK946 remains quarantined after the exact supplier catalog item is verified", () => {
   assert.equal(status.subjectId, "KK946");
   assert.equal(status.disposition, "QUARANTINED");
-  assert.equal(status.bindings.supplierCatalogItem, "AMBIGUOUS");
+  assert.equal(status.bindings.supplierCatalogItem, "VERIFIED");
   assert.ok(
     Object.entries(status.bindings)
       .filter(([key]) => key !== "supplierCatalogItem")
@@ -56,4 +60,16 @@ test("operator return packet is sanitized and never claims verification by defau
   assert.match(runbook, /`VERIFIED` must not be recorded until/);
   assert.doesNotMatch(statusText, /https?:\/\//);
   assert.doesNotMatch(statusText, /(?:phone|address|email|access.?key|secret|authorization)/i);
+});
+
+test("authenticated precheck verifies only catalog identity and preserves approval boundaries", () => {
+  assert.match(authenticatedPrecheck, /catalogBinding: VERIFIED/);
+  assert.match(authenticatedPrecheck, /optionSkuCode: UNKNOWN/);
+  assert.match(authenticatedPrecheck, /rawEvidenceMoved: false/);
+  assert.match(authenticatedPrecheck, /commerceWritePerformed: false/);
+  assert.match(authenticatedPrecheck, /requires separate owner approval/);
+  assert.doesNotMatch(
+    authenticatedPrecheck,
+    /(?:\b\d{3}-\d{2}-\d{5}\b|\b01\d-\d{3,4}-\d{4}\b|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,})/,
+  );
 });

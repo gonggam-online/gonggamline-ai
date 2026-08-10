@@ -1,5 +1,53 @@
 # Work status
 
+## 2026-08-10 — KK946 authenticated supplier precheck
+
+- Objective: perform the PR #114 next gate: an authenticated, read-only review
+  of Domeggook item `56288849`, then record only a sanitized evidence packet.
+- Branch/base: `codex/docs/kk946-authenticated-supplier-precheck` from exact
+  `origin/main` / PR #114 merge
+  `6a57e7ec65ab12398e6a0909d198ff3d8207a439`.
+- Risk: high-risk/manual for the whole first-sale path. This bounded task
+  permits authenticated reads and internal sanitized documentation only.
+- Revenue impact: confirms the exact purchasable black option and real terms
+  needed for a separately approved sample-order decision without risking an
+  unsupported purchase.
+- Root-cause class: external business evidence gap. The authenticated catalog
+  resolves the supplier item, but required option-code, VAT/invoice,
+  documentary, measurement, marking, and rights facts are still absent.
+- Scope: exact black option/code, MOQ, account-visible price/shipping/VAT/tax
+  document path, stock, dispatch, returns/defects, manufacturer/origin/material/
+  markings, and image-rights scope; sanitized status only.
+- Non-goals: cart, message, order, payment, download, supplier/warehouse
+  instruction, paid inspection, raw evidence transfer, DB/Auth/RLS,
+  configuration changes, Production mutation, listing, or fulfillment.
+- Completed: verified the clean detached worktree; fetched latest `origin/main`;
+  confirmed PR #114 merged; read binding governance and approved Domeggook
+  read-only architecture; created the dedicated branch; inspected the signed-in
+  item page read-only; verified item `56288849`, black option availability,
+  price/MOQ, stock, shipping, dispatch, tax classification, returns, material,
+  manufacturer, and origin; recorded only a sanitized packet. Dropdown and
+  shipping-detail UI were opened locally; no cart, message, purchase, payment,
+  download, or external write occurred.
+- Current/blocker: option/SKU code, VAT inclusion, tax-invoice path, exact
+  dimensions/weight, markings, defect handling, and policy-complete image
+  rights require supplier confirmation. Sending an inquiry requires owner
+  approval.
+- Changed files: authenticated precheck packet, sanitized status manifest,
+  evidence contract test, Listing policy changelog, and this status.
+- Commands/results: clean-tree check passed; PR #114 merge and exact base
+  verified; repository/Architecture/evidence audit and authenticated browser
+  read completed; lint, typecheck, and production build passed. Full unit tests:
+  545 passed / 2 pre-existing AWS packet drift failures. Local Playwright:
+  35 passed / 2 skipped / 7 pre-existing missing-Supabase API failures.
+- Last commit: none on this branch.
+- Exact next action: deliver the manual-risk PR, then request owner approval
+  for the exact supplier inquiry text.
+- Remaining risks: supplier item is verified but purchased option and all
+  downstream transaction/lot/unit bindings remain `UNKNOWN`; image use/edit
+  rights are not proven; supplier contact, order, paid inspection, and Gaemi
+  Warehouse actions each require separate approval.
+
 ## 2026-08-09 KK946 first-sale read-only assessment
 
 - Objective: advance KK946 through the shortest safe first-sale path while

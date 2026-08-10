@@ -6,7 +6,7 @@
   "rawEvidenceMoved": false,
   "commerceWritePerformed": false,
   "bindings": {
-    "supplierCatalogItem": "AMBIGUOUS",
+    "supplierCatalogItem": "VERIFIED",
     "purchasedOptionSku": "UNKNOWN",
     "inboundLot": "UNKNOWN",
     "inspectedUnit": "UNKNOWN",
@@ -17,8 +17,8 @@
     "outboundLocation": "UNKNOWN",
     "returnCenter": "UNKNOWN"
   },
-  "nextAction": "OWNER_SELECT_EXACT_SUPPLIER_ITEM_AFTER_AUTHENTICATED_READ_ONLY_REVIEW",
+  "nextAction": "OWNER_APPROVE_SANITIZED_SUPPLIER_INQUIRY_FOR_MISSING_TERMS",
   "rawEvidenceAuthority": "SOURCE_SYSTEMS_UNCHANGED",
   "confidentialEvidenceStore": "NOT_APPROVED",
-  "updatedAt": "2026-08-09T00:00:00.000Z"
+  "updatedAt": "2026-08-10T00:00:00.000Z"
 }
