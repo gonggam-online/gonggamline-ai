@@ -17,13 +17,14 @@ const status = JSON.parse(statusText) as {
   confidentialEvidenceStore: string;
 };
 
-test("KK946 remains quarantined after catalog and explicitly allowed image use are verified", () => {
+test("KK946 remains quarantined after catalog, image use, and warehouse option are verified", () => {
   assert.equal(status.subjectId, "KK946");
   assert.equal(status.disposition, "QUARANTINED");
   assert.equal(status.bindings.supplierCatalogItem, "VERIFIED");
   assert.equal(status.bindings.imageUseRights, "VERIFIED");
+  assert.equal(status.bindings.warehouseProductOption, "VERIFIED");
   assert.ok(Object.entries(status.bindings)
-    .filter(([key]) => !["supplierCatalogItem", "imageUseRights"].includes(key))
+    .filter(([key]) => !["supplierCatalogItem", "imageUseRights", "warehouseProductOption"].includes(key))
     .every(([, value]) => value === "UNKNOWN"));
 });
 
@@ -68,6 +69,8 @@ test("authenticated precheck verifies only catalog identity and preserves approv
   assert.match(authenticatedPrecheck, /commerceWritePerformed: false/);
   assert.match(authenticatedPrecheck, /Exact displayed payment total: `8,100 KRW`/);
   assert.match(authenticatedPrecheck, /Supplier inquiry\s+is reserved for exceptions/);
+  assert.match(authenticatedPrecheck, /PJ1491663/);
+  assert.match(authenticatedPrecheck, /No inbound application, paid inspection/);
   assert.doesNotMatch(
     authenticatedPrecheck,
     /(?:\b\d{3}-\d{2}-\d{5}\b|\b01\d-\d{3,4}-\d{4}\b|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,})/,

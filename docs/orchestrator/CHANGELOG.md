@@ -1,5 +1,13 @@
 # Orchestrator changelog
 
+## 2026-08-10 — KK946 Gaemi product registration
+
+- Registered sanitized warehouse product `PJ1491663` for `KK946 mini pouch`,
+  option `black`, after exact owner approval.
+- Verified the product is active and not received, with no approval backlog.
+- Performed no inbound application, paid inspection, point use, supplier order,
+  payment, listing, or fulfillment action.
+
 ## 2026-08-05 — Gaemi Warehouse to Rocket Growth adapter Architecture
 
 - Audited Gaemi Warehouse's public 2025.06 rate card and 2025.07 Rocket Growth

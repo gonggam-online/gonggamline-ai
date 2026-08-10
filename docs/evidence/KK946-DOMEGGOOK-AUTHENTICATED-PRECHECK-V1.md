@@ -92,6 +92,21 @@ must fail closed to own photography, inspection, or exceptional inquiry.
   accepted and no order, payment, supplier message, warehouse instruction, or
   download occurred.
 
+## Gaemi Warehouse product registration
+
+- On `2026-08-10` KST, after exact owner approval, the product was registered
+  at the Icheon warehouse as `KK946 mini pouch` with the single option `black`.
+- The sanitized warehouse product reference is `PJ1491663`.
+- Product management showed one active product, option `black`, status
+  `not received`, and zero items awaiting approval. This verifies only the
+  warehouse product/option registration; it does not bind a purchased option,
+  inbound lot, inspected unit, or stock quantity.
+- A rights-permitted catalog representative image was resized to the warehouse
+  upload constraint and submitted. The temporary local derivative was not
+  retained as evidence, and no raw page capture or account data was recorded.
+- No inbound application, paid inspection, point use, warehouse request,
+  Domeggook order, or payment was performed.
+
 ## Sanitized return packet
 
 ```text
@@ -108,16 +123,17 @@ documentaryFacts: INCOMPLETE
 assetRights: INCOMPLETE
 categorySelection: NOT_CHECKED
 sellerLogistics: NOT_CHECKED
+warehouseProductOption: VERIFIED_PJ1491663_BLACK_ACTIVE_NOT_RECEIVED
 rawEvidenceMoved: false
 externalDraftWritePerformed: true
 commerceWritePerformed: false
-notes: CHECKOUT_TOTAL_AND_GAEMI_DESTINATION_VERIFIED_ORDER_NOT_SUBMITTED
+notes: GAEMI_PRODUCT_REGISTERED_INBOUND_AND_ORDER_NOT_SUBMITTED
 ```
 
 ## Next approval boundary
 
-The shortest next action is owner approval of the exact `8,100 KRW` black-six
-order to the checkout-populated Gaemi Warehouse destination. Supplier inquiry
-is reserved for exceptions and is not required here. Payment execution, paid
-inspection, and Gaemi Warehouse instructions remain separately approved
-actions.
+The shortest next action is an exact owner-approved Gaemi Warehouse inbound
+application for six black units against `PJ1491663`, followed only after that
+gate by the separately approved `8,100 KRW` Domeggook order. Supplier inquiry
+is reserved for exceptions and is not required here. Payment execution and
+paid inspection remain separately approved actions.

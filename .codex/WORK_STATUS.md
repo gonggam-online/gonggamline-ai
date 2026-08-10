@@ -1,5 +1,25 @@
 # Work status
 
+## 2026-08-10 — KK946 Gaemi Warehouse product registration
+
+- Objective: register only the approved Gaemi product/option required before
+  an inbound application for the six-unit black KK946 sample.
+- Branch/risk: `codex/docs/kk946-authenticated-supplier-precheck`; high-risk
+  first-sale path with manual merge and exact external-write boundaries.
+- Completed: registered `KK946 mini pouch`, option `black`, at the Icheon
+  warehouse after exact owner approval; verified sanitized product reference
+  `PJ1491663`, active state, `not received` status, and zero approval backlog.
+- External effects: one warehouse product/option registration. No inbound
+  application, paid inspection, point use, warehouse request, Domeggook order,
+  payment, supplier message, listing, or fulfillment action occurred.
+- Evidence handling: retained only the sanitized product reference and status;
+  no address, contact, account identifier, raw capture, or provider payload.
+- Current gate: exact approval for a six-unit black inbound application against
+  `PJ1491663`; the `8,100 KRW` Domeggook order remains a later separate gate.
+- Remaining risks: purchased option, transaction, inbound lot, inspected unit,
+  dimensions/weight/markings, paid inspection scope, and Coupang category are
+  still `UNKNOWN`; KK946 remains quarantined.
+
 ## 2026-08-10 — KK946 authenticated supplier precheck
 
 - Objective: perform the PR #114 next gate: an authenticated, read-only review
