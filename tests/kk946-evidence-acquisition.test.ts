@@ -7,6 +7,10 @@ const authenticatedPrecheck = readFileSync(
   "docs/evidence/KK946-DOMEGGOOK-AUTHENTICATED-PRECHECK-V1.md",
   "utf8",
 );
+const inboundInspectionPacket = readFileSync(
+  "docs/evidence/KK946-INBOUND-INSPECTION-EVIDENCE-PACKET-V1.md",
+  "utf8",
+);
 const statusText = readFileSync("docs/evidence/kk946-evidence-status-v1.json", "utf8");
 const status = JSON.parse(statusText) as {
   subjectId: string;
@@ -15,6 +19,11 @@ const status = JSON.parse(statusText) as {
   commerceWritePerformed: boolean;
   bindings: Record<string, string>;
   confidentialEvidenceStore: string;
+  monitoring: {
+    domeggookOrderStatus: string;
+    gaemiInboundStatus: string;
+    externalWritePerformed: boolean;
+  };
 };
 
 test("KK946 remains quarantined after catalog and warehouse setup are verified", () => {
@@ -34,6 +43,28 @@ test("KK946 remains quarantined after catalog and warehouse setup are verified",
       "supplierOrderPaymentComplete",
     ].includes(key))
     .every(([, value]) => value === "UNKNOWN"));
+});
+
+test("read-only monitor distinguishes authentication gaps from shipment evidence", () => {
+  assert.equal(status.monitoring.domeggookOrderStatus, "NOT_CHECKED_AUTH_REQUIRED");
+  assert.equal(status.monitoring.gaemiInboundStatus, "VERIFIED_PENDING");
+  assert.equal(status.monitoring.externalWritePerformed, false);
+  assert.match(inboundInspectionPacket, /public item-page promise[\s\S]+not order-level shipment evidence/i);
+  assert.match(inboundInspectionPacket, /DOMEGGOOK_AUTH_REQUIRED_FOR_ORDER_STATUS/);
+});
+
+test("inbound packet binds receipt and full inspection without moving raw evidence", () => {
+  for (const identifier of ["56288849", "OR75260192", "PJ1491663", "A1296915119go"]) {
+    assert.match(inboundInspectionPacket, new RegExp(identifier, "i"));
+  }
+  assert.match(inboundInspectionPacket, /each inspected unit \(1\.\.6\)/);
+  assert.match(inboundInspectionPacket, /length, width, height, unit weight, and package weight/);
+  assert.match(inboundInspectionPacket, /must not be\s+downloaded or committed/);
+  assert.match(inboundInspectionPacket, /externalWritePerformedByThisMonitor: false/);
+  assert.doesNotMatch(
+    inboundInspectionPacket,
+    /(?:\b01\d-\d{3,4}-\d{4}\b|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,})/,
+  );
 });
 
 test("status manifest proves no raw evidence movement and records the order write", () => {

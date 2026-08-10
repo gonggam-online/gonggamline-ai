@@ -1,5 +1,17 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-10 - KK946 inbound and inspection packet
+
+- Re-observed Gaemi application `A1296915119go` as inbound pending for
+  `PJ1491663`, black, six units, without creating an external write.
+- Recorded Domeggook order shipment as `NOT_CHECKED`, not shipped: the current
+  session requires authentication and the public dispatch promise is not
+  order-level evidence.
+- Added the exact order-to-tracking-to-application-to-lot-to-six-units receipt
+  and full-inspection checklist, with conflicts and missing scope failing closed.
+- Kept raw labels, invoices, images, personal data, and provider payloads in
+  their source systems; no confidential evidence store was invented.
+
 ## 2026-08-10 - KK946 authenticated Domeggook precheck
 
 - Replaced per-item supplier inquiry with a default catalog-order path: clear

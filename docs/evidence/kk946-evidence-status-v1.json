@@ -22,7 +22,13 @@
     "returnCenter": "UNKNOWN"
   },
   "nextAction": "READ_ONLY_MONITOR_SUPPLIER_CONFIRMATION_AND_SHIPMENT",
+  "monitoring": {
+    "observedAt": "2026-08-10T04:52:32.000Z",
+    "domeggookOrderStatus": "NOT_CHECKED_AUTH_REQUIRED",
+    "gaemiInboundStatus": "VERIFIED_PENDING",
+    "externalWritePerformed": false
+  },
   "rawEvidenceAuthority": "SOURCE_SYSTEMS_UNCHANGED",
   "confidentialEvidenceStore": "NOT_APPROVED",
-  "updatedAt": "2026-08-10T04:06:40.000Z"
+  "updatedAt": "2026-08-10T04:52:32.000Z"
 }
