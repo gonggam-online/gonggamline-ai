@@ -1,5 +1,16 @@
 # Work status
 
+## 2026-08-10 — KK946 Gaemi inbound application
+
+- Completed exact approved external write: application `A1296915119go` for
+  `PJ1491663`, black, six units, dimensions `10.5 x 3.6 x 6.5 cm`, box `1`.
+- Selected full inspection at 100 KRW per unit plus VAT and recorded the
+  owner-approved delivery note; Gaemi confirms `pending inbound`.
+- No order, payment, shipment, tracking registration, receipt, stock, point
+  deduction, inspection result, or inbound-lot binding occurred.
+- Next exact gate: owner approval of the displayed 8,100 KRW Domeggook order
+  to the checkout-populated Gaemi destination.
+
 ## 2026-08-10 — KK946 Gaemi Warehouse product registration
 
 - Objective: register only the approved Gaemi product/option required before

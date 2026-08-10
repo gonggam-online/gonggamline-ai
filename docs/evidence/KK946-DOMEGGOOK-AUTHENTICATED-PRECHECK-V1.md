@@ -109,6 +109,17 @@ must fail closed to own photography, inspection, or exceptional inquiry.
 
 ## Sanitized return packet
 
+### Gaemi inbound application status
+
+- After exact owner approval, inbound application `A1296915119go` was submitted
+  for warehouse product `PJ1491663`, option `black`, quantity `6`.
+- Submitted unit dimensions were `10.5 x 3.6 x 6.5 cm`, expected B2B outbound
+  carton was Gaemi box `1`, and full inspection was selected at the displayed
+  `100 KRW` per unit (`600 KRW` plus VAT for six units).
+- Gaemi shows the application as `pending inbound`. No shipment, tracking
+  registration, receipt, stock, inspection result, point deduction, or inbound
+  lot binding exists yet.
+
 ```text
 subjectId: KK946
 catalogBinding: VERIFIED
@@ -124,16 +135,17 @@ assetRights: INCOMPLETE
 categorySelection: NOT_CHECKED
 sellerLogistics: NOT_CHECKED
 warehouseProductOption: VERIFIED_PJ1491663_BLACK_ACTIVE_NOT_RECEIVED
+warehouseInboundApplication: VERIFIED_A1296915119GO_PENDING
 rawEvidenceMoved: false
 externalDraftWritePerformed: true
 commerceWritePerformed: false
-notes: GAEMI_PRODUCT_REGISTERED_INBOUND_AND_ORDER_NOT_SUBMITTED
+notes: GAEMI_INBOUND_APPLICATION_PENDING_ORDER_NOT_SUBMITTED
 ```
 
 ## Next approval boundary
 
-The shortest next action is an exact owner-approved Gaemi Warehouse inbound
-application for six black units against `PJ1491663`, followed only after that
-gate by the separately approved `8,100 KRW` Domeggook order. Supplier inquiry
-is reserved for exceptions and is not required here. Payment execution and
-paid inspection remain separately approved actions.
+The shortest next action is the separately approved `8,100 KRW` Domeggook
+black-six order to the checkout-populated Gaemi destination. Supplier inquiry
+is reserved for exceptions and is not required here. Order/payment execution
+remains separately approved; the approved full-inspection charge applies only
+after physical receipt and processing.

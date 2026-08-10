@@ -1,5 +1,13 @@
 # Orchestrator changelog
 
+## 2026-08-10 — KK946 Gaemi inbound application
+
+- Submitted approved inbound application `A1296915119go` for `PJ1491663`,
+  black, six units, with evidence-backed dimensions and box-1 estimate.
+- Selected approved full inspection at the displayed 100 KRW per unit plus VAT.
+- Verified pending-inbound status; no supplier order, shipment, receipt, point
+  deduction, inspection result, or inbound-lot binding occurred.
+
 ## 2026-08-10 — KK946 Gaemi product registration
 
 - Registered sanitized warehouse product `PJ1491663` for `KK946 mini pouch`,

@@ -9,6 +9,7 @@
   "bindings": {
     "supplierCatalogItem": "VERIFIED",
     "warehouseProductOption": "VERIFIED",
+    "warehouseInboundApplication": "VERIFIED",
     "purchasedOptionSku": "UNKNOWN",
     "inboundLot": "UNKNOWN",
     "inspectedUnit": "UNKNOWN",
@@ -19,8 +20,8 @@
     "outboundLocation": "UNKNOWN",
     "returnCenter": "UNKNOWN"
   },
-  "nextAction": "OWNER_APPROVE_GAEMI_INBOUND_APPLICATION_FOR_BLACK_SIX_UNITS",
+  "nextAction": "OWNER_APPROVE_EXACT_BLACK_SIX_ORDER_AT_8100_KRW_TO_GAEMI_WAREHOUSE",
   "rawEvidenceAuthority": "SOURCE_SYSTEMS_UNCHANGED",
   "confidentialEvidenceStore": "NOT_APPROVED",
-  "updatedAt": "2026-08-10T12:00:00.000Z"
+  "updatedAt": "2026-08-10T03:42:38.000Z"
 }
