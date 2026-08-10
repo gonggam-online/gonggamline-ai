@@ -1,5 +1,15 @@
 # Work status
 
+## 2026-08-10 — KK946 Domeggook order pending payment
+
+- Completed exact approved commerce write: order `OR75260192`, Domeggook item
+  `56288849`, black six units, merchandise 5,100 KRW plus shipping 3,000 KRW.
+- Kookmin Bank virtual-account order and business expense evidence request were
+  created; status is `payment expected` through `2026-08-11 23:59 KST`.
+- No transfer, payment confirmation, shipment, tracking, receipt, or purchased
+  option/lot binding occurred; no financial account number was retained.
+- Next exact gate: owner approval and user-controlled transfer of 8,100 KRW.
+
 ## 2026-08-10 — KK946 Gaemi inbound application
 
 - Completed exact approved external write: application `A1296915119go` for

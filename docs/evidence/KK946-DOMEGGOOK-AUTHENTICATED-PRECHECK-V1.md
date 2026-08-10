@@ -109,6 +109,18 @@ must fail closed to own photography, inspection, or exceptional inquiry.
 
 ## Sanitized return packet
 
+### Domeggook order pending payment
+
+- After exact owner approval, order `OR75260192` was created for item
+  `56288849`, option `black`, quantity `6`, with the approved Gaemi destination.
+- Merchandise was `5,100 KRW`, prepaid shipping was `3,000 KRW`, and the order
+  total was `8,100 KRW` using a Kookmin Bank virtual account with business
+  expense cash-receipt evidence requested.
+- Domeggook shows `payment expected`; the payment deadline is
+  `2026-08-11 23:59 KST`. No transfer, payment confirmation, shipment, tracking,
+  receipt, or purchased-option binding has occurred. The virtual account number
+  was not retained in the repository.
+
 ### Gaemi inbound application status
 
 - After exact owner approval, inbound application `A1296915119go` was submitted
@@ -136,16 +148,16 @@ categorySelection: NOT_CHECKED
 sellerLogistics: NOT_CHECKED
 warehouseProductOption: VERIFIED_PJ1491663_BLACK_ACTIVE_NOT_RECEIVED
 warehouseInboundApplication: VERIFIED_A1296915119GO_PENDING
+supplierOrder: VERIFIED_OR75260192_PAYMENT_EXPECTED
 rawEvidenceMoved: false
 externalDraftWritePerformed: true
-commerceWritePerformed: false
-notes: GAEMI_INBOUND_APPLICATION_PENDING_ORDER_NOT_SUBMITTED
+commerceWritePerformed: true
+notes: DOMEGGOOK_ORDER_CREATED_PAYMENT_NOT_TRANSFERRED
 ```
 
 ## Next approval boundary
 
-The shortest next action is the separately approved `8,100 KRW` Domeggook
-black-six order to the checkout-populated Gaemi destination. Supplier inquiry
-is reserved for exceptions and is not required here. Order/payment execution
-remains separately approved; the approved full-inspection charge applies only
-after physical receipt and processing.
+The shortest next action is an exact owner-approved `8,100 KRW` transfer to the
+generated virtual account before `2026-08-11 23:59 KST`. Supplier inquiry is
+reserved for exceptions and is not required here. The approved full-inspection
+charge applies only after physical receipt and processing.

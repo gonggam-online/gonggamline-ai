@@ -24,19 +24,21 @@ test("KK946 remains quarantined after catalog and warehouse setup are verified",
   assert.equal(status.bindings.imageUseRights, "VERIFIED");
   assert.equal(status.bindings.warehouseProductOption, "VERIFIED");
   assert.equal(status.bindings.warehouseInboundApplication, "VERIFIED");
+  assert.equal(status.bindings.supplierOrderPendingPayment, "VERIFIED");
   assert.ok(Object.entries(status.bindings)
     .filter(([key]) => ![
       "supplierCatalogItem",
       "imageUseRights",
       "warehouseProductOption",
       "warehouseInboundApplication",
+      "supplierOrderPendingPayment",
     ].includes(key))
     .every(([, value]) => value === "UNKNOWN"));
 });
 
-test("status manifest proves no raw evidence movement or commerce write", () => {
+test("status manifest proves no raw evidence movement and records the order write", () => {
   assert.equal(status.rawEvidenceMoved, false);
-  assert.equal(status.commerceWritePerformed, false);
+  assert.equal(status.commerceWritePerformed, true);
   assert.equal(status.confidentialEvidenceStore, "NOT_APPROVED");
 });
 
@@ -72,13 +74,15 @@ test("authenticated precheck verifies only catalog identity and preserves approv
   assert.match(authenticatedPrecheck, /catalogBinding: VERIFIED/);
   assert.match(authenticatedPrecheck, /optionSkuCode: UNKNOWN/);
   assert.match(authenticatedPrecheck, /rawEvidenceMoved: false/);
-  assert.match(authenticatedPrecheck, /commerceWritePerformed: false/);
+  assert.match(authenticatedPrecheck, /commerceWritePerformed: true/);
   assert.match(authenticatedPrecheck, /Exact displayed payment total: `8,100 KRW`/);
-  assert.match(authenticatedPrecheck, /Supplier inquiry\s+is reserved for exceptions/);
+  assert.match(authenticatedPrecheck, /Supplier inquiry\s+is\s+reserved for exceptions/);
   assert.match(authenticatedPrecheck, /PJ1491663/);
   assert.match(authenticatedPrecheck, /No inbound application, paid inspection/);
   assert.match(authenticatedPrecheck, /A1296915119go/);
   assert.match(authenticatedPrecheck, /pending inbound/);
+  assert.match(authenticatedPrecheck, /OR75260192/);
+  assert.match(authenticatedPrecheck, /payment expected/);
   assert.doesNotMatch(
     authenticatedPrecheck,
     /(?:\b\d{3}-\d{2}-\d{5}\b|\b01\d-\d{3,4}-\d{4}\b|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,})/,
