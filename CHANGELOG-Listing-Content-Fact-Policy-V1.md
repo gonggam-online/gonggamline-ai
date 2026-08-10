@@ -1,5 +1,22 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-10 - KK946 authenticated Domeggook precheck
+
+- Replaced per-item supplier inquiry with a default catalog-order path: clear
+  catalog terms and explicit image-use permission proceed without inquiry;
+  conflicts, regulated evidence gaps, and absent permissions fail closed.
+- Verified the black-six checkout total at `8,100 KRW` and the built-in Gaemi
+  Warehouse destination helper. Checkout created one cart/draft item; no order,
+  payment, message, instruction, or download occurred.
+- Verified owner-selected supplier item `56288849` and observed the black
+  option, MOQ, price, stock, shipping, tax classification, dispatch, return,
+  material, manufacturer, and origin claims in an authenticated read-only view.
+- Kept option/SKU code, VAT treatment, tax-invoice path, dimensions, markings,
+  physical observations, and complete image rights `UNKNOWN` or incomplete.
+- Recorded only a sanitized packet. No raw evidence movement, download,
+  supplier contact, cart, order, payment, inspection, warehouse instruction,
+  listing, database, configuration, or Production write occurred.
+
 ## 2026-08-08 - KK946 evidence acquisition runbook
 
 - Added the exact supplier-item to purchased-SKU to inbound-lot to inspected-

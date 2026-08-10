@@ -4,21 +4,25 @@
   "classification": "internal-sanitized-status-only",
   "disposition": "QUARANTINED",
   "rawEvidenceMoved": false,
-  "commerceWritePerformed": false,
+  "externalDraftWritePerformed": true,
+  "commerceWritePerformed": true,
   "bindings": {
-    "supplierCatalogItem": "AMBIGUOUS",
+    "supplierCatalogItem": "VERIFIED",
+    "warehouseProductOption": "VERIFIED",
+    "warehouseInboundApplication": "VERIFIED",
+    "supplierOrderPaymentComplete": "VERIFIED",
     "purchasedOptionSku": "UNKNOWN",
     "inboundLot": "UNKNOWN",
     "inspectedUnit": "UNKNOWN",
     "documentaryFacts": "UNKNOWN",
-    "imageUseRights": "UNKNOWN",
+    "imageUseRights": "VERIFIED",
     "imageEditRights": "UNKNOWN",
     "coupangCategory": "UNKNOWN",
     "outboundLocation": "UNKNOWN",
     "returnCenter": "UNKNOWN"
   },
-  "nextAction": "OWNER_SELECT_EXACT_SUPPLIER_ITEM_AFTER_AUTHENTICATED_READ_ONLY_REVIEW",
+  "nextAction": "READ_ONLY_MONITOR_SUPPLIER_CONFIRMATION_AND_SHIPMENT",
   "rawEvidenceAuthority": "SOURCE_SYSTEMS_UNCHANGED",
   "confidentialEvidenceStore": "NOT_APPROVED",
-  "updatedAt": "2026-08-09T00:00:00.000Z"
+  "updatedAt": "2026-08-10T04:06:40.000Z"
 }
