@@ -22,8 +22,9 @@
   tests 5/5; full tests 546/546; lint with zero errors and four existing
   warnings; typecheck; production build with 85 routes; local Playwright with
   the existing Supabase-unconfigured baseline (35 passed, 2 skipped, 7 failed).
-- Current: implementation and delivery are complete; Draft PR #116 awaits an
-  owner merge decision because this task explicitly prohibits Production.
+- Current: merged PR #115 commit
+  `6a90390cd2246151eb8862090058019d4bb169f8` into the branch, preserving both
+  work-status records; PR #116 delivery revalidation is in progress.
 - Blockers/owner actions: none currently.
 - Changed files: `tools/aws-backup-change-set/plan.ts`,
   `tests/aws-backup-change-set-plan.test.ts`,
@@ -40,11 +41,107 @@
   `c2667de6225cfaf1f1c092371a30882bcc40b33b`; `ci-tests` passed in 43 seconds
   and all PR checks now pass. No cherry-pick or Stage 13A evidence change is
   required for the current head.
-- Exact next action: validate the final status-only head for PR #116, then leave
-  the Draft PR for review without merge or Production deployment.
+- Post-merge local validation: focused packet tests 5/5 and full tests 547/547
+  passed; typecheck and production build passed; lint passed after removing
+  disposable Playwright output, with four existing Revenue-test warnings;
+  Playwright retained the expected unconfigured-Supabase baseline of 35 passed,
+  2 skipped, and 7 failed routes.
+- Exact next action: commit and push the conflict-free latest-main merge, then
+  validate the new exact head and leave PR #116 for review without merge or
+  Production deployment.
 - Remaining risk: packet generation must remain identical to the committed LF
   Git source on both Windows and Linux; AWS execution remains prohibited.
+## 2026-08-10 — KK946 Domeggook payment complete
 
+- Completed exact approved commerce write: order `OR75260192`, Domeggook item
+  `56288849`, black six units, merchandise 5,100 KRW plus shipping 3,000 KRW.
+- Kookmin Bank virtual-account payment of 8,100 KRW was confirmed at
+  `2026-08-10 13:06:40 KST`; status is `payment complete`.
+- No shipment, tracking, receipt, or lot binding occurred; no financial account
+  number was retained.
+- Next action: read-only monitoring for supplier confirmation and shipment.
+
+## 2026-08-10 — KK946 Gaemi inbound application
+
+- Completed exact approved external write: application `A1296915119go` for
+  `PJ1491663`, black, six units, dimensions `10.5 x 3.6 x 6.5 cm`, box `1`.
+- Selected full inspection at 100 KRW per unit plus VAT and recorded the
+  owner-approved delivery note; Gaemi confirms `pending inbound`.
+- No order, payment, shipment, tracking registration, receipt, stock, point
+  deduction, inspection result, or inbound-lot binding occurred.
+- Next exact gate: owner approval of the displayed 8,100 KRW Domeggook order
+  to the checkout-populated Gaemi destination.
+
+## 2026-08-10 — KK946 Gaemi Warehouse product registration
+
+- Objective: register only the approved Gaemi product/option required before
+  an inbound application for the six-unit black KK946 sample.
+- Branch/risk: `codex/docs/kk946-authenticated-supplier-precheck`; high-risk
+  first-sale path with manual merge and exact external-write boundaries.
+- Completed: registered `KK946 mini pouch`, option `black`, at the Icheon
+  warehouse after exact owner approval; verified sanitized product reference
+  `PJ1491663`, active state, `not received` status, and zero approval backlog.
+- External effects: one warehouse product/option registration. No inbound
+  application, paid inspection, point use, warehouse request, Domeggook order,
+  payment, supplier message, listing, or fulfillment action occurred.
+- Evidence handling: retained only the sanitized product reference and status;
+  no address, contact, account identifier, raw capture, or provider payload.
+- Current gate: exact approval for a six-unit black inbound application against
+  `PJ1491663`; the `8,100 KRW` Domeggook order remains a later separate gate.
+- Remaining risks: purchased option, transaction, inbound lot, inspected unit,
+  dimensions/weight/markings, paid inspection scope, and Coupang category are
+  still `UNKNOWN`; KK946 remains quarantined.
+
+## 2026-08-10 — KK946 authenticated supplier precheck
+
+- Objective: perform the PR #114 next gate: an authenticated, read-only review
+  of Domeggook item `56288849`, then record only a sanitized evidence packet.
+- Branch/base: `codex/docs/kk946-authenticated-supplier-precheck` from exact
+  `origin/main` / PR #114 merge
+  `6a57e7ec65ab12398e6a0909d198ff3d8207a439`.
+- Risk: high-risk/manual for the whole first-sale path. This bounded task
+  permits authenticated reads and internal sanitized documentation only.
+- Revenue impact: confirms the exact purchasable black option and real terms
+  needed for a separately approved sample-order decision without risking an
+  unsupported purchase.
+- Root-cause class: external business evidence gap. The authenticated catalog
+  resolves the supplier item and explicit image-use permission. Physical
+  measurement and marking evidence remain for post-receipt inspection.
+- Scope: exact black option/code, MOQ, account-visible price/shipping/VAT/tax
+  document path, stock, dispatch, returns/defects, manufacturer/origin/material/
+  markings, and image-rights scope; sanitized status only.
+- Non-goals: cart, message, order, payment, download, supplier/warehouse
+  instruction, paid inspection, raw evidence transfer, DB/Auth/RLS,
+  configuration changes, Production mutation, listing, or fulfillment.
+- Completed: verified the clean detached worktree; fetched latest `origin/main`;
+  confirmed PR #114 merged; read binding governance and approved Domeggook
+  read-only architecture; created the dedicated branch; inspected the signed-in
+  item page read-only; verified item `56288849`, black option availability,
+  price/MOQ, stock, shipping, dispatch, tax classification, returns, material,
+  manufacturer, and origin; recorded only a sanitized packet. Dropdown and
+  shipping-detail UI were opened locally; no cart, message, purchase, payment,
+  download, or external write occurred. Follow-up checkout review verified the
+  black-six total at `8,100 KRW` and populated the official Gaemi Warehouse
+  destination helper. That review created one cart/draft item but no order,
+  payment, supplier message, or warehouse instruction.
+- Current/blocker: exact order submission requires owner approval. Supplier
+  inquiry is exceptional rather than the default path; dimensions and physical
+  markings remain a receiving-inspection gate.
+- Changed files: authenticated precheck packet, sanitized status manifest,
+  evidence contract test, Listing policy changelog, and this status.
+- Commands/results: clean-tree check passed; PR #114 merge and exact base
+  verified; repository/Architecture/evidence audit and authenticated browser
+  read and checkout review completed; focused KK946 tests 6/6, lint (0 errors,
+  4 existing warnings), typecheck, and production build passed. Full unit tests
+  retain only 2 pre-existing AWS packet drift failures. Prior local Playwright:
+  35 passed / 2 skipped / 7 pre-existing missing-Supabase API failures.
+- Last commit: none on this branch.
+- Exact next action: validate and update the manual-risk PR, then request owner
+  approval for the exact `8,100 KRW` black-six order to Gaemi Warehouse.
+- Remaining risks: supplier item is verified but purchased option and all
+  downstream transaction/lot/unit bindings remain `UNKNOWN`; image use/edit
+  edit rights remain limited; order, paid inspection, and Gaemi Warehouse
+  instructions each require separate approval.
 ## 2026-08-09 KK946 first-sale read-only assessment
 
 - Objective: advance KK946 through the shortest safe first-sale path while

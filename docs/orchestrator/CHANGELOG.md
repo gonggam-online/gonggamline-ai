@@ -1,5 +1,31 @@
 # Orchestrator changelog
 
+## 2026-08-10 — KK946 Domeggook payment complete
+
+- Created approved order `OR75260192` for black six units at 8,100 KRW total
+  to the approved Gaemi destination, using a Kookmin Bank virtual account and
+  business expense evidence request.
+- Verified exact 8,100 KRW virtual-account payment at
+  `2026-08-10 13:06:40 KST`; status is `payment complete`.
+- No shipment, tracking, or receipt has occurred; retained no virtual-account
+  or business-registration number.
+
+## 2026-08-10 — KK946 Gaemi inbound application
+
+- Submitted approved inbound application `A1296915119go` for `PJ1491663`,
+  black, six units, with evidence-backed dimensions and box-1 estimate.
+- Selected approved full inspection at the displayed 100 KRW per unit plus VAT.
+- Verified pending-inbound status; no supplier order, shipment, receipt, point
+  deduction, inspection result, or inbound-lot binding occurred.
+
+## 2026-08-10 — KK946 Gaemi product registration
+
+- Registered sanitized warehouse product `PJ1491663` for `KK946 mini pouch`,
+  option `black`, after exact owner approval.
+- Verified the product is active and not received, with no approval backlog.
+- Performed no inbound application, paid inspection, point use, supplier order,
+  payment, listing, or fulfillment action.
+
 ## 2026-08-05 — Gaemi Warehouse to Rocket Growth adapter Architecture
 
 - Audited Gaemi Warehouse's public 2025.06 rate card and 2025.07 Rocket Growth

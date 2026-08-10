@@ -3,6 +3,10 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const runbook = readFileSync("docs/runbooks/KK946-EVIDENCE-ACQUISITION-V1.md", "utf8");
+const authenticatedPrecheck = readFileSync(
+  "docs/evidence/KK946-DOMEGGOOK-AUTHENTICATED-PRECHECK-V1.md",
+  "utf8",
+);
 const statusText = readFileSync("docs/evidence/kk946-evidence-status-v1.json", "utf8");
 const status = JSON.parse(statusText) as {
   subjectId: string;
@@ -13,20 +17,28 @@ const status = JSON.parse(statusText) as {
   confidentialEvidenceStore: string;
 };
 
-test("KK946 remains quarantined when the supplier catalog identity is ambiguous", () => {
+test("KK946 remains quarantined after catalog and warehouse setup are verified", () => {
   assert.equal(status.subjectId, "KK946");
   assert.equal(status.disposition, "QUARANTINED");
-  assert.equal(status.bindings.supplierCatalogItem, "AMBIGUOUS");
-  assert.ok(
-    Object.entries(status.bindings)
-      .filter(([key]) => key !== "supplierCatalogItem")
-      .every(([, value]) => value === "UNKNOWN"),
-  );
+  assert.equal(status.bindings.supplierCatalogItem, "VERIFIED");
+  assert.equal(status.bindings.imageUseRights, "VERIFIED");
+  assert.equal(status.bindings.warehouseProductOption, "VERIFIED");
+  assert.equal(status.bindings.warehouseInboundApplication, "VERIFIED");
+  assert.equal(status.bindings.supplierOrderPaymentComplete, "VERIFIED");
+  assert.ok(Object.entries(status.bindings)
+    .filter(([key]) => ![
+      "supplierCatalogItem",
+      "imageUseRights",
+      "warehouseProductOption",
+      "warehouseInboundApplication",
+      "supplierOrderPaymentComplete",
+    ].includes(key))
+    .every(([, value]) => value === "UNKNOWN"));
 });
 
-test("status manifest proves no raw evidence movement or commerce write", () => {
+test("status manifest proves no raw evidence movement and records the order write", () => {
   assert.equal(status.rawEvidenceMoved, false);
-  assert.equal(status.commerceWritePerformed, false);
+  assert.equal(status.commerceWritePerformed, true);
   assert.equal(status.confidentialEvidenceStore, "NOT_APPROVED");
 });
 
@@ -56,4 +68,23 @@ test("operator return packet is sanitized and never claims verification by defau
   assert.match(runbook, /`VERIFIED` must not be recorded until/);
   assert.doesNotMatch(statusText, /https?:\/\//);
   assert.doesNotMatch(statusText, /(?:phone|address|email|access.?key|secret|authorization)/i);
+});
+
+test("authenticated precheck verifies only catalog identity and preserves approval boundaries", () => {
+  assert.match(authenticatedPrecheck, /catalogBinding: VERIFIED/);
+  assert.match(authenticatedPrecheck, /optionSkuCode: UNKNOWN/);
+  assert.match(authenticatedPrecheck, /rawEvidenceMoved: false/);
+  assert.match(authenticatedPrecheck, /commerceWritePerformed: true/);
+  assert.match(authenticatedPrecheck, /Exact displayed payment total: `8,100 KRW`/);
+  assert.match(authenticatedPrecheck, /Supplier inquiry\s+is\s+reserved for exceptions/);
+  assert.match(authenticatedPrecheck, /PJ1491663/);
+  assert.match(authenticatedPrecheck, /No inbound application, paid inspection/);
+  assert.match(authenticatedPrecheck, /A1296915119go/);
+  assert.match(authenticatedPrecheck, /pending inbound/);
+  assert.match(authenticatedPrecheck, /OR75260192/);
+  assert.match(authenticatedPrecheck, /payment complete/);
+  assert.doesNotMatch(
+    authenticatedPrecheck,
+    /(?:\b\d{3}-\d{2}-\d{5}\b|\b01\d-\d{3,4}-\d{4}\b|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,})/,
+  );
 });
