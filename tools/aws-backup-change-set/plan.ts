@@ -58,8 +58,9 @@ function sortedResourceNames(
 }
 
 export function buildDisabledWorkerChangeSetPlan(templateSource: string) {
-  const template = parseTemplate(templateSource);
-  const sourceBytes = Buffer.byteLength(templateSource, "utf8");
+  const canonicalTemplateSource = templateSource.replace(/\r\n?/g, "\n");
+  const template = parseTemplate(canonicalTemplateSource);
+  const sourceBytes = Buffer.byteLength(canonicalTemplateSource, "utf8");
   if (sourceBytes > maximumInlineTemplateBytes) {
     throw new Error("TEMPLATE_EXCEEDS_INLINE_BODY_LIMIT");
   }
@@ -106,7 +107,7 @@ export function buildDisabledWorkerChangeSetPlan(templateSource: string) {
     },
     template: {
       repositoryPath: templateRepositoryPath,
-      sha256: createHash("sha256").update(templateSource).digest("hex"),
+      sha256: createHash("sha256").update(canonicalTemplateSource).digest("hex"),
       bytes: sourceBytes,
       inlineTemplateBodyEligible: true,
       inlineTemplateBodyMaximumBytes: maximumInlineTemplateBytes,
