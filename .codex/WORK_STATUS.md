@@ -1,5 +1,48 @@
 # Work status
 
+## 2026-08-10 KK946 inbound/inspection packet and shipment monitor
+
+- Objective: prepare the smallest receipt/full-inspection evidence packet and
+  perform read-only Domeggook shipment monitoring before physical dispatch.
+- Branch/base: `codex/docs/kk946-inbound-inspection-packet` from `origin/main`
+  `d2f5c67758805e80b6ec7d722f635d8ad7cd7b36`.
+- Risk/root cause: normal-risk documentation, contract tests, and read-only
+  monitoring. The remaining gap is external business evidence, not DB or code.
+- Revenue impact: makes the paid sample immediately admissible or rejectable
+  after receipt without inventing facts or delaying the first-sale path.
+- Cloud-first: GitHub owns sanitized source, PR, CI, and recovery state. Raw
+  provider evidence remains in Domeggook/Gaemi; confidential asset storage is
+  not approved. Local browser/test artifacts are disposable and not retained.
+- Scope/non-goals: sanitized status, receipt/inspection checklist, and read-only
+  status observations only. No supplier message, order edit, cancellation,
+  return, tracking registration, paid work, warehouse mutation, listing,
+  database/configuration/secret, or Production action.
+- Completed: mandatory boot and architecture/risk gate; clean latest-main task
+  branch; browser read-only checks; Gaemi application `A1296915119go` verified
+  pending for `PJ1491663`, black, six; packet/status/test/changelog; focused
+  tests 8/8; full tests 549/549; lint with zero errors and four existing
+  warnings; typecheck; production build with 85 routes; local Playwright with
+  the existing unconfigured-Supabase baseline (35 passed, 2 skipped, 7 failed).
+- Current: authenticated read-only monitoring verified order `OR75260192` as
+  in transit with CJ Logistics tracking `540939262870`. No address, contact,
+  account identity, or raw provider capture was retained. Gaemi remains pending
+  inbound, so warehouse receipt is the next external evidence dependency.
+  Updated focused tests pass 8/8; full tests pass 549/549; lint remains at zero
+  errors/four existing warnings; typecheck and 85-route build pass.
+- Changed files: inbound/inspection packet, sanitized status manifest, KK946
+  contract test, Listing policy changelog, and this recovery record.
+- Delivery: commit `5a1a7986f35ed5bceb813aa2260f45f7a4ee49f0` is pushed;
+  Draft PR #117 targets `main`, is mergeable, and has `normal-risk`. Vercel and
+  Preview browser validation passed. The first CI attempt had one unrelated
+  Orchestrator Phase 3 timing failure (`PROCESS_SHUTDOWN_FAILED` versus
+  `TOKENS`); the unchanged exact head passed all CI after failed-job rerun.
+- Exact next action: commit/push the verified shipment checkpoint, validate the
+  new exact head, then mark PR #117 Ready for Review. After merge, monitor Gaemi
+  receipt read-only; do not touch Production in this task.
+- Remaining risks: warehouse receipt, inbound lot, six inspected units,
+  physical/documentary facts, and category/logistics evidence remain unknown;
+  KK946 stays quarantined.
+
 ## 2026-08-10 AWS disabled-worker packet cross-platform reproducibility
 
 - Objective: restore the two failing `aws-backup-change-set-plan` CI tests
