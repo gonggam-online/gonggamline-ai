@@ -1,5 +1,15 @@
 # Changelog — Encrypted Cloud Backup Architecture
 
+## 2026-08-10
+
+- Made the disabled-worker change-set packet generator canonicalize template
+  line endings before calculating the reviewed byte count and SHA-256 digest.
+- Replaced line-ending-sensitive negative-test text substitution with parsed
+  template mutations so the fail-closed resource boundary is reproducible on
+  Windows and Linux.
+- Performed no AWS operation, resource change, Production access, secret use,
+  paid action, or change-set execution.
+
 ## 2026-08-08
 
 - Implemented the deployable Node.js 22 Lambda adapter for the accepted backup

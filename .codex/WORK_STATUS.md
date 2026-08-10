@@ -1,5 +1,43 @@
 # Work status
 
+## 2026-08-10 AWS disabled-worker packet cross-platform reproducibility
+
+- Objective: restore the two failing `aws-backup-change-set-plan` CI tests
+  independently of PR #115 without changing the accepted AWS boundary.
+- Branch/base: `codex/fix/aws-backup-packet-drift` from `origin/main`
+  `6a57e7ec65ab12398e6a0909d198ff3d8207a439`.
+- Risk/root cause: normal-risk code/test reproducibility fix. The code cause is
+  CRLF-sensitive digest/byte calculation and LF-only negative-test mutation;
+  external configuration and database causes are excluded.
+- Revenue impact: removes an unrelated exact-head CI blocker so Stage 13A can
+  proceed without weakening payment evidence or AWS safety gates.
+- Cloud-first: GitHub source/PR/Actions own durable code and evidence; local
+  dependencies and test output are disposable. No AWS, Production, secret,
+  paid, database, or commerce write is authorized.
+- Scope: canonical LF calculation in the existing no-AWS builder, structural
+  negative-test mutation, changelog, and recovery status. No template, packet,
+  AWS resource, API, database, or runtime behavior change.
+- Completed: mandatory boot; clean latest-main branch; Windows origin/main
+  reproduction; root-cause classification; minimal implementation; focused
+  tests 5/5; full tests 546/546; lint with zero errors and four existing
+  warnings; typecheck; production build with 85 routes; local Playwright with
+  the existing Supabase-unconfigured baseline (35 passed, 2 skipped, 7 failed).
+- Current: diff/security review, delivery, exact-head CI, and Preview.
+- Blockers/owner actions: none currently.
+- Changed files: `tools/aws-backup-change-set/plan.ts`,
+  `tests/aws-backup-change-set-plan.test.ts`,
+  `CHANGELOG-Encrypted-Cloud-Backup-Architecture.md`, and this file.
+- Remote evidence: PR #115 head `c2667de6225cfaf1f1c092371a30882bcc40b33b`
+  now passes all five AWS packet tests. Its current `ci-tests` failure is two
+  unrelated Orchestrator Phase 3 timing assertions, while every other check and
+  Preview passes.
+- Exact next action: review and commit this isolated cross-platform fix, push a
+  separate PR, then inspect its exact-head checks. PR #115 should rerun its
+  current `ci-tests`; it does not need to copy this branch into its Stage 13A
+  evidence commit unless the AWS failures recur on the exact head.
+- Remaining risk: packet generation must remain identical to the committed LF
+  Git source on both Windows and Linux; AWS execution remains prohibited.
+
 ## 2026-08-09 KK946 first-sale read-only assessment
 
 - Objective: advance KK946 through the shortest safe first-sale path while

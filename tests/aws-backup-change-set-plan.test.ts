@@ -70,21 +70,21 @@ test("packet cannot authorize execution, root use, long-lived keys, or paid reso
 });
 
 test("builder fails closed when the worker default or resource boundary drifts", () => {
-  const workerEnabled = templateSource.replace(
-    '"Default": "false",',
-    '"Default": "true",',
-  );
+  const workerEnabledTemplate = JSON.parse(templateSource) as {
+    Parameters: { EnableWorkerResources: { Default: string } };
+  };
+  workerEnabledTemplate.Parameters.EnableWorkerResources.Default = "true";
   assert.throws(
-    () => buildDisabledWorkerChangeSetPlan(workerEnabled),
+    () => buildDisabledWorkerChangeSetPlan(JSON.stringify(workerEnabledTemplate)),
     /WORKER_RESOURCES_MUST_DEFAULT_FALSE/,
   );
 
-  const unconditionalWorker = templateSource.replace(
-    '"BackupWorker": {\n      "Type": "AWS::Lambda::Function",\n      "Condition": "CreateWorkerResources",',
-    '"BackupWorker": {\n      "Type": "AWS::Lambda::Function",',
-  );
+  const unconditionalWorkerTemplate = JSON.parse(templateSource) as {
+    Resources: { BackupWorker: { Condition?: string } };
+  };
+  delete unconditionalWorkerTemplate.Resources.BackupWorker.Condition;
   assert.throws(
-    () => buildDisabledWorkerChangeSetPlan(unconditionalWorker),
+    () => buildDisabledWorkerChangeSetPlan(JSON.stringify(unconditionalWorkerTemplate)),
     /DISABLED_WORKER_RESOURCE_BOUNDARY_DRIFTED/,
   );
 });
