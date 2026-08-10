@@ -28,8 +28,14 @@
   order evidence. Authenticated retry is the exact external dependency.
 - Changed files: inbound/inspection packet, sanitized status manifest, KK946
   contract test, Listing policy changelog, and this recovery record.
-- Exact next action: review the complete diff, commit/push, open the normal-risk
-  PR, and validate exact CI/Preview.
+- Delivery: commit `5a1a7986f35ed5bceb813aa2260f45f7a4ee49f0` is pushed;
+  Draft PR #117 targets `main`, is mergeable, and has `normal-risk`. Vercel and
+  Preview browser validation passed. The first CI attempt had one unrelated
+  Orchestrator Phase 3 timing failure (`PROCESS_SHUTDOWN_FAILED` versus
+  `TOKENS`); the unchanged exact head passed all CI after failed-job rerun.
+- Exact next action: validate the status-only final head, then mark PR #117
+  Ready for Review when every exact-head gate remains green. Do not merge or
+  touch Production in this task.
 - Remaining risks: supplier confirmation, shipment/tracking, receipt, inbound
   lot, six inspected units, physical/documentary facts, and category/logistics
   evidence remain unknown; KK946 stays quarantined.
