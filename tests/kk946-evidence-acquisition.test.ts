@@ -24,14 +24,14 @@ test("KK946 remains quarantined after catalog and warehouse setup are verified",
   assert.equal(status.bindings.imageUseRights, "VERIFIED");
   assert.equal(status.bindings.warehouseProductOption, "VERIFIED");
   assert.equal(status.bindings.warehouseInboundApplication, "VERIFIED");
-  assert.equal(status.bindings.supplierOrderPendingPayment, "VERIFIED");
+  assert.equal(status.bindings.supplierOrderPaymentComplete, "VERIFIED");
   assert.ok(Object.entries(status.bindings)
     .filter(([key]) => ![
       "supplierCatalogItem",
       "imageUseRights",
       "warehouseProductOption",
       "warehouseInboundApplication",
-      "supplierOrderPendingPayment",
+      "supplierOrderPaymentComplete",
     ].includes(key))
     .every(([, value]) => value === "UNKNOWN"));
 });
@@ -82,7 +82,7 @@ test("authenticated precheck verifies only catalog identity and preserves approv
   assert.match(authenticatedPrecheck, /A1296915119go/);
   assert.match(authenticatedPrecheck, /pending inbound/);
   assert.match(authenticatedPrecheck, /OR75260192/);
-  assert.match(authenticatedPrecheck, /payment expected/);
+  assert.match(authenticatedPrecheck, /payment complete/);
   assert.doesNotMatch(
     authenticatedPrecheck,
     /(?:\b\d{3}-\d{2}-\d{5}\b|\b01\d-\d{3,4}-\d{4}\b|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,})/,

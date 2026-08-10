@@ -10,7 +10,7 @@
     "supplierCatalogItem": "VERIFIED",
     "warehouseProductOption": "VERIFIED",
     "warehouseInboundApplication": "VERIFIED",
-    "supplierOrderPendingPayment": "VERIFIED",
+    "supplierOrderPaymentComplete": "VERIFIED",
     "purchasedOptionSku": "UNKNOWN",
     "inboundLot": "UNKNOWN",
     "inspectedUnit": "UNKNOWN",
@@ -21,8 +21,8 @@
     "outboundLocation": "UNKNOWN",
     "returnCenter": "UNKNOWN"
   },
-  "nextAction": "OWNER_APPROVE_8100_KRW_VIRTUAL_ACCOUNT_TRANSFER_BEFORE_2026_08_11_2359_KST",
+  "nextAction": "READ_ONLY_MONITOR_SUPPLIER_CONFIRMATION_AND_SHIPMENT",
   "rawEvidenceAuthority": "SOURCE_SYSTEMS_UNCHANGED",
   "confidentialEvidenceStore": "NOT_APPROVED",
-  "updatedAt": "2026-08-10T03:55:27.000Z"
+  "updatedAt": "2026-08-10T04:06:40.000Z"
 }

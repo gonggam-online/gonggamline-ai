@@ -1,13 +1,14 @@
 # Orchestrator changelog
 
-## 2026-08-10 — KK946 Domeggook order pending payment
+## 2026-08-10 — KK946 Domeggook payment complete
 
 - Created approved order `OR75260192` for black six units at 8,100 KRW total
   to the approved Gaemi destination, using a Kookmin Bank virtual account and
   business expense evidence request.
-- Verified `payment expected` through `2026-08-11 23:59 KST`.
-- Performed no transfer, payment confirmation, shipment, tracking, or receipt;
-  retained no virtual-account or business-registration number.
+- Verified exact 8,100 KRW virtual-account payment at
+  `2026-08-10 13:06:40 KST`; status is `payment complete`.
+- No shipment, tracking, or receipt has occurred; retained no virtual-account
+  or business-registration number.
 
 ## 2026-08-10 — KK946 Gaemi inbound application
 
