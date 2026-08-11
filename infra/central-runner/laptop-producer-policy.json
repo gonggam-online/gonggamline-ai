@@ -1,0 +1,17 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublishRequests",
+      "Effect": "Allow",
+      "Action": ["sqs:SendMessage", "sqs:GetQueueAttributes", "sqs:GetQueueUrl"],
+      "Resource": "REQUEST_QUEUE_ARN"
+    },
+    {
+      "Sid": "ConsumeResponses",
+      "Effect": "Allow",
+      "Action": ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:ChangeMessageVisibility", "sqs:GetQueueAttributes", "sqs:GetQueueUrl"],
+      "Resource": "RESPONSE_QUEUE_ARN"
+    }
+  ]
+}

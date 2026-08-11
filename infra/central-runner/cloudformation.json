@@ -1,0 +1,56 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "GonggamLine cross-PC central runner queues (read-only Coupang operations)",
+  "Resources": {
+    "RequestDeadLetterQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "QueueName": "gonggam-central-requests-dlq",
+        "KmsMasterKeyId": "alias/aws/sqs",
+        "MessageRetentionPeriod": 1209600
+      }
+    },
+    "ResponseDeadLetterQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "QueueName": "gonggam-central-responses-dlq",
+        "KmsMasterKeyId": "alias/aws/sqs",
+        "MessageRetentionPeriod": 1209600
+      }
+    },
+    "RequestQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "QueueName": "gonggam-central-requests",
+        "KmsMasterKeyId": "alias/aws/sqs",
+        "MessageRetentionPeriod": 345600,
+        "ReceiveMessageWaitTimeSeconds": 20,
+        "VisibilityTimeout": 60,
+        "RedrivePolicy": {
+          "deadLetterTargetArn": { "Fn::GetAtt": ["RequestDeadLetterQueue", "Arn"] },
+          "maxReceiveCount": 3
+        }
+      }
+    },
+    "ResponseQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "QueueName": "gonggam-central-responses",
+        "KmsMasterKeyId": "alias/aws/sqs",
+        "MessageRetentionPeriod": 345600,
+        "ReceiveMessageWaitTimeSeconds": 20,
+        "VisibilityTimeout": 60,
+        "RedrivePolicy": {
+          "deadLetterTargetArn": { "Fn::GetAtt": ["ResponseDeadLetterQueue", "Arn"] },
+          "maxReceiveCount": 3
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "RequestQueueUrl": { "Value": { "Ref": "RequestQueue" } },
+    "RequestQueueArn": { "Value": { "Fn::GetAtt": ["RequestQueue", "Arn"] } },
+    "ResponseQueueUrl": { "Value": { "Ref": "ResponseQueue" } },
+    "ResponseQueueArn": { "Value": { "Fn::GetAtt": ["ResponseQueue", "Arn"] } }
+  }
+}
