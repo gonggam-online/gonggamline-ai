@@ -1,5 +1,31 @@
 # Architecture review
 
+## WING SQS Read-only Runner v1 - 2026-08-11
+
+- Status: approved by explicit repository-owner delegated directive on
+  2026-08-11.
+- Revenue gate: let Picktil Discovery acquire bounded WING evidence without
+  copying desktop credentials or granting commerce-write authority.
+- Existing boundary: extend merged PR #118's desktop central runner, DPAPI
+  credential store, SQS/IAM assets, and HMAC client; do not create a parallel
+  runner.
+- New contract/lifecycle: exact `1.0.0` FIFO request/response DTOs, the three
+  fixed read operations, poison rejection, and response-before-delete ordering.
+- Cloud-first: AWS FIFO is the remote duplicate-suppression boundary. The
+  worker persists no local automation ledger or provider response. At-least-once
+  delivery may repeat only a bounded read and cannot produce a commerce write.
+- Security: desktop-only credentials/vendor ID, environment-only queue URLs,
+  least privilege, sanitized logs/errors, no raw provider persistence, and no
+  write-capable WING operation.
+- Risk: high-risk/manual because Queue, external integration,
+  secrets/environment, and authorization surfaces are involved.
+  `manual-merge-required`; no auto-merge.
+- External actions: no queue/IAM/secret/scheduled-task change and no live WING
+  call are authorized by implementation alone. The single final
+  `connection_test` waits for verified runtime inputs.
+- Story: [WING SQS Read-only Runner v1](../docs/architecture/WING-SQS-READONLY-RUNNER-V1.md).
+- Rollback: revert the PR and stop the worker after response reconciliation.
+
 ## KK946 evidence acquisition runbook - 2026-08-08
 
 - Approved boundary: Listing Content Fact and Policy Contract v1, ordered

@@ -3,7 +3,7 @@ param(
   [Parameter(Mandatory = $true)][string]$RequestQueueUrl,
   [Parameter(Mandatory = $true)][string]$ResponseQueueUrl,
   [string]$AwsProfile = "gonggamline-central-runner",
-  [string]$Region = "ap-southeast-1",
+  [string]$Region = "ap-northeast-2",
   [string]$AwsConfigRoot = "D:\Dev\gonggamline-ai",
   [string]$CredentialStorePath = (Join-Path $env:LOCALAPPDATA "GonggamLine\central-runner.credentials.json")
 )

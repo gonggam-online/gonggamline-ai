@@ -4613,3 +4613,63 @@ perform the documented read-only Supabase schema and completeness inspection.
   verified. Proposed caps are not owner-approved execution authority.
 
 ---
+# WING SQS Read-only Runner v1 - 2026-08-11
+
+- Objective: extend the existing PR #118 central runner for Picktil Discovery
+  with an exact typed read-only FIFO contract, stateless at-least-once reads,
+  poison-message fail-close behavior, and graceful shutdown.
+- Branch: `codex/feat/wing-sqs-readonly-runner`
+- Base: `origin/main` at
+  `95cc073e700e2ebe9e47c1545da14fc1e3e7899c`.
+- Risk: high-risk/manual; `manual-merge-required`; auto-merge prohibited.
+- Revenue impact: unblock safe marketplace evidence acquisition without
+  copying WING credentials to the notebook.
+- Root-cause class: external configuration is verified for the desktop role and
+  both deployed Seoul FIFO queues. The remaining code issue was a Cloud-first
+  violation caused by the local durable replay ledger.
+- Scope: Architecture/Decision approval record, exact v1 contract, read-only
+  operations, FIFO worker, failure/redaction/shutdown tests, documentation and
+  delivery.
+- Non-goals: queue/IAM provisioning, secret changes, scheduled-task install,
+  Production/Supabase/Vercel changes, marketplace writes, order/inventory/
+  settlement calls, and more than one final live connection test.
+- Completed: safe clean main inspection; latest origin/main fast-forward; PR
+  #118 reuse audit; governance boot; Architecture Story and Decision record;
+  exact contract, FIFO consumer, GET-only adapter, poison/redaction/shutdown
+  behavior, focused tests, exact-head CI/Preview, and desktop runtime identity/
+  FIFO queue access/encryption/redrive verification.
+- Current: stateless amendment and local validation are complete; publish the
+  amendment to Draft PR #119 and reconcile its exact-head checks.
+- Blockers: none for code validation. Runtime cutover remains post-merge and
+  retains the separately approved single read-only `connection_test` gate.
+- Owner action: manually merge PR #119 only after the amended exact-head gates
+  pass.
+- Changed files: runner contracts/worker/smoke, focused tests, startup defaults,
+  Architecture/Decision/Work Status, README, and changelog.
+- Exact next action: commit and push the stateless amendment to the existing
+  high-risk Draft PR #119, then reconcile exact-head checks without merging.
+- Remaining risks: SQS at-least-once delivery can repeat a bounded read after
+  the FIFO deduplication window; no commerce write is allowed. Final desktop
+  cutover and one read-only connection test remain post-merge.
+- Deployment identity evidence: an authenticated AWS call matched the intended
+  account and `GonggamCentralRunnerDesktop` reserved role. The laptop role was
+  not used on this desktop and remains outside this desktop verification scope.
+- Infrastructure authority: Picktil Discovery 09-cloud-platform Terraform in
+  `ap-northeast-2`; this repo consumes queue URLs only and does not deploy its
+  legacy CloudFormation reference.
+- Focused validation: 11/11 passed; typecheck passed; lint has zero errors and
+  four pre-existing Revenue test warnings.
+- Full local validation: tests 560/560 passed; production build passed with 85
+  routes; Playwright 42 passed and 2 skipped with no failures; `git diff
+  --check` passed; no tracked generated output, actual queue identifier, or
+  strong credential pattern was found. `npm ci` reported eight existing
+  dependency advisories (one moderate, seven high) without a lockfile change.
+- External evidence on 2026-08-11: Desktop role/account matched; both Picktil 09
+  Seoul FIFO queues allowed `GetQueueAttributes`, were empty, used SQS-managed
+  encryption, and had DLQ redrive count 3. No queue/IAM/secret change or
+  commerce write occurred in this desktop verification.
+- Amended local validation: central-runner 10/10, full tests 559/559,
+  typecheck, production build, and lint with zero errors/four pre-existing
+  warnings passed. Local Playwright passed 35, skipped 2, and failed 7 only on
+  the existing unconfigured Supabase `missing_url` routes; no runner route or
+  browser surface changed.
