@@ -4613,3 +4613,37 @@ perform the documented read-only Supabase schema and completeness inspection.
   verified. Proposed caps are not owner-approved execution authority.
 
 ---
+# WING SQS Read-only Runner v1 - 2026-08-11
+
+- Objective: extend the existing PR #118 central runner for Picktil Discovery
+  with an exact typed read-only FIFO contract, restart-safe response replay,
+  poison-message fail-close behavior, and graceful shutdown.
+- Branch: `codex/feat/wing-sqs-readonly-runner`
+- Base: `origin/main` at
+  `95cc073e700e2ebe9e47c1545da14fc1e3e7899c`.
+- Risk: high-risk/manual; `manual-merge-required`; auto-merge prohibited.
+- Revenue impact: unblock safe marketplace evidence acquisition without
+  copying WING credentials to the notebook.
+- Root-cause class: external configuration is pending (AWS CLI/SSO, queue
+  identities, WING credential availability); generic code/docs/tests continue
+  independently.
+- Scope: Architecture/Decision approval record, exact v1 contract, read-only
+  operations, FIFO worker, local replay cache, failure/redaction/shutdown tests,
+  documentation and delivery.
+- Non-goals: queue/IAM provisioning, secret changes, scheduled-task install,
+  Production/Supabase/Vercel changes, marketplace writes, order/inventory/
+  settlement calls, and more than one final live connection test.
+- Completed: safe clean main inspection; latest origin/main fast-forward; PR
+  #118 reuse audit; governance boot; Architecture Story and Decision record.
+- Current: implement the bounded contract/worker/ledger test slice.
+- Blockers: actual queue URL/ARN and laptop role ARN pending from Picktil 09;
+  AWS CLI/SSO and WING credentials unavailable in the active environment.
+- Owner action: none yet; runtime configuration will be requested only after
+  generic implementation and tests are complete.
+- Changed files: Architecture/Decision/Work Status documents only at this
+  checkpoint.
+- Exact next action: commit Architecture approval checkpoint, then implement
+  contracts and hermetic worker tests.
+- Remaining risks: local replay-cache loss can repeat a read; Windows process
+  lifecycle and SQS delivery ordering require tests; actual runtime identity
+  remains unverified.

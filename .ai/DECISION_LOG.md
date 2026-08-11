@@ -1329,3 +1329,35 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   merge in this Story.
 - Rollback: revert the unmerged implementation PR. Existing Production Auth,
   administrator user, environment variables, and database remain unchanged.
+# 2026-08-11 - WING SQS Read-only Runner v1 approved
+
+- Category: Architecture acceptance and bounded high-risk implementation
+  authorization.
+- Owner / approver: repository owner through explicit delegated directive
+  dated 2026-08-11.
+- Existing source: merged central Coupang runner PR #118, merge
+  `95cc073e700e2ebe9e47c1545da14fc1e3e7899c`.
+- Decision: extend the existing desktop runner with exact contract version
+  `1.0.0`, message types `wing.read.request` / `wing.read.response`, source
+  `picktil-discovery`, operations `connection_test`,
+  `list_seller_products`, and `category_meta`, FIFO response replay, and a
+  credential-free local processed-request cache.
+- Capability boundary: reject every create/update/delete/listing/price/order/
+  inventory/return/settlement/payment or unknown operation before the WING
+  adapter. Vendor ID and credentials never enter queue contracts.
+- Cloud-first decision: accept the local ledger only as a replaceable
+  read-replay cache within the desktop credential boundary. It is not a
+  business source of truth; ledger loss can repeat only a read. A managed
+  remote idempotency ledger requires a separate Architecture/cost decision.
+- Runtime status at approval: AWS CLI/SSO configuration and WING credential
+  availability were not present in the active desktop environment; no values
+  were inspected or emitted. Queue URLs/ARNs and laptop role ARN remain pending
+  from Picktil 09.
+- Risk/delivery: high-risk/manual; Draft PR, `manual-merge-required`, no
+  auto-merge. No queue/IAM/secret/environment/scheduled-task/Production change
+  or commerce write is authorized.
+- Live-call gate: at most one final read-only `connection_test`, only after
+  runtime identity, queue inputs, and desktop credentials are verified. All
+  other tests use fakes.
+- Rollback: Git revert and stop the worker. Retain the ledger until queued
+  responses are reconciled.
