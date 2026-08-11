@@ -6,11 +6,11 @@
   Picktil Discovery.
 - Strict `connection_test`, `list_seller_products`, and `category_meta`
   parameter validation with all unknown/write operations rejected.
-- Restart-safe SQLite processed-request replay cache without credentials,
-  vendor ID, or raw provider errors.
+- Stateless at-least-once read processing with no local automation ledger or
+  persisted provider response.
 - Bounded SQS FIFO consumer/response publisher behavior, poison fail-close,
   response-before-delete ordering, redacted logs, and graceful shutdown.
-- Hermetic contract, duplicate, restart, failure, DLQ, FIFO, redaction, and
+- Hermetic contract, duplicate-read, failure, DLQ, FIFO, redaction, and
   shutdown tests.
 
 ## Infrastructure ownership
@@ -23,5 +23,4 @@ created or changed by this implementation.
 ## Risk and rollback
 
 High-risk/manual. Apply `manual-merge-required`; never auto-merge. Roll back by
-reverting the PR and stopping the worker. Preserve the replay cache until
-queued responses are reconciled.
+reverting the PR and stopping the worker after queued responses are reconciled.

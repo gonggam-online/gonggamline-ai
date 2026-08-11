@@ -10,11 +10,10 @@
   credential store, SQS/IAM assets, and HMAC client; do not create a parallel
   runner.
 - New contract/lifecycle: exact `1.0.0` FIFO request/response DTOs, the three
-  fixed read operations, poison rejection, response replay, and restart-safe
-  local processed-request cache.
-- Cloud-first exception: the ledger is a credential-free replay cache, not a
-  business source of truth. Loss may repeat a read but cannot produce a write;
-  AWS FIFO remains remote deduplication. A managed ledger is separately gated.
+  fixed read operations, poison rejection, and response-before-delete ordering.
+- Cloud-first: AWS FIFO is the remote duplicate-suppression boundary. The
+  worker persists no local automation ledger or provider response. At-least-once
+  delivery may repeat only a bounded read and cannot produce a commerce write.
 - Security: desktop-only credentials/vendor ID, environment-only queue URLs,
   least privilege, sanitized logs/errors, no raw provider persistence, and no
   write-capable WING operation.
@@ -25,8 +24,7 @@
   call are authorized by implementation alone. The single final
   `connection_test` waits for verified runtime inputs.
 - Story: [WING SQS Read-only Runner v1](../docs/architecture/WING-SQS-READONLY-RUNNER-V1.md).
-- Rollback: revert the PR and stop the worker; preserve ledger until response
-  reconciliation.
+- Rollback: revert the PR and stop the worker after response reconciliation.
 
 ## KK946 evidence acquisition runbook - 2026-08-08
 

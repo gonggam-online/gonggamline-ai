@@ -7,8 +7,8 @@ Status: approved by repository-owner directive dated 2026-08-11.
 Picktil Discovery needs bounded Coupang WING evidence without copying the
 desktop-owned WING credentials to a notebook or making marketplace writes. The
 smallest revenue-path improvement is to extend the existing central runner from
-PR #118 with a stable FIFO request/response contract, one additional seller
-product read, and restart-safe duplicate suppression.
+PR #118 with a stable FIFO request/response contract and one additional seller
+product read.
 
 Owner: Supplier / Procurement integration, with the desktop central runner as
 the credential-bearing execution boundary.
@@ -37,15 +37,14 @@ adapter invocation.
 Picktil Discovery
   -> encrypted request FIFO (AWS SQS)
     -> desktop central runner contract parser
-      -> processed-request ledger / response replay cache
       -> fixed read-only WING adapter
     -> encrypted response FIFO (AWS SQS)
       -> Picktil Discovery
 ```
 
 - `tools/central-runner/contracts.ts` owns public queue DTO validation.
-- `tools/central-runner/worker.ts` owns polling, poison handling, replay,
-  response publication, acknowledgement, and graceful shutdown.
+- `tools/central-runner/worker.ts` owns polling, poison handling, response
+  publication, acknowledgement, and graceful shutdown.
 - `lib/coupang/client.ts` remains the HMAC transport owner.
 - WING credentials and vendor ID remain desktop-only configuration and are
   absent from request/response contracts and logs.
@@ -77,24 +76,17 @@ credential-free.
 2. Reject malformed, expired, unsupported, and write-like messages without a
    WING call; publish a correlated `rejected` or `expired` response when safe
    correlation fields can be recovered.
-3. Claim `(requestId, idempotencyKey)` in a transactional processed-request
-   ledger before WING execution.
-4. A completed duplicate republishes the byte-equivalent normalized response
-   and does not call WING again.
-5. An identity/key conflict fails closed as poison input.
-6. Only after response publication succeeds is the request acknowledged.
-7. Failed transient execution remains retryable until SQS redrive moves the
+3. Execute only the validated read-only adapter operation.
+4. Only after response publication succeeds is the request acknowledged.
+5. Failed transient execution remains retryable until SQS redrive moves the
    message to the configured DLQ. The worker never manually bypasses redrive.
 
-The ledger is a desktop-local durable replay cache because the WING credential
-boundary itself is desktop-only. It contains internal request identity,
-operation, normalized response JSON, and timestamps only; no credential,
-vendor ID, raw provider body, product secret, or customer/order data. It is not
-the business source of truth. The repository-owner directive accepts this
-limited Cloud-first exception for read-only calls: ledger loss can cause a
-repeated read but cannot cause a commerce write. AWS FIFO deduplication remains
-the remote first line of duplicate suppression. A managed remote ledger would
-require a separate paid/external Architecture Story.
+The worker creates no local automation ledger or response cache. SQS FIFO
+explicit deduplication is the remote duplicate-suppression boundary. SQS is
+at-least-once, so a crash after a WING read can repeat that read. This is
+accepted only because the contract rejects every commerce write. A managed
+remote idempotency ledger would require a separate paid/external Architecture
+Story and is not introduced here.
 
 ## Security and privacy
 
@@ -116,15 +108,16 @@ require a separate paid/external Architecture Story.
 - Missing queue/config/AWS session: fail startup or polling closed.
 - Invalid JSON/schema/write operation: poison-safe rejection; no WING call.
 - Expired request: `expired`; no WING call.
-- Duplicate: replay stored response; no WING call.
+- Duplicate after the FIFO deduplication window: the same bounded read may run
+  again; no commerce state can change.
 - WING timeout/provider failure: sanitized `failed` response with deterministic
   retryability; no raw body or credential material.
-- Response-send failure: do not delete request; retry/replay safely.
+- Response-send failure: do not delete request; allow safe read retry.
 - Shutdown: stop receiving, bound in-flight completion, release resources, and
   exit without acknowledging unfinished work.
 
 Metrics/evidence are sanitized counters for received, succeeded, failed,
-rejected, expired, replayed, redriven-by-SQS, and shutdown outcome.
+rejected, expired, redriven-by-SQS, and shutdown outcome.
 
 ## Capacity and cost
 
@@ -140,8 +133,7 @@ Picktil 09 stack. Existing SQS cost and quota controls remain authoritative.
 
 - exact contract/version/type/source and operation parameter tests;
 - explicit write-operation and malformed/expired poison rejection;
-- FIFO group/dedup fields and normalized response replay;
-- durable restart duplicate test proving one WING invocation;
+- FIFO group/dedup fields and at-least-once duplicate-read behavior;
 - bounded polling, visibility timeout, DLQ receive-count behavior;
 - log redaction and environment-secret absence;
 - graceful shutdown and response-send-before-delete ordering;
@@ -159,9 +151,8 @@ Picktil 09 stack. Existing SQS cost and quota controls remain authoritative.
 5. Install/restart the scheduled task only under a separate environment and
    authorization action.
 
-Rollback is Git revert plus stopping the desktop worker. Preserve the replay
-ledger until queued responses are reconciled; deletion requires a separate
-operator decision. No marketplace or database rollback is needed.
+Rollback is Git revert plus stopping the desktop worker after queued responses
+are reconciled. No local ledger, marketplace, or database rollback is needed.
 
 ## Approval and risk
 

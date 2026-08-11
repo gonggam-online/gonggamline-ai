@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import path from "node:path";
 
 import {
   DeleteMessageCommand,
@@ -18,7 +17,6 @@ import {
   type WingReadRequest,
   type WingReadResponse,
 } from "./contracts.ts";
-import { ProcessedRequestLedger } from "./processed-request-ledger.ts";
 
 export interface WingReadAdapter {
   execute(request: WingReadRequest): Promise<{ readonly ok: true; readonly result: unknown } | {
@@ -61,7 +59,6 @@ export class WingReadRunner {
   constructor(
     private readonly queue: QueuePort,
     private readonly wing: WingReadAdapter,
-    private readonly ledger: ProcessedRequestLedger,
     private readonly log: LogSink = defaultLog,
     private readonly now: () => Date = () => new Date(),
   ) {}
@@ -100,44 +97,20 @@ export class WingReadRunner {
       return "poison";
     }
 
-    const claim = this.ledger.claim(request, this.now());
-    if (claim.kind === "conflict") {
-      this.log({
-        event: "wing_read_poison",
-        requestId: request.requestId,
-        operation: request.operation,
-        errorCode: "IDEMPOTENCY_CONFLICT",
-        receiveCount,
-      });
-      return "poison";
-    }
-
     let response: WingReadResponse;
-    if (claim.kind === "replay") {
-      response = claim.response;
-      this.log({ event: "wing_read_response_replayed", requestId: request.requestId, operation: request.operation });
-    } else if (claim.kind === "interrupted") {
+    try {
+      const executed = await this.wing.execute(request);
+      response = executed.ok
+        ? wingReadResponse(request, { status: "succeeded", result: safeProviderResult(executed.result) }, this.now())
+        : wingReadResponse(request, {
+            status: "failed",
+            error: { code: executed.code, retryable: executed.retryable },
+          }, this.now());
+    } catch {
       response = wingReadResponse(request, {
         status: "failed",
-        error: { code: "PRIOR_EXECUTION_INDETERMINATE", retryable: false },
+        error: { code: "WING_ADAPTER_FAILED", retryable: true },
       }, this.now());
-      this.ledger.complete(request, response, this.now());
-    } else {
-      try {
-        const executed = await this.wing.execute(request);
-        response = executed.ok
-          ? wingReadResponse(request, { status: "succeeded", result: safeProviderResult(executed.result) }, this.now())
-          : wingReadResponse(request, {
-              status: "failed",
-              error: { code: executed.code, retryable: executed.retryable },
-            }, this.now());
-      } catch {
-        response = wingReadResponse(request, {
-          status: "failed",
-          error: { code: "WING_ADAPTER_FAILED", retryable: true },
-        }, this.now());
-      }
-      this.ledger.complete(request, response, this.now());
     }
 
     await this.queue.send(response);
@@ -246,18 +219,14 @@ async function main(): Promise<void> {
   const requestQueueUrl = process.env.CENTRAL_RUNNER_REQUEST_QUEUE_URL?.trim();
   const responseQueueUrl = process.env.CENTRAL_RUNNER_RESPONSE_QUEUE_URL?.trim();
   if (!requestQueueUrl || !responseQueueUrl) throw new Error("CENTRAL_RUNNER_QUEUE_CONFIGURATION_MISSING");
-  const ledgerPath = process.env.CENTRAL_RUNNER_LEDGER_PATH?.trim() ||
-    path.join(process.env.LOCALAPPDATA ?? process.cwd(), "GonggamLine", "central-runner.sqlite");
-  const ledger = new ProcessedRequestLedger(path.resolve(ledgerPath));
   const controller = new AbortController();
   process.once("SIGINT", () => controller.abort());
   process.once("SIGTERM", () => controller.abort());
   const client = new SQSClient({ region: process.env.AWS_REGION?.trim() || "ap-northeast-2" });
-  const runner = new WingReadRunner(createSqsQueuePort({ client, requestQueueUrl, responseQueueUrl }), createCoupangWingReadAdapter(), ledger);
+  const runner = new WingReadRunner(createSqsQueuePort({ client, requestQueueUrl, responseQueueUrl }), createCoupangWingReadAdapter());
   try {
     await runner.run(controller.signal);
   } finally {
-    ledger.close();
     client.destroy();
   }
 }

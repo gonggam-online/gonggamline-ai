@@ -1,8 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync, rmSync } from "node:fs";
-import { mkdtemp } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import path from "node:path";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
@@ -23,7 +20,6 @@ import {
   type WingReadRequest,
   type WingReadResponse,
 } from "@/tools/central-runner/contracts";
-import { ProcessedRequestLedger } from "@/tools/central-runner/processed-request-ledger";
 import {
   createSqsQueuePort,
   WingReadRunner,
@@ -81,16 +77,6 @@ class FakeQueue implements QueuePort {
   }
 }
 
-async function fixture(): Promise<{
-  readonly directory: string;
-  readonly ledgerPath: string;
-  readonly ledger: ProcessedRequestLedger;
-}> {
-  const directory = await mkdtemp(path.join(tmpdir(), "wing-runner-"));
-  const ledgerPath = path.join(directory, "processed.sqlite");
-  return { directory, ledgerPath, ledger: new ProcessedRequestLedger(ledgerPath) };
-}
-
 test("accepts exact 1.0.0 read contracts and operation parameters", () => {
   assert.equal(parseWingReadRequest(request(), NOW).operation, "category_meta");
   assert.equal(parseWingReadRequest(request({ operation: "connection_test", parameters: {} }), NOW).operation, "connection_test");
@@ -115,135 +101,78 @@ test("rejects writes, credentials, wrong source/version/type, and invalid window
 });
 
 test("expired correlated input produces expired response without WING", async () => {
-  const data = await fixture();
   let wingCalls = 0;
   const queue = new FakeQueue([message(request({ expiresAt: "2026-08-11T02:59:59.000Z" }))]);
-  try {
-    const runner = new WingReadRunner(queue, {
-      async execute() { wingCalls += 1; return { ok: true, result: {} }; },
-    }, data.ledger, () => undefined, () => NOW);
-    assert.equal(await runner.pollOnce(new AbortController().signal), "processed");
-    assert.equal(wingCalls, 0);
-    assert.equal(queue.sent[0]?.status, "expired");
-    assert.equal(queue.sent[0]?.messageType, WING_READ_RESPONSE_TYPE);
-    assert.deepEqual(queue.deleted, ["receipt-1"]);
-  } finally {
-    data.ledger.close();
-    rmSync(data.directory, { recursive: true, force: true });
-  }
+  const runner = new WingReadRunner(queue, {
+    async execute() { wingCalls += 1; return { ok: true, result: {} }; },
+  }, () => undefined, () => NOW);
+  assert.equal(await runner.pollOnce(new AbortController().signal), "processed");
+  assert.equal(wingCalls, 0);
+  assert.equal(queue.sent[0]?.status, "expired");
+  assert.equal(queue.sent[0]?.messageType, WING_READ_RESPONSE_TYPE);
+  assert.deepEqual(queue.deleted, ["receipt-1"]);
 });
 
 test("poison input remains unacknowledged for SQS DLQ redrive", async () => {
-  const data = await fixture();
   const logs: Parameters<LogSink>[0][] = [];
   const queue = new FakeQueue([message("{not-json", 3)]);
-  try {
-    const runner = new WingReadRunner(queue, { async execute() { throw new Error("must not run"); } }, data.ledger, (entry) => logs.push(entry), () => NOW);
-    assert.equal(await runner.pollOnce(new AbortController().signal), "poison");
-    assert.equal(queue.sent.length, 0);
-    assert.equal(queue.deleted.length, 0);
-    assert.equal(logs[0]?.receiveCount, 3);
-    assert.equal(logs[0]?.errorCode, "INVALID_REQUEST");
-  } finally {
-    data.ledger.close();
-    rmSync(data.directory, { recursive: true, force: true });
-  }
+  const runner = new WingReadRunner(queue, { async execute() { throw new Error("must not run"); } }, (entry) => logs.push(entry), () => NOW);
+  assert.equal(await runner.pollOnce(new AbortController().signal), "poison");
+  assert.equal(queue.sent.length, 0);
+  assert.equal(queue.deleted.length, 0);
+  assert.equal(logs[0]?.receiveCount, 3);
+  assert.equal(logs[0]?.errorCode, "INVALID_REQUEST");
 });
 
-test("durable completed duplicate replays identical response without WING recall", async () => {
-  const data = await fixture();
+test("duplicate delivery can repeat only a read and remains correlated", async () => {
   let wingCalls = 0;
   const wing: WingReadAdapter = {
-    async execute() { wingCalls += 1; return { ok: true, result: { items: [{ sellerProductId: 1 }] } }; },
+    async execute() { wingCalls += 1; return { ok: true, result: { connected: true } }; },
   };
-  const firstQueue = new FakeQueue([message(request())]);
-  try {
-    const first = new WingReadRunner(firstQueue, wing, data.ledger, () => undefined, () => NOW);
-    await first.pollOnce(new AbortController().signal);
-    data.ledger.close();
-
-    const reopened = new ProcessedRequestLedger(data.ledgerPath);
-    try {
-      const duplicateQueue = new FakeQueue([message(request(), 2)]);
-      const second = new WingReadRunner(duplicateQueue, wing, reopened, () => undefined, () => new Date("2026-08-11T03:01:00.000Z"));
-      await second.pollOnce(new AbortController().signal);
-      assert.equal(wingCalls, 1);
-      assert.deepEqual(duplicateQueue.sent[0], firstQueue.sent[0]);
-      assert.deepEqual(duplicateQueue.deleted, ["receipt-2"]);
-    } finally {
-      reopened.close();
-    }
-  } finally {
-    rmSync(data.directory, { recursive: true, force: true });
-  }
+  const input = request({ operation: "connection_test", parameters: {} });
+  const queue = new FakeQueue([message(input), message(input, 2)]);
+  const runner = new WingReadRunner(queue, wing, () => undefined, () => NOW);
+  await runner.pollOnce(new AbortController().signal);
+  await runner.pollOnce(new AbortController().signal);
+  assert.equal(wingCalls, 2);
+  assert.equal(queue.sent[0]?.requestId, input.requestId);
+  assert.equal(queue.sent[1]?.requestId, input.requestId);
+  assert.deepEqual(queue.deleted, ["receipt-1", "receipt-2"]);
 });
 
-test("response send failure leaves request and retry replays without WING recall", async () => {
-  const data = await fixture();
-  let wingCalls = 0;
-  const wing: WingReadAdapter = { async execute() { wingCalls += 1; return { ok: true, result: { connected: true } }; } };
-  const queue = new FakeQueue([message(request({ operation: "connection_test", parameters: {} }))]);
-  queue.sendFailures = 1;
-  try {
-    const runner = new WingReadRunner(queue, wing, data.ledger, () => undefined, () => NOW);
-    await assert.rejects(() => runner.pollOnce(new AbortController().signal));
-    assert.equal(queue.deleted.length, 0);
-    queue.messages.push(message(request({ operation: "connection_test", parameters: {} }), 2));
-    await runner.pollOnce(new AbortController().signal);
-    assert.equal(wingCalls, 1);
-    assert.equal(queue.sent[0]?.status, "succeeded");
-    assert.deepEqual(queue.deleted, ["receipt-2"]);
-  } finally {
-    data.ledger.close();
-    rmSync(data.directory, { recursive: true, force: true });
-  }
-});
-
-test("interrupted prior execution fails closed and becomes deterministic replay", async () => {
-  const data = await fixture();
+test("response send failure leaves request unacknowledged for safe read retry", async () => {
   let wingCalls = 0;
   const input = request({ operation: "connection_test", parameters: {} });
-  assert.equal(data.ledger.claim(input, NOW).kind, "claimed");
-  const queue = new FakeQueue([message(input, 2), message(input, 3)]);
-  try {
-    const runner = new WingReadRunner(queue, {
-      async execute() { wingCalls += 1; return { ok: true, result: {} }; },
-    }, data.ledger, () => undefined, () => NOW);
-    await runner.pollOnce(new AbortController().signal);
-    await runner.pollOnce(new AbortController().signal);
-    assert.equal(wingCalls, 0);
-    assert.equal(queue.sent[0]?.error?.code, "PRIOR_EXECUTION_INDETERMINATE");
-    assert.equal(queue.sent[0]?.error?.retryable, false);
-    assert.deepEqual(queue.sent[1], queue.sent[0]);
-  } finally {
-    data.ledger.close();
-    rmSync(data.directory, { recursive: true, force: true });
-  }
+  const queue = new FakeQueue([message(input)]);
+  queue.sendFailures = 1;
+  const runner = new WingReadRunner(queue, {
+    async execute() { wingCalls += 1; return { ok: true, result: { connected: true } }; },
+  }, () => undefined, () => NOW);
+  await assert.rejects(() => runner.pollOnce(new AbortController().signal));
+  assert.equal(queue.deleted.length, 0);
+  queue.messages.push(message(input, 2));
+  await runner.pollOnce(new AbortController().signal);
+  assert.equal(wingCalls, 2);
+  assert.equal(queue.sent[0]?.status, "succeeded");
+  assert.deepEqual(queue.deleted, ["receipt-2"]);
 });
 
 test("result and logs redact credential-shaped fields", async () => {
-  const data = await fixture();
   const logs: Parameters<LogSink>[0][] = [];
   const queue = new FakeQueue([message(request())]);
-  try {
-    const runner = new WingReadRunner(queue, {
-      async execute() {
-        return { ok: true, result: { item: 1, nextToken: "page-2", accessKey: "synthetic", nested: { secretKey: "synthetic", vendorId: "synthetic" } } };
-      },
-    }, data.ledger, (entry) => logs.push(entry), () => NOW);
-    await runner.pollOnce(new AbortController().signal);
-    const serialized = JSON.stringify({ response: queue.sent, logs });
-    assert.doesNotMatch(serialized, /synthetic/);
-    assert.match(serialized, /"item":1/);
-    assert.match(serialized, /"nextToken":"page-2"/);
-  } finally {
-    data.ledger.close();
-    rmSync(data.directory, { recursive: true, force: true });
-  }
+  const runner = new WingReadRunner(queue, {
+    async execute() {
+      return { ok: true, result: { item: 1, nextToken: "page-2", accessKey: "synthetic", nested: { secretKey: "synthetic", vendorId: "synthetic" } } };
+    },
+  }, (entry) => logs.push(entry), () => NOW);
+  await runner.pollOnce(new AbortController().signal);
+  const serialized = JSON.stringify({ response: queue.sent, logs });
+  assert.doesNotMatch(serialized, /synthetic/);
+  assert.match(serialized, /"item":1/);
+  assert.match(serialized, /"nextToken":"page-2"/);
 });
 
 test("graceful shutdown stops a bounded poll loop", async () => {
-  const data = await fixture();
   const logs: Parameters<LogSink>[0][] = [];
   const controller = new AbortController();
   const queue: QueuePort = {
@@ -253,19 +182,14 @@ test("graceful shutdown stops a bounded poll loop", async () => {
     async send() { throw new Error("must not send"); },
     async delete() { throw new Error("must not delete"); },
   };
-  try {
-    const runner = new WingReadRunner(queue, { async execute() { throw new Error("must not run"); } }, data.ledger, (entry) => logs.push(entry), () => NOW);
-    const running = runner.run(controller.signal);
-    controller.abort();
-    await running;
-    assert.equal(logs.at(-1)?.event, "wing_read_shutdown");
-  } finally {
-    data.ledger.close();
-    rmSync(data.directory, { recursive: true, force: true });
-  }
+  const runner = new WingReadRunner(queue, { async execute() { throw new Error("must not run"); } }, (entry) => logs.push(entry), () => NOW);
+  const running = runner.run(controller.signal);
+  controller.abort();
+  await running;
+  assert.equal(logs.at(-1)?.event, "wing_read_shutdown");
 });
 
-test("consumer uses FIFO fields while Picktil Terraform remains infrastructure authority", () => {
+test("consumer uses explicit FIFO fields while Picktil Terraform remains infrastructure authority", () => {
   const worker = readFileSync("tools/central-runner/worker.ts", "utf8");
   const smoke = readFileSync("tools/central-runner/smoke.ts", "utf8");
   const runbook = readFileSync("docs/central-runner/README.md", "utf8");
@@ -275,9 +199,10 @@ test("consumer uses FIFO fields while Picktil Terraform remains infrastructure a
   assert.match(smoke, /MessageDeduplicationId:/);
   assert.match(runbook, /09-cloud-platform Terraform is the sole/);
   assert.match(runbook, /must not be deployed or extended/);
+  assert.doesNotMatch(worker, /CENTRAL_RUNNER_LEDGER_PATH|processed-request-ledger/);
 });
 
-test("SQS port enforces bounded long polling, visibility, FIFO response, and delete ordering inputs", async () => {
+test("SQS port enforces bounded long polling, visibility, FIFO response, and delete inputs", async () => {
   const commands: unknown[] = [];
   const client = {
     async send(command: unknown): Promise<Record<string, unknown>> {

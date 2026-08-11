@@ -1340,15 +1340,15 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Decision: extend the existing desktop runner with exact contract version
   `1.0.0`, message types `wing.read.request` / `wing.read.response`, source
   `picktil-discovery`, operations `connection_test`,
-  `list_seller_products`, and `category_meta`, FIFO response replay, and a
-  credential-free local processed-request cache.
+  `list_seller_products`, and `category_meta`, with explicit FIFO group and
+  deduplication identifiers.
 - Capability boundary: reject every create/update/delete/listing/price/order/
   inventory/return/settlement/payment or unknown operation before the WING
   adapter. Vendor ID and credentials never enter queue contracts.
-- Cloud-first decision: accept the local ledger only as a replaceable
-  read-replay cache within the desktop credential boundary. It is not a
-  business source of truth; ledger loss can repeat only a read. A managed
-  remote idempotency ledger requires a separate Architecture/cost decision.
+- Cloud-first decision: persist no local automation ledger or provider
+  response. AWS FIFO is the remote duplicate-suppression boundary. At-least-once
+  delivery may repeat only a bounded read. A managed remote idempotency ledger
+  requires a separate Architecture/cost decision.
 - Runtime status at approval: AWS CLI/SSO configuration and WING credential
   availability were not present in the active desktop environment; no values
   were inspected or emitted. Queue URLs/ARNs and laptop role ARN remain pending
@@ -1363,5 +1363,5 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Live-call gate: at most one final read-only `connection_test`, only after
   runtime identity, queue inputs, and desktop credentials are verified. All
   other tests use fakes.
-- Rollback: Git revert and stop the worker. Retain the ledger until queued
-  responses are reconciled.
+- Rollback: Git revert and stop the worker after queued responses are
+  reconciled.
