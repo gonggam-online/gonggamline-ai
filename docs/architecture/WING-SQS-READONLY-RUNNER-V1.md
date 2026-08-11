@@ -128,8 +128,11 @@ rejected, expired, replayed, redriven-by-SQS, and shutdown outcome.
 
 ## Capacity and cost
 
-One-message bounded long polling is sufficient for the initial discovery
-workflow. No queue provisioning or paid-resource change is authorized here.
+One-message bounded long polling in `ap-northeast-2` is sufficient for the
+initial discovery workflow. Picktil Discovery 09-cloud-platform Terraform is
+the sole SQS infrastructure source of truth; this repository consumes URLs and
+must not deploy or extend its legacy CloudFormation reference. No queue
+provisioning or paid-resource change is authorized here.
 Actual URLs/ARNs and the laptop role ARN arrive from the separately deployed
 Picktil 09 stack. Existing SQS cost and quota controls remain authoritative.
 

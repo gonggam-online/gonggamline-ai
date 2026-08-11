@@ -4634,16 +4634,35 @@ perform the documented read-only Supabase schema and completeness inspection.
   Production/Supabase/Vercel changes, marketplace writes, order/inventory/
   settlement calls, and more than one final live connection test.
 - Completed: safe clean main inspection; latest origin/main fast-forward; PR
-  #118 reuse audit; governance boot; Architecture Story and Decision record.
-- Current: implement the bounded contract/worker/ledger test slice.
+  #118 reuse audit; governance boot; Architecture Story and Decision record;
+  exact contract, FIFO consumer, GET-only adapter, SQLite replay cache,
+  poison/redaction/shutdown behavior, and focused tests.
+- Current: generic implementation and local validation complete; delivery and
+  remote exact-head checks remain.
 - Blockers: actual queue URL/ARN and laptop role ARN pending from Picktil 09;
   AWS CLI/SSO and WING credentials unavailable in the active environment.
 - Owner action: none yet; runtime configuration will be requested only after
   generic implementation and tests are complete.
-- Changed files: Architecture/Decision/Work Status documents only at this
-  checkpoint.
-- Exact next action: commit Architecture approval checkpoint, then implement
-  contracts and hermetic worker tests.
-- Remaining risks: local replay-cache loss can repeat a read; Windows process
-  lifecycle and SQS delivery ordering require tests; actual runtime identity
-  remains unverified.
+- Changed files: runner contracts/worker/smoke/ledger, focused tests, startup
+  defaults, Architecture/Decision/Work Status, README, and changelog.
+- Exact next action: commit and push the implementation, open a high-risk Draft
+  PR, and reconcile exact-head CI/Preview without merging.
+- Remaining risks: local replay-cache loss can repeat a read; the live AWS/WING
+  connection test remains blocked; actual runtime identity remains unverified.
+- Deployment identity evidence (no AWS call): SSO start URL `UNCONFIRMED`, SSO
+  region config `UNCONFIRMED`, caller account `UNCONFIRMED`, exact current IAM
+  role/principal ARN `UNCONFIRMED`; repository historical permission-set name
+  `GonggamCentralRunnerDesktop` is not caller proof; laptop role
+  `공감센트라런너랩톱 최소권한` exact ARN `UNCONFIRMED`.
+- Infrastructure authority: Picktil Discovery 09-cloud-platform Terraform in
+  `ap-northeast-2`; this repo consumes queue URLs only and does not deploy its
+  legacy CloudFormation reference.
+- Focused validation: 11/11 passed; typecheck passed; lint has zero errors and
+  four pre-existing Revenue test warnings.
+- Full local validation: tests 560/560 passed; production build passed with 85
+  routes; Playwright 42 passed and 2 skipped with no failures; `git diff
+  --check` passed; no tracked generated output, actual queue identifier, or
+  strong credential pattern was found. `npm ci` reported eight existing
+  dependency advisories (one moderate, seven high) without a lockfile change.
+- External effects: no AWS or WING API call, queue/IAM/secret/scheduled-task
+  change, marketplace write, Production, Supabase, or Vercel change occurred.

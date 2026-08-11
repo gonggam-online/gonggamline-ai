@@ -1353,6 +1353,10 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   availability were not present in the active desktop environment; no values
   were inspected or emitted. Queue URLs/ARNs and laptop role ARN remain pending
   from Picktil 09.
+- Infrastructure ownership amendment: Picktil Discovery 09-cloud-platform
+  Terraform is the sole SQS source of truth in `ap-northeast-2`. This repo
+  consumes environment-provided URLs only; its legacy central-runner
+  CloudFormation is not a deployment source for this Story.
 - Risk/delivery: high-risk/manual; Draft PR, `manual-merge-required`, no
   auto-merge. No queue/IAM/secret/environment/scheduled-task/Production change
   or commerce write is authorized.

@@ -1,117 +1,267 @@
+import crypto from "node:crypto";
+import path from "node:path";
+
 import {
   DeleteMessageCommand,
   ReceiveMessageCommand,
   SendMessageCommand,
   SQSClient,
+  type Message,
 } from "@aws-sdk/client-sqs";
 
 import {
-  CENTRAL_RUNNER_SCHEMA_VERSION,
   categoryCode,
-  parseCentralRunnerRequest,
-  type CentralRunnerRequest,
-  type CentralRunnerResponse,
+  parseWingReadRequest,
+  sellerProductParameters,
+  WingRequestError,
+  wingReadResponse,
+  type WingReadRequest,
+  type WingReadResponse,
 } from "./contracts.ts";
+import { ProcessedRequestLedger } from "./processed-request-ledger.ts";
 
-const requestQueueUrl = process.env.CENTRAL_RUNNER_REQUEST_QUEUE_URL?.trim();
-const responseQueueUrl = process.env.CENTRAL_RUNNER_RESPONSE_QUEUE_URL?.trim();
-const region = process.env.AWS_REGION?.trim() || "ap-southeast-1";
-
-if (!requestQueueUrl || !responseQueueUrl) {
-  throw new Error("CENTRAL_RUNNER_QUEUE_CONFIGURATION_MISSING");
+export interface WingReadAdapter {
+  execute(request: WingReadRequest): Promise<{ readonly ok: true; readonly result: unknown } | {
+    readonly ok: false;
+    readonly code: string;
+    readonly retryable: boolean;
+  }>;
 }
 
-const sqs = new SQSClient({ region });
+export interface QueuePort {
+  receive(signal: AbortSignal): Promise<Message | null>;
+  send(response: WingReadResponse): Promise<void>;
+  delete(receiptHandle: string): Promise<void>;
+}
 
-function response(request: CentralRunnerRequest, input: Omit<CentralRunnerResponse, "schemaVersion" | "taskId" | "completedAt">): CentralRunnerResponse {
+export interface RunnerLog {
+  readonly event: string;
+  readonly requestId?: string;
+  readonly operation?: string;
+  readonly status?: string;
+  readonly errorCode?: string;
+  readonly receiveCount?: number;
+}
+
+export type LogSink = (entry: RunnerLog) => void;
+
+const defaultLog: LogSink = (entry) => console.log(JSON.stringify(entry));
+
+function safeProviderResult(value: unknown): unknown {
+  const serialized = JSON.stringify(value, (key, nested) =>
+    /access.?key|secret.?key|authorization|vendor.?id|credential|api.?key|password|session.?token|security.?token/i.test(key)
+      ? undefined
+      : nested,
+  );
+  if (serialized.length > 200_000) throw new Error("WING_RESPONSE_TOO_LARGE");
+  return JSON.parse(serialized) as unknown;
+}
+
+export class WingReadRunner {
+  constructor(
+    private readonly queue: QueuePort,
+    private readonly wing: WingReadAdapter,
+    private readonly ledger: ProcessedRequestLedger,
+    private readonly log: LogSink = defaultLog,
+    private readonly now: () => Date = () => new Date(),
+  ) {}
+
+  async pollOnce(signal: AbortSignal): Promise<"idle" | "processed" | "poison"> {
+    const message = await this.queue.receive(signal);
+    if (message === null) return "idle";
+    const receiveCount = Number(message.Attributes?.ApproximateReceiveCount ?? "1");
+    if (!message.Body || !message.ReceiptHandle) {
+      this.log({ event: "wing_read_poison", errorCode: "MESSAGE_ENVELOPE_INVALID", receiveCount });
+      return "poison";
+    }
+
+    let request: WingReadRequest;
+    try {
+      request = parseWingReadRequest(JSON.parse(message.Body) as unknown, this.now());
+    } catch (error) {
+      if (error instanceof WingRequestError && error.correlation !== null) {
+        const rejected = wingReadResponse(error.correlation, {
+          status: error.status,
+          error: { code: error.code, retryable: false },
+        }, this.now());
+        await this.queue.send(rejected);
+        await this.queue.delete(message.ReceiptHandle);
+        this.log({
+          event: "wing_read_request_rejected",
+          requestId: error.correlation.requestId,
+          operation: error.correlation.operation,
+          status: error.status,
+          errorCode: error.code,
+          receiveCount,
+        });
+        return "processed";
+      }
+      this.log({ event: "wing_read_poison", errorCode: "INVALID_REQUEST", receiveCount });
+      return "poison";
+    }
+
+    const claim = this.ledger.claim(request, this.now());
+    if (claim.kind === "conflict") {
+      this.log({
+        event: "wing_read_poison",
+        requestId: request.requestId,
+        operation: request.operation,
+        errorCode: "IDEMPOTENCY_CONFLICT",
+        receiveCount,
+      });
+      return "poison";
+    }
+
+    let response: WingReadResponse;
+    if (claim.kind === "replay") {
+      response = claim.response;
+      this.log({ event: "wing_read_response_replayed", requestId: request.requestId, operation: request.operation });
+    } else if (claim.kind === "interrupted") {
+      response = wingReadResponse(request, {
+        status: "failed",
+        error: { code: "PRIOR_EXECUTION_INDETERMINATE", retryable: false },
+      }, this.now());
+      this.ledger.complete(request, response, this.now());
+    } else {
+      try {
+        const executed = await this.wing.execute(request);
+        response = executed.ok
+          ? wingReadResponse(request, { status: "succeeded", result: safeProviderResult(executed.result) }, this.now())
+          : wingReadResponse(request, {
+              status: "failed",
+              error: { code: executed.code, retryable: executed.retryable },
+            }, this.now());
+      } catch {
+        response = wingReadResponse(request, {
+          status: "failed",
+          error: { code: "WING_ADAPTER_FAILED", retryable: true },
+        }, this.now());
+      }
+      this.ledger.complete(request, response, this.now());
+    }
+
+    await this.queue.send(response);
+    await this.queue.delete(message.ReceiptHandle);
+    this.log({
+      event: "wing_read_request_completed",
+      requestId: request.requestId,
+      operation: request.operation,
+      status: response.status,
+      receiveCount,
+    });
+    return "processed";
+  }
+
+  async run(signal: AbortSignal): Promise<void> {
+    let delayMs = 1_000;
+    while (!signal.aborted) {
+      try {
+        await this.pollOnce(signal);
+        delayMs = 1_000;
+      } catch {
+        if (signal.aborted) break;
+        this.log({ event: "wing_read_poll_failed", errorCode: "QUEUE_OPERATION_FAILED" });
+        await new Promise<void>((resolve) => {
+          const timer = setTimeout(resolve, delayMs);
+          signal.addEventListener("abort", () => { clearTimeout(timer); resolve(); }, { once: true });
+        });
+        delayMs = Math.min(delayMs * 2, 60_000);
+      }
+    }
+    this.log({ event: "wing_read_shutdown", status: "settled" });
+  }
+}
+
+export function createSqsQueuePort(input: {
+  readonly client: SQSClient;
+  readonly requestQueueUrl: string;
+  readonly responseQueueUrl: string;
+  readonly waitTimeSeconds?: number;
+  readonly visibilityTimeoutSeconds?: number;
+}): QueuePort {
   return {
-    schemaVersion: CENTRAL_RUNNER_SCHEMA_VERSION,
-    taskId: request.taskId,
-    completedAt: new Date().toISOString(),
-    ...input,
+    async receive(signal) {
+      const received = await input.client.send(new ReceiveMessageCommand({
+        QueueUrl: input.requestQueueUrl,
+        MaxNumberOfMessages: 1,
+        WaitTimeSeconds: input.waitTimeSeconds ?? 20,
+        VisibilityTimeout: input.visibilityTimeoutSeconds ?? 60,
+        MessageSystemAttributeNames: ["ApproximateReceiveCount"],
+      }), { abortSignal: signal });
+      return received.Messages?.[0] ?? null;
+    },
+    async send(response) {
+      const body = JSON.stringify(response);
+      await input.client.send(new SendMessageCommand({
+        QueueUrl: input.responseQueueUrl,
+        MessageBody: body,
+        MessageGroupId: "wing-read-responses",
+        MessageDeduplicationId: crypto.createHash("sha256").update(body).digest("hex"),
+      }));
+    },
+    async delete(receiptHandle) {
+      await input.client.send(new DeleteMessageCommand({
+        QueueUrl: input.requestQueueUrl,
+        ReceiptHandle: receiptHandle,
+      }));
+    },
   };
 }
 
-async function execute(request: CentralRunnerRequest): Promise<CentralRunnerResponse> {
-  const { coupangRequest, getCoupangConfig } = await import("@/lib/coupang/client");
-  if (request.operation === "COUPANG_CONNECTION_TEST") {
-    const { vendorId } = getCoupangConfig();
-    const result = await coupangRequest<unknown>({
-      method: "GET",
-      path: `/v2/providers/seller_api/apis/api/v1/marketplace/seller-products/inflow-status`,
-      searchParams: new URLSearchParams({ vendorId }),
-      signal: AbortSignal.timeout(15_000),
-    });
-    return response(request, {
-      ok: result.ok,
-      status: result.status,
-      ...(result.ok ? { result: { connected: true } } : { errorCode: "COUPANG_REQUEST_FAILED" }),
-    });
-  }
-  const result = await coupangRequest<unknown>({
-    method: "GET",
-    path: `/v2/providers/seller_api/apis/api/v1/marketplace/meta/category-related-metas/display-category-codes/${categoryCode(request)}`,
-    signal: AbortSignal.timeout(15_000),
-  });
-  return response(request, {
-    ok: result.ok,
-    status: result.status,
-    ...(result.ok ? { result: result.data } : { errorCode: "COUPANG_REQUEST_FAILED" }),
-  });
+export function createCoupangWingReadAdapter(): WingReadAdapter {
+  return {
+    async execute(request) {
+      const { coupangRequest, getCoupangConfig } = await import("@/lib/coupang/client");
+      const { vendorId } = getCoupangConfig();
+      let pathName: string;
+      let searchParams: URLSearchParams | undefined;
+      if (request.operation === "connection_test") {
+        pathName = "/v2/providers/seller_api/apis/api/v1/marketplace/seller-products/inflow-status";
+        searchParams = new URLSearchParams({ vendorId });
+      } else if (request.operation === "list_seller_products") {
+        const parameters = sellerProductParameters(request);
+        pathName = "/v2/providers/seller_api/apis/api/v1/marketplace/seller-products";
+        searchParams = new URLSearchParams({ vendorId, maxPerPage: String(parameters.maxPerPage) });
+        if (parameters.nextToken !== undefined) searchParams.set("nextToken", parameters.nextToken);
+      } else {
+        pathName = `/v2/providers/seller_api/apis/api/v1/marketplace/meta/category-related-metas/display-category-codes/${categoryCode(request)}`;
+      }
+      const result = await coupangRequest<unknown>({
+        method: "GET",
+        path: pathName,
+        searchParams,
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (result.ok) return { ok: true, result: request.operation === "connection_test" ? { connected: true } : result.data };
+      return {
+        ok: false,
+        code: result.status === 429 ? "WING_RATE_LIMITED" : "WING_REQUEST_FAILED",
+        retryable: result.status === 429 || result.status >= 500,
+      };
+    },
+  };
 }
 
-async function processMessage(body: string): Promise<CentralRunnerResponse> {
-  let parsed: unknown;
+async function main(): Promise<void> {
+  const requestQueueUrl = process.env.CENTRAL_RUNNER_REQUEST_QUEUE_URL?.trim();
+  const responseQueueUrl = process.env.CENTRAL_RUNNER_RESPONSE_QUEUE_URL?.trim();
+  if (!requestQueueUrl || !responseQueueUrl) throw new Error("CENTRAL_RUNNER_QUEUE_CONFIGURATION_MISSING");
+  const ledgerPath = process.env.CENTRAL_RUNNER_LEDGER_PATH?.trim() ||
+    path.join(process.env.LOCALAPPDATA ?? process.cwd(), "GonggamLine", "central-runner.sqlite");
+  const ledger = new ProcessedRequestLedger(path.resolve(ledgerPath));
+  const controller = new AbortController();
+  process.once("SIGINT", () => controller.abort());
+  process.once("SIGTERM", () => controller.abort());
+  const client = new SQSClient({ region: process.env.AWS_REGION?.trim() || "ap-northeast-2" });
+  const runner = new WingReadRunner(createSqsQueuePort({ client, requestQueueUrl, responseQueueUrl }), createCoupangWingReadAdapter(), ledger);
   try {
-    parsed = JSON.parse(body);
-  } catch {
-    throw new Error("INVALID_REQUEST");
-  }
-  const request = parseCentralRunnerRequest(parsed);
-  try {
-    return await execute(request);
-  } catch (error) {
-    return response(request, {
-      ok: false,
-      status: 503,
-      errorCode: error instanceof Error ? error.message : "EXECUTION_FAILED",
-    });
+    await runner.run(controller.signal);
+  } finally {
+    ledger.close();
+    client.destroy();
   }
 }
 
-async function run(): Promise<void> {
-  let delayMs = 1_000;
-  for (;;) {
-    try {
-      const received = await sqs.send(new ReceiveMessageCommand({
-        QueueUrl: requestQueueUrl,
-        MaxNumberOfMessages: 1,
-        WaitTimeSeconds: 20,
-        VisibilityTimeout: 60,
-        MessageSystemAttributeNames: ["ApproximateReceiveCount"],
-      }));
-      delayMs = 1_000;
-      const message = received.Messages?.[0];
-      if (!message?.Body || !message.ReceiptHandle) continue;
-      const result = await processMessage(message.Body);
-      await sqs.send(new SendMessageCommand({
-        QueueUrl: responseQueueUrl,
-        MessageBody: JSON.stringify(result),
-        MessageGroupId: undefined,
-      }));
-      await sqs.send(new DeleteMessageCommand({
-        QueueUrl: requestQueueUrl,
-        ReceiptHandle: message.ReceiptHandle,
-      }));
-    } catch (error) {
-      console.error(JSON.stringify({
-        event: "central_runner_poll_failed",
-        errorCode: error instanceof Error ? error.message : "UNKNOWN_ERROR",
-      }));
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-      delayMs = Math.min(delayMs * 2, 60_000);
-    }
-  }
+if (process.argv[1]?.replaceAll("\\", "/").endsWith("/tools/central-runner/worker.ts")) {
+  void main();
 }
-
-void run();

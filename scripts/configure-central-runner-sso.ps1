@@ -1,6 +1,6 @@
 param(
   [string]$AwsConfigRoot = "D:\Dev\gonggamline-ai",
-  [string]$Region = "ap-southeast-1",
+  [string]$Region = "ap-northeast-2",
   [string]$AccountId = "205382053735"
 )
 
