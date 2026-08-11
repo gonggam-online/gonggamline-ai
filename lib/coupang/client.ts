@@ -73,6 +73,7 @@ export async function coupangRequest<T>(options: {
   path: string;
   searchParams?: URLSearchParams;
   body?: unknown;
+  signal?: AbortSignal;
 }): Promise<CoupangApiResult<T>> {
   const config = getCoupangConfig();
   const authorization = createAuthorization(
@@ -96,6 +97,7 @@ export async function coupangRequest<T>(options: {
       },
       body: options.body === undefined ? undefined : JSON.stringify(options.body),
       cache: "no-store",
+      signal: options.signal,
     });
   } catch {
     throw new Error(NO_DATA_MESSAGE);
