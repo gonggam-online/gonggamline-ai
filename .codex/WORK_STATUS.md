@@ -46,19 +46,22 @@
   scoped engine/evidence diff does not touch those routes; exact Preview remains the
   binding configured browser gate. The same baseline reproduced after the code
   correction. A transient full-test ENOENT occurred only while build and tests
-  concurrently replaced `.next`; the serial full rerun passed `565/565`.
+  concurrently replaced `.next`; the final serial full rerun passed `567/567`.
 - Review: complete diff and `git diff --check` passed. New decision evidence has
   no URL in the machine record and no raw account/contact/bank/credential data;
   provider URLs appear only as public authority references in the narrative.
-- Delivery: commit `d1224c376c6f58349f974f1a38a8a454ed2b329c` pushed on
-  `codex/fix/kk946-profitability-fee-basis`; Draft PR #122 targets `main`, has
-  `manual-merge-required`, and must not auto-merge.
+- Delivery: commits `cc08a8c1fa7df009dd20856bc082fa9339bafb85` and
+  `ff4545a943bfc1ca6bf9a6e7e31e12e19d176b48` pushed on
+  `codex/fix/kk946-profitability-fee-basis`; Ready PR #122 targets `main`, has
+  `manual-merge-required`, and has no auto-merge request.
 - Exact-head gates: CI lint/tests/typecheck/build/security audit/database
   baseline/Item Selection security/R1 atomic replay all passed. Vercel Preview
   deployed and Preview Playwright passed `42`, skipped `2`, with no console,
   page, or failed-request errors across the configured route suite. Artifact:
-  `preview-browser-evidence`, GitHub Actions run `31563588274`.
-- Current: final diff review, commit/push, PR #122 update, and exact-head gates.
+  `preview-browser-evidence` (artifact `9129279388`), CI run `31565340515`,
+  Preview browser run `31565340535`.
+- Current: delivery complete; owner financial-policy review and manual merge
+  decision on PR #122.
 - Changed files: profitability engine/policy/regression test; KK946 first-sale,
   inbound, profitability/listing and machine-status evidence; focused contract
   tests; changelog/decision log; this recovery record.
