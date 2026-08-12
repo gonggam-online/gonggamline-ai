@@ -1,5 +1,67 @@
 # Work status
 
+## 2026-08-12 KK946 profitability and Coupang listing facts
+
+- Objective: select an evidence-bounded selling price, calculate exact known
+  per-order variable costs, and acquire every available Coupang registration
+  fact without performing a commerce write.
+- Branch/base: `codex/fix/kk946-profitability-fee-basis` from latest merged
+  `origin/main` at `1d9785cf1fecc14c530dc7317e41b59bc4819692`.
+- Risk/root cause: high-risk/manual because price, fee and margin decisions can
+  affect commerce. Root-cause order found no database issue: WING account
+  logistics and seller facts are external blockers, while the engine's use of
+  net revenue instead of customer final price for the fee was a code defect.
+- Revenue impact: establishes a policy-passing `11,800 KRW` target for the six
+  stocked units and prevents an incomplete category payload from delaying or
+  corrupting the first-sale test.
+- Cloud-first: GitHub owns sanitized calculation inputs/results, evidence docs,
+  tests, PR and CI history. Domeggook, Gaemi and Coupang remain authorities for
+  raw order/ledger/image/account/category data. Browser state and local outputs
+  are temporary and no raw screenshot, address, contact, bank or credential is
+  retained.
+- Scope/non-goals: authenticated read-only supplier/warehouse observations,
+  current public rate/market research, approved-engine calculation, evidence
+  docs and tests. No Product Creation, price/stock/coupon/ad/fulfillment write,
+  Production/database/config/secret, paid action or provider mutation.
+- Root facts: six-unit cash outflow `9,530 KRW`; current declared one-unit
+  deterministic variable cost `4,353.94 KRW` net of deductible VAT / `4,789.33
+  KRW` gross cash; authenticated WING fee `10.5%` on customer final price;
+  `11,800 KRW` base contribution `3,364 KRW / 31.36%`, stress `2,560 KRW /
+  23.86%`. Exact recommend threshold is `11,243 KRW`; operational floor is
+  `11,300 KRW`.
+- Acquired listing facts: item `56288849`, model `KK946`, black, polyester,
+  `10.5 x 3.6 x 6.5 cm` warehouse-recorded dimensions, manufacturer claim
+  `KLAND`, China (OEM), stock six, taxable status and detail-image use allowed.
+- Completed: mandatory boot and task branch; supplier/warehouse/rate/market
+  reads; deterministic package plan; authenticated read-only WING category
+  path, `10.5%` fee, notice and account-logistics review; marketplace fee-base
+  code correction with regression test; packet/status/changelog updates;
+  focused tests `38/38`, full tests `565/565`, typecheck, and 85-route build
+  pass. Lint has zero source errors and four pre-existing test warnings when
+  generated Playwright output is excluded.
+- Browser baseline: local Playwright `35` passed, `2` skipped and `7` failed on
+  the unchanged unconfigured-Supabase routes `/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow` and `/workspace`. This
+  scoped engine/evidence diff does not touch those routes; exact Preview remains the
+  binding configured browser gate. The same baseline reproduced after the code
+  correction. A transient full-test ENOENT occurred only while build and tests
+  concurrently replaced `.next`; the serial full rerun passed `565/565`.
+- Review: complete diff and `git diff --check` passed. New decision evidence has
+  no URL in the machine record and no raw account/contact/bank/credential data;
+  provider URLs appear only as public authority references in the narrative.
+- Current: finish diff/security review, then commit, push and open a
+  manual-merge-required PR with exact-head CI/Preview evidence.
+- Changed files: profitability engine/policy/regression test; KK946 first-sale,
+  inbound, profitability/listing and machine-status evidence; focused contract
+  tests; changelog/decision log; this recovery record.
+- Blocker/owner action: before listing, register outbound and return locations
+  in WING and approve handling, warranty, seller/importer and A/S facts. These
+  are external writes and were not performed.
+- Remaining risks: exact displayCategoryCode/validity and allowed attributes,
+  barcode/brand/certification treatment, seller notice facts, actual weight,
+  image-edit rights, future storage/SKU charges, actual invoice and mature
+  ad/return rates.
+
 ## 2026-08-12 KK946 inspection stage and actual cost evidence
 
 - Objective: admit the provider stage images and actual warehouse charges,

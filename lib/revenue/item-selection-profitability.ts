@@ -1,8 +1,8 @@
 export const ITEM_SELECTION_PROFITABILITY_POLICY_VERSION =
-  "gonggamline-profitability-2026-07-27-v1" as const;
+  "gonggamline-profitability-2026-08-12-v2" as const;
 
 export const ITEM_SELECTION_PROFITABILITY_POLICY_EFFECTIVE_DATE =
-  "2026-07-27" as const;
+  "2026-08-12" as const;
 
 export const ITEM_SELECTION_PROFITABILITY_POLICY = Object.freeze({
   fallbackMarketplaceFeeRate: 0.109,
@@ -313,6 +313,7 @@ function assertNoDoubleCounting(facts: readonly MoneyFact[]): void {
 
 function scenario(
   name: ProfitabilityScenarioName,
+  grossSellingPrice: number,
   netRevenue: number,
   fixedCosts: readonly MoneyFact[],
   marketplaceFee: { rate: number; fact: RateFact },
@@ -323,7 +324,12 @@ function scenario(
     ...fixedCosts
       .filter(({ confirmationStatus }) => confirmationStatus !== "NOT_APPLICABLE")
       .map(lineFromMoney),
-    rateLine("marketplaceFee", netRevenue, marketplaceFee.rate, marketplaceFee.fact),
+    rateLine(
+      "marketplaceFee",
+      grossSellingPrice,
+      marketplaceFee.rate,
+      marketplaceFee.fact,
+    ),
     rateLine("advertising", netRevenue, advertising.rate, advertising.fact),
     rateLine("returnLoss", netRevenue, returnLoss.rate, returnLoss.fact),
   ];
@@ -452,7 +458,11 @@ export function calculateItemSelectionProfitability(
     return incomplete(missingFacts);
   }
 
+  const grossSellingPrice = input.finalSellingPrice.amountKrw ?? 0;
   const netRevenue = netAmount(input.finalSellingPrice);
+  if (grossSellingPrice <= 0) {
+    throw new RangeError("finalSellingPrice must be positive.");
+  }
   if (netRevenue <= 0) throw new RangeError("finalSellingPrice must be positive.");
 
   const providedFeeRate = input.marketplaceFeeRate;
@@ -527,6 +537,7 @@ export function calculateItemSelectionProfitability(
   const marketplaceFee = { rate: feeRate, fact: feeFact };
   const baseScenario = scenario(
     "baseScenario",
+    grossSellingPrice,
     netRevenue,
     [...commonCosts, normalizedFulfillment],
     marketplaceFee,
@@ -539,6 +550,7 @@ export function calculateItemSelectionProfitability(
   };
   const stressScenario = scenario(
     "stressScenario",
+    grossSellingPrice,
     netRevenue,
     [...commonCosts, stressFulfillment],
     marketplaceFee,
@@ -547,6 +559,7 @@ export function calculateItemSelectionProfitability(
   );
   const currentEffectiveScenario = scenario(
     "currentEffectiveScenario",
+    grossSellingPrice,
     netRevenue,
     [...commonCosts, currentFulfillment],
     marketplaceFee,

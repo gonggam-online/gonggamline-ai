@@ -124,7 +124,7 @@ function gates(
 test("exposes the immutable approved policy values", () => {
   assert.equal(
     ITEM_SELECTION_PROFITABILITY_POLICY_VERSION,
-    "gonggamline-profitability-2026-07-27-v1",
+    "gonggamline-profitability-2026-08-12-v2",
   );
   assert.equal(ITEM_SELECTION_PROFITABILITY_POLICY.fallbackMarketplaceFeeRate, 0.109);
   assert.equal(ITEM_SELECTION_PROFITABILITY_POLICY.monthlyCoupangServiceFeeKrw, 55_000);
@@ -306,6 +306,11 @@ test("handles deductible VAT, non-deductible VAT, exempt and exclusive amounts",
     }),
   );
   assert.equal(deductible.scenarios.baseScenario?.netRevenueRawKrw, 20_000);
+  assert.equal(
+    deductible.scenarios.baseScenario?.costs.find(({ id }) => id === "marketplaceFee")
+      ?.rawAmountKrw,
+    2_200,
+  );
   assert.equal(
     deductible.scenarios.baseScenario?.costs.find(({ id }) => id === "supplierUnitCost")
       ?.rawAmountKrw,

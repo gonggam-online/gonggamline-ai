@@ -34,8 +34,9 @@
 - No itemized pass/fail report, weight, material/marking observation, or defect
   detail was visible. Record the outcome as `NO_EXCEPTION_OBSERVED`, not as an
   invented itemized quality report. Physical sale suitability receives a
-  conditional pass; listing eligibility remains on hold for the missing facts
-  and incomplete profitability calculation.
+  conditional pass; listing eligibility remains on hold for WING category
+  metadata and seller-owned listing facts. The later profitability packet
+  closes the deterministic cost screen but not those listing gates.
 
 Only sanitized internal status is retained here. Raw provider pages, invoices,
 labels, photographs, addresses, contacts, account identifiers, and credentials
@@ -153,12 +154,18 @@ full-inspection service coverage of all six received units. Combined with the
 verified `8,100 KRW` supplier order, current sample cash outflow is `9,530 KRW`
 for six units, or approximately `1,588.33 KRW` per unit.
 
-This is not a confirmed contribution-profit result. VAT treatment for the
-warehouse debits, final selling price, exact Coupang category fee, outbound
-fulfillment/delivery, pick-pack/packaging/label, storage duration, advertising,
-and return-loss facts remain unresolved. Under
-`gonggamline-profitability-2026-07-27-v1`, profitability therefore remains
-`INCOMPLETE`; no price or listing is authorized.
+The current Gaemi rate card is VAT-exclusive and the actual point debits
+reconcile to `700 + VAT = 770 KRW` for unloading and `600 + VAT = 660 KRW` for
+full inspection. The warehouse VAT treatment is therefore recorded as
+VAT-inclusive/deductible for this calculation.
+
+The linked profitability packet binds a one-unit extreme-small shipping plan,
+sets a target customer price of `11,800 KRW`, and passes the approved base and
+stress gates using the authenticated WING category fee of `10.5%` on the
+customer's final price. Profitability is `RECOMMEND_ESTIMATED`, not
+realized-profit `CONFIRMED`: mature advertising/return rates, future storage
+charges, and the actual fulfillment invoice remain unresolved. No price or
+listing write is authorized by this packet.
 
 ## Admission and stop rules
 
@@ -193,11 +200,11 @@ inspectionExecution: VERIFIED_FULL_INSPECTION_ALL_6_RECEIVED_UNITS
 inspectionOutcome: NO_EXCEPTION_OBSERVED_NO_ITEMIZED_REPORT
 documentaryFacts: UNKNOWN
 saleSuitability: CONDITIONAL_PASS_PROVIDER_FULL_INSPECTION_COMPLETE_NO_EXCEPTION_OBSERVED
-listingEligibility: HOLD_REQUIRED_FACTS_AND_PROFITABILITY_INCOMPLETE
-profitability: INCOMPLETE
+listingEligibility: HOLD_WING_LOGISTICS_AND_SELLER_FACTS_REQUIRED
+profitability: RECOMMEND_ESTIMATED_AT_11800_KRW
 rawEvidenceMoved: false
 externalWritePerformedByThisMonitor: false
-notes: ACQUIRE_LISTING_AND_VARIABLE_COST_FACTS
+notes: ACQUIRE_WING_CATEGORY_METADATA_AND_SELLER_LISTING_FACTS
 ```
 
 Rollback is a Git revert. There is no provider rollback because this packet and

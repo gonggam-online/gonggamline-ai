@@ -1365,3 +1365,22 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   other tests use fakes.
 - Rollback: Git revert and stop the worker after queued responses are
   reconciled.
+
+## 2026-08-12 - Item Selection profitability fee basis v2
+
+- Category: high-risk/manual financial-policy correction.
+- Evidence: authenticated WING showed `10.5% (VAT 별도, 정률)` for the selected
+  KK946 category; Coupang's published fee guidance states that the commission
+  base is the customer's final purchase price.
+- Decision: version the engine as
+  `gonggamline-profitability-2026-08-12-v2` and calculate marketplace fees from
+  the VAT-inclusive final selling price. Advertising and return-loss reserves
+  continue to use VAT-exclusive net revenue.
+- Consequence: the taxable-price fee understatement is removed. KK946 at
+  `11,800 KRW` remains `RECOMMEND_ESTIMATED`, with `3,364 KRW` base and `2,560
+  KRW` stress contribution; exact recommend threshold is `11,243 KRW`.
+- Boundary: no Product Creation, price, stock, account logistics, Production,
+  database, secret, paid action, or provider write is authorized.
+- Delivery: `manual-merge-required`; no auto-merge or Production validation
+  before explicit owner merge.
+- Rollback: Git revert restores v1 calculation semantics.
