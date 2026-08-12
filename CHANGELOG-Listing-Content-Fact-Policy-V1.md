@@ -1,5 +1,24 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-12 - KK946 inspection stage and cost evidence
+
+- Verified four provider-side image references for the registered product,
+  inbound start, subdivision work, and storage completion without moving raw
+  images or user screenshots into Git.
+- Limited those images to process-stage evidence; they do not by themselves
+  prove six separately identified unit results or an itemized quality report.
+- Verified actual Gaemi point charges of `770 KRW` inbound unloading and
+  `660 KRW` full inspection. Combined verified sample cash outflow is
+  `9,530 KRW` for six units, approximately `1,588.33 KRW` per unit.
+- Triangulated the completed six-unit receipt, full-inspection charge, retained
+  stage images, and no exception signal as verified provider full-inspection
+  execution for all six units. Individual photographs are not required.
+- Classified physical sale suitability as conditional pass, listing eligibility
+  as hold, and profitability as incomplete because detailed product facts and
+  required price/fee/fulfillment/variable-cost facts remain absent.
+- Performed no request, paid work, warehouse, inventory, fulfillment, price,
+  listing, database, or Production write.
+
 ## 2026-08-12 - KK946 warehouse receipt complete
 
 - Verified Gaemi application `A1296915119go` as inbound complete for

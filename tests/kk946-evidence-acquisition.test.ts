@@ -19,6 +19,30 @@ const status = JSON.parse(statusText) as {
   commerceWritePerformed: boolean;
   bindings: Record<string, string>;
   confidentialEvidenceStore: string;
+  saleSuitability: string;
+  listingEligibility: string;
+  profitability: {
+    policyVersion: string;
+    status: string;
+    missingFacts: string[];
+  };
+  inspectionStageEvidence: {
+    productImage: string;
+    inboundStart: string;
+    subdivisionWork: string;
+    storageComplete: string;
+    provesSixUnitInspectionOutcome: boolean;
+    inspectionExecutionBasis: string;
+  };
+  costEvidence: {
+    supplierOrderTotalKrw: number;
+    warehouseInboundUnloadingKrw: number;
+    warehouseFullInspectionKrw: number;
+    verifiedSampleCashOutflowKrw: number;
+    quantity: number;
+    derivedPerUnitApproxKrw: number;
+    warehouseChargeVatTreatment: string;
+  };
   monitoring: {
     domeggookOrderStatus: string;
     carrier: string;
@@ -47,11 +71,16 @@ test("KK946 remains quarantined after catalog and warehouse setup are verified",
       "warehouseProductOption",
       "warehouseInboundApplication",
       "supplierOrderPaymentComplete",
+      "inspectionStageImages",
+      "fullInspectionCharge",
+      "fullInspectionExecution",
+      "fullInspectionOutcome",
+      "inspectedUnitCoverage",
     ].includes(key))
     .every(([, value]) => value === "UNKNOWN"));
 });
 
-test("read-only monitor records exact completed receipt without advancing inspection", () => {
+test("read-only monitor records exact completed receipt and full-inspection execution", () => {
   assert.equal(status.monitoring.domeggookOrderStatus, "VERIFIED_DELIVERED");
   assert.equal(status.monitoring.carrier, "CJ_LOGISTICS");
   assert.equal(status.monitoring.trackingReference, "540939262870");
@@ -64,16 +93,17 @@ test("read-only monitor records exact completed receipt without advancing inspec
   assert.match(inboundInspectionPacket, /public item-page promise[\s\S]+not order-level shipment evidence/i);
   assert.match(inboundInspectionPacket, /VERIFIED_CJ_LOGISTICS_540939262870/);
   assert.match(inboundInspectionPacket, /warehouse receipt[\s\S]+`VERIFIED_COMPLETE`/i);
-  assert.match(inboundInspectionPacket, /No per-unit inspection result/);
+  assert.match(inboundInspectionPacket, /full-inspection service covered the six received units/i);
   assert.equal(status.bindings.inboundLot, "UNKNOWN");
-  assert.equal(status.bindings.inspectedUnit, "UNKNOWN");
+  assert.equal(status.bindings.inspectedUnitCoverage, "VERIFIED_ALL_6_RECEIVED_UNITS");
+  assert.equal(status.bindings.inspectedUnitIdentity, "UNKNOWN");
 });
 
 test("inbound packet binds receipt and full inspection without moving raw evidence", () => {
   for (const identifier of ["56288849", "OR75260192", "PJ1491663", "A1296915119go"]) {
     assert.match(inboundInspectionPacket, new RegExp(identifier, "i"));
   }
-  assert.match(inboundInspectionPacket, /each inspected unit \(1\.\.6\)/);
+  assert.match(inboundInspectionPacket, /provider full-inspection service covering all six received units/);
   assert.match(inboundInspectionPacket, /length, width, height, unit weight, and package weight/);
   assert.match(inboundInspectionPacket, /must not be\s+downloaded or committed/);
   assert.match(inboundInspectionPacket, /externalWritePerformedByThisMonitor: false/);
@@ -81,6 +111,46 @@ test("inbound packet binds receipt and full inspection without moving raw eviden
     inboundInspectionPacket,
     /(?:\b01\d-\d{3,4}-\d{4}\b|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,})/,
   );
+});
+
+test("provider stage images support process evidence without inventing itemized outcomes", () => {
+  assert.equal(status.bindings.inspectionStageImages, "VERIFIED");
+  assert.equal(status.inspectionStageEvidence.productImage, "VERIFIED_PROVIDER_REFERENCE");
+  assert.equal(status.inspectionStageEvidence.inboundStart, "VERIFIED_PROVIDER_REFERENCE");
+  assert.equal(status.inspectionStageEvidence.subdivisionWork, "VERIFIED_PROVIDER_REFERENCE");
+  assert.equal(status.inspectionStageEvidence.storageComplete, "VERIFIED_PROVIDER_REFERENCE");
+  assert.equal(status.inspectionStageEvidence.provesSixUnitInspectionOutcome, false);
+  assert.equal(status.bindings.fullInspectionExecution, "VERIFIED");
+  assert.equal(status.bindings.fullInspectionOutcome, "NO_EXCEPTION_OBSERVED");
+  assert.equal(
+    status.inspectionStageEvidence.inspectionExecutionBasis,
+    "COMPLETED_RECEIPT_PLUS_FULL_INSPECTION_CHARGE_PLUS_NO_EXCEPTION_SIGNAL",
+  );
+  assert.match(inboundInspectionPacket, /do not show six separately identified units/i);
+  assert.match(inboundInspectionPacket, /does not create an itemized quality report/i);
+  assert.match(inboundInspectionPacket, /local screenshots[\s\S]+not copied into Git/i);
+});
+
+test("actual warehouse charges advance cash evidence without inventing profit", () => {
+  assert.equal(status.costEvidence.supplierOrderTotalKrw, 8100);
+  assert.equal(status.costEvidence.warehouseInboundUnloadingKrw, 770);
+  assert.equal(status.costEvidence.warehouseFullInspectionKrw, 660);
+  assert.equal(status.costEvidence.verifiedSampleCashOutflowKrw, 9530);
+  assert.equal(status.costEvidence.quantity, 6);
+  assert.equal(status.costEvidence.derivedPerUnitApproxKrw, 1588.33);
+  assert.equal(status.costEvidence.warehouseChargeVatTreatment, "UNKNOWN");
+  assert.equal(
+    status.saleSuitability,
+    "CONDITIONAL_PASS_PROVIDER_FULL_INSPECTION_COMPLETE_NO_EXCEPTION_OBSERVED",
+  );
+  assert.equal(status.listingEligibility, "HOLD_REQUIRED_FACTS_AND_PROFITABILITY_INCOMPLETE");
+  assert.equal(status.profitability.status, "INCOMPLETE");
+  assert.equal(
+    status.profitability.policyVersion,
+    "gonggamline-profitability-2026-07-27-v1",
+  );
+  assert(status.profitability.missingFacts.includes("finalSellingPrice"));
+  assert(status.profitability.missingFacts.includes("coupangCategoryFeeRate"));
 });
 
 test("status manifest proves no raw evidence movement and records the order write", () => {

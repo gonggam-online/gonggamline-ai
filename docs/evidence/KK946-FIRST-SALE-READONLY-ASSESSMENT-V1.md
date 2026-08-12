@@ -3,8 +3,12 @@
 ## Decision
 
 - Disposition: `QUARANTINED`
-- Sample order: `HOLD`
-- Paid warehouse inspection: `NOT_AUTHORIZED`
+- Sample order: `COMPLETED` for six black units under order `OR75260192`
+- Warehouse receipt: `COMPLETED` with six received and six in stock
+- Paid warehouse inspection: `VERIFIED_EXECUTED_NO_EXCEPTION_OBSERVED`
+- Physical sale suitability:
+  `CONDITIONAL_PASS_FULL_INSPECTION_COMPLETE_NO_EXCEPTION_OBSERVED`
+- Listing eligibility: `HOLD_REQUIRED_FACTS_AND_PROFITABILITY_INCOMPLETE`
 - Coupang listing: `NOT_AUTHORIZED`
 - Rocket Growth inbound: `NOT_AUTHORIZED`
 - Risk: high-risk/manual for the whole first-sale project because later steps
@@ -12,9 +16,10 @@
 - Root cause: external business evidence is incomplete. This is not a database
   or code failure.
 
-This record contains sanitized read-only findings only. No raw asset, account
-identity, personal data, provider response, order, message, upload, payment, or
-commerce write was created.
+This record contains sanitized findings only. The later owner-approved order,
+payment, warehouse application, receipt, and inspection charge are recorded in
+the linked KK946 evidence packet. This update performs no external write and
+retains no raw asset, account identity, personal data, or provider payload.
 
 ## Supplier prevalidation
 
@@ -40,6 +45,18 @@ discovery evidence only. Authenticated terms and the exact option must be
 verified before selecting one supplier listing.
 
 ## Profitability screen
+
+### 2026-08-12 actual-cost checkpoint
+
+The completed six-unit sample has verified cash outflow of `9,530 KRW`:
+`8,100 KRW` supplier order, `770 KRW` inbound unloading, and `660 KRW` full
+inspection. This is approximately `1,588.33 KRW` per received unit. The stage
+images and point ledger improve evidence but do not close the approved
+profitability contract. Final selling price, exact Coupang category fee,
+outbound fulfillment/delivery, pick-pack/packaging/label, storage duration,
+advertising, return loss, and warehouse-charge VAT treatment remain missing.
+The current profitability result is therefore `INCOMPLETE`, not an approved
+price or margin.
 
 The authoritative policy is
 `gonggamline-profitability-2026-07-27-v1`. Public Coupang search evidence
