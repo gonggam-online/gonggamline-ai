@@ -26,7 +26,7 @@
     "outboundLocation": "UNKNOWN",
     "returnCenter": "UNKNOWN"
   },
-  "nextAction": "REGISTER_WING_LOGISTICS_AND_APPROVE_SELLER_NOTICE_FACTS",
+  "nextAction": "DO_NOT_REORDER_OR_LIST_SINGLE_UNIT_AS_IS_REVIEW_BUNDLE_OR_LOWER_COST_ONLY",
   "monitoring": {
     "observedAt": "2026-08-12T02:40:56.000Z",
     "domeggookOrderStatus": "VERIFIED_DELIVERED",
@@ -64,8 +64,8 @@
     "deterministicVariableCostNetOfDeductibleVatKrw": 4353.94,
     "deterministicVariableCashOutflowGrossKrw": 4789.33
   },
-  "saleSuitability": "CONDITIONAL_PASS_PROVIDER_FULL_INSPECTION_COMPLETE_NO_EXCEPTION_OBSERVED",
-  "listingEligibility": "HOLD_WING_LOGISTICS_AND_SELLER_FACTS_REQUIRED",
+  "saleSuitability": "PHYSICAL_INSPECTION_PASS_BUT_SINGLE_UNIT_ECONOMICS_FAIL",
+  "listingEligibility": "HOLD_SINGLE_UNIT_MARKET_PRICE_UNPROFITABLE",
   "coupangListingRead": {
     "selectedCategoryPathStatus": "VERIFIED",
     "selectedCategoryPath": "패션의류잡화 > 유니섹스/남녀공용 패션 > 공용 잡화 > 가방 > 남녀공용파우치",
@@ -78,15 +78,18 @@
     "productCreationPerformed": false
   },
   "profitability": {
-    "policyVersion": "gonggamline-profitability-2026-08-12-v2",
-    "status": "RECOMMEND_ESTIMATED",
-    "targetSellingPriceKrw": 11800,
+    "policyVersion": "gonggamline-profitability-2026-08-12-v3",
+    "status": "REJECT_MARKET_PRICE_UNPROFITABLE",
+    "prePurchaseGateStatus": "FAIL",
+    "samplePurchaseEligible": false,
+    "observedIdenticalMarketDeliveredPriceKrw": 4290,
+    "rejectedProposedSellingPriceKrw": 11800,
     "minimumRecommendPriceKrw": 11243,
     "operationalRecommendFloorKrw": 11300,
-    "baseContributionKrw": 3364,
-    "baseContributionMarginPercent": 31.36,
-    "stressContributionKrw": 2560,
-    "stressContributionMarginPercent": 23.86,
+    "baseContributionKrw": -1548,
+    "baseContributionMarginPercent": -39.69,
+    "stressContributionKrw": -1840,
+    "stressContributionMarginPercent": -47.19,
     "missingFacts": [],
     "estimatedFacts": [
       "actualAdvertisingRateAfterMaturity",

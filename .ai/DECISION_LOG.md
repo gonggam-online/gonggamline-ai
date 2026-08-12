@@ -1384,3 +1384,33 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Delivery: `manual-merge-required`; no auto-merge or Production validation
   before explicit owner merge.
 - Rollback: Git revert restores v1 calculation semantics.
+
+## 2026-08-12 - Pre-purchase market-profitability gate v3
+
+- Category: high-risk/manual financial and procurement-eligibility policy.
+- Owner direction: validate profitability first and purchase only the minimum
+  sample for products that pass; do not purchase first and justify afterward.
+- Decision: version the engine as
+  `gonggamline-profitability-2026-08-12-v3`. Purchase review requires a
+  confirmed identical-product delivered price observed within seven days,
+  equal unit counts, complete conservative economics at that market price,
+  recommend-level base/stress thresholds, and requested quantity equal to the
+  supplier MOQ.
+- Fail-closed behavior: absent, stale, comparable-only, mismatched, or
+  unconfirmed evidence is `INCOMPLETE`; below-threshold economics is `FAIL`.
+  Neither state is purchase-eligible. A `PASS` is necessary evidence, not
+  authority for an order, payment, provider, warehouse, or other commerce
+  write.
+- KK946 correction: the identical one-unit Coupang offer is `4,290 KRW`
+  delivered. At that price the v3 engine reports approximately `-1,548 KRW`
+  base and `-1,840 KRW` stress contribution, so KK946 is rejected for reorder
+  and single-unit listing as-is. The prior `11,800 KRW` model remains only an
+  infeasible economic requirement, not a target price.
+- Boundary: pure engine, policy, tests, and sanitized Git evidence only. No
+  database, Production, secret, provider, listing, price, stock, paid, or
+  commerce write. Trusted persistence and enforcement in the legacy
+  Procurement path require a separate high-risk Story; `sourcing_decisions`
+  alone are not purchase authority.
+- Delivery: `manual-merge-required`; no auto-merge.
+- Rollback: Git revert restores v2 screening semantics, but does not authorize
+  any purchase.

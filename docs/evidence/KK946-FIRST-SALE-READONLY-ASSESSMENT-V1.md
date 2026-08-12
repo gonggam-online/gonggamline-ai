@@ -8,17 +8,17 @@
 - Paid warehouse inspection: `VERIFIED_EXECUTED_NO_EXCEPTION_OBSERVED`.
 - Physical sale suitability:
   `CONDITIONAL_PASS_FULL_INSPECTION_COMPLETE_NO_EXCEPTION_OBSERVED`.
-- Profitability: `RECOMMEND_ESTIMATED` at `11,800 KRW` with free customer
-  shipping.
-- Listing eligibility:
-  `HOLD_WING_LOGISTICS_AND_SELLER_FACTS_REQUIRED`.
+- Profitability: `REJECT_MARKET_PRICE_UNPROFITABLE` at the confirmed identical
+  one-unit delivered market price of `4,290 KRW`.
+- Listing eligibility: `HOLD_SINGLE_UNIT_MARKET_PRICE_UNPROFITABLE`.
 - Coupang listing and Rocket Growth inbound: `NOT_AUTHORIZED`.
 - Risk: high-risk/manual because pricing, listing, inventory and fulfillment are
   commerce decisions. This assessment performs no new external write.
 
-The remaining listing blockers are missing WING outbound/return locations and
-seller-owned notice facts. The fee-basis defect found during reconciliation was
-a code root cause and is corrected in policy v2. Raw provider evidence remains
+The primary blocker is failed single-unit market economics; missing WING
+outbound/return locations and seller-owned notice facts are secondary. The
+fee-basis defect found during reconciliation was corrected in policy v2, and
+the purchase-order defect is corrected by the fail-closed v3 gate. Raw provider evidence remains
 in Domeggook, Gaemi, and Coupang; GitHub owns only sanitized status and review
 history.
 
@@ -47,17 +47,18 @@ Gaemi VAT-exclusive rate card and actual debits bind deductible-VAT treatment
 and a declared one-unit extreme-small package plan.
 
 The deterministic net-of-deductible-VAT variable cost is `4,353.94 KRW` per
-one-unit order under that plan. At the selected `11,800 KRW` customer price,
-`gonggamline-profitability-2026-08-12-v2` reports:
+one-unit order under that plan. At the confirmed identical-product delivered
+market price of `4,290 KRW`,
+`gonggamline-profitability-2026-08-12-v3` reports:
 
 | Scenario | Contribution | Margin |
 |---|---:|---:|
-| base | `3,364 KRW` | `31.36%` |
-| stress | `2,560 KRW` | `23.86%` |
+| base | `-1,548 KRW` | `-39.69%` |
+| stress | `-1,840 KRW` | `-47.19%` |
 
 The engine uses the authenticated WING `10.5%` marketplace fee on the
 customer's final price plus policy advertising and return-loss rates. The
-result passes the recommendation gates but is not realized-profit `CONFIRMED`.
+result fails the recommendation and pre-purchase gates.
 Mature advertising/return evidence, future storage/SKU charges and the actual
 fulfillment invoice remain unresolved. The authoritative calculation and
 listing-fact inventory is
@@ -108,10 +109,11 @@ This draft is review-only and cannot be sent to Coupang.
 
 ## Next gate
 
-Register WING outbound and return locations, approve the missing seller-authored
-notice facts, and then perform the official category-code read. Stop before
-every Product Creation, price, stock, coupon, advertisement or fulfillment
-write unless separately approved.
+Do not reorder or list KK946 as a single unit at an invented premium. Perform
+only read-only analysis of a genuinely differentiated bundle or negotiate a
+materially lower verified cost, then rerun the fresh identical-market-price
+gate. WING logistics registration and Product Creation are not the next step
+for this SKU while the economics fail.
 
 Rollback is a Git revert. There is no provider rollback for this read-only
 assessment.

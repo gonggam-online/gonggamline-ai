@@ -3,15 +3,29 @@
   "subjectId": "KK946",
   "classification": "internal-sanitized-decision-evidence",
   "observedAt": "2026-08-12T05:00:00.000Z",
-  "policyVersion": "gonggamline-profitability-2026-08-12-v2",
+  "policyVersion": "gonggamline-profitability-2026-08-12-v3",
   "decision": {
-    "targetSellingPriceKrw": 11800,
+    "observedIdenticalMarketDeliveredPriceKrw": 4290,
+    "rejectedProposedSellingPriceKrw": 11800,
     "customerShippingFeeKrw": 0,
     "minimumRecommendPriceKrw": 11243,
     "operationalRecommendFloorKrw": 11300,
     "conditionalExperimentFloorKrw": 9900,
-    "status": "RECOMMEND_ESTIMATED",
+    "status": "REJECT_MARKET_PRICE_UNPROFITABLE",
+    "prePurchaseGateStatus": "FAIL",
+    "samplePurchaseEligible": false,
+    "additionalPurchaseAllowed": false,
     "externalPriceWritePerformed": false
+  },
+  "marketOffer": {
+    "matchType": "IDENTICAL",
+    "candidateUnitsPerOffer": 1,
+    "observedUnitsPerOffer": 1,
+    "deliveredPriceKrw": 4290,
+    "customerShippingFeeKrw": 0,
+    "sourceReference": "coupang:product:9681483612:item:28950548345",
+    "observedAt": "2026-08-12",
+    "confirmationStatus": "CONFIRMED_OPERATOR_PROVIDED_SCREENSHOT"
   },
   "quantityBasis": 6,
   "deterministicPerOrderCosts": {
@@ -43,6 +57,15 @@
     "actualMatureOrderEvidence": false
   },
   "scenarios": [
+    {
+      "sellingPriceKrw": 4290,
+      "baseContributionKrw": -1548,
+      "baseContributionMarginPercent": -39.69,
+      "stressContributionKrw": -1840,
+      "stressContributionMarginPercent": -47.19,
+      "recommendMinimums": false,
+      "conditionalMinimums": false
+    },
     {
       "sellingPriceKrw": 9900,
       "baseContributionKrw": 2122,

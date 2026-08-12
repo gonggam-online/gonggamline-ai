@@ -2,22 +2,22 @@
 
 ## Decision
 
-- Target customer price: `11,800 KRW`, free shipping.
+- Confirmed identical-product delivered market price: `4,290 KRW` for one unit.
+- Prior proposed price `11,800 KRW`: rejected as market-infeasible; it is not a
+  target price.
 - Exact policy recommend threshold: `11,243 KRW`; operational rounded floor:
   `11,300 KRW`.
-- A `9,900 KRW` first-sale experiment is economically positive but remains a
-  conditional-policy case, not the normal launch price.
-- Profitability disposition: `RECOMMEND_ESTIMATED`. The deterministic physical
-  costs and WING category fee are confirmed, and the `11,800 KRW` scenario
-  passes the approved base and stress gates. Realized profit remains estimated
-  until mature advertising/return evidence and the actual fulfillment invoice
-  exist.
+- Profitability disposition: `REJECT_MARKET_PRICE_UNPROFITABLE`. At the actual
+  identical-product market price, both base and stress contribution are
+  negative. The v3 pre-purchase gate is `FAIL`; no reorder or single-unit
+  listing as-is is eligible.
 - This is a read-only decision packet. No price, stock, product, coupon,
   advertisement, fulfillment, address, or marketplace write was performed.
 
-The target prioritizes positive contribution under stress. It is not proof of
-demand. The first six units are a bounded demand test, not evidence for a larger
-buy.
+The first six units are historical pilot evidence. They do not authorize a
+larger buy and do not represent the future operating order. The binding order
+is profitability validation first, then a separately approved minimum-MOQ
+sample only for a passing product.
 
 ## Deterministic variable cost per one-unit order
 
@@ -47,7 +47,7 @@ management costs are not silently allocated into the first-order result.
 
 ## Approved-engine scenarios
 
-These results use `gonggamline-profitability-2026-08-12-v2`. The authenticated
+These results use `gonggamline-profitability-2026-08-12-v3`. The authenticated
 WING form showed `10.5% (VAT 별도, 정률)` for the selected category. Coupang
 charges the rate on the customer's VAT-inclusive final price; deductible VAT
 on the fee means the net fee expense is `final price * 10.5%`. Advertising uses
@@ -56,18 +56,19 @@ on the fee means the net fee expense is `final price * 10.5%`. Advertising uses
 
 | Customer price | Base contribution | Base margin | Stress contribution | Stress margin | Policy result |
 |---:|---:|---:|---:|---:|---|
+| **`4,290`** | **`-1,548`** | **`-39.69%`** | **`-1,840`** | **`-47.19%`** | **reject / pre-purchase FAIL** |
 | `9,900` | `2,122` | `23.57%` | `1,447` | `16.07%` | conditional |
 | `10,900` | `2,776` | `28.01%` | `2,032` | `20.51%` | conditional |
 | `11,200` | `2,972` | `29.19%` | `2,208` | `21.69%` | conditional |
 | `11,243` | `3,000` | `29.35%` | `2,233` | `21.85%` | exact recommend threshold |
 | `11,300` | `3,037` | `29.57%` | `2,267` | `22.07%` | operational recommend floor |
-| **`11,800`** | **`3,364`** | **`31.36%`** | **`2,560`** | **`23.86%`** | **recommend** |
+| `11,800` | `3,364` | `31.36%` | `2,560` | `23.86%` | mathematical pass, market-infeasible |
 
-At `11,800 KRW`, the fee's net expense is `1,239 KRW` and its VAT-inclusive
-cash charge is `1,362.90 KRW`. Known net costs before advertising and return
-reserves are `5,592.94 KRW`; known gross cash outflow is `6,152.23 KRW`.
-Advertising and return amounts remain policy estimates. They must not be used to lower the price
-or to claim realized profit.
+At `4,290 KRW`, the customer net revenue is `3,900 KRW`, which is already below
+the `4,353.94 KRW` deterministic variable cost before the marketplace fee,
+advertising, and return reserve. Advertising and return amounts remain policy
+estimates. The hypothetical `11,800 KRW` scenario must not be used to claim a
+viable market price or realized profit.
 
 ## Listing facts already acquired
 
@@ -144,11 +145,11 @@ values, certification type, barcode requirement, brand/trademark state,
 outbound location, and return center. None may be inferred from a form default
 or a similar product.
 
-Therefore listing eligibility remains `HOLD`. The next owner-side action is to
-register the outbound and return locations in WING and approve the missing
-seller-authored notice facts. Those actions are external writes and were not
-performed here. The exact category API read can then close category-bound
-metadata without creating a product.
+Therefore listing eligibility remains `HOLD`, with failed single-unit economics
+preceding the metadata blockers. Do not register logistics solely for KK946 or
+create the product as-is. The only economically relevant next paths are a
+read-only differentiated-bundle analysis or a materially lower verified
+landed/fulfillment-cost negotiation, each followed by a new exact-market gate.
 
 ## Source and recovery
 

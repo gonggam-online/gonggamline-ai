@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
   calculateItemSelectionProfitability,
+  evaluatePrePurchaseProfitabilityGate,
   type MoneyFact,
   type ItemSelectionProfitabilityInput,
   type RateFact,
@@ -22,12 +23,24 @@ type DecisionRecord = {
   subjectId: string;
   policyVersion: string;
   decision: {
-    targetSellingPriceKrw: number;
+    observedIdenticalMarketDeliveredPriceKrw: number;
+    rejectedProposedSellingPriceKrw: number;
     minimumRecommendPriceKrw: number;
     operationalRecommendFloorKrw: number;
     conditionalExperimentFloorKrw: number;
     status: string;
+    prePurchaseGateStatus: string;
+    samplePurchaseEligible: boolean;
+    additionalPurchaseAllowed: boolean;
     externalPriceWritePerformed: boolean;
+  };
+  marketOffer: {
+    matchType: "IDENTICAL";
+    candidateUnitsPerOffer: number;
+    observedUnitsPerOffer: number;
+    deliveredPriceKrw: number;
+    sourceReference: string;
+    observedAt: string;
   };
   quantityBasis: number;
   deterministicPerOrderCosts: {
@@ -152,7 +165,7 @@ function profitabilityInput(sellingPriceKrw: number): ItemSelectionProfitability
 test("KK946 deterministic cost arithmetic reconciles cash and VAT bases", () => {
   const costs = decision.deterministicPerOrderCosts;
   assert.equal(decision.subjectId, "KK946");
-  assert.equal(decision.policyVersion, "gonggamline-profitability-2026-08-12-v2");
+  assert.equal(decision.policyVersion, "gonggamline-profitability-2026-08-12-v3");
   assert.ok(Math.abs(costs.landedCashCostGrossKrw - 9530 / 6) < 0.0001);
   assert.ok(
     Math.abs(
@@ -193,16 +206,51 @@ test("approved engine reproduces every stored KK946 scenario", () => {
   }
 });
 
-test("target price passes recommend gates while exact actuals stay explicit", () => {
-  const target = decision.scenarios.find(
-    ({ sellingPriceKrw }) => sellingPriceKrw === decision.decision.targetSellingPriceKrw,
+test("KK946 fails the pre-purchase gate at the confirmed identical market price", () => {
+  const gate = evaluatePrePurchaseProfitabilityGate({
+    profitabilityInput: profitabilityInput(
+      decision.decision.rejectedProposedSellingPriceKrw,
+    ),
+    marketOffer: {
+      matchType: decision.marketOffer.matchType,
+      candidateUnitsPerOffer: decision.marketOffer.candidateUnitsPerOffer,
+      observedUnitsPerOffer: decision.marketOffer.observedUnitsPerOffer,
+      deliveredPrice: {
+        id: "marketDeliveredPrice",
+        amountKrw: decision.marketOffer.deliveredPriceKrw,
+        sourceType: "MARKETPLACE_PUBLIC",
+        sourceReference: decision.marketOffer.sourceReference,
+        effectiveFrom: decision.marketOffer.observedAt,
+        vatTreatment: "VAT_INCLUSIVE_DEDUCTIBLE",
+        includedIn: [],
+        confirmationStatus: "CONFIRMED",
+      },
+    },
+    requestedSampleQuantity: decision.quantityBasis,
+    evaluatedAt: "2026-08-12T05:00:00.000Z",
+  });
+  assert.equal(gate.status, "FAIL");
+  assert.equal(gate.samplePurchaseEligible, false);
+  assert.equal(gate.commerceWriteAuthorized, false);
+  assert.equal(
+    gate.profitabilityAtMarketPrice?.scenarios.baseScenario
+      ?.contributionProfitDisplayKrw,
+    -1548,
   );
-  assert.ok(target);
-  assert.equal(decision.decision.status, "RECOMMEND_ESTIMATED");
+  assert.equal(
+    gate.profitabilityAtMarketPrice?.scenarios.stressScenario
+      ?.contributionProfitDisplayKrw,
+    -1840,
+  );
+  assert.equal(decision.decision.status, "REJECT_MARKET_PRICE_UNPROFITABLE");
+  assert.equal(decision.decision.prePurchaseGateStatus, "FAIL");
+  assert.equal(decision.decision.samplePurchaseEligible, false);
+  assert.equal(decision.decision.additionalPurchaseAllowed, false);
   assert.equal(decision.decision.minimumRecommendPriceKrw, 11243);
   assert.equal(decision.decision.operationalRecommendFloorKrw, 11300);
   assert.equal(decision.decision.conditionalExperimentFloorKrw, 9900);
-  assert.equal(target.recommendMinimums, true);
+  assert.equal(decision.decision.observedIdenticalMarketDeliveredPriceKrw, 4290);
+  assert.equal(decision.decision.rejectedProposedSellingPriceKrw, 11800);
   assert.equal(decision.rateCosts.marketplaceFeeRate, 0.105);
   assert.equal(
     decision.rateCosts.marketplaceFeeStatus,
@@ -237,7 +285,8 @@ test("listing packet separates acquired facts from category-bound unknowns", () 
   ]) {
     assert.match(packet, new RegExp(required, "i"));
   }
-  assert.match(packet, /must not be used to lower the price/i);
+  assert.match(packet, /must not be used to claim a\s+viable market price/i);
+  assert.match(packet, /profitability validation first,.+minimum-MOQ\s+sample/is);
   assert.match(packet, /No price, stock, product, coupon,[\s\S]+write was performed/i);
   assert.doesNotMatch(
     packet,
