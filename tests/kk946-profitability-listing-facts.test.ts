@@ -286,7 +286,10 @@ test("listing packet separates acquired facts from category-bound unknowns", () 
     assert.match(packet, new RegExp(required, "i"));
   }
   assert.match(packet, /must not be used to claim a\s+viable market price/i);
-  assert.match(packet, /profitability validation first,.+minimum-MOQ\s+sample/is);
+  assert.match(
+    packet,
+    /profitability validation first,[\s\S]+minimum-MOQ\s+sample/i,
+  );
   assert.match(packet, /No price, stock, product, coupon,[\s\S]+write was performed/i);
   assert.doesNotMatch(
     packet,
