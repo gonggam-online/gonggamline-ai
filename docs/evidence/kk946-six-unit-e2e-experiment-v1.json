@@ -1,0 +1,120 @@
+{
+  "schemaVersion": "1.0.0",
+  "subjectId": "KK946",
+  "status": "READ_ONLY_PREFLIGHT_COMPLETE_AWAITING_EXTERNAL_WRITE_APPROVAL",
+  "risk": "HIGH_RISK_MANUAL",
+  "purpose": "VALIDATE_COUPANG_LISTING_SALE_FULFILLMENT_RETURN_AND_SETTLEMENT_WITH_EXISTING_STOCK",
+  "ordinaryPrePurchaseGate": {
+    "status": "FAIL",
+    "samplePurchaseEligible": false,
+    "additionalPurchaseAllowed": false,
+    "exceptionChangesGateResult": false
+  },
+  "experiment": {
+    "marketplace": "COUPANG",
+    "accountScope": "CURRENT_OWNER_WING_ACCOUNT",
+    "catalogProductId": "9681483612",
+    "catalogOption": "BLACK",
+    "proposedSellerProductCode": "KK946-BLACK",
+    "model": "KK946",
+    "unitsPerOffer": 1,
+    "maximumSellableStock": 6,
+    "normalPriceKrw": 4290,
+    "salePriceKrw": 4290,
+    "customerDeliveryChargeKrw": 0,
+    "deliveryChargeType": "FREE",
+    "advertisingEnabled": false,
+    "couponEnabled": false,
+    "automaticPriceAdjustmentEnabled": false,
+    "reorderEnabled": false,
+    "maximumOrders": 6,
+    "maximumExposureDays": 14,
+    "noSaleReviewAfterDays": 7,
+    "actualAttributableLossCapKrw": 30000,
+    "fulfillmentMode": "SELLER_FULFILLED_VIA_GAEMI_ONLY",
+    "rocketGrowthInboundAllowed": false
+  },
+  "economics": {
+    "marketplaceFeeRate": 0.105,
+    "perOrderBaseContributionKrw": -1548,
+    "perOrderStressContributionKrw": -1840,
+    "sixOrderBaseContributionKrw": -9288,
+    "sixOrderStressContributionKrw": -11040,
+    "stressHeadroomToLossCapKrw": 18960,
+    "historicalCashAlreadyCommittedKrw": 9530,
+    "historicalCashIsNotAddedAgainToContributionLoss": true
+  },
+  "category": {
+    "wingPath": "패션의류잡화 > 유니섹스/남녀공용 패션 > 공용 잡화 > 가방 > 남녀공용파우치",
+    "displayCategoryCodeStatus": "UNKNOWN_UI_DOES_NOT_REQUIRE_MANUAL_CODE",
+    "noticeCategory": "가방",
+    "purchaseOptions": [
+      {
+        "name": "색상",
+        "value": "블랙"
+      },
+      {
+        "name": "패션의류/잡화 사이즈",
+        "value": "상세페이지 참조"
+      }
+    ]
+  },
+  "productFacts": {
+    "kind": "충전기·케이블 수납용 미니 파우치",
+    "material": "폴리에스터",
+    "color": "블랙",
+    "warehouseRecordedSizeCm": "10.5 x 3.6 x 6.5",
+    "manufacturerClaim": "KLAND",
+    "countryOfOriginSupplierClaim": "중국 (OEM)",
+    "importerIdentityStatus": "OWNER_CONFIRMATION_REQUIRED",
+    "handlingPrecautionsStatus": "OWNER_CONFIRMATION_REQUIRED",
+    "qualityWarrantyTextStatus": "OWNER_CONFIRMATION_REQUIRED",
+    "afterSalesPartyStatus": "PRIVATE_OWNER_INPUT_REQUIRED",
+    "certificationStatus": "EXACT_CATEGORY_AND_PRODUCT_CONFIRMATION_REQUIRED",
+    "barcodeStatus": "UNKNOWN_WAREHOUSE_LABEL_IS_NOT_PRODUCT_BARCODE_EVIDENCE"
+  },
+  "listingAssets": {
+    "supplierDetailImageUse": "VERIFIED_UNCHANGED_USE_ONLY",
+    "imageEditRights": "UNKNOWN",
+    "rightsClearedMainImage": "MISSING",
+    "rightsClearedDetailImage": "MISSING",
+    "competitorImageUseAllowed": false,
+    "syntheticProductImageAllowed": false,
+    "durableConfidentialAssetStore": "NOT_APPROVED"
+  },
+  "logistics": {
+    "wingLogisticsRecordCount": 0,
+    "outboundRecordStatus": "MISSING",
+    "returnRecordStatus": "MISSING",
+    "providerPrivateDispatchDetailsStatus": "REQUIRES_PROVIDER_OR_OWNER_CONFIRMATION",
+    "providerPrivateReturnDetailsStatus": "REQUIRES_PROVIDER_OR_OWNER_CONFIRMATION",
+    "jejuAndIslandSettingStatus": "OWNER_CONFIRMATION_REQUIRED",
+    "returnChargeStatus": "OWNER_CONFIRMATION_REQUIRED",
+    "representativeAccountDefaultAllowed": false
+  },
+  "externalWrites": {
+    "performed": false,
+    "addressCreationPerformed": false,
+    "productSavePerformed": false,
+    "productRegistrationPerformed": false,
+    "priceOrStockWritePerformed": false,
+    "advertisingWritePerformed": false,
+    "approvalStatus": "NOT_YET_REQUESTED"
+  },
+  "stopConditions": [
+    "RIGHTS_CLEARED_MAIN_AND_DETAIL_ASSETS_MISSING",
+    "PRIVATE_GAEMI_DISPATCH_OR_RETURN_DETAILS_UNCONFIRMED",
+    "RETURN_CHARGE_UNCONFIRMED",
+    "IMPORTER_OR_CERTIFICATION_FACT_UNCONFIRMED",
+    "FINAL_WING_SUMMARY_DIFFERS_FROM_EXACT_APPROVED_PACKET",
+    "LOSS_CAP_WOULD_BE_EXCEEDED",
+    "UNEXPECTED_PAYMENT_ADVERTISEMENT_COUPON_OR_FULFILLMENT_WRITE"
+  ],
+  "cloudFirst": {
+    "sanitizedPacketOwner": "GITHUB",
+    "rawAccountAndProviderFactsOwner": "SOURCE_PROVIDER_SYSTEMS",
+    "localBrowserState": "TEMPORARY_UNSAVED",
+    "newLocalDurableStateCreated": false,
+    "rawPersonalOrSecretDataMoved": false
+  }
+}

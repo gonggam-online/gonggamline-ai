@@ -1,5 +1,22 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-12 - KK946 six-unit E2E liquidation readiness
+
+- Preserved the failed ordinary pre-purchase gate while preparing a bounded
+  exception for the six already-held units: `4,290 KRW`, free shipping, no
+  ads/coupons/automatic repricing/reorder, and a `30,000 KRW` loss cap.
+- Bound the draft to Coupang catalog product `9681483612`, black, and the WING
+  path/options observed read-only; no public breadcrumb was invented as an API
+  category code.
+- Recorded WING's empty address book and made both outbound and return record
+  creation part of the later exact external-write approval.
+- Kept rights-cleared listing assets, importer/certification, seller-private
+  notice/contact facts, Gaemi-authorized logistics data, and return charges as
+  fail-closed blockers.
+- Added a machine-readable experiment contract and regression tests. No address,
+  product save/registration, price, stock, ad, fulfillment, paid, database,
+  secret/configuration, or Production write occurred.
+
 ## 2026-08-12 - KK946 inspection stage and cost evidence
 
 - Verified four provider-side image references for the registered product,

@@ -22,11 +22,11 @@
     "documentaryFacts": "UNKNOWN",
     "imageUseRights": "VERIFIED",
     "imageEditRights": "UNKNOWN",
-    "coupangCategory": "UNKNOWN",
+    "coupangCategory": "VERIFIED_WING_CATALOG_PATH_CODE_UNKNOWN",
     "outboundLocation": "UNKNOWN",
     "returnCenter": "UNKNOWN"
   },
-  "nextAction": "DO_NOT_REORDER_OR_LIST_SINGLE_UNIT_AS_IS_REVIEW_BUNDLE_OR_LOWER_COST_ONLY",
+  "nextAction": "PREPARE_NO_REORDER_SIX_UNIT_E2E_LIQUIDATION_EXPERIMENT_AND_AWAIT_EXACT_EXTERNAL_WRITE_APPROVAL",
   "monitoring": {
     "observedAt": "2026-08-12T02:40:56.000Z",
     "domeggookOrderStatus": "VERIFIED_DELIVERED",
@@ -65,16 +65,31 @@
     "deterministicVariableCashOutflowGrossKrw": 4789.33
   },
   "saleSuitability": "PHYSICAL_INSPECTION_PASS_BUT_SINGLE_UNIT_ECONOMICS_FAIL",
-  "listingEligibility": "HOLD_SINGLE_UNIT_MARKET_PRICE_UNPROFITABLE",
+  "listingEligibility": "HOLD_E2E_EXCEPTION_AWAITING_EXTERNAL_WRITE_APPROVAL",
   "coupangListingRead": {
     "selectedCategoryPathStatus": "VERIFIED",
     "selectedCategoryPath": "패션의류잡화 > 유니섹스/남녀공용 패션 > 공용 잡화 > 가방 > 남녀공용파우치",
     "displayCategoryCodeStatus": "UNKNOWN",
+    "catalogProductId": "9681483612",
+    "catalogMatchOption": "BLACK",
+    "catalogItemWinnerPriceKrw": 4290,
+    "mandatoryPurchaseOptions": [
+      {
+        "name": "색상",
+        "value": "블랙"
+      },
+      {
+        "name": "패션의류/잡화 사이즈",
+        "value": "상세페이지 참조"
+      }
+    ],
     "marketplaceFeeRate": 0.105,
     "marketplaceFeeStatus": "VERIFIED_WING_FINAL_PRICE_BASIS_VAT_EXCLUSIVE_FEE",
     "noticeCategory": "가방",
+    "wingLogisticsRecordCount": 0,
     "outboundLocationStatus": "MISSING",
     "returnCenterStatus": "MISSING",
+    "experimentExceptionStatus": "AWAITING_EXTERNAL_WRITE_APPROVAL",
     "productCreationPerformed": false
   },
   "profitability": {

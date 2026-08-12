@@ -1,5 +1,29 @@
 # Decision log
 
+## 2026-08-12 - Prepare a six-unit KK946 E2E liquidation exception
+
+- Decision: preserve KK946's failed ordinary v3 pre-purchase gate and prohibit
+  reorder, while preparing a separately approved liquidation experiment using
+  only the six units already held at Gaemi.
+- Exact scope: Coupang catalog product `9681483612` black, one unit per offer,
+  stock/orders capped at six, normal/sale price `4,290 KRW`, free shipping, no
+  ads/coupons/automatic repricing/Rocket Growth, 14-day maximum exposure, and
+  `30,000 KRW` actual attributable loss cap.
+- Read-only result: WING exposes the catalog path and two required purchase
+  options but its address book has zero records. Creating the outbound/return
+  records and registering the offer are high-risk external writes that remain
+  unauthorized.
+- Fail-closed facts: do not use the account representative-address default,
+  competitor images, synthetic look-alike images, guessed importer/certification
+  data, a warehouse label as a barcode, or a public breadcrumb as an API
+  category code.
+- Cloud-first: GitHub owns only sanitized contract/test/PR/CI evidence; provider
+  systems retain all private address, contact, asset, transaction, return, and
+  settlement evidence. Local browser state is temporary and unsaved.
+- Risk/rollback: high-risk/manual with `manual-merge-required`. Repository
+  rollback is Git revert; any later live rollback must pause offer exposure
+  without cancelling paid orders or deleting provider evidence.
+
 ## 2026-08-08 - Keep KK946 quarantined pending exact evidence binding
 
 - Dependency: accepted Listing Content Fact and Policy Contract v1 and merged
