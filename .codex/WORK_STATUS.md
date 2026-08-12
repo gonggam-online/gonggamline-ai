@@ -1,5 +1,47 @@
 # Work status
 
+## 2026-08-12 KK946 WING/Gaemi final preflight after PR #123
+
+- Objective: close every discoverable read-only WING, Gaemi, and supplier fact
+  before requesting the six-unit external-write approval.
+- Branch/base: `codex/ops/kk946-wing-final-preflight` from merged PR #123 at
+  `a97eb9193af3fb61f81cbe350adb1f34d9c26dc9`.
+- Risk/root cause: high-risk/manual. External configuration/facts are blocking;
+  no database or compensating code defect was found.
+- Verified: WING catalog/category/options remain selected, auto-save is off,
+  logistics records remain absent, and no price/stock/image/notice submission
+  occurred. Gaemi holds six units and has sufficient base-outbound balance.
+- External blocker: Gaemi Coupang API is disconnected and automatic order
+  collection is disabled. Manual order entry is available but does not validate
+  automation.
+- Product facts: supplier catalog supports pouch, polyester, KLAND manufacturer,
+  China OEM, and unchanged image-use permission. Black and dimensions remain
+  bound to the purchased/warehouse evidence.
+- Remaining facts: importer and physical compliance marking, rights-cleared
+  WING-suitable main/detail assets, password-gated WING seller/A/S information,
+  provider-authorized outbound/return routing, Jeju/island policy, carrier, and
+  initial/return charges.
+- Owner action: enter the WING password directly on the seller-information
+  reauthentication page and leave it open. Never send the password in chat.
+  Provider inquiry or API configuration needs separate external-write approval.
+- External writes: none. No inquiry, credential/configuration, address, draft,
+  product, price, stock, ad, fulfillment, paid, database, or Production write.
+- Cloud-first: GitHub owns sanitized facts/tests/PR history; source providers
+  retain PII, credentials, raw images, addresses, balances, and transactions.
+- Changed files: sanitized KK946 Markdown/JSON evidence packet, its regression
+  test, listing changelog, decision log, and this status only.
+- Verification: focused tests `20/20`, full tests `573/573`, typecheck, and the
+  85-route production build pass. Source lint reports zero errors and the same
+  four pre-existing test warnings. Local browser baseline remains `35` passed,
+  `2` skipped, and `7` failed only on the known unconfigured-local-Supabase
+  routes `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`,
+  `/workflow`, and `/workspace`. Diff check and a targeted secret/PII scan pass;
+  the only email-shaped scan hit is an older unrelated backup filename.
+- Current/next: review the complete diff, commit and push, open a high-risk
+  manual PR, wait for exact CI/Preview gates, then continue only after the owner
+  reauthenticates WING and separately authorizes any provider inquiry or API
+  configuration.
+
 ## 2026-08-12 KK946 six-unit Coupang E2E listing readiness
 
 - Objective: prepare the fastest safe real sale-to-settlement validation for

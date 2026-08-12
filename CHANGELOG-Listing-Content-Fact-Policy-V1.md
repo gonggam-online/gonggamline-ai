@@ -1,5 +1,19 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-12 - KK946 post-merge WING/Gaemi final preflight
+
+- Confirmed read-only that Gaemi holds six units and has enough provider balance
+  for six base outbounds without persisting the private balance amount.
+- Classified the disconnected Gaemi Coupang API and disabled automatic order
+  collection as an external-configuration blocker; retained manual first-order
+  entry as a visible fallback rather than claiming automation.
+- Promoted supplier notice claims for type, polyester, manufacturer, and origin,
+  while retaining importer, physical compliance marking, A/S, image suitability,
+  and provider-authorized return routing as fail-closed facts.
+- Added current adult/general textile and child-directed marketing boundaries.
+- Performed no provider inquiry, credential/configuration, address, product,
+  price, stock, fulfillment, paid, database, or Production write.
+
 ## 2026-08-12 - KK946 six-unit E2E liquidation readiness
 
 - Preserved the failed ordinary pre-purchase gate while preparing a bounded

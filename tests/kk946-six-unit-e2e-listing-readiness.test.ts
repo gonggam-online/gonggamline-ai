@@ -45,6 +45,9 @@ const record = JSON.parse(recordText) as {
     stressHeadroomToLossCapKrw: number;
   };
   listingAssets: {
+    supplierThumbnailObserved: boolean;
+    supplierImagePermissionStatus: string;
+    supplierImageRegistrationSuitabilityStatus: string;
     rightsClearedMainImage: string;
     rightsClearedDetailImage: string;
     competitorImageUseAllowed: boolean;
@@ -55,13 +58,19 @@ const record = JSON.parse(recordText) as {
     outboundRecordStatus: string;
     returnRecordStatus: string;
     representativeAccountDefaultAllowed: boolean;
+    gaemiInventoryUnits: number;
+    gaemiFulfillmentBalanceStatus: string;
+    gaemiCoupangApiConnectionStatus: string;
+    gaemiAutomaticOrderCollectionEnabled: boolean;
+    manualOrderFallbackAvailable: boolean;
+    wingSellerPrivateInfoStatus: string;
   };
   externalWrites: Record<string, boolean | string>;
   stopConditions: string[];
 };
 
 test("six-unit exception preserves the failed ordinary profitability gate", () => {
-  assert.equal(record.status, "READ_ONLY_PREFLIGHT_COMPLETE_AWAITING_EXTERNAL_WRITE_APPROVAL");
+  assert.equal(record.status, "READ_ONLY_PREFLIGHT_OWNER_ACTION_REQUIRED");
   assert.equal(record.risk, "HIGH_RISK_MANUAL");
   assert.equal(record.ordinaryPrePurchaseGate.status, "FAIL");
   assert.equal(record.ordinaryPrePurchaseGate.samplePurchaseEligible, false);
@@ -109,8 +118,23 @@ test("missing logistics and rights-cleared assets fail closed", () => {
   assert.equal(record.listingAssets.rightsClearedDetailImage, "MISSING");
   assert.equal(record.listingAssets.competitorImageUseAllowed, false);
   assert.equal(record.listingAssets.syntheticProductImageAllowed, false);
+  assert.equal(record.listingAssets.supplierThumbnailObserved, true);
+  assert.equal(record.listingAssets.supplierImagePermissionStatus, "VERIFIED_PROVIDER_PAGE_USE_ALLOWED");
+  assert.equal(record.listingAssets.supplierImageRegistrationSuitabilityStatus, "UNVERIFIED_MAIN_AND_DETAIL_REQUIREMENTS");
   assert.ok(record.stopConditions.includes("RIGHTS_CLEARED_MAIN_AND_DETAIL_ASSETS_MISSING"));
   assert.ok(record.stopConditions.includes("PRIVATE_GAEMI_DISPATCH_OR_RETURN_DETAILS_UNCONFIRMED"));
+});
+
+test("post-merge logistics evidence exposes the manual fallback without inventing automation", () => {
+  assert.equal(record.logistics.gaemiInventoryUnits, 6);
+  assert.equal(record.logistics.gaemiFulfillmentBalanceStatus, "SUFFICIENT_FOR_SIX_BASE_OUTBOUNDS");
+  assert.equal(record.logistics.gaemiCoupangApiConnectionStatus, "DISCONNECTED");
+  assert.equal(record.logistics.gaemiAutomaticOrderCollectionEnabled, false);
+  assert.equal(record.logistics.manualOrderFallbackAvailable, true);
+  assert.equal(record.logistics.wingSellerPrivateInfoStatus, "PASSWORD_REAUTH_REQUIRED");
+  assert.ok(record.stopConditions.includes("COUPANG_API_DISCONNECTED_IF_AUTOMATED_FULFILLMENT_IS_REQUIRED"));
+  assert.match(packet, /manual first-order fallback/i);
+  assert.match(packet, /Vendor code, Access Key, and Secret Key[\s\S]+never in Git/i);
 });
 
 test("packet proves no external write and contains the exact approval boundary", () => {
@@ -120,6 +144,8 @@ test("packet proves no external write and contains the exact approval boundary",
   assert.equal(record.externalWrites.productRegistrationPerformed, false);
   assert.equal(record.externalWrites.priceOrStockWritePerformed, false);
   assert.equal(record.externalWrites.advertisingWritePerformed, false);
+  assert.equal(record.externalWrites.providerInquiryPerformed, false);
+  assert.equal(record.externalWrites.apiConfigurationWritePerformed, false);
   assert.match(packet, /This statement is not yet an approval/i);
   assert.match(packet, /9681483612[\s\S]+KK946-BLACK[\s\S]+재고 6/);
   assert.match(packet, /광고·쿠폰·자동가격조정·재주문 없음/);

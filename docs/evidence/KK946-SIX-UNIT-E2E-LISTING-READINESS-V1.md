@@ -2,7 +2,7 @@
 
 Observed: 2026-08-12 (KST)
 
-Status: `READ_ONLY_PREFLIGHT_COMPLETE_AWAITING_EXTERNAL_WRITE_APPROVAL`
+Status: `READ_ONLY_PREFLIGHT_OWNER_ACTION_REQUIRED`
 
 Risk: high-risk/manual
 
@@ -44,6 +44,35 @@ registration does not require the operator to invent one. An API path must use
 Coupang's official Category Recommendation or category metadata source first;
 the public breadcrumb number must not be substituted.
 
+## Post-merge authenticated read-only follow-up
+
+After PR #123 merged, the provider systems were read again without saving or
+submitting anything:
+
+- Gaemi still holds exactly six KK946 black units. Its current point balance is
+  sufficient for six base outbound charges; the private balance amount is not
+  copied into Git.
+- The Gaemi account's Coupang API connection is `DISCONNECTED`, automatic order
+  collection is disabled, and no Coupang vendor/access/secret value is stored
+  there. A manual order entry remains available for the first-sale fallback,
+  but it cannot prove the automated order-to-shipment loop.
+- The authenticated Gaemi page and current member manual verify the Icheon
+  inbound center. They do not authorize reusing that inbound identity as the
+  WING customer-return record. Gaemi must confirm the exact recipient naming,
+  return routing, carrier, Jeju/island policy, and charges before that write.
+- The supplier catalog now directly supports the notice claims `파우치`,
+  `폴리에스테르`, manufacturer `KLAND`, and country `중국(OEM)`. The purchased
+  option and warehouse record support black and `10.5 x 3.6 x 6.5 cm`.
+- The supplier page exposes an unchanged-use permission and a product thumbnail,
+  but the evidence still does not prove that one asset satisfies both WING main
+  and detail-image requirements or that modification is allowed.
+- WING seller-private information requires password reauthentication. No
+  password was requested, read, stored, or typed by this task.
+
+The exact root-cause classification is external configuration/facts, not
+database or code. Do not add a code fallback for missing seller identity,
+provider return authority, API credentials, or product compliance markings.
+
 ## Exact offer plan
 
 | Field | Bound value |
@@ -77,6 +106,14 @@ warehouse-recorded `10.5 x 3.6 x 6.5 cm`, manufacturer claim `KLAND`, and
 supplier origin claim China (OEM). The offer kind can be described as a
 charger/cable storage mini pouch.
 
+The offer must remain adult/general-use and must not be described or targeted as
+a children's product. The current official safety sources apply the children's
+product regime to products intended for children age 13 or younger, while
+general household textile goods remain subject to their applicable safety and
+marking standard. Therefore the WING default `인증·신고 대상 아님` is not by
+itself evidence: importer responsibility and the physical product/packaging
+marking still need verification.
+
 These fields remain stop conditions rather than guessed form values:
 
 1. Seller/importer identity and exact certification applicability.
@@ -89,6 +126,14 @@ These fields remain stop conditions rather than guessed form values:
    unknown. A competitor image or synthetic look-alike image is prohibited.
 5. An approved recoverable confidential asset store. Raw images, account data,
    addresses, contacts, or evidence must not be committed to Git.
+6. Password-gated WING seller/A/S facts and the exact provider-authorized return
+   routing. The operator must enter the password directly in WING; it must never
+   be sent through chat or committed.
+7. Automated fulfillment requires a separately approved Gaemi Coupang API
+   connection. Vendor code, Access Key, and Secret Key are secrets/private
+   configuration and must be entered only in the provider UI, never in Git or
+   Codex output. Until connected, the experiment may use only the documented
+   manual first-order fallback.
 
 WING's current UI recommends a square main/additional image of at least 500 px
 (`1000 x 1000` recommended), JPG/PNG and no more than 10 MB; it permits up to
@@ -112,6 +157,20 @@ charge, and the procedure that maps a Coupang return into Gaemi. Gaemi's public
 material says returns must be requested in its system and unregistered returns
 can be delayed or incur charges; that public statement is not authority to use
 a particular center address or phone number.
+
+The shortest owner path is:
+
+1. In WING, open `판매자정보 > 판매자정보`, enter the password directly, and
+   leave the page open so the existing seller/A/S facts can be read without
+   exposing the password.
+2. Obtain Gaemi confirmation for the exact WING outbound/return recipient,
+   address/contact, Jeju/island policy, carrier, and initial/return charges. A
+   support request is itself an external message and is not authorized by this
+   packet.
+3. Choose whether this six-unit experiment may use manual Gaemi order entry or
+   whether a separately approved secret-bearing Coupang API connection is a
+   prerequisite. Product Registration approval does not silently authorize API
+   credential configuration.
 
 ## Proposed execution sequence after exact approval
 
@@ -161,6 +220,12 @@ writes remain prohibited.
 - Gaemi terms: <https://www.gemichango.com/gemi_terms1.html>
 - Gaemi public rate card:
   <https://www.gemichango.com/Gemichango_Logistics_cost_chart.pdf>
+- Gaemi current member manual:
+  <https://www.gemichango.com/%EA%B0%9C%EB%AF%B8%EC%B0%BD%EA%B3%A0_%EC%9D%B4%EC%9A%A9%EC%95%88%EB%82%B4%28%ED%9A%8C%EC%9B%90%EC%82%AC%29_%EB%A7%A4%EB%89%B4%EC%96%BCv1.3_25.01.pdf>
+- Korea Product Safety general textile standard:
+  <https://www.law.go.kr/LSW/admRulLsInfoP.do?admRulSeq=2100000237416>
+- Korea children's product scope:
+  <https://www.law.go.kr/LSW/admRulInfoP.do?admRulSeq=2100000184154>
 
 GitHub owns only this sanitized decision packet, tests, PR, and CI evidence.
 WING, Coupang, Domeggook, and Gaemi remain the authorities for private account,

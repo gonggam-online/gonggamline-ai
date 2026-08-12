@@ -1,5 +1,21 @@
 # Decision log
 
+## 2026-08-12 - Keep KK946 execution blocked on external facts after PR #123
+
+- Read-only evidence: six Gaemi units and sufficient base-outbound balance are
+  available, but the Gaemi Coupang API is disconnected and automatic order
+  collection is disabled.
+- Decision: allow a clearly labelled manual first-order fallback for the bounded
+  six-unit experiment; do not describe it as automated fulfillment. API secret
+  configuration requires separate exact approval and provider-UI entry.
+- Compliance: keep the listing adult/general-use only. Supplier catalog claims
+  do not close importer identity, physical textile marking, image suitability,
+  or seller-private A/S evidence.
+- Logistics: the verified inbound center is not automatically an authorized
+  WING return identity. Provider return routing and fees require confirmation.
+- Risk/rollback: high-risk/manual evidence update. No external write occurred;
+  repository rollback is Git revert.
+
 ## 2026-08-12 - Prepare a six-unit KK946 E2E liquidation exception
 
 - Decision: preserve KK946's failed ordinary v3 pre-purchase gate and prohibit

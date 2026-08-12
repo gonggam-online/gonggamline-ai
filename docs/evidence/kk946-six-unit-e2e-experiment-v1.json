@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "subjectId": "KK946",
-  "status": "READ_ONLY_PREFLIGHT_COMPLETE_AWAITING_EXTERNAL_WRITE_APPROVAL",
+  "status": "READ_ONLY_PREFLIGHT_OWNER_ACTION_REQUIRED",
   "risk": "HIGH_RISK_MANUAL",
   "purpose": "VALIDATE_COUPANG_LISTING_SALE_FULFILLMENT_RETURN_AND_SETTLEMENT_WITH_EXISTING_STOCK",
   "ordinaryPrePurchaseGate": {
@@ -66,15 +66,22 @@
     "warehouseRecordedSizeCm": "10.5 x 3.6 x 6.5",
     "manufacturerClaim": "KLAND",
     "countryOfOriginSupplierClaim": "중국 (OEM)",
+    "supplierNoticeFactsStatus": "VERIFIED_PROVIDER_CATALOG_CLAIMS",
+    "adultGeneralUseScopeRequired": true,
+    "childDirectedMarketingAllowed": false,
     "importerIdentityStatus": "OWNER_CONFIRMATION_REQUIRED",
     "handlingPrecautionsStatus": "OWNER_CONFIRMATION_REQUIRED",
     "qualityWarrantyTextStatus": "OWNER_CONFIRMATION_REQUIRED",
     "afterSalesPartyStatus": "PRIVATE_OWNER_INPUT_REQUIRED",
-    "certificationStatus": "EXACT_CATEGORY_AND_PRODUCT_CONFIRMATION_REQUIRED",
+    "certificationStatus": "ADULT_GENERAL_POUCH_NOT_CHILD_PRODUCT_BUT_GENERAL_TEXTILE_COMPLIANCE_MARKING_UNVERIFIED",
+    "physicalComplianceLabelStatus": "UNKNOWN",
     "barcodeStatus": "UNKNOWN_WAREHOUSE_LABEL_IS_NOT_PRODUCT_BARCODE_EVIDENCE"
   },
   "listingAssets": {
     "supplierDetailImageUse": "VERIFIED_UNCHANGED_USE_ONLY",
+    "supplierThumbnailObserved": true,
+    "supplierImagePermissionStatus": "VERIFIED_PROVIDER_PAGE_USE_ALLOWED",
+    "supplierImageRegistrationSuitabilityStatus": "UNVERIFIED_MAIN_AND_DETAIL_REQUIREMENTS",
     "imageEditRights": "UNKNOWN",
     "rightsClearedMainImage": "MISSING",
     "rightsClearedDetailImage": "MISSING",
@@ -88,9 +95,16 @@
     "returnRecordStatus": "MISSING",
     "providerPrivateDispatchDetailsStatus": "REQUIRES_PROVIDER_OR_OWNER_CONFIRMATION",
     "providerPrivateReturnDetailsStatus": "REQUIRES_PROVIDER_OR_OWNER_CONFIRMATION",
+    "gaemiInventoryUnits": 6,
+    "gaemiFulfillmentBalanceStatus": "SUFFICIENT_FOR_SIX_BASE_OUTBOUNDS",
+    "gaemiCoupangApiConnectionStatus": "DISCONNECTED",
+    "gaemiAutomaticOrderCollectionEnabled": false,
+    "manualOrderFallbackAvailable": true,
+    "gaemiInboundCenterStatus": "VERIFIED_BUT_NOT_AUTHORITY_FOR_WING_RETURN_USE",
     "jejuAndIslandSettingStatus": "OWNER_CONFIRMATION_REQUIRED",
     "returnChargeStatus": "OWNER_CONFIRMATION_REQUIRED",
-    "representativeAccountDefaultAllowed": false
+    "representativeAccountDefaultAllowed": false,
+    "wingSellerPrivateInfoStatus": "PASSWORD_REAUTH_REQUIRED"
   },
   "externalWrites": {
     "performed": false,
@@ -99,6 +113,8 @@
     "productRegistrationPerformed": false,
     "priceOrStockWritePerformed": false,
     "advertisingWritePerformed": false,
+    "providerInquiryPerformed": false,
+    "apiConfigurationWritePerformed": false,
     "approvalStatus": "NOT_YET_REQUESTED"
   },
   "stopConditions": [
@@ -106,6 +122,9 @@
     "PRIVATE_GAEMI_DISPATCH_OR_RETURN_DETAILS_UNCONFIRMED",
     "RETURN_CHARGE_UNCONFIRMED",
     "IMPORTER_OR_CERTIFICATION_FACT_UNCONFIRMED",
+    "GENERAL_TEXTILE_IMPORTER_OR_PHYSICAL_LABEL_UNVERIFIED",
+    "OWNER_WING_REAUTH_REQUIRED_FOR_PRIVATE_SELLER_FACTS",
+    "COUPANG_API_DISCONNECTED_IF_AUTOMATED_FULFILLMENT_IS_REQUIRED",
     "FINAL_WING_SUMMARY_DIFFERS_FROM_EXACT_APPROVED_PACKET",
     "LOSS_CAP_WOULD_BE_EXCEEDED",
     "UNEXPECTED_PAYMENT_ADVERTISEMENT_COUPON_OR_FULFILLMENT_WRITE"
