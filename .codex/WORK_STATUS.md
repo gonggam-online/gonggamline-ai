@@ -49,8 +49,15 @@
 - Review: complete diff and `git diff --check` passed. New decision evidence has
   no URL in the machine record and no raw account/contact/bank/credential data;
   provider URLs appear only as public authority references in the narrative.
-- Current: finish diff/security review, then commit, push and open a
-  manual-merge-required PR with exact-head CI/Preview evidence.
+- Delivery: commit `d1224c376c6f58349f974f1a38a8a454ed2b329c` pushed on
+  `codex/fix/kk946-profitability-fee-basis`; Draft PR #122 targets `main`, has
+  `manual-merge-required`, and must not auto-merge.
+- Exact-head gates: CI lint/tests/typecheck/build/security audit/database
+  baseline/Item Selection security/R1 atomic replay all passed. Vercel Preview
+  deployed and Preview Playwright passed `42`, skipped `2`, with no console,
+  page, or failed-request errors across the configured route suite. Artifact:
+  `preview-browser-evidence`, GitHub Actions run `31563588274`.
+- Current: owner financial-policy review and manual merge decision on PR #122.
 - Changed files: profitability engine/policy/regression test; KK946 first-sale,
   inbound, profitability/listing and machine-status evidence; focused contract
   tests; changelog/decision log; this recovery record.
