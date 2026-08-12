@@ -2,11 +2,14 @@
 
 Observed: 2026-08-12 (KST)
 
-Status: `READ_ONLY_PREFLIGHT_OWNER_ACTION_REQUIRED`
+Status: `PROVIDER_REPLY_PENDING_AFTER_AUTHORIZED_INFORMATIONAL_WRITE`
 
 Risk: high-risk/manual
 
-External writes performed by this task: none
+External writes performed by this task: one active informational Gaemi request;
+one duplicate request was explicitly marked to ignore. No order, shipment,
+return, address, listing, price, stock, advertisement, API configuration,
+payment, database, or Production write occurred.
 
 ## Decision
 
@@ -72,6 +75,34 @@ submitting anything:
 The exact root-cause classification is external configuration/facts, not
 database or code. Do not add a code fallback for missing seller identity,
 provider return authority, API credentials, or product compliance markings.
+
+## Authenticated Gaemi B2C and return follow-up
+
+The owner authorized informational external writing when account-native facts
+were unavailable. The authenticated account established the following before
+that request:
+
+- KK946 supports `B2C 일반출고`, distinct from the separate Rocket Growth and
+  milk-run B2B paths. A one-unit quantity can be prepared in the form, but no
+  customer data was entered and no order was completed.
+- The general outbound/return page identifies CJ Logistics as the normal return
+  carrier. A non-CJ return requires advance information through the provider
+  request box.
+- The return form is bound to an existing outbound order and captures a return
+  or exchange reason, requested disposition, optional evidence, and request
+  details. No outbound order exists yet, so no return request was created.
+- The public rate card remains a standard rate, not proof of the account's final
+  VAT-inclusive debit. The authenticated pages do not expose the exact WING
+  recipient label, account-applied outbound/return debit, or Jeju/island rule.
+
+One categorized provider request now asks for the current account carrier,
+WING-safe outbound/return labels, address/contact authority, return identifier,
+Jeju/island rule, VAT-inclusive one-unit outbound and customer-return cost, and
+the Coupang-to-Gaemi manual return steps. The confirmation flow created a second
+identical general request; a correction on that thread tells the provider to
+ignore it and answer only the categorized request. The reply remains pending.
+This bounded informational write does not authorize any commerce or secret
+configuration write.
 
 ## Exact offer plan
 
@@ -163,10 +194,10 @@ The shortest owner path is:
 1. In WING, open `판매자정보 > 판매자정보`, enter the password directly, and
    leave the page open so the existing seller/A/S facts can be read without
    exposing the password.
-2. Obtain Gaemi confirmation for the exact WING outbound/return recipient,
-   address/contact, Jeju/island policy, carrier, and initial/return charges. A
-   support request is itself an external message and is not authorized by this
-   packet.
+2. Wait for the active categorized Gaemi request to confirm the exact WING
+   outbound/return recipient, address/contact, Jeju/island policy, carrier, and
+   initial/return charges. The owner authorized and the task performed only
+   this informational provider write.
 3. Choose whether this six-unit experiment may use manual Gaemi order entry or
    whether a separately approved secret-bearing Coupang API connection is a
    prerequisite. Product Registration approval does not silently authorize API

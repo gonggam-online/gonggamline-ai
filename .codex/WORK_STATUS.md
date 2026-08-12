@@ -1,5 +1,39 @@
 # Work status
 
+## 2026-08-12 KK946 Gaemi B2C return and account-rate follow-up
+
+- Objective: close WING logistics facts from the authenticated Gaemi account
+  before any address or listing write.
+- Branch/PR: `codex/ops/kk946-wing-final-preflight`; Draft PR #124.
+- Risk/root cause: high-risk/manual; external provider facts, not database/code.
+- Verified: six KK946 units remain available; B2C general outbound is distinct
+  from Rocket Growth; CJ Logistics is the normal return carrier; non-CJ returns
+  require advance provider notice; the return form is bound to an existing order
+  and no order or return was created.
+- Rate status: public standard rates do not prove the account's final
+  VAT-inclusive debit. Exact WING recipient labeling, account-applied outbound
+  and return cost, Jeju/island handling, and manual return identifier remain
+  provider-reply pending.
+- Authorized external write: one active categorized informational request. The
+  confirmation flow also created one duplicate; its thread now instructs the
+  provider to ignore it and answer only the categorized request.
+- Prohibited writes preserved: no order, shipment, return, WING address, draft,
+  listing, price, stock, advertisement, API/configuration, payment, database, or
+  Production write.
+- Cloud-first: Gaemi owns private provider replies and messages; GitHub retains
+  sanitized status/tests/PR history only. No private address/contact, balance,
+  account identity, or raw capture is copied into Git.
+- Verification: JSON parse and focused tests `6/6` pass; full tests `573/573`,
+  typecheck, source lint with zero errors and four pre-existing warnings, and
+  the 85-route production build pass. Local browser baseline remains `35`
+  passed, `2` skipped, and the same `7` unconfigured-local-Supabase failures on
+  `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
+  and `/workspace`. Diff check and targeted secret/PII scan pass; the only scan
+  hit is an older unrelated backup filename.
+- Current/next: review the diff, push PR #124, wait for exact CI/Preview, then
+  apply the provider reply without another owner prompt while preserving the
+  exact live product-registration approval boundary.
+
 ## 2026-08-12 KK946 WING/Gaemi final preflight after PR #123
 
 - Objective: close every discoverable read-only WING, Gaemi, and supplier fact

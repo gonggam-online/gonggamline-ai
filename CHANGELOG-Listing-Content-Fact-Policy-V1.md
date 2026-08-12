@@ -1,5 +1,16 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-12 - KK946 Gaemi B2C return and rate inquiry
+
+- Verified the authenticated account's CJ Logistics return default, order-bound
+  return form, and separation between B2C seller fulfillment and Rocket Growth.
+- Kept account-applied VAT-inclusive rates, WING-safe recipient labeling,
+  Jeju/island handling, and exact manual return mapping fail-closed because the
+  provider UI does not expose them.
+- Recorded one authorized active informational provider request. A duplicate
+  request produced by the confirmation flow was marked to ignore; no commerce,
+  paid, secret/configuration, database, or Production write occurred.
+
 ## 2026-08-12 - KK946 post-merge WING/Gaemi final preflight
 
 - Confirmed read-only that Gaemi holds six units and has enough provider balance

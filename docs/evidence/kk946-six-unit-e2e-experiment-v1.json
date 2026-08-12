@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "subjectId": "KK946",
-  "status": "READ_ONLY_PREFLIGHT_OWNER_ACTION_REQUIRED",
+  "status": "PROVIDER_REPLY_PENDING_AFTER_AUTHORIZED_INFORMATIONAL_WRITE",
   "risk": "HIGH_RISK_MANUAL",
   "purpose": "VALIDATE_COUPANG_LISTING_SALE_FULFILLMENT_RETURN_AND_SETTLEMENT_WITH_EXISTING_STOCK",
   "ordinaryPrePurchaseGate": {
@@ -101,21 +101,28 @@
     "gaemiAutomaticOrderCollectionEnabled": false,
     "manualOrderFallbackAvailable": true,
     "gaemiInboundCenterStatus": "VERIFIED_BUT_NOT_AUTHORITY_FOR_WING_RETURN_USE",
-    "jejuAndIslandSettingStatus": "OWNER_CONFIRMATION_REQUIRED",
-    "returnChargeStatus": "OWNER_CONFIRMATION_REQUIRED",
+    "gaemiCurrentB2cReturnCarrier": "CJ_LOGISTICS",
+    "gaemiReturnFormStatus": "VERIFIED_ORDER_BOUND_FORM_AVAILABLE_NO_ORDER_CREATED",
+    "gaemiReturnIdentificationStatus": "ORDER_CODE_AND_REASON_BOUND_EXACT_RECIPIENT_LABEL_REPLY_PENDING",
+    "gaemiAccountAppliedRateStatus": "PROVIDER_REPLY_PENDING",
+    "jejuAndIslandSettingStatus": "PROVIDER_REPLY_PENDING",
+    "returnChargeStatus": "PROVIDER_REPLY_PENDING",
     "representativeAccountDefaultAllowed": false,
-    "wingSellerPrivateInfoStatus": "PASSWORD_REAUTH_REQUIRED"
+    "wingSellerPrivateInfoStatus": "OWNER_REAUTH_REPORTED_COMPLETE_PRIVATE_FACT_COPY_NOT_PERFORMED"
   },
   "externalWrites": {
-    "performed": false,
+    "performed": true,
     "addressCreationPerformed": false,
     "productSavePerformed": false,
     "productRegistrationPerformed": false,
     "priceOrStockWritePerformed": false,
     "advertisingWritePerformed": false,
-    "providerInquiryPerformed": false,
+    "providerInquiryPerformed": true,
+    "providerInquiryStatus": "ONE_ACTIVE_CATEGORIZED_THREAD_REPLY_PENDING",
+    "providerInquiryDuplicateStatus": "ONE_DUPLICATE_THREAD_MARKED_IGNORE",
+    "providerOrderShipmentOrReturnMutationPerformed": false,
     "apiConfigurationWritePerformed": false,
-    "approvalStatus": "NOT_YET_REQUESTED"
+    "approvalStatus": "OWNER_AUTHORIZED_INFORMATIONAL_PROVIDER_WRITE_ONLY"
   },
   "stopConditions": [
     "RIGHTS_CLEARED_MAIN_AND_DETAIL_ASSETS_MISSING",

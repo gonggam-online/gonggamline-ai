@@ -1,5 +1,18 @@
 # Decision log
 
+## 2026-08-12 - Use Gaemi account facts before WING logistics creation
+
+- Evidence: the account identifies CJ Logistics as its normal return carrier
+  and provides an order-bound return form, but not the final account-applied
+  debit or exact WING recipient label.
+- Decision: keep seller-fulfilled B2C distinct from Rocket Growth; wait for the
+  single active categorized provider reply before creating WING address records.
+- External write: owner-authorized informational request only. One duplicate was
+  marked to ignore. No order, shipment, return, listing, paid, API/configuration,
+  database, or Production write was authorized or performed.
+- Risk/rollback: high-risk/manual. Provider messages are durable at Gaemi and
+  cannot be rolled back; Git evidence can be reverted normally.
+
 ## 2026-08-12 - Keep KK946 execution blocked on external facts after PR #123
 
 - Read-only evidence: six Gaemi units and sufficient base-outbound balance are

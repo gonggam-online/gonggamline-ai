@@ -63,6 +63,10 @@ const record = JSON.parse(recordText) as {
     gaemiCoupangApiConnectionStatus: string;
     gaemiAutomaticOrderCollectionEnabled: boolean;
     manualOrderFallbackAvailable: boolean;
+    gaemiCurrentB2cReturnCarrier: string;
+    gaemiReturnFormStatus: string;
+    gaemiReturnIdentificationStatus: string;
+    gaemiAccountAppliedRateStatus: string;
     wingSellerPrivateInfoStatus: string;
   };
   externalWrites: Record<string, boolean | string>;
@@ -70,7 +74,7 @@ const record = JSON.parse(recordText) as {
 };
 
 test("six-unit exception preserves the failed ordinary profitability gate", () => {
-  assert.equal(record.status, "READ_ONLY_PREFLIGHT_OWNER_ACTION_REQUIRED");
+  assert.equal(record.status, "PROVIDER_REPLY_PENDING_AFTER_AUTHORIZED_INFORMATIONAL_WRITE");
   assert.equal(record.risk, "HIGH_RISK_MANUAL");
   assert.equal(record.ordinaryPrePurchaseGate.status, "FAIL");
   assert.equal(record.ordinaryPrePurchaseGate.samplePurchaseEligible, false);
@@ -131,21 +135,35 @@ test("post-merge logistics evidence exposes the manual fallback without inventin
   assert.equal(record.logistics.gaemiCoupangApiConnectionStatus, "DISCONNECTED");
   assert.equal(record.logistics.gaemiAutomaticOrderCollectionEnabled, false);
   assert.equal(record.logistics.manualOrderFallbackAvailable, true);
-  assert.equal(record.logistics.wingSellerPrivateInfoStatus, "PASSWORD_REAUTH_REQUIRED");
+  assert.equal(record.logistics.gaemiCurrentB2cReturnCarrier, "CJ_LOGISTICS");
+  assert.equal(record.logistics.gaemiReturnFormStatus, "VERIFIED_ORDER_BOUND_FORM_AVAILABLE_NO_ORDER_CREATED");
+  assert.equal(
+    record.logistics.gaemiReturnIdentificationStatus,
+    "ORDER_CODE_AND_REASON_BOUND_EXACT_RECIPIENT_LABEL_REPLY_PENDING",
+  );
+  assert.equal(record.logistics.gaemiAccountAppliedRateStatus, "PROVIDER_REPLY_PENDING");
+  assert.equal(
+    record.logistics.wingSellerPrivateInfoStatus,
+    "OWNER_REAUTH_REPORTED_COMPLETE_PRIVATE_FACT_COPY_NOT_PERFORMED",
+  );
   assert.ok(record.stopConditions.includes("COUPANG_API_DISCONNECTED_IF_AUTOMATED_FULFILLMENT_IS_REQUIRED"));
   assert.match(packet, /manual first-order fallback/i);
   assert.match(packet, /Vendor code, Access Key, and Secret Key[\s\S]+never in Git/i);
 });
 
-test("packet proves no external write and contains the exact approval boundary", () => {
-  assert.equal(record.externalWrites.performed, false);
+test("packet limits the authorized provider inquiry and preserves the commerce-write boundary", () => {
+  assert.equal(record.externalWrites.performed, true);
   assert.equal(record.externalWrites.addressCreationPerformed, false);
   assert.equal(record.externalWrites.productSavePerformed, false);
   assert.equal(record.externalWrites.productRegistrationPerformed, false);
   assert.equal(record.externalWrites.priceOrStockWritePerformed, false);
   assert.equal(record.externalWrites.advertisingWritePerformed, false);
-  assert.equal(record.externalWrites.providerInquiryPerformed, false);
+  assert.equal(record.externalWrites.providerInquiryPerformed, true);
+  assert.equal(record.externalWrites.providerInquiryStatus, "ONE_ACTIVE_CATEGORIZED_THREAD_REPLY_PENDING");
+  assert.equal(record.externalWrites.providerInquiryDuplicateStatus, "ONE_DUPLICATE_THREAD_MARKED_IGNORE");
+  assert.equal(record.externalWrites.providerOrderShipmentOrReturnMutationPerformed, false);
   assert.equal(record.externalWrites.apiConfigurationWritePerformed, false);
+  assert.equal(record.externalWrites.approvalStatus, "OWNER_AUTHORIZED_INFORMATIONAL_PROVIDER_WRITE_ONLY");
   assert.match(packet, /This statement is not yet an approval/i);
   assert.match(packet, /9681483612[\s\S]+KK946-BLACK[\s\S]+재고 6/);
   assert.match(packet, /광고·쿠폰·자동가격조정·재주문 없음/);
