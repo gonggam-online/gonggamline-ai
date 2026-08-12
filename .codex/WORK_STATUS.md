@@ -1,5 +1,39 @@
 # Work status
 
+## 2026-08-12 KK946 inspection stage and actual cost evidence
+
+- Objective: admit the provider stage images and actual warehouse charges,
+  then make an evidence-bounded sale-suitability and profitability decision.
+- Branch/base: `codex/docs/kk946-inspection-stage-evidence` from `origin/main`
+  `795d2d16b5bf7b2c1ecec99cb02f9693344f9385`.
+- Risk/root cause: normal-risk read-only evidence documentation and contract
+  tests. Provider inspection execution is closed; the remaining blocker is
+  external listing/product facts and financial evidence, not DB or code.
+- Revenue impact: advances actual unit cash cost while preventing stage photos
+  from being misrepresented as a full quality pass.
+- Cloud-first: GitHub owns only sanitized status/tests/review. Gaemi owns raw
+  images and the point ledger; local OneDrive screenshots remain untracked
+  review aids and are not copied to the repository.
+- Scope/non-goals: record four stage-image references, actual `770 KRW` inbound
+  unloading and `660 KRW` inspection charges, and deterministic conditional-
+  pass/HOLD/INCOMPLETE outcomes. No provider request, new paid work, listing,
+  price, inventory, fulfillment, database, secret, or Production action.
+- Completed: authenticated tab-by-tab visual verification; authenticated point
+  ledger verification; sanitized packet/status/test/changelog updates; focused
+  contract tests `10/10`; full tests `561/561`; typecheck and build pass; lint
+  passes with four pre-existing warnings.
+- Browser baseline: `35` passed, `2` skipped, `7` failed only because local
+  Supabase is unconfigured on the established listing/market/procurement/
+  revenue/sourcing/workflow/workspace routes. This documentation-only diff does
+  not touch those routes; Preview remains the binding configured check.
+- Current: final diff review and normal-risk PR delivery.
+- Blocker/owner action: acquire the required product/listing facts and exact
+  variable-cost inputs; no additional inspection request is required.
+- Remaining risks: no itemized pass/fail report, weights, material/marking or
+  defect detail, final selling price, exact category fee, outbound/packaging/
+  storage cost, mature advertising, return loss, or warehouse-charge VAT
+  treatment.
+
 ## 2026-08-12 KK946 warehouse receipt completion
 
 - Objective: record the completed KK946 warehouse receipt and identify the

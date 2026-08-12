@@ -11,9 +11,14 @@
     "warehouseProductOption": "VERIFIED",
     "warehouseInboundApplication": "VERIFIED",
     "supplierOrderPaymentComplete": "VERIFIED",
+    "inspectionStageImages": "VERIFIED",
+    "fullInspectionCharge": "VERIFIED",
+    "fullInspectionExecution": "VERIFIED",
+    "fullInspectionOutcome": "NO_EXCEPTION_OBSERVED",
     "purchasedOptionSku": "UNKNOWN",
     "inboundLot": "UNKNOWN",
-    "inspectedUnit": "UNKNOWN",
+    "inspectedUnitCoverage": "VERIFIED_ALL_6_RECEIVED_UNITS",
+    "inspectedUnitIdentity": "UNKNOWN",
     "documentaryFacts": "UNKNOWN",
     "imageUseRights": "VERIFIED",
     "imageEditRights": "UNKNOWN",
@@ -21,7 +26,7 @@
     "outboundLocation": "UNKNOWN",
     "returnCenter": "UNKNOWN"
   },
-  "nextAction": "ACQUIRE_FULL_INSPECTION_EVIDENCE",
+  "nextAction": "ACQUIRE_LISTING_AND_VARIABLE_COST_FACTS",
   "monitoring": {
     "observedAt": "2026-08-12T02:40:56.000Z",
     "domeggookOrderStatus": "VERIFIED_DELIVERED",
@@ -40,7 +45,40 @@
     "visibleExceptionStatus": "NONE_OBSERVED",
     "externalWritePerformed": false
   },
+  "inspectionStageEvidence": {
+    "productImage": "VERIFIED_PROVIDER_REFERENCE",
+    "inboundStart": "VERIFIED_PROVIDER_REFERENCE",
+    "subdivisionWork": "VERIFIED_PROVIDER_REFERENCE",
+    "storageComplete": "VERIFIED_PROVIDER_REFERENCE",
+    "provesSixUnitInspectionOutcome": false,
+    "inspectionExecutionBasis": "COMPLETED_RECEIPT_PLUS_FULL_INSPECTION_CHARGE_PLUS_NO_EXCEPTION_SIGNAL"
+  },
+  "costEvidence": {
+    "supplierOrderTotalKrw": 8100,
+    "warehouseInboundUnloadingKrw": 770,
+    "warehouseFullInspectionKrw": 660,
+    "verifiedSampleCashOutflowKrw": 9530,
+    "quantity": 6,
+    "derivedPerUnitApproxKrw": 1588.33,
+    "warehouseChargeVatTreatment": "UNKNOWN"
+  },
+  "saleSuitability": "CONDITIONAL_PASS_PROVIDER_FULL_INSPECTION_COMPLETE_NO_EXCEPTION_OBSERVED",
+  "listingEligibility": "HOLD_REQUIRED_FACTS_AND_PROFITABILITY_INCOMPLETE",
+  "profitability": {
+    "policyVersion": "gonggamline-profitability-2026-07-27-v1",
+    "status": "INCOMPLETE",
+    "missingFacts": [
+      "finalSellingPrice",
+      "coupangCategoryFeeRate",
+      "outboundFulfillmentAndDelivery",
+      "pickPackPackagingLabelSet",
+      "storageDurationCost",
+      "advertisingRate",
+      "returnLossRate",
+      "warehouseChargeVatTreatment"
+    ]
+  },
   "rawEvidenceAuthority": "SOURCE_SYSTEMS_UNCHANGED",
   "confidentialEvidenceStore": "NOT_APPROVED",
-  "updatedAt": "2026-08-12T02:40:56.000Z"
+  "updatedAt": "2026-08-12T03:36:34.000Z"
 }
