@@ -1,5 +1,44 @@
 # Work status
 
+## 2026-08-12 KK946 warehouse receipt completion
+
+- Objective: record the completed KK946 warehouse receipt and identify the
+  smallest remaining evidence gate before truthful sales preparation.
+- Branch/base: `codex/docs/kk946-inbound-completion` from latest `origin/main`
+  `59c2d2919c1037becd08bb9f6b42b83f7fa2287a`.
+- Risk/root cause: normal-risk documentation and contract-test update. The
+  remaining blocker is external physical-inspection evidence, not DB or code.
+- Revenue impact: proves sellable stock count while preventing uninspected
+  units or catalog claims from entering a marketplace listing.
+- Cloud-first: GitHub owns sanitized status, review, and CI evidence; Gaemi
+  remains authoritative for raw receipt/inspection evidence. Browser state and
+  test output are disposable; no confidential evidence was downloaded.
+- Scope/non-goals: record completed receipt, count, stock, dimensions, and
+  remaining inspection gaps. No warehouse/inventory/fulfillment/listing write,
+  paid inspection request, Production, database, configuration, or secret.
+- Completed: mandatory boot; clean latest-main task branch; authenticated
+  read-only verification of application `A1296915119go`, product `PJ1491663`,
+  black, received 6, dispatched 0, stock 6, dimensions `10.5 x 3.6 x 6.5 cm`,
+  last inbound `2026-08-12 11:40:56 KST`, and no visible exception status.
+- Current: local implementation and validation complete; deliver the normal-
+  risk documentation PR and verify its exact-head CI/Preview.
+- Blockers/owner actions: full six-unit inspection evidence is not visible.
+  Do not release quarantine or create a listing until it is obtained.
+- Changed files: KK946 inbound packet, sanitized status manifest, contract
+  test, Listing policy changelog, and this recovery record.
+- Validation: focused KK946 contract checks passed within the full suite;
+  full tests passed 559/559 after `npm ci`; lint passed with zero errors and
+  four existing warnings; typecheck and the 85-route production build passed;
+  `git diff --check` passed. Local Playwright matched the existing unconfigured-
+  Supabase baseline: 35 passed, 2 skipped, and 7 failed on `/listing`,
+  `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and
+  `/workspace`; no changed file contributes to those routes or APIs.
+- Exact next action: commit, push, create the PR, and validate exact-head
+  CI/Preview.
+- Remaining risks: distinct lot identity, six inspected-unit results, weights,
+  material/markings, defects, and provider-side inspection-image references
+  remain unknown.
+
 ## 2026-08-10 KK946 inbound/inspection packet and shipment monitor
 
 - Objective: prepare the smallest receipt/full-inspection evidence packet and
