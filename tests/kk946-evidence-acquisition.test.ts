@@ -24,6 +24,10 @@ const status = JSON.parse(statusText) as {
     carrier: string;
     trackingReference: string;
     gaemiInboundStatus: string;
+    gaemiReceivedQuantity: number;
+    gaemiDispatchedQuantity: number;
+    gaemiStockQuantity: number;
+    visibleExceptionStatus: string;
     externalWritePerformed: boolean;
   };
 };
@@ -47,15 +51,22 @@ test("KK946 remains quarantined after catalog and warehouse setup are verified",
     .every(([, value]) => value === "UNKNOWN"));
 });
 
-test("read-only monitor records exact shipment evidence without advancing receipt", () => {
-  assert.equal(status.monitoring.domeggookOrderStatus, "VERIFIED_IN_TRANSIT");
+test("read-only monitor records exact completed receipt without advancing inspection", () => {
+  assert.equal(status.monitoring.domeggookOrderStatus, "VERIFIED_DELIVERED");
   assert.equal(status.monitoring.carrier, "CJ_LOGISTICS");
   assert.equal(status.monitoring.trackingReference, "540939262870");
-  assert.equal(status.monitoring.gaemiInboundStatus, "VERIFIED_PENDING");
+  assert.equal(status.monitoring.gaemiInboundStatus, "VERIFIED_COMPLETE");
+  assert.equal(status.monitoring.gaemiReceivedQuantity, 6);
+  assert.equal(status.monitoring.gaemiDispatchedQuantity, 0);
+  assert.equal(status.monitoring.gaemiStockQuantity, 6);
+  assert.equal(status.monitoring.visibleExceptionStatus, "NONE_OBSERVED");
   assert.equal(status.monitoring.externalWritePerformed, false);
   assert.match(inboundInspectionPacket, /public item-page promise[\s\S]+not order-level shipment evidence/i);
   assert.match(inboundInspectionPacket, /VERIFIED_CJ_LOGISTICS_540939262870/);
-  assert.match(inboundInspectionPacket, /warehouse receipt[\s\S]+`UNKNOWN`/i);
+  assert.match(inboundInspectionPacket, /warehouse receipt[\s\S]+`VERIFIED_COMPLETE`/i);
+  assert.match(inboundInspectionPacket, /No per-unit inspection result/);
+  assert.equal(status.bindings.inboundLot, "UNKNOWN");
+  assert.equal(status.bindings.inspectedUnit, "UNKNOWN");
 });
 
 test("inbound packet binds receipt and full inspection without moving raw evidence", () => {

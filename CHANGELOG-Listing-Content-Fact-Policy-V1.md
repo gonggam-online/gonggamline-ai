@@ -1,5 +1,18 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-12 - KK946 warehouse receipt complete
+
+- Verified Gaemi application `A1296915119go` as inbound complete for
+  `PJ1491663`, black, with 6 received, 0 dispatched, and 6 in stock.
+- Recorded the provider dimensions `10.5 x 3.6 x 6.5 cm` and last inbound time
+  without promoting them to per-unit physical inspection evidence.
+- Observed no visible shortage, overage, hold, rejection, or damage signal.
+- Kept the distinct inbound-lot binding, six per-unit inspection outcomes,
+  weights, material/markings, defects, and image references unknown, so KK946
+  remains quarantined until full-inspection evidence is available.
+- Performed no warehouse, inventory, fulfillment, listing, or other external
+  write; raw provider evidence remains in its source system.
+
 ## 2026-08-10 - KK946 inbound and inspection packet
 
 - Authenticated read-only monitoring advanced Domeggook order `OR75260192` to

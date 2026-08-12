@@ -21,16 +21,26 @@
     "outboundLocation": "UNKNOWN",
     "returnCenter": "UNKNOWN"
   },
-  "nextAction": "READ_ONLY_MONITOR_GAEMI_RECEIPT",
+  "nextAction": "ACQUIRE_FULL_INSPECTION_EVIDENCE",
   "monitoring": {
-    "observedAt": "2026-08-10T05:13:39.000Z",
-    "domeggookOrderStatus": "VERIFIED_IN_TRANSIT",
+    "observedAt": "2026-08-12T02:40:56.000Z",
+    "domeggookOrderStatus": "VERIFIED_DELIVERED",
     "carrier": "CJ_LOGISTICS",
     "trackingReference": "540939262870",
-    "gaemiInboundStatus": "VERIFIED_PENDING",
+    "gaemiInboundStatus": "VERIFIED_COMPLETE",
+    "gaemiReceivedQuantity": 6,
+    "gaemiDispatchedQuantity": 0,
+    "gaemiStockQuantity": 6,
+    "gaemiRecordedDimensionsCm": {
+      "length": 10.5,
+      "width": 3.6,
+      "height": 6.5
+    },
+    "gaemiLastInboundAt": "2026-08-12T02:40:56.000Z",
+    "visibleExceptionStatus": "NONE_OBSERVED",
     "externalWritePerformed": false
   },
   "rawEvidenceAuthority": "SOURCE_SYSTEMS_UNCHANGED",
   "confidentialEvidenceStore": "NOT_APPROVED",
-  "updatedAt": "2026-08-10T05:13:39.000Z"
+  "updatedAt": "2026-08-12T02:40:56.000Z"
 }

@@ -2,17 +2,23 @@
 
 ## Current read-only checkpoint
 
-- Observed at: `2026-08-10 14:13 KST`.
-- Domeggook order `OR75260192` was re-observed in the authenticated order list
-  as `in transit`, using CJ Logistics with tracking reference `540939262870`.
-  This verifies supplier dispatch and the order-to-tracking binding, but not
-  warehouse receipt, inbound lot, or inspected units.
+- Observed at: `2026-08-12 11:40:56 KST`.
+- Domeggook order `OR75260192` was observed delivered after its authenticated
+  CJ Logistics shipment with tracking reference `540939262870`. This verifies
+  supplier delivery and the order-to-tracking binding, but not the distinct
+  warehouse lot or inspected units.
 - A public item-page promise such as same-day dispatch or average dispatch time
   is not order-level shipment evidence and must never advance the order state.
-- Gaemi application `A1296915119go` was re-observed in the authenticated
-  `inbound pending` list for `PJ1491663`, option `black`, quantity `6`.
-- No receipt, stock, inspection result, inbound lot, or inspected-unit binding
-  was visible. KK946 therefore remains `QUARANTINED`.
+- Gaemi application `A1296915119go` moved to the authenticated `inbound
+  complete` list for `PJ1491663`, option `black`. The detail showed `6`
+  received, `0` dispatched, and `6` in stock, with recorded dimensions
+  `10.5 x 3.6 x 6.5 cm` and last inbound time `2026-08-12 11:40:56`.
+- No shortage, overage, hold, rejection, or damage signal was visible in the
+  completed record. This verifies warehouse receipt and stock count, but not
+  a distinct inbound-lot identifier or a full inspection of each unit.
+- No per-unit inspection result, weight, material/marking observation, defect
+  result, or inspection-image reference was visible. KK946 therefore remains
+  `QUARANTINED`.
 
 Only sanitized internal status is retained here. Raw provider pages, invoices,
 labels, photographs, addresses, contacts, account identifiers, and credentials
@@ -42,10 +48,12 @@ these sanitized outcomes:
 | Signal | Admissible authority | Current result | Next action |
 |---|---|---|---|
 | supplier confirmation | exact Domeggook authenticated order list | `VERIFIED_DISPATCHED` | no supplier action required |
-| shipment state | exact Domeggook authenticated order list | `VERIFIED_IN_TRANSIT` | monitor warehouse receipt |
+| shipment state | exact Domeggook authenticated order list | `VERIFIED_DELIVERED` | no supplier action required |
 | carrier and tracking | exact Domeggook authenticated order list | `VERIFIED` | CJ Logistics / `540939262870` |
-| warehouse receipt | exact Gaemi application/detail | `UNKNOWN` | wait; current state is `inbound pending` |
-| inspection result | exact Gaemi inspection record | `UNKNOWN` | wait for receipt and completed full inspection |
+| warehouse receipt | exact Gaemi application/detail | `VERIFIED_COMPLETE` | received 6 / dispatched 0 / stock 6 |
+| recorded dimensions | exact Gaemi application/detail | `VERIFIED_RECORDED` | `10.5 x 3.6 x 6.5 cm`; not a per-unit measurement |
+| inbound lot identity | exact Gaemi lot/detail | `UNKNOWN` | obtain a distinct lot or equivalent provider binding |
+| inspection result | exact Gaemi inspection record | `UNKNOWN` | obtain completed full-inspection evidence for all six units |
 
 Monitoring is GET/navigation/read-only. It must not submit a supplier message,
 confirm purchase, cancel or return an order, register a tracking number, edit an
@@ -111,15 +119,17 @@ refund, supplier contact, or any provider-side mutation.
 subjectId: KK946
 supplierOrder: VERIFIED_OR75260192_PAYMENT_COMPLETE
 supplierConfirmation: VERIFIED_DISPATCHED
-shipment: VERIFIED_IN_TRANSIT
+shipment: VERIFIED_DELIVERED_TO_WAREHOUSE
 carrierTracking: VERIFIED_CJ_LOGISTICS_540939262870
-warehouseInboundApplication: VERIFIED_A1296915119GO_PENDING
+warehouseInboundApplication: VERIFIED_A1296915119GO_COMPLETE
+warehouseReceipt: VERIFIED_6_RECEIVED_0_DISPATCHED_6_IN_STOCK
+warehouseRecordedDimensions: VERIFIED_10.5_X_3.6_X_6.5_CM
 inboundLot: UNKNOWN
 inspectedUnits: UNKNOWN
 documentaryFacts: UNKNOWN
 rawEvidenceMoved: false
 externalWritePerformedByThisMonitor: false
-notes: MONITOR_GAEMI_RECEIPT
+notes: ACQUIRE_FULL_INSPECTION_EVIDENCE
 ```
 
 Rollback is a Git revert. There is no provider rollback because this packet and
