@@ -1,8 +1,8 @@
 export const ITEM_SELECTION_PROFITABILITY_POLICY_VERSION =
-  "gonggamline-profitability-2026-07-27-v1" as const;
+  "gonggamline-profitability-2026-08-12-v3" as const;
 
 export const ITEM_SELECTION_PROFITABILITY_POLICY_EFFECTIVE_DATE =
-  "2026-07-27" as const;
+  "2026-08-12" as const;
 
 export const ITEM_SELECTION_PROFITABILITY_POLICY = Object.freeze({
   fallbackMarketplaceFeeRate: 0.109,
@@ -21,6 +21,7 @@ export const ITEM_SELECTION_PROFITABILITY_POLICY = Object.freeze({
   recommendMinimumStressMarginRate: 0.1,
   conditionalMinimumContributionKrw: 2_000,
   conditionalMinimumMarginRate: 0.15,
+  identicalMarketOfferMaximumAgeDays: 7,
 } as const);
 
 export const ITEM_SELECTION_REQUIRED_VARIABLE_COST_IDS = [
@@ -44,6 +45,7 @@ export type VatTreatment =
 
 export type CostSourceType =
   | "WING"
+  | "MARKETPLACE_PUBLIC"
   | "CONTRACT"
   | "QUOTE"
   | "SETTLEMENT"
@@ -162,6 +164,22 @@ export type ItemSelectionProfitabilityResult = {
   nextActions: readonly string[];
   meetsRecommendMinimums: boolean | null;
   meetsConditionalMinimums: boolean | null;
+};
+
+export type PrePurchaseMarketOffer = {
+  matchType: "IDENTICAL" | "COMPARABLE";
+  candidateUnitsPerOffer: number;
+  observedUnitsPerOffer: number;
+  deliveredPrice: MoneyFact;
+};
+
+export type PrePurchaseProfitabilityGateResult = {
+  status: "PASS" | "FAIL" | "INCOMPLETE";
+  samplePurchaseEligible: boolean;
+  commerceWriteAuthorized: false;
+  reasonCodes: readonly string[];
+  missingFacts: readonly string[];
+  profitabilityAtMarketPrice: ItemSelectionProfitabilityResult | null;
 };
 
 const RETURN_LOSS_RATES: Record<
@@ -313,6 +331,7 @@ function assertNoDoubleCounting(facts: readonly MoneyFact[]): void {
 
 function scenario(
   name: ProfitabilityScenarioName,
+  grossSellingPrice: number,
   netRevenue: number,
   fixedCosts: readonly MoneyFact[],
   marketplaceFee: { rate: number; fact: RateFact },
@@ -323,7 +342,12 @@ function scenario(
     ...fixedCosts
       .filter(({ confirmationStatus }) => confirmationStatus !== "NOT_APPLICABLE")
       .map(lineFromMoney),
-    rateLine("marketplaceFee", netRevenue, marketplaceFee.rate, marketplaceFee.fact),
+    rateLine(
+      "marketplaceFee",
+      grossSellingPrice,
+      marketplaceFee.rate,
+      marketplaceFee.fact,
+    ),
     rateLine("advertising", netRevenue, advertising.rate, advertising.fact),
     rateLine("returnLoss", netRevenue, returnLoss.rate, returnLoss.fact),
   ];
@@ -452,7 +476,11 @@ export function calculateItemSelectionProfitability(
     return incomplete(missingFacts);
   }
 
+  const grossSellingPrice = input.finalSellingPrice.amountKrw ?? 0;
   const netRevenue = netAmount(input.finalSellingPrice);
+  if (grossSellingPrice <= 0) {
+    throw new RangeError("finalSellingPrice must be positive.");
+  }
   if (netRevenue <= 0) throw new RangeError("finalSellingPrice must be positive.");
 
   const providedFeeRate = input.marketplaceFeeRate;
@@ -527,6 +555,7 @@ export function calculateItemSelectionProfitability(
   const marketplaceFee = { rate: feeRate, fact: feeFact };
   const baseScenario = scenario(
     "baseScenario",
+    grossSellingPrice,
     netRevenue,
     [...commonCosts, normalizedFulfillment],
     marketplaceFee,
@@ -539,6 +568,7 @@ export function calculateItemSelectionProfitability(
   };
   const stressScenario = scenario(
     "stressScenario",
+    grossSellingPrice,
     netRevenue,
     [...commonCosts, stressFulfillment],
     marketplaceFee,
@@ -547,6 +577,7 @@ export function calculateItemSelectionProfitability(
   );
   const currentEffectiveScenario = scenario(
     "currentEffectiveScenario",
+    grossSellingPrice,
     netRevenue,
     [...commonCosts, currentFulfillment],
     marketplaceFee,
@@ -633,6 +664,135 @@ function incomplete(missingFacts: readonly string[]): ItemSelectionProfitability
     nextActions: facts.map((fact) => `${fact}을(를) 확인하세요.`),
     meetsRecommendMinimums: null,
     meetsConditionalMinimums: null,
+  };
+}
+
+export function evaluatePrePurchaseProfitabilityGate(input: {
+  profitabilityInput: ItemSelectionProfitabilityInput;
+  marketOffer: PrePurchaseMarketOffer | null;
+  requestedSampleQuantity: number | null;
+  evaluatedAt: string;
+}): PrePurchaseProfitabilityGateResult {
+  const missingFacts: string[] = [];
+  const minimumOrderQuantity = input.profitabilityInput.minimumOrderQuantity;
+
+  if (minimumOrderQuantity === null) missingFacts.push("minimumOrderQuantity");
+  if (input.requestedSampleQuantity === null) {
+    missingFacts.push("requestedSampleQuantity");
+  }
+  if (input.marketOffer === null) {
+    missingFacts.push("identicalMarketOffer");
+  }
+  if (missingFacts.length > 0) {
+    return {
+      status: "INCOMPLETE",
+      samplePurchaseEligible: false,
+      commerceWriteAuthorized: false,
+      reasonCodes: ["PRE_PURCHASE_EVIDENCE_INCOMPLETE"],
+      missingFacts: unique(missingFacts),
+      profitabilityAtMarketPrice: null,
+    };
+  }
+
+  const marketOffer = input.marketOffer;
+  const requestedSampleQuantity = input.requestedSampleQuantity;
+  if (!marketOffer || requestedSampleQuantity === null || minimumOrderQuantity === null) {
+    throw new Error("Pre-purchase gate reached an unreachable incomplete state.");
+  }
+
+  assertFact(marketOffer.deliveredPrice, "marketOffer.deliveredPrice");
+  const evaluatedAtMs = Date.parse(input.evaluatedAt);
+  const marketObservedAtMs = Date.parse(
+    marketOffer.deliveredPrice.effectiveFrom ?? "",
+  );
+  if (!Number.isFinite(evaluatedAtMs)) {
+    throw new RangeError("evaluatedAt must be a valid ISO date or timestamp.");
+  }
+  for (const [value, field] of [
+    [marketOffer.candidateUnitsPerOffer, "marketOffer.candidateUnitsPerOffer"],
+    [marketOffer.observedUnitsPerOffer, "marketOffer.observedUnitsPerOffer"],
+    [requestedSampleQuantity, "requestedSampleQuantity"],
+  ] as const) {
+    if (!Number.isInteger(value) || value < 1) {
+      throw new RangeError(`${field} must be a positive integer.`);
+    }
+  }
+
+  const evidenceMissing = [
+    ...(marketOffer.matchType === "IDENTICAL" ? [] : ["identicalMarketOffer"]),
+    ...(marketOffer.candidateUnitsPerOffer === marketOffer.observedUnitsPerOffer
+      ? []
+      : ["marketOffer.unitCountMatch"]),
+    ...(marketOffer.deliveredPrice.confirmationStatus === "CONFIRMED"
+      ? []
+      : ["marketOffer.confirmedDeliveredPrice"]),
+    ...(!Number.isFinite(marketObservedAtMs)
+      ? ["marketOffer.observedAt"]
+      : marketObservedAtMs > evaluatedAtMs ||
+          evaluatedAtMs - marketObservedAtMs >
+            ITEM_SELECTION_PROFITABILITY_POLICY.identicalMarketOfferMaximumAgeDays *
+              24 *
+              60 *
+              60 *
+              1_000
+        ? ["marketOffer.freshness"]
+        : []),
+  ];
+  if (evidenceMissing.length > 0) {
+    return {
+      status: "INCOMPLETE",
+      samplePurchaseEligible: false,
+      commerceWriteAuthorized: false,
+      reasonCodes: ["IDENTICAL_MARKET_OFFER_NOT_CONFIRMED"],
+      missingFacts: unique(evidenceMissing),
+      profitabilityAtMarketPrice: null,
+    };
+  }
+
+  const profitabilityAtMarketPrice = calculateItemSelectionProfitability({
+    ...input.profitabilityInput,
+    finalSellingPrice: marketOffer.deliveredPrice,
+  });
+  if (profitabilityAtMarketPrice.status === "INCOMPLETE") {
+    return {
+      status: "INCOMPLETE",
+      samplePurchaseEligible: false,
+      commerceWriteAuthorized: false,
+      reasonCodes: ["PROFITABILITY_AT_MARKET_PRICE_INCOMPLETE"],
+      missingFacts: profitabilityAtMarketPrice.missingFacts,
+      profitabilityAtMarketPrice,
+    };
+  }
+
+  if (requestedSampleQuantity !== minimumOrderQuantity) {
+    return {
+      status: "FAIL",
+      samplePurchaseEligible: false,
+      commerceWriteAuthorized: false,
+      reasonCodes: ["SAMPLE_QUANTITY_MUST_EQUAL_MINIMUM_ORDER_QUANTITY"],
+      missingFacts: [],
+      profitabilityAtMarketPrice,
+    };
+  }
+
+  if (profitabilityAtMarketPrice.meetsRecommendMinimums !== true) {
+    return {
+      status: "FAIL",
+      samplePurchaseEligible: false,
+      commerceWriteAuthorized: false,
+      reasonCodes: ["MARKET_PRICE_FAILS_RECOMMEND_PROFITABILITY"],
+      missingFacts: [],
+      profitabilityAtMarketPrice,
+    };
+  }
+
+  return {
+    status: "PASS",
+    samplePurchaseEligible: true,
+    commerceWriteAuthorized: false,
+    reasonCodes: ["MARKET_PRICE_PASSES_RECOMMEND_PROFITABILITY_AT_MINIMUM_SAMPLE"],
+    missingFacts: [],
+    profitabilityAtMarketPrice,
   };
 }
 

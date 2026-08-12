@@ -24,7 +24,17 @@ const status = JSON.parse(statusText) as {
   profitability: {
     policyVersion: string;
     status: string;
+    observedIdenticalMarketDeliveredPriceKrw: number;
+    rejectedProposedSellingPriceKrw: number;
+    prePurchaseGateStatus: string;
+    samplePurchaseEligible: boolean;
+    minimumRecommendPriceKrw: number;
+    operationalRecommendFloorKrw: number;
+    baseContributionKrw: number;
+    stressContributionKrw: number;
     missingFacts: string[];
+    estimatedFacts: string[];
+    externalPriceWritePerformed: boolean;
   };
   inspectionStageEvidence: {
     productImage: string;
@@ -138,19 +148,34 @@ test("actual warehouse charges advance cash evidence without inventing profit", 
   assert.equal(status.costEvidence.verifiedSampleCashOutflowKrw, 9530);
   assert.equal(status.costEvidence.quantity, 6);
   assert.equal(status.costEvidence.derivedPerUnitApproxKrw, 1588.33);
-  assert.equal(status.costEvidence.warehouseChargeVatTreatment, "UNKNOWN");
+  assert.equal(
+    status.costEvidence.warehouseChargeVatTreatment,
+    "VERIFIED_VAT_INCLUSIVE_DEDUCTIBLE",
+  );
   assert.equal(
     status.saleSuitability,
-    "CONDITIONAL_PASS_PROVIDER_FULL_INSPECTION_COMPLETE_NO_EXCEPTION_OBSERVED",
+    "PHYSICAL_INSPECTION_PASS_BUT_SINGLE_UNIT_ECONOMICS_FAIL",
   );
-  assert.equal(status.listingEligibility, "HOLD_REQUIRED_FACTS_AND_PROFITABILITY_INCOMPLETE");
-  assert.equal(status.profitability.status, "INCOMPLETE");
+  assert.equal(
+    status.listingEligibility,
+    "HOLD_SINGLE_UNIT_MARKET_PRICE_UNPROFITABLE",
+  );
+  assert.equal(status.profitability.status, "REJECT_MARKET_PRICE_UNPROFITABLE");
+  assert.equal(status.profitability.prePurchaseGateStatus, "FAIL");
+  assert.equal(status.profitability.samplePurchaseEligible, false);
   assert.equal(
     status.profitability.policyVersion,
-    "gonggamline-profitability-2026-07-27-v1",
+    "gonggamline-profitability-2026-08-12-v3",
   );
-  assert(status.profitability.missingFacts.includes("finalSellingPrice"));
-  assert(status.profitability.missingFacts.includes("coupangCategoryFeeRate"));
+  assert.equal(status.profitability.observedIdenticalMarketDeliveredPriceKrw, 4290);
+  assert.equal(status.profitability.rejectedProposedSellingPriceKrw, 11800);
+  assert.equal(status.profitability.minimumRecommendPriceKrw, 11243);
+  assert.equal(status.profitability.operationalRecommendFloorKrw, 11300);
+  assert.equal(status.profitability.baseContributionKrw, -1548);
+  assert.equal(status.profitability.stressContributionKrw, -1840);
+  assert.deepEqual(status.profitability.missingFacts, []);
+  assert(!status.profitability.estimatedFacts.includes("wingCurrentCategoryFeeRate"));
+  assert.equal(status.profitability.externalPriceWritePerformed, false);
 });
 
 test("status manifest proves no raw evidence movement and records the order write", () => {

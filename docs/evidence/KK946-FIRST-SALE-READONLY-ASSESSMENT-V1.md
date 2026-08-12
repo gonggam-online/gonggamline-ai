@@ -1,166 +1,119 @@
 # KK946 first-sale read-only assessment v1
 
-## Decision
+## Current decision
 
-- Disposition: `QUARANTINED`
-- Sample order: `COMPLETED` for six black units under order `OR75260192`
-- Warehouse receipt: `COMPLETED` with six received and six in stock
-- Paid warehouse inspection: `VERIFIED_EXECUTED_NO_EXCEPTION_OBSERVED`
+- Disposition: `QUARANTINED`.
+- Sample order: `COMPLETED` for six black units under order `OR75260192`.
+- Warehouse receipt: `COMPLETED` with six received and six in stock.
+- Paid warehouse inspection: `VERIFIED_EXECUTED_NO_EXCEPTION_OBSERVED`.
 - Physical sale suitability:
-  `CONDITIONAL_PASS_FULL_INSPECTION_COMPLETE_NO_EXCEPTION_OBSERVED`
-- Listing eligibility: `HOLD_REQUIRED_FACTS_AND_PROFITABILITY_INCOMPLETE`
-- Coupang listing: `NOT_AUTHORIZED`
-- Rocket Growth inbound: `NOT_AUTHORIZED`
-- Risk: high-risk/manual for the whole first-sale project because later steps
-  include profitability, procurement, inspection, listing, and fulfillment.
-- Root cause: external business evidence is incomplete. This is not a database
-  or code failure.
+  `CONDITIONAL_PASS_FULL_INSPECTION_COMPLETE_NO_EXCEPTION_OBSERVED`.
+- Profitability: `REJECT_MARKET_PRICE_UNPROFITABLE` at the confirmed identical
+  one-unit delivered market price of `4,290 KRW`.
+- Listing eligibility: `HOLD_SINGLE_UNIT_MARKET_PRICE_UNPROFITABLE`.
+- Coupang listing and Rocket Growth inbound: `NOT_AUTHORIZED`.
+- Risk: high-risk/manual because pricing, listing, inventory and fulfillment are
+  commerce decisions. This assessment performs no new external write.
 
-This record contains sanitized findings only. The later owner-approved order,
-payment, warehouse application, receipt, and inspection charge are recorded in
-the linked KK946 evidence packet. This update performs no external write and
-retains no raw asset, account identity, personal data, or provider payload.
+The primary blocker is failed single-unit market economics; missing WING
+outbound/return locations and seller-owned notice facts are secondary. The
+fee-basis defect found during reconciliation was corrected in policy v2, and
+the purchase-order defect is corrected by the fail-closed v3 gate. Raw provider evidence remains
+in Domeggook, Gaemi, and Coupang; GitHub owns only sanitized status and review
+history.
 
-## Supplier prevalidation
+## Verified supplier, receipt and inspection checkpoint
 
-Observed on 2026-08-09 from the public Domeggook catalog:
+- Domeggook item `56288849` is bound to model `KK946`, paid order
+  `OR75260192`, black option, quantity six, `850 KRW` unit price and
+  `3,000 KRW` supplier delivery.
+- Supplier claims describe a polyester pouch manufactured by `KLAND` in China
+  (OEM). These remain catalog/documentary claims where physical evidence is
+  absent.
+- Gaemi product `PJ1491663` and application `A1296915119go` show six received,
+  zero dispatched and six in stock, with recorded dimensions
+  `10.5 x 3.6 x 6.5 cm`.
+- The completed receipt, `660 KRW` full-inspection debit, stage-image presence,
+  and no visible exception verify service execution for all six units. They do
+  not create six itemized condition reports or per-unit measurements.
+- Detail-image use is allowed on the supplier page. Editing rights and the
+  exact-byte grant scope remain unknown.
 
-- exact `KK946` title search returned three supplier listings, so the supplier
-  item identity is `AMBIGUOUS`;
-- the strongest public candidate was item `56288849`: catalog unit price
-  `850 KRW` at MOQ `6`, a `840 KRW` tier at 500 units, shipping from
-  `3,000 KRW`, public stock `14,112`, and reported average dispatch `0.2` days;
-- catalog claims identify a polyester mini cable/charger storage pouch,
-  imported from China, with a color option;
-- dimensions, detailed color, handling, warranty, and service fields use a
-  generic “see details” statement and are not admitted product facts;
-- the catalog displays detail-image use as allowed, but does not prove the
-  exact-byte grantor authority, editing, marketplace/CDN sharing, territory,
-  term, expiry, or revocation terms required by the Listing evidence policy;
-- no accepted purchase, inbound lot, inspected unit, documentary packet, or
-  rights-cleared asset exists in the repository evidence chain.
+## Profitability checkpoint
 
-The public catalog ranking, stock, dispatch, supplier grade, and claims are
-discovery evidence only. Authenticated terms and the exact option must be
-verified before selecting one supplier listing.
+The six-unit sample has verified cash outflow of `9,530 KRW`: `8,100 KRW`
+supplier order, `770 KRW` inbound unloading and `660 KRW` full inspection. The
+Gaemi VAT-exclusive rate card and actual debits bind deductible-VAT treatment
+and a declared one-unit extreme-small package plan.
 
-## Profitability screen
+The deterministic net-of-deductible-VAT variable cost is `4,353.94 KRW` per
+one-unit order under that plan. At the confirmed identical-product delivered
+market price of `4,290 KRW`,
+`gonggamline-profitability-2026-08-12-v3` reports:
 
-### 2026-08-12 actual-cost checkpoint
+| Scenario | Contribution | Margin |
+|---|---:|---:|
+| base | `-1,548 KRW` | `-39.69%` |
+| stress | `-1,840 KRW` | `-47.19%` |
 
-The completed six-unit sample has verified cash outflow of `9,530 KRW`:
-`8,100 KRW` supplier order, `770 KRW` inbound unloading, and `660 KRW` full
-inspection. This is approximately `1,588.33 KRW` per received unit. The stage
-images and point ledger improve evidence but do not close the approved
-profitability contract. Final selling price, exact Coupang category fee,
-outbound fulfillment/delivery, pick-pack/packaging/label, storage duration,
-advertising, return loss, and warehouse-charge VAT treatment remain missing.
-The current profitability result is therefore `INCOMPLETE`, not an approved
-price or margin.
+The engine uses the authenticated WING `10.5%` marketplace fee on the
+customer's final price plus policy advertising and return-loss rates. The
+result fails the recommendation and pre-purchase gates.
+Mature advertising/return evidence, future storage/SKU charges and the actual
+fulfillment invoice remain unresolved. The authoritative calculation and
+listing-fact inventory is
+`KK946-PROFITABILITY-AND-COUPANG-LISTING-FACTS-V1.md`.
 
-The authoritative policy is
-`gonggamline-profitability-2026-07-27-v1`. Public Coupang search evidence
-observed on 2026-08-09 showed adjacent cable/charger pouch offers spanning
-approximately `4,850-13,870 KRW`, including visible price points near
-`6,900`, `7,900`, `10,800`, and `11,800 KRW`. This is directional market
-evidence, not an exact comparable set or demand proof.
+## Listing and rights gate
 
-Illustrative arithmetic treats the visible consumer selling price, the
-observed `850 KRW` catalog unit price, and the MOQ-six allocation of the
-displayed `3,000 KRW` supplier shipping charge as VAT-inclusive deductible
-amounts, then applies only the approved policy fallbacks. It deliberately
-excludes still-unknown
-inspection, storage, pick/pack, packaging, label, supplier-to-fulfillment,
-other variable costs, and the confirmed category fee.
+Before listing eligibility can change from `HOLD`:
 
-| Price | Normalized contribution before unknown costs | Stress contribution before unknown costs | Interpretation |
-|---:|---:|---:|---|
-| 7,900 KRW | about 987 KRW | about -52 KRW | fails stress-positive and conditional minimums |
-| 9,900 KRW | about 2,307 KRW | about 1,132 KRW | conditional only before unknown costs |
-| 10,900 KRW | about 2,967 KRW | about 1,724 KRW | just below the recommendation profit threshold |
-| 11,800 KRW | about 3,561 KRW | about 2,256 KRW | clears numerical thresholds before unknown costs, but demand is unproven |
+1. obtain the exact WING display-category code and validity via the official
+   read API or category file; the manual form already confirms the path and fee;
+2. capture remaining mandatory attributes and allowed values/units;
+   certifications, documents and barcode rule from that category;
+3. obtain seller-authored handling, warranty, A/S, importer/seller, shipping
+   and return facts that the supplier's generic “see details” text cannot fill;
+4. bind actual weight and every remaining required product fact without
+   promoting catalog claims to physical measurements;
+5. use only rights-cleared exact image bytes; do not infer editing rights,
+   brand authorization or a certification exemption;
+6. register outbound and return locations in WING through a separately approved
+   external-write step, without copying sensitive values into Git.
 
-These figures are not an approved price or margin result. The engine outcome
-remains `INCOMPLETE` until every required money fact and the exact Coupang
-category fee are sourced. A viable evidence target is a selling price at or
-above approximately `11,000 KRW` with all unknown per-unit costs low enough to retain at
-least `3,000 KRW / 20%` normalized contribution and `10%` stress margin.
+Any `UNKNOWN`, `CONFLICT` or `PROHIBITED` required fact keeps the listing in
+quarantine.
 
-## Rights and required evidence gate
+## Completed sample and inspection boundary
 
-Before a sample order recommendation can change from `HOLD`:
+The separately owner-approved purchase and full-inspection work are complete.
+This historical write does not authorize a reorder, return, refund, additional
+paid inspection, Product Creation, price, stock, coupon, advertisement,
+fulfillment or Rocket Growth action.
 
-1. bind one exact supplier item and option through an authenticated read-only
-   review;
-2. confirm VAT, MOQ, shipping allocation, option stock, return terms, and an
-   invoice/tax-document path;
-3. obtain exact dimensions, weight, construction, components, markings,
-   packaging, origin/manufacturer basis, and applicable certification or
-   non-applicability evidence;
-4. obtain a rights grant that covers exact asset bytes, Coupang use, CDN and
-   processor sharing, editing, territory, term, expiry, revocation, and the
-   grantor's authority; otherwise create new inspection photography under an
-   approved asset-intake boundary;
-5. confirm the exact Coupang display category, category fee, notices,
-   attributes, required documents/certifications, outbound location, and
-   return center through a separately owner-triggered read.
+If Gaemi later exposes itemized evidence without a paid request, read-only
+capture may add actual unit/package weight, markings, zipper/seam condition,
+defect count and disposition. Absence of those rows does not negate verified
+service execution, but it prevents inventing itemized outcomes.
 
-Any `UNKNOWN`, `CONFLICT`, or `PROHIBITED` fact remains quarantined.
+## Non-publishable listing draft
 
-## Conditional sample-order decision
-
-If the evidence above passes and a current all-in sample quote is supplied,
-recommend the smallest identity-preserving sample that covers every intended
-color/option; otherwise do not order. For the currently displayed MOQ, the
-approval packet must name the exact supplier item, option mix, quantity,
-merchandise total, shipping, VAT treatment, destination, payment amount,
-maximum authorized amount, and cancellation/return limits. No purchase has
-been authorized or made.
-
-## Gaemi Warehouse inspection plan
-
-Standard quantity receipt is insufficient. Before requesting any paid work,
-obtain an itemized quote and scope for the exact sample/lot. The requested
-checklist should bind each observation to the supplier item, purchased option,
-lot, and inspected unit:
-
-1. received count and option/color reconciliation;
-2. individual unit and packaged dimensions/weight using stated units and
-   measurement method;
-3. exterior material/texture, zipper operation, stitching, seams, lining,
-   mesh/elastic compartments, odor, contamination, scratches, deformation,
-   and loose threads;
-4. practical fit test using representative charger, cable, earphone, and small
-   accessory objects without claiming device compatibility;
-5. packaging condition, barcode/label surface, country-of-origin marking, and
-   other visible markings;
-6. defect taxonomy, inspected population, pass threshold, exception photos,
-   disposition, rework/return options, and evidence retention/access terms;
-7. exact fees for receipt, inspection, photography, measurement, storage,
-   labeling, packaging, and later B2B/Rocket Growth handling.
-
-Only a separately approved `CUSTOM_FULL_UNIT_INSPECTION` scope can support a
-quality decision. Quantity receipt or stage photos alone leave quality
-`UNKNOWN`.
-
-## Non-publishable Listing draft
-
-This draft is for review only and cannot be sent to Coupang.
-
-- Evidence-bounded title: `미니 케이블 정리 파우치 충전기 소품 수납`
+- Evidence-bounded title: `미니 케이블 정리 파우치 충전기 소품 수납 블랙`.
 - Candidate search terms: `케이블파우치`, `충전기파우치`, `미니파우치`,
-  `케이블정리`, `전선보관`, `소품수납`
-- Excluded until proven: brand names, waterproof/water-resistant claims,
-  shock protection, exact compatibility, exact dimensions/capacity, premium,
-  best/lowest-price language, certification claims, and supplier image use.
-- Detail-page structure after evidence admission: problem/use context,
-  inspected construction and compartments, measured size/weight, option/color,
-  practical fit observations, packaging/markings, care/warranty, required
-  notices, delivery/returns, and evidence provenance.
+  `케이블정리`, `전선보관`, `소품수납`.
+- Excluded until proven: brand authorization, waterproof/water-resistant,
+  shock protection, exact device compatibility, premium/best claims,
+  certification exemption and image-edit rights.
+
+This draft is review-only and cannot be sent to Coupang.
 
 ## Next gate
 
-The immediate next action is an authenticated read-only review that selects
-one exact supplier listing and option and returns only sanitized terms. The
-project stops before purchase. After the exact all-in sample amount and rights/
-document path are known, issue a separate sample-purchase approval request.
+Do not reorder or list KK946 as a single unit at an invented premium. Perform
+only read-only analysis of a genuinely differentiated bundle or negotiate a
+materially lower verified cost, then rerun the fresh identical-market-price
+gate. WING logistics registration and Product Creation are not the next step
+for this SKU while the economics fail.
+
+Rollback is a Git revert. There is no provider rollback for this read-only
+assessment.

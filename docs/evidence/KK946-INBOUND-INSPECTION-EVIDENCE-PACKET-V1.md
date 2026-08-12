@@ -34,8 +34,10 @@
 - No itemized pass/fail report, weight, material/marking observation, or defect
   detail was visible. Record the outcome as `NO_EXCEPTION_OBSERVED`, not as an
   invented itemized quality report. Physical sale suitability receives a
-  conditional pass; listing eligibility remains on hold for the missing facts
-  and incomplete profitability calculation.
+  conditional physical pass; listing eligibility remains on hold because
+  single-unit market economics fail before WING category metadata and
+  seller-owned listing facts. The later profitability packet closes the cost
+  screen with a rejection, not a purchase or listing recommendation.
 
 Only sanitized internal status is retained here. Raw provider pages, invoices,
 labels, photographs, addresses, contacts, account identifiers, and credentials
@@ -153,12 +155,18 @@ full-inspection service coverage of all six received units. Combined with the
 verified `8,100 KRW` supplier order, current sample cash outflow is `9,530 KRW`
 for six units, or approximately `1,588.33 KRW` per unit.
 
-This is not a confirmed contribution-profit result. VAT treatment for the
-warehouse debits, final selling price, exact Coupang category fee, outbound
-fulfillment/delivery, pick-pack/packaging/label, storage duration, advertising,
-and return-loss facts remain unresolved. Under
-`gonggamline-profitability-2026-07-27-v1`, profitability therefore remains
-`INCOMPLETE`; no price or listing is authorized.
+The current Gaemi rate card is VAT-exclusive and the actual point debits
+reconcile to `700 + VAT = 770 KRW` for unloading and `600 + VAT = 660 KRW` for
+full inspection. The warehouse VAT treatment is therefore recorded as
+VAT-inclusive/deductible for this calculation.
+
+The linked profitability packet binds a one-unit extreme-small shipping plan
+and the authenticated WING category fee of `10.5%` on the customer's final
+price. The confirmed identical one-unit market offer is `4,290 KRW` delivered.
+At that price, v3 reports `-1,548 KRW` base and `-1,840 KRW` stress
+contribution, so the pre-purchase gate is `FAIL`. The prior `11,800 KRW`
+scenario is a market-infeasible economic requirement, not a target. No reorder,
+price, or listing write is authorized by this packet.
 
 ## Admission and stop rules
 
@@ -192,12 +200,12 @@ inboundLot: UNKNOWN
 inspectionExecution: VERIFIED_FULL_INSPECTION_ALL_6_RECEIVED_UNITS
 inspectionOutcome: NO_EXCEPTION_OBSERVED_NO_ITEMIZED_REPORT
 documentaryFacts: UNKNOWN
-saleSuitability: CONDITIONAL_PASS_PROVIDER_FULL_INSPECTION_COMPLETE_NO_EXCEPTION_OBSERVED
-listingEligibility: HOLD_REQUIRED_FACTS_AND_PROFITABILITY_INCOMPLETE
-profitability: INCOMPLETE
+saleSuitability: PHYSICAL_INSPECTION_PASS_BUT_SINGLE_UNIT_ECONOMICS_FAIL
+listingEligibility: HOLD_SINGLE_UNIT_MARKET_PRICE_UNPROFITABLE
+profitability: REJECT_AT_IDENTICAL_MARKET_DELIVERED_PRICE_4290_KRW
 rawEvidenceMoved: false
 externalWritePerformedByThisMonitor: false
-notes: ACQUIRE_LISTING_AND_VARIABLE_COST_FACTS
+notes: DO_NOT_REORDER_OR_LIST_AS_IS_REVIEW_BUNDLE_OR_LOWER_COST_ONLY
 ```
 
 Rollback is a Git revert. There is no provider rollback because this packet and

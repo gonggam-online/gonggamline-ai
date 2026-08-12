@@ -5,6 +5,7 @@ import {
   ITEM_SELECTION_PROFITABILITY_POLICY,
   ITEM_SELECTION_PROFITABILITY_POLICY_VERSION,
   calculateItemSelectionProfitability,
+  evaluatePrePurchaseProfitabilityGate,
   mapSupplierProfitabilityFacts,
   toItemSelectionProfitabilityPolicyInput,
   type ItemSelectionProfitabilityInput,
@@ -124,7 +125,7 @@ function gates(
 test("exposes the immutable approved policy values", () => {
   assert.equal(
     ITEM_SELECTION_PROFITABILITY_POLICY_VERSION,
-    "gonggamline-profitability-2026-07-27-v1",
+    "gonggamline-profitability-2026-08-12-v3",
   );
   assert.equal(ITEM_SELECTION_PROFITABILITY_POLICY.fallbackMarketplaceFeeRate, 0.109);
   assert.equal(ITEM_SELECTION_PROFITABILITY_POLICY.monthlyCoupangServiceFeeKrw, 55_000);
@@ -133,6 +134,104 @@ test("exposes the immutable approved policy values", () => {
   assert.equal(ITEM_SELECTION_PROFITABILITY_POLICY.advertisingBaseRate, 0.125);
   assert.equal(ITEM_SELECTION_PROFITABILITY_POLICY.advertisingStressRate, 0.18);
   assert.equal(ITEM_SELECTION_PROFITABILITY_POLICY.advertisingLaunchCapRate, 0.2);
+  assert.equal(
+    ITEM_SELECTION_PROFITABILITY_POLICY.identicalMarketOfferMaximumAgeDays,
+    7,
+  );
+});
+
+test("pre-purchase gate fails closed without a fresh identical delivered-price offer", () => {
+  const missing = evaluatePrePurchaseProfitabilityGate({
+    profitabilityInput: input(),
+    marketOffer: null,
+    requestedSampleQuantity: 1,
+    evaluatedAt: "2026-08-12T00:00:00.000Z",
+  });
+  assert.equal(missing.status, "INCOMPLETE");
+  assert.equal(missing.samplePurchaseEligible, false);
+  assert.equal(missing.commerceWriteAuthorized, false);
+  assert(missing.missingFacts.includes("identicalMarketOffer"));
+
+  const staleComparable = evaluatePrePurchaseProfitabilityGate({
+    profitabilityInput: input(),
+    marketOffer: {
+      matchType: "COMPARABLE",
+      candidateUnitsPerOffer: 1,
+      observedUnitsPerOffer: 1,
+      deliveredPrice: {
+        ...money("marketDeliveredPrice", 20_000),
+        sourceType: "MARKETPLACE_PUBLIC",
+        effectiveFrom: "2026-08-01",
+      },
+    },
+    requestedSampleQuantity: 1,
+    evaluatedAt: "2026-08-12T00:00:00.000Z",
+  });
+  assert.equal(staleComparable.status, "INCOMPLETE");
+  assert(staleComparable.missingFacts.includes("identicalMarketOffer"));
+  assert(staleComparable.missingFacts.includes("marketOffer.freshness"));
+
+  const mismatchedUnits = evaluatePrePurchaseProfitabilityGate({
+    profitabilityInput: input(),
+    marketOffer: {
+      matchType: "IDENTICAL",
+      candidateUnitsPerOffer: 1,
+      observedUnitsPerOffer: 2,
+      deliveredPrice: {
+        ...money("marketDeliveredPrice", 20_000),
+        sourceType: "MARKETPLACE_PUBLIC",
+        effectiveFrom: "2026-08-12",
+      },
+    },
+    requestedSampleQuantity: 1,
+    evaluatedAt: "2026-08-12T00:00:00.000Z",
+  });
+  assert.equal(mismatchedUnits.status, "INCOMPLETE");
+  assert(mismatchedUnits.missingFacts.includes("marketOffer.unitCountMatch"));
+});
+
+test("pre-purchase gate evaluates the market price and permits only the exact MOQ", () => {
+  const marketOffer = {
+    matchType: "IDENTICAL" as const,
+    candidateUnitsPerOffer: 1,
+    observedUnitsPerOffer: 1,
+    deliveredPrice: {
+      ...money("marketDeliveredPrice", 20_000),
+      sourceType: "MARKETPLACE_PUBLIC" as const,
+      effectiveFrom: "2026-08-12",
+    },
+  };
+  const pass = evaluatePrePurchaseProfitabilityGate({
+    profitabilityInput: input(),
+    marketOffer,
+    requestedSampleQuantity: 1,
+    evaluatedAt: "2026-08-12T00:00:00.000Z",
+  });
+  assert.equal(pass.status, "PASS");
+  assert.equal(pass.samplePurchaseEligible, true);
+  assert.equal(pass.commerceWriteAuthorized, false);
+
+  const aboveMinimum = evaluatePrePurchaseProfitabilityGate({
+    profitabilityInput: input(),
+    marketOffer,
+    requestedSampleQuantity: 2,
+    evaluatedAt: "2026-08-12T00:00:00.000Z",
+  });
+  assert.equal(aboveMinimum.status, "FAIL");
+  assert.deepEqual(aboveMinimum.reasonCodes, [
+    "SAMPLE_QUANTITY_MUST_EQUAL_MINIMUM_ORDER_QUANTITY",
+  ]);
+
+  const loss = evaluatePrePurchaseProfitabilityGate({
+    profitabilityInput: input({ supplierUnitCost: money("supplierUnitCost", 18_000) }),
+    marketOffer,
+    requestedSampleQuantity: 1,
+    evaluatedAt: "2026-08-12T00:00:00.000Z",
+  });
+  assert.equal(loss.status, "FAIL");
+  assert.deepEqual(loss.reasonCodes, [
+    "MARKET_PRICE_FAILS_RECOMMEND_PROFITABILITY",
+  ]);
 });
 
 test("uses a confirmed Wing fee without a manual-review cap", () => {
@@ -306,6 +405,11 @@ test("handles deductible VAT, non-deductible VAT, exempt and exclusive amounts",
     }),
   );
   assert.equal(deductible.scenarios.baseScenario?.netRevenueRawKrw, 20_000);
+  assert.equal(
+    deductible.scenarios.baseScenario?.costs.find(({ id }) => id === "marketplaceFee")
+      ?.rawAmountKrw,
+    2_200,
+  );
   assert.equal(
     deductible.scenarios.baseScenario?.costs.find(({ id }) => id === "supplierUnitCost")
       ?.rawAmountKrw,

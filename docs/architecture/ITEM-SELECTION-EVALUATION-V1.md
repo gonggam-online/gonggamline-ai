@@ -238,7 +238,7 @@ Calculation contract and does not duplicate its formula. Sources are:
 | Value | Source |
 |---|---|
 | supplier unit cost, supplier shipping, MOQ | sanitized provider snapshot |
-| proposed selling price | explicit run input or separately approved measured market evidence |
+| candidate selling price | fresh confirmed identical-product delivered market evidence with the same sellable unit count |
 | fee amount/rate, advertising, logistics, packaging, return reserve, VAT treatment | approved system setting with version/provenance or explicit run input |
 
 Outputs are expected revenue per unit, supply cost, marketplace fee,
@@ -254,6 +254,22 @@ means “profitability not confirmed” and caps the verdict at `MANUAL_REVIEW`.
 The repository has no approved minimum profit/margin for this use case, so
 `RECOMMEND` remains unavailable until the owner supplies those versioned
 thresholds in a separate high-risk Revenue policy Story.
+
+#### Pre-purchase eligibility amendment
+
+An arbitrary proposed price is insufficient for procurement. Before any sample
+purchase can be considered, the Revenue-owned gate must evaluate the fresh
+confirmed delivered price of an identical product with the same unit count,
+apply all mandatory and conservative variable costs, and pass the recommend
+profit and stress thresholds. The requested sample quantity must equal the
+verified supplier MOQ. Missing, stale, comparable-only, or mismatched evidence
+fails closed as `INCOMPLETE`; a below-threshold market-price scenario is
+`FAIL`.
+
+`PASS` means eligible for separate purchase review, not authorized to order or
+pay. Until a trusted persisted gate result is bound to the Procurement write
+path in a separately approved high-risk Story, `sourcing_decisions` alone must
+not be used as purchase authority.
 
 ### Verdict and ordering
 

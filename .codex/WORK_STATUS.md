@@ -1,5 +1,78 @@
 # Work status
 
+## 2026-08-12 KK946 profitability and Coupang listing facts
+
+- Objective: enforce profitability validation before procurement, permit only
+  a minimum-MOQ sample after a pass, and correct KK946 using the confirmed
+  identical-product market price without performing a commerce write.
+- Branch/base: `codex/fix/kk946-profitability-fee-basis` from latest merged
+  `origin/main` at `1d9785cf1fecc14c530dc7317e41b59bc4819692`.
+- Risk/root cause: high-risk/manual because price, fee and margin decisions can
+  affect commerce. Root-cause order found no database issue: WING account
+  logistics and seller facts are external blockers, while the engine's use of
+  net revenue instead of customer final price for the fee was a code defect.
+- Revenue impact: prevents capital from being spent before market viability is
+  known and rejects KK946 single-unit resale before further listing work.
+- Cloud-first: GitHub owns sanitized calculation inputs/results, evidence docs,
+  tests, PR and CI history. Domeggook, Gaemi and Coupang remain authorities for
+  raw order/ledger/image/account/category data. Browser state and local outputs
+  are temporary and no raw screenshot, address, contact, bank or credential is
+  retained.
+- Scope/non-goals: authenticated read-only supplier/warehouse observations,
+  current public rate/market research, approved-engine calculation, evidence
+  docs and tests. No Product Creation, price/stock/coupon/ad/fulfillment write,
+  Production/database/config/secret, paid action or provider mutation.
+- Root facts: six-unit historical pilot cash outflow `9,530 KRW`; current declared one-unit
+  deterministic variable cost `4,353.94 KRW` net of deductible VAT / `4,789.33
+  KRW` gross cash; authenticated WING fee `10.5%` on customer final price;
+  identical-product delivered market price `4,290 KRW`; v3 base contribution
+  `-1,548 KRW / -39.69%`, stress `-1,840 KRW / -47.19%`. The prior `11,800
+  KRW` scenario is an infeasible economic requirement, not a target.
+- Acquired listing facts: item `56288849`, model `KK946`, black, polyester,
+  `10.5 x 3.6 x 6.5 cm` warehouse-recorded dimensions, manufacturer claim
+  `KLAND`, China (OEM), stock six, taxable status and detail-image use allowed.
+- Completed: mandatory boot and task branch; supplier/warehouse/rate/market
+  reads; deterministic package plan; authenticated read-only WING category
+  path, `10.5%` fee, notice and account-logistics review; marketplace fee-base
+  code correction; v3 fresh-identical-price/MOQ fail-closed gate; packet,
+  status, architecture, roadmap, decision-log, changelog and regression-test
+  updates. Focused tests pass `40/40`; the final full rerun passes `567/567`
+  after one transient Orchestrator timing assertion passed both isolated and
+  full reruns. Typecheck and 85-route build pass. Lint has zero source
+  errors and four pre-existing test warnings when generated output is excluded.
+- Browser baseline: local Playwright `35` passed, `2` skipped and `7` failed on
+  the unchanged unconfigured-Supabase routes `/listing`, `/market`,
+  `/procurement`, `/revenue`, `/sourcing`, `/workflow` and `/workspace`. This
+  scoped engine/evidence diff does not touch those routes; exact Preview remains the
+  binding configured browser gate. The same baseline reproduced after the code
+  correction. A transient full-test ENOENT occurred only while build and tests
+  concurrently replaced `.next`; the final serial full rerun passed `567/567`.
+- Review: complete diff and `git diff --check` passed. New decision evidence has
+  no URL in the machine record and no raw account/contact/bank/credential data;
+  provider URLs appear only as public authority references in the narrative.
+- Delivery: commits `cc08a8c1fa7df009dd20856bc082fa9339bafb85` and
+  `ff4545a943bfc1ca6bf9a6e7e31e12e19d176b48` pushed on
+  `codex/fix/kk946-profitability-fee-basis`; Ready PR #122 targets `main`, has
+  `manual-merge-required`, and has no auto-merge request.
+- Exact-head gates: CI lint/tests/typecheck/build/security audit/database
+  baseline/Item Selection security/R1 atomic replay all passed. Vercel Preview
+  deployed and Preview Playwright passed `42`, skipped `2`, with no console,
+  page, or failed-request errors across the configured route suite. Artifact:
+  `preview-browser-evidence` (artifact `9129279388`), CI run `31565340515`,
+  Preview browser run `31565340535`.
+- Current: delivery complete; owner financial-policy review and manual merge
+  decision on PR #122.
+- Changed files: profitability engine/policy/regression test; KK946 first-sale,
+  inbound, profitability/listing and machine-status evidence; focused contract
+  tests; changelog/decision log; this recovery record.
+- Blocker/owner action: do not reorder or list KK946 as a single unit. The only
+  useful next paths are read-only differentiated-bundle analysis or verified
+  cost reduction, followed by a new v3 gate. No WING logistics write is needed
+  for KK946 while economics fail.
+- Remaining risks: the pure v3 gate is not yet bound to a trusted persisted
+  Procurement record. That integration requires a separate high-risk schema/
+  contract Story; legacy `sourcing_decisions` alone are not purchase authority.
+
 ## 2026-08-12 KK946 inspection stage and actual cost evidence
 
 - Objective: admit the provider stage images and actual warehouse charges,

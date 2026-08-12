@@ -221,7 +221,8 @@ measure, photograph, or inspect a sample personally:
 
 ```text
 Domeggook supplier evidence
-  -> bounded procurement approval/action
+  -> fresh identical-market-price profitability gate PASS
+  -> bounded procurement approval/action for exact MOQ
   -> approved third-party inspection/preparation warehouse
   -> structured inspection evidence and exception report
   -> Coupang Rocket Growth inbound readiness decision
@@ -268,12 +269,19 @@ candidate when evidence indicates material repeatable profit, differentiation,
 bundle potential, supply leverage, or a credible path to direct sourcing. This
 classification is SHADOW-only until an owner accepts the exact proposal.
 
-An accepted exception may authorize either:
+An accepted exception may propose either:
 
-1. an owner/operator sample purchase and direct inspection; or
+1. an owner/operator minimum-MOQ sample purchase and direct inspection, only
+   after the fresh identical-market-price profitability gate passes; or
 2. contact with the original manufacturer/importer/supplier to obtain a lower
    landed cost, documented content/brand rights, capacity, lead time, MOQ,
    quality controls, and invoice terms.
+
+Strategic classification does not bypass the pre-purchase profitability gate.
+If the gate is incomplete or fails, no resale sample purchase is authorized;
+the permitted next action is read-only research or supplier cost negotiation.
+A separately approved non-resale research expense must never be recorded as
+sellable inventory or evidence that the resale economics passed.
 
 The exception must be a separate bounded change set. It records the evidence
 that triggered escalation, exact SKU or bundle, contact/purchase target, maximum
