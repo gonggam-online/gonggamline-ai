@@ -24,8 +24,8 @@
   outflow is already allocated and is not double-counted in contribution loss.
 - Completed/current: boot, latest-main branch, evidence audit, authenticated
   WING read-only category/catalog/address review, exact offer contract, blocker
-  packet, regression tests, complete local gates, and diff review. Current work
-  is commit/push/Draft PR and exact-head CI/Preview verification.
+  packet, regression tests, complete local gates, diff review, commit/push, and
+  Draft PR #123. Current work is recording and revalidating delivery evidence.
 - External writes: none. No address registration, draft/temporary save,
   product registration, price/stock/ad/fulfillment, paid, database,
   secret/configuration, or Production mutation occurred.
@@ -49,9 +49,21 @@
   `/sourcing`, `/workflow`, and `/workspace`; this documentation/test diff does
   not touch those routes and exact configured Preview is the binding browser
   gate. Full diff and `git diff --check` pass.
-- Last commit/next: branch is not committed yet. Next action is commit/push a
-  Draft PR with `manual-merge-required`, then validate exact-head CI/Preview;
-  live execution remains blocked.
+- First delivery head: commit
+  `63976a9b7c10197d75b84c79e44dae2d861ee95a`, pushed on
+  `codex/feat/kk946-six-unit-e2e-listing`; Draft PR #123 has
+  `manual-merge-required` and no auto-merge. All ten reported checks pass,
+  including build, baseline replay, tests, three security gates, Vercel, and
+  Preview browser E2E.
+- Exact Preview: `https://gonggamline-gqmd1sfam-gg-online.vercel.app`; browser
+  result `42` passed, `2` skipped, with no route/API/console failure. Evidence
+  artifact `9130046631` has SHA-256
+  `7a40005ff3a9197b7c508a3fc500bf6fc83b386bf9f9101023c797a9750c3bdc`
+  and expires 2026-08-26.
+- Next action: push this status checkpoint, revalidate the new exact head, then
+  make PR #123 ready for manual merge. After merge, exact private listing facts
+  must be closed and the owner must send the packet's external-write approval;
+  live execution remains blocked until then.
 - Remaining risks: provider form drift, new fees, image-rights mismatch,
   return/refund/penalty variance, and actual loss-cap exhaustion. Stop on any
   final WING summary mismatch or unexpected write/payment.
