@@ -96,8 +96,13 @@ documentary proof for material, origin, trademark, or certification.
 
 The read-only Product Registration form was used without saving a product.
 
+- Exact catalog match: Coupang product `9681483612`, black option, item-winner
+  price `4,290 KRW`.
 - Selected path: `패션의류잡화 > 유니섹스/남녀공용 패션 > 공용 잡화 > 가방 > 남녀공용파우치`.
 - Current fee shown: `10.5% (VAT 별도, 정률)`.
+- Mandatory purchase-option names exposed by WING: `색상` and
+  `패션의류/잡화 사이즈`; the matched black offer supplies `블랙` and
+  `상세페이지 참조` respectively.
 - Notice category: `가방`.
 - Manual form did not expose the exact `displayCategoryCode`; obtain it through
   the official Category Recommendation/category API or category Excel before
@@ -127,14 +132,16 @@ Suggested values and form defaults are UI choices, not documentary evidence.
 
 ## Remaining listing blockers
 
-1. WING showed no registered outbound shipping place.
+1. WING showed an empty address book (`0` records), so no registered outbound
+   shipping place exists.
 2. WING showed no registered return/exchange place.
 3. Seller/importer identity and an A/S responsible party and phone number are
    still missing from the sanitized packet.
 4. Handling precautions and quality-warranty language require seller approval.
-5. Exact `displayCategoryCode`, current category validity, allowed mandatory
-   purchase/search attribute values, and barcode behavior require the official
-   read API or category file.
+5. Exact `displayCategoryCode`, current category validity, optional search
+   filters, and barcode behavior require the official read API or category
+   file. The WING UI path and its two matched purchase-option values are
+   verified, but they are not an API category-code substitute.
 6. Actual unit/package weight and rights-cleared listing-ready main/detail
    images are still required; image editing rights remain unknown.
 7. `KLAND` is only a manufacturer claim and must not be treated as verified
@@ -145,11 +152,14 @@ values, certification type, barcode requirement, brand/trademark state,
 outbound location, and return center. None may be inferred from a form default
 or a similar product.
 
-Therefore listing eligibility remains `HOLD`, with failed single-unit economics
-preceding the metadata blockers. Do not register logistics solely for KK946 or
-create the product as-is. The only economically relevant next paths are a
-read-only differentiated-bundle analysis or a materially lower verified
-landed/fulfillment-cost negotiation, each followed by a new exact-market gate.
+Therefore ordinary listing eligibility remains `HOLD`, with failed single-unit
+economics preceding the metadata blockers. The repository owner has separately
+directed preparation of a bounded, no-reorder six-unit liquidation experiment
+to validate the end-to-end sale and settlement process. That exception does
+not change the v3 pre-purchase failure, and it does not authorize any address,
+listing, price, stock, fulfillment, advertisement, or return write. The exact
+execution packet is recorded separately and remains
+`AWAITING_EXTERNAL_WRITE_APPROVAL`.
 
 ## Source and recovery
 

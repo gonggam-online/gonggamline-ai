@@ -1,5 +1,27 @@
 # Architecture review
 
+## KK946 six-unit E2E listing readiness - 2026-08-12
+
+- Status: documentation/evidence implementation only; execution awaits an exact
+  repository-owner external-write approval after delivery gates.
+- Revenue gate: complete the first real search-to-settlement loop with already
+  held stock while preserving the default rule that profitability must pass
+  before procurement.
+- Existing boundary: uses the accepted Listing Content Fact/Policy and Sales
+  Learning concepts; introduces no new runtime, API, database, queue, secret,
+  Production route, or authorization surface.
+- Exact exception: catalog product `9681483612` black, stock/orders six,
+  `4,290 KRW`, free shipping, no ads/coupons/auto-repricing/reorder, 14-day
+  exposure, and `30,000 KRW` actual attributable loss cap.
+- Fail closed: WING logistics records are absent and rights-cleared listing
+  assets plus private seller/provider facts remain incomplete. A local
+  readiness packet cannot authorize or substitute for those external facts.
+- Cloud-first: GitHub owns sanitized packet/tests/PR/CI evidence. WING, Coupang,
+  Domeggook, and Gaemi own account, address, contact, asset, order, return, and
+  settlement data; browser state is disposable.
+- Risk: high-risk/manual; `manual-merge-required`, no auto-merge. No external
+  write is part of this PR. Git revert is the repository rollback.
+
 ## WING SQS Read-only Runner v1 - 2026-08-11
 
 - Status: approved by explicit repository-owner delegated directive on

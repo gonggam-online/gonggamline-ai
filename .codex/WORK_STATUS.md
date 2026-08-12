@@ -1,5 +1,61 @@
 # Work status
 
+## 2026-08-12 KK946 six-unit Coupang E2E listing readiness
+
+- Objective: prepare the fastest safe real sale-to-settlement validation for
+  all six already-held KK946 units without weakening the pre-purchase
+  profitability gate or performing an unapproved external write.
+- Branch/base: `codex/feat/kk946-six-unit-e2e-listing` from merged PR #122 at
+  `579147e0d9e52eb99e97195b30a5dfbec58aea6b`.
+- Risk/root cause: high-risk/manual because the next actions create WING
+  logistics records and a live offer. External configuration/facts are the
+  active blockers: WING address book is empty, Gaemi-authorized private
+  logistics inputs and return charges are unconfirmed, and listing-ready image
+  evidence is absent. No database or compensating code change is indicated.
+- Revenue impact: caps liquidation at the six existing units and produces the
+  first measurable listing/sale/fulfillment/settlement learning loop without
+  new procurement, advertising, or Rocket Growth inventory.
+- Exact scope: catalog `9681483612` black; one unit per offer; stock/orders 6;
+  normal/sale price `4,290 KRW`; free shipping; ads, coupons, automatic
+  repricing, reorder, and Rocket Growth disabled; 14-day exposure; day-7
+  no-sale review; actual attributable loss cap `30,000 KRW`.
+- Economics: v3 contribution remains `-1,548 KRW` base / `-1,840 KRW` stress
+  per order, or `-9,288 / -11,040 KRW` for six. The existing `9,530 KRW` cash
+  outflow is already allocated and is not double-counted in contribution loss.
+- Completed/current: boot, latest-main branch, evidence audit, authenticated
+  WING read-only category/catalog/address review, exact offer contract, blocker
+  packet, regression tests, complete local gates, and diff review. Current work
+  is commit/push/Draft PR and exact-head CI/Preview verification.
+- External writes: none. No address registration, draft/temporary save,
+  product registration, price/stock/ad/fulfillment, paid, database,
+  secret/configuration, or Production mutation occurred.
+- Cloud-first: GitHub owns sanitized packet/tests/PR/CI. Provider systems retain
+  private logistics, account, asset, transaction, return, and settlement data.
+  Unsaved browser state and local test/build outputs are temporary.
+- Changed files: KK946 profitability/status packets, new six-unit readiness
+  Markdown/JSON and test, one existing evidence test, listing changelog,
+  architecture review, decision log, and this status.
+- Blockers/owner actions: confirm Gaemi-authorized outbound/return data and
+  charges, rights-cleared main/detail assets, importer/certification and private
+  notice/A/S facts; merge the high-risk PR after gates; then send the exact
+  external-write approval statement from the readiness packet.
+- Verification: focused tests `19/19`; full tests `572/572`; typecheck and the
+  85-route production build pass. Source lint passes with zero errors and four
+  pre-existing test warnings after excluding generated `.next`,
+  `playwright-report`, and `test-results`; the unscoped lint command fails only
+  because it traverses the existing Playwright report bundles. Local browser
+  baseline is unchanged at `35` passed, `2` skipped, `7` failed on the
+  unconfigured-Supabase routes `/listing`, `/market`, `/procurement`, `/revenue`,
+  `/sourcing`, `/workflow`, and `/workspace`; this documentation/test diff does
+  not touch those routes and exact configured Preview is the binding browser
+  gate. Full diff and `git diff --check` pass.
+- Last commit/next: branch is not committed yet. Next action is commit/push a
+  Draft PR with `manual-merge-required`, then validate exact-head CI/Preview;
+  live execution remains blocked.
+- Remaining risks: provider form drift, new fees, image-rights mismatch,
+  return/refund/penalty variance, and actual loss-cap exhaustion. Stop on any
+  final WING summary mismatch or unexpected write/payment.
+
 ## 2026-08-12 KK946 profitability and Coupang listing facts
 
 - Objective: enforce profitability validation before procurement, permit only

@@ -129,9 +129,22 @@
     "actualFulfillmentInvoice"
   ],
   "coupangListingMetadata": {
+    "catalogProductId": "9681483612",
+    "catalogMatchOption": "BLACK",
+    "catalogItemWinnerPriceKrw": 4290,
     "selectedCategoryPath": "패션의류잡화 > 유니섹스/남녀공용 패션 > 공용 잡화 > 가방 > 남녀공용파우치",
     "displayCategoryCodeStatus": "UNKNOWN_MANUAL_FORM_DID_NOT_EXPOSE_CODE",
     "noticeCategory": "가방",
+    "mandatoryPurchaseOptions": [
+      {
+        "name": "색상",
+        "value": "블랙"
+      },
+      {
+        "name": "패션의류/잡화 사이즈",
+        "value": "상세페이지 참조"
+      }
+    ],
     "mandatoryNoticeRows": [
       "종류",
       "소재",
@@ -143,8 +156,10 @@
       "품질보증기준",
       "A/S 책임자와 전화번호"
     ],
+    "wingLogisticsRecordCount": 0,
     "outboundLocationStatus": "MISSING_IN_WING_ACCOUNT",
     "returnCenterStatus": "MISSING_IN_WING_ACCOUNT",
+    "experimentExceptionStatus": "AWAITING_EXTERNAL_WRITE_APPROVAL",
     "productCreationPerformed": false
   },
   "rawEvidenceMoved": false,

@@ -86,8 +86,13 @@ test("KK946 remains quarantined after catalog and warehouse setup are verified",
       "fullInspectionExecution",
       "fullInspectionOutcome",
       "inspectedUnitCoverage",
+      "coupangCategory",
     ].includes(key))
     .every(([, value]) => value === "UNKNOWN"));
+  assert.equal(
+    status.bindings.coupangCategory,
+    "VERIFIED_WING_CATALOG_PATH_CODE_UNKNOWN",
+  );
 });
 
 test("read-only monitor records exact completed receipt and full-inspection execution", () => {
@@ -158,7 +163,7 @@ test("actual warehouse charges advance cash evidence without inventing profit", 
   );
   assert.equal(
     status.listingEligibility,
-    "HOLD_SINGLE_UNIT_MARKET_PRICE_UNPROFITABLE",
+    "HOLD_E2E_EXCEPTION_AWAITING_EXTERNAL_WRITE_APPROVAL",
   );
   assert.equal(status.profitability.status, "REJECT_MARKET_PRICE_UNPROFITABLE");
   assert.equal(status.profitability.prePurchaseGateStatus, "FAIL");
