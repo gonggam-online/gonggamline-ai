@@ -2,12 +2,13 @@
 
 Observed: 2026-08-12 (KST)
 
-Status: `PROVIDER_REPLY_PENDING_AFTER_AUTHORIZED_INFORMATIONAL_WRITE`
+Status: `PROVIDER_PARTIAL_REPLY_FOLLOWUP_PENDING_AFTER_AUTHORIZED_INFORMATIONAL_WRITE`
 
 Risk: high-risk/manual
 
-External writes performed by this task: one active informational Gaemi request;
-one duplicate request was explicitly marked to ignore. No order, shipment,
+External writes performed by this task: one active informational Gaemi request
+and one bounded follow-up on that same thread; one duplicate request was
+explicitly marked to ignore and was closed by the provider. No order, shipment,
 return, address, listing, price, stock, advertisement, API configuration,
 payment, database, or Production write occurred.
 
@@ -95,14 +96,22 @@ that request:
   VAT-inclusive debit. The authenticated pages do not expose the exact WING
   recipient label, account-applied outbound/return debit, or Jeju/island rule.
 
-One categorized provider request now asks for the current account carrier,
-WING-safe outbound/return labels, address/contact authority, return identifier,
-Jeju/island rule, VAT-inclusive one-unit outbound and customer-return cost, and
-the Coupang-to-Gaemi manual return steps. The confirmation flow created a second
-identical general request; a correction on that thread tells the provider to
-ignore it and answer only the categorized request. The reply remains pending.
-This bounded informational write does not authorize any commerce or secret
-configuration write.
+The categorized provider thread received a partial reply. Gaemi confirmed that
+B2C general outbound and WING must use CJ Logistics, supplied private WING
+outbound/return values that remain only in the provider system, and stated that
+no extra company or order-code text is required in the return recipient label.
+It also confirmed Jeju and island delivery with a `3,000-5,000 KRW` regional
+surcharge, an order-bound return/exchange application under general order
+information, and use of the general-outbound menu rather than the separate
+Coupang/Rocket-Growth outbound menu.
+
+The reply did not provide the exact account-applied VAT-inclusive one-unit
+outbound or simple-return debit, CJ collection automation/manual responsibility,
+required return identifiers, or recommended WING initial-return, return, Jeju,
+and non-Jeju-island values. One bounded follow-up was therefore submitted on
+the same categorized thread. No new request was created. The duplicate general
+thread was closed after the ignore instruction. This informational exchange
+does not authorize any commerce or secret-configuration write.
 
 ## Exact offer plan
 
@@ -194,10 +203,11 @@ The shortest owner path is:
 1. In WING, open `판매자정보 > 판매자정보`, enter the password directly, and
    leave the page open so the existing seller/A/S facts can be read without
    exposing the password.
-2. Wait for the active categorized Gaemi request to confirm the exact WING
-   outbound/return recipient, address/contact, Jeju/island policy, carrier, and
-   initial/return charges. The owner authorized and the task performed only
-   this informational provider write.
+2. Wait for the same categorized Gaemi thread to complete the exact
+   account-applied VAT-inclusive outbound/return calculation, CJ collection
+   responsibility, required return identifiers, and recommended WING charge
+   values. The provider-supplied private WING logistics values remain at Gaemi
+   and must not be copied into Git or chat.
 3. Choose whether this six-unit experiment may use manual Gaemi order entry or
    whether a separately approved secret-bearing Coupang API connection is a
    prerequisite. Product Registration approval does not silently authorize API

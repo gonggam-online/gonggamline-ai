@@ -2,6 +2,13 @@
 
 ## 2026-08-12 - KK946 Gaemi B2C return and rate inquiry
 
+- Recorded the provider's partial reply: CJ Logistics for B2C/WING, private
+  WING logistics values retained only at source, no extra recipient identifier,
+  Jeju/island delivery with a `3,000-5,000 KRW` surcharge range, order-bound
+  return application, and the general-outbound path for marketplace orders.
+- Kept exact VAT-inclusive account debits, CJ collection responsibility,
+  required return fields, and recommended WING fee inputs fail-closed; sent one
+  bounded follow-up on the same categorized thread without creating a new one.
 - Verified the authenticated account's CJ Logistics return default, order-bound
   return form, and separation between B2C seller fulfillment and Rocket Growth.
 - Kept account-applied VAT-inclusive rates, WING-safe recipient labeling,

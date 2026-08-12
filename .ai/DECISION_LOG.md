@@ -2,13 +2,23 @@
 
 ## 2026-08-12 - Use Gaemi account facts before WING logistics creation
 
+- Provider reply: CJ Logistics is confirmed for B2C/WING; private WING
+  logistics values were supplied at source; no extra return-recipient text is
+  required; Jeju/island delivery has a `3,000-5,000 KRW` surcharge range; and
+  marketplace returns/outbounds use the general order/outbound path.
+- Incomplete reply decision: keep exact VAT-inclusive outbound/return debit,
+  CJ collection responsibility, required return fields, WING-use authority,
+  and recommended WING charge inputs fail-closed. Submit one bounded follow-up
+  on the same thread and create no new inquiry.
 - Evidence: the account identifies CJ Logistics as its normal return carrier
   and provides an order-bound return form, but not the final account-applied
   debit or exact WING recipient label.
 - Decision: keep seller-fulfilled B2C distinct from Rocket Growth; wait for the
-  single active categorized provider reply before creating WING address records.
-- External write: owner-authorized informational request only. One duplicate was
-  marked to ignore. No order, shipment, return, listing, paid, API/configuration,
+  same categorized provider thread to close the remaining fields before
+  creating WING address records.
+- External write: owner-authorized informational request and one follow-up on
+  that same thread only. One duplicate was marked to ignore and closed. No
+  order, shipment, return, listing, paid, API/configuration,
   database, or Production write was authorized or performed.
 - Risk/rollback: high-risk/manual. Provider messages are durable at Gaemi and
   cannot be rolled back; Git evidence can be reverted normally.

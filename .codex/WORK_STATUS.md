@@ -2,6 +2,26 @@
 
 ## 2026-08-12 KK946 Gaemi B2C return and account-rate follow-up
 
+- Provider reply: the categorized thread received a partial response. CJ
+  Logistics is confirmed for B2C and WING; private WING logistics values were
+  supplied and remain only at Gaemi; no extra return-recipient identifier is
+  required; Jeju/island delivery is available with a `3,000-5,000 KRW` range;
+  returns are requested against the order under general order information; and
+  marketplace seller fulfillment uses the general-outbound menu.
+- Follow-up: one reply on the same categorized thread asks only for the missing
+  account-applied VAT-inclusive outbound/return numbers or formulas, CJ
+  collection responsibility and required fields, explicit WING-use authority,
+  and recommended WING return/remote-area values. No new request was created.
+- Still blocked: exact debit amounts, collection automation/manual ownership,
+  and exact WING fee fields remain provider-follow-up pending. The duplicate
+  general thread was closed after its ignore instruction.
+- Current validation: focused KK946 tests `6/6`, JSON parse, typecheck,
+  tracked-source lint with zero errors and four pre-existing warnings, and the
+  85-route production build pass. The full Windows suite passed `572/573`;
+  unchanged `tests/orchestrator-phase-3.test.ts` reproduces one late-file-
+  mutation timing failure in isolation. No orchestrator file differs from the
+  branch base, so this is classified outside this evidence-only change pending
+  exact-head Linux CI.
 - Objective: close WING logistics facts from the authenticated Gaemi account
   before any address or listing write.
 - Branch/PR: `codex/ops/kk946-wing-final-preflight`; Draft PR #124.
@@ -10,13 +30,12 @@
   from Rocket Growth; CJ Logistics is the normal return carrier; non-CJ returns
   require advance provider notice; the return form is bound to an existing order
   and no order or return was created.
-- Rate status: public standard rates do not prove the account's final
-  VAT-inclusive debit. Exact WING recipient labeling, account-applied outbound
-  and return cost, Jeju/island handling, and manual return identifier remain
-  provider-reply pending.
-- Authorized external write: one active categorized informational request. The
-  confirmation flow also created one duplicate; its thread now instructs the
-  provider to ignore it and answer only the categorized request.
+- Rate status: public standard rates and the partial reply do not prove the
+  account's final VAT-inclusive debit. Account-applied outbound and return cost,
+  exact WING remote-area fields, and CJ collection mechanics remain pending.
+- Authorized external write: one categorized informational request and one
+  bounded follow-up on the same thread. The confirmation flow also created one
+  duplicate; it was marked to ignore and the provider closed it.
 - Prohibited writes preserved: no order, shipment, return, WING address, draft,
   listing, price, stock, advertisement, API/configuration, payment, database, or
   Production write.

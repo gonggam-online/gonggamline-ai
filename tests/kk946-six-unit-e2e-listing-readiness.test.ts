@@ -74,7 +74,10 @@ const record = JSON.parse(recordText) as {
 };
 
 test("six-unit exception preserves the failed ordinary profitability gate", () => {
-  assert.equal(record.status, "PROVIDER_REPLY_PENDING_AFTER_AUTHORIZED_INFORMATIONAL_WRITE");
+  assert.equal(
+    record.status,
+    "PROVIDER_PARTIAL_REPLY_FOLLOWUP_PENDING_AFTER_AUTHORIZED_INFORMATIONAL_WRITE",
+  );
   assert.equal(record.risk, "HIGH_RISK_MANUAL");
   assert.equal(record.ordinaryPrePurchaseGate.status, "FAIL");
   assert.equal(record.ordinaryPrePurchaseGate.samplePurchaseEligible, false);
@@ -139,9 +142,12 @@ test("post-merge logistics evidence exposes the manual fallback without inventin
   assert.equal(record.logistics.gaemiReturnFormStatus, "VERIFIED_ORDER_BOUND_FORM_AVAILABLE_NO_ORDER_CREATED");
   assert.equal(
     record.logistics.gaemiReturnIdentificationStatus,
-    "ORDER_CODE_AND_REASON_BOUND_EXACT_RECIPIENT_LABEL_REPLY_PENDING",
+    "ORDER_BOUND_APPLICATION_NO_EXTRA_RECIPIENT_IDENTIFIER_REQUIRED",
   );
-  assert.equal(record.logistics.gaemiAccountAppliedRateStatus, "PROVIDER_REPLY_PENDING");
+  assert.equal(
+    record.logistics.gaemiAccountAppliedRateStatus,
+    "PROVIDER_FOLLOWUP_PENDING_EXACT_VAT_INCLUSIVE_AMOUNT_OR_ACCOUNT_FORMULA",
+  );
   assert.equal(
     record.logistics.wingSellerPrivateInfoStatus,
     "OWNER_REAUTH_REPORTED_COMPLETE_PRIVATE_FACT_COPY_NOT_PERFORMED",
@@ -159,8 +165,15 @@ test("packet limits the authorized provider inquiry and preserves the commerce-w
   assert.equal(record.externalWrites.priceOrStockWritePerformed, false);
   assert.equal(record.externalWrites.advertisingWritePerformed, false);
   assert.equal(record.externalWrites.providerInquiryPerformed, true);
-  assert.equal(record.externalWrites.providerInquiryStatus, "ONE_ACTIVE_CATEGORIZED_THREAD_REPLY_PENDING");
-  assert.equal(record.externalWrites.providerInquiryDuplicateStatus, "ONE_DUPLICATE_THREAD_MARKED_IGNORE");
+  assert.equal(
+    record.externalWrites.providerInquiryStatus,
+    "ONE_ACTIVE_CATEGORIZED_THREAD_PARTIAL_REPLY_FOLLOWUP_PENDING",
+  );
+  assert.equal(
+    record.externalWrites.providerInquiryDuplicateStatus,
+    "ONE_DUPLICATE_THREAD_CLOSED_AFTER_IGNORE_INSTRUCTION",
+  );
+  assert.equal(record.externalWrites.providerFollowupPerformed, true);
   assert.equal(record.externalWrites.providerOrderShipmentOrReturnMutationPerformed, false);
   assert.equal(record.externalWrites.apiConfigurationWritePerformed, false);
   assert.equal(record.externalWrites.approvalStatus, "OWNER_AUTHORIZED_INFORMATIONAL_PROVIDER_WRITE_ONLY");
