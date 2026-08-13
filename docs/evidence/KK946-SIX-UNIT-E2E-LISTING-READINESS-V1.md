@@ -1,16 +1,17 @@
 # KK946 six-unit Coupang E2E listing readiness v1
 
-Observed: 2026-08-12 (KST)
+Observed: 2026-08-12 through 2026-08-13 (KST)
 
-Status: `PROVIDER_PARTIAL_REPLY_FOLLOWUP_PENDING_AFTER_AUTHORIZED_INFORMATIONAL_WRITE`
+Status: `PROVIDER_FOLLOWUP_RECEIVED_REMAINING_FIELDS_FAIL_CLOSED`
 
 Risk: high-risk/manual
 
-External writes performed by this task: one active informational Gaemi request
-and one bounded follow-up on that same thread; one duplicate request was
-explicitly marked to ignore and was closed by the provider. No order, shipment,
-return, address, listing, price, stock, advertisement, API configuration,
-payment, database, or Production write occurred.
+External writes performed by this task: one informational Gaemi request and one
+bounded follow-up on that same categorized thread; the provider has now replied
+to both. One duplicate request was explicitly marked to ignore and was closed
+by the provider. No additional inquiry, order, shipment, return, address,
+listing, price, stock, advertisement, API configuration, payment, database, or
+Production write occurred.
 
 ## Decision
 
@@ -105,13 +106,28 @@ surcharge, an order-bound return/exchange application under general order
 information, and use of the general-outbound menu rather than the separate
 Coupang/Rocket-Growth outbound menu.
 
-The reply did not provide the exact account-applied VAT-inclusive one-unit
-outbound or simple-return debit, CJ collection automation/manual responsibility,
-required return identifiers, or recommended WING initial-return, return, Jeju,
-and non-Jeju-island values. One bounded follow-up was therefore submitted on
-the same categorized thread. No new request was created. The duplicate general
-thread was closed after the ignore instruction. This informational exchange
-does not authorize any commerce or secret-configuration write.
+The bounded follow-up received a final provider reply on 2026-08-13. Gaemi
+cannot verify whether the private logistics values it supplied are accepted by
+the current WING account because it cannot inspect that account. It also cannot
+pre-confirm the packaging class or the VAT-inclusive final outbound and return
+debits; those become observable only in the Gaemi point ledger after the
+corresponding operation completes. The public account-visible rate card remains
+planning evidence, not an exact debit promise.
+
+For a customer return, the operator must first check in WING whether Coupang
+has arranged pickup. If the item is sent back to Gaemi, the matching existing
+order must then be opened under Gaemi general order information and submitted
+as `return/exchange`. The reply still does not determine whether the pickup is
+automatic or seller-entered in every case, and it supplies no additional
+mandatory identifier beyond the order-bound application already observed.
+
+Gaemi declined to prescribe WING initial-return and return fees. It repeated
+that Jeju and island delivery is available with a regional surcharge in the
+`3,000-5,000 KRW` range, but did not split that range into exact WING Jeju and
+non-Jeju-island fields. These values therefore remain owner-entered WING policy
+decisions, not provider-confirmed account charges. No further provider inquiry
+is authorized or needed for this packet. This informational exchange does not
+authorize any commerce or secret-configuration write.
 
 ## Exact offer plan
 
@@ -190,24 +206,20 @@ and Jeju/island availability. The return record also determines the operational
 return route and charges. The account's representative-address default must not
 be accepted silently.
 
-Before execution, the owner or Gaemi must confirm the exact private dispatch
-and return details authorized for this seller account, Jeju/island policy,
-carrier/method, outbound lead time, initial-return delivery charge, return
-charge, and the procedure that maps a Coupang return into Gaemi. Gaemi's public
-material says returns must be requested in its system and unregistered returns
-can be delayed or incur charges; that public statement is not authority to use
-a particular center address or phone number.
+Before execution, the owner must confirm WING accepts the private dispatch and
+return values retained at Gaemi, choose the WING initial-return, return, Jeju,
+and non-Jeju-island fee fields under Coupang policy, and accept that the exact
+Gaemi debit is measurable only after the applicable operation. Gaemi confirmed
+CJ Logistics and the order-bound return application, but did not guarantee a
+fixed package, final debit, or universal automatic-pickup mode.
 
 The shortest owner path is:
 
-1. In WING, open `판매자정보 > 판매자정보`, enter the password directly, and
-   leave the page open so the existing seller/A/S facts can be read without
-   exposing the password.
-2. Wait for the same categorized Gaemi thread to complete the exact
-   account-applied VAT-inclusive outbound/return calculation, CJ collection
-   responsibility, required return identifiers, and recommended WING charge
-   values. The provider-supplied private WING logistics values remain at Gaemi
-   and must not be copied into Git or chat.
+1. Reauthenticate WING only if the existing session expires; the password must
+   be entered directly and never copied into chat or Git.
+2. Review the provider-supplied private logistics values directly at Gaemi,
+   verify WING accepts them, and choose the WING return/remote-area fee fields.
+   Exact Gaemi outbound and return debits remain post-operation ledger evidence.
 3. Choose whether this six-unit experiment may use manual Gaemi order entry or
    whether a separately approved secret-bearing Coupang API connection is a
    prerequisite. Product Registration approval does not silently authorize API

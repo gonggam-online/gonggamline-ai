@@ -1,5 +1,47 @@
 # Work status
 
+## 2026-08-13 KK946 Gaemi B2C final follow-up reply
+
+- Objective/revenue impact: close the provider-information wait so the six-unit
+  first-sale experiment has an exact remaining owner approval boundary instead
+  of waiting for facts the provider cannot supply.
+- Branch/PR/risk: `codex/ops/kk946-wing-final-preflight`; Draft PR #124;
+  high-risk/manual with `manual-merge-required` and no auto-merge.
+- Root-cause class: external provider/account facts. No database or code fault
+  is being compensated for.
+- Provider result: the same categorized thread received its final follow-up
+  reply. Gaemi cannot inspect WING account acceptance, pre-confirm package
+  class, or state exact VAT-inclusive outbound/return debits; final debits are
+  observable only after the applicable operation in the point ledger.
+- Return result: check Coupang pickup status in WING first; when the item is sent
+  back to Gaemi, apply against the matching existing order as return/exchange.
+  A universal automatic/manual pickup mode and extra required identifiers were
+  not established.
+- Fee result: no provider-recommended WING initial-return/return amount or exact
+  Jeju/non-Jeju-island split. The confirmed regional surcharge range remains
+  `3,000-5,000 KRW`; exact WING fields require owner selection under Coupang
+  policy.
+- Durable state: Gaemi retains the private/raw reply and logistics values;
+  GitHub owns only this sanitized packet, tests, PR, and CI/Preview evidence.
+  Browser state and local build/test output are disposable.
+- External writes: none for this final read. No new inquiry, order, shipment,
+  return, WING address/product, price, stock, advertisement, payment,
+  API/configuration, Production, database, or secret write occurred.
+- Local validation: focused KK946 tests `6/6`, full tests `573/573`, JSON
+  parse, typecheck, 85-route production build, diff check, and targeted
+  PII/secret scan pass. Source lint has zero errors and the same four
+  pre-existing Revenue-test warnings. Local Playwright remains the known
+  unconfigured-Supabase baseline: `35` passed, `2` skipped, and `7` failed only
+  on `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`,
+  `/workflow`, and `/workspace`; exact configured Preview is binding.
+- Remaining approval boundary: after PR #124 passes exact-head gates and is
+  manually merged, the owner must separately approve the exact WING logistics
+  records and fee fields plus the six-unit product-registration payload. Rights-
+  cleared assets and importer/physical-compliance facts remain hard blockers.
+- Current/next: update the sanitized packet/tests, run complete local gates,
+  push the exact head, update PR #124, validate CI/Vercel Preview/browser E2E,
+  then stop the reply monitor and report the exact manual next action.
+
 ## 2026-08-12 KK946 Gaemi B2C return and account-rate follow-up
 
 - Provider reply: the categorized thread received a partial response. CJ

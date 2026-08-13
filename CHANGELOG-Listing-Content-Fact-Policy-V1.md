@@ -1,5 +1,22 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-13 - KK946 Gaemi B2C follow-up reply
+
+- Recorded the final reply on the existing categorized thread without creating
+  another provider request or exposing the private logistics values.
+- Classified the exact outbound/return debit as post-operation point-ledger
+  evidence because Gaemi cannot pre-confirm package class or final charge.
+- Bound the return sequence to checking WING pickup status first and then using
+  the existing-order return/exchange application when the item is sent back to
+  Gaemi; universal automatic versus manual pickup remains unconfirmed.
+- Kept WING acceptance of the private logistics values and the exact initial-
+  return, return, Jeju, and non-Jeju-island fields owner-confirmed and
+  fail-closed because the provider cannot inspect the seller's WING account or
+  recommend account-specific fee inputs.
+- Performed no new inquiry, order, shipment, return, address, listing, price,
+  stock, advertisement, API/configuration, payment, database, or Production
+  write.
+
 ## 2026-08-12 - KK946 Gaemi B2C return and rate inquiry
 
 - Recorded the provider's partial reply: CJ Logistics for B2C/WING, private

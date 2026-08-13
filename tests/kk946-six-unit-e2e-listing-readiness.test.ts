@@ -67,6 +67,10 @@ const record = JSON.parse(recordText) as {
     gaemiReturnFormStatus: string;
     gaemiReturnIdentificationStatus: string;
     gaemiAccountAppliedRateStatus: string;
+    jejuAndIslandSettingStatus: string;
+    returnChargeStatus: string;
+    gaemiReturnWorkflowStatus: string;
+    wingReturnChargeRecommendationStatus: string;
     wingSellerPrivateInfoStatus: string;
   };
   externalWrites: Record<string, boolean | string>;
@@ -76,7 +80,7 @@ const record = JSON.parse(recordText) as {
 test("six-unit exception preserves the failed ordinary profitability gate", () => {
   assert.equal(
     record.status,
-    "PROVIDER_PARTIAL_REPLY_FOLLOWUP_PENDING_AFTER_AUTHORIZED_INFORMATIONAL_WRITE",
+    "PROVIDER_FOLLOWUP_RECEIVED_REMAINING_FIELDS_FAIL_CLOSED",
   );
   assert.equal(record.risk, "HIGH_RISK_MANUAL");
   assert.equal(record.ordinaryPrePurchaseGate.status, "FAIL");
@@ -146,7 +150,23 @@ test("post-merge logistics evidence exposes the manual fallback without inventin
   );
   assert.equal(
     record.logistics.gaemiAccountAppliedRateStatus,
-    "PROVIDER_FOLLOWUP_PENDING_EXACT_VAT_INCLUSIVE_AMOUNT_OR_ACCOUNT_FORMULA",
+    "NOT_PRECONFIRMABLE_ACTUAL_VAT_INCLUSIVE_DEBIT_AVAILABLE_ONLY_AFTER_COMPLETED_OUTBOUND_POINT_LEDGER",
+  );
+  assert.equal(
+    record.logistics.returnChargeStatus,
+    "NOT_PRECONFIRMABLE_ACTUAL_VAT_INCLUSIVE_DEBIT_AVAILABLE_ONLY_AFTER_COMPLETED_RETURN_POINT_LEDGER",
+  );
+  assert.equal(
+    record.logistics.jejuAndIslandSettingStatus,
+    "PROVIDER_CONFIRMED_AVAILABLE_SURCHARGE_RANGE_3000_TO_5000_EXACT_WING_SPLIT_NOT_RECOMMENDED",
+  );
+  assert.equal(
+    record.logistics.gaemiReturnWorkflowStatus,
+    "CHECK_COUPANG_WING_PICKUP_STATUS_THEN_APPLY_ORDER_BOUND_RETURN_IN_GAEMI_WHEN_ITEM_IS_SENT_BACK_COLLECTION_MODE_NOT_CONFIRMED",
+  );
+  assert.equal(
+    record.logistics.wingReturnChargeRecommendationStatus,
+    "PROVIDER_DECLINED_ACCOUNT_SPECIFIC_RECOMMENDATION_OWNER_MUST_SET_PER_WING_POLICY",
   );
   assert.equal(
     record.logistics.wingSellerPrivateInfoStatus,
@@ -167,7 +187,7 @@ test("packet limits the authorized provider inquiry and preserves the commerce-w
   assert.equal(record.externalWrites.providerInquiryPerformed, true);
   assert.equal(
     record.externalWrites.providerInquiryStatus,
-    "ONE_ACTIVE_CATEGORIZED_THREAD_PARTIAL_REPLY_FOLLOWUP_PENDING",
+    "ONE_ACTIVE_CATEGORIZED_THREAD_FOLLOWUP_REPLY_RECEIVED_NO_FURTHER_INQUIRY",
   );
   assert.equal(
     record.externalWrites.providerInquiryDuplicateStatus,
@@ -177,6 +197,10 @@ test("packet limits the authorized provider inquiry and preserves the commerce-w
   assert.equal(record.externalWrites.providerOrderShipmentOrReturnMutationPerformed, false);
   assert.equal(record.externalWrites.apiConfigurationWritePerformed, false);
   assert.equal(record.externalWrites.approvalStatus, "OWNER_AUTHORIZED_INFORMATIONAL_PROVIDER_WRITE_ONLY");
+  assert.ok(record.stopConditions.includes("WING_RETURN_PICKUP_MODE_AND_FEE_FIELDS_REQUIRE_OWNER_CONFIRMATION"));
+  assert.ok(record.stopConditions.includes("PRIVATE_WING_SELLER_AND_AFTER_SALES_FACTS_NOT_CAPTURED"));
+  assert.ok(!record.stopConditions.includes("OWNER_WING_REAUTH_REQUIRED_FOR_PRIVATE_SELLER_FACTS"));
+  assert.match(packet, /The bounded follow-up received a final provider reply/i);
   assert.match(packet, /This statement is not yet an approval/i);
   assert.match(packet, /9681483612[\s\S]+KK946-BLACK[\s\S]+재고 6/);
   assert.match(packet, /광고·쿠폰·자동가격조정·재주문 없음/);

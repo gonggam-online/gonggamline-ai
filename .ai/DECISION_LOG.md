@@ -1,5 +1,25 @@
 # Decision log
 
+## 2026-08-13 - Close the KK946 Gaemi inquiry without inventing exact costs
+
+- Final provider evidence: Gaemi cannot inspect the current WING account or
+  guarantee that the supplied private logistics values will be accepted there.
+  It cannot pre-confirm package class or final outbound/return debit; the exact
+  values become available only in the point ledger after each operation.
+- Return decision: check WING for Coupang pickup status first. If the item is
+  returned to Gaemi, use the matching existing order's return/exchange
+  application. Do not claim a universal automatic or manual pickup mode.
+- Fee decision: Gaemi did not recommend WING initial-return/return values or an
+  exact Jeju versus non-Jeju-island split. Preserve the confirmed regional
+  `3,000-5,000 KRW` surcharge range only as planning evidence and require the
+  owner to choose the exact WING fields under Coupang policy.
+- Consequence: the provider follow-up is complete, but the WING logistics write
+  and listing remain blocked by account acceptance, owner fee choices, product
+  compliance facts, and rights-cleared assets. No further provider inquiry is
+  authorized for this packet.
+- Risk/rollback: high-risk/manual. No new external write occurred while reading
+  the reply; repository changes can be reverted normally.
+
 ## 2026-08-12 - Use Gaemi account facts before WING logistics creation
 
 - Provider reply: CJ Logistics is confirmed for B2C/WING; private WING
