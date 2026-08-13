@@ -1497,3 +1497,20 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Delivery: `manual-merge-required`; no auto-merge.
 - Rollback: Git revert restores v2 screening semantics, but does not authorize
   any purchase.
+# 2026-08-13 — Listing minimum-fit and conversion owner amendment v1
+
+- Owner decision: accept approved supplier trust profiles, allow verified
+  unchanged source-image reuse without inferring edit rights, and limit
+  registration blockers to actual required-field/conflict/rights-or-claim/
+  payload-validation/live-approval failures.
+- Conversion objective: qualified conversion plus attributable profit with
+  cancellation/return/refund/policy guardrails; CTR/CVR alone cannot select a
+  winner. Only separately approved sequential revisions are allowed absent an
+  official Coupang parallel experiment capability.
+- Architecture impact: amends the accepted Listing Content Fact and Policy
+  Contract interpretation but preserves Listing ownership, exact category,
+  evidence provenance, no-invention, legacy-draft quarantine, durable-state,
+  and Seller live-write boundaries.
+- Story: `docs/architecture/LISTING-CONTENT-CONVERSION-OWNER-AMENDMENT-V1.md`.
+- Risk/rollback: high-risk/manual; no auto-merge, DB, provider, Production, or
+  marketplace write. Git revert before live use.

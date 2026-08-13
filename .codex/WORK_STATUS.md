@@ -1,5 +1,55 @@
 # Work status
 
+## 2026-08-13 Generic Listing Content/Conversion pipeline
+
+- Objective/revenue impact: implement the accepted evidence-first Listing
+  contract as a reusable pipeline for every approved product, with KK946 only
+  as the first acceptance fixture, so the first WING sale cannot proceed with
+  copied supplier content, unsupported claims, or unverified asset rights.
+- Branch/base: `codex/feat/listing-content-pipeline` from fresh `origin/main`
+  `307241fd3f771fd8cb1dbcd69cde44c1f1eb3ec4`.
+- Risk: high-risk/manual because the offline registration-ready mapper guards
+  marketplace content and price/inventory fields; no marketplace write is in
+  scope. Apply `manual-merge-required`; never auto-merge.
+- Root-cause classification: (1) external configuration/evidence: no approved
+  image/LLM provider or paid/secret use, and KK946 edit rights are UNKNOWN;
+  (2) database: legacy `listing_drafts` cannot be treated as durable evidence
+  packets and no schema change is approved; (3) code: legacy generator only
+  joins supplier-like text, emits a thumbnail brief/detail outline, and contains
+  mojibake.
+- Architecture/compliance: use the accepted Listing Content Fact and Policy
+  Contract v1 and existing Listing/category/preflight boundaries. No new
+  domain, public API, migration, DB/RLS/Auth, queue, provider, secret, paid call,
+  Production mutation, or commerce write. Durable source/test/review evidence
+  belongs in GitHub; runtime business assets remain blocked pending an approved
+  managed asset boundary. Local build/browser output is disposable.
+- Scope: generic typed evidence/provenance, deterministic title/keyword policy,
+  rights-aware asset manifest and rendered mobile package validation, offline
+  field-addressed registration mapper, review UI, synthetic generic and KK946
+  fixtures/tests, and relevant mojibake correction.
+- Non-goals: persistence, schema changes, live supplier/Coupang/provider calls,
+  image generation/editing, asset upload, listing submission, price/inventory
+  mutation, Production/config/secret/paid actions, or granting rights.
+- Progress: 10/12 steps complete. Generic implementation, focused and full
+  tests, lint, typecheck, build, and local browser validation are complete.
+  Current step: complete diff/security review, commit/push/PR, then exact-head
+  CI and configured Preview verification.
+- Blocker/owner boundary: KK946 unchanged supplier assets are eligible because
+  use rights are verified; unknown edit rights only exclude derivatives. It
+  remains `REGISTRATION_BLOCKED` on exact category/required notice evidence and
+  the exact live-write approval. Provider/config/secret/paid use and durable
+  asset storage each require a separate approved Story/action.
+- Recovery: push coherent commits to this branch; GitHub branch/PR/CI is the
+  recovery source. No unique local durable business state may be created.
+- Local validation: lint has zero errors/four pre-existing Revenue warnings;
+  typecheck passes; focused Listing tests pass 13/13; full tests pass 585/585;
+  production build passes with 86 routes. Local Playwright passes 36, skips 2,
+  and fails the same seven unconfigured-Supabase routes; the new
+  `/listing/review` route passes with no page/console/request errors.
+- Exact next action: complete diff/security review, commit/push, create a
+  high-risk Draft PR, and wait for exact-head CI/Vercel Preview evidence.
+
+
 ## 2026-08-13 KK946 Gaemi B2C final follow-up reply
 
 - Objective/revenue impact: close the provider-information wait so the six-unit

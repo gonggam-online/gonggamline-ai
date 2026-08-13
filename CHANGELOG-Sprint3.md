@@ -170,3 +170,14 @@
 - Database schema, migrations, Runtime Queue, Workers, and Production data.
 - Marketplace, pricing, order, inventory, fulfillment, and settlement writes.
 - OpenAI and LLM behavior.
+# 2026-08-13 — Generic evidence-based Listing Content/Conversion pipeline
+
+- Added generic typed evidence, supplier-trust, title/keyword candidates,
+  rights-aware asset manifests, rendered 780px detail packages, registration
+  mapping, visual QA, and sequential learning contracts.
+- Separated minimum registration blockers from conversion warnings and kept
+  content approval distinct from exact live-write approval.
+- Added non-product-specific review UI, synthetic non-KK coverage, and KK946
+  acceptance fixtures. KK946 remains outside production source constants.
+- No schema, persistence, external provider, asset upload, Production, or
+  marketplace write was added.
