@@ -1,5 +1,59 @@
 # Work status
 
+## 2026-08-14 KK946 WING registration packet and draft entry
+
+- Objective/revenue impact: use the merged generic Listing Content/Conversion
+  pipeline to produce the first exact KK946 registration packet and enter only
+  the validated selected variant into the existing WING draft, accelerating the
+  first measurable sale without submitting an unvalidated or rights-unsafe
+  listing.
+- Branch/base: `codex/ops/kk946-wing-registration` from merged `origin/main`
+  `5cf73a75a3e35373aa7779a3b8f43cbdf05b7dcb` (PR #125 merge).
+- Risk: high-risk/manual because this task reads authenticated WING business
+  state and is authorized to write the existing listing draft fields. Final
+  Product Registration submission is not authorized and must remain untouched.
+- Root-cause order: (1) external evidence/configuration is the active gate—exact
+  WING category/notices/options/logistics and deployable unchanged-use assets;
+  (2) no database change or local durable fallback is allowed; (3) code changes
+  are permitted only if the merged generic adapter cannot represent verified
+  WING inputs without product hardcoding.
+- Architecture/Cloud-first: use the accepted Listing Content/Conversion and
+  Coupang preflight boundaries. WING/Coupang and the approved supplier/asset
+  provider own private operational facts and draft state; GitHub may retain only
+  sanitized contracts, decisions, tests and delivery evidence. Browser state,
+  downloads and local render output are disposable and never authoritative.
+- Scope: Production smoke; authenticated WING read; exact external adapter
+  packet; pipeline/gate execution; selected-variant draft entry; read-back and
+  no-submit proof; sanitized recovery evidence and high-risk PR if files change.
+- Non-goals: final Product Registration submission, ad/coupon/automatic pricing,
+  reorder/procurement, order/fulfillment/return/settlement/payment, secret or
+  provider configuration, DB/RLS/Auth, paid generation, or asset transformation.
+- Progress: 4/11 steps complete. Merge/governance, the follow-up branch,
+  Production smoke, and approved-supplier asset inspection are complete.
+  Authenticated WING exact-category/draft inspection is the current work.
+- Production: deployment for exact merge `5cf73a7` succeeded. GitHub Production
+  browser run `31753329215` passed `44`, skipped `2`, on
+  `https://gonggamline-ai.vercel.app`; artifact `9201812470` has SHA-256
+  `912d6aa79abc242542f10650c953caddc9ea54592bd7358bd1da77f8462c0148`.
+- Owner authority: the 2026-08-14 request authorizes exact KK946 adapter
+  construction, content approval, separate live-write approval representation,
+  and WING draft field entry. It does not authorize clicking the final listing
+  submission control.
+- Asset evidence: supplier page `56288849` states detail-image use is allowed.
+  The unchanged main is JPEG 760x760, SHA-256
+  `d3ab260cef16fd5fc0485591b01fe0571d3d5f04b61832159b5029a2c4797bcf`;
+  the unchanged detail is JPEG 860x10877, SHA-256
+  `24c70d1f4b124093baa73c5e84210d1c209234e9e569a9756ac33f72de3f1449`.
+  Downloads are disposable and remain outside Git. The main shows both white
+  and black products while the requested sellable option is black; the detail
+  says PVC while the supplier notice table/current adapter fact says polyester.
+  These factual conflicts prevent visual-QA PASS until authoritative WING facts
+  or owner-approved evidence resolves them.
+- Exact next action: owner signs in to WING in the retained Chrome tab. Read the
+  existing draft's exact category, required notices, option/filter and private
+  logistics records; then reconcile the asset conflicts before packet execution.
+
+
 ## 2026-08-13 Generic Listing Content/Conversion pipeline
 
 - Objective/revenue impact: implement the accepted evidence-first Listing
