@@ -30,14 +30,15 @@
 - Non-goals: persistence, schema changes, live supplier/Coupang/provider calls,
   image generation/editing, asset upload, listing submission, price/inventory
   mutation, Production/config/secret/paid actions, or granting rights.
-- Progress: owner amendment follow-up 10/12 steps complete. Reconfirmed the
+- Progress: owner amendment follow-up 12/12 steps complete. Reconfirmed the
   branch/PR HEAD; strengthened the generic trust/policy/ranker/selected-variant,
   rights/render/mapper/learning contracts; moved the legacy named preflight
   adapter to a generic path; expanded synthetic and KK946 acceptance tests; and
   recorded the 16-item compliance matrix. Full local quality/build/browser
   gates pass. Complete diff, secret-pattern, generated-output and production
-  hardcoding reviews pass. Commit/push and new exact-head CI/Preview validation
-  remain current work.
+  hardcoding reviews pass. Implementation, commit/push, exact-head CI and
+  Preview validation are complete. Manual merge and real-product adapter work
+  remain outside this implementation delivery.
 - Blocker/owner boundary: KK946 unchanged supplier assets are eligible because
   use rights are verified; unknown edit rights only exclude derivatives. It
   remains `REGISTRATION_BLOCKED` on exact category/required notice evidence and
@@ -67,12 +68,19 @@
   navigation requests before the final page response. The Listing mobile test
   now follows the existing page-health rule by ignoring only
   `net::ERR_ABORTED` and still fails on page/console/API/non-abort request
-  errors. A new exact-head run is required after the E2E fix.
-- Exact next action: complete full local gates and diff/security review, push a
-  coherent follow-up commit to Draft PR #125, then validate exact-head CI and
-  Preview without merging. The repository owner still manually reviews/merges;
-  a separate real KK946 category/notice/private-asset/live-approval adapter
-  packet remains required before any WING-resume signal.
+  errors. Fix commit `8b5a32b980f4495a38b7a9730736522ac82e7eda`
+  is pushed. All eleven reported exact-head checks pass, including CI tests,
+  disposable DB/security replays, build, Vercel, and Preview browser E2E.
+  Preview run `31685289440` passed `44`, skipped `2`, and reported no final
+  page/API/console/non-abort request failure at
+  `https://gonggamline-3nznbo6vx-gg-online.vercel.app`. Artifact `9175201051`
+  has SHA-256
+  `bab5ac235ac5378d32f7a17afe6a1daac1b79cec7cf1db225ba2a95a183aa3b7`
+  and expires 2026-08-27.
+- Exact next action: repository-owner manual review/merge of Draft PR #125.
+  After merge, verify origin/main and Production. Separately supply a real
+  KK946 exact category/notice/private-asset/live-approval adapter packet and
+  rerun the pipeline before any WING-resume signal.
 
 
 ## 2026-08-13 KK946 Gaemi B2C final follow-up reply

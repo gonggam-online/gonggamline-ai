@@ -22,7 +22,7 @@ never embedded in production source.
 | 13. WING mapper | PASS | exact category attributes/notices/options/filters/assets/detail/commerce validation; legacy draft test | Registration blocker paths visible | External adapter simulation reaches READY; real exact category/notice packet absent |
 | 14. Review UI | PARTIAL | `ListingContentReview`; route/E2E surface | All required review concepts represented | No durable packet reader by design until approved secure persistence exists |
 | 15. KK946 acceptance | BLOCKED | four KK946 acceptance tests | Generic UI can display a supplied packet | Actual minimum packet is blocked by blocker classes 1, 4, and 5; edit rights only warn |
-| 16. Delivery | PARTIAL | Lint 0 errors, typecheck, 598/598 tests, production build and Listing mobile E2E pass; full local browser baseline is documented | Exact-head CI/Preview is pending the follow-up commit | Commit/push/CI/Preview remain; high-risk merge and Production verification remain manual/post-merge |
+| 16. Delivery | PARTIAL | Lint 0 errors, typecheck, 598/598 tests, production build and Listing mobile E2E pass; all eleven exact-head checks pass | Preview passed 44, skipped 2, with no final page/API/console/non-abort request failure; artifact `9175201051` | Implementation/PR gates pass; high-risk merge and Production verification remain manual/post-merge |
 
 ## Current KK946 boundary
 
