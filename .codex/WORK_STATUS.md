@@ -1,5 +1,88 @@
 # Work status
 
+## 2026-08-13 Generic Listing Content/Conversion pipeline
+
+- Objective/revenue impact: implement the accepted evidence-first Listing
+  contract as a reusable pipeline for every approved product, with KK946 only
+  as the first acceptance fixture, so the first WING sale cannot proceed with
+  copied supplier content, unsupported claims, or unverified asset rights.
+- Branch/base: `codex/feat/listing-content-pipeline` from fresh `origin/main`
+  `307241fd3f771fd8cb1dbcd69cde44c1f1eb3ec4`.
+- Risk: high-risk/manual because the offline registration-ready mapper guards
+  marketplace content and price/inventory fields; no marketplace write is in
+  scope. Apply `manual-merge-required`; never auto-merge.
+- Root-cause classification: (1) external configuration/evidence: no approved
+  image/LLM provider or paid/secret use, and KK946 edit rights are UNKNOWN;
+  (2) database: legacy `listing_drafts` cannot be treated as durable evidence
+  packets and no schema change is approved; (3) code: legacy generator only
+  joins supplier-like text, emits a thumbnail brief/detail outline, and contains
+  mojibake.
+- Architecture/compliance: use the accepted Listing Content Fact and Policy
+  Contract v1 and existing Listing/category/preflight boundaries. No new
+  domain, public API, migration, DB/RLS/Auth, queue, provider, secret, paid call,
+  Production mutation, or commerce write. Durable source/test/review evidence
+  belongs in GitHub; runtime business assets remain blocked pending an approved
+  managed asset boundary. Local build/browser output is disposable.
+- Scope: generic typed evidence/provenance, deterministic title/keyword policy,
+  rights-aware asset manifest and rendered mobile package validation, offline
+  field-addressed registration mapper, review UI, synthetic generic and KK946
+  fixtures/tests, and relevant mojibake correction.
+- Non-goals: persistence, schema changes, live supplier/Coupang/provider calls,
+  image generation/editing, asset upload, listing submission, price/inventory
+  mutation, Production/config/secret/paid actions, or granting rights.
+- Progress: owner amendment follow-up 12/12 steps complete. Reconfirmed the
+  branch/PR HEAD; strengthened the generic trust/policy/ranker/selected-variant,
+  rights/render/mapper/learning contracts; moved the legacy named preflight
+  adapter to a generic path; expanded synthetic and KK946 acceptance tests; and
+  recorded the 16-item compliance matrix. Full local quality/build/browser
+  gates pass. Complete diff, secret-pattern, generated-output and production
+  hardcoding reviews pass. Implementation, commit/push, exact-head CI and
+  Preview validation are complete. Manual merge and real-product adapter work
+  remain outside this implementation delivery.
+- Blocker/owner boundary: KK946 unchanged supplier assets are eligible because
+  use rights are verified; unknown edit rights only exclude derivatives. It
+  remains `REGISTRATION_BLOCKED` on exact category/required notice evidence and
+  the exact live-write approval. Provider/config/secret/paid use and durable
+  asset storage each require a separate approved Story/action.
+- Recovery: push coherent commits to this branch; GitHub branch/PR/CI is the
+  recovery source. No unique local durable business state may be created.
+- Local validation: lint passes with zero errors and four pre-existing Revenue
+  test warnings; typecheck passes; full unit/integration tests pass `598/598`.
+  One known orchestrator timing test failed once at its wall-clock edge, then
+  passed in isolation and in the immediate full rerun. Production build passes.
+  The Listing review mobile Chromium E2E passes with no page, console, request,
+  overflow, or encoding error. The earlier full local browser baseline remains
+  `36` passed, `2` skipped, and `7` failed only on routes requiring the absent
+  local Supabase configuration; exact configured Preview is the binding gate.
+- Delivery: commits `a74e622`, `79c71a5`, and `2d460cf` are pushed; Draft PR #125 targets
+  `main`, has `manual-merge-required`, is conflict-free, and has no auto-merge.
+  All reported exact-head checks pass. Preview browser run `31679580706`
+  passed 43 routes with no page/console/request failure at
+  `https://gonggamline-h6cdh5lfd-gg-online.vercel.app`. Evidence artifact
+  `9172967501` has SHA-256
+  `f47acd9c7e69865c29dd9ab40bc822eaa467829fe6af0edd6377e8b51163db1d`.
+- Follow-up delivery: owner-amendment commit `698a217` is pushed. Its first
+  exact-head CI run exposed the existing orchestrator shutdown timing race in
+  two jobs, while the directly affected Listing tests passed. Preview also
+  exposed an E2E-only false positive: Vercel protection intentionally aborts
+  navigation requests before the final page response. The Listing mobile test
+  now follows the existing page-health rule by ignoring only
+  `net::ERR_ABORTED` and still fails on page/console/API/non-abort request
+  errors. Fix commit `8b5a32b980f4495a38b7a9730736522ac82e7eda`
+  is pushed. All eleven reported exact-head checks pass, including CI tests,
+  disposable DB/security replays, build, Vercel, and Preview browser E2E.
+  Preview run `31685289440` passed `44`, skipped `2`, and reported no final
+  page/API/console/non-abort request failure at
+  `https://gonggamline-3nznbo6vx-gg-online.vercel.app`. Artifact `9175201051`
+  has SHA-256
+  `bab5ac235ac5378d32f7a17afe6a1daac1b79cec7cf1db225ba2a95a183aa3b7`
+  and expires 2026-08-27.
+- Exact next action: repository-owner manual review/merge of Draft PR #125.
+  After merge, verify origin/main and Production. Separately supply a real
+  KK946 exact category/notice/private-asset/live-approval adapter packet and
+  rerun the pipeline before any WING-resume signal.
+
+
 ## 2026-08-13 KK946 Gaemi B2C final follow-up reply
 
 - Objective/revenue impact: close the provider-information wait so the six-unit

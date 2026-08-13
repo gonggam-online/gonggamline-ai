@@ -6,6 +6,7 @@ export const pageRoutes = [
   "/discovery",
   "/dashboard/revenue",
   "/listing",
+  "/listing/review",
   "/market",
   "/os",
   "/procurement",

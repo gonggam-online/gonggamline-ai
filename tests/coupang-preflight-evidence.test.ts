@@ -8,7 +8,7 @@ import {
   decodeOutboundEvidence,
   decodeReturnEvidence,
 } from "../lib/coupang/preflight-evidence.ts";
-import { mapCoupangEvidenceToProductPreflight } from "../engines/listing/kk946-preflight-adapter.ts";
+import { mapCoupangEvidenceToProductPreflight } from "../engines/listing/coupang-preflight-adapter.ts";
 import type { CoupangCategorySnapshot } from "../shared/contracts/coupang-category-snapshot.ts";
 
 const observedAt = "2026-08-08T00:00:00.000Z";

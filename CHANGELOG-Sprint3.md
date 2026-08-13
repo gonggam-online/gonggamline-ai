@@ -1,5 +1,30 @@
 # Sprint 3 - Runtime Stabilization
 
+# Generic Listing Content/Conversion pipeline owner amendment
+
+## Added
+
+- Versioned approved-supplier trust admission and capability-change
+  reevaluation without escalating unchanged image use into edit rights.
+- A current-source Marketplace policy snapshot, intent/query mapping,
+  deterministic two-candidate title and keyword ranking, rights-aware shot
+  manifest, rendered mobile detail package, and selected-variant mapper.
+- Five stable registration blocker classes separated from warning and
+  conversion optimization status.
+- Append-only revision metrics and traffic, attributable-profit,
+  cancellation, and return/refund guardrails with no automatic winner.
+- Generic and KK946 acceptance coverage, including recursive proof that
+  production source contains no KK946 constant and UTF-8/NFC regressions.
+
+## Preserved
+
+- `legacy listing_drafts`, existing public APIs, database schema, Auth/RLS,
+  Production configuration, providers, secrets, prices, stock, ads, orders,
+  and marketplace writes are unchanged.
+- KK946 remains a fixture/adapter acceptance case. Its live WING packet is not
+  registration-ready until exact category/notices, private asset binding, and
+  a separate live-write approval are supplied.
+
 # Item Selection finalization RPC correction
 
 ## Fixed
@@ -170,3 +195,14 @@
 - Database schema, migrations, Runtime Queue, Workers, and Production data.
 - Marketplace, pricing, order, inventory, fulfillment, and settlement writes.
 - OpenAI and LLM behavior.
+# 2026-08-13 — Generic evidence-based Listing Content/Conversion pipeline
+
+- Added generic typed evidence, supplier-trust, title/keyword candidates,
+  rights-aware asset manifests, rendered 780px detail packages, registration
+  mapping, visual QA, and sequential learning contracts.
+- Separated minimum registration blockers from conversion warnings and kept
+  content approval distinct from exact live-write approval.
+- Added non-product-specific review UI, synthetic non-KK coverage, and KK946
+  acceptance fixtures. KK946 remains outside production source constants.
+- No schema, persistence, external provider, asset upload, Production, or
+  marketplace write was added.
