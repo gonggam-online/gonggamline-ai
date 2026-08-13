@@ -19,7 +19,7 @@ export type MarketplacePolicySnapshot = Readonly<{
   competitorMarks: readonly string[];
   prohibitedClaimPatterns: readonly string[];
   sources: readonly Readonly<{ sourceId: string; url: string; observedAt: string; appliesTo: string; limitation: string; version: string; digest: string }>[];
-}>; 
+}>;
 
 export type ListingAssetRole = "MAIN" | "ADDITIONAL" | "DETAIL";
 export type ListingAssetTransformation =
@@ -177,4 +177,4 @@ export type ListingContentPacket = Readonly<{
   issues: readonly ListingPipelineIssue[];
   registrationPayload: Record<string, unknown> | null;
   approval: Readonly<{ contentApproved: boolean; livePublishAuthorized: boolean }>;
-}>; 
+}>;
