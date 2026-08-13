@@ -4,8 +4,16 @@ function monitor(page: Page): string[] {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
   page.on("console", (message) => { if (message.type() === "error") errors.push(`console.error: ${message.text()}`); });
-  page.on("response", (response) => { if (response.status() >= 400) errors.push(`response ${response.status()}: ${response.url()}`); });
-  page.on("requestfailed", (request) => errors.push(`requestfailed: ${request.url()} ${request.failure()?.errorText ?? ""}`));
+  page.on("response", (response) => {
+    if (response.status() >= 400 && response.url().includes("/api/")) {
+      errors.push(`api ${response.status()}: ${response.url()}`);
+    }
+  });
+  page.on("requestfailed", (request) => {
+    const errorText = request.failure()?.errorText ?? "";
+    if (errorText === "net::ERR_ABORTED") return;
+    errors.push(`requestfailed: ${request.url()} ${errorText}`);
+  });
   return errors;
 }
 

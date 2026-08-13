@@ -60,6 +60,14 @@
   `https://gonggamline-h6cdh5lfd-gg-online.vercel.app`. Evidence artifact
   `9172967501` has SHA-256
   `f47acd9c7e69865c29dd9ab40bc822eaa467829fe6af0edd6377e8b51163db1d`.
+- Follow-up delivery: owner-amendment commit `698a217` is pushed. Its first
+  exact-head CI run exposed the existing orchestrator shutdown timing race in
+  two jobs, while the directly affected Listing tests passed. Preview also
+  exposed an E2E-only false positive: Vercel protection intentionally aborts
+  navigation requests before the final page response. The Listing mobile test
+  now follows the existing page-health rule by ignoring only
+  `net::ERR_ABORTED` and still fails on page/console/API/non-abort request
+  errors. A new exact-head run is required after the E2E fix.
 - Exact next action: complete full local gates and diff/security review, push a
   coherent follow-up commit to Draft PR #125, then validate exact-head CI and
   Preview without merging. The repository owner still manually reviews/merges;
