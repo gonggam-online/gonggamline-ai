@@ -38,9 +38,18 @@
   manually merged, the owner must separately approve the exact WING logistics
   records and fee fields plus the six-unit product-registration payload. Rights-
   cleared assets and importer/physical-compliance facts remain hard blockers.
-- Current/next: update the sanitized packet/tests, run complete local gates,
-  push the exact head, update PR #124, validate CI/Vercel Preview/browser E2E,
-  then stop the reply monitor and report the exact manual next action.
+- First delivery head: `77b6c6687b89e35832677cbb0d1b1febafb8d137`
+  is pushed and PR #124 is updated. All 11 reported exact-head checks pass,
+  including CI, Vercel, database/security replays, and Preview browser E2E.
+  Exact Preview is
+  `https://gonggamline-i0anh19b3-gg-online.vercel.app`; browser evidence
+  artifact `9169648661` has SHA-256
+  `f6bea31f019b49d01e31da622f7d558fbfe098c64a3a12435dea2e6b5821a6d9`
+  and expires 2026-08-27.
+- Current/next: publish this delivery-evidence checkpoint, validate its exact
+  head, stop the provider-reply monitor, and await repository-owner manual PR
+  merge. After merge, the exact WING logistics/product external-write approval
+  remains separate and blocked by the listed facts.
 
 ## 2026-08-12 KK946 Gaemi B2C return and account-rate follow-up
 
