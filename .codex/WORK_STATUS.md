@@ -1,5 +1,151 @@
 # Work status
 
+## 2026-08-13 KK946 Gaemi B2C final follow-up reply
+
+- Objective/revenue impact: close the provider-information wait so the six-unit
+  first-sale experiment has an exact remaining owner approval boundary instead
+  of waiting for facts the provider cannot supply.
+- Branch/PR/risk: `codex/ops/kk946-wing-final-preflight`; Draft PR #124;
+  high-risk/manual with `manual-merge-required` and no auto-merge.
+- Root-cause class: external provider/account facts. No database or code fault
+  is being compensated for.
+- Provider result: the same categorized thread received its final follow-up
+  reply. Gaemi cannot inspect WING account acceptance, pre-confirm package
+  class, or state exact VAT-inclusive outbound/return debits; final debits are
+  observable only after the applicable operation in the point ledger.
+- Return result: check Coupang pickup status in WING first; when the item is sent
+  back to Gaemi, apply against the matching existing order as return/exchange.
+  A universal automatic/manual pickup mode and extra required identifiers were
+  not established.
+- Fee result: no provider-recommended WING initial-return/return amount or exact
+  Jeju/non-Jeju-island split. The confirmed regional surcharge range remains
+  `3,000-5,000 KRW`; exact WING fields require owner selection under Coupang
+  policy.
+- Durable state: Gaemi retains the private/raw reply and logistics values;
+  GitHub owns only this sanitized packet, tests, PR, and CI/Preview evidence.
+  Browser state and local build/test output are disposable.
+- External writes: none for this final read. No new inquiry, order, shipment,
+  return, WING address/product, price, stock, advertisement, payment,
+  API/configuration, Production, database, or secret write occurred.
+- Local validation: focused KK946 tests `6/6`, full tests `573/573`, JSON
+  parse, typecheck, 85-route production build, diff check, and targeted
+  PII/secret scan pass. Source lint has zero errors and the same four
+  pre-existing Revenue-test warnings. Local Playwright remains the known
+  unconfigured-Supabase baseline: `35` passed, `2` skipped, and `7` failed only
+  on `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`,
+  `/workflow`, and `/workspace`; exact configured Preview is binding.
+- Remaining approval boundary: after PR #124 passes exact-head gates and is
+  manually merged, the owner must separately approve the exact WING logistics
+  records and fee fields plus the six-unit product-registration payload. Rights-
+  cleared assets and importer/physical-compliance facts remain hard blockers.
+- First delivery head: `77b6c6687b89e35832677cbb0d1b1febafb8d137`
+  is pushed and PR #124 is updated. All 11 reported exact-head checks pass,
+  including CI, Vercel, database/security replays, and Preview browser E2E.
+  Exact Preview is
+  `https://gonggamline-i0anh19b3-gg-online.vercel.app`; browser evidence
+  artifact `9169648661` has SHA-256
+  `f6bea31f019b49d01e31da622f7d558fbfe098c64a3a12435dea2e6b5821a6d9`
+  and expires 2026-08-27.
+- Current/next: publish this delivery-evidence checkpoint, validate its exact
+  head, stop the provider-reply monitor, and await repository-owner manual PR
+  merge. After merge, the exact WING logistics/product external-write approval
+  remains separate and blocked by the listed facts.
+
+## 2026-08-12 KK946 Gaemi B2C return and account-rate follow-up
+
+- Provider reply: the categorized thread received a partial response. CJ
+  Logistics is confirmed for B2C and WING; private WING logistics values were
+  supplied and remain only at Gaemi; no extra return-recipient identifier is
+  required; Jeju/island delivery is available with a `3,000-5,000 KRW` range;
+  returns are requested against the order under general order information; and
+  marketplace seller fulfillment uses the general-outbound menu.
+- Follow-up: one reply on the same categorized thread asks only for the missing
+  account-applied VAT-inclusive outbound/return numbers or formulas, CJ
+  collection responsibility and required fields, explicit WING-use authority,
+  and recommended WING return/remote-area values. No new request was created.
+- Still blocked: exact debit amounts, collection automation/manual ownership,
+  and exact WING fee fields remain provider-follow-up pending. The duplicate
+  general thread was closed after its ignore instruction.
+- Current validation: focused KK946 tests `6/6`, JSON parse, typecheck,
+  tracked-source lint with zero errors and four pre-existing warnings, and the
+  85-route production build pass. The full Windows suite passed `572/573`;
+  unchanged `tests/orchestrator-phase-3.test.ts` reproduces one late-file-
+  mutation timing failure in isolation. No orchestrator file differs from the
+  branch base, so this is classified outside this evidence-only change pending
+  exact-head Linux CI.
+- Objective: close WING logistics facts from the authenticated Gaemi account
+  before any address or listing write.
+- Branch/PR: `codex/ops/kk946-wing-final-preflight`; Draft PR #124.
+- Risk/root cause: high-risk/manual; external provider facts, not database/code.
+- Verified: six KK946 units remain available; B2C general outbound is distinct
+  from Rocket Growth; CJ Logistics is the normal return carrier; non-CJ returns
+  require advance provider notice; the return form is bound to an existing order
+  and no order or return was created.
+- Rate status: public standard rates and the partial reply do not prove the
+  account's final VAT-inclusive debit. Account-applied outbound and return cost,
+  exact WING remote-area fields, and CJ collection mechanics remain pending.
+- Authorized external write: one categorized informational request and one
+  bounded follow-up on the same thread. The confirmation flow also created one
+  duplicate; it was marked to ignore and the provider closed it.
+- Prohibited writes preserved: no order, shipment, return, WING address, draft,
+  listing, price, stock, advertisement, API/configuration, payment, database, or
+  Production write.
+- Cloud-first: Gaemi owns private provider replies and messages; GitHub retains
+  sanitized status/tests/PR history only. No private address/contact, balance,
+  account identity, or raw capture is copied into Git.
+- Verification: JSON parse and focused tests `6/6` pass; full tests `573/573`,
+  typecheck, source lint with zero errors and four pre-existing warnings, and
+  the 85-route production build pass. Local browser baseline remains `35`
+  passed, `2` skipped, and the same `7` unconfigured-local-Supabase failures on
+  `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`,
+  and `/workspace`. Diff check and targeted secret/PII scan pass; the only scan
+  hit is an older unrelated backup filename.
+- Current/next: review the diff, push PR #124, wait for exact CI/Preview, then
+  apply the provider reply without another owner prompt while preserving the
+  exact live product-registration approval boundary.
+
+## 2026-08-12 KK946 WING/Gaemi final preflight after PR #123
+
+- Objective: close every discoverable read-only WING, Gaemi, and supplier fact
+  before requesting the six-unit external-write approval.
+- Branch/base: `codex/ops/kk946-wing-final-preflight` from merged PR #123 at
+  `a97eb9193af3fb61f81cbe350adb1f34d9c26dc9`.
+- Risk/root cause: high-risk/manual. External configuration/facts are blocking;
+  no database or compensating code defect was found.
+- Verified: WING catalog/category/options remain selected, auto-save is off,
+  logistics records remain absent, and no price/stock/image/notice submission
+  occurred. Gaemi holds six units and has sufficient base-outbound balance.
+- External blocker: Gaemi Coupang API is disconnected and automatic order
+  collection is disabled. Manual order entry is available but does not validate
+  automation.
+- Product facts: supplier catalog supports pouch, polyester, KLAND manufacturer,
+  China OEM, and unchanged image-use permission. Black and dimensions remain
+  bound to the purchased/warehouse evidence.
+- Remaining facts: importer and physical compliance marking, rights-cleared
+  WING-suitable main/detail assets, password-gated WING seller/A/S information,
+  provider-authorized outbound/return routing, Jeju/island policy, carrier, and
+  initial/return charges.
+- Owner action: enter the WING password directly on the seller-information
+  reauthentication page and leave it open. Never send the password in chat.
+  Provider inquiry or API configuration needs separate external-write approval.
+- External writes: none. No inquiry, credential/configuration, address, draft,
+  product, price, stock, ad, fulfillment, paid, database, or Production write.
+- Cloud-first: GitHub owns sanitized facts/tests/PR history; source providers
+  retain PII, credentials, raw images, addresses, balances, and transactions.
+- Changed files: sanitized KK946 Markdown/JSON evidence packet, its regression
+  test, listing changelog, decision log, and this status only.
+- Verification: focused tests `20/20`, full tests `573/573`, typecheck, and the
+  85-route production build pass. Source lint reports zero errors and the same
+  four pre-existing test warnings. Local browser baseline remains `35` passed,
+  `2` skipped, and `7` failed only on the known unconfigured-local-Supabase
+  routes `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`,
+  `/workflow`, and `/workspace`. Diff check and a targeted secret/PII scan pass;
+  the only email-shaped scan hit is an older unrelated backup filename.
+- Current/next: review the complete diff, commit and push, open a high-risk
+  manual PR, wait for exact CI/Preview gates, then continue only after the owner
+  reauthenticates WING and separately authorizes any provider inquiry or API
+  configuration.
+
 ## 2026-08-12 KK946 six-unit Coupang E2E listing readiness
 
 - Objective: prepare the fastest safe real sale-to-settlement validation for

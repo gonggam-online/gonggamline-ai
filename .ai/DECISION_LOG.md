@@ -1,5 +1,64 @@
 # Decision log
 
+## 2026-08-13 - Close the KK946 Gaemi inquiry without inventing exact costs
+
+- Final provider evidence: Gaemi cannot inspect the current WING account or
+  guarantee that the supplied private logistics values will be accepted there.
+  It cannot pre-confirm package class or final outbound/return debit; the exact
+  values become available only in the point ledger after each operation.
+- Return decision: check WING for Coupang pickup status first. If the item is
+  returned to Gaemi, use the matching existing order's return/exchange
+  application. Do not claim a universal automatic or manual pickup mode.
+- Fee decision: Gaemi did not recommend WING initial-return/return values or an
+  exact Jeju versus non-Jeju-island split. Preserve the confirmed regional
+  `3,000-5,000 KRW` surcharge range only as planning evidence and require the
+  owner to choose the exact WING fields under Coupang policy.
+- Consequence: the provider follow-up is complete, but the WING logistics write
+  and listing remain blocked by account acceptance, owner fee choices, product
+  compliance facts, and rights-cleared assets. No further provider inquiry is
+  authorized for this packet.
+- Risk/rollback: high-risk/manual. No new external write occurred while reading
+  the reply; repository changes can be reverted normally.
+
+## 2026-08-12 - Use Gaemi account facts before WING logistics creation
+
+- Provider reply: CJ Logistics is confirmed for B2C/WING; private WING
+  logistics values were supplied at source; no extra return-recipient text is
+  required; Jeju/island delivery has a `3,000-5,000 KRW` surcharge range; and
+  marketplace returns/outbounds use the general order/outbound path.
+- Incomplete reply decision: keep exact VAT-inclusive outbound/return debit,
+  CJ collection responsibility, required return fields, WING-use authority,
+  and recommended WING charge inputs fail-closed. Submit one bounded follow-up
+  on the same thread and create no new inquiry.
+- Evidence: the account identifies CJ Logistics as its normal return carrier
+  and provides an order-bound return form, but not the final account-applied
+  debit or exact WING recipient label.
+- Decision: keep seller-fulfilled B2C distinct from Rocket Growth; wait for the
+  same categorized provider thread to close the remaining fields before
+  creating WING address records.
+- External write: owner-authorized informational request and one follow-up on
+  that same thread only. One duplicate was marked to ignore and closed. No
+  order, shipment, return, listing, paid, API/configuration,
+  database, or Production write was authorized or performed.
+- Risk/rollback: high-risk/manual. Provider messages are durable at Gaemi and
+  cannot be rolled back; Git evidence can be reverted normally.
+
+## 2026-08-12 - Keep KK946 execution blocked on external facts after PR #123
+
+- Read-only evidence: six Gaemi units and sufficient base-outbound balance are
+  available, but the Gaemi Coupang API is disconnected and automatic order
+  collection is disabled.
+- Decision: allow a clearly labelled manual first-order fallback for the bounded
+  six-unit experiment; do not describe it as automated fulfillment. API secret
+  configuration requires separate exact approval and provider-UI entry.
+- Compliance: keep the listing adult/general-use only. Supplier catalog claims
+  do not close importer identity, physical textile marking, image suitability,
+  or seller-private A/S evidence.
+- Logistics: the verified inbound center is not automatically an authorized
+  WING return identity. Provider return routing and fees require confirmation.
+- Risk/rollback: high-risk/manual evidence update. No external write occurred;
+  repository rollback is Git revert.
+
 ## 2026-08-12 - Prepare a six-unit KK946 E2E liquidation exception
 
 - Decision: preserve KK946's failed ordinary v3 pre-purchase gate and prohibit

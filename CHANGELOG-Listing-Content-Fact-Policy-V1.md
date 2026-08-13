@@ -1,5 +1,54 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-13 - KK946 Gaemi B2C follow-up reply
+
+- Recorded the final reply on the existing categorized thread without creating
+  another provider request or exposing the private logistics values.
+- Classified the exact outbound/return debit as post-operation point-ledger
+  evidence because Gaemi cannot pre-confirm package class or final charge.
+- Bound the return sequence to checking WING pickup status first and then using
+  the existing-order return/exchange application when the item is sent back to
+  Gaemi; universal automatic versus manual pickup remains unconfirmed.
+- Kept WING acceptance of the private logistics values and the exact initial-
+  return, return, Jeju, and non-Jeju-island fields owner-confirmed and
+  fail-closed because the provider cannot inspect the seller's WING account or
+  recommend account-specific fee inputs.
+- Performed no new inquiry, order, shipment, return, address, listing, price,
+  stock, advertisement, API/configuration, payment, database, or Production
+  write.
+
+## 2026-08-12 - KK946 Gaemi B2C return and rate inquiry
+
+- Recorded the provider's partial reply: CJ Logistics for B2C/WING, private
+  WING logistics values retained only at source, no extra recipient identifier,
+  Jeju/island delivery with a `3,000-5,000 KRW` surcharge range, order-bound
+  return application, and the general-outbound path for marketplace orders.
+- Kept exact VAT-inclusive account debits, CJ collection responsibility,
+  required return fields, and recommended WING fee inputs fail-closed; sent one
+  bounded follow-up on the same categorized thread without creating a new one.
+- Verified the authenticated account's CJ Logistics return default, order-bound
+  return form, and separation between B2C seller fulfillment and Rocket Growth.
+- Kept account-applied VAT-inclusive rates, WING-safe recipient labeling,
+  Jeju/island handling, and exact manual return mapping fail-closed because the
+  provider UI does not expose them.
+- Recorded one authorized active informational provider request. A duplicate
+  request produced by the confirmation flow was marked to ignore; no commerce,
+  paid, secret/configuration, database, or Production write occurred.
+
+## 2026-08-12 - KK946 post-merge WING/Gaemi final preflight
+
+- Confirmed read-only that Gaemi holds six units and has enough provider balance
+  for six base outbounds without persisting the private balance amount.
+- Classified the disconnected Gaemi Coupang API and disabled automatic order
+  collection as an external-configuration blocker; retained manual first-order
+  entry as a visible fallback rather than claiming automation.
+- Promoted supplier notice claims for type, polyester, manufacturer, and origin,
+  while retaining importer, physical compliance marking, A/S, image suitability,
+  and provider-authorized return routing as fail-closed facts.
+- Added current adult/general textile and child-directed marketing boundaries.
+- Performed no provider inquiry, credential/configuration, address, product,
+  price, stock, fulfillment, paid, database, or Production write.
+
 ## 2026-08-12 - KK946 six-unit E2E liquidation readiness
 
 - Preserved the failed ordinary pre-purchase gate while preparing a bounded
