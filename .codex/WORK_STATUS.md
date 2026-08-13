@@ -30,11 +30,14 @@
 - Non-goals: persistence, schema changes, live supplier/Coupang/provider calls,
   image generation/editing, asset upload, listing submission, price/inventory
   mutation, Production/config/secret/paid actions, or granting rights.
-- Progress: 11/12 steps complete. Generic implementation, local validation,
-  complete diff/security review, commit/push, Draft PR, exact-head CI, Vercel,
-  and configured Preview validation are complete. Current step is the binding
-  repository-owner manual merge decision; post-merge Production smoke and the
-  later exact KK946 adapter packet remain incomplete.
+- Progress: owner amendment follow-up 10/12 steps complete. Reconfirmed the
+  branch/PR HEAD; strengthened the generic trust/policy/ranker/selected-variant,
+  rights/render/mapper/learning contracts; moved the legacy named preflight
+  adapter to a generic path; expanded synthetic and KK946 acceptance tests; and
+  recorded the 16-item compliance matrix. Full local quality/build/browser
+  gates pass. Complete diff, secret-pattern, generated-output and production
+  hardcoding reviews pass. Commit/push and new exact-head CI/Preview validation
+  remain current work.
 - Blocker/owner boundary: KK946 unchanged supplier assets are eligible because
   use rights are verified; unknown edit rights only exclude derivatives. It
   remains `REGISTRATION_BLOCKED` on exact category/required notice evidence and
@@ -42,22 +45,26 @@
   asset storage each require a separate approved Story/action.
 - Recovery: push coherent commits to this branch; GitHub branch/PR/CI is the
   recovery source. No unique local durable business state may be created.
-- Local validation: lint has zero errors/four pre-existing Revenue warnings;
-  typecheck passes; focused Listing tests pass 13/13; full tests pass 585/585;
-  production build passes with 86 routes. Local Playwright passes 36, skips 2,
-  and fails the same seven unconfigured-Supabase routes; the new
-  `/listing/review` route passes with no page/console/request errors.
-- Delivery: commits `a74e622` and `79c71a5` are pushed; Draft PR #125 targets
+- Local validation: lint passes with zero errors and four pre-existing Revenue
+  test warnings; typecheck passes; full unit/integration tests pass `598/598`.
+  One known orchestrator timing test failed once at its wall-clock edge, then
+  passed in isolation and in the immediate full rerun. Production build passes.
+  The Listing review mobile Chromium E2E passes with no page, console, request,
+  overflow, or encoding error. The earlier full local browser baseline remains
+  `36` passed, `2` skipped, and `7` failed only on routes requiring the absent
+  local Supabase configuration; exact configured Preview is the binding gate.
+- Delivery: commits `a74e622`, `79c71a5`, and `2d460cf` are pushed; Draft PR #125 targets
   `main`, has `manual-merge-required`, is conflict-free, and has no auto-merge.
   All reported exact-head checks pass. Preview browser run `31679580706`
   passed 43 routes with no page/console/request failure at
   `https://gonggamline-h6cdh5lfd-gg-online.vercel.app`. Evidence artifact
   `9172967501` has SHA-256
   `f47acd9c7e69865c29dd9ab40bc822eaa467829fe6af0edd6377e8b51163db1d`.
-- Exact next action: publish this recovery checkpoint and revalidate its exact
-  head, then repository owner manually reviews/merges PR #125. After merge,
-  Production smoke precedes a separate exact KK946 category/notice/asset/
-  approval adapter packet; no WING submission is authorized yet.
+- Exact next action: complete full local gates and diff/security review, push a
+  coherent follow-up commit to Draft PR #125, then validate exact-head CI and
+  Preview without merging. The repository owner still manually reviews/merges;
+  a separate real KK946 category/notice/private-asset/live-approval adapter
+  packet remains required before any WING-resume signal.
 
 
 ## 2026-08-13 KK946 Gaemi B2C final follow-up reply

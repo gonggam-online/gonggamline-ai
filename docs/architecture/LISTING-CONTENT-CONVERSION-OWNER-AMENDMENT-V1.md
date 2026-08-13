@@ -33,6 +33,13 @@ unchanged use is allowed, limited samples, and cold-start optimization coverage
 are `WARNING` or `OPTIMIZATION_PENDING`. No warning may be converted into an
 invented legal/category fact.
 
+The typed implementation emits exactly one of these five `blockerClass`
+values: `REQUIRED_FIELD_MISSING`, `CORE_FACT_CONFLICT`,
+`PROHIBITED_PAYLOAD_CONTENT`, `PAYLOAD_VALIDATION_FAILED`, or
+`LIVE_WRITE_APPROVAL_MISSING`. A packet with no blocker is
+`REGISTRATION_READY` even when conversion warnings remain. Its conversion axis
+stays `COLD_START` until seller actual metrics justify a stronger state.
+
 ## Supplier trust and image-rights amendment
 
 An `ApprovedSupplierTrustProfile` is a versioned allowlist/capability decision.
@@ -89,3 +96,22 @@ disposable.
 Revert this implementation before any live use. A later approved packet must be
 re-evaluated whenever its supplier trust profile, rights, category, policy,
 asset digest, selected variant, or commerce fields change.
+
+## Typed implementation map
+
+- Policy sources and official limits:
+  `engines/listing/marketplace-policy.ts` and
+  `MarketplacePolicySnapshot` in `shared/domain/listing-content.ts`.
+- Trust admission and capability-change reevaluation:
+  `engines/listing/supplier-trust.ts` and
+  `engines/listing/approved-supplier-profiles.ts`.
+- Generic candidate rankers, rights-aware render, visual QA, selected-variant
+  mapper and five-class gate: `engines/listing/content-pipeline.ts`.
+- Append-only metrics and guardrails: `shared/domain/listing-learning.ts` and
+  `engines/listing/learning.ts`.
+- Operator presentation: `components/listing/listing-content-review.tsx` and
+  `/listing/review`. The route intentionally does not persist or load business
+  packets until the separate Database/Auth/RLS Story is approved.
+- Acceptance evidence: `tests/listing-content-pipeline.test.ts`,
+  `tests/listing-supplier-trust-and-learning.test.ts`, and
+  `tests/kk946-listing-content-acceptance.test.ts`.

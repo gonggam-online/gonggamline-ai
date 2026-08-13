@@ -1,5 +1,33 @@
 # Decision log
 
+## 2026-08-13 - Separate minimum Listing registration fitness from conversion optimization
+
+- Owner amendment: an active versioned supplier trust profile automatically
+  admits facts within its capability. Verified unchanged image reuse does not
+  imply edit or generative-reference rights; unsupported derivatives are
+  excluded without blocking a payload that uses the verified original.
+- Registration decision: `REGISTRATION_BLOCKED` is limited to required-field
+  absence, unresolved purchase-critical conflict, prohibited/unlicensed/false
+  selected content, exact category/schema/payload failure, or missing live-write
+  approval. Every blocker carries one stable owner-approved blocker class.
+- Conversion decision: optimize qualified purchase conversion and actual
+  attributable profit while constraining cancellations, returns/refunds,
+  customer misunderstanding, and policy violations. CTR/CVR alone never
+  declares a winner.
+- Evidence order: current Coupang official policy, fresh pattern-only public
+  category observations, commerce UX research, then seller/category/product
+  actual metrics. Competitor text and images are never copied.
+- Experiment boundary: one human-approved variant enters a payload. Parallel
+  duplicate listings are prohibited; a sequential revision requires separate
+  approval, sufficient traffic, profit/return/cancellation guardrails, and a
+  rollback revision.
+- Durable-state boundary: this PR provides pure contracts/evaluation only.
+  Append-only runtime persistence remains a separate Database/Auth/RLS Story
+  and `legacy listing_drafts` cannot be cast to registration-ready.
+- Risk/rollback: high-risk/manual; no marketplace, provider, database,
+  Production, configuration, secret, paid, price, stock, ad, or order write is
+  authorized. Roll back through Git before any live adoption.
+
 ## 2026-08-13 - Close the KK946 Gaemi inquiry without inventing exact costs
 
 - Final provider evidence: Gaemi cannot inspect the current WING account or

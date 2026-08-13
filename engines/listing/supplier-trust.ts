@@ -1,4 +1,4 @@
-import type { ApprovedSupplierTrustProfile, TrustedSupplierAdmission, TrustedSupplierObservation } from "@/shared/domain/supplier-trust";
+import type { ApprovedSupplierTrustProfile, SupplierTrustReevaluation, TrustedSupplierAdmission, TrustedSupplierObservation } from "@/shared/domain/supplier-trust";
 
 const MAX_WARNING_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -17,4 +17,15 @@ export function admitTrustedSupplierObservations(profile: ApprovedSupplierTrustP
     return [{ factId: `trusted:${profile.profileId}:${observation.observationId}`, subjectId: observation.subjectId, field: observation.field, factClass: "CATALOG_CLAIM" as const, value: observation.value, sourceType: "SUPPLIER_CATALOG" as const, sourceReference: `${observation.sourceReference}#trust=${profile.version}`, evidenceDigest: observation.evidenceDigest, observedAt: observation.observedAt, capturedAt: observation.capturedAt, status: active ? "PROVEN" as const : "PROHIBITED" as const, scope: "CATALOG_ITEM" as const, scopeReference: `trusted:${profile.sourceId}:${observation.subjectId}`, reviewerReference: `trust-profile:${profile.profileId}:${profile.version}` }];
   });
   return { facts, warnings, profileVersion: profile.version };
+}
+
+export function evaluateSupplierTrustChange(previous: ApprovedSupplierTrustProfile, next: ApprovedSupplierTrustProfile): SupplierTrustReevaluation {
+  const affectedFields = previous.allowedFactFields.filter((field) => !next.allowedFactFields.includes(field));
+  const reasons: SupplierTrustReevaluation["reasons"][number][] = [];
+  if (next.status === "REVOKED") reasons.push("PROFILE_REVOKED");
+  if (affectedFields.length > 0) reasons.push("CAPABILITY_REDUCED");
+  const assetsAffected = previous.originalImageUse === "VERIFIED" && next.originalImageUse !== "VERIFIED" || previous.imageEditRights === "VERIFIED" && next.imageEditRights !== "VERIFIED";
+  if (assetsAffected) reasons.push("IMAGE_RIGHTS_REDUCED");
+  if (previous.allowedChannels.some((channel) => !next.allowedChannels.includes(channel))) reasons.push("CHANNEL_REMOVED");
+  return { required: reasons.length > 0, affectedFields, assetsAffected, reasons };
 }
