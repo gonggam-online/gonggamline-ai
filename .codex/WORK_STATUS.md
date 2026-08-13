@@ -30,10 +30,11 @@
 - Non-goals: persistence, schema changes, live supplier/Coupang/provider calls,
   image generation/editing, asset upload, listing submission, price/inventory
   mutation, Production/config/secret/paid actions, or granting rights.
-- Progress: 10/12 steps complete. Generic implementation, focused and full
-  tests, lint, typecheck, build, and local browser validation are complete.
-  Current step: complete diff/security review, commit/push/PR, then exact-head
-  CI and configured Preview verification.
+- Progress: 11/12 steps complete. Generic implementation, local validation,
+  complete diff/security review, commit/push, Draft PR, exact-head CI, Vercel,
+  and configured Preview validation are complete. Current step is the binding
+  repository-owner manual merge decision; post-merge Production smoke and the
+  later exact KK946 adapter packet remain incomplete.
 - Blocker/owner boundary: KK946 unchanged supplier assets are eligible because
   use rights are verified; unknown edit rights only exclude derivatives. It
   remains `REGISTRATION_BLOCKED` on exact category/required notice evidence and
@@ -46,8 +47,17 @@
   production build passes with 86 routes. Local Playwright passes 36, skips 2,
   and fails the same seven unconfigured-Supabase routes; the new
   `/listing/review` route passes with no page/console/request errors.
-- Exact next action: complete diff/security review, commit/push, create a
-  high-risk Draft PR, and wait for exact-head CI/Vercel Preview evidence.
+- Delivery: commits `a74e622` and `79c71a5` are pushed; Draft PR #125 targets
+  `main`, has `manual-merge-required`, is conflict-free, and has no auto-merge.
+  All reported exact-head checks pass. Preview browser run `31679580706`
+  passed 43 routes with no page/console/request failure at
+  `https://gonggamline-h6cdh5lfd-gg-online.vercel.app`. Evidence artifact
+  `9172967501` has SHA-256
+  `f47acd9c7e69865c29dd9ab40bc822eaa467829fe6af0edd6377e8b51163db1d`.
+- Exact next action: publish this recovery checkpoint and revalidate its exact
+  head, then repository owner manually reviews/merges PR #125. After merge,
+  Production smoke precedes a separate exact KK946 category/notice/asset/
+  approval adapter packet; no WING submission is authorized yet.
 
 
 ## 2026-08-13 KK946 Gaemi B2C final follow-up reply
