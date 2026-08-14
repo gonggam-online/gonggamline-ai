@@ -1,5 +1,54 @@
 # Work status
 
+## 2026-08-14 Listing creative Production storage rollout and OIDC correction
+
+- Objective/revenue impact: complete the next post-PR-134 step toward actual
+  conversion assets by establishing the approved recoverable private master and
+  public CDN mirror, then make the server adapter compatible with Vercel's
+  current short-lived OIDC authentication without leaking a long-lived secret.
+- Branch/base: `codex/ops/listing-creative-provider-rollout` from exact merged
+  `origin/main` `66b313e64df165cb9390d446998c9079d66b5e7b` (PR #134).
+- Risk: high-risk credential/Production integration. The owner has explicitly
+  approved the accepted managed-store/provider Architecture and autonomous
+  continuation, but exact-head validation and reversible rollout evidence remain
+  binding. No WING live-write, product publication, or paid OpenAI call occurs
+  until its independent final gates pass.
+- Root-cause order: (1) external configuration: authenticated Supabase/Vercel
+  setup now exists; Vercel billing continuity remains uncertain and OpenAI is
+  signed out with no verified project key/budget; (2) database: unattended job
+  and approval persistence still needs S3-12 DB/Auth/RLS; (3) code: the merged
+  service required only `BLOB_READ_WRITE_TOKEN`, while the new Blob connection
+  correctly installed OIDC `BLOB_STORE_ID` instead.
+- Cloud-first gate: Supabase private bucket `listing-creative-private-v1` owns
+  masters/manifests; Vercel public Blob `listing-creative-public-v1` in ICN1 is
+  a replaceable mirror; GitHub owns source/contracts/evidence. Local fixtures are
+  disposable. Recovery remains digest verification from private master followed
+  by selected-approval publication and CDN verification.
+- Production baseline: PR #134 merge commit `66b313e` deployment `5905203111`
+  passed Production browser workflow `31795723183` with `44/44` runnable tests.
+  Evidence artifact `9217315058` SHA-256 is
+  `dc5729dfc467b4b3c1549b69cbc58a40bba494f23fad55cf636b94bc72e1a298`.
+- External result: created the approved private Supabase bucket with public off,
+  20 MiB and exact MIME limits and zero policies; created public Vercel Blob
+  store in Seoul and connected it using OIDC metadata. No asset bytes were
+  uploaded or published, no token/value revealed, no card/payment action taken,
+  and no OpenAI or commerce call occurred.
+- Current progress: 7/12 steps complete. Exact baseline, private bucket, public
+  mirror, official OIDC/SDK audit, Production-only OIDC adapter/tests,
+  Architecture/runbook records, and all local verification/diff review are
+  complete. PR/CI/Preview, merge/Production, synthetic restore drill, OpenAI
+  paid smoke, and KK946 execution remain.
+- Implementation checkpoint: added a pure Production credential resolver that
+  prefers `BLOB_STORE_ID` OIDC, retains an injected legacy-token fallback, and
+  returns unavailable outside Production. The object-store adapter omits the
+  token field in OIDC mode so `@vercel/blob@2.8.0` uses its request-context
+  credential. Full unit/integration `653/653`, focused storage `15/15`, lint
+  zero errors/four pre-existing warnings, typecheck, 86-route build, and mobile
+  Chromium E2E `1/1` pass; diff/secret/product-hardcode review passes.
+- Exact next action: deliver the high-risk Draft PR and wait for exact-head CI
+  and Preview. After merge, run Production smoke and a synthetic private/public
+  restore drill before configuring the bounded OpenAI paid smoke.
+
 ## 2026-08-14 Listing creative actual-byte QA and approval continuation
 
 - Objective/revenue impact: after merged PR #133, connect real provider bytes to

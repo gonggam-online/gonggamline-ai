@@ -13,6 +13,7 @@ import type {
   PublicListingCreativeObjectStore,
 } from "@/engines/listing/creative-storage";
 import { CreativeStorageError } from "@/engines/listing/creative-storage";
+import type { ListingCreativeBlobAuthentication } from "@/lib/listing/creative-blob-auth";
 import { LISTING_CREATIVE_PRIVATE_BUCKET } from "@/shared/domain/listing-creative-storage";
 
 function copyArrayBuffer(bytes: Uint8Array): ArrayBuffer {
@@ -86,10 +87,19 @@ implements PrivateListingCreativeObjectStore {
 
 export class VercelPublicListingCreativeObjectStore
 implements PublicListingCreativeObjectStore {
-  constructor(private readonly token: string) {
-    if (token.trim().length === 0) {
+  constructor(private readonly authentication: ListingCreativeBlobAuthentication) {
+    if (
+      authentication.mode === "READ_WRITE_TOKEN"
+      && authentication.token.trim().length === 0
+    ) {
       throw new CreativeStorageError("INVALID_STORAGE_INPUT");
     }
+  }
+
+  private credentialOptions(): Readonly<{ token?: string }> {
+    return this.authentication.mode === "READ_WRITE_TOKEN"
+      ? { token: this.authentication.token }
+      : {};
   }
 
   async putImmutable(
@@ -104,7 +114,7 @@ implements PublicListingCreativeObjectStore {
         allowOverwrite: false,
         cacheControlMaxAge: 31536000,
         contentType,
-        token: this.token,
+        ...this.credentialOptions(),
       });
       if (result.pathname !== pathname) {
         throw new CreativeStorageError("PUBLIC_MIRROR_VERIFICATION_FAILED");
@@ -124,7 +134,7 @@ implements PublicListingCreativeObjectStore {
       const result = await getBlob(pathname, {
         access: "public",
         useCache: consistency === "DELIVERY",
-        token: this.token,
+        ...this.credentialOptions(),
       });
       if (!result || result.statusCode !== 200) return null;
       return new Uint8Array(await new Response(result.stream).arrayBuffer());
@@ -135,7 +145,7 @@ implements PublicListingCreativeObjectStore {
 
   async remove(pathname: string): Promise<void> {
     try {
-      await deleteBlob(pathname, { token: this.token });
+      await deleteBlob(pathname, this.credentialOptions());
     } catch {
       throw new CreativeStorageError("PUBLIC_TAKEDOWN_NOT_VERIFIED");
     }

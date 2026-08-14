@@ -8,25 +8,30 @@ an image-provider call, a public generation route, a marketplace write, or use
 of a generated artifact. Stop if the target project, access level, MIME limit,
 token environment, object digest, or operator identity cannot be verified.
 
-Never copy `SUPABASE_SERVICE_ROLE_KEY` or `BLOB_READ_WRITE_TOKEN` into chat,
-screenshots, logs, Git, a client bundle, or a Preview environment.
+Never copy `SUPABASE_SERVICE_ROLE_KEY`, `BLOB_READ_WRITE_TOKEN`, or an OIDC
+token into chat, screenshots, logs, Git, a client bundle, or a Preview environment.
 
-## 2026-08-14 exact-project preflight
+## 2026-08-14 exact-project rollout result
 
-The post-PR-132 read-only preflight found three current external stop conditions:
+The post-PR-134 authenticated rollout established the following exact state:
 
-- the Supabase Dashboard session is not authenticated, so the existing managed
-  project and bucket state cannot yet be verified or changed;
-- the current Vercel Create Blob Store form requires an irreversible region
-  choice that the accepted Story did not name;
-- the same form states that connection variables are added to both Production
-  and Preview, while this contract permits a read-write token only in Production.
-  The team trial is also expired and presents a payment-method action.
+- Supabase bucket `listing-creative-private-v1` exists with public access off,
+  the approved 20 MiB/MIME limits, and zero `anon`/`authenticated` policies;
+- public Vercel Blob store `listing-creative-public-v1` exists in `ICN1` (Seoul)
+  and is connected with `BLOB_STORE_ID` plus `BLOB_WEBHOOK_PUBLIC_KEY`;
+- the connection uses Vercel's current OIDC default. No long-lived
+  `BLOB_READ_WRITE_TOKEN` was added, revealed, or copied;
+- the store identifier is present in Production and Preview, but the application
+  storage composition rejects every non-Production `VERCEL_ENV` before the SDK;
+- the Vercel trial is expired. No payment method was entered; availability and
+  billing remain an operational warning before relying on the mirror for sales.
 
-Do not infer a region, connect a write token to Preview, enter payment data, or
-create the store until an exact owner amendment names the region and a verified
-Vercel procedure preserves Production-only write authority. Code and fake-based
-validation may continue independently.
+Vercel's 2026-06-01 official OIDC announcement states that new Blob connections
+default to short-lived, automatically rotated OIDC credentials and no longer
+need a long-lived read-write token. `@vercel/blob@2.8.0` resolves that credential
+from the Production request context and `BLOB_STORE_ID`. Observed 2026-08-14;
+scope is Vercel-hosted Functions only, so legacy-token fallback remains available
+for an explicitly controlled non-OIDC migration, never Preview.
 
 ## 1. Supabase private master
 
@@ -45,10 +50,12 @@ validation may continue independently.
 ## 2. Vercel public mirror
 
 1. Open the GonggamLine Vercel project, then **Storage > Create Database > Blob**.
-2. Create a **Public** Blob store named `listing-creative-public-v1` and connect
-   it only to the **Production** environment.
-3. Verify Vercel installs `BLOB_READ_WRITE_TOKEN` as a server-only Production
-   secret. Do not create a `NEXT_PUBLIC_*` copy and do not expose it to Preview.
+2. Create a **Public** Blob store named `listing-creative-public-v1` in `ICN1`.
+3. Prefer the current OIDC connection. Verify `BLOB_STORE_ID` exists and no
+   long-lived `BLOB_READ_WRITE_TOKEN` is required. Although Vercel exposes the
+   non-secret store identifier to Production and Preview, application code must
+   reject non-Production execution before any write. Do not create a
+   `NEXT_PUBLIC_*` credential or reveal an OIDC token.
 4. Keep SDK object writes immutable: `addRandomSuffix=false` because the path is
    already SHA-256 content-addressed, and `allowOverwrite=false`.
 
