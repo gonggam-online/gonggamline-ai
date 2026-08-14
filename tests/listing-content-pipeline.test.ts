@@ -42,6 +42,19 @@ test("one human-approved variant alone is mapped to the live payload", () => {
   assert.ok(result.detailPage.html.includes(result.conversion.candidates[1].title));
 });
 
+test("core purchase facts not selected by title policy never leak into title candidates", () => {
+  const input = genericListingInput();
+  const result = buildListingContentPacket({
+    ...input,
+    corePurchaseFields: [...input.corePurchaseFields, "material", "stockQuantity"],
+  }, genericCommerceFields());
+
+  assert.equal(result.status, "REGISTRATION_READY");
+  assert.equal(result.title.value, "정리 파우치 GL-01 네이비");
+  assert.doesNotMatch(result.title.value, /폴리에스터|20/);
+  assert.ok(result.conversion.candidates.every(({ title }) => !title.includes("폴리에스터") && !title.includes("20")));
+});
+
 test("Coupang keyword character rules exclude invalid candidates without blocking registration", () => {
   const input = genericListingInput();
   const facts = input.evidence.facts.map((fact) => fact.field === "keywords" ? { ...fact, value: "파우치,정리" } : fact);

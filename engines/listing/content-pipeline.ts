@@ -85,7 +85,10 @@ function rankTitleTokens(input: ListingContentInput, facts: readonly ListingEvid
     const intentBonus = mapping.priority * (strategy === "INTENT_FIRST" ? 100 : 10);
     base.set(mapping.field, current + intentBonus);
   }
-  for (const field of input.corePurchaseFields) base.set(field, (base.get(field) ?? 0) + (strategy === "PURCHASE_FIRST" ? 60 : 5));
+  for (const field of input.corePurchaseFields) {
+    if (!base.has(field)) continue;
+    base.set(field, (base.get(field) ?? 0) + (strategy === "PURCHASE_FIRST" ? 60 : 5));
+  }
   return [...base.entries()]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .map(([field, rank]): ProvenancedText | null => {

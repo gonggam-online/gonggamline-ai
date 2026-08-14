@@ -28,9 +28,10 @@
 - Non-goals: final Product Registration submission, ad/coupon/automatic pricing,
   reorder/procurement, order/fulfillment/return/settlement/payment, secret or
   provider configuration, DB/RLS/Auth, paid generation, or asset transformation.
-- Progress: 4/11 steps complete. Merge/governance, the follow-up branch,
-  Production smoke, and approved-supplier asset inspection are complete.
-  Authenticated WING exact-category/draft inspection is the current work.
+- Progress: 9/11 steps complete. Merge/governance, branch, Production smoke,
+  supplier assets, authenticated WING inspection, exact adapter, pipeline/gates,
+  selected-variant draft entry and saved-draft/visual read-back are complete.
+  Full repository gates and the high-risk PR/CI handoff are current.
 - Production: deployment for exact merge `5cf73a7` succeeded. GitHub Production
   browser run `31753329215` passed `44`, skipped `2`, on
   `https://gonggamline-ai.vercel.app`; artifact `9201812470` has SHA-256
@@ -47,11 +48,21 @@
   Downloads are disposable and remain outside Git. The main shows both white
   and black products while the requested sellable option is black; the detail
   says PVC while the supplier notice table/current adapter fact says polyester.
-  These factual conflicts prevent visual-QA PASS until authoritative WING facts
-  or owner-approved evidence resolves them.
-- Exact next action: owner signs in to WING in the retained Chrome tab. Read the
-  existing draft's exact category, required notices, option/filter and private
-  logistics records; then reconcile the asset conflicts before packet execution.
+  The reconciled material is `PVC, 폴리에스터`. The detail source is excluded
+  because it mixes white/black variants; the unchanged main remains included.
+- WING result: exact adapter rerun is `REGISTRATION_READY`; selected-payload
+  rights and render visual QA pass; category/payload blockers are zero. The
+  selected title is `미니 파우치 충전기 케이블 수납 KK946`; seven keywords,
+  eleven search filters, nine notices, the unchanged main, rendered text detail,
+  price `4,290`, stock `6`, free shipping, no advertising and no reorder were
+  saved and verified through a fresh saved-draft reload. The final `상품등록`
+  control was not used.
+- Local validation: diff/check and targeted private-data/secret scan pass;
+  lint passes with zero errors and four pre-existing Revenue-test warnings;
+  typecheck passes; full unit/integration tests pass `599/599`; the 86-route
+  production build passes; focused mobile Listing browser E2E passes `1/1`.
+- Exact next action: commit/push, create the high-risk manual-merge PR, then
+  wait for exact-head CI and Preview.
 
 
 ## 2026-08-13 Generic Listing Content/Conversion pipeline
