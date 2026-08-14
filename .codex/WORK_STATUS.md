@@ -24,11 +24,12 @@
   operational assets are not created here because no approved managed object
   store exists. Local test/render outputs are disposable and fake artifacts are
   permanently non-deployable.
-- Progress: 9/12 steps complete. Governance/imagegen instructions, #127 merge/
+- Progress: 11/12 steps complete. Governance/imagegen instructions, #127 merge/
   latest-main/Production checks, sanitized #126 reintegration, generic v3 rights
   and approval contracts, actual-byte deterministic renderer, KK946 acceptance,
-  mapper/UI and local quality/browser validation are complete. Delivery and
-  exact-head CI/Preview remain.
+  mapper/UI, local quality/browser validation, GitHub delivery and first exact-
+  head CI/Preview are complete. Manual merge and post-merge Production smoke
+  remain outside this high-risk PR's automatic authority.
 - Production evidence: `origin/main` deployment `5900636453` is successful at
   `https://gonggamline-l5iy8ulgs-gg-online.vercel.app`; Production browser run
   `31770758249` passed `44/44` against `https://gonggamline-ai.vercel.app`.
@@ -43,16 +44,24 @@
   visual inspection PASS. Full local browser baseline is `37 passed, 2 skipped,
   7 failed` only because local Supabase is intentionally unconfigured; exact
   configured Preview remains the binding full-browser gate.
-- Checkpoint: implementation/docs commit pending. Earlier unpushed local
-  checkpoints were intentionally squashed before delivery so sanitized external
-  adapter fields, rather than account-linked provider codes, are the only Git
-  history.
+- Delivery: implementation commit `a75609b`; pushed branch
+  `codex/feat/listing-renderer-provider-kk946`; Draft PR #130 is `CLEAN`, labelled
+  `manual-merge-required`, and supersedes closed PR #126. Earlier unpushed local
+  checkpoints were intentionally squashed so only sanitized external adapter
+  fields, rather than account-linked provider codes, entered Git history.
+- First exact-head remote evidence: all CI jobs PASS, Vercel Preview deployment
+  `5900890428` PASS at `https://gonggamline-3a6lm2ts1-gg-online.vercel.app`, and
+  Preview browser run `31772308976` PASS. Artifact `9208603510` has SHA-256
+  `18b5c0d9c29f3dc98831276bcf2dd4a7262c33057d2f23e151acc2abc323f902`
+  and expires 2026-08-28.
 - Remaining blocker/owner boundary: a real image provider/model/terms/paid cap,
   server-only secret, output commercial-use grant and managed object-store/CDN
   are not approved. Operational assets cannot be generated or persisted until
   separate high-risk/manual Architecture Stories are accepted.
-- Exact next action: finish diff/encoding/sensitive-data review, commit/push and
-  open a high-risk Draft PR, then wait for exact-head CI/Vercel Preview evidence.
+- Exact next action: push this status-only checkpoint, confirm its new exact-head
+  CI/Preview, then request repository-owner manual merge of PR #130. After merge,
+  verify origin/main and Production. Real provider/storage work remains a
+  separate high-risk/manual Architecture Story.
 
 
 ## 2026-08-14 Generic Listing creative optimization Architecture
