@@ -33,11 +33,12 @@
   store in Seoul and connected it using OIDC metadata. No asset bytes were
   uploaded or published, no token/value revealed, no card/payment action taken,
   and no OpenAI or commerce call occurred.
-- Current progress: 7/12 steps complete. Exact baseline, private bucket, public
+- Current progress: 8/12 steps complete. Exact baseline, private bucket, public
   mirror, official OIDC/SDK audit, Production-only OIDC adapter/tests,
   Architecture/runbook records, and all local verification/diff review are
-  complete. PR/CI/Preview, merge/Production, synthetic restore drill, OpenAI
-  paid smoke, and KK946 execution remain.
+  complete. PR #135 delivery, exact-head CI, Vercel Preview, browser evidence,
+  and direct review-page inspection also pass. Merge/Production, synthetic
+  restore drill, OpenAI paid smoke, and KK946 execution remain.
 - Implementation checkpoint: added a pure Production credential resolver that
   prefers `BLOB_STORE_ID` OIDC, retains an injected legacy-token fallback, and
   returns unavailable outside Production. The object-store adapter omits the
@@ -45,9 +46,21 @@
   credential. Full unit/integration `653/653`, focused storage `15/15`, lint
   zero errors/four pre-existing warnings, typecheck, 86-route build, and mobile
   Chromium E2E `1/1` pass; diff/secret/product-hardcode review passes.
-- Exact next action: deliver the high-risk Draft PR and wait for exact-head CI
-  and Preview. After merge, run Production smoke and a synthetic private/public
-  restore drill before configuring the bounded OpenAI paid smoke.
+- Delivery: commits `75760f3` and `8705b43` are pushed in review-ready PR #135
+  with `manual-merge-required`. Exact-head CI run `31796789234` passes all eight
+  jobs; Preview deployment `5905403114` is Ready; browser run `31796789229`
+  passes and artifact `9217724104` has SHA-256
+  `8faa8ae922f0a4ec263f63794b01118c2ce73a6cd5444a1c622c16ba4a5a893a`.
+- Provider external gate: authenticated OpenAI Platform inspection shows the
+  Personal organization is Free tier, prompts to add payment details, and the
+  official GPT Image 2 model is unsupported on Free tier. No payment details,
+  API key, Vercel OpenAI secret, or provider request were created. The owner must
+  add a payment method/credits before the USD 50 project limit/alerts and bounded
+  fact-only smoke can be configured and proven.
+- Exact next action: manually merge PR #135 under the repository's high-risk
+  rule, run exact merge-head Production smoke and the synthetic private/public
+  restore drill, then configure the bounded OpenAI paid smoke after billing is
+  available.
 
 ## 2026-08-14 Listing creative actual-byte QA and approval continuation
 
