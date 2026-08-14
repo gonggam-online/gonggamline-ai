@@ -1,5 +1,9 @@
 # Orchestrator implementation roadmap
 
+## External asset policy dependency
+
+Phase 6 and any later Listing/Item Selection work consume [External Commerce Asset Discovery and Rights Policy v1.1](../architecture/EXTERNAL-COMMERCE-ASSET-DISCOVERY-AND-RIGHTS-POLICY-V1.1.md). An `UNKNOWN` asset right blocks that asset's publication/derivative lane, not unrelated candidate research. This dependency grants no crawler, download, storage, paid-provider, external-integration, Production, or marketplace-write authority.
+
 This roadmap authorizes no implementation. Each phase requires its own approved
 TaskContract, branch, PR, tests, and applicable Architecture decision.
 

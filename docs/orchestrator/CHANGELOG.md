@@ -1,5 +1,11 @@
 # Orchestrator changelog
 
+## 2026-08-14 - External commerce asset rights policy dependency
+
+- Added the v1.1 dependency that separates lawful asset discovery from publication and derivative authorization.
+- Preserved continued product/content research when a particular asset's rights are unknown, while keeping that asset out of Production publication.
+- Granted no crawl, download, storage, paid-provider, external integration, Production, or marketplace-write authority.
+
 ## 2026-08-10 — KK946 Domeggook payment complete
 
 - Created approved order `OR75260192` for black six units at 8,100 KRW total

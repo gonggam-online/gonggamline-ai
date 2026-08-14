@@ -1,5 +1,13 @@
 # Architecture Story: Listing Content Fact and Policy Contract v1
 
+> Amended on 2026-08-14 by
+> [External Commerce Asset Discovery and Rights Policy v1.1](EXTERNAL-COMMERCE-ASSET-DISCOVERY-AND-RIGHTS-POLICY-V1.1.md).
+> Asset discovery/reference collection is separate from publication and
+> derivative authorization. Unknown rights quarantine the affected asset lane,
+> not unrelated product, keyword, title, story, or alternative-source research.
+> Asset-scoped failures additionally follow
+> [Asset Error Isolation and Pipeline Continuity Policy v1](ASSET-ERROR-ISOLATION-AND-PIPELINE-CONTINUITY-POLICY-V1.md): continue independent work, record exact partial counts, and exclude every blocked asset from derivative/publication/upload paths.
+
 ## 1. Decision status
 
 - Status: accepted by the repository owner on 2026-08-05.
@@ -183,7 +191,7 @@ An image output is an asset manifest, not a prompt. Each source and derivative r
 - Generated or edited assets must not alter count, dimensions, color, components, included accessories, labels, certifications, or condition.
 - Main-image and category-specific composition rules come only from the exact Coupang metadata/policy snapshot.
 
-No derivative may be produced while either use or the intended edit operation is `UNKNOWN`, `CONFLICT`, or `PROHIBITED`.
+No derivative may be produced while either use or the intended edit operation is `UNKNOWN`, `CONFLICT`, or `PROHIBITED`. This rule does not prohibit bounded discovery metadata or `PUBLIC_REFERENCE_ONLY` research under v1.1; those references never enter a publication manifest without a scoped grant.
 
 ### Detail page
 

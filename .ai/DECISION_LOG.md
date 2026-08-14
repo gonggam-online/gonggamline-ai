@@ -24,6 +24,18 @@
   is temporary. Operational assets and state have no approved durable owner yet.
   Roll back with Git revert.
 
+## 2026-08-14 - Separate external asset discovery from publication rights
+
+- Owner decision: accept External Commerce Asset Discovery and Rights Policy v1.1 through delegated task 12D.
+- Canonical policy SHA-256: `cb06faeb826d3fc3e51c12b4faf5d3c9123d1258670f253b242671fcfd6921c0`.
+- Revenue decision: allow bounded lawful discovery/indexing of supplier, manufacturer, wholesale, and public references so `UNKNOWN` rights do not stop product facts, titles, keywords, stories, or alternative-source work.
+- Rights decision: public visibility, wholesale listing, purchase, URL, or file possession is not a reproduction/edit license. Exact use and each edit operation require scoped verifiable evidence.
+- Fast path: exact platform reseller grant, supplier/manufacturer permission, contract/message, or file metadata can admit the bound original and only expressly allowed operations.
+- Safety: no access-control bypass, watermark removal, source laundering, unauthorized people/personal data/third-party marks or characters, forged evidence, or ignored takedown/revocation.
+- Cloud-first: GitHub stores policy only. Operational references, grants, digests, manifests, approvals, sensitive documents, and binaries wait for an approved encrypted remote evidence boundary; no local-only asset archive.
+- Authority/risk: normal-risk docs-only. No crawling, download, upload, paid generation, external integration, database/queue, Production, or commerce write is authorized. Later implementation is separately reviewed.
+- Rollback: Git revert; published-asset impact, if any later exists, requires digest-based takedown reconciliation rather than repository rollback alone.
+
 ## 2026-08-13 - Separate minimum Listing registration fitness from conversion optimization
 
 - Owner amendment: an active versioned supplier trust profile automatically
@@ -1566,3 +1578,14 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Story: `docs/architecture/LISTING-CONTENT-CONVERSION-OWNER-AMENDMENT-V1.md`.
 - Risk/rollback: high-risk/manual; no auto-merge, DB, provider, Production, or
   marketplace write. Git revert before live use.
+# 2026-08-14 - Asset error isolation and pipeline continuity v1
+
+- Category: Listing/asset policy amendment.
+- Owner/approver: repository owner through delegated workroom 12E.
+- Policy version/digest: `asset-error-isolation-v1` / `cb2c15f8973586df4dc7ae1d022568901beaf54822743e3c36b704fc7728ed1c` (SHA-256 of the canonical policy document).
+- Dependency: External Commerce Asset Discovery and Rights Policy v1.1 digest `cb06faeb826d3fc3e51c12b4faf5d3c9123d1258670f253b242671fcfd6921c0`.
+- Decision: default to item-scoped continuation, catch rights/permission failures at the item boundary, map 403/409 to explicit blocked/conflict states, return reconciled sanitized counts/outcomes, and continue valid assets plus independent content/alternative-source research.
+- Non-bypass boundary: blocked assets never enter derivative/publication/upload lanes; `bypass_rights_check` is forbidden; 403/409 are not success; browser impersonation and header/cookie/session rotation are prohibited.
+- Cloud-first: GitHub owns this policy and sanitized delivery evidence. Runtime status/evidence/audit has no approved remote owner, so no runtime code, database, Queue, crawler, storage, provider, Production, or marketplace write is authorized.
+- Risk/rollback: normal-risk documentation only. Git revert; immutable operational audit would require reconciliation if a later implementation exists.
+- Downstream: COORD and workrooms 15, 15C, 16B, 20, and 22 consume `asset-error-isolation-v1` and the 12D digest above.

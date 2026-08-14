@@ -5,8 +5,10 @@
 - Objective/revenue impact: make conversion-oriented visual content the default
   for every selected/procurement-approved product, while preserving the fastest
   eligible unchanged-image registration packet and avoiding unlicensed pixels.
-- Branch/base: `codex/feat/listing-creative-optimization` from merged
-  `origin/main` `5cf73a75a3e35373aa7779a3b8f43cbdf05b7dcb`.
+- Branch/base: `codex/feat/listing-creative-optimization`; latest merged
+  `origin/main` `5e2b4fcab5d8ccce811b61126b40e45857f1b76c` is integrated locally.
+  The three documentation conflicts caused by merged PRs #128 and #129 were
+  resolved additively, preserving both newer asset policies and this Story.
 - Risk: normal-risk documentation/contract-test PR with mandatory manual
   Architecture approval. Future provider/paid/secret, managed asset storage,
   DB/Auth/RLS, Production, and commerce-write work is high-risk/manual.
@@ -31,12 +33,14 @@
   Operational asset bytes need an approved private object store/CDN and recovery
   evidence; immutable revisions/approvals/learning need a separate approved DB/
   Auth/RLS Story. Local test/build/browser artifacts are disposable.
-- Progress: 11/11 Architecture-delivery steps complete. Governance/base checks, code/DB/external audit,
+- Progress: 10/11 Architecture-delivery steps complete. Governance/base checks, code/DB/external audit,
   current official research, proposed Story, rights taxonomy, candidate/renderer/
   QA/provider/storage/UI/learning contract, regression design, full validation,
-  diff/encoding/sensitive-data review, GitHub delivery, and first-head exact CI/
-  Preview observation are complete. Runtime implementation correctly remains
-  gated by manual Architecture merge.
+  diff/encoding/sensitive-data review, initial GitHub delivery, and first-head
+  exact CI/Preview observation are complete. Latest-main conflict resolution and
+  local revalidation are complete; the updated exact-head CI/Preview observation
+  remains. Runtime implementation correctly remains gated by manual Architecture
+  merge.
 - Changed files: proposed creative Architecture Story, owner amendment,
   Architecture Review, Decision Log, Sprint 03, architecture test, and this
   status.
@@ -53,17 +57,36 @@
   edge once; its isolated rerun passed `19/19` before the full green rerun.
   `git diff --check` and UTF-8 replacement-character review pass; no secret,
   account identifier, raw provider payload, PII, or binary business asset is added.
-- Delivery: commit `a9879fb` is pushed on Draft PR #127; the PR is mergeable,
-  labelled `manual-merge-required`, and has no auto-merge. All first-head CI,
+- Delivery: Draft PR #127 remains labelled `manual-merge-required` with no
+  auto-merge. Commit `a9879fb` and its first-head CI are preserved; the latest-main
+  merge checkpoint is ready to commit and push. All first-head CI,
   disposable DB/security replays, build, Vercel, and Preview browser checks pass.
   Preview run `31760601697` tested 44 routes at
   `https://gonggamline-9tew524jh-gg-online.vercel.app` with no reported page/API/
   console/non-abort request failure. Artifact `9204468366` has SHA-256
   `f34ae938d7ee792f24233d501d3b4960ba442d9001f63a9ba88f5485ce9295ca`
   and expires 2026-08-28.
-- Exact next action: publish this evidence checkpoint, confirm its exact-head
-  checks, then request repository-owner manual Architecture merge. Only after
+- Exact next action: commit/push this latest-main conflict-resolution checkpoint,
+  confirm its exact-head checks and Preview, then request repository-owner manual
+  Architecture merge. Only after
   merge may the pure v3 contract/planner/fake-renderer implementation branch begin.
+
+## 2026-08-14 Asset Error Isolation and Pipeline Continuity Policy v1
+
+- Objective/revenue impact: prevent one asset rights/access/HTTP failure from aborting useful independent asset and content research, while keeping every blocked asset out of derivative/publication/upload paths.
+- Branch/base: `codex/docs/asset-error-isolation-policy` from fresh `origin/main` `76d45d80ee15d05b8f811aa45f222353f2c9a358`.
+- Risk/root cause: normal-risk docs-only; code/contract policy gap. No external configuration or database failure is compensated for.
+- Architecture/compliance: existing Listing governance and 12D v1.1 boundary; no new Domain, public API, database/migration, Queue/lifecycle, crawler/provider/storage integration, Production, or commerce write.
+- Cloud-first: GitHub branch/PR/merged repository owns policy, decision, runbook, and sanitized delivery evidence. Operational status/evidence/audit and asset storage have no approved remote owner here; runtime implementation is stopped. Local checkout/build/browser output is disposable.
+- Scope: item-scoped continuation default, fail-closed rights/access/conflict states, 403/409 mapping, bounded retry policy, sanitized count/item envelope, honest service identity, forbidden bypass option, immutable evidence-based reevaluation, typed pseudocontract/test requirements, and downstream handoff.
+- Non-goals: runtime code, crawler, API, database, Queue, retry scheduler, scraping/download/upload, asset movement, provider/config/secret, paid call, Production, or marketplace write.
+- Policy version/digest: `asset-error-isolation-v1` / `cb2c15f8973586df4dc7ae1d022568901beaf54822743e3c36b704fc7728ed1c`; compatible 12D digest `cb06faeb826d3fc3e51c12b4faf5d3c9123d1258670f253b242671fcfd6921c0`.
+- Progress: 6/8 checkpoints complete. Boot/safety/branch, architecture/risk/Cloud-first classification, documentation implementation, complete diff review, local quality/build, and browser baseline are complete. Delivery/exact CI/Preview and safe merge/downstream notification/terminal verification remain.
+- Changed files: 12E architecture policy, operator runbook, changelog, Architecture Review, Decision Log, Epic Roadmap, 12D/Listing/Item Selection cross-links, and this status.
+- Blockers/owner actions: none for docs delivery. Runtime work remains blocked until a separate approved Architecture Story names the managed status/evidence/audit owner and every provider/security/retry boundary.
+- Recovery: push coherent commits to this branch; GitHub branch/PR/checks are the remote recovery source. No unique local durable operational state is allowed.
+- Local validation: `git diff --check` passes; lint has zero errors and four pre-existing Revenue-test warnings; typecheck passes; full tests pass `598/598`; production build passes with 86 routes. Local Playwright is the known unconfigured-Supabase baseline: `37` passed, `2` skipped, and `7` failed only on `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace` API 500s. Exact configured Preview is the binding browser gate.
+- Exact next action: commit/push/open the normal-risk PR, wait for exact-head CI/Vercel/Preview browser evidence, then enable safe auto-merge if every required gate passes and notify downstream workrooms.
 
 ## 2026-08-13 Generic Listing Content/Conversion pipeline
 
@@ -5181,3 +5204,65 @@ perform the documented read-only Supabase schema and completeness inspection.
   warnings passed. Local Playwright passed 35, skipped 2, and failed 7 only on
   the existing unconfigured Supabase `missing_url` routes; no runner route or
   browser surface changed.
+# 2026-08-14 External Commerce Asset Discovery and Rights Policy v1.1
+
+- Objective: permit fast, broad, lawful discovery of wholesale, supplier,
+  manufacturer, and public-reference assets while separating discovery from
+  exact publication and derivative authority.
+- Revenue impact: prevents a single rights-`UNKNOWN` asset from stopping
+  product/title/keyword/story research and directs work to the fastest
+  rights-cleared alternative for a first sale.
+- Branch/base: `codex/docs/external-asset-rights-policy-amendment` from latest
+  `origin/main` `5cf73a7` (merged PR #125).
+- Risk: normal-risk docs-only. Later crawler/intake/storage/provider,
+  legal/publication, paid, Production, and marketplace work remains separately
+  reviewed and may be high-risk/manual.
+- Root-cause class: policy-contract ambiguity. Existing safe rights quarantine
+  could be read as stopping discovery/research rather than only the affected
+  publication/derivative lane; no external configuration or database failure
+  is being compensated for in code.
+- Scope: canonical v1.1 policy, parent Listing amendments, Architecture Review,
+  Decision Log, roadmap/backlog/runbook/compliance/changelog/status updates.
+- Non-goals: Domain/API/DB/Queue implementation, crawling, download, upload,
+  durable asset intake, paid generation, external integration, Production, or
+  marketplace writes.
+- Architecture compliance: preserves existing Listing and Seller boundaries;
+  introduces no runtime boundary. Owner policy acceptance is the delegated 12D
+  directive dated 2026-08-14.
+- Cloud-first: GitHub owns policy and sanitized delivery evidence. Operational
+  URLs, grants, digests, manifests, approvals, sensitive documents, and binaries
+  have no approved new store in this Story and therefore cannot be durably
+  collected; no local-only archive. Local build/browser output is disposable.
+- Dependency audit: current main includes PR #125. Draft PR #126 (KK946) and
+  #127 (Listing creative) are not bases for this independent policy amendment
+  and require downstream policy-version notification.
+- Checkpoints: governance/branch, dependency audit, conflict/legal-source audit,
+  policy draft, parent policy amendments, roadmap/runbook/changelog updates,
+  digest/diff review, local quality gates, browser gate, commit/push/PR,
+  exact CI/Preview, and coordination handoff.
+- Completed: first ten checkpoints, including digest/diff review, all local
+  gates, commit, push, and Ready PR creation. Current: exact remote gates.
+  Blockers: none for docs delivery; local browser completeness is limited by
+  the existing absent Supabase configuration.
+- Canonical policy SHA-256: `cb06faeb826d3fc3e51c12b4faf5d3c9123d1258670f253b242671fcfd6921c0`.
+- Changed files: canonical policy and changelog; Listing Fact/Policy and
+  Conversion amendments; KK946 runbook; Architecture Review; Decision Log;
+  Epic/orchestrator roadmaps; backlog; pipeline compliance; orchestrator
+  changelog; this status.
+- Local validation: `git diff --check` passed; lint passed with zero errors and
+  four pre-existing warnings; typecheck passed; unit tests passed 598/598;
+  production build passed and generated 86 route entries. Local Playwright
+  passed 37, skipped 2, and failed 7 only on the existing unconfigured
+  Supabase `missing_url` condition for `/listing`, `/market`, `/procurement`,
+  `/revenue`, `/sourcing`, `/workflow`, and `/workspace`. No runtime file
+  changed, so code compensation is prohibited; exact Preview is the remote
+  browser gate. `npm ci` reported eight existing advisories (one moderate,
+  seven high) without changing the lockfile.
+- Delivery: commit `09f02656cb83b6e2e5599dea453cc05ba85f03e7`
+  pushed; Ready PR #128 targets `main` as normal-risk docs-only.
+- Exact next action: publish this recovery-status checkpoint, reconcile its
+  exact-head CI/Preview/browser gates, then send dependency notifications and
+  enable native auto-merge only if every binding gate passes.
+- Remaining risks: provider terms and copyright scope can change; operational
+  evidence storage, automated discovery, publication, and takedown SLA are not
+  implemented or authorized.
