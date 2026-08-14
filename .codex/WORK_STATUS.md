@@ -5152,8 +5152,8 @@ perform the documented read-only Supabase schema and completeness inspection.
   policy draft, parent policy amendments, roadmap/runbook/changelog updates,
   digest/diff review, local quality gates, browser gate, commit/push/PR,
   exact CI/Preview, and coordination handoff.
-- Completed: first nine checkpoints, including digest/diff review and all local
-  quality/browser gates. Current: commit, push, PR, and exact remote gates.
+- Completed: first ten checkpoints, including digest/diff review, all local
+  gates, commit, push, and Ready PR creation. Current: exact remote gates.
   Blockers: none for docs delivery; local browser completeness is limited by
   the existing absent Supabase configuration.
 - Canonical policy SHA-256: `cb06faeb826d3fc3e51c12b4faf5d3c9123d1258670f253b242671fcfd6921c0`.
@@ -5170,9 +5170,11 @@ perform the documented read-only Supabase schema and completeness inspection.
   changed, so code compensation is prohibited; exact Preview is the remote
   browser gate. `npm ci` reported eight existing advisories (one moderate,
   seven high) without changing the lockfile.
-- Exact next action: commit the reviewed docs-only scope, push, create a Ready
-  normal-risk PR, and reconcile exact-head CI/Preview before dependency
-  notification.
+- Delivery: commit `09f02656cb83b6e2e5599dea453cc05ba85f03e7`
+  pushed; Ready PR #128 targets `main` as normal-risk docs-only.
+- Exact next action: publish this recovery-status checkpoint, reconcile its
+  exact-head CI/Preview/browser gates, then send dependency notifications and
+  enable native auto-merge only if every binding gate passes.
 - Remaining risks: provider terms and copyright scope can change; operational
   evidence storage, automated discovery, publication, and takedown SLA are not
   implemented or authorized.
