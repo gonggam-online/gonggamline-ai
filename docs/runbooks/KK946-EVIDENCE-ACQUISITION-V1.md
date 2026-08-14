@@ -1,5 +1,11 @@
 # KK946 evidence acquisition runbook v1
 
+> 2026-08-14 amendment: apply
+> [External Commerce Asset Discovery and Rights Policy v1.1](../architecture/EXTERNAL-COMMERCE-ASSET-DISCOVERY-AND-RIGHTS-POLICY-V1.1.md).
+> `UNKNOWN` asset rights block publication/derivatives for that asset, not
+> KK946 identity, facts, keywords, title/story research, or alternative-asset
+> discovery. Public references without a scoped grant remain research-only.
+
 ## Status and authority
 
 - Status: operator-ready, collection not started.

@@ -22,3 +22,5 @@
 | 18 | Product evidence object-storage inventory | M | High | Asset rights, data classification, retention and deletion owner confirmed |
 | 19 | Cross-PC bootstrap installer | M | Normal unless secrets/config change | Supported OS/toolchain matrix and readiness contract accepted |
 | 20 | Previous-PC-unavailable recovery drill | M | High if Production/backup accessed | Remote authorities ready; sanitized drill plan approved |
+| 21 | External asset discovery/intake Architecture | M | High | v1.1 policy consumed; provider terms/rate limits and encrypted evidence owner/retention/recovery approved |
+| 22 | Rights-aware publication/takedown implementation | L | High | exact use/edit grants, digest graph, revocation SLA, marketplace and managed-storage Architecture approved |

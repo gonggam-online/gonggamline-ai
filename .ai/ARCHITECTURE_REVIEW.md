@@ -1,5 +1,14 @@
 # Architecture review
 
+## External Commerce Asset Discovery and Rights Policy v1.1 - 2026-08-14
+
+- Status: owner-accepted policy amendment through delegated task 12D; documentation implementation only.
+- Revenue gate: accelerate lawful supplier/manufacturer/public-reference discovery without converting public visibility into publication permission.
+- Existing boundary: amends Listing Content Fact/Policy and Conversion owner decisions; creates no Domain, API, database, queue, crawler, downloader, storage, external integration, or marketplace behavior.
+- Decision: discovery, original-use authority, and operation-specific edit authority are independent. Rights `UNKNOWN` blocks the affected asset lane, not unrelated product/content research.
+- Cloud-first: GitHub owns only policy and sanitized delivery evidence. Source metadata, licenses, manifests, approvals, sensitive documents, and binaries need a separately approved encrypted managed evidence boundary; no local-only archive and no sensitive GitHub upload.
+- Risk: normal-risk docs-only. Every later collection/integration/paid/Production/publication implementation retains its separate risk and manual gates. Rollback is Git revert.
+
 ## KK946 six-unit E2E listing readiness - 2026-08-12
 
 - Status: documentation/evidence implementation only; execution awaits an exact
