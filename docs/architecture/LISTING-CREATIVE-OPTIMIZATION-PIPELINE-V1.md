@@ -2,8 +2,11 @@
 
 ## Status and business outcome
 
-- Status: proposed Architecture Story; repository-owner review and manual merge
-  are required before runtime implementation.
+- Status: accepted by repository-owner manual merge of PR #127 on 2026-08-14;
+  merge commit `b463028a9d79ca44a863475c2ad8df99bb37f53a`.
+- Authorization remains limited to ordered implementation steps 1-4. The merge
+  does not authorize real provider calls, paid/secret/configuration, managed
+  asset storage, Database/Auth/RLS, Production, or marketplace writes.
 - Scope: a product-agnostic default pipeline for every selected and procurement-
   approved product. KK946 is an external adapter/acceptance case only and no
   product identifier, fact, price, category, keyword, URL, or asset belongs in

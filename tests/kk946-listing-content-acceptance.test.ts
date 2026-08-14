@@ -1,8 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { buildListingContentPacket } from "../engines/listing/content-pipeline.ts";
-import { kk946AcceptanceInput, kk946CommerceFields } from "./fixtures/kk946-listing-content.ts";
-import { genericCategorySnapshot, genericCommerceFields } from "./fixtures/listing-content.ts";
+import { buildFixtureCreativeReviewPacket, planningInputFromListingContent } from "../engines/listing/creative-planner.ts";
+import { mapApprovedCreativeCandidate } from "../engines/listing/creative-approval.ts";
+import {
+  kk946AcceptanceInput,
+  kk946CommerceFields,
+  kk946WingCategoryMetadataObservation,
+  kk946WingRegistrationAdapter,
+} from "./fixtures/kk946-listing-content.ts";
 
 test("KK946 acceptance packet is blocked by exact category and required notices, not unknown edit rights", () => {
   const input = kk946AcceptanceInput();
@@ -42,20 +48,47 @@ test("KK946 commercial fields retain the accepted six-unit experiment values wit
 });
 
 test("KK946 accepts an externally injected exact-category adapter without production hardcoding", () => {
-  const input = kk946AcceptanceInput();
-  const adapterFacts = [
-    { ...input.evidence.facts[0], factId: "kk946-adapter-category", field: "coupangCategoryContract", value: "external-validated-category" },
-    { ...input.evidence.facts[0], factId: "kk946-adapter-notice", field: "productNoticeFacts", value: "external-validated-notice" },
-  ];
-  assert.ok(input.contentApproval);
-  const adaptedInput = { ...input, category: genericCategorySnapshot, evidence: { ...input.evidence, facts: [...input.evidence.facts, ...adapterFacts] }, contentApproval: { ...input.contentApproval, categoryMetadataDigest: genericCategorySnapshot.metadataDigest } };
-  const baseCommerce = genericCommerceFields();
-  const commerce = { ...baseCommerce, liveWriteApproval: { approved: true, approvalReference: "fixture:external-adapter-approval" }, originalPrice: 4290, salePrice: 4290, maximumBuyCount: 6, stockQuantity: 6, attributes: [], searchFilters: [{ name: "색상", value: "블랙", factIds: ["kk946-inspection-3"] }], notices: [{ name: "품명 및 모델명", value: "미니 파우치", factIds: ["kk946-adapter-notice"] }] };
-  const result = buildListingContentPacket(adaptedInput, commerce);
+  const { input, commerce } = kk946WingRegistrationAdapter({ vendorUserId: "fixture:private-wing-user", outboundShippingPlaceCode: "fixture:private-outbound", returnCenterCode: "fixture:private-return-center", companyContactNumber: "fixture:private-wing-contact", returnZipCode: "00000", returnAddress: "fixture:private-return-address", returnAddressDetail: "fixture:private-return-detail" });
+  const result = buildListingContentPacket(input, commerce);
   assert.equal(result.status, "REGISTRATION_READY");
   assert.ok(result.registrationPayload);
+  assert.equal(input.category.displayCategoryCode, "69291");
+  assert.equal(kk946WingCategoryMetadataObservation.internalCategoryId, "2979");
+  assert.deepEqual(kk946WingCategoryMetadataObservation.fullPath, ["패션의류잡화", "여성패션", "여성잡화", "가방", "여성파우치"]);
+  assert.equal(result.title.value, "미니 파우치 충전기 케이블 수납 KK946");
+  assert.deepEqual(result.keywords.map(({ text }) => text), ["충전기 파우치", "케이블 파우치", "소형 수납 파우치", "투명 파우치", "미니 파우치", "충전기 케이블 수납", "KK946"]);
   assert.equal(result.assets[0].disposition, "INCLUDED");
-  assert.equal(result.assets[1].disposition, "DERIVATIVE_UNAVAILABLE");
+  assert.equal(result.assets[0].outputDigest, "d3ab260cef16fd5fc0485591b01fe0571d3d5f04b61832159b5029a2c4797bcf");
+  assert.equal(result.assets[1].disposition, "EXCLUDED");
+  assert.equal(result.assets[2].disposition, "DERIVATIVE_UNAVAILABLE");
+  assert.deepEqual(result.detailPage.review, { encoding: "PASS", mobileWidth: "PASS", readability: "PASS", assetReferences: "PASS", claims: "PASS", crop: "PASS", productFacts: "PASS", load: "PASS" });
+  assert.equal(commerce.salePrice, 4290);
+  assert.equal(commerce.stockQuantity, 6);
+  assert.equal(commerce.deliveryChargeType, "FREE");
+  assert.deepEqual(commerce.options.map(({ name, value }) => [name, value]), [["색상", "블랙"], ["패션의류/잡화 사이즈", "FREE"]]);
+  assert.ok(commerce.searchFilters.some(({ name, value }) => name === "파우치 종류" && value === "일반/다용도"));
+  assert.ok(commerce.notices.every(({ value, factIds }) => value.length > 0 && factIds.length > 0));
   assert.ok(result.issues.some(({ code, severity }) => code === "DERIVATIVE_UNAVAILABLE" && severity === "WARNING"));
+  assert.ok(result.issues.some(({ code, severity }) => code === "MAIN_IMAGE_OPTIMIZATION_PENDING" && severity === "OPTIMIZATION_PENDING"));
+  assert.ok(result.issues.some(({ code, severity }) => code === "OWNER_APPROVED_ASSUMPTION" && severity === "WARNING"));
   assert.ok(!result.issues.some(({ severity }) => severity === "BLOCKER"));
+});
+
+test("KK946 minimum packet stays ready while synthetic renderer output remains review-only", async () => {
+  const { input, commerce } = kk946WingRegistrationAdapter({
+    vendorUserId: "fixture:private-wing-user",
+    outboundShippingPlaceCode: "fixture:private-outbound",
+    returnCenterCode: "fixture:private-return-center",
+    companyContactNumber: "fixture:private-wing-contact",
+    returnZipCode: "00000",
+    returnAddress: "fixture:private-return-address",
+    returnAddressDetail: "fixture:private-return-detail",
+  });
+  const registration = buildListingContentPacket(input, commerce);
+  const creative = await buildFixtureCreativeReviewPacket(planningInputFromListingContent(input));
+
+  assert.equal(registration.status, "REGISTRATION_READY");
+  assert.equal(creative.candidates.length, 2);
+  assert.ok(creative.candidates.flatMap(({ artifacts }) => artifacts).every(({ deployability }) => deployability === "FIXTURE_ONLY"));
+  assert.equal(mapApprovedCreativeCandidate(creative), null);
 });

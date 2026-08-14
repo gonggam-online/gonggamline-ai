@@ -1,5 +1,68 @@
 # Work status
 
+## 2026-08-14 Listing renderer/provider implementation and KK946 reintegration
+
+- Objective/revenue impact: integrate PR #126's sanitized KK946 adapter packet
+  onto the Architecture-approved latest main and implement the smallest real-byte
+  creative pipeline that can be reviewed without pretending a fake/provider-less
+  artifact is deployable.
+- Branch/base: `codex/feat/listing-renderer-provider-kk946` from `origin/main`
+  `b463028a9d79ca44a863475c2ad8df99bb37f53a` (merged PR #127).
+- Risk: high-risk/manual because the combined packet gates a real marketplace
+  draft. No live marketplace submission, DB/RLS/Auth migration, secret/config,
+  paid provider call, or Production mutation is authorized in this PR.
+- Root-cause classification: (1) external configuration: no approved real image
+  provider/model/terms/paid cap/secret or managed object store/CDN; (2) database:
+  legacy `listing_drafts` cannot own immutable creative revisions and approvals;
+  (3) code: v2 trusts caller-provided asset metadata and has no actual byte
+  renderer/computed QA/selected creative-set binding.
+- Architecture compliance: merged PR #127 permits ordered steps 1-4 only: pure
+  v3 types, generic planner, deterministic synthetic renderer/computed QA,
+  selected-set-only mapper, and fixture-preview review UI. Real provider/storage/
+  persistence/live-write remain separate Architecture/manual gates.
+- Cloud-first: GitHub owns source, fixtures, PR and CI evidence. Generated
+  operational assets are not created here because no approved managed object
+  store exists. Local test/render outputs are disposable and fake artifacts are
+  permanently non-deployable.
+- Progress: 11/12 steps complete. Governance/imagegen instructions, #127 merge/
+  latest-main/Production checks, sanitized #126 reintegration, generic v3 rights
+  and approval contracts, actual-byte deterministic renderer, KK946 acceptance,
+  mapper/UI, local quality/browser validation, GitHub delivery and first exact-
+  head CI/Preview are complete. Manual merge and post-merge Production smoke
+  remain outside this high-risk PR's automatic authority.
+- Production evidence: `origin/main` deployment `5900636453` is successful at
+  `https://gonggamline-l5iy8ulgs-gg-online.vercel.app`; Production browser run
+  `31770758249` passed `44/44` against `https://gonggamline-ai.vercel.app`.
+- Changed files: v3 creative types, rights evaluator, deterministic provider/
+  renderer, candidate planner, digest-bound mapper, Listing review UI/E2E,
+  generic and KK946 acceptance tests, Architecture/Decision/evidence/changelog,
+  and the sanitized #126 Listing adapter/ranker scope.
+- Validation: focused Listing suite `30/30`; full unit/integration `616/616`;
+  lint zero errors with four pre-existing Revenue warnings; typecheck PASS;
+  production build PASS with 86 routes; focused mobile Chromium E2E `1/1` with
+  four decoded raster images, no overflow/console/API/request failures and
+  visual inspection PASS. Full local browser baseline is `37 passed, 2 skipped,
+  7 failed` only because local Supabase is intentionally unconfigured; exact
+  configured Preview remains the binding full-browser gate.
+- Delivery: implementation commit `a75609b`; pushed branch
+  `codex/feat/listing-renderer-provider-kk946`; PR #130 is review-ready, `CLEAN`, labelled
+  `manual-merge-required`, and supersedes closed PR #126. Earlier unpushed local
+  checkpoints were intentionally squashed so only sanitized external adapter
+  fields, rather than account-linked provider codes, entered Git history.
+- First exact-head remote evidence: all CI jobs PASS, Vercel Preview deployment
+  `5900890428` PASS at `https://gonggamline-3a6lm2ts1-gg-online.vercel.app`, and
+  Preview browser run `31772308976` PASS. Artifact `9208603510` has SHA-256
+  `18b5c0d9c29f3dc98831276bcf2dd4a7262c33057d2f23e151acc2abc323f902`
+  and expires 2026-08-28.
+- Remaining blocker/owner boundary: a real image provider/model/terms/paid cap,
+  server-only secret, output commercial-use grant and managed object-store/CDN
+  are not approved. Operational assets cannot be generated or persisted until
+  separate high-risk/manual Architecture Stories are accepted.
+- Exact next action: request repository-owner manual merge of PR #130. After
+  merge, verify origin/main and Production. Real provider/storage work remains
+  a separate high-risk/manual Architecture Story.
+
+
 ## 2026-08-14 Generic Listing creative optimization Architecture
 
 - Objective/revenue impact: make conversion-oriented visual content the default
