@@ -1,5 +1,67 @@
 # Work status
 
+## 2026-08-14 Managed Listing creative storage adapter implementation
+
+- Objective/revenue impact: implement the smallest cloud-first asset boundary
+  that can archive actual generated Listing bytes, verify them, and later publish
+  one content-approved digest without treating local files or fixture URLs as
+  durable/deployable assets.
+- Branch/base: `codex/feat/listing-managed-storage-adapter` from exact merged
+  `origin/main` `4fd227193314c14cd096d73e46f97a340f4bd9d0` (PR #131).
+- Risk: high-risk/manual because the contract targets managed private Storage and
+  a public CDN. This PR performs no bucket/store creation, secret/config write,
+  paid provider call, public asset publication, DB/RLS/Auth migration, or
+  marketplace write; exact external setup remains post-merge and reversible.
+- Root-cause classification: (1) external configuration: the Supabase bucket,
+  Vercel Blob store/token, and provider secret are not configured; (2) database:
+  immutable job/approval state still needs the separate S3-12 Story; (3) code:
+  there is no managed private/public object-store port, immutable addressing,
+  byte verification, takedown, or restore implementation.
+- AI CTO compliance: this is the shortest safe revenue step after the accepted
+  Architecture because a real provider output cannot be reviewed or sold until
+  it has a recoverable private master. It uses merged v3 contracts, introduces no
+  public route or parallel subsystem, and preserves fixture non-deployability and
+  the separate live-write approval.
+- Cloud-first durable-state gate: GitHub owns code/contracts/tests. After a later
+  exact external setup, Supabase private Storage owns masters/manifests and Vercel
+  Blob owns replaceable approved public mirrors. This PR uses only in-memory
+  synthetic test bytes, creates no local durable state, and requires no data
+  migration. Recovery is private-master digest verification followed by public
+  mirror reconstruction; takedown removes the public mirror first.
+- Progress: 8/12 overall steps are locally complete. Managed storage/CDN ports,
+  deterministic fakes, Production-only guarded composition, negative tests,
+  local restore drill, and all local gates pass; GitHub/Preview delivery remains.
+- Production baseline: merge-head deployment `5903385221` is successful;
+  `/listing/review` HTTP 200; `/api/health/runtime` reports expected `degraded`
+  because Coupang remains unconfigured; Production browser workflow
+  `31786116009` passed `44/44` runnable tests with two intentional skips.
+- Scope: generic content-addressed storage types, immutable key builder, private
+  and public ports, Supabase/Vercel adapters with injected credentials, in-memory
+  fake, selected-digest publication, signed-review URL, takedown/restore, tests,
+  accepted-Architecture status, and operator configuration evidence.
+- Non-goals: OpenAI adapter/spend, semantic image QA, real product generation,
+  bucket/store/secret creation, durable DB job state, WING/Coupang mutation, and
+  KK946 values in production code.
+- Changed files: generic storage domain/engine/fakes, Supabase private and Vercel
+  public server adapters, guarded asset repository composition, reproducible
+  private-bucket config, rollout/restore runbook, security importer allowlist,
+  dependency pin, tests, and accepted-Architecture/Sprint/governance records.
+- Validation: storage/security focused `16/16`; full unit/integration `637/637`;
+  lint zero errors with four pre-existing Revenue-test warnings; typecheck PASS;
+  production build PASS with 86 routes; focused mobile Listing review Chromium
+  `1/1` PASS; diff/encoding/product-hardcode/sensitive-value review PASS.
+- Dependency audit: `@vercel/blob@2.8.0` introduces no reported advisory. The
+  repository still has four pre-existing Production audit findings through
+  `next@16.2.11` (`postcss`, `sharp`, and `nanoid`) with a suggested Next 16.3.1
+  upgrade; that unrelated framework/security upgrade is not hidden or mixed into
+  this storage PR.
+- External state: no bucket, Blob store, token, signed URL, object, public CDN
+  mirror, provider spend, DB migration, or marketplace state was created or
+  changed. Exact setup remains stopped until this high-risk PR is manually
+  merged.
+- Exact next action: commit/push this coherent implementation, create the
+  high-risk manual PR, and wait for exact-head CI/Vercel Preview/browser evidence.
+
 ## 2026-08-14 Managed Listing creative storage/provider Architecture
 
 - Objective/revenue impact: unlock real conversion-oriented Listing images with
