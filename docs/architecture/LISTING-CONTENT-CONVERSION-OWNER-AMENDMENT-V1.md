@@ -2,6 +2,7 @@
 
 > Rights interpretation is further amended by
 > [External Commerce Asset Discovery and Rights Policy v1.1](EXTERNAL-COMMERCE-ASSET-DISCOVERY-AND-RIGHTS-POLICY-V1.1.md): broad lawful discovery is allowed, while public availability alone never grants publication or derivative rights.
+> Batch continuity follows [Asset Error Isolation and Pipeline Continuity Policy v1](ASSET-ERROR-ISOLATION-AND-PIPELINE-CONTINUITY-POLICY-V1.md); `RIGHTS_BLOCKED`, conflicts, and access denial remain excluded even when other assets continue.
 
 ## Decision
 

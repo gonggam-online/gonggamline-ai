@@ -1,5 +1,23 @@
 # Work status
 
+## 2026-08-14 Asset Error Isolation and Pipeline Continuity Policy v1
+
+- Objective/revenue impact: prevent one asset rights/access/HTTP failure from aborting useful independent asset and content research, while keeping every blocked asset out of derivative/publication/upload paths.
+- Branch/base: `codex/docs/asset-error-isolation-policy` from fresh `origin/main` `76d45d80ee15d05b8f811aa45f222353f2c9a358`.
+- Risk/root cause: normal-risk docs-only; code/contract policy gap. No external configuration or database failure is compensated for.
+- Architecture/compliance: existing Listing governance and 12D v1.1 boundary; no new Domain, public API, database/migration, Queue/lifecycle, crawler/provider/storage integration, Production, or commerce write.
+- Cloud-first: GitHub branch/PR/merged repository owns policy, decision, runbook, and sanitized delivery evidence. Operational status/evidence/audit and asset storage have no approved remote owner here; runtime implementation is stopped. Local checkout/build/browser output is disposable.
+- Scope: item-scoped continuation default, fail-closed rights/access/conflict states, 403/409 mapping, bounded retry policy, sanitized count/item envelope, honest service identity, forbidden bypass option, immutable evidence-based reevaluation, typed pseudocontract/test requirements, and downstream handoff.
+- Non-goals: runtime code, crawler, API, database, Queue, retry scheduler, scraping/download/upload, asset movement, provider/config/secret, paid call, Production, or marketplace write.
+- Policy version/digest: `asset-error-isolation-v1` / `cb2c15f8973586df4dc7ae1d022568901beaf54822743e3c36b704fc7728ed1c`; compatible 12D digest `cb06faeb826d3fc3e51c12b4faf5d3c9123d1258670f253b242671fcfd6921c0`.
+- Progress: 6/8 checkpoints complete. Boot/safety/branch, architecture/risk/Cloud-first classification, documentation implementation, complete diff review, local quality/build, and browser baseline are complete. Delivery/exact CI/Preview and safe merge/downstream notification/terminal verification remain.
+- Changed files: 12E architecture policy, operator runbook, changelog, Architecture Review, Decision Log, Epic Roadmap, 12D/Listing/Item Selection cross-links, and this status.
+- Blockers/owner actions: none for docs delivery. Runtime work remains blocked until a separate approved Architecture Story names the managed status/evidence/audit owner and every provider/security/retry boundary.
+- Recovery: push coherent commits to this branch; GitHub branch/PR/checks are the remote recovery source. No unique local durable operational state is allowed.
+- Local validation: `git diff --check` passes; lint has zero errors and four pre-existing Revenue-test warnings; typecheck passes; full tests pass `598/598`; production build passes with 86 routes. Local Playwright is the known unconfigured-Supabase baseline: `37` passed, `2` skipped, and `7` failed only on `/listing`, `/market`, `/procurement`, `/revenue`, `/sourcing`, `/workflow`, and `/workspace` API 500s. Exact configured Preview is the binding browser gate.
+- Exact next action: commit/push/open the normal-risk PR, wait for exact-head CI/Vercel/Preview browser evidence, then enable safe auto-merge if every required gate passes and notify downstream workrooms.
+
+
 ## 2026-08-13 Generic Listing Content/Conversion pipeline
 
 - Objective/revenue impact: implement the accepted evidence-first Listing

@@ -1,5 +1,8 @@
 # Architecture Story: Item Selection Evaluation v1
 
+> Asset acquisition/evaluation consumers must apply
+> [Asset Error Isolation and Pipeline Continuity Policy v1](ASSET-ERROR-ISOLATION-AND-PIPELINE-CONTINUITY-POLICY-V1.md): an asset failure is item-scoped, but no blocked asset can satisfy the image-rights hard gate.
+
 ## 1. Approval status
 
 - Status: approved by the repository-owner directive dated 2026-07-27
