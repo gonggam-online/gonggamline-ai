@@ -20,8 +20,17 @@
 - Completed: latest-main/governance/Next.js audit; external/DB/code
   classification; Vercel Production environment-name audit without revealing
   values; signed-in billing inspection; compliant transport design.
-- Current work: local implementation-independent gates are complete; stage,
-  commit, push, and deliver the manual-merge Architecture PR.
+- Delivery: Architecture commit
+  `810f4b2cbab34b1529a4a99bd14ab4609dc3edd3` is pushed and Draft PR #137 is
+  mergeable with `manual-merge-required`; auto-merge remains disabled.
+- Exact-head evidence: CI run `31805851763` passed lint, typecheck, tests, build,
+  security audit, database replay, atomic Product mutation, and Item Selection
+  security. Vercel Preview deployment `5907169153` is Ready at
+  `https://gonggamline-2ekpyfeah-gg-online.vercel.app`; Preview browser run
+  `31805851802` passed 44/44 checks. Evidence artifact `9221182132` has SHA-256
+  `c44f16e38a5695fcfaf7bcf41ea8f81ed316bfbc7a8ee217e11078ffdd6f0ef3`.
+- Current work: publish this status-only checkpoint, verify the final exact head,
+  and mark the PR ready for repository-owner Architecture review.
 - Validation: `git diff --check` PASS; focused Architecture tests 10/10 PASS;
   lint PASS with zero errors and four pre-existing unrelated warnings; typecheck
   PASS; full unit/integration tests 660/660 PASS; Production build PASS with 86
