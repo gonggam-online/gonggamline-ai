@@ -104,6 +104,25 @@ Revert this implementation before any live use. A later approved packet must be
 re-evaluated whenever its supplier trust profile, rights, category, policy,
 asset digest, selected variant, or commerce fields change.
 
+## Proposed creative-optimization amendment (2026-08-14)
+
+The owner requested that conversion optimization become the default for every
+future product and that publicly visible images be editable unless expressly
+prohibited. The first half is accepted as a proposed generic pipeline. The
+second half is not an enforceable rights grant: public availability and silence
+do not establish reproduction, editing, provider-upload, or generative-reference
+permission, and an internal owner decision cannot create a third party's rights.
+
+The proposed
+[Listing Creative Optimization Pipeline v1](./LISTING-CREATIVE-OPTIMIZATION-PIPELINE-V1.md)
+therefore maximizes verified capabilities operation by operation. Approved
+supplier unchanged-use remains automatic and edit-right absence excludes only
+the derivative. Competitor and arbitrary web images remain observation-only;
+new creative uses own/commissioned assets, express operation grants, verified
+open/public-domain rights, or independent fact-only generation without a third-
+party image reference. This amendment becomes binding only after its separate
+Architecture PR is manually approved and merged.
+
 ## Typed implementation map
 
 - Policy sources and official limits:
