@@ -231,17 +231,20 @@ Story. Local files, browser downloads, and build output are temporary only.
 2. Generic candidate planner and rights invalidation policy with non-KK fixtures.
 3. Deterministic fixture renderer and computed QA; selected-set-only mapper.
 4. Review UI with actual fixture previews and digest-bound content approval.
-5. Managed object-storage/CDN Architecture Story and implementation PR
-   (high-risk/manual).
-6. Real provider/model/paid/secret Architecture Story and adapter PR
-   (high-risk/manual).
+5. Managed object-storage/CDN Architecture Story combined with the real
+   provider/model/paid/secret boundary,
+   [Listing Managed Creative Asset and Image Provider v1](./LISTING-MANAGED-CREATIVE-ASSET-AND-IMAGE-PROVIDER-V1.md), followed by separately
+   reviewable implementation PRs (high-risk/manual).
+6. Actual-byte provider QA, public delivery mirror, review, approval, and mapper
+   integration (high-risk/manual).
 7. Database/Auth/RLS immutable persistence and learning PR
    (high-risk/manual).
 8. Product adapter packet and acceptance run; KK946 remains fixture-only.
 9. Separately approved live marketplace registration (high-risk/manual).
 
-Architecture acceptance permits only steps 1-4. Steps 5-9 retain their stated
-approval boundaries. Each PR must run diff review, lint, typecheck, unit and
+The owner approved the step 5 Architecture category on 2026-08-14, but its exact
+Story must be manually merged before implementation. Steps 5-9 retain their
+stated approval boundaries. Each PR must run diff review, lint, typecheck, unit and
 negative tests, build, browser/visual checks, exact-head CI/Preview, and applicable
 post-merge Production smoke. Rollback is Git revert before runtime adoption;
 asset/provider/storage rollback is defined in its later Architecture Story.

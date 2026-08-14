@@ -31,9 +31,16 @@ Requires approved Sprint 02 packet, category metadata, brand/certification evide
 8. S3-08 (M, after S3-07 merge): pure v3 creative contracts, candidate planner,
    deterministic fixture renderer, computed QA, selected-set mapper, and review
    UI using synthetic non-KK fixtures.
-9. S3-09 (high-risk, manual): managed object storage/CDN, real provider and paid
-   use, secrets, and immutable Database/Auth/RLS persistence as separately
-   approved Stories/PRs.
+9. S3-09 (Architecture, high-risk, manual): managed Supabase private asset
+   archive, Vercel Blob public CDN mirror, pinned OpenAI Image provider/model/
+   terms, paid cap, server secrets, lifecycle, takedown, and recovery Story.
+10. S3-10 (high-risk, manual, after S3-09 merge): storage/CDN adapters,
+    deterministic fake, and exact external configuration with restore evidence.
+11. S3-11 (high-risk, manual, after S3-10): real image provider adapter, rights/
+    spend/idempotency gates, actual-byte QA, review approval and selected-set
+    public delivery.
+12. S3-12 (high-risk, manual): immutable Database/Auth/RLS jobs, approvals,
+    rights dependencies, and append-only learning before unattended execution.
 
 ## Done
 

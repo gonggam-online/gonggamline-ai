@@ -1,0 +1,287 @@
+# Listing Managed Creative Asset and Image Provider v1
+
+## Status, owner decision, and revenue outcome
+
+- Status: proposed high-risk Architecture Story. The repository owner approved
+  the managed object-store/CDN, image provider/model/terms, paid-use limit,
+  server-secret, and output-commercial-use architecture boundary on 2026-08-14.
+  That approval becomes durable implementation authorization only when this
+  Story is manually reviewed and merged.
+- Revenue outcome: let the generic Listing pipeline produce real, reviewable,
+  conversion-oriented image artifacts instead of stopping at briefs or
+  fixture-only rasters, while preserving a fast unchanged-image registration
+  packet when new creative is unavailable.
+- Scope: every selected and procurement-approved product. Product identifiers,
+  facts, prices, categories, image references, titles, and keywords are supplied
+  through typed evidence/adapters and never hard-coded in provider or storage
+  production code.
+- This Story approves the exact architecture and ordered implementation below.
+  It performs no bucket/store creation, secret write, paid provider call,
+  database migration, Production mutation, or marketplace write.
+- Risk: high-risk/manual because the later implementation changes managed
+  storage, CDN publication, billing, secrets, Production configuration, and an
+  external generative provider. No auto-merge is permitted.
+
+## Root-cause classification and present state
+
+1. External configuration: the existing Supabase project has no Storage bucket;
+   the Vercel project has no Blob store/token and currently requires an account
+   billing action; OpenAI Platform is not authenticated and no project key or
+   budget has been verified. These are configuration gates, not code defects.
+2. Database/state: `legacy listing_drafts` cannot own immutable provider jobs,
+   rights dependencies, creative approvals, or learning. This Story does not
+   cast it to registration-ready and does not invent a local ledger.
+3. Code: merged Listing v3 has a deterministic actual-byte fixture renderer and
+   computed QA, but deliberately marks its output `FIXTURE_ONLY`; it has no real
+   provider adapter or managed artifact repository.
+
+Production smoke on 2026-08-14 returned HTTP 200 for `/listing/review`, passed
+the focused Chromium review flow, and reported runtime `degraded` solely because
+Coupang is unconfigured. That smoke does not prove this unimplemented provider.
+
+## Approved cloud-first topology
+
+The minimum reliable topology separates confidential evidence from public
+delivery and gives each durable state an explicit owner and recovery path.
+
+| State | Authoritative owner | Access | Recovery / deletion |
+| --- | --- | --- | --- |
+| admitted source bytes, rights evidence references, generated masters, manifests | Supabase Storage private bucket `listing-creative-private-v1` in the existing managed project | server service role for writes; short-lived signed review URLs; no public bucket | export through the S3-compatible interface, verify SHA-256, and restore to another encrypted store; legal hold overrides normal purge |
+| approved channel-ready images and rendered detail assets | Vercel Blob public store `listing-creative-public-v1` | server token for writes; public CDN read only after digest-bound content approval | regenerate the public mirror from the Supabase master and manifest; takedown deletes the public object first |
+| provider/model/terms/pricing snapshot records and sanitized job manifests | Supabase private bucket beside the artifact revision | server-only; no raw prompt containing private evidence and no raw provider response retained | rebuild from immutable normalized manifests and Git-owned contract versions |
+| source, schemas, deterministic fixtures, architecture and CI evidence | GitHub | repository policy | branch/PR history and Git revert |
+| local files, browser downloads, test output | none; disposable cache only | current task process | remove after upload/verification; never the only copy |
+
+Supabase and Vercel are not interchangeable sources of truth. Supabase owns the
+private recoverable master. Vercel Blob is a replaceable public delivery mirror
+containing only artifacts already approved for the channel. Raw supplier files,
+licence documents, account data, PII, and rejected candidates never enter the
+public store.
+
+### Immutable addressing and lifecycle
+
+Objects use content addressing and never overwrite an existing key:
+
+```text
+v1/<subjectHash>/<revisionDigest>/<role>/<sha256>.<ext>
+```
+
+- `subjectHash` is a non-reversible internal subject key, not a supplier account
+  identifier or product title.
+- SHA-256 is computed from stored bytes after decoding and MIME/dimension checks.
+- A public object is accepted only when its bytes match the private master digest
+  and the selected candidate/content-approval manifest.
+- Manifests are append-only: `RESERVED`, `GENERATED`, `ARCHIVED`, `APPROVED`,
+  `PUBLISHED`, `REVOKED`, `TAKEDOWN`, or `FAILED`. A new state is a new object,
+  never a mutation that erases earlier evidence.
+- Public mirrors remain only while an active listing or approved rollback needs
+  them. A rights withdrawal, takedown, digest mismatch, or factual failure removes
+  the public mirror first and invalidates every dependent packet.
+- Private masters remain while any active listing/approval depends on them and
+  for at least 90 days after final unpublish, unless a shorter legal deletion
+  duty or a legal hold applies. Retention may be lengthened only by a later
+  approved policy; the service does not silently retain provider payloads.
+- CDN/object deletion is verified by origin and public fetch. Supabase Smart CDN
+  invalidation can take up to its documented edge-invalidation window, so a
+  takedown remains `TAKEDOWN_PENDING` until verification completes.
+
+### Access and secret boundary
+
+- `SUPABASE_SERVICE_ROLE_KEY` and `BLOB_READ_WRITE_TOKEN` are server-only. They
+  never appear in `NEXT_PUBLIC_*`, client bundles, logs, prompts, Git, screenshots,
+  or review packets.
+- Supabase private bucket upload/read policies default deny. Service-role writes
+  are permitted only from the server adapter; review reads use short-lived signed
+  URLs. Public retrieval is never enabled on the private bucket.
+- Vercel Blob has no source/evidence upload path. Its write token publishes only
+  the exact selected digest after content approval; live-write approval remains
+  a separate marketplace boundary.
+- Preview and CI use deterministic fakes and disposable fixture bytes. Real paid
+  generation and Production secrets are not automatically exposed to Preview.
+- Initial real execution is a single authenticated operator dispatch. No public
+  generation route and no concurrent automation are authorized until the later
+  Database/Auth/RLS job Story provides durable idempotency and authorization.
+
+## Approved image provider contract
+
+The initial provider is the OpenAI Image API with the pinned model snapshot
+`gpt-image-2-2026-04-21`. The Image API, rather than a conversational image flow,
+is used for one immutable job because it gives the smallest auditable request,
+output, and cost envelope. The adapter records:
+
+- provider, exact model snapshot, endpoint contract version, request timestamp,
+  organization/project-independent request hash, and idempotency key;
+- normalized prompt digest, admitted fact/evidence digests, input asset digests,
+  exact rights capabilities, recipe, size, quality, format, and output count;
+- observed Services Agreement, model, generation-guide, and pricing snapshot
+  identifiers; output-commercial-use decision and human review identity;
+- returned usage/cost, sanitized provider request identifier, output byte digest,
+  decoded MIME/dimensions, computed visual QA, storage keys, and final status.
+
+`OPENAI_API_KEY` is the only new OpenAI server secret. It is created as a
+least-privilege project key, stored only in the Vercel Production environment,
+rotated after suspected exposure, and never committed or returned to the client.
+Organization verification, project billing, and a successful zero-payload
+connection check are external configuration gates.
+
+### Paid-use envelope
+
+The owner-approved initial safety envelope is deliberately small:
+
+- maximum USD 2.00 estimated and actual provider spend per product revision;
+- maximum six output images and two provider attempts per revision;
+- OpenAI project monthly budget USD 50, with alerts at 50%, 80%, and 100%;
+- stop before a request when estimated cumulative cost would cross either cap;
+- no automatic retry for content-policy, rights, fact, billing, authentication,
+  or rate-limit failures; a retry needs a new bounded job attempt;
+- no paid call from tests, pull requests, Preview, scheduled jobs, or a browser.
+
+Pricing is checked against the current official snapshot before each Production
+rollout. A changed model, terms, price, output ownership condition, training/data
+use condition, or region requires a new versioned policy decision before calls
+resume. Budget limits are safety ceilings, not spending targets.
+
+### Provider terms and output use
+
+The observed OpenAI Services Agreement says, as between the customer and OpenAI
+and to the extent permitted by applicable law, the customer retains input rights
+and owns output; it also makes the customer responsible for having input rights,
+using outputs lawfully, and evaluating output accuracy, and notes that output may
+not be unique. Business/API content is not used to improve models unless the
+customer explicitly opts in. These terms do not clear third-party copyright,
+trademark, trade dress, design, publicity, privacy, or product-representation
+rights. The system therefore records `syntheticOutputCommercialUse=VERIFIED`
+only when both the provider terms snapshot and the particular job's input-rights
+and output-review gates pass.
+
+## Rights and truthful-product gates
+
+This Story preserves the accepted operation-specific rights contract:
+
+- a supplier original with verified unchanged marketplace use may remain in the
+  minimum listing even when edit or provider-upload rights are unknown;
+- any source pixel uploaded to the provider requires `providerUpload=VERIFIED`;
+  image editing/reference also requires the exact transform and
+  `generativeReference=VERIFIED` capabilities;
+- competitor and arbitrary web pixels remain observation-only and cannot be
+  downloaded into this store, edited, composited, or sent to the provider;
+- text-to-image independent generation may use admitted non-expressive product
+  facts without a third-party pixel reference;
+- generated output cannot be deployed merely because the provider returned it.
+  Human and computed review must confirm product identity, color, quantity,
+  dimensions/scale treatment, material, components, options, prohibited marks,
+  unsupported claims, and exact selected-variant consistency;
+- uncertainty about the visible construction or included components produces
+  `PRODUCT_REPRESENTATION_REVIEW_REQUIRED`, not a successful artifact.
+
+Rights withdrawal, trust-profile narrowing, model/terms change, fact conflict,
+or input/output digest change invalidates the dependent artifact, content
+approval, public mirror, and registration packet. It does not block an unrelated
+eligible unchanged-source packet.
+
+## Generic execution flow
+
+1. Admit the typed evidence packet and exact category/policy snapshot.
+2. Evaluate the minimum registration packet independently from conversion gaps.
+3. Plan at least two product-agnostic creative candidate sets.
+4. Evaluate operation-specific input rights and fact coverage for every render
+   job; exclude only the ineligible job.
+5. Reserve the immutable job key with `upsert=false`; a duplicate reservation
+   stops before spending.
+6. Run the deterministic fake in CI/Preview or the bounded OpenAI adapter only in
+   an approved Production operator dispatch.
+7. Decode bytes, compute digest/dimensions/MIME and semantic/visual QA, then write
+   the private master and append-only manifest.
+8. A human selects one candidate and content approval binds every title, keyword,
+   filter, image, detail-package, policy, provider, recipe, and revision digest.
+9. Publish only the selected channel-ready digests to Vercel Blob and verify CDN
+   loads. Fixture, rejected, unselected, or unapproved output never publishes.
+10. The mapper consumes that one approval packet. A separate live-write approval
+    is still required for WING/Coupang submission.
+
+Provider or storage outage produces `OPTIMIZATION_UNAVAILABLE` and visible retry
+evidence. It never converts a missing artifact into success. When an eligible
+unchanged packet exists, registration readiness may remain ready while conversion
+readiness is pending.
+
+## Product acceptance boundary
+
+A real product adapter can request generation only with sufficient admitted facts
+and rights. KK946 remains an external acceptance packet, not production logic.
+Its verified unchanged supplier asset can support minimum registration, but the
+currently recorded unknown edit/provider-upload/generative-reference rights mean
+supplier pixels cannot be sent to this provider. Independent fact-only generation
+may be reviewed, but the presently admitted text facts do not by themselves prove
+the pouch's exact visible construction. A deployable optimized KK946 image needs
+one of:
+
+1. owned or commissioned exact-product photography;
+2. a supplier grant covering provider upload and the requested reference/edit
+   operation; or
+3. sufficiently complete exact visible-product evidence plus independent
+   generation and human product-representation approval without source pixels.
+
+This is a conversion warning/pending state, not a registration blocker when the
+eligible unchanged original is selected. No generated KK946 artifact may be
+called deployable until rights, computed QA, and factual human review pass.
+
+## Implementation and manual gates
+
+After manual merge of this Story, implementation proceeds as separately
+reviewable high-risk PRs:
+
+1. private Supabase bucket, default-deny access policies, public Vercel Blob
+   store, server adapters, digest verification, takedown, restore drill, and
+   deterministic fakes;
+2. OpenAI Image API adapter, pinned model/terms/pricing record, server-only key,
+   spend guards, rights gate, sanitized manifest, and negative tests;
+3. actual-byte computed QA, review UI, digest-bound approval, public mirror, and
+   selected-set-only mapper integration;
+4. separately approved Database/Auth/RLS immutable job/approval/learning state
+   before concurrent or unattended generation;
+5. product adapter acceptance and one explicit paid Production generation run;
+6. separate live commerce-write approval and WING entry.
+
+Bucket/store creation, billing/payment changes, API-key creation, secret writes,
+real provider calls, Production configuration, and public asset publication are
+external side effects. The owner has approved their Architecture category, but
+each exact implementation PR remains manual-merge-required and must show the
+target, cost envelope, rollback, and exact-head evidence before the action.
+
+## Verification and rollback
+
+- Contract tests prove no product-specific values occur in provider/storage
+  production paths, fixtures never deploy, unknown provider-upload rights reject
+  reference jobs, duplicate reservations do not spend, budgets fail closed, and
+  only the approved digest can reach the public mirror.
+- Integration tests use an in-memory/fake object repository and fake provider;
+  no CI or Preview test has a real key or billable call.
+- Storage validation uploads a synthetic non-product fixture, verifies private
+  access denial, signed review access, digest equality, public selected-object
+  fetch, takedown, and recovery, then deletes the disposable fixture.
+- Provider validation performs one separately approved bounded synthetic smoke,
+  records usage/cost without prompt/provider payload leakage, and quarantines the
+  output from marketplace use.
+- Rollback order is: stop provider dispatch, revoke/rotate provider and Blob
+  write keys, remove public mirrors, invalidate approvals, preserve private
+  evidence subject to retention/legal hold, revert code, and verify no live
+  payload references a removed digest.
+
+## Official source snapshots observed 2026-08-14
+
+Each digest below is SHA-256 of the normalized source record (canonical URL,
+observation date, and the exact policy/pricing fields used), not a claim that the
+external webpage bytes are immutable. Re-observation creates a new record.
+
+| Source | Version/digest | Applied scope | Limitation |
+| --- | --- | --- | --- |
+| [GPT Image 2 model](https://developers.openai.com/api/docs/models/gpt-image-2) | model `gpt-image-2-2026-04-21`; `91066da0ecef43df3e1339d65e87bde8c2224a4dc655c169523be3f6c40385a7` | exact image model and supported generation/edit surface | model capability is not a product-accuracy or rights guarantee |
+| [Image generation guide](https://developers.openai.com/api/docs/guides/image-generation) | `35bdefae24e7116ab4d67cbe6dc7fbf91d468522f7b55c1d07d559c9306a814d` | Image API choice, size/quality/format, organization-verification notice | operational limits may change and are rechecked at rollout |
+| [OpenAI API pricing](https://developers.openai.com/api/docs/pricing) | `gpt-image-2` Standard image input USD 8/M, cached input USD 2/M, output USD 30/M; text input USD 5/M, cached USD 1.25/M; `2bbd4eb905bc2a32ab7028f8eb024079650a93ce999b8f645ae8bbcc1db26938` | cost estimation and stop-before-spend guard | token pricing does not predict exact per-image cost without actual usage |
+| [OpenAI Services Agreement](https://openai.com/policies/services-agreement/) | observed agreement; `7a9261d770293cfc11331ffc89f8c71543a48b22347113df2bf0efb28c08f2cd` | input responsibility, output allocation, opt-in training boundary | not legal advice; does not clear third-party rights or uniqueness |
+| [Supabase bucket fundamentals](https://supabase.com/docs/guides/storage/buckets/fundamentals) | `cc5b5d4d9a4ab1d2965346fe78b37647f507e0f49f4de969dc60134fcd0ffb2d` | private-by-default bucket and signed URLs | exact project policies must be reviewed after creation |
+| [Supabase Storage access control](https://supabase.com/docs/guides/storage/security/access-control) | `2f17cdb2240bf933f8875ac1cdad6b1f555863b72e60e020668629a7f391b810` | default-deny RLS and server-only service key | service role bypasses RLS and therefore increases secret impact |
+| [Supabase Smart CDN](https://supabase.com/docs/guides/storage/cdn/smart-cdn) | `d6a068d38124c7a09e58db9ae5ff2002c49c85a9f7ad60d66fb67af55419f5e3` | CDN/cache and deletion-verification behavior | plan/edge invalidation behavior can change |
+| [Supabase Storage pricing](https://supabase.com/docs/guides/storage/pricing) | Pro included storage/egress plus usage pricing observed; `8361ce176aea23472fcf709115f7826bca611f9f18f857222992392c191e3936` | budget review for private archive | account invoice and current dashboard remain authoritative |
+| [Vercel Blob](https://vercel.com/docs/vercel-blob) and [private storage](https://vercel.com/docs/vercel-blob/private-storage) | `ee121ab5ddfd5e0e8867d2b8351e7188c68c9d4bee56a3d106ca894c0a2f8a88`; `d719e9f11ba103f2b5b6e8064fa03ec33a338a88b47dbfbd765c0b644bd3f520` | public delivery store, CDN URL, token boundary | current project has no configured store/token; private Blob is not selected as the master |
+| [Vercel Blob usage and pricing](https://vercel.com/docs/vercel-blob/usage-and-pricing) | `a1c01d55a36f578c22dac95df197864e3a963a694ccf2dd574e7b845565de625` | delivery cost and spend-management review | current project requires a billing action before rollout |
