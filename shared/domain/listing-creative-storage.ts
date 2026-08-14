@@ -37,7 +37,10 @@ export type ListingCreativeArtifactDescriptor =
   ListingCreativeStorageContext & Readonly<{
     byteDigest: string;
     byteSize: number;
+    width: number;
+    height: number;
     mimeType: ListingCreativeAssetMimeType;
+    computedQaDigest: string;
   }>;
 
 export type ListingCreativeManifestEvent = Readonly<{
@@ -50,6 +53,11 @@ export type ListingCreativeManifestEvent = Readonly<{
   role: ListingAssetRole | null;
   objectPath: string | null;
   objectDigest: string | null;
+  byteSize: number | null;
+  width: number | null;
+  height: number | null;
+  mimeType: ListingCreativeAssetMimeType | null;
+  computedQaDigest: string | null;
   approvalReference: string | null;
   reasonCode: string | null;
   occurredAt: string;
@@ -78,8 +86,22 @@ export type PublishedListingCreativeAsset = Readonly<{
 
 export type ListingCreativePublicationApproval = Readonly<{
   contentApproved: true;
+  packetId: string;
   approvalReference: string;
+  reviewerReference: string;
+  approvedAt: string;
+  contentApprovalDigest: string;
   selectedCandidateSetId: string;
   boundRevisionDigest: string;
   boundArtifactDigests: readonly string[];
+  boundProductReviewDigests: readonly string[];
+  boundProviderExecutionDigests: readonly string[];
+  boundEvidenceEvaluationId: string;
+  boundPolicyDigest: string;
+  boundCategoryMetadataDigest: string;
+  boundTitleCandidateId: string;
+  boundKeywordCandidateId: string;
+  boundFilterSetDigest: string;
+  boundDetailPackageDigest: string;
+  boundRenderRecipeVersions: readonly string[];
 }>;

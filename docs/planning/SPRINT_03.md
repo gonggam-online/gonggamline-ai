@@ -38,10 +38,12 @@ Requires approved Sprint 02 packet, category metadata, brand/certification evide
     deterministic fake, immutable addressing, takedown, and restore boundary.
     Exact external configuration remains stopped on the recorded region,
     environment-scope, login, and billing gates.
-11. S3-11 (high-risk, manual, implementation in progress): first deliver the
-    real image provider adapter, rights/spend/idempotency gates, sanitized usage,
-    and fake transport; then separately deliver actual-byte QA, review approval,
-    and selected-set public delivery after the provider slice merges.
+11. S3-11 (high-risk, manual): provider adapter merged as PR #133. The next
+    separately reviewable slice validates complete PNG bytes, archives the exact
+    digest, binds human product-representation QA and canonical content approval,
+    and admits only selected public references to the creative registration
+    mapper. External storage/secret/paid/publication rollout remains stopped
+    until its exact managed-service gates pass.
 12. S3-12 (high-risk, manual): immutable Database/Auth/RLS jobs, approvals,
     rights dependencies, and append-only learning before unattended execution.
 

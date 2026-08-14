@@ -1,5 +1,32 @@
 # Architecture review
 
+## Listing actual-byte QA and digest-bound approval implementation review - 2026-08-14
+
+- Accepted Architecture: PR #131 / merge `4fd2271`; storage PR #132 / merge
+  `5d2a6ad`; provider PR #133 / merge `d910f33`. This is the ordered managed-
+  creative step 3 and introduces no new Domain, public API, database, migration,
+  Queue or concurrent runtime lifecycle.
+- Boundary: Listing domain computes binary and product-representation gates;
+  injected application services orchestrate the accepted provider and managed
+  storage ports. The selected-set mapper consumes only a canonical approval and
+  digest-verified public references.
+- Truth/security: full PNG structure and inflated payload are verified before
+  archive; every selected artifact needs human factual/visual PASS; approval
+  binds evidence/category/policy/content/provider/review/revision digests. A
+  private, fixture, data, unselected or unapproved reference cannot enter the
+  creative registration mapper. Live-write approval is still separate.
+- Cloud-first: real masters/manifests belong in the accepted Supabase private
+  bucket and approved public mirrors in Vercel Blob. Tests use disposable fakes;
+  no local artifact is authoritative. Durable job/approval concurrency remains
+  blocked on the separate Database/Auth/RLS Story.
+- External stop: no Blob store/token or OpenAI key is configured, billing is
+  expired, and Supabase/OpenAI sessions are signed out. This code PR performs no
+  external configuration, paid call, public publication, Production mutation or
+  marketplace write.
+- Risk/rollback: high-risk/manual, no auto-merge. Revert code and invalidate any
+  later dependent approval/public mirror; external rollout follows the accepted
+  runbooks only after exact configuration gates pass.
+
 ## Listing Image API adapter implementation review - 2026-08-14
 
 - Accepted Architecture: PR #131 / merge `4fd2271`; storage implementation PR
