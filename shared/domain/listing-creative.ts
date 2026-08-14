@@ -48,6 +48,24 @@ export type CreativeProviderApproval = Readonly<{
   outputCommercialUseApproved: boolean;
 }>;
 
+export type CreativeProviderExecution = Readonly<{
+  operation: "GENERATE" | "EDIT";
+  requestHash: string;
+  promptDigest: string;
+  requestedAt: string;
+  sanitizedProviderRequestHash: string | null;
+  quality: "LOW" | "MEDIUM" | "HIGH";
+  pricingSnapshotVersion: string;
+  estimatedCostUsd: number;
+  actualCostUsd: number | null;
+  usage: Readonly<{
+    inputTextTokens: number | null;
+    inputImageTokens: number | null;
+    outputTokens: number | null;
+    totalTokens: number | null;
+  }>;
+}>;
+
 export type CreativeSourceAuthorization = Readonly<{
   assetDigest: string;
   sourceClass: CreativeSourceClass;
@@ -110,6 +128,7 @@ export type RenderedCreativeArtifact = Readonly<{
   providerApprovalReference: string | null;
   providerModelVersion: string;
   providerTermsVersion: string;
+  providerExecution: CreativeProviderExecution | null;
   deployability: "FIXTURE_ONLY" | "NONDEPLOYABLE" | "DEPLOYABLE";
   review: ComputedArtifactReview;
 }>;

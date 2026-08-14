@@ -1,5 +1,61 @@
 # Work status
 
+## 2026-08-14 Listing GPT Image provider adapter implementation
+
+- Objective/revenue impact: connect the accepted Listing creative contract to a
+  bounded real Image API adapter so eligible products can produce reviewable
+  conversion assets instead of stopping at deterministic fixture previews.
+- Branch/base: `codex/feat/listing-image-provider-adapter` from exact merged
+  `origin/main` `5d2a6ad42201a5b02ecb620b3d5cbbec25e76fa7` (PR #132).
+- Risk: high-risk/manual because the adapter is intended for a paid external
+  provider and Production server secret. No provider call, secret write, bucket/
+  store creation, public asset publication, database/RLS/Auth mutation, or
+  marketplace write is performed by the code-validation phase.
+- Root-cause classification: (1) external configuration: Supabase Dashboard is
+  not authenticated; the current Vercel Blob UI requires an irreversible region
+  choice and connects variables to both Production and Preview, contrary to the
+  accepted Production-only secret contract; the Vercel trial is expired and no
+  OpenAI project/key/budget is verified; (2) database/state: unattended or
+  concurrent provider jobs still require the separate immutable DB/Auth/RLS
+  Story; (3) code: merged main has only a fixture renderer and no Image API
+  adapter, request budget, sanitized usage record, or transport fake.
+- Production baseline: merge commit `5d2a6ad` deployment `5903924173` is Ready at
+  `https://gonggamline-jrrq9vt22-gg-online.vercel.app`; Production browser run
+  `31789026526` passed. Canonical `/listing/review` is HTTP 200, all four fixture
+  rasters decode at expected dimensions, there is no horizontal overflow or
+  browser console warning/error, and runtime health is expected `degraded` only
+  because Coupang remains unconfigured.
+- Cloud-first gate: GitHub owns code/contracts/tests and exact-head evidence;
+  Supabase private Storage remains the approved master and Vercel Blob the
+  replaceable public mirror after exact external rollout. `OPENAI_API_KEY` may
+  exist only as a managed Production server secret. Tests use an injected fake
+  transport and sanitized byte fixtures; no local artifact is authoritative.
+- Current progress: 8/12 overall steps complete. Production baseline, external
+  read-only audit, provider adapter, durable dispatch reservation, complete diff
+  review, and all local validation gates are complete. GitHub delivery and exact
+  Preview evidence remain current.
+- External evidence: Vercel Production already has a sensitive Production-only
+  `SUPABASE_SERVICE_ROLE_KEY`, but has neither `BLOB_READ_WRITE_TOKEN` nor
+  `OPENAI_API_KEY` and has no `NEXT_PUBLIC_OPENAI*` variable. Supabase Dashboard
+  and OpenAI Platform are not authenticated. No value was revealed or copied.
+- Implementation: pinned OpenAI SDK `7.4.0` and
+  `gpt-image-2-2026-04-21`; deterministic fact-only/edit request normalization;
+  prompt/request/source-rights/pricing digests; strict exact input resolver;
+  USD 2/revision, six-output and two-attempt limits; current official cost table;
+  cumulative actual-cost quarantine; SDK retry disabled; hashed request identity;
+  required Supabase-private immutable reservation before transport; server-only
+  Production composition; no public route.
+- Validation: focused final provider/renderer/storage `31/31`; full tests
+  `645/645`; lint zero errors and four pre-existing Revenue-test warnings;
+  typecheck PASS; production build PASS with 86 routes; mobile Listing review
+  Chromium `1/1` PASS; diff/encoding/product-hardcode review PASS. Production
+  dependency audit retains the four pre-existing Next/PostCSS/sharp/nanoid
+  findings; `openai@7.4.0` adds no reported Production advisory.
+- Exact next action: commit and push this high-risk branch, create a
+  manual-merge-required PR, and wait for exact-head CI/Preview/browser evidence.
+  Real storage/provider setup and paid smoke remain stopped on the
+  recorded login, region, environment-scope, billing, key, and budget gates.
+
 ## 2026-08-14 Managed Listing creative storage adapter implementation
 
 - Objective/revenue impact: implement the smallest cloud-first asset boundary

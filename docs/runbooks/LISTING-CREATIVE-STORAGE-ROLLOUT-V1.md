@@ -11,6 +11,23 @@ token environment, object digest, or operator identity cannot be verified.
 Never copy `SUPABASE_SERVICE_ROLE_KEY` or `BLOB_READ_WRITE_TOKEN` into chat,
 screenshots, logs, Git, a client bundle, or a Preview environment.
 
+## 2026-08-14 exact-project preflight
+
+The post-PR-132 read-only preflight found three current external stop conditions:
+
+- the Supabase Dashboard session is not authenticated, so the existing managed
+  project and bucket state cannot yet be verified or changed;
+- the current Vercel Create Blob Store form requires an irreversible region
+  choice that the accepted Story did not name;
+- the same form states that connection variables are added to both Production
+  and Preview, while this contract permits a read-write token only in Production.
+  The team trial is also expired and presents a payment-method action.
+
+Do not infer a region, connect a write token to Preview, enter payment data, or
+create the store until an exact owner amendment names the region and a verified
+Vercel procedure preserves Production-only write authority. Code and fake-based
+validation may continue independently.
+
 ## 1. Supabase private master
 
 1. Open the existing GonggamLine managed Supabase project, then **Storage**.
