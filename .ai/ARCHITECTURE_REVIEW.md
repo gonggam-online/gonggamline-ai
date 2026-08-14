@@ -32,13 +32,16 @@
 
 ## Vercel paid-billing observation - 2026-08-14
 
-- Authenticated UI evidence: the team Billing page has a default payment method,
-  but the plan remains `Pro Trial`, the expiry indicator is `00:00:00`, and the
-  page presents `End Trial and Start Pro Plan`. On-demand budget configuration
-  is disabled in this state.
-- Classification: external configuration, not code. Paid Pro continuity is not
-  active or verified. Private Supabase archive and review do not depend on this
-  gate; the first Vercel Blob product publication does.
+- Authenticated UI evidence supplied by the owner: the active team Billing page
+  shows `Hobby Plan` / `Active` and presents `Upgrade to Pro`. The screenshot
+  does not establish whether a payment method is stored.
+- Official boundary: Vercel Blob is available within Hobby's included limits,
+  but Hobby has no on-demand overage and Vercel describes it as personal,
+  non-commercial use. A commercial product-asset delivery dependency therefore
+  requires Pro activation or a separately accepted commercial CDN/store.
+- Classification: external configuration, not code. Private Supabase archive
+  and review do not depend on this gate; commercial Vercel Blob publication
+  does.
 - Data handling: no card suffix, expiry, invoice email, address, tax field, or
   account identifier is copied into Git, logs, or task evidence.
 - Authority: read-only observation. No payment, plan, budget, add-on, invoice,

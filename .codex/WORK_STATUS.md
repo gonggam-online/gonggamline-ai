@@ -10,8 +10,8 @@
 - Risk: normal-risk read-only external-state documentation. No payment, plan,
   secret, Production configuration, asset publication, provider call, or
   commerce write.
-- Root-cause order: (1) external configuration: default payment method exists,
-  but Vercel remains expired `Pro Trial` with paid Pro not activated; (2)
+- Root-cause order: (1) external configuration: the active Vercel team is on
+  `Hobby Plan` / `Active`, not Pro; payment-method state is unverified; (2)
   database: no change; (3) code: S3-16 implementation is now Architecture-
   authorized but is outside this status correction.
 - Cloud-first gate: GitHub owns the sanitized observation and Production
@@ -21,10 +21,11 @@
   Production deployment `5907391571` succeeded; Production browser smoke
   `31807000133` passed 44/44; artifact `9221619734` digest is
   `0e2d3c2100f9907889c3ee0a78113a841d196250e1423f6fb100979f0f56925d`.
-- Billing observation: authenticated page shows a default payment method plus
-  `Pro Trial`, expiry `00:00:00`, disabled on-demand budget, and the explicit
-  `End Trial and Start Pro Plan` action. Paid Pro/public-Blob continuity remains
-  blocked; private Supabase archive does not.
+- Billing observation: owner-supplied authenticated evidence shows `Hobby Plan`
+  / `Active` and `Upgrade to Pro`. Official Vercel material permits Blob within
+  Hobby limits but describes Hobby as personal/non-commercial and provides no
+  on-demand overage. Commercial public-Blob use remains blocked; private
+  Supabase archive does not.
 - Validation: `git diff --check` PASS; focused Architecture/storage tests 25/25
   PASS; lint PASS with zero errors and four pre-existing test-file warnings;
   typecheck PASS; full test suite 660/660 PASS; production build PASS.
@@ -45,7 +46,7 @@
   call, public publication, content approval, or WING write.
 - Root-cause order: (1) external configuration: OpenAI/Supabase secrets are
   correctly Production Sensitive and cannot be exported by Vercel CLI; OpenAI
-  is funded, while Vercel shows a payment method plus Pro Trial; (2) database:
+  is funded, while Vercel shows active Hobby rather than Pro; (2) database:
   S3-12 concurrent/unattended job persistence is not accepted; (3) code: no
   authenticated Production call site exists for the merged dispatch service.
 - Cloud-first gate: proposed create-only plan, authorization, reservation,

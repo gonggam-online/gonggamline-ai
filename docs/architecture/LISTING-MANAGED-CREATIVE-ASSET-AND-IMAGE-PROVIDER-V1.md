@@ -27,12 +27,12 @@
 1. External configuration, amended 2026-08-14 after PR #137: the approved
    Supabase private bucket and Vercel public Blob mirror now exist. The mirror
    uses Vercel's current OIDC-default connection in ICN1 rather than a long-lived
-   token. OpenAI provider billing/key/budget configuration is verified. Vercel's
-   authenticated Billing page shows a default payment method but still labels
-   the team `Pro Trial`, shows the trial expiry countdown at `00:00:00`, and
-   offers `End Trial and Start Pro Plan`; paid Pro continuity is therefore not
-   active or verified. These remaining conditions are configuration gates, not
-   code defects.
+   token. OpenAI provider billing/key/budget configuration is verified. Owner-
+   supplied authenticated Billing evidence for the active team shows `Hobby
+   Plan` / `Active` and `Upgrade to Pro`; it does not establish payment-method
+   state. Vercel documents Blob availability within Hobby's included limits but
+   describes Hobby as personal/non-commercial and supplies no on-demand overage.
+   Commercial public delivery therefore retains an external configuration gate.
 2. Database/state: `legacy listing_drafts` cannot own immutable provider jobs,
    rights dependencies, creative approvals, or learning. This Story does not
    cast it to registration-ready and does not invent a local ledger.
@@ -281,9 +281,8 @@ target, cost envelope, rollback, and exact-head evidence before the action.
   short-lived private review URLs. It never selects a candidate or creates
   content/live-write approval.
 - No paid image request, public image publication, or WING write has occurred at
-  this checkpoint. A payment method exists, but paid Pro is not active while the
-  Billing page remains on expired `Pro Trial`; public Blob publication therefore
-  retains the billing-continuity gate.
+  this checkpoint. The active team is on `Hobby Plan` / `Active`, not Pro;
+  commercial public Blob publication therefore retains the plan/terms gate.
 
 ## Verification and rollback
 
@@ -321,4 +320,4 @@ external webpage bytes are immutable. Re-observation creates a new record.
 | [Supabase Smart CDN](https://supabase.com/docs/guides/storage/cdn/smart-cdn) | `d6a068d38124c7a09e58db9ae5ff2002c49c85a9f7ad60d66fb67af55419f5e3` | CDN/cache and deletion-verification behavior | plan/edge invalidation behavior can change |
 | [Supabase Storage pricing](https://supabase.com/docs/guides/storage/pricing) | Pro included storage/egress plus usage pricing observed; `8361ce176aea23472fcf709115f7826bca611f9f18f857222992392c191e3936` | budget review for private archive | account invoice and current dashboard remain authoritative |
 | [Vercel Blob](https://vercel.com/docs/vercel-blob), [Blob SDK](https://vercel.com/docs/vercel-blob/using-blob-sdk), and [OIDC announcement](https://vercel.com/changelog/vercel-blob-now-supports-oidc-authentication) | `@vercel/blob@2.8.0`; OIDC re-observed 2026-08-14 | public delivery store, immutable put/get/delete, CDN/origin verification, short-lived Production authentication | ICN1 public mirror exists; public Blob is reconstructable and never the private master |
-| [Vercel Blob usage and pricing](https://vercel.com/docs/vercel-blob/usage-and-pricing) | official pricing re-observed 2026-08-14; authenticated Billing dashboard observed 2026-08-14 | delivery cost and spend-management review | a default payment method exists, but the team remains `Pro Trial` with expiry `00:00:00` and an explicit `End Trial and Start Pro Plan` action; paid Pro continuity is not active or verified |
+| [Vercel Blob usage and pricing](https://vercel.com/docs/vercel-blob/usage-and-pricing) and [Vercel pricing](https://vercel.com/pricing) | official pages re-observed 2026-08-14; owner-supplied authenticated active-team Billing evidence observed 2026-08-14 | delivery cost, included-limit, plan-applicability, and spend-management review | Blob is available within Hobby's included limits (1 GB storage, 10,000 simple operations, 2,000 advanced operations, 10 GB transfer); Hobby has no on-demand overage and is described as personal/non-commercial. Active team shows `Hobby Plan` / `Active`; commercial publication requires Pro or another accepted commercial store |
