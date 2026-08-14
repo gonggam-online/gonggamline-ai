@@ -1,5 +1,30 @@
 # Decision log
 
+## 2026-08-14 - Accept operator dispatch and correct Vercel billing state
+
+- Architecture acceptance: repository owner squash-merged PR #137 as
+  `bf007382f9325d64aebd0ab9675fe4eae60216d5`, authorizing the separately
+  reviewable S3-16 implementation. This merge did not call a provider, publish
+  an asset, or write Coupang/WING.
+- Production evidence: `origin/main` matches the merge commit; Vercel Production
+  deployment `5907391571` completed successfully and browser smoke run
+  `31807000133` passed 44/44 checks. Evidence artifact `9221619734` has SHA-256
+  `0e2d3c2100f9907889c3ee0a78113a841d196250e1423f6fb100979f0f56925d`.
+- Billing correction: owner-supplied authenticated Vercel Billing evidence for
+  the active team shows `Hobby Plan` / `Active` and `Upgrade to Pro`. The earlier
+  `Pro Trial` observation came from a different or stale billing context and is
+  not authoritative for this project. Payment-method state is not established
+  by the supplied evidence.
+- Official applicability: Blob is available within Hobby's included limits, but
+  Hobby has no paid overage and is described by Vercel as personal,
+  non-commercial use. Commercial Vercel Blob publication therefore remains
+  blocked pending Pro activation or a separately accepted commercial store;
+  private Supabase archive/review remains allowed. Separate Vercel AI Gateway
+  credit does not prove Blob or OpenAI Image API billing authority.
+- Privacy/authority: only non-sensitive status was recorded. No card details,
+  billing contact/address/tax data, payment, plan change, add-on, budget, public
+  object, provider call, or marketplace write occurred.
+
 ## 2026-08-14 - Propose authenticated Listing creative operator dispatch
 
 - Finding: the merged provider, actual-byte QA, private archive, and handoff
@@ -16,9 +41,9 @@
   or call Coupang/WING. CI/Preview remain fake-only; concurrent, scheduled,
   unattended, bulk, or multi-operator dispatch remains blocked on S3-12.
 - External observation: OpenAI funding and Production Sensitive variables are
-  present. Vercel shows a payment method and Pro Trial; public Blob billing
-  continuity remains a later publication gate and is not needed for private
-  generation/archive.
+  present. The active Vercel team shows Hobby rather than Pro; commercial public
+  Blob delivery remains a later configuration gate and is not needed for
+  private generation/archive.
 - Authority/risk: proposed Architecture amendment, high-risk/manual. Manual
   merge accepts only the contract; the implementation and first paid Production
   run each retain their exact documented gate. No external write occurs here.

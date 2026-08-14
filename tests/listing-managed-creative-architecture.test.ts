@@ -183,5 +183,7 @@ test("official provider and storage snapshots are versioned with limitations", (
   assert.match(architecture, /not legal advice/);
   assert.match(architecture, /ICN1 public mirror exists/);
   assert.match(architecture, /OIDC re-observed 2026-08-14/);
-  assert.match(architecture, /billing continuity is not yet verified/);
+  assert.match(architecture, /`Hobby Plan`/);
+  assert.match(architecture, /personal\/non-commercial/);
+  assert.match(architecture, /Commercial public delivery therefore retains/);
 });

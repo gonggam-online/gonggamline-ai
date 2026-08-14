@@ -23,8 +23,13 @@ The post-PR-134 authenticated rollout established the following exact state:
   `BLOB_READ_WRITE_TOKEN` was added, revealed, or copied;
 - the store identifier is present in Production and Preview, but the application
   storage composition rejects every non-Production `VERCEL_ENV` before the SDK;
-- the Vercel trial is expired. No payment method was entered; availability and
-  billing remain an operational warning before relying on the mirror for sales.
+- owner-supplied authenticated evidence for the active team shows `Hobby Plan` /
+  `Active` and `Upgrade to Pro`; payment-method state is not established. Blob is
+  available within Hobby's included limits, but Hobby has no on-demand overage
+  and Vercel describes it as personal/non-commercial. Do not rely on this mirror
+  for commercial sales until Pro is active or another commercial store is
+  accepted. Separate Vercel AI Gateway credit is not Blob or OpenAI Image API
+  billing authority.
 
 Vercel's 2026-06-01 official OIDC announcement states that new Blob connections
 default to short-lived, automatically rotated OIDC credentials and no longer
@@ -58,6 +63,10 @@ for an explicitly controlled non-OIDC migration, never Preview.
    `NEXT_PUBLIC_*` credential or reveal an OIDC token.
 4. Keep SDK object writes immutable: `addRandomSuffix=false` because the path is
    already SHA-256 content-addressed, and `allowOverwrite=false`.
+5. Before the first commercial product publication, verify the active team no
+   longer says `Hobby Plan`, a paid Pro billing cycle and spend management are
+   active, or an alternative commercial CDN/store has been accepted. Seeing AI
+   Gateway credit does not close this gate.
 
 ## 3. Synthetic restore drill
 

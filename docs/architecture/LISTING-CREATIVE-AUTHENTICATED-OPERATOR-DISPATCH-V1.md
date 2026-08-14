@@ -1,6 +1,7 @@
 # Listing Creative Authenticated Operator Dispatch v1
 
-Status: proposed owner amendment; manual merge is the acceptance event.
+Status: accepted by repository-owner squash merge of PR #137 on 2026-08-14;
+merge commit `bf007382f9325d64aebd0ab9675fe4eae60216d5`.
 
 ## Revenue decision
 
