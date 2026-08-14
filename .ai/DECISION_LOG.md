@@ -1,5 +1,30 @@
 # Decision log
 
+## 2026-08-14 - Prefer Production-scoped Vercel Blob OIDC
+
+- External result: authenticated rollout created private Supabase bucket
+  `listing-creative-private-v1` with approved limits/default deny and public
+  Vercel Blob mirror `listing-creative-public-v1` in Seoul (`ICN1`). No product
+  asset, paid provider call, public listing asset, or WING write occurred.
+- Authentication decision: use Vercel Blob's 2026-06-01 OIDC default and the
+  pinned `@vercel/blob@2.8.0` support. Production Functions receive short-lived,
+  automatically rotating credentials; the non-secret `BLOB_STORE_ID` selects
+  the store. A legacy read-write token is fallback only when OIDC is unavailable.
+- Environment decision: `BLOB_STORE_ID` and webhook public key may be visible in
+  Preview as connection metadata, but storage composition rejects every
+  non-Production `VERCEL_ENV`. No OIDC or legacy write credential is copied to a
+  client, Preview configuration, log, screenshot, packet, or Git.
+- Operations: Vercel billing continuity remains unverified because the trial is
+  expired and no payment data was entered. OpenAI project/key/budget and the
+  bounded paid smoke remain separate gates. Live commerce approval is unchanged.
+- Evidence: official Vercel OIDC announcement observed 2026-08-14:
+  https://vercel.com/changelog/vercel-blob-now-supports-oidc-authentication .
+  Limitation: automatic request-context authentication applies to Vercel-hosted
+  functions; external runtimes require a separately governed credential path.
+- Risk/rollback: high-risk rollout and credential-boundary correction. Disable
+  dispatch, disconnect the store, remove public mirrors, and revert the adapter;
+  preserve private masters and approval evidence for reconciliation.
+
 ## 2026-08-14 - Bind actual Listing image bytes, human QA, approval, publication and mapper
 
 - Decision: implement the accepted managed-creative step 3 as a product-agnostic

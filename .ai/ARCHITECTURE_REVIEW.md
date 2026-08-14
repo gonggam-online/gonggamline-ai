@@ -1,5 +1,32 @@
 # Architecture review
 
+## 2026-08-14 - Listing creative managed-store OIDC rollout correction
+
+- Scope: reconcile the merged managed creative storage adapter with Vercel
+  Blob's current OIDC-default project connection, document the authenticated
+  Supabase/Vercel rollout, and preserve Production-only write execution.
+- External configuration: `listing-creative-private-v1` is the Supabase private
+  authoritative master with approved limits/default deny;
+  `listing-creative-public-v1` is the replaceable public mirror in ICN1. No
+  object, provider request, payment, or marketplace mutation is part of this
+  correction.
+- Code: the adapter selects OIDC whenever `BLOB_STORE_ID` is present and falls
+  back to an injected legacy read-write token only for a controlled migration.
+  It rejects Preview/development before constructing either store.
+- Security: the store identifier and webhook public key are connection metadata,
+  not write secrets. The SDK obtains the short-lived credential from the Vercel
+  Production request context. No credential is exposed to `NEXT_PUBLIC_*` or
+  accepted from a client.
+- Cloud-first/recovery: Supabase remains the durable private source of truth;
+  Blob remains reconstructable from a digest-verified master and canonical
+  approval. GitHub owns code/policy/CI evidence. Local fixtures are disposable.
+- Risk: high-risk credential/Production integration. Exact-head CI/Preview and
+  post-merge Production smoke remain required. Paid OpenAI execution, durable
+  DB/Auth/RLS jobs, public product publication, and WING write remain separate.
+- Rollback: stop dispatch, remove public mirrors, disconnect the Blob project,
+  revert the adapter, and preserve private master/approval evidence until all
+  references are reconciled.
+
 ## Listing actual-byte QA and digest-bound approval implementation review - 2026-08-14
 
 - Accepted Architecture: PR #131 / merge `4fd2271`; storage PR #132 / merge

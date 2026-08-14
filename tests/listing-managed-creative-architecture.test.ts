@@ -122,6 +122,7 @@ test("official provider and storage snapshots are versioned with limitations", (
   );
   assert.match(architecture, /Services Agreement/);
   assert.match(architecture, /not legal advice/);
-  assert.match(architecture, /current project has no configured store\/token/);
-  assert.match(architecture, /current project requires a billing action/);
+  assert.match(architecture, /ICN1 public mirror exists/);
+  assert.match(architecture, /OIDC re-observed 2026-08-14/);
+  assert.match(architecture, /billing continuity is not yet verified/);
 });

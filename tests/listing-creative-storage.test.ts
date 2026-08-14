@@ -20,6 +20,7 @@ import {
   InMemoryPrivateListingCreativeObjectStore,
   InMemoryPublicListingCreativeObjectStore,
 } from "../engines/listing/creative-storage-fake.ts";
+import { resolveProductionListingCreativeBlobAuthentication } from "../lib/listing/creative-blob-auth.ts";
 import type {
   ListingCreativeArtifactDescriptor,
   ListingCreativePublicationApproval,
@@ -393,13 +394,33 @@ test("server adapters pin private/public access, disable overwrite, and accept c
   assert.match(adapter, /allowOverwrite: false/);
   assert.match(adapter, /useCache: consistency === "DELIVERY"/);
   assert.doesNotMatch(adapter, /process\.env|NEXT_PUBLIC_|KK946/i);
-  assert.match(runtime, /process\.env\.BLOB_READ_WRITE_TOKEN/);
-  assert.match(runtime, /process\.env\.VERCEL_ENV !== "production"/);
+  assert.match(runtime, /resolveProductionListingCreativeBlobAuthentication/);
+  assert.match(runtime, /BLOB_STORE_ID: process\.env\.BLOB_STORE_ID/);
+  assert.match(runtime, /VERCEL_ENV: process\.env\.VERCEL_ENV/);
   assert.match(runtime, /createGuardedServiceRoleClient\(guardContext\)/);
   assert.doesNotMatch(runtime, /NEXT_PUBLIC_(?:BLOB|SERVICE_ROLE|OPENAI)|KK946/i);
   assert.match(config, /\[storage\.buckets\.listing-creative-private-v1\][\s\S]*public = false/);
   assert.match(config, /application\/json/);
   assert.equal(JSON.parse(packageJson).dependencies["@vercel/blob"], "2.8.0");
+});
+
+test("Production Blob authentication prefers short-lived OIDC and fails closed outside Production", () => {
+  assert.deepEqual(resolveProductionListingCreativeBlobAuthentication({
+    VERCEL_ENV: "production",
+    BLOB_STORE_ID: "store_fixture",
+    BLOB_READ_WRITE_TOKEN: "legacy-token-must-not-win",
+  }), { mode: "OIDC" });
+  assert.deepEqual(resolveProductionListingCreativeBlobAuthentication({
+    VERCEL_ENV: "production",
+    BLOB_READ_WRITE_TOKEN: "legacy-token",
+  }), { mode: "READ_WRITE_TOKEN", token: "legacy-token" });
+  assert.equal(resolveProductionListingCreativeBlobAuthentication({
+    VERCEL_ENV: "preview",
+    BLOB_STORE_ID: "store_fixture",
+  }), null);
+  assert.equal(resolveProductionListingCreativeBlobAuthentication({
+    VERCEL_ENV: "production",
+  }), null);
 });
 
 test("managed creative storage production sources remain product-agnostic", async () => {
@@ -420,7 +441,7 @@ test("the rollout runbook preserves private default-deny and exact restore evide
   ), "utf8");
   assert.match(runbook, /Public bucket disabled/);
   assert.match(runbook, /no `anon` or `authenticated`/);
-  assert.match(runbook, /Production[\s\S]*BLOB_READ_WRITE_TOKEN/);
+  assert.match(runbook, /Production[\s\S]*OIDC/);
   assert.match(runbook, /TAKEDOWN_PENDING/);
   assert.match(runbook, /Restore the same digest from the private master/);
   assert.doesNotMatch(runbook, /NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN/);

@@ -24,16 +24,20 @@
 
 ## Root-cause classification and present state
 
-1. External configuration: the existing Supabase project has no Storage bucket;
-   the Vercel project has no Blob store/token and currently requires an account
-   billing action; OpenAI Platform is not authenticated and no project key or
-   budget has been verified. These are configuration gates, not code defects.
+1. External configuration, amended 2026-08-14 after PR #134: the approved
+   Supabase private bucket and Vercel public Blob mirror now exist. The mirror
+   uses Vercel's current OIDC-default connection in ICN1 rather than a long-lived
+   token. Vercel billing continuity is still unverified; OpenAI Platform is not
+   authenticated and no project key or budget has been verified. These remaining
+   conditions are configuration gates, not code defects.
 2. Database/state: `legacy listing_drafts` cannot own immutable provider jobs,
    rights dependencies, creative approvals, or learning. This Story does not
    cast it to registration-ready and does not invent a local ledger.
-3. Code: merged Listing v3 has a deterministic actual-byte fixture renderer and
-   computed QA, but deliberately marks its output `FIXTURE_ONLY`; it has no real
-   provider adapter or managed artifact repository.
+3. Code, amended after PRs #132-#134: Listing v3 now has managed storage, a pinned
+   provider adapter, complete PNG-byte QA, human product-representation review,
+   canonical approval, selected publication, and public-only mapper boundaries.
+   Operational OIDC/restore/provider drills and durable concurrent DB/Auth/RLS
+   state remain incomplete.
 
 Production smoke on 2026-08-14 returned HTTP 200 for `/listing/review`, passed
 the focused Chromium review flow, and reported runtime `degraded` solely because
@@ -47,7 +51,7 @@ delivery and gives each durable state an explicit owner and recovery path.
 | State | Authoritative owner | Access | Recovery / deletion |
 | --- | --- | --- | --- |
 | admitted source bytes, rights evidence references, generated masters, manifests | Supabase Storage private bucket `listing-creative-private-v1` in the existing managed project | server service role for writes; short-lived signed review URLs; no public bucket | export through the S3-compatible interface, verify SHA-256, and restore to another encrypted store; legal hold overrides normal purge |
-| approved channel-ready images and rendered detail assets | Vercel Blob public store `listing-creative-public-v1` | server token for writes; public CDN read only after digest-bound content approval | regenerate the public mirror from the Supabase master and manifest; takedown deletes the public object first |
+| approved channel-ready images and rendered detail assets | Vercel Blob public store `listing-creative-public-v1` | Production OIDC identity for writes; public CDN read only after digest-bound content approval | regenerate the public mirror from the Supabase master and manifest; takedown deletes the public object first |
 | provider/model/terms/pricing snapshot records and sanitized job manifests | Supabase private bucket beside the artifact revision | server-only; no raw prompt containing private evidence and no raw provider response retained | rebuild from immutable normalized manifests and Git-owned contract versions |
 | source, schemas, deterministic fixtures, architecture and CI evidence | GitHub | repository policy | branch/PR history and Git revert |
 | local files, browser downloads, test output | none; disposable cache only | current task process | remove after upload/verification; never the only copy |
@@ -87,15 +91,17 @@ v1/<subjectHash>/<revisionDigest>/<role>/<sha256>.<ext>
 
 ### Access and secret boundary
 
-- `SUPABASE_SERVICE_ROLE_KEY` and `BLOB_READ_WRITE_TOKEN` are server-only. They
+- `SUPABASE_SERVICE_ROLE_KEY` and any legacy `BLOB_READ_WRITE_TOKEN` are
+  server-only. The preferred Vercel Blob credential is its short-lived,
+  automatically rotated OIDC token with `BLOB_STORE_ID`. Credentials
   never appear in `NEXT_PUBLIC_*`, client bundles, logs, prompts, Git, screenshots,
   or review packets.
 - Supabase private bucket upload/read policies default deny. Service-role writes
   are permitted only from the server adapter; review reads use short-lived signed
   URLs. Public retrieval is never enabled on the private bucket.
-- Vercel Blob has no source/evidence upload path. Its write token publishes only
-  the exact selected digest after content approval; live-write approval remains
-  a separate marketplace boundary.
+- Vercel Blob has no source/evidence upload path. Its Production OIDC identity
+  publishes only the exact selected digest after content approval; live-write
+  approval remains a separate marketplace boundary.
 - Preview and CI use deterministic fakes and disposable fixture bytes. Real paid
   generation and Production secrets are not automatically exposed to Preview.
 - Initial real execution is a single authenticated operator dispatch. No public
@@ -283,5 +289,5 @@ external webpage bytes are immutable. Re-observation creates a new record.
 | [Supabase Storage access control](https://supabase.com/docs/guides/storage/security/access-control) | `2f17cdb2240bf933f8875ac1cdad6b1f555863b72e60e020668629a7f391b810` | default-deny RLS and server-only service key | service role bypasses RLS and therefore increases secret impact |
 | [Supabase Smart CDN](https://supabase.com/docs/guides/storage/cdn/smart-cdn) | `d6a068d38124c7a09e58db9ae5ff2002c49c85a9f7ad60d66fb67af55419f5e3` | CDN/cache and deletion-verification behavior | plan/edge invalidation behavior can change |
 | [Supabase Storage pricing](https://supabase.com/docs/guides/storage/pricing) | Pro included storage/egress plus usage pricing observed; `8361ce176aea23472fcf709115f7826bca611f9f18f857222992392c191e3936` | budget review for private archive | account invoice and current dashboard remain authoritative |
-| [Vercel Blob](https://vercel.com/docs/vercel-blob) and [Blob SDK](https://vercel.com/docs/vercel-blob/using-blob-sdk) | `@vercel/blob@2.8.0`; `ee121ab5ddfd5e0e8867d2b8351e7188c68c9d4bee56a3d106ca894c0a2f8a88` | public delivery store, immutable put/get/delete, CDN/origin verification, token boundary | current project has no configured store/token; public Blob is a mirror, not the master |
-| [Vercel Blob usage and pricing](https://vercel.com/docs/vercel-blob/usage-and-pricing) | `a1c01d55a36f578c22dac95df197864e3a963a694ccf2dd574e7b845565de625` | delivery cost and spend-management review | current project requires a billing action before rollout |
+| [Vercel Blob](https://vercel.com/docs/vercel-blob), [Blob SDK](https://vercel.com/docs/vercel-blob/using-blob-sdk), and [OIDC announcement](https://vercel.com/changelog/vercel-blob-now-supports-oidc-authentication) | `@vercel/blob@2.8.0`; OIDC re-observed 2026-08-14 | public delivery store, immutable put/get/delete, CDN/origin verification, short-lived Production authentication | ICN1 public mirror exists; public Blob is reconstructable and never the private master |
+| [Vercel Blob usage and pricing](https://vercel.com/docs/vercel-blob/usage-and-pricing) | re-observed 2026-08-14 | delivery cost and spend-management review | team trial is expired and billing continuity is not yet verified; no payment method was entered |

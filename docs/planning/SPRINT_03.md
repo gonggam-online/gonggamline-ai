@@ -46,6 +46,9 @@ Requires approved Sprint 02 packet, category metadata, brand/certification evide
     until its exact managed-service gates pass.
 12. S3-12 (high-risk, manual): immutable Database/Auth/RLS jobs, approvals,
     rights dependencies, and append-only learning before unattended execution.
+13. S3-13 (high-risk, rollout): Production-only Vercel Blob OIDC composition,
+    authenticated Supabase private bucket and ICN1 public mirror rollout, and a
+    synthetic restore drill before any product/provider execution.
 
 ## Done
 
