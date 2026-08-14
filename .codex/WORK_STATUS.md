@@ -30,10 +30,10 @@
   replaceable public mirror after exact external rollout. `OPENAI_API_KEY` may
   exist only as a managed Production server secret. Tests use an injected fake
   transport and sanitized byte fixtures; no local artifact is authoritative.
-- Current progress: 8/12 overall steps complete. Production baseline, external
+- Current progress: 9/12 overall steps complete. Production baseline, external
   read-only audit, provider adapter, durable dispatch reservation, complete diff
-  review, and all local validation gates are complete. GitHub delivery and exact
-  Preview evidence remain current.
+  review, all local validation gates, and implementation commit `a657154` are
+  complete. Push, PR, and exact Preview evidence remain current.
 - External evidence: Vercel Production already has a sensitive Production-only
   `SUPABASE_SERVICE_ROLE_KEY`, but has neither `BLOB_READ_WRITE_TOKEN` nor
   `OPENAI_API_KEY` and has no `NEXT_PUBLIC_OPENAI*` variable. Supabase Dashboard
@@ -51,7 +51,7 @@
   Chromium `1/1` PASS; diff/encoding/product-hardcode review PASS. Production
   dependency audit retains the four pre-existing Next/PostCSS/sharp/nanoid
   findings; `openai@7.4.0` adds no reported Production advisory.
-- Exact next action: commit and push this high-risk branch, create a
+- Exact next action: push this high-risk branch, create a
   manual-merge-required PR, and wait for exact-head CI/Preview/browser evidence.
   Real storage/provider setup and paid smoke remain stopped on the
   recorded login, region, environment-scope, billing, key, and budget gates.
