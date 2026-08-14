@@ -1,5 +1,9 @@
 # Listing Content/Conversion pipeline compliance
 
+## 2026-08-14 rights-policy amendment
+
+The pipeline must interpret asset rights under [External Commerce Asset Discovery and Rights Policy v1.1](../architecture/EXTERNAL-COMMERCE-ASSET-DISCOVERY-AND-RIGHTS-POLICY-V1.1.md). Discovery/reference status is independent from exact original-use and operation-specific edit authority. `PUBLIC_REFERENCE_ONLY` content cannot enter a publication manifest; its presence does not block unrelated factual, title, keyword, story, or alternative-asset research. Runtime conformance is not claimed by this docs-only amendment and requires a separate approved implementation Story.
+
 Observed and evaluated on 2026-08-13. This is the delivery evidence map for PR
 #125, not a live WING approval. `PASS` means the generic offline contract and
 its deterministic tests exist. KK946 remains an external adapter case and is

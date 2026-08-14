@@ -1,5 +1,9 @@
 # Architecture roadmap: Epics 4-9
 
+## External commerce asset policy dependency (v1.1)
+
+All Listing, Item Selection, asset-generation, sales-learning, and marketplace-publication Epics must consume [External Commerce Asset Discovery and Rights Policy v1.1](../docs/architecture/EXTERNAL-COMMERCE-ASSET-DISCOVERY-AND-RIGHTS-POLICY-V1.1.md). Discovery may continue under its bounded rules when publication rights are unknown, but no public or wholesale asset enters a Production manifest without exact use authority and operation-specific edit authority. Crawler, intake, durable storage, provider, takedown automation, and publication remain separate Architecture/risk gates.
+
 This roadmap documents sequence and architecture questions only. It authorizes
 no feature, schema, Queue, marketplace write, or external integration.
 

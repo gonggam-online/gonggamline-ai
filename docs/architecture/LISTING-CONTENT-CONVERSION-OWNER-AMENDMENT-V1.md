@@ -1,5 +1,8 @@
 # Listing Content/Conversion owner amendment v1
 
+> Rights interpretation is further amended by
+> [External Commerce Asset Discovery and Rights Policy v1.1](EXTERNAL-COMMERCE-ASSET-DISCOVERY-AND-RIGHTS-POLICY-V1.1.md): broad lawful discovery is allowed, while public availability alone never grants publication or derivative rights.
+
 ## Decision
 
 - Status: owner-approved scope amendment on 2026-08-13.
@@ -49,6 +52,9 @@ forces reevaluation. A verified right to reuse an original image permits
 `transformation=NONE`; it never implies crop, background removal, overlay,
 composite, or generative-reference rights. Unsupported derivatives are omitted
 as `DERIVATIVE_UNAVAILABLE`, while the unchanged source remains eligible.
+Rights-unknown public material remains `PUBLIC_REFERENCE_ONLY`; its discovery
+does not block unrelated conversion research or an otherwise valid listing
+that excludes it.
 
 ## Conversion objective and evidence hierarchy
 

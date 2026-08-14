@@ -5116,3 +5116,65 @@ perform the documented read-only Supabase schema and completeness inspection.
   warnings passed. Local Playwright passed 35, skipped 2, and failed 7 only on
   the existing unconfigured Supabase `missing_url` routes; no runner route or
   browser surface changed.
+# 2026-08-14 External Commerce Asset Discovery and Rights Policy v1.1
+
+- Objective: permit fast, broad, lawful discovery of wholesale, supplier,
+  manufacturer, and public-reference assets while separating discovery from
+  exact publication and derivative authority.
+- Revenue impact: prevents a single rights-`UNKNOWN` asset from stopping
+  product/title/keyword/story research and directs work to the fastest
+  rights-cleared alternative for a first sale.
+- Branch/base: `codex/docs/external-asset-rights-policy-amendment` from latest
+  `origin/main` `5cf73a7` (merged PR #125).
+- Risk: normal-risk docs-only. Later crawler/intake/storage/provider,
+  legal/publication, paid, Production, and marketplace work remains separately
+  reviewed and may be high-risk/manual.
+- Root-cause class: policy-contract ambiguity. Existing safe rights quarantine
+  could be read as stopping discovery/research rather than only the affected
+  publication/derivative lane; no external configuration or database failure
+  is being compensated for in code.
+- Scope: canonical v1.1 policy, parent Listing amendments, Architecture Review,
+  Decision Log, roadmap/backlog/runbook/compliance/changelog/status updates.
+- Non-goals: Domain/API/DB/Queue implementation, crawling, download, upload,
+  durable asset intake, paid generation, external integration, Production, or
+  marketplace writes.
+- Architecture compliance: preserves existing Listing and Seller boundaries;
+  introduces no runtime boundary. Owner policy acceptance is the delegated 12D
+  directive dated 2026-08-14.
+- Cloud-first: GitHub owns policy and sanitized delivery evidence. Operational
+  URLs, grants, digests, manifests, approvals, sensitive documents, and binaries
+  have no approved new store in this Story and therefore cannot be durably
+  collected; no local-only archive. Local build/browser output is disposable.
+- Dependency audit: current main includes PR #125. Draft PR #126 (KK946) and
+  #127 (Listing creative) are not bases for this independent policy amendment
+  and require downstream policy-version notification.
+- Checkpoints: governance/branch, dependency audit, conflict/legal-source audit,
+  policy draft, parent policy amendments, roadmap/runbook/changelog updates,
+  digest/diff review, local quality gates, browser gate, commit/push/PR,
+  exact CI/Preview, and coordination handoff.
+- Completed: first ten checkpoints, including digest/diff review, all local
+  gates, commit, push, and Ready PR creation. Current: exact remote gates.
+  Blockers: none for docs delivery; local browser completeness is limited by
+  the existing absent Supabase configuration.
+- Canonical policy SHA-256: `cb06faeb826d3fc3e51c12b4faf5d3c9123d1258670f253b242671fcfd6921c0`.
+- Changed files: canonical policy and changelog; Listing Fact/Policy and
+  Conversion amendments; KK946 runbook; Architecture Review; Decision Log;
+  Epic/orchestrator roadmaps; backlog; pipeline compliance; orchestrator
+  changelog; this status.
+- Local validation: `git diff --check` passed; lint passed with zero errors and
+  four pre-existing warnings; typecheck passed; unit tests passed 598/598;
+  production build passed and generated 86 route entries. Local Playwright
+  passed 37, skipped 2, and failed 7 only on the existing unconfigured
+  Supabase `missing_url` condition for `/listing`, `/market`, `/procurement`,
+  `/revenue`, `/sourcing`, `/workflow`, and `/workspace`. No runtime file
+  changed, so code compensation is prohibited; exact Preview is the remote
+  browser gate. `npm ci` reported eight existing advisories (one moderate,
+  seven high) without changing the lockfile.
+- Delivery: commit `09f02656cb83b6e2e5599dea453cc05ba85f03e7`
+  pushed; Ready PR #128 targets `main` as normal-risk docs-only.
+- Exact next action: publish this recovery-status checkpoint, reconcile its
+  exact-head CI/Preview/browser gates, then send dependency notifications and
+  enable native auto-merge only if every binding gate passes.
+- Remaining risks: provider terms and copyright scope can change; operational
+  evidence storage, automated discovery, publication, and takedown SLA are not
+  implemented or authorized.

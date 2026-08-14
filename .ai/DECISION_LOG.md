@@ -1,5 +1,17 @@
 # Decision log
 
+## 2026-08-14 - Separate external asset discovery from publication rights
+
+- Owner decision: accept External Commerce Asset Discovery and Rights Policy v1.1 through delegated task 12D.
+- Canonical policy SHA-256: `cb06faeb826d3fc3e51c12b4faf5d3c9123d1258670f253b242671fcfd6921c0`.
+- Revenue decision: allow bounded lawful discovery/indexing of supplier, manufacturer, wholesale, and public references so `UNKNOWN` rights do not stop product facts, titles, keywords, stories, or alternative-source work.
+- Rights decision: public visibility, wholesale listing, purchase, URL, or file possession is not a reproduction/edit license. Exact use and each edit operation require scoped verifiable evidence.
+- Fast path: exact platform reseller grant, supplier/manufacturer permission, contract/message, or file metadata can admit the bound original and only expressly allowed operations.
+- Safety: no access-control bypass, watermark removal, source laundering, unauthorized people/personal data/third-party marks or characters, forged evidence, or ignored takedown/revocation.
+- Cloud-first: GitHub stores policy only. Operational references, grants, digests, manifests, approvals, sensitive documents, and binaries wait for an approved encrypted remote evidence boundary; no local-only asset archive.
+- Authority/risk: normal-risk docs-only. No crawling, download, upload, paid generation, external integration, database/queue, Production, or commerce write is authorized. Later implementation is separately reviewed.
+- Rollback: Git revert; published-asset impact, if any later exists, requires digest-based takedown reconciliation rather than repository rollback alone.
+
 ## 2026-08-13 - Separate minimum Listing registration fitness from conversion optimization
 
 - Owner amendment: an active versioned supplier trust profile automatically
