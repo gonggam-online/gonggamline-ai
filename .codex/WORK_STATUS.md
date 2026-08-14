@@ -45,7 +45,7 @@
   7 failed` only because local Supabase is intentionally unconfigured; exact
   configured Preview remains the binding full-browser gate.
 - Delivery: implementation commit `a75609b`; pushed branch
-  `codex/feat/listing-renderer-provider-kk946`; Draft PR #130 is `CLEAN`, labelled
+  `codex/feat/listing-renderer-provider-kk946`; PR #130 is review-ready, `CLEAN`, labelled
   `manual-merge-required`, and supersedes closed PR #126. Earlier unpushed local
   checkpoints were intentionally squashed so only sanitized external adapter
   fields, rather than account-linked provider codes, entered Git history.
@@ -58,10 +58,9 @@
   server-only secret, output commercial-use grant and managed object-store/CDN
   are not approved. Operational assets cannot be generated or persisted until
   separate high-risk/manual Architecture Stories are accepted.
-- Exact next action: push this status-only checkpoint, confirm its new exact-head
-  CI/Preview, then request repository-owner manual merge of PR #130. After merge,
-  verify origin/main and Production. Real provider/storage work remains a
-  separate high-risk/manual Architecture Story.
+- Exact next action: request repository-owner manual merge of PR #130. After
+  merge, verify origin/main and Production. Real provider/storage work remains
+  a separate high-risk/manual Architecture Story.
 
 
 ## 2026-08-14 Generic Listing creative optimization Architecture
