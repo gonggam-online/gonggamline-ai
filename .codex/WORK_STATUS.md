@@ -1,5 +1,66 @@
 # Work status
 
+## 2026-08-14 Listing creative live provider continuation
+
+- Objective/revenue impact: after merged PR #135 and owner-completed billing,
+  execute the smallest governed path from real GPT Image 2 bytes to private
+  archive, reviewable product representation, selected public CDN assets, and
+  the KK946 registration adapter without performing a WING live write.
+- Branch/base: `codex/feat/listing-creative-live-pipeline` from exact
+  `origin/main` `c99ade4220531c5cf2b7903271d6c7aca72ac069` (merged PR #135).
+- Risk: high-risk/manual because this Story includes provider configuration,
+  billable execution, Production object storage, public asset publication, and
+  exact content approval evidence. Auto-merge is prohibited; WING submission
+  remains a distinct commerce-write boundary.
+- Root-cause order: (1) external configuration: OpenAI Pay-as-you-go USD 5,
+  restricted project key, Production-only Sensitive `OPENAI_API_KEY`, and USD 50
+  hard spend cap are verified; Vercel public-Blob billing continuity is still
+  unverified; (2) database: no concurrent/unattended job persistence is
+  approved, so execution remains one authenticated operator dispatch; (3) code:
+  fixture planning passes field names rather than proven values and has no
+  generic real-provider operator composition.
+- Cloud-first gate: Supabase private bucket `listing-creative-private-v1` owns
+  generated masters and immutable manifests; Vercel Blob
+  `listing-creative-public-v1` owns only selected approved public mirrors;
+  GitHub owns contracts, sanitized evidence, and delivery state. Local
+  `.env.local`, render previews, and test output are temporary projections and
+  must be removed or remain ignored after remote archive verification.
+- Completed: governance boot and recovery; PR #135 merge/exact-head gate audit;
+  clean latest-main branch; Production `/` and `/listing/review` smoke with no
+  console errors, broken images, or horizontal overflow; Vercel project link and
+  environment-name audit without revealing values.
+- Completed continuation: the fact materializer excludes private/operational
+  fields, the external planner emits two MAIN/DETAIL candidates at supported
+  sizes with zero pixel inputs, the generic dispatcher blocks non-ready packets
+  before provider use, archives and re-inspects bytes, and issues short-lived
+  private review URLs. Product-review digest forgery and invalid PNG filter bytes
+  are rejected. Focused synthetic/KK946 tests and typecheck pass.
+- Security event: the first created key's hidden value appeared in an in-app DOM
+  diagnostic. It was never saved to Vercel, was immediately revoked, and its
+  replacement was stored without diagnostic output; clipboard and in-memory
+  secret variables were cleared.
+- Delivery: commit `43cd1e972ba5c81c091855d00ba009a9614e735b` is pushed on
+  `codex/feat/listing-creative-live-pipeline`; PR #136 is ready for review,
+  `manual-merge-required`, cleanly mergeable, and intentionally has no
+  auto-merge. Exact-head lint, typecheck, tests, build, security audit, database
+  replay, atomic mutation, item-selection security, Vercel deployment, and
+  Preview browser E2E all pass. The item-selection security job's first run had
+  two unrelated orchestrator timing failures; an unchanged-head rerun passed.
+- Verification: lint PASS with four pre-existing unrelated warnings; typecheck
+  PASS; 658/658 unit/integration tests PASS; production build PASS; targeted
+  Listing mobile E2E 1/1 PASS. Full local E2E is 37 PASS, 2 skipped, 7 failed
+  only because local Supabase public URL is intentionally absent. Exact-head
+  Preview E2E passes; authenticated in-app inspection of `/listing/review`
+  confirmed all four fixture images load at their declared dimensions with no
+  horizontal overflow, console errors, or failed resource requests.
+- Blocker: one bounded paid generation and public publication require the merged
+  exact Production head; public Blob publication additionally requires Vercel
+  billing continuity verification. WING live-write remains separate.
+- Current progress: 9/10 steps complete. The binding stop is owner/manual merge
+  of PR #136. After merge, verify exact Production, confirm Blob billing
+  continuity, and execute one bounded fact-only generation to private
+  `REVIEW_REQUIRED` state only; do not publish or write WING.
+
 ## 2026-08-14 Listing creative Production storage rollout and OIDC correction
 
 - Objective/revenue impact: complete the next post-PR-134 step toward actual

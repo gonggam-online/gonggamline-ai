@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  buildExternalCreativeReviewPacket,
   buildFixtureCreativeReviewPacket,
+  materializeCreativeFactConstraints,
+  planExternalCreativeJobs,
   planningInputFromListingContent,
 } from "../engines/listing/creative-planner.ts";
 import {
@@ -9,13 +12,183 @@ import {
   DeterministicFixtureCreativeProvider,
   executeCreativeRenderJob,
   renderDeterministicFixturePng,
+  type ListingCreativeProvider,
+  type ProviderRenderResult,
 } from "../engines/listing/creative-renderer.ts";
 import { mapApprovedCreativeCandidate } from "../engines/listing/creative-approval.ts";
 import {
   evaluateCreativeRenderJobRights,
   evaluateCreativeSourceAuthorization,
 } from "../engines/listing/creative-rights.ts";
-import { genericListingInput } from "./fixtures/listing-content.ts";
+import { ManagedListingCreativeStorage } from "../engines/listing/creative-storage.ts";
+import {
+  InMemoryPrivateListingCreativeObjectStore,
+  InMemoryPublicListingCreativeObjectStore,
+} from "../engines/listing/creative-storage-fake.ts";
+import { generateAndArchiveListingCreative } from "../services/listing-creative-dispatch.service.ts";
+import type { CreativeRenderJob } from "../shared/domain/listing-creative.ts";
+import {
+  genericCommerceFields,
+  genericListingInput,
+} from "./fixtures/listing-content.ts";
+
+const externalProviderApproval = {
+  providerKind: "EXTERNAL_IMAGE_PROVIDER",
+  providerId: "fixture-external-provider",
+  modelVersion: "fixture-model-v1",
+  termsVersion: "fixture-terms-v1",
+  approvalReference: "fixture:external-provider-approval",
+  paidUsageApproved: true,
+  serverSecretApproved: true,
+  managedAssetStoreApproved: true,
+  outputCommercialUseApproved: true,
+} as const;
+
+class FakeExternalProvider implements ListingCreativeProvider {
+  readonly approval = externalProviderApproval;
+  renderCalls = 0;
+
+  async render(job: CreativeRenderJob): Promise<ProviderRenderResult> {
+    this.renderCalls += 1;
+    return {
+      bytes: renderDeterministicFixturePng(job),
+      providerKind: this.approval.providerKind,
+      providerId: this.approval.providerId,
+      modelVersion: this.approval.modelVersion,
+      termsVersion: this.approval.termsVersion,
+      durableAssetReference: null,
+      execution: {
+        operation: "GENERATE",
+        requestHash: "a".repeat(64),
+        promptDigest: "b".repeat(64),
+        requestedAt: "2026-08-14T13:00:00.000Z",
+        sanitizedProviderRequestHash: "c".repeat(64),
+        quality: "HIGH",
+        pricingSnapshotVersion: "fixture-pricing-v1",
+        estimatedCostUsd: 0.01,
+        actualCostUsd: 0.01,
+        usage: {
+          inputTextTokens: 10,
+          inputImageTokens: 0,
+          outputTokens: 20,
+          totalTokens: 30,
+        },
+      },
+    };
+  }
+}
+
+test("creative planning materializes admitted fact values and excludes operational fields", () => {
+  const listingInput = genericListingInput();
+  const facts = materializeCreativeFactConstraints(listingInput);
+  const serialized = facts.constraints.join("\n");
+  assert.match(serialized, /field=productName; value=정리 파우치/);
+  assert.match(serialized, /field=color; value=네이비/);
+  assert.doesNotMatch(serialized, /fixture:catalog:item-01|sourceReference|stock/i);
+  assert.deepEqual(facts.factIds, [
+    "fixture-fact-1",
+    "fixture-fact-2",
+    "fixture-fact-3",
+    "fixture-fact-4",
+    "fixture-fact-5",
+  ]);
+  assert.throws(
+    () => materializeCreativeFactConstraints({
+      ...listingInput,
+      creativeFactFields: ["companyContactNumber"],
+    }),
+    /CREATIVE_FACT_FIELDS_INVALID/,
+  );
+});
+
+test("external planner creates two fact-only candidates at supported GPT Image sizes", () => {
+  const planning = planningInputFromListingContent(genericListingInput());
+  const jobs = planExternalCreativeJobs(planning, externalProviderApproval);
+  assert.equal(jobs.length, 4);
+  assert.deepEqual([...new Set(jobs.map(({ candidateSetId }) => candidateSetId))], [
+    "creative-a",
+    "creative-b",
+  ]);
+  assert.deepEqual(jobs.map(({ width, height }) => `${width}x${height}`), [
+    "1024x1024",
+    "1024x1536",
+    "1024x1024",
+    "1024x1536",
+  ]);
+  assert.ok(jobs.every((job) =>
+    job.transformation === "FACT_ONLY_SYNTHETIC"
+    && job.inputAssetDigests.length === 0
+    && job.inputSources.length === 0
+    && job.factualConstraints.some((constraint) => constraint.includes("value="))));
+});
+
+test("external outputs become review-ready but cannot select, approve, or publish themselves", async () => {
+  const listingInput = genericListingInput();
+  const provider = new FakeExternalProvider();
+  const storage = new ManagedListingCreativeStorage(
+    new InMemoryPrivateListingCreativeObjectStore(),
+    new InMemoryPublicListingCreativeObjectStore(),
+  );
+  const result = await generateAndArchiveListingCreative({
+    listingInput,
+    commerce: genericCommerceFields(),
+    provider,
+    storage,
+    occurredAt: "2026-08-14T13:05:00.000Z",
+    archiveSequenceStart: 1,
+  });
+  const packet = result.creative;
+
+  assert.equal(result.listing.status, "REGISTRATION_READY");
+  assert.equal(result.archived.length, 4);
+  assert.equal(result.privateReviewAssets.length, 4);
+  assert.ok(result.privateReviewAssets.every(({ signedReviewUrl }) =>
+    signedReviewUrl.startsWith("https://review.invalid/")));
+  assert.equal(packet.registrationReadiness, "PASS");
+  assert.equal(packet.conversionReadiness, "REVIEW_READY");
+  assert.equal(packet.candidates.length, 2);
+  assert.equal(packet.selectedCandidateSetId, null);
+  assert.equal(packet.contentApproval.approved, false);
+  assert.equal(packet.liveWriteApproval.approved, false);
+  assert.equal(mapApprovedCreativeCandidate(packet), null);
+  assert.ok(packet.candidates.every((candidate) =>
+    candidate.artifacts.length === 2
+    && candidate.artifacts.some(({ role }) => role === "MAIN")
+    && candidate.artifacts.some(({ role }) => role === "DETAIL")));
+  assert.ok(packet.issues.some(({ code }) => code === "PRODUCT_REPRESENTATION_REVIEW_REQUIRED"));
+  const jobs = packet.candidates.flatMap(({ renderJobs }) => renderJobs);
+  const artifacts = packet.candidates.flatMap(({ artifacts: candidateArtifacts }) =>
+    candidateArtifacts);
+  assert.throws(() => buildExternalCreativeReviewPacket({
+    planning: planningInputFromListingContent(listingInput),
+    listing: result.listing,
+    jobs: jobs.map((job, index) => index === 0
+      ? { ...job, inputAssetDigests: ["d".repeat(64)] }
+      : job),
+    artifacts,
+  }), /EXTERNAL_CREATIVE_REVIEW_INPUT_INVALID/);
+});
+
+test("dispatch refuses a blocked registration packet before any provider call", async () => {
+  const listingInput = genericListingInput();
+  const provider = new FakeExternalProvider();
+  const storage = new ManagedListingCreativeStorage(
+    new InMemoryPrivateListingCreativeObjectStore(),
+    new InMemoryPublicListingCreativeObjectStore(),
+  );
+  await assert.rejects(generateAndArchiveListingCreative({
+    listingInput: {
+      ...listingInput,
+      category: { ...listingInput.category, categoryValid: false, disposition: "QUARANTINED" },
+    },
+    commerce: genericCommerceFields(),
+    provider,
+    storage,
+    occurredAt: "2026-08-14T13:05:00.000Z",
+    archiveSequenceStart: 1,
+  }), /LISTING_REGISTRATION_PACKET_NOT_READY/);
+  assert.equal(provider.renderCalls, 0);
+});
 
 test("deterministic renderer produces actual PNG bytes with computed metadata", async () => {
   const input = planningInputFromListingContent(genericListingInput());

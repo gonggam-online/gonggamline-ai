@@ -1,5 +1,22 @@
 # Listing Content Fact and Policy Contract v1 changelog
 
+## 2026-08-14 - Fact-materialized external creative dispatch
+
+- Added a product-agnostic allowlist of admitted creative fact fields and
+  materialized their unique PROVEN values into provider constraints; private
+  commerce/operational fields are rejected.
+- Added two fact-only creative candidates using provider-supported 1024x1024
+  MAIN and 1024x1536 DETAIL requests with no supplier, competitor, or web pixel
+  inputs.
+- Added a generic dispatch composition that refuses blocked registration
+  packets before provider use, rechecks and archives actual bytes, and returns
+  short-lived private review URLs without self-selecting or self-approving.
+- Hardened PNG scanline filters and canonical human product-review digest
+  validation. Synthetic and KK946 acceptance tests prove private fields and
+  supplier references do not enter provider jobs.
+- Configured a restricted Production-only provider key and a USD 50 hard spend
+  cap outside Git. No paid request, public publication, or WING write occurred.
+
 ## 2026-08-13 - KK946 Gaemi B2C follow-up reply
 
 - Recorded the final reply on the existing categorized thread without creating
