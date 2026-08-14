@@ -39,19 +39,27 @@
   diagnostic. It was never saved to Vercel, was immediately revoked, and its
   replacement was stored without diagnostic output; clipboard and in-memory
   secret variables were cleared.
-- Current: finish full regression/build/browser gates, diff review, and the
-  manual high-risk PR. Do not run a paid provider call from unmerged code.
+- Delivery: commit `43cd1e972ba5c81c091855d00ba009a9614e735b` is pushed on
+  `codex/feat/listing-creative-live-pipeline`; PR #136 is ready for review,
+  `manual-merge-required`, cleanly mergeable, and intentionally has no
+  auto-merge. Exact-head lint, typecheck, tests, build, security audit, database
+  replay, atomic mutation, item-selection security, Vercel deployment, and
+  Preview browser E2E all pass. The item-selection security job's first run had
+  two unrelated orchestrator timing failures; an unchanged-head rerun passed.
 - Verification: lint PASS with four pre-existing unrelated warnings; typecheck
   PASS; 658/658 unit/integration tests PASS; production build PASS; targeted
   Listing mobile E2E 1/1 PASS. Full local E2E is 37 PASS, 2 skipped, 7 failed
-  only because local Supabase public URL is intentionally absent; repeat the
-  full suite against exact-head Preview where managed configuration exists.
+  only because local Supabase public URL is intentionally absent. Exact-head
+  Preview E2E passes; authenticated in-app inspection of `/listing/review`
+  confirmed all four fixture images load at their declared dimensions with no
+  horizontal overflow, console errors, or failed resource requests.
 - Blocker: one bounded paid generation and public publication require the merged
   exact Production head; public Blob publication additionally requires Vercel
   billing continuity verification. WING live-write remains separate.
-- Exact next action: complete all local gates and submit the manual PR, then
-  after merge run Production smoke and the bounded fact-only generation to
-  private review state only.
+- Current progress: 9/10 steps complete. The binding stop is owner/manual merge
+  of PR #136. After merge, verify exact Production, confirm Blob billing
+  continuity, and execute one bounded fact-only generation to private
+  `REVIEW_REQUIRED` state only; do not publish or write WING.
 
 ## 2026-08-14 Listing creative Production storage rollout and OIDC correction
 
