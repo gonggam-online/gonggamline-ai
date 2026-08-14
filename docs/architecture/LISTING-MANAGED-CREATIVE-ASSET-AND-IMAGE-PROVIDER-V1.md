@@ -254,6 +254,25 @@ external side effects. The owner has approved their Architecture category, but
 each exact implementation PR remains manual-merge-required and must show the
 target, cost envelope, rollback, and exact-head evidence before the action.
 
+### 2026-08-14 rollout checkpoint
+
+- OpenAI Pay-as-you-go is active with USD 5 credit. Auto-reload remains off and
+  the organization spend limit is USD 50 with hard enforcement.
+- A restricted Default-project key with Model capabilities Request permission is
+  stored only as the Sensitive Production-scoped Vercel variable
+  `OPENAI_API_KEY`. A key whose hidden form value entered diagnostic output was
+  revoked before use or Vercel storage; the replacement value was never logged.
+- The generic planner now materializes explicit PROVEN fact values, rejects
+  operational/private fields, produces two fact-only candidates using
+  1024x1024 MAIN and 1024x1536 DETAIL requests, and sends zero source pixels.
+- The dispatch composition refuses non-ready registration packets before the
+  provider call, archives and re-inspects every output byte, and returns only
+  short-lived private review URLs. It never selects a candidate or creates
+  content/live-write approval.
+- No paid image request, public image publication, or WING write has occurred at
+  this checkpoint. Vercel billing continuity still requires verification before
+  relying on public Blob publication.
+
 ## Verification and rollback
 
 - Contract tests prove no product-specific values occur in provider/storage

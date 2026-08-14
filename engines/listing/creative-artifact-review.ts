@@ -55,9 +55,15 @@ export function createProductRepresentationReview(
 export function productRepresentationReviewPasses(
   review: CreativeProductRepresentationReview | null,
 ): review is CreativeProductRepresentationReview {
+  if (!review) return false;
+  const { reviewDigest, ...reviewInput } = review;
+  const expectedDigest = digestCanonicalJson({
+    schemaVersion: "gonggamline-listing-product-representation-review-v1",
+    ...reviewInput,
+  });
   return Boolean(
-    review
-    && SHA256.test(review.reviewDigest)
+    SHA256.test(reviewDigest)
+    && expectedDigest === reviewDigest
     && PRODUCT_REVIEW_FIELDS.every((field) => review[field] === "PASS"),
   );
 }

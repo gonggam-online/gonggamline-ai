@@ -175,6 +175,7 @@ export function inspectCreativePng(bytes: Uint8Array): PngInspection | null {
   let sawHeader = false;
   let sawEnd = false;
   let expectedInflatedBytes = 0;
+  let scanlineBytes = 0;
   let structure: "PASS" | "FAIL" = "PASS";
   const imageData: Uint8Array[] = [];
   try {
@@ -207,6 +208,7 @@ export function inspectCreativePng(bytes: Uint8Array): PngInspection | null {
           || data[12] !== 0
         ) structure = "FAIL";
         expectedInflatedBytes = height * (1 + width * channels);
+        scanlineBytes = 1 + width * channels;
       } else if (type === "IDAT") {
         imageData.push(data);
       } else if (type === "IEND") {
@@ -226,7 +228,12 @@ export function inspectCreativePng(bytes: Uint8Array): PngInspection | null {
     const inflated = inflateSync(join(imageData), {
       maxOutputLength: Math.max(1, expectedInflatedBytes + 1),
     });
-    pixelPayload = expectedInflatedBytes > 0 && inflated.byteLength === expectedInflatedBytes
+    const filterBytesValid = scanlineBytes > 0
+      && Array.from({ length: height }, (_, row) => inflated[row * scanlineBytes])
+        .every((filterByte) => filterByte <= 4);
+    pixelPayload = expectedInflatedBytes > 0
+      && inflated.byteLength === expectedInflatedBytes
+      && filterBytesValid
       ? "PASS"
       : "FAIL";
   } catch {
@@ -292,7 +299,7 @@ export async function executeCreativeRenderJobWithBytes(
   const roleDimensions = job.role === "MAIN"
     ? job.width >= 1000 && job.height >= 1000 && job.width === job.height
     : job.role === "DETAIL"
-      ? job.width === 780 && job.height > 0
+      ? job.width >= 780 && job.height > 0
       : job.width >= 780 && job.height > 0;
   const review: ComputedArtifactReview = {
     decode: inspected && inspected.structure === "PASS" && inspected.pixelPayload === "PASS" ? "PASS" : "FAIL",

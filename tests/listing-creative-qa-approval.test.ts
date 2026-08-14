@@ -227,7 +227,7 @@ test("actual-byte QA rejects corrupt PNG CRC or trailing bytes", () => {
     height: 1000,
     mimeType: "image/png",
     altText: "손상 검증용 합성 이미지",
-    factualConstraints: input.factualConstraintFields,
+    factualConstraints: input.factualConstraints,
     renderRecipeVersion: "fixture-corrupt-v1",
     provider: EXTERNAL_APPROVAL,
   };
@@ -264,6 +264,13 @@ test("human product review must pass every factual and visual gate", async () =>
   });
   assert.throws(
     () => attachProductRepresentationReview({ ...artifact, productRepresentationReview: null }, failed),
+    /PRODUCT_REPRESENTATION_REVIEW_REQUIRED/,
+  );
+  assert.throws(
+    () => attachProductRepresentationReview(
+      { ...artifact, productRepresentationReview: null },
+      { ...passing, reviewerReference: "fixture:forged-reviewer" },
+    ),
     /PRODUCT_REPRESENTATION_REVIEW_REQUIRED/,
   );
 });

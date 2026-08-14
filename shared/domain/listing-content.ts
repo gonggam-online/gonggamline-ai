@@ -159,6 +159,7 @@ export type ListingContentInput = Readonly<{
   titleFieldOrder: readonly string[];
   minimumRequiredFields: readonly string[];
   corePurchaseFields: readonly string[];
+  creativeFactFields: readonly string[];
   keywordFields: readonly string[];
   customerIntents: readonly Readonly<{ intentId: string; query: string; attributeFields: readonly string[] }>[];
   queryAttributeMappings: readonly Readonly<{ query: string; taxonomy: CustomerIntentTaxonomy; field: string; priority: number; sourceIds: readonly string[] }>[];

@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { buildListingContentPacket } from "../engines/listing/content-pipeline.ts";
-import { buildFixtureCreativeReviewPacket, planningInputFromListingContent } from "../engines/listing/creative-planner.ts";
+import {
+  buildFixtureCreativeReviewPacket,
+  planExternalCreativeJobs,
+  planningInputFromListingContent,
+} from "../engines/listing/creative-planner.ts";
 import { mapApprovedCreativeCandidate } from "../engines/listing/creative-approval.ts";
 import {
   kk946AcceptanceInput,
@@ -91,4 +95,47 @@ test("KK946 minimum packet stays ready while synthetic renderer output remains r
   assert.equal(creative.candidates.length, 2);
   assert.ok(creative.candidates.flatMap(({ artifacts }) => artifacts).every(({ deployability }) => deployability === "FIXTURE_ONLY"));
   assert.equal(mapApprovedCreativeCandidate(creative), null);
+});
+
+test("KK946 external creative plan uses admitted visible facts and sends zero supplier pixels", () => {
+  const privateMarkers = [
+    "fixture:private-wing-user",
+    "fixture:private-outbound",
+    "fixture:private-return-center",
+    "fixture:private-wing-contact",
+    "fixture:private-return-address",
+    "fixture:private-return-detail",
+  ];
+  const { input } = kk946WingRegistrationAdapter({
+    vendorUserId: privateMarkers[0],
+    outboundShippingPlaceCode: privateMarkers[1],
+    returnCenterCode: privateMarkers[2],
+    companyContactNumber: privateMarkers[3],
+    returnZipCode: "00000",
+    returnAddress: privateMarkers[4],
+    returnAddressDetail: privateMarkers[5],
+  });
+  const planning = planningInputFromListingContent(input);
+  const jobs = planExternalCreativeJobs(planning, {
+    providerKind: "EXTERNAL_IMAGE_PROVIDER",
+    providerId: "fixture-openai-image-provider",
+    modelVersion: "fixture-gpt-image-model",
+    termsVersion: "fixture-commercial-terms",
+    approvalReference: "fixture:provider-approval",
+    paidUsageApproved: true,
+    serverSecretApproved: true,
+    managedAssetStoreApproved: true,
+    outputCommercialUseApproved: true,
+  });
+  const serialized = JSON.stringify(jobs);
+
+  assert.ok(jobs.every(({ inputAssetDigests, inputSources, transformation }) =>
+    transformation === "FACT_ONLY_SYNTHETIC"
+    && inputAssetDigests.length === 0
+    && inputSources.length === 0));
+  assert.match(serialized, /field=modelName; value=KK946/);
+  assert.match(serialized, /field=color;/);
+  assert.match(serialized, /field=dimensions; value=10\.5/);
+  assert.ok(privateMarkers.every((marker) => !serialized.includes(marker)));
+  assert.doesNotMatch(serialized, /domeggook\.com|supplier-asset|sourceReference/iu);
 });

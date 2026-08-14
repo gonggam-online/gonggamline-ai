@@ -49,6 +49,12 @@ Requires approved Sprint 02 packet, category metadata, brand/certification evide
 13. S3-13 (high-risk, rollout): Production-only Vercel Blob OIDC composition,
     authenticated Supabase private bucket and ICN1 public mirror rollout, and a
     synthetic restore drill before any product/provider execution.
+14. S3-14 (high-risk, manual): materialize only explicitly selected admitted
+    fact values into product-agnostic provider jobs, plan two fact-only creative
+    candidates at supported GPT Image sizes, archive actual bytes before review,
+    issue short-lived private review URLs, and require digest-valid human
+    product-representation review before selection/publication. KK946 remains an
+    acceptance adapter; supplier pixels and private WING fields are excluded.
 
 ## Done
 

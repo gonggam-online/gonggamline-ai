@@ -7,7 +7,11 @@ export default async function ListingReviewPage() {
     packetId: "listing-review-synthetic-fixture",
     subjectReference: "synthetic-review-subject",
     provenFactIds: ["fixture:identity", "fixture:dimensions", "fixture:material"],
-    factualConstraintFields: ["identity", "dimensions", "material", "color", "quantity"],
+    factualConstraints: [
+      "factId=fixture:identity; field=productName; value=합성 검토 상품",
+      "factId=fixture:dimensions; field=dimensions; value=12 × 5 × 8 cm",
+      "factId=fixture:material; field=material; value=폴리에스터",
+    ],
     evidenceEvaluationId: "fixture:evidence-evaluation-v1",
     policyDigest: "fixture:policy-digest-v1",
     categoryMetadataDigest: "fixture:category-metadata-digest-v1",

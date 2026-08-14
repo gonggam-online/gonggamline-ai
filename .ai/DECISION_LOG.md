@@ -1732,3 +1732,26 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Cloud-first: GitHub owns this policy and sanitized delivery evidence. Runtime status/evidence/audit has no approved remote owner, so no runtime code, database, Queue, crawler, storage, provider, Production, or marketplace write is authorized.
 - Risk/rollback: normal-risk documentation only. Git revert; immutable operational audit would require reconciliation if a later implementation exists.
 - Downstream: COORD and workrooms 15, 15C, 16B, 20, and 22 consume `asset-error-isolation-v1` and the 12D digest above.
+
+# 2026-08-14 - Listing creative fact-materialized dispatch checkpoint
+
+- Category: high-risk/manual Listing provider rollout under the accepted Managed
+  Creative Asset and Image Provider v1 Story.
+- Decision: provider prompts receive only an explicit allowlist of uniquely
+  PROVEN fact values and fact IDs. Private/operational fields, supplier URLs,
+  source digests, and supplier/competitor/web pixels are excluded from fact-only
+  generation. Two candidates use exact provider-supported dimensions.
+- Review boundary: external output is archived and actual-byte verified before a
+  short-lived private review URL is issued. Generation never supplies human
+  product-representation PASS, selected candidate, content approval, public
+  publication, or live-write approval.
+- External configuration evidence: OpenAI Pay-as-you-go USD 5 credit, auto-reload
+  off, USD 50 enforced spend cap, and a restricted project key stored as the
+  Sensitive Production-only Vercel variable `OPENAI_API_KEY`. No secret value is
+  recorded in Git.
+- Remaining gate: code PR manual merge and exact-head verification precede a
+  bounded paid call; public Vercel Blob publication also requires billing
+  continuity verification. WING remains a distinct commerce-write boundary.
+- Rollback: stop dispatch, revoke the project key, remove the Vercel variable,
+  revert the implementation PR, and preserve private manifest evidence according
+  to the accepted retention boundary.
