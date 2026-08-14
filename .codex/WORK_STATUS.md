@@ -21,7 +21,7 @@
   failure/review manifests and generated masters belong to private Supabase
   Storage. GitHub owns code/contracts/tests. Browser JSON, signed URLs, local
   checkout, and test assets are disposable and contain no durable authority.
-- Progress: 10/12 steps. Governance/base audit; external/DB/code classification;
+- Progress: 11/12 steps. Governance/base audit; external/DB/code classification;
   typed operator contracts; allowlisted fact-value materialization; immutable
   plan/authorization/reservation/handoff engine; Supabase repository and
   private-only provider composition; PREPARE/DISPATCH/re-sign API plus operator
@@ -32,10 +32,21 @@
   QA at desktop and 390px mobile widths found no overflow, console warnings, or
   errors; the initial UI exposes only disabled PREPARE and no approval/publish/
   WING controls.
-- Current work: complete final diff/secret/product-hardcode review, then commit,
-  push, and open the high-risk manual-review PR.
-- Exact next action: deliver the PR and wait for exact-head CI and Vercel Preview.
-  Do not invoke the Production dispatch in this PR.
+- Delivery: implementation commit `d6b1c23d9f3f8f08e71d26829c45b285df819d88`
+  is pushed in Draft PR #139 with `manual-merge-required`, clean merge status,
+  and auto-merge disabled. Exact-head CI run `31810910011` passed all eight
+  jobs. Preview deployment `5908124349` is Ready; browser run `31810910092`
+  passed. Evidence artifact `9223120592` expires 2026-08-28; the mobile Listing
+  screenshot SHA-256 is
+  `85907f78b3ae9bfa60bd0123d1958c629395277cead1d3080314b9b75b7ef976`.
+- Preview direct review: `/admin/listing/creative-dispatch` renders the expected
+  Korean UI with PREPARE disabled until input, no overflow or console errors,
+  and no approval/publication/WING controls. Anonymous API probes are denied by
+  the Preview/auth boundary before service execution.
+- Exact next action: repository owner manually reviews and merges PR #139. Then
+  verify exact `origin/main` and Production health/UI/API before separately
+  authorizing the first paid private dispatch. Do not invoke the provider from
+  this PR branch.
 - Remaining risks: distributed five-minute slot intentionally serializes paid
   runs; partial provider output remains private and non-retryable; human product
   accuracy review and selected-candidate publication are later phases.
