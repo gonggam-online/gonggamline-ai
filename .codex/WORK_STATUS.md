@@ -28,7 +28,7 @@
 - Non-goals: final Product Registration submission, ad/coupon/automatic pricing,
   reorder/procurement, order/fulfillment/return/settlement/payment, secret or
   provider configuration, DB/RLS/Auth, paid generation, or asset transformation.
-- Progress: 9/11 steps complete. Merge/governance, branch, Production smoke,
+- Progress: 10/11 steps complete. Merge/governance, branch, Production smoke,
   supplier assets, authenticated WING inspection, exact adapter, pipeline/gates,
   selected-variant draft entry and saved-draft/visual read-back are complete.
   Full repository gates and the high-risk PR/CI handoff are current.
@@ -61,8 +61,14 @@
   lint passes with zero errors and four pre-existing Revenue-test warnings;
   typecheck passes; full unit/integration tests pass `599/599`; the 86-route
   production build passes; focused mobile Listing browser E2E passes `1/1`.
-- Exact next action: commit/push, create the high-risk manual-merge PR, then
-  wait for exact-head CI and Preview.
+- Delivery: commits `46c79cf` and `60ddbb3` are pushed; Draft PR #126 targets
+  `main`, has `manual-merge-required`, and has no auto-merge. Exact-head Preview
+  run `31757013882` passed. CI exposed a pre-existing event-loop timing race in
+  the App Server shutdown evidence tests; the branch now gives the internally
+  bounded shutdown a minimum scheduler boundary and verifies late-write timer
+  cancellation directly instead of relying on wall-clock ordering.
+- Exact next action: commit/push the deterministic CI stabilization and wait
+  for all checks on the new exact head before the final handoff.
 
 
 ## 2026-08-13 Generic Listing Content/Conversion pipeline

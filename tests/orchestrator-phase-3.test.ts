@@ -473,6 +473,7 @@ test("timeout terminates an ignoring App Server before a late file mutation", as
   const ledger = createLedger(ledgerDirectory);
   let child: FakeAppServerProcess | undefined;
   let lateWrite: NodeJS.Timeout | undefined;
+  let lateWriteCancelled = false;
   try {
     const adapter = new AppServerWorkerAdapter(
       {
@@ -497,12 +498,13 @@ test("timeout terminates an ignoring App Server before a late file mutation", as
                   path.join(repository.directory, "docs", "late.md"),
                   "late\n",
                 ),
-              100,
+              5_000,
             );
           },
           onTerminate: () => {
             if (lateWrite !== undefined) {
               clearTimeout(lateWrite);
+              lateWriteCancelled = true;
             }
           },
         });
@@ -521,8 +523,6 @@ test("timeout terminates an ignoring App Server before a late file mutation", as
         estimatedCostKrwLimit: 1_000,
       }),
     );
-    await new Promise((resolve) => setTimeout(resolve, 120));
-
     assert.equal(result.run.state, "FAILED");
     assert.equal(ledger.taskState("task-phase-3"), "FAILED");
     assert.equal(
@@ -530,6 +530,7 @@ test("timeout terminates an ignoring App Server before a late file mutation", as
       "WALL_TIME_TIMEOUT",
     );
     assert.equal(child?.terminationCalls, 1);
+    assert.equal(lateWriteCancelled, true);
     assert.equal(
       existsSync(path.join(repository.directory, "docs", "late.md")),
       false,
@@ -556,6 +557,7 @@ test("budget breach terminates the App Server before a late file mutation", asyn
   const ledger = createLedger(ledgerDirectory);
   let child: FakeAppServerProcess | undefined;
   let lateWrite: NodeJS.Timeout | undefined;
+  let lateWriteCancelled = false;
   try {
     const adapter = new AppServerWorkerAdapter(
       {
@@ -584,12 +586,13 @@ test("budget breach terminates the App Server before a late file mutation", asyn
                   path.join(repository.directory, "docs", "budget-late.md"),
                   "late\n",
                 ),
-              40,
+              5_000,
             );
           },
           onTerminate: () => {
             if (lateWrite !== undefined) {
               clearTimeout(lateWrite);
+              lateWriteCancelled = true;
             }
           },
         });
@@ -608,14 +611,13 @@ test("budget breach terminates the App Server before a late file mutation", asyn
         estimatedCostKrwLimit: 1_000,
       }),
     );
-    await new Promise((resolve) => setTimeout(resolve, 60));
-
     assert.equal(result.run.state, "FAILED");
     assert.equal(
       ledger.runResult("run-budget-shutdown")?.failureCode,
       "TOKENS",
     );
     assert.equal(child?.terminationCalls, 1);
+    assert.equal(lateWriteCancelled, true);
     assert.equal(
       existsSync(path.join(repository.directory, "docs", "budget-late.md")),
       false,
@@ -656,6 +658,7 @@ for (const behavior of ["throw", "reject", "pending"] as const) {
           return child;
         },
       );
+      assert.equal(adapter.interruptBoundaryMs, 1_000);
       const engine = new OrchestratorExecutionEngine(
         ledger,
         adapter,

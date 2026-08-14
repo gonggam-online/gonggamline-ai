@@ -267,10 +267,10 @@ export class AppServerWorkerAdapter implements WorkerAdapter {
     private readonly config: AppServerWorkerConfig,
     private readonly launcher: AppServerLauncher = defaultLauncher,
   ) {
-    this.interruptBoundaryMs =
+    const declaredShutdownMs =
       (config.shutdownGraceMs ?? 50) +
-      (config.forcedExitGraceMs ?? 1_000) +
-      50;
+      (config.forcedExitGraceMs ?? 1_000);
+    this.interruptBoundaryMs = Math.max(declaredShutdownMs + 50, 1_000);
   }
 
   async execute(
