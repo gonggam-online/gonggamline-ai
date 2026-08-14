@@ -1,5 +1,32 @@
 # Decision log
 
+## 2026-08-14 - Propose managed creative storage and pinned image provider
+
+- Owner decision: approve an Architecture boundary for a managed object store/
+  CDN, image provider/model/terms, paid limit, server secret, and commercial-use
+  review. Manual merge of the exact Story is still required before external or
+  code implementation.
+- Storage decision: use the existing managed Supabase project as the private,
+  recoverable master/evidence store and Vercel Blob as a replaceable public CDN
+  mirror for selected approved outputs only. Content-address every artifact,
+  prohibit overwrite, and restore public assets from the private digest.
+- Provider decision: use OpenAI Image API with
+  `gpt-image-2-2026-04-21`; cap a product revision at USD 2, six outputs, and two
+  attempts, with a USD 50 monthly project budget and stop-before-spend checks.
+- Security decision: `OPENAI_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and
+  `BLOB_READ_WRITE_TOKEN` are server-only. Real paid calls are Production
+  operator actions; CI and Preview use deterministic fakes.
+- Rights/output decision: provider terms can establish the provider/customer
+  allocation only. They never grant missing third-party input rights or prove
+  product accuracy. Unknown provider-upload/reference rights reject that job;
+  an eligible unchanged original may still support minimum registration.
+- Current stop: no Supabase bucket, Vercel Blob store/token, or authenticated
+  OpenAI project/key/budget is verified. Architecture documentation does not
+  mutate those systems or claim a deployable KK946 artifact.
+- Cloud-first/rollback: Supabase owns private masters, Vercel owns replaceable
+  public mirrors, GitHub owns source/contracts. Stop dispatch, revoke keys,
+  remove mirrors, invalidate approvals, preserve governed evidence, and revert.
+
 ## 2026-08-14 - Accept creative Architecture and implement actual-byte fixture boundary
 
 - Owner approval: PR #127 was manually merged as commit

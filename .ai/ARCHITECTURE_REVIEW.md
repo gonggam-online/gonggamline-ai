@@ -1,5 +1,32 @@
 # Architecture review
 
+## Proposed Listing Managed Creative Asset and Image Provider v1 - 2026-08-14
+
+- Status: repository owner approved the architecture category on 2026-08-14;
+  exact implementation authorization requires manual merge of this high-risk
+  Story.
+- Revenue gate: replace fixture-only Listing creative output with real,
+  recoverable, reviewable assets while keeping an eligible unchanged-source
+  registration packet available when optimization is pending.
+- Topology: Supabase Storage private bucket owns source/master bytes and immutable
+  manifests; Vercel Blob is a replaceable public CDN mirror containing selected,
+  content-approved channel assets only.
+- Provider: OpenAI Image API pinned to `gpt-image-2-2026-04-21`; maximum USD 2 per
+  product revision, six outputs, two attempts, and USD 50 monthly project budget.
+  CI/Preview use deterministic fakes and receive no real provider key.
+- Rights/truth: every pixel input needs verified provider-upload and requested
+  operation rights. Competitor/web pixels remain observation-only. Independent
+  fact-only output still needs computed and human product-representation QA.
+- Security/recovery: server-only keys, private default-deny access, immutable
+  digest keys, separate private master/public mirror, takedown, retention, and
+  verified restore. `legacy listing_drafts` remains ineligible for durable jobs
+  or approvals.
+- Current external gates: no Storage bucket or Blob store/token exists, Vercel
+  requires a billing action, and OpenAI Platform/key/budget are unverified.
+- Risk/rollback: high-risk/manual. Stop dispatch, rotate keys, remove public
+  mirrors, invalidate approvals, preserve governed private evidence, and revert.
+- Story: [Listing Managed Creative Asset and Image Provider v1](../docs/architecture/LISTING-MANAGED-CREATIVE-ASSET-AND-IMAGE-PROVIDER-V1.md).
+
 ## Accepted Listing Creative Optimization Pipeline v1 - 2026-08-14
 
 - Status: accepted by repository-owner manual merge of PR #127 on 2026-08-14;

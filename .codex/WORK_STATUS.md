@@ -1,5 +1,53 @@
 # Work status
 
+## 2026-08-14 Managed Listing creative storage/provider Architecture
+
+- Objective/revenue impact: unlock real conversion-oriented Listing images with
+  a recoverable managed asset path and bounded provider, without mistaking the
+  merged fixture renderer for a deployable Production generator.
+- Branch/base: `codex/feat/listing-managed-image-provider` from exact
+  `origin/main` `593e731190213b8237671f7b0a360ab312e37514` (merged PR #130).
+- Risk: high-risk/manual. The owner approved managed storage/CDN, provider/model/
+  terms, paid limit, server secret, and commercial-output Architecture categories;
+  the exact Story must be manually merged before external implementation.
+- Root-cause classification: (1) external configuration: Supabase has no Storage
+  bucket, Vercel has no Blob store/token and requires a billing action, and
+  OpenAI Platform/key/budget are unverified; (2) database/state: no immutable
+  provider-job/approval/learning persistence exists; (3) code: v3 has only a
+  `FIXTURE_ONLY` deterministic actual-byte renderer and no real provider/store.
+- Cloud-first: Supabase private Storage is the proposed authoritative master and
+  manifest archive; Vercel Blob is a replaceable public CDN mirror; GitHub owns
+  source/contracts/CI. Local/browser artifacts remain disposable. DB/Auth/RLS
+  job and approval state is a later separate Story.
+- Progress: 5/12 steps complete. Exact origin/main and Production focused smoke,
+  governance/current-contract audit, official OpenAI/Supabase/Vercel research,
+  authenticated external-configuration read-only audit, managed store/CDN
+  architecture, and provider/terms/cost/secret architecture are drafted. Full
+  repository validation and high-risk Architecture delivery are current.
+- Production evidence: `/listing/review` HTTP 200; focused Production Chromium
+  Listing review E2E `1/1` PASS; `/api/health/runtime` is `degraded` because
+  Coupang is unconfigured while application, Supabase configuration and runtime
+  queue checks are available.
+- Architecture decision: private bucket `listing-creative-private-v1`, public
+  Blob store `listing-creative-public-v1`, immutable SHA-256 addressing, pinned
+  OpenAI Image API model `gpt-image-2-2026-04-21`, USD 2/revision, six outputs,
+  two attempts, and USD 50/month project ceiling. CI/Preview use fakes only.
+- Rights/KK946: unknown provider-upload/generative-reference rights keep supplier
+  pixels out of the provider. Verified unchanged use can preserve minimum
+  registration readiness; fact-only output is not deployable until exact visible
+  product representation is independently verified.
+- Changed files: proposed managed creative Architecture Story, Architecture
+  Review, Decision Log, creative ordered gates, Sprint 03 tickets, regression
+  tests, and this status.
+- External owner actions remaining after Architecture merge: add Vercel billing
+  method, authenticate/provision an OpenAI project key and budget, create the
+  private Supabase bucket and public Blob store, and install secrets through
+  their managed UIs. No secret value belongs in chat, logs, screenshots, or Git.
+- Exact next action: run focused and full gates, diff/encoding/secret review,
+  commit/push/open a `manual-merge-required` Architecture PR, validate exact-head
+  CI/Preview, and request manual merge. External creation and paid calls remain
+  stopped until that merge.
+
 ## 2026-08-14 Listing renderer/provider implementation and KK946 reintegration
 
 - Objective/revenue impact: integrate PR #126's sanitized KK946 adapter packet
