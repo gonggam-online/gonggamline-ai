@@ -1,5 +1,21 @@
 # Decision log
 
+## 2026-08-14 - Accept managed creative storage and provider Architecture
+
+- Owner decision: manually merge PR #131 as
+  `4fd227193314c14cd096d73e46f97a340f4bd9d0`, accepting the generic managed
+  private-master/public-mirror and bounded image-provider Architecture.
+- Implementation sequence: first implement storage/CDN ports, immutable digest
+  addressing, deterministic fakes, takedown, and restore; then separately add
+  provider/spend/rights guards, QA/UI/approval, durable DB/Auth/RLS state, one
+  product acceptance run, and an independently approved commerce write.
+- Risk boundary: each implementation PR remains high-risk/manual. The merged
+  Architecture does not itself create a bucket/store, write a secret, spend
+  provider funds, publish an object, mutate Production, or submit to WING.
+- Cloud-first decision: Supabase private Storage is the authoritative master and
+  Vercel Blob is a reconstructable public mirror. Local assets and fixture bytes
+  are disposable and never become registration evidence.
+
 ## 2026-08-14 - Propose managed creative storage and pinned image provider
 
 - Owner decision: approve an Architecture boundary for a managed object store/

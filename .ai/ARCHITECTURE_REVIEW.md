@@ -1,10 +1,13 @@
 # Architecture review
 
-## Proposed Listing Managed Creative Asset and Image Provider v1 - 2026-08-14
+## Accepted Listing Managed Creative Asset and Image Provider v1 - 2026-08-14
 
-- Status: repository owner approved the architecture category on 2026-08-14;
-  exact implementation authorization requires manual merge of this high-risk
-  Story.
+- Status: accepted by repository-owner manual merge of PR #131 on 2026-08-14;
+  merge commit `4fd227193314c14cd096d73e46f97a340f4bd9d0`.
+- Implementation authorization: the ordered high-risk/manual PRs in the Story
+  may proceed. Each exact external bucket/store, secret/config, paid provider,
+  public publication, Production, DB/Auth/RLS, or commerce-write action retains
+  its documented manual boundary.
 - Revenue gate: replace fixture-only Listing creative output with real,
   recoverable, reviewable assets while keeping an eligible unchanged-source
   registration packet available when optimization is pending.

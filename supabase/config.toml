@@ -2,3 +2,8 @@ project_id = "gonggamline-ai-sprint-b0"
 
 [db]
 major_version = 15
+
+[storage.buckets.listing-creative-private-v1]
+public = false
+file_size_limit = "20MiB"
+allowed_mime_types = ["image/png", "image/jpeg", "image/webp", "application/json"]

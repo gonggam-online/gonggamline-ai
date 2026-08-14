@@ -2,11 +2,11 @@
 
 ## Status, owner decision, and revenue outcome
 
-- Status: proposed high-risk Architecture Story. The repository owner approved
-  the managed object-store/CDN, image provider/model/terms, paid-use limit,
-  server-secret, and output-commercial-use architecture boundary on 2026-08-14.
-  That approval becomes durable implementation authorization only when this
-  Story is manually reviewed and merged.
+- Status: accepted by repository-owner manual merge of PR #131 on 2026-08-14;
+  merge commit `4fd227193314c14cd096d73e46f97a340f4bd9d0`. The managed object-store/CDN,
+  image provider/model/terms, paid-use limit, server-secret, and output-commercial-
+  use architecture boundary is now durable implementation authorization for the
+  ordered high-risk/manual PRs below.
 - Revenue outcome: let the generic Listing pipeline produce real, reviewable,
   conversion-oriented image artifacts instead of stopping at briefs or
   fixture-only rasters, while preserving a fast unchanged-image registration
@@ -283,5 +283,5 @@ external webpage bytes are immutable. Re-observation creates a new record.
 | [Supabase Storage access control](https://supabase.com/docs/guides/storage/security/access-control) | `2f17cdb2240bf933f8875ac1cdad6b1f555863b72e60e020668629a7f391b810` | default-deny RLS and server-only service key | service role bypasses RLS and therefore increases secret impact |
 | [Supabase Smart CDN](https://supabase.com/docs/guides/storage/cdn/smart-cdn) | `d6a068d38124c7a09e58db9ae5ff2002c49c85a9f7ad60d66fb67af55419f5e3` | CDN/cache and deletion-verification behavior | plan/edge invalidation behavior can change |
 | [Supabase Storage pricing](https://supabase.com/docs/guides/storage/pricing) | Pro included storage/egress plus usage pricing observed; `8361ce176aea23472fcf709115f7826bca611f9f18f857222992392c191e3936` | budget review for private archive | account invoice and current dashboard remain authoritative |
-| [Vercel Blob](https://vercel.com/docs/vercel-blob) and [private storage](https://vercel.com/docs/vercel-blob/private-storage) | `ee121ab5ddfd5e0e8867d2b8351e7188c68c9d4bee56a3d106ca894c0a2f8a88`; `d719e9f11ba103f2b5b6e8064fa03ec33a338a88b47dbfbd765c0b644bd3f520` | public delivery store, CDN URL, token boundary | current project has no configured store/token; private Blob is not selected as the master |
+| [Vercel Blob](https://vercel.com/docs/vercel-blob) and [Blob SDK](https://vercel.com/docs/vercel-blob/using-blob-sdk) | `@vercel/blob@2.8.0`; `ee121ab5ddfd5e0e8867d2b8351e7188c68c9d4bee56a3d106ca894c0a2f8a88` | public delivery store, immutable put/get/delete, CDN/origin verification, token boundary | current project has no configured store/token; public Blob is a mirror, not the master |
 | [Vercel Blob usage and pricing](https://vercel.com/docs/vercel-blob/usage-and-pricing) | `a1c01d55a36f578c22dac95df197864e3a963a694ccf2dd574e7b845565de625` | delivery cost and spend-management review | current project requires a billing action before rollout |

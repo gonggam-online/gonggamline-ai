@@ -34,8 +34,9 @@ Requires approved Sprint 02 packet, category metadata, brand/certification evide
 9. S3-09 (Architecture, high-risk, manual): managed Supabase private asset
    archive, Vercel Blob public CDN mirror, pinned OpenAI Image provider/model/
    terms, paid cap, server secrets, lifecycle, takedown, and recovery Story.
-10. S3-10 (high-risk, manual, after S3-09 merge): storage/CDN adapters,
-    deterministic fake, and exact external configuration with restore evidence.
+10. S3-10 (high-risk, manual, after S3-09 merge; implementation in progress):
+    storage/CDN adapters, deterministic fake, and exact external configuration
+    with restore evidence.
 11. S3-11 (high-risk, manual, after S3-10): real image provider adapter, rights/
     spend/idempotency gates, actual-byte QA, review approval and selected-set
     public delivery.
