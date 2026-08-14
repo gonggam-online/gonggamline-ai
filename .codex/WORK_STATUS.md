@@ -30,10 +30,10 @@
   replaceable public mirror after exact external rollout. `OPENAI_API_KEY` may
   exist only as a managed Production server secret. Tests use an injected fake
   transport and sanitized byte fixtures; no local artifact is authoritative.
-- Current progress: 9/12 overall steps complete. Production baseline, external
+- Current progress: 11/12 overall steps complete. Production baseline, external
   read-only audit, provider adapter, durable dispatch reservation, complete diff
-  review, all local validation gates, and implementation commit `a657154` are
-  complete. Push, PR, and exact Preview evidence remain current.
+  review, all local validation gates, commits, push, Draft PR #133, CI, Vercel
+  Preview, and browser evidence are complete. Manual merge remains current.
 - External evidence: Vercel Production already has a sensitive Production-only
   `SUPABASE_SERVICE_ROLE_KEY`, but has neither `BLOB_READ_WRITE_TOKEN` nor
   `OPENAI_API_KEY` and has no `NEXT_PUBLIC_OPENAI*` variable. Supabase Dashboard
@@ -51,8 +51,20 @@
   Chromium `1/1` PASS; diff/encoding/product-hardcode review PASS. Production
   dependency audit retains the four pre-existing Next/PostCSS/sharp/nanoid
   findings; `openai@7.4.0` adds no reported Production advisory.
-- Exact next action: push this high-risk branch, create a
-  manual-merge-required PR, and wait for exact-head CI/Preview/browser evidence.
+- Delivery: implementation commit `a657154` and status commit `356ef64` are
+  pushed. Draft PR #133 is `CLEAN`, labelled `manual-merge-required`, and every
+  exact-head CI/Preview check passes. `ci-db-baseline-replay` twice hit an
+  unrelated disposable-container exit after successful first-stack migration;
+  a third identical-head run passed without code or migration changes. Vercel
+  Preview `https://gonggamline-8vfx0usxs-gg-online.vercel.app` passed `44/44`
+  runnable browser tests with two intentional skips. Evidence artifact
+  `9215560309` has SHA-256
+  `b36d73dd4b8995af8277d6f61cd7c60c187994ba0941c234eddd7b36139c4bfe`
+  and expires 2026-08-28. Direct visual inspection found four decoded fixture
+  images at expected dimensions, no overflow, no console/page log, and clear
+  fixture/non-live labeling.
+- Exact next action: push this sanitized evidence checkpoint, wait for its new
+  exact-head CI/Preview, mark PR #133 review-ready, and request manual merge.
   Real storage/provider setup and paid smoke remain stopped on the
   recorded login, region, environment-scope, billing, key, and budget gates.
 
