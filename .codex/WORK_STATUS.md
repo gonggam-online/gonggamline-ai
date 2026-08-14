@@ -59,8 +59,17 @@
   mirror, provider spend, DB migration, or marketplace state was created or
   changed. Exact setup remains stopped until this high-risk PR is manually
   merged.
-- Exact next action: commit/push this coherent implementation, create the
-  high-risk manual PR, and wait for exact-head CI/Vercel Preview/browser evidence.
+- Delivery: implementation commit `16475e3`; pushed branch; Draft PR #132 is
+  `CLEAN`, labelled `manual-merge-required`, and all initial exact-head checks
+  pass. Vercel Preview deployment `5903662823` is Ready at
+  `https://gonggamline-ir1mqckj1-gg-online.vercel.app`; browser workflow
+  `31787701624` passed `44/44` runnable tests with two intentional skips and no
+  test failure. Evidence artifact `9214197150` has SHA-256
+  `779494963f094535586a91fd45d96fd1927ad2fae371d327c89838e840246068` and
+  expires 2026-08-28.
+- Exact next action: push this sanitized delivery-evidence checkpoint, verify its
+  new exact-head CI/Preview, then request manual merge of PR #132. External
+  bucket/store/token setup remains stopped until that merge.
 
 ## 2026-08-14 Managed Listing creative storage/provider Architecture
 
