@@ -1,5 +1,39 @@
 # Work status
 
+## 2026-08-14 Listing creative authenticated operator dispatch amendment
+
+- Objective/revenue impact: make the already merged real image provider and
+  private archive executable without copying Production secrets to a local PC,
+  while stopping the first product run at human-reviewable private assets.
+- Branch/base: `codex/feat/listing-creative-operator-dispatch` from exact merged
+  `origin/main` `834dd001bd0291e67f8dba79807c5f3016f61322` (PR #136).
+- Risk: high-risk/manual Architecture amendment. No auto-merge, Production paid
+  call, public publication, content approval, or WING write.
+- Root-cause order: (1) external configuration: OpenAI/Supabase secrets are
+  correctly Production Sensitive and cannot be exported by Vercel CLI; OpenAI
+  is funded, while Vercel shows a payment method plus Pro Trial; (2) database:
+  S3-12 concurrent/unattended job persistence is not accepted; (3) code: no
+  authenticated Production call site exists for the merged dispatch service.
+- Cloud-first gate: proposed create-only plan, authorization, reservation,
+  failure, and review-handoff manifests live in private Supabase Storage. GitHub
+  owns contract/delivery evidence. Browser/local state is disposable.
+- Completed: latest-main/governance/Next.js audit; external/DB/code
+  classification; Vercel Production environment-name audit without revealing
+  values; signed-in billing inspection; compliant transport design.
+- Current work: local implementation-independent gates are complete; stage,
+  commit, push, and deliver the manual-merge Architecture PR.
+- Validation: `git diff --check` PASS; focused Architecture tests 10/10 PASS;
+  lint PASS with zero errors and four pre-existing unrelated warnings; typecheck
+  PASS; full unit/integration tests 660/660 PASS; Production build PASS with 86
+  routes; mobile Listing review Playwright 1/1 PASS.
+- Blocker/owner action: runtime implementation must wait for manual merge of this
+  Architecture amendment. That merge will not itself spend, publish, or write a
+  marketplace.
+- Remaining risks: route implementation must add fresh AAL2, exact origin,
+  purpose CSRF, body/rate limits, server-recomputed digests, whole-plan
+  create-only reservation, private sanitized handoff, and zero same-request
+  human approval/publication/live write.
+
 ## 2026-08-14 Listing creative live provider continuation
 
 - Objective/revenue impact: after merged PR #135 and owner-completed billing,

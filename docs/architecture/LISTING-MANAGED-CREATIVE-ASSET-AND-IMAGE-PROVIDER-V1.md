@@ -104,9 +104,13 @@ v1/<subjectHash>/<revisionDigest>/<role>/<sha256>.<ext>
   approval remains a separate marketplace boundary.
 - Preview and CI use deterministic fakes and disposable fixture bytes. Real paid
   generation and Production secrets are not automatically exposed to Preview.
-- Initial real execution is a single authenticated operator dispatch. No public
-  generation route and no concurrent automation are authorized until the later
-  Database/Auth/RLS job Story provides durable idempotency and authorization.
+- Initial real execution is a single authenticated operator dispatch. No
+  unauthenticated or general-purpose generation route and no concurrent
+  automation are authorized until the later Database/Auth/RLS job Story
+  provides durable idempotency and authorization. The proposed
+  [authenticated operator dispatch amendment](LISTING-CREATIVE-AUTHENTICATED-OPERATOR-DISPATCH-V1.md)
+  defines the only allowed Production call site: two purpose-bound AAL2 admin
+  mutations with a private create-only plan, authorization, and reservation.
 
 ## Approved image provider contract
 
@@ -140,7 +144,11 @@ The owner-approved initial safety envelope is deliberately small:
 - stop before a request when estimated cumulative cost would cross either cap;
 - no automatic retry for content-policy, rights, fact, billing, authentication,
   or rate-limit failures; a retry needs a new bounded job attempt;
-- no paid call from tests, pull requests, Preview, scheduled jobs, or a browser.
+- no paid call from tests, pull requests, Preview, scheduled jobs, or a
+  general-purpose browser endpoint. After manual acceptance of the operator
+  dispatch amendment, a browser may initiate only its exact authenticated AAL2
+  admin mutation; server-held credentials and a durable server-created
+  authorization remain mandatory.
 
 Pricing is checked against the current official snapshot before each Production
 rollout. A changed model, terms, price, output ownership condition, training/data

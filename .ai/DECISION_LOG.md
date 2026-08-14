@@ -1,5 +1,30 @@
 # Decision log
 
+## 2026-08-14 - Propose authenticated Listing creative operator dispatch
+
+- Finding: the merged provider, actual-byte QA, private archive, and handoff
+  services have no compliant Production call site. Vercel correctly prevents
+  local export of Sensitive `OPENAI_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY`,
+  while the accepted v1 contract rejects a general-purpose generation route.
+- Proposal: authorize a product-agnostic two-phase admin mutation. PREPARE makes
+  no paid call and persists the server-computed plan; AUTHORIZE_AND_DISPATCH
+  requires fresh AAL2, exact origin, purpose-bound CSRF, current snapshots, and
+  a create-only Supabase-private authorization and whole-plan reservation before
+  the first provider call.
+- Safety: the single bounded call stops at private `REVIEW_REQUIRED`. It cannot
+  auto-pass human review, select/publish/map content, create live-write approval,
+  or call Coupang/WING. CI/Preview remain fake-only; concurrent, scheduled,
+  unattended, bulk, or multi-operator dispatch remains blocked on S3-12.
+- External observation: OpenAI funding and Production Sensitive variables are
+  present. Vercel shows a payment method and Pro Trial; public Blob billing
+  continuity remains a later publication gate and is not needed for private
+  generation/archive.
+- Authority/risk: proposed Architecture amendment, high-risk/manual. Manual
+  merge accepts only the contract; the implementation and first paid Production
+  run each retain their exact documented gate. No external write occurs here.
+- Rollback: do not compose the route; revert the amendment. Any later failed or
+  partial output remains quarantined in the private store for reconciliation.
+
 ## 2026-08-14 - Prefer Production-scoped Vercel Blob OIDC
 
 - External result: authenticated rollout created private Supabase bucket

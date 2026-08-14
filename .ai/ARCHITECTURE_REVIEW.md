@@ -1,5 +1,33 @@
 # Architecture review
 
+## Proposed authenticated Listing creative operator dispatch - 2026-08-14
+
+- Status: proposed; repository-owner manual merge is required before runtime
+  implementation.
+- Revenue gate: the accepted provider/archive service cannot be invoked in
+  Production without either exporting Vercel Sensitive secrets (forbidden) or
+  adding an authenticated deployed call site. This amendment chooses the
+  smallest reusable call site rather than ad hoc local secret handling.
+- Boundary: a non-billable PREPARE mutation persists a canonical plan; a second
+  fresh-AAL2, exact-origin, purpose-CSRF mutation creates a digest-bound operator
+  authorization and whole-plan reservation before one bounded provider call.
+  The response stops at private `REVIEW_REQUIRED`.
+- Durable state: Supabase private Storage owns create-only prepared,
+  authorized, reserved, failure, and review-handoff manifests. GitHub owns the
+  contract and CI evidence. Local/browser state is disposable and cannot confer
+  approval.
+- Security: Production only, server-held secrets, current admin allowlist,
+  body/schema/rate limits, sanitized telemetry, no client-trusted digest, no
+  automatic retry, no default human QA PASS, and no public/general-purpose
+  generation endpoint.
+- Non-goals: no content approval, Vercel Blob publication, registration mapping,
+  live-write approval, Coupang/WING call, concurrent worker, schedule, or DB/RLS
+  expansion.
+- Risk/rollback: high-risk/manual. Revert the amendment to keep dispatch
+  disabled. After implementation, disable composition and preserve private
+  evidence; rotate the provider key only if compromise is suspected.
+- Story: [Listing Creative Authenticated Operator Dispatch v1](../docs/architecture/LISTING-CREATIVE-AUTHENTICATED-OPERATOR-DISPATCH-V1.md).
+
 ## 2026-08-14 - Listing creative managed-store OIDC rollout correction
 
 - Scope: reconcile the merged managed creative storage adapter with Vercel
