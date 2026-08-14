@@ -23,8 +23,12 @@ The post-PR-134 authenticated rollout established the following exact state:
   `BLOB_READ_WRITE_TOKEN` was added, revealed, or copied;
 - the store identifier is present in Production and Preview, but the application
   storage composition rejects every non-Production `VERCEL_ENV` before the SDK;
-- the Vercel trial is expired. No payment method was entered; availability and
-  billing remain an operational warning before relying on the mirror for sales.
+- a default payment method is present, but the authenticated Billing page still
+  labels the team `Pro Trial`, shows expiry `00:00:00`, disables on-demand budget
+  configuration, and requires `End Trial and Start Pro Plan`. Paid Pro
+  continuity remains an operational blocker before relying on the mirror for
+  sales. Do not interpret the separate Vercel AI Gateway credit as Blob or
+  OpenAI Image API billing authority.
 
 Vercel's 2026-06-01 official OIDC announcement states that new Blob connections
 default to short-lived, automatically rotated OIDC credentials and no longer
@@ -58,6 +62,10 @@ for an explicitly controlled non-OIDC migration, never Preview.
    `NEXT_PUBLIC_*` credential or reveal an OIDC token.
 4. Keep SDK object writes immutable: `addRandomSuffix=false` because the path is
    already SHA-256 content-addressed, and `allowOverwrite=false`.
+5. Before the first product publication, verify the Billing page no longer says
+   `Pro Trial`, the paid Pro billing cycle is active, spend management can be
+   configured, and the default payment method remains valid. Merely storing a
+   payment method or seeing AI Gateway credit does not close this gate.
 
 ## 3. Synthetic restore drill
 

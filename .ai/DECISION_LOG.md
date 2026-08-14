@@ -1,5 +1,28 @@
 # Decision log
 
+## 2026-08-14 - Accept operator dispatch and correct Vercel billing state
+
+- Architecture acceptance: repository owner squash-merged PR #137 as
+  `bf007382f9325d64aebd0ab9675fe4eae60216d5`, authorizing the separately
+  reviewable S3-16 implementation. This merge did not call a provider, publish
+  an asset, or write Coupang/WING.
+- Production evidence: `origin/main` matches the merge commit; Vercel Production
+  deployment `5907391571` completed successfully and browser smoke run
+  `31807000133` passed 44/44 checks. Evidence artifact `9221619734` has SHA-256
+  `0e2d3c2100f9907889c3ee0a78113a841d196250e1423f6fb100979f0f56925d`.
+- Billing correction: authenticated Vercel Billing shows a default payment
+  method, contradicting the earlier historical “no payment method” observation.
+  It still shows `Pro Trial`, expiry `00:00:00`, disabled on-demand budget
+  configuration, and `End Trial and Start Pro Plan`; paid Pro continuity is
+  therefore not active or verified.
+- Scope: private provider output may still archive to the accepted Supabase
+  master and stop at `REVIEW_REQUIRED`. Public Vercel Blob product publication
+  remains blocked until paid Pro is visibly active. Separate Vercel AI Gateway
+  credit does not prove Blob or OpenAI Image API billing authority.
+- Privacy/authority: only non-sensitive status was recorded. No card details,
+  billing contact/address/tax data, payment, plan change, add-on, budget, public
+  object, provider call, or marketplace write occurred.
+
 ## 2026-08-14 - Propose authenticated Listing creative operator dispatch
 
 - Finding: the merged provider, actual-byte QA, private archive, and handoff

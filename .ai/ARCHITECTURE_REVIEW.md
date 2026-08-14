@@ -1,9 +1,11 @@
 # Architecture review
 
-## Proposed authenticated Listing creative operator dispatch - 2026-08-14
+## Accepted authenticated Listing creative operator dispatch - 2026-08-14
 
-- Status: proposed; repository-owner manual merge is required before runtime
-  implementation.
+- Status: accepted by repository-owner squash merge of PR #137 as
+  `bf007382f9325d64aebd0ab9675fe4eae60216d5`. The S3-16 high-risk runtime
+  implementation may proceed; its exact PR and first paid Production dispatch
+  remain manual gates.
 - Revenue gate: the accepted provider/archive service cannot be invoked in
   Production without either exporting Vercel Sensitive secrets (forbidden) or
   adding an authenticated deployed call site. This amendment chooses the
@@ -27,6 +29,20 @@
   disabled. After implementation, disable composition and preserve private
   evidence; rotate the provider key only if compromise is suspected.
 - Story: [Listing Creative Authenticated Operator Dispatch v1](../docs/architecture/LISTING-CREATIVE-AUTHENTICATED-OPERATOR-DISPATCH-V1.md).
+
+## Vercel paid-billing observation - 2026-08-14
+
+- Authenticated UI evidence: the team Billing page has a default payment method,
+  but the plan remains `Pro Trial`, the expiry indicator is `00:00:00`, and the
+  page presents `End Trial and Start Pro Plan`. On-demand budget configuration
+  is disabled in this state.
+- Classification: external configuration, not code. Paid Pro continuity is not
+  active or verified. Private Supabase archive and review do not depend on this
+  gate; the first Vercel Blob product publication does.
+- Data handling: no card suffix, expiry, invoice email, address, tax field, or
+  account identifier is copied into Git, logs, or task evidence.
+- Authority: read-only observation. No payment, plan, budget, add-on, invoice,
+  or billing-profile mutation was performed.
 
 ## 2026-08-14 - Listing creative managed-store OIDC rollout correction
 

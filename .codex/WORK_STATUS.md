@@ -1,5 +1,39 @@
 # Work status
 
+## 2026-08-14 PR #137 merge and Vercel billing correction
+
+- Objective/revenue impact: accept the only governed Production operator
+  dispatch transport, verify the merged Production head, and prevent public
+  asset publication from relying on a falsely assumed paid Vercel plan.
+- Branch/base: `codex/docs/vercel-paid-billing-status` from exact merged
+  `origin/main` `bf007382f9325d64aebd0ab9675fe4eae60216d5`.
+- Risk: normal-risk read-only external-state documentation. No payment, plan,
+  secret, Production configuration, asset publication, provider call, or
+  commerce write.
+- Root-cause order: (1) external configuration: default payment method exists,
+  but Vercel remains expired `Pro Trial` with paid Pro not activated; (2)
+  database: no change; (3) code: S3-16 implementation is now Architecture-
+  authorized but is outside this status correction.
+- Cloud-first gate: GitHub owns the sanitized observation and Production
+  evidence. Vercel Billing remains authoritative for current plan state. No
+  screenshot, billing PII, browser state, or local file becomes durable state.
+- Completed: PR #137 merged as `bf007382`; `origin/main` synchronized; Vercel
+  Production deployment `5907391571` succeeded; Production browser smoke
+  `31807000133` passed 44/44; artifact `9221619734` digest is
+  `0e2d3c2100f9907889c3ee0a78113a841d196250e1423f6fb100979f0f56925d`.
+- Billing observation: authenticated page shows a default payment method plus
+  `Pro Trial`, expiry `00:00:00`, disabled on-demand budget, and the explicit
+  `End Trial and Start Pro Plan` action. Paid Pro/public-Blob continuity remains
+  blocked; private Supabase archive does not.
+- Validation: `git diff --check` PASS; focused Architecture/storage tests 25/25
+  PASS; lint PASS with zero errors and four pre-existing test-file warnings;
+  typecheck PASS; full test suite 660/660 PASS; production build PASS.
+- Current work: deliver the reviewed seven-file correction without touching
+  billing controls, then wait for exact-head CI and Preview evidence.
+- Exact next action after delivery: implement S3-16 PREPARE and
+  AUTHORIZE_AND_DISPATCH on a fresh branch; first Production run stops at
+  private `REVIEW_REQUIRED`.
+
 ## 2026-08-14 Listing creative authenticated operator dispatch amendment
 
 - Objective/revenue impact: make the already merged real image provider and

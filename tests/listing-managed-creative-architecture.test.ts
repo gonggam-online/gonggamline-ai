@@ -183,5 +183,7 @@ test("official provider and storage snapshots are versioned with limitations", (
   assert.match(architecture, /not legal advice/);
   assert.match(architecture, /ICN1 public mirror exists/);
   assert.match(architecture, /OIDC re-observed 2026-08-14/);
-  assert.match(architecture, /billing continuity is not yet verified/);
+  assert.match(architecture, /default payment method exists/);
+  assert.match(architecture, /`Pro Trial`/);
+  assert.match(architecture, /paid Pro continuity is not active or verified/);
 });
