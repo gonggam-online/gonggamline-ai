@@ -5,6 +5,8 @@
 > Asset discovery/reference collection is separate from publication and
 > derivative authorization. Unknown rights quarantine the affected asset lane,
 > not unrelated product, keyword, title, story, or alternative-source research.
+> Asset-scoped failures additionally follow
+> [Asset Error Isolation and Pipeline Continuity Policy v1](ASSET-ERROR-ISOLATION-AND-PIPELINE-CONTINUITY-POLICY-V1.md): continue independent work, record exact partial counts, and exclude every blocked asset from derivative/publication/upload paths.
 
 ## 1. Decision status
 

@@ -1,5 +1,8 @@
 # External Commerce Asset Discovery and Rights Policy v1.1
 
+> Pipeline failure handling is refined by
+> [Asset Error Isolation and Pipeline Continuity Policy v1](ASSET-ERROR-ISOLATION-AND-PIPELINE-CONTINUITY-POLICY-V1.md). Item-scoped continuity never converts a rights/access failure into publication eligibility.
+
 ## Decision and authority
 
 - Status: owner-accepted policy amendment on 2026-08-14 through delegated task `12D`.

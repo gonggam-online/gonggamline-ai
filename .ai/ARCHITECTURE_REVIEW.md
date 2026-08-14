@@ -1,5 +1,14 @@
 # Architecture review
 
+## Asset Error Isolation and Pipeline Continuity Policy v1 - 2026-08-14
+
+- Status: owner-accepted delegated 12E policy; documentation/pseudocontract only.
+- Revenue gate: keep valid assets and independent content research moving when one asset fails, reducing avoidable batch restarts without increasing rights or access risk.
+- Existing boundary: refines Listing/12D failure semantics; creates no Domain, API, database, Queue, crawler, storage, retry service, external integration, or publication behavior.
+- Fail-closed decision: item errors continue the batch, while rights/access/conflict outcomes are excluded from derivative, publication, and upload lanes. `bypass_rights_check` is a contract error.
+- Cloud-first: GitHub owns policy/delivery evidence. Operational status/evidence/audit has no approved remote owner here, so runtime implementation remains stopped.
+- Risk/rollback: normal-risk docs-only; Git revert. Every later runtime/provider/database/Queue/Production/write Story keeps its separate gate.
+
 ## External Commerce Asset Discovery and Rights Policy v1.1 - 2026-08-14
 
 - Status: owner-accepted policy amendment through delegated task 12D; documentation implementation only.
