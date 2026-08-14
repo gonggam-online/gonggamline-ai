@@ -1,5 +1,45 @@
 # Work status
 
+## 2026-08-14 S3-16 Listing creative operator runtime
+
+- Objective/revenue impact: make the merged fact-only GPT Image provider
+  operable for every approved product through one bounded Production operator
+  action, preserve actual bytes in the approved private store, and expose them
+  for product-representation review without publishing or writing WING.
+- Branch/base: `codex/feat/listing-creative-operator-runtime` from exact
+  `origin/main` `b6065c2dcbb02ae0b7901388351d9cc85b1d11fe` (merged PR #138).
+- Risk: high-risk/manual due to admin auth, Production paid-provider composition,
+  and durable private manifests. Auto-merge is prohibited. The first paid call,
+  public publication, content approval, and commerce write remain separate.
+- Root-cause order: (1) external configuration: OpenAI funding/key and Supabase
+  private store exist; a Vercel payment method is verified but paid Pro
+  activation is not; (2) database: no DB/RLS expansion, Supabase private Storage
+  remains authoritative; (3) code: the merged provider/archive parts lacked a
+  governed operator route, distributed reservation, sanitized handoff recovery,
+  and real review surface.
+- Cloud-first gate: immutable prepared/authorized/global-reserved/plan-reserved/
+  failure/review manifests and generated masters belong to private Supabase
+  Storage. GitHub owns code/contracts/tests. Browser JSON, signed URLs, local
+  checkout, and test assets are disposable and contain no durable authority.
+- Progress: 10/12 steps. Governance/base audit; external/DB/code classification;
+  typed operator contracts; allowlisted fact-value materialization; immutable
+  plan/authorization/reservation/handoff engine; Supabase repository and
+  private-only provider composition; PREPARE/DISPATCH/re-sign API plus operator
+  review UI are implemented. No paid or Production write has run.
+- Validation: lint has zero errors and four pre-existing Revenue-test warnings;
+  typecheck passes; full unit/integration tests pass 666/666; production build
+  passes with 87 generated pages/routes; `git diff --check` passes. Local browser
+  QA at desktop and 390px mobile widths found no overflow, console warnings, or
+  errors; the initial UI exposes only disabled PREPARE and no approval/publish/
+  WING controls.
+- Current work: complete final diff/secret/product-hardcode review, then commit,
+  push, and open the high-risk manual-review PR.
+- Exact next action: deliver the PR and wait for exact-head CI and Vercel Preview.
+  Do not invoke the Production dispatch in this PR.
+- Remaining risks: distributed five-minute slot intentionally serializes paid
+  runs; partial provider output remains private and non-retryable; human product
+  accuracy review and selected-candidate publication are later phases.
+
 ## 2026-08-14 PR #137 merge and Vercel billing correction
 
 - Objective/revenue impact: accept the only governed Production operator

@@ -13,11 +13,15 @@ import {
 import type { ManagedListingCreativeStorage } from "@/engines/listing/creative-storage";
 import type { AdminGuardContext } from "@/lib/auth/admin-request-guard.server";
 import { OpenAiSdkListingImageTransport } from "@/lib/listing/openai-image-transport.server";
-import { createProductionManagedListingCreativeStorage } from "@/services/listing-creative-asset.repository";
-import type { CreativeRenderJob } from "@/shared/domain/listing-creative";
+import { createProductionManagedListingCreativePrivateStorage } from "@/services/listing-creative-asset.repository";
+import type {
+  CreativeProviderApproval,
+  CreativeRenderJob,
+} from "@/shared/domain/listing-creative";
 
 export type ProductionListingImageProviderContext = Readonly<{
   provider: OpenAiListingCreativeProvider;
+  providerApproval: CreativeProviderApproval;
   storage: ManagedListingCreativeStorage;
 }>;
 
@@ -25,7 +29,6 @@ const SHA256 = /^[a-f0-9]{64}$/;
 
 export type ProductionListingImageReservation = Readonly<{
   jobId: string;
-  artifactId: string;
   sequence: number;
 }>;
 
@@ -45,7 +48,6 @@ implements OpenAiListingImageDispatchReservation {
     for (const reservation of reservations) {
       if (
         reservation.jobId.trim().length === 0
-        || reservation.artifactId.trim().length === 0
         || !Number.isSafeInteger(reservation.sequence)
         || reservation.sequence < 0
         || map.has(reservation.jobId)
@@ -67,7 +69,7 @@ implements OpenAiListingImageDispatchReservation {
         subjectReference: input.job.subjectReference,
         revisionDigest: this.revisionDigest,
         candidateSetId: input.job.candidateSetId,
-        artifactId: reservation.artifactId,
+        artifactId: input.job.jobId,
         role: input.job.role,
       },
       jobDigest: input.requestHash,
@@ -79,9 +81,8 @@ implements OpenAiListingImageDispatchReservation {
 
 export function createProductionListingImageProviderContext(input: Readonly<{
   guardContext: AdminGuardContext;
-  operatorApprovalReference: string;
-  projectBudgetVerificationReference: string;
-  termsPricingVerificationReference: string;
+  authorizationDigest: string;
+  dispatchPlanDigest: string;
   revisionDigest: string;
   reservations: readonly ProductionListingImageReservation[];
   inputResolver?: OpenAiListingImageInputResolver;
@@ -90,15 +91,15 @@ export function createProductionListingImageProviderContext(input: Readonly<{
   if (
     process.env.VERCEL_ENV !== "production"
     || !apiKey
-    || input.operatorApprovalReference.trim().length === 0
-    || input.projectBudgetVerificationReference.trim().length === 0
-    || input.termsPricingVerificationReference.trim().length === 0
+    || !SHA256.test(input.authorizationDigest)
+    || !SHA256.test(input.dispatchPlanDigest)
   ) throw new Error("OPENAI_IMAGE_CONFIGURATION_UNAVAILABLE");
-  const storage = createProductionManagedListingCreativeStorage(input.guardContext);
+  const storage = createProductionManagedListingCreativePrivateStorage(input.guardContext);
   const approvalDigest = createHash("sha256").update([
-    input.operatorApprovalReference,
-    input.projectBudgetVerificationReference,
-    input.termsPricingVerificationReference,
+    "gonggamline-listing-creative-provider-approval-v1",
+    input.authorizationDigest,
+    input.dispatchPlanDigest,
+    input.revisionDigest,
   ].join("\n")).digest("hex");
   const approval = createOpenAiListingImageProviderApproval({
     approvalReference: `listing-image-provider-approval:${approvalDigest}`,
@@ -124,6 +125,7 @@ export function createProductionListingImageProviderContext(input: Readonly<{
       ),
       input.inputResolver ?? null,
     ),
+    providerApproval: approval,
     storage,
   };
 }

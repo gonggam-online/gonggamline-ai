@@ -30,6 +30,15 @@ function isNotFound(error: unknown): boolean {
   return status === 404 || status === "404";
 }
 
+function isConflict(error: unknown): boolean {
+  const status = storageStatus(error);
+  if (status === 409 || status === "409") return true;
+  if (!error || typeof error !== "object") return false;
+  const message = (error as Readonly<{ message?: unknown }>).message;
+  return typeof message === "string"
+    && /already exists|duplicate/i.test(message);
+}
+
 export class SupabasePrivateListingCreativeObjectStore
 implements PrivateListingCreativeObjectStore {
   constructor(
@@ -56,7 +65,11 @@ implements PrivateListingCreativeObjectStore {
       { contentType, upsert: false, cacheControl: "31536000" },
     );
     if (error || !data?.path) {
-      throw new CreativeStorageError("IMMUTABLE_OBJECT_CONFLICT");
+      throw new CreativeStorageError(
+        error && isConflict(error)
+          ? "IMMUTABLE_OBJECT_CONFLICT"
+          : "STORAGE_CONFIGURATION_UNAVAILABLE",
+      );
     }
     return {
       pathname: data.path,

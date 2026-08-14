@@ -16,7 +16,9 @@ export type AdminCsrfPurpose =
   | "product-operator-patch"
   | "product-manual-competition"
   | "product-automatic-competition"
-  | "product-competition-batch";
+  | "product-competition-batch"
+  | "listing-creative-dispatch-prepare"
+  | "listing-creative-dispatch";
 
 export type AdminCsrfToken = Readonly<{
   token: string;
