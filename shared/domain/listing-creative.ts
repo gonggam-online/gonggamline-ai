@@ -101,9 +101,39 @@ export type ComputedArtifactReview = Readonly<{
   digest: "PASS" | "FAIL";
   mime: "PASS" | "FAIL";
   dimensions: "PASS" | "FAIL";
+  byteLimit: "PASS" | "FAIL";
+  roleDimensions: "PASS" | "FAIL";
+  pngStructure: "PASS" | "FAIL";
+  pixelPayload: "PASS" | "FAIL";
+  altText: "PASS" | "FAIL";
   mobileSafe: "PASS" | "FAIL";
   sourceRights: "PASS" | "FAIL";
   deployability: "PASS" | "FAIL";
+}>;
+
+export type CreativeProductRepresentationDecision =
+  | "PASS"
+  | "FAIL"
+  | "REVIEW_REQUIRED";
+
+export type CreativeProductRepresentationReview = Readonly<{
+  reviewReference: string;
+  reviewerReference: string;
+  reviewedAt: string;
+  reviewedArtifactDigest: string;
+  reviewDigest: string;
+  productIdentity: CreativeProductRepresentationDecision;
+  color: CreativeProductRepresentationDecision;
+  quantity: CreativeProductRepresentationDecision;
+  dimensionsAndScale: CreativeProductRepresentationDecision;
+  material: CreativeProductRepresentationDecision;
+  components: CreativeProductRepresentationDecision;
+  optionConsistency: CreativeProductRepresentationDecision;
+  prohibitedMarks: CreativeProductRepresentationDecision;
+  unsupportedClaims: CreativeProductRepresentationDecision;
+  crop: CreativeProductRepresentationDecision;
+  encoding: CreativeProductRepresentationDecision;
+  load: CreativeProductRepresentationDecision;
 }>;
 
 export type RenderedCreativeArtifact = Readonly<{
@@ -119,6 +149,7 @@ export type RenderedCreativeArtifact = Readonly<{
   mimeType: "image/png";
   previewDataUrl: string;
   durableAssetReference: string | null;
+  publicAssetReference: string | null;
   altText: string;
   factIds: readonly string[];
   inputAssetDigests: readonly string[];
@@ -129,7 +160,12 @@ export type RenderedCreativeArtifact = Readonly<{
   providerModelVersion: string;
   providerTermsVersion: string;
   providerExecution: CreativeProviderExecution | null;
-  deployability: "FIXTURE_ONLY" | "NONDEPLOYABLE" | "DEPLOYABLE";
+  productRepresentationReview: CreativeProductRepresentationReview | null;
+  deployability:
+    | "FIXTURE_ONLY"
+    | "NONDEPLOYABLE"
+    | "REVIEW_READY"
+    | "DEPLOYABLE";
   review: ComputedArtifactReview;
 }>;
 
@@ -140,6 +176,8 @@ export type CreativeCandidateSet = Readonly<{
   confidence: "LOW" | "MEDIUM" | "HIGH";
   titleCandidateId: string;
   keywordCandidateId: string;
+  filterSetDigest: string;
+  detailPackageDigest: string;
   renderJobs: readonly CreativeRenderJob[];
   artifacts: readonly RenderedCreativeArtifact[];
 }>;
@@ -162,13 +200,20 @@ export type ListingCreativeReviewPacket = Readonly<{
   contentApproval: Readonly<{
     approved: boolean;
     approvalReference: string | null;
+    reviewerReference: string | null;
+    approvedAt: string | null;
+    approvalDigest: string | null;
     boundArtifactDigests: readonly string[];
+    boundProductReviewDigests: readonly string[];
+    boundProviderExecutionDigests: readonly string[];
     boundEvidenceEvaluationId: string | null;
     boundPolicyDigest: string | null;
     boundCategoryMetadataDigest: string | null;
     boundCandidateSetId: string | null;
     boundTitleCandidateId: string | null;
     boundKeywordCandidateId: string | null;
+    boundFilterSetDigest: string | null;
+    boundDetailPackageDigest: string | null;
     boundRenderRecipeVersions: readonly string[];
     boundRevisionId: string | null;
   }>;

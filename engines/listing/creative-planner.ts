@@ -9,6 +9,7 @@ import {
   DeterministicFixtureCreativeProvider,
   executeCreativeRenderJob,
 } from "@/engines/listing/creative-renderer";
+import { digestCanonicalJson } from "@/engines/listing/category-snapshot";
 
 const FIXTURE_PROVIDER = new DeterministicFixtureCreativeProvider();
 
@@ -36,7 +37,13 @@ export function planningInputFromListingContent(
     evidenceEvaluationId: input.evidence.evaluationId,
     policyDigest: input.policy.digest,
     categoryMetadataDigest: input.category.metadataDigest,
-    revisionId: `${input.packetId}:creative-revision-1`,
+    revisionId: digestCanonicalJson({
+      packetId: input.packetId,
+      evidenceEvaluationId: input.evidence.evaluationId,
+      policyDigest: input.policy.digest,
+      categoryMetadataDigest: input.category.metadataDigest,
+      revision: 1,
+    }) ?? "",
   });
 }
 
@@ -83,18 +90,27 @@ export async function buildFixtureCreativeReviewPacket(
 ): Promise<ListingCreativeReviewPacket> {
   const jobs = planFixtureCreativeJobs(input);
   const artifacts = await Promise.all(jobs.map((job) => executeCreativeRenderJob(job, FIXTURE_PROVIDER)));
-  const candidates: CreativeCandidateSet[] = ["creative-a", "creative-b"].map((candidateSetId, index) => ({
-    candidateSetId,
-    label: index === 0 ? "정보 우선 구성" : "특징 우선 구성",
-    rationale: index === 0
-      ? ["상품 식별과 크기 정보를 먼저 검토하는 cold-start prior"]
-      : ["핵심 특징과 모바일 스캔 흐름을 먼저 검토하는 cold-start prior"],
-    confidence: "LOW",
-    titleCandidateId: `title-${index === 0 ? "a" : "b"}`,
-    keywordCandidateId: `keywords-${index === 0 ? "a" : "b"}`,
-    renderJobs: jobs.filter((job) => job.candidateSetId === candidateSetId),
-    artifacts: artifacts.filter((artifact) => artifact.candidateSetId === candidateSetId),
-  }));
+  const candidates: CreativeCandidateSet[] = ["creative-a", "creative-b"].map((candidateSetId, index) => {
+    const candidateJobs = jobs.filter((job) => job.candidateSetId === candidateSetId);
+    return {
+      candidateSetId,
+      label: index === 0 ? "정보 우선 구성" : "특징 우선 구성",
+      rationale: index === 0
+        ? ["상품 식별과 크기 정보를 먼저 검토하는 cold-start prior"]
+        : ["핵심 특징과 모바일 스캔 흐름을 먼저 검토하는 cold-start prior"],
+      confidence: "LOW",
+      titleCandidateId: `title-${index === 0 ? "a" : "b"}`,
+      keywordCandidateId: `keywords-${index === 0 ? "a" : "b"}`,
+      filterSetDigest: digestCanonicalJson({ candidateSetId, kind: "synthetic-filter-fixture" }) ?? "",
+      detailPackageDigest: digestCanonicalJson({
+        candidateSetId,
+        kind: "synthetic-detail-fixture",
+        jobs: candidateJobs.map(({ jobId, role, width, height }) => ({ jobId, role, width, height })),
+      }) ?? "",
+      renderJobs: candidateJobs,
+      artifacts: artifacts.filter((artifact) => artifact.candidateSetId === candidateSetId),
+    };
+  });
   return Object.freeze({
     schemaVersion: LISTING_CREATIVE_PACKET_VERSION,
     packetId: `${input.packetId}:creative-fixture-review`,
@@ -110,13 +126,20 @@ export async function buildFixtureCreativeReviewPacket(
     contentApproval: {
       approved: false,
       approvalReference: null,
+      reviewerReference: null,
+      approvedAt: null,
+      approvalDigest: null,
       boundArtifactDigests: [],
+      boundProductReviewDigests: [],
+      boundProviderExecutionDigests: [],
       boundEvidenceEvaluationId: null,
       boundPolicyDigest: null,
       boundCategoryMetadataDigest: null,
       boundCandidateSetId: null,
       boundTitleCandidateId: null,
       boundKeywordCandidateId: null,
+      boundFilterSetDigest: null,
+      boundDetailPackageDigest: null,
       boundRenderRecipeVersions: [],
       boundRevisionId: null,
     },

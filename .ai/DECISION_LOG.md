@@ -1,5 +1,34 @@
 # Decision log
 
+## 2026-08-14 - Bind actual Listing image bytes, human QA, approval, publication and mapper
+
+- Decision: implement the accepted managed-creative step 3 as a product-agnostic
+  bridge. A provider response now retains transient bytes long enough to validate
+  full PNG chunk order/CRC/IDAT/IEND and bounded dimensions, archive the exact
+  digest privately, and enter `REVIEW_READY`; provider success alone remains
+  nondeployable.
+- Product-truth decision: a digest-bound human review must pass identity, color,
+  quantity, dimensions/scale, material, components, selected option, prohibited
+  marks, unsupported claims, crop, encoding and load for every selected asset.
+  One failed or unresolved check prevents content approval and publication.
+- Approval decision: canonical content approval binds the selected candidate,
+  artifact bytes, human reviews, provider executions and terms, evidence,
+  category, policy, title, keywords, filters, detail package, recipes and
+  revision. Storage recomputes that digest; the registration mapper accepts only
+  the selected set's verified public HTTPS references and never a private,
+  signed, data, fixture or unselected reference.
+- Compatibility: this slice introduces no public route, database, migration,
+  Queue or unattended lifecycle. `legacy listing_drafts` remains ineligible;
+  durable concurrent job/approval state still requires the separate S3-12
+  Database/Auth/RLS Story. Live-write approval remains independent.
+- External state: Vercel has no Blob store/token and its trial is expired;
+  Supabase and OpenAI Platform are signed out and no OpenAI Production key/budget
+  is verified. No bucket, billing, secret, paid call, public object, Production
+  mutation or WING write is performed by this implementation.
+- Risk/rollback: high-risk/manual. Revert the QA/approval bridge; stop dispatch,
+  remove any later public mirrors and invalidate dependent approvals before
+  reverting a configured runtime.
+
 ## 2026-08-14 - Implement the pinned Listing Image API boundary
 
 - Decision: implement the accepted S3-11 provider slice with the official OpenAI

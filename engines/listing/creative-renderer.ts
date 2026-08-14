@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { deflateSync } from "node:zlib";
+import { deflateSync, inflateSync } from "node:zlib";
 import type {
   ComputedArtifactReview,
   CreativeProviderExecution,
@@ -18,6 +18,11 @@ export type ProviderRenderResult = Readonly<{
   termsVersion: string;
   durableAssetReference: string | null;
   execution: CreativeProviderExecution | null;
+}>;
+
+export type ExecutedCreativeRender = Readonly<{
+  artifact: RenderedCreativeArtifact;
+  bytes: Uint8Array;
 }>;
 
 export interface ListingCreativeProvider {
@@ -134,16 +139,127 @@ export function assertExternalProviderApproved(approval: CreativeProviderApprova
   }
 }
 
-function inspectPng(bytes: Uint8Array): Readonly<{ width: number; height: number; mimeType: "image/png" } | null> {
-  if (bytes.length < 24 || !PNG_SIGNATURE.every((byte, index) => bytes[index] === byte)) return null;
-  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  return { width: view.getUint32(16, false), height: view.getUint32(20, false), mimeType: "image/png" };
+type PngInspection = Readonly<{
+  width: number;
+  height: number;
+  mimeType: "image/png";
+  structure: "PASS" | "FAIL";
+  pixelPayload: "PASS" | "FAIL";
+}>;
+
+export type CreativeArtifactByteInspection = Readonly<{
+  byteDigest: string;
+  byteSize: number;
+  width: number;
+  height: number;
+  mimeType: "image/png" | null;
+  pngStructure: "PASS" | "FAIL";
+  pixelPayload: "PASS" | "FAIL";
+  computedQaDigest: string;
+}>;
+
+function readAscii(bytes: Uint8Array): string {
+  return Buffer.from(bytes).toString("ascii");
 }
 
-export async function executeCreativeRenderJob(
+export function inspectCreativePng(bytes: Uint8Array): PngInspection | null {
+  if (
+    bytes.length < 33
+    || bytes.length > 20 * 1024 * 1024
+    || !PNG_SIGNATURE.every((byte, index) => bytes[index] === byte)
+  ) return null;
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  let offset = PNG_SIGNATURE.length;
+  let width = 0;
+  let height = 0;
+  let sawHeader = false;
+  let sawEnd = false;
+  let expectedInflatedBytes = 0;
+  let structure: "PASS" | "FAIL" = "PASS";
+  const imageData: Uint8Array[] = [];
+  try {
+    while (offset + 12 <= bytes.length) {
+      const length = view.getUint32(offset, false);
+      const typeStart = offset + 4;
+      const dataStart = typeStart + 4;
+      const dataEnd = dataStart + length;
+      const crcOffset = dataEnd;
+      if (dataEnd + 4 > bytes.length) return null;
+      const typeBytes = bytes.slice(typeStart, dataStart);
+      const type = readAscii(typeBytes);
+      const data = bytes.slice(dataStart, dataEnd);
+      const expectedCrc = view.getUint32(crcOffset, false);
+      if (crc32(join([typeBytes, data])) !== expectedCrc) structure = "FAIL";
+      if (type === "IHDR") {
+        if (sawHeader || length !== 13 || offset !== PNG_SIGNATURE.length) structure = "FAIL";
+        width = view.getUint32(dataStart, false);
+        height = view.getUint32(dataStart + 4, false);
+        const bitDepth = data[8];
+        const colorType = data[9];
+        const channels = colorType === 0 ? 1 : colorType === 2 ? 3 : colorType === 4 ? 2 : colorType === 6 ? 4 : 0;
+        sawHeader = width > 0 && height > 0 && width <= 4096 && height <= 4096;
+        if (
+          !sawHeader
+          || bitDepth !== 8
+          || channels === 0
+          || data[10] !== 0
+          || data[11] !== 0
+          || data[12] !== 0
+        ) structure = "FAIL";
+        expectedInflatedBytes = height * (1 + width * channels);
+      } else if (type === "IDAT") {
+        imageData.push(data);
+      } else if (type === "IEND") {
+        if (length !== 0) structure = "FAIL";
+        sawEnd = true;
+        offset = dataEnd + 4;
+        break;
+      }
+      offset = dataEnd + 4;
+    }
+  } catch {
+    return null;
+  }
+  if (!sawHeader || !sawEnd || imageData.length === 0 || offset !== bytes.length) structure = "FAIL";
+  let pixelPayload: "PASS" | "FAIL" = "FAIL";
+  try {
+    const inflated = inflateSync(join(imageData), {
+      maxOutputLength: Math.max(1, expectedInflatedBytes + 1),
+    });
+    pixelPayload = expectedInflatedBytes > 0 && inflated.byteLength === expectedInflatedBytes
+      ? "PASS"
+      : "FAIL";
+  } catch {
+    pixelPayload = "FAIL";
+  }
+  return { width, height, mimeType: "image/png", structure, pixelPayload };
+}
+
+export function inspectCreativeArtifactBytes(
+  bytes: Uint8Array,
+): CreativeArtifactByteInspection {
+  const inspected = inspectCreativePng(bytes);
+  const byteDigest = createHash("sha256").update(bytes).digest("hex");
+  const record = {
+    schemaVersion: "gonggamline-listing-creative-byte-qa-v1",
+    byteDigest,
+    byteSize: bytes.byteLength,
+    width: inspected?.width ?? 0,
+    height: inspected?.height ?? 0,
+    mimeType: inspected?.mimeType ?? null,
+    pngStructure: inspected?.structure ?? "FAIL",
+    pixelPayload: inspected?.pixelPayload ?? "FAIL",
+  } as const;
+  return Object.freeze({
+    ...record,
+    computedQaDigest: createHash("sha256").update(JSON.stringify(record)).digest("hex"),
+  });
+}
+
+export async function executeCreativeRenderJobWithBytes(
   job: CreativeRenderJob,
   provider: ListingCreativeProvider,
-): Promise<RenderedCreativeArtifact> {
+): Promise<ExecutedCreativeRender> {
   if (
     job.provider.providerKind !== provider.approval.providerKind
     || job.provider.providerId !== provider.approval.providerId
@@ -169,20 +285,30 @@ export async function executeCreativeRenderJob(
   ) {
     throw new Error("PROVIDER_OUTPUT_IDENTITY_MISMATCH");
   }
-  const inspected = inspectPng(output.bytes);
-  const digest = createHash("sha256").update(output.bytes).digest("hex");
+  const byteInspection = inspectCreativeArtifactBytes(output.bytes);
+  const inspected = inspectCreativePng(output.bytes);
+  const digest = byteInspection.byteDigest;
   const fixtureOnly = output.providerKind === "DETERMINISTIC_FIXTURE";
-  const durableOutputReady = Boolean(output.durableAssetReference);
+  const roleDimensions = job.role === "MAIN"
+    ? job.width >= 1000 && job.height >= 1000 && job.width === job.height
+    : job.role === "DETAIL"
+      ? job.width === 780 && job.height > 0
+      : job.width >= 780 && job.height > 0;
   const review: ComputedArtifactReview = {
-    decode: inspected ? "PASS" : "FAIL",
+    decode: inspected && inspected.structure === "PASS" && inspected.pixelPayload === "PASS" ? "PASS" : "FAIL",
     digest: /^[a-f0-9]{64}$/.test(digest) ? "PASS" : "FAIL",
     mime: inspected?.mimeType === job.mimeType ? "PASS" : "FAIL",
     dimensions: inspected?.width === job.width && inspected.height === job.height ? "PASS" : "FAIL",
+    byteLimit: output.bytes.byteLength <= 20 * 1024 * 1024 ? "PASS" : "FAIL",
+    roleDimensions: roleDimensions ? "PASS" : "FAIL",
+    pngStructure: inspected?.structure ?? "FAIL",
+    pixelPayload: inspected?.pixelPayload ?? "FAIL",
+    altText: job.altText.trim().length >= 5 ? "PASS" : "FAIL",
     mobileSafe: job.width >= 780 && job.height > 0 ? "PASS" : "FAIL",
     sourceRights: rights.allowed ? "PASS" : "FAIL",
-    deployability: !fixtureOnly && durableOutputReady ? "PASS" : "FAIL",
+    deployability: "FAIL",
   };
-  return Object.freeze({
+  const artifact: RenderedCreativeArtifact = Object.freeze({
     artifactId: `${job.jobId}:${digest.slice(0, 12)}`,
     candidateSetId: job.candidateSetId,
     jobId: job.jobId,
@@ -195,6 +321,7 @@ export async function executeCreativeRenderJob(
     mimeType: "image/png",
     previewDataUrl: `data:image/png;base64,${Buffer.from(output.bytes).toString("base64")}`,
     durableAssetReference: output.durableAssetReference,
+    publicAssetReference: null,
     altText: job.altText,
     factIds: job.factIds,
     inputAssetDigests: job.inputAssetDigests,
@@ -205,11 +332,16 @@ export async function executeCreativeRenderJob(
     providerModelVersion: output.modelVersion,
     providerTermsVersion: output.termsVersion,
     providerExecution: output.execution,
-    deployability: !fixtureOnly && durableOutputReady
-      ? "DEPLOYABLE"
-      : fixtureOnly
-        ? "FIXTURE_ONLY"
-        : "NONDEPLOYABLE",
+    productRepresentationReview: null,
+    deployability: fixtureOnly ? "FIXTURE_ONLY" : "NONDEPLOYABLE",
     review,
   });
+  return Object.freeze({ artifact, bytes: Uint8Array.from(output.bytes) });
+}
+
+export async function executeCreativeRenderJob(
+  job: CreativeRenderJob,
+  provider: ListingCreativeProvider,
+): Promise<RenderedCreativeArtifact> {
+  return (await executeCreativeRenderJobWithBytes(job, provider)).artifact;
 }

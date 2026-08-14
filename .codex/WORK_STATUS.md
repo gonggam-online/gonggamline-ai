@@ -1,5 +1,69 @@
 # Work status
 
+## 2026-08-14 Listing creative actual-byte QA and approval continuation
+
+- Objective/revenue impact: after merged PR #133, connect real provider bytes to
+  managed private archive, computed and human product-representation QA,
+  digest-bound content approval, selected-candidate publication, and the mapper;
+  preserve the minimum unchanged-image packet while conversion optimization is
+  unavailable.
+- Branch/base: `codex/feat/listing-creative-qa-approval` from exact
+  `origin/main` `d910f3364892d547831f9a8639f8d0b026716942` (merged PR #133).
+- Risk: high-risk/manual. The accepted Architecture covers managed storage,
+  provider, paid limit, secret and output review, but external configuration,
+  paid dispatch, public publication, Production mutation and WING write retain
+  their exact manual gates; this branch will not auto-merge.
+- Root-cause classification: (1) external configuration: Vercel is authenticated
+  but the trial is expired, no Blob store exists, and neither
+  `BLOB_READ_WRITE_TOKEN` nor `OPENAI_API_KEY` exists; Supabase and OpenAI
+  Platform sessions are signed out; (2) database/state: no approved immutable
+  DB/Auth/RLS persistence exists for unattended/concurrent jobs or approvals,
+  so `legacy listing_drafts` remains ineligible; (3) code at branch start:
+  provider output was returned as NONDEPLOYABLE and not archived/reviewed,
+  product-semantic QA was not digest-bound, and publication approval was
+  narrower than the full packet. The apparent Korean mojibake was a PowerShell
+  read-encoding artifact; UTF-8 source and regression gates are clean.
+- AI CTO/Architecture compliance: Listing owns the pure QA/approval rules;
+  application services orchestrate the already accepted provider and storage
+  ports. No new Domain, public API, Queue, database, migration or concurrent
+  lifecycle is introduced. The smallest revenue step is the accepted Story's
+  ordered implementation step 3; later DB/Auth/RLS and live commerce remain
+  separate Stories.
+- Cloud-first gate: GitHub owns source/contracts/tests/task and delivery evidence;
+  the accepted Supabase private bucket owns real masters/manifests and Vercel
+  Blob owns only selected public mirrors after configuration. Local fixture/test
+  output is disposable and never authoritative. Recovery is private digest
+  restore to the public mirror; no local fallback is allowed.
+- Production baseline: merge deployment `5904649004` for exact commit `d910f33`
+  is Ready at `https://gonggamline-prfns4pn7-gg-online.vercel.app`. Production
+  browser workflow `31792785327` passed 44 tests with two intentional skips;
+  evidence artifact `9216198363` has SHA-256
+  `ac68c83cde0cbb01160a83e47d9e628ff67415a2a594947dbc3e0cae4dbf4341`.
+- Current progress: 8/12 steps complete. Merge/base, task branch/governance,
+  exact Production smoke, external/DB audit, code-gap audit, generic
+  QA/approval/publication/mapper implementation, test/UI coverage, full local
+  gates and mobile visual QA are complete. Delivery is current.
+- External stop conditions: do not invent the irreversible Vercel Blob region,
+  expose its write token to Preview, enter billing data, or create secrets while
+  the accepted Production-only boundary cannot be proven. Supabase and OpenAI
+  require authenticated sessions before their exact managed state can be
+  verified. Independent code and fake-based validation continue.
+- Implementation checkpoint: full PNG structure/CRC/IDAT/IEND and bounded-byte
+  QA; transient provider-byte to private-archive orchestration; digest-bound
+  human identity/color/quantity/scale/material/components/options/marks/claims/
+  crop/encoding/load review; canonical content approval; selected-set public
+  publication bridge with partial-publication compensation;
+  public-reference-only registration mapper; expanded read-only review UI.
+  Validation: full tests `652/652`; lint zero errors and four pre-existing
+  Revenue-test warnings; typecheck PASS; production build PASS with 86 routes;
+  mobile Chromium E2E `1/1` PASS with four decoded images, no horizontal
+  overflow, no console/page/API/request error; diff/encoding/product-hardcode
+  review PASS.
+- Exact next action: commit and push the reviewed change, open the high-risk
+  Draft PR with `manual-merge-required`, and wait for exact-head CI/Vercel
+  Preview. No paid call, external publication, Production mutation or WING
+  write occurs in this PR.
+
 ## 2026-08-14 Listing GPT Image provider adapter implementation
 
 - Objective/revenue impact: connect the accepted Listing creative contract to a

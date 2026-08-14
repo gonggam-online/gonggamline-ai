@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 
 import { digestCanonicalJson } from "@/engines/listing/category-snapshot";
+import { inspectCreativeArtifactBytes } from "@/engines/listing/creative-renderer";
 import type {
   ArchivedListingCreativeAsset,
   ListingCreativeArtifactDescriptor,
@@ -189,11 +190,46 @@ function approvedFor(
   archived: ArchivedListingCreativeAsset,
   approval: ListingCreativePublicationApproval,
 ): boolean {
+  const expectedApprovalDigest = digestCanonicalJson({
+    schemaVersion: "gonggamline-listing-creative-content-approval-v1",
+    packetId: approval.packetId,
+    reviewerReference: approval.reviewerReference,
+    approvalReference: approval.approvalReference,
+    approvedAt: approval.approvedAt,
+    boundArtifactDigests: approval.boundArtifactDigests,
+    boundProductReviewDigests: approval.boundProductReviewDigests,
+    boundProviderExecutionDigests: approval.boundProviderExecutionDigests,
+    boundEvidenceEvaluationId: approval.boundEvidenceEvaluationId,
+    boundPolicyDigest: approval.boundPolicyDigest,
+    boundCategoryMetadataDigest: approval.boundCategoryMetadataDigest,
+    boundCandidateSetId: approval.selectedCandidateSetId,
+    boundTitleCandidateId: approval.boundTitleCandidateId,
+    boundKeywordCandidateId: approval.boundKeywordCandidateId,
+    boundFilterSetDigest: approval.boundFilterSetDigest,
+    boundDetailPackageDigest: approval.boundDetailPackageDigest,
+    boundRenderRecipeVersions: approval.boundRenderRecipeVersions,
+    boundRevisionId: approval.boundRevisionDigest,
+  });
   return approval.contentApproved
     && approval.approvalReference.trim().length > 0
+    && approval.reviewerReference.trim().length > 0
+    && Number.isFinite(Date.parse(approval.approvedAt))
+    && expectedApprovalDigest === approval.contentApprovalDigest
     && approval.selectedCandidateSetId === archived.descriptor.candidateSetId
     && approval.boundRevisionDigest === archived.descriptor.revisionDigest
-    && approval.boundArtifactDigests.includes(archived.descriptor.byteDigest);
+    && approval.boundArtifactDigests.includes(archived.descriptor.byteDigest)
+    && approval.boundProductReviewDigests.length === approval.boundArtifactDigests.length
+    && approval.boundProductReviewDigests.every((digest) => SHA256.test(digest))
+    && approval.boundProviderExecutionDigests.length === approval.boundArtifactDigests.length
+    && approval.boundProviderExecutionDigests.every((digest) => SHA256.test(digest))
+    && approval.boundEvidenceEvaluationId.trim().length > 0
+    && SHA256.test(approval.boundPolicyDigest)
+    && SHA256.test(approval.boundCategoryMetadataDigest)
+    && approval.boundTitleCandidateId.trim().length > 0
+    && approval.boundKeywordCandidateId.trim().length > 0
+    && SHA256.test(approval.boundFilterSetDigest)
+    && SHA256.test(approval.boundDetailPackageDigest)
+    && approval.boundRenderRecipeVersions.length === approval.boundArtifactDigests.length;
 }
 
 export class ManagedListingCreativeStorage {
@@ -255,6 +291,11 @@ export class ManagedListingCreativeStorage {
       role: input.context.role,
       objectPath: null,
       objectDigest: input.jobDigest,
+      byteSize: null,
+      width: null,
+      height: null,
+      mimeType: null,
+      computedQaDigest: null,
       approvalReference: null,
       reasonCode: null,
       occurredAt: input.occurredAt,
@@ -280,6 +321,17 @@ export class ManagedListingCreativeStorage {
     if (sha256(input.bytes) !== input.descriptor.byteDigest) {
       throw new CreativeStorageError("ASSET_DIGEST_MISMATCH");
     }
+    const inspected = inspectCreativeArtifactBytes(input.bytes);
+    if (
+      inspected.pngStructure !== "PASS"
+      || inspected.pixelPayload !== "PASS"
+      || inspected.mimeType !== input.descriptor.mimeType
+      || inspected.width !== input.descriptor.width
+      || inspected.height !== input.descriptor.height
+      || inspected.computedQaDigest !== input.descriptor.computedQaDigest
+    ) {
+      throw new CreativeStorageError("PRIVATE_MASTER_VERIFICATION_FAILED");
+    }
     const objectPath = listingCreativeObjectPath(input.descriptor);
     const location = await this.ensurePrivateImmutable(
       objectPath,
@@ -296,6 +348,11 @@ export class ManagedListingCreativeStorage {
       role: input.descriptor.role,
       objectPath,
       objectDigest: input.descriptor.byteDigest,
+      byteSize: input.descriptor.byteSize,
+      width: input.descriptor.width,
+      height: input.descriptor.height,
+      mimeType: input.descriptor.mimeType,
+      computedQaDigest: input.descriptor.computedQaDigest,
       approvalReference: null,
       reasonCode: null,
       occurredAt: input.occurredAt,
@@ -339,6 +396,11 @@ export class ManagedListingCreativeStorage {
       role: input.archived.descriptor.role,
       objectPath: input.archived.objectPath,
       objectDigest: input.archived.descriptor.byteDigest,
+      byteSize: input.archived.descriptor.byteSize,
+      width: input.archived.descriptor.width,
+      height: input.archived.descriptor.height,
+      mimeType: input.archived.descriptor.mimeType,
+      computedQaDigest: input.archived.descriptor.computedQaDigest,
       approvalReference: input.approval.approvalReference,
       reasonCode: null,
       occurredAt: input.occurredAt,
@@ -376,6 +438,11 @@ export class ManagedListingCreativeStorage {
       role: input.archived.descriptor.role,
       objectPath: input.archived.objectPath,
       objectDigest: input.archived.descriptor.byteDigest,
+      byteSize: input.archived.descriptor.byteSize,
+      width: input.archived.descriptor.width,
+      height: input.archived.descriptor.height,
+      mimeType: input.archived.descriptor.mimeType,
+      computedQaDigest: input.archived.descriptor.computedQaDigest,
       approvalReference: input.approval.approvalReference,
       reasonCode: null,
       occurredAt: input.occurredAt,
@@ -409,6 +476,11 @@ export class ManagedListingCreativeStorage {
         role: input.published.archived.descriptor.role,
         objectPath: input.published.archived.objectPath,
         objectDigest: input.published.archived.descriptor.byteDigest,
+        byteSize: input.published.archived.descriptor.byteSize,
+        width: input.published.archived.descriptor.width,
+        height: input.published.archived.descriptor.height,
+        mimeType: input.published.archived.descriptor.mimeType,
+        computedQaDigest: input.published.archived.descriptor.computedQaDigest,
         approvalReference: input.published.manifest.event.approvalReference,
         reasonCode: input.reasonCode,
         occurredAt: input.occurredAt,
@@ -426,6 +498,11 @@ export class ManagedListingCreativeStorage {
       role: input.published.archived.descriptor.role,
       objectPath: input.published.archived.objectPath,
       objectDigest: input.published.archived.descriptor.byteDigest,
+      byteSize: input.published.archived.descriptor.byteSize,
+      width: input.published.archived.descriptor.width,
+      height: input.published.archived.descriptor.height,
+      mimeType: input.published.archived.descriptor.mimeType,
+      computedQaDigest: input.published.archived.descriptor.computedQaDigest,
       approvalReference: input.published.manifest.event.approvalReference,
       reasonCode: input.reasonCode,
       occurredAt: input.occurredAt,

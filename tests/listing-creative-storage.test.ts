@@ -10,6 +10,12 @@ import {
   listingCreativeSubjectHash,
   type PublicListingCreativeObjectStore,
 } from "../engines/listing/creative-storage.ts";
+import { digestCanonicalJson } from "../engines/listing/category-snapshot.ts";
+import {
+  DeterministicFixtureCreativeProvider,
+  inspectCreativeArtifactBytes,
+  renderDeterministicFixturePng,
+} from "../engines/listing/creative-renderer.ts";
 import {
   InMemoryPrivateListingCreativeObjectStore,
   InMemoryPublicListingCreativeObjectStore,
@@ -18,11 +24,32 @@ import type {
   ListingCreativeArtifactDescriptor,
   ListingCreativePublicationApproval,
 } from "../shared/domain/listing-creative-storage.ts";
+import type { CreativeRenderJob } from "../shared/domain/listing-creative.ts";
 
 const OCCURRED_AT = "2026-08-14T09:30:00.000Z";
 const REVISION_DIGEST = createHash("sha256").update("synthetic-revision-v1").digest("hex");
 const JOB_DIGEST = createHash("sha256").update("synthetic-job-v1").digest("hex");
-const BYTES = Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10, 1, 2, 3, 4]);
+const FIXTURE_PROVIDER = new DeterministicFixtureCreativeProvider();
+const STORAGE_RENDER_JOB: CreativeRenderJob = {
+  jobId: "fixture-storage-main",
+  candidateSetId: "creative-a",
+  subjectReference: "fixture:synthetic-organizer:001",
+  role: "MAIN",
+  shotType: "PACKSHOT",
+  transformation: "FACT_ONLY_SYNTHETIC",
+  inputAssetDigests: [],
+  inputSources: [],
+  factIds: ["fixture:identity"],
+  width: 1000,
+  height: 1000,
+  mimeType: "image/png",
+  altText: "합성 저장소 검증 이미지",
+  factualConstraints: ["identity"],
+  renderRecipeVersion: "fixture-storage-v1",
+  provider: FIXTURE_PROVIDER.approval,
+};
+const BYTES = renderDeterministicFixturePng(STORAGE_RENDER_JOB);
+const BYTE_INSPECTION = inspectCreativeArtifactBytes(BYTES);
 const BYTE_DIGEST = createHash("sha256").update(BYTES).digest("hex");
 
 function descriptor(
@@ -36,7 +63,10 @@ function descriptor(
     role: "MAIN",
     byteDigest: BYTE_DIGEST,
     byteSize: BYTES.byteLength,
+    width: BYTE_INSPECTION.width,
+    height: BYTE_INSPECTION.height,
     mimeType: "image/png",
+    computedQaDigest: BYTE_INSPECTION.computedQaDigest,
     ...overrides,
   };
 }
@@ -44,14 +74,48 @@ function descriptor(
 function approval(
   overrides: Partial<ListingCreativePublicationApproval> = {},
 ): ListingCreativePublicationApproval {
-  return {
+  const base = {
     contentApproved: true,
+    packetId: "fixture:storage-packet",
     approvalReference: "approval:fixture-content-review:001",
+    reviewerReference: "fixture:storage-reviewer",
+    approvedAt: OCCURRED_AT,
     selectedCandidateSetId: "creative-a",
     boundRevisionDigest: REVISION_DIGEST,
     boundArtifactDigests: [BYTE_DIGEST],
-    ...overrides,
-  };
+    boundProductReviewDigests: ["d".repeat(64)],
+    boundProviderExecutionDigests: ["a".repeat(64)],
+    boundEvidenceEvaluationId: "fixture:evidence-evaluation",
+    boundPolicyDigest: "e".repeat(64),
+    boundCategoryMetadataDigest: "f".repeat(64),
+    boundTitleCandidateId: "title-a",
+    boundKeywordCandidateId: "keywords-a",
+    boundFilterSetDigest: "b".repeat(64),
+    boundDetailPackageDigest: "1".repeat(64),
+    boundRenderRecipeVersions: ["fixture-storage-v1"],
+  } as const;
+  const merged = { ...base, ...overrides };
+  const contentApprovalDigest = overrides.contentApprovalDigest ?? digestCanonicalJson({
+    schemaVersion: "gonggamline-listing-creative-content-approval-v1",
+    packetId: merged.packetId,
+    reviewerReference: merged.reviewerReference,
+    approvalReference: merged.approvalReference,
+    approvedAt: merged.approvedAt,
+    boundArtifactDigests: merged.boundArtifactDigests,
+    boundProductReviewDigests: merged.boundProductReviewDigests,
+    boundProviderExecutionDigests: merged.boundProviderExecutionDigests,
+    boundEvidenceEvaluationId: merged.boundEvidenceEvaluationId,
+    boundPolicyDigest: merged.boundPolicyDigest,
+    boundCategoryMetadataDigest: merged.boundCategoryMetadataDigest,
+    boundCandidateSetId: merged.selectedCandidateSetId,
+    boundTitleCandidateId: merged.boundTitleCandidateId,
+    boundKeywordCandidateId: merged.boundKeywordCandidateId,
+    boundFilterSetDigest: merged.boundFilterSetDigest,
+    boundDetailPackageDigest: merged.boundDetailPackageDigest,
+    boundRenderRecipeVersions: merged.boundRenderRecipeVersions,
+    boundRevisionId: merged.boundRevisionDigest,
+  }) ?? "";
+  return { ...merged, contentApprovalDigest };
 }
 
 function storage() {
@@ -101,6 +165,10 @@ test("archive computes the byte contract, writes the private master, and creates
     sequence: 1,
   });
   assert.equal(archived.manifest.event.state, "ARCHIVED");
+  assert.equal(archived.manifest.event.width, 1000);
+  assert.equal(archived.manifest.event.height, 1000);
+  assert.equal(archived.manifest.event.mimeType, "image/png");
+  assert.equal(archived.manifest.event.computedQaDigest, BYTE_INSPECTION.computedQaDigest);
   assert.match(archived.privateMasterReference, /^memory-private:\/\//);
   assert.equal(archived.objectPath, listingCreativeObjectPath(descriptor()));
   assert.match(await service.createSignedReviewUrl(archived, 300), /^https:\/\/review\.invalid\//);
@@ -121,6 +189,25 @@ test("archive fails closed on caller-claimed digest or byte-size mismatch", asyn
     occurredAt: OCCURRED_AT,
     sequence: 1,
   }), "ASSET_BYTE_SIZE_MISMATCH");
+});
+
+test("archive rejects malformed PNG bytes even when caller digest and size are exact", async () => {
+  const { service } = storage();
+  const corrupted = Uint8Array.from(BYTES);
+  corrupted[29] ^= 0xff;
+  const inspected = inspectCreativeArtifactBytes(corrupted);
+  await rejectsCode(service.archive({
+    descriptor: descriptor({
+      byteDigest: inspected.byteDigest,
+      byteSize: inspected.byteSize,
+      width: inspected.width,
+      height: inspected.height,
+      computedQaDigest: inspected.computedQaDigest,
+    }),
+    bytes: corrupted,
+    occurredAt: OCCURRED_AT,
+    sequence: 1,
+  }), "PRIVATE_MASTER_VERIFICATION_FAILED");
 });
 
 test("only a selected digest-bound content approval can publish the exact private bytes", async () => {
