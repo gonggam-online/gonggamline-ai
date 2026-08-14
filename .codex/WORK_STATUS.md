@@ -19,11 +19,12 @@
   manifest archive; Vercel Blob is a replaceable public CDN mirror; GitHub owns
   source/contracts/CI. Local/browser artifacts remain disposable. DB/Auth/RLS
   job and approval state is a later separate Story.
-- Progress: 5/12 steps complete. Exact origin/main and Production focused smoke,
+- Progress: 6/12 steps complete. Exact origin/main and Production focused smoke,
   governance/current-contract audit, official OpenAI/Supabase/Vercel research,
   authenticated external-configuration read-only audit, managed store/CDN
-  architecture, and provider/terms/cost/secret architecture are drafted. Full
-  repository validation and high-risk Architecture delivery are current.
+  architecture, provider/terms/cost/secret architecture, full validation, and
+  the high-risk Architecture PR delivery are complete. Manual merge is the next
+  gate before external implementation.
 - Production evidence: `/listing/review` HTTP 200; focused Production Chromium
   Listing review E2E `1/1` PASS; `/api/health/runtime` is `degraded` because
   Coupang is unconfigured while application, Supabase configuration and runtime
@@ -43,10 +44,23 @@
   method, authenticate/provision an OpenAI project key and budget, create the
   private Supabase bucket and public Blob store, and install secrets through
   their managed UIs. No secret value belongs in chat, logs, screenshots, or Git.
-- Exact next action: run focused and full gates, diff/encoding/secret review,
-  commit/push/open a `manual-merge-required` Architecture PR, validate exact-head
-  CI/Preview, and request manual merge. External creation and paid calls remain
-  stopped until that merge.
+- Validation: focused Architecture `14/14`; full tests `624/624`; lint zero
+  errors with four pre-existing Revenue-test warnings; typecheck PASS; production
+  build PASS with 86 routes; diff/encoding/secret review PASS. Production focused
+  Chromium is `1/1` PASS.
+- Delivery: commit `fe9bf6d`; pushed branch; Draft PR #131 is `CLEAN`, labelled
+  `manual-merge-required`, and remains high-risk. Initial exact-head CI is green
+  after one unrelated `orchestrator-phase-3` termination-timing test failed at
+  574ms and the failed job rerun passed all `624/624`; no code workaround was
+  added. Vercel Preview and browser workflow pass `44/44` runnable tests with two
+  intentional skips at the exact deployment
+  `https://gonggamline-24k23x3jc-gg-online.vercel.app`; evidence artifact
+  `9211404931` has SHA-256
+  `6ff68c2c5f494aa8e59c6b85dedcb2b0c4d4cbfde6ef1c686252ff5b98f2ce1a`.
+- Exact next action: push this sanitized delivery-evidence checkpoint, verify its
+  new exact-head CI/Preview, then request manual merge of PR #131. External
+  bucket/store creation, billing, secret writes, and paid calls remain stopped
+  until that merge.
 
 ## 2026-08-14 Listing renderer/provider implementation and KK946 reintegration
 
