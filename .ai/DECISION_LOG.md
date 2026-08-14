@@ -1,5 +1,29 @@
 # Decision log
 
+## 2026-08-14 - Implement the pinned Listing Image API boundary
+
+- Decision: implement the accepted S3-11 provider slice with the official OpenAI
+  TypeScript SDK pinned to `7.4.0`, Image API model
+  `gpt-image-2-2026-04-21`, an injected fake transport for tests, deterministic
+  prompt/request digests, and no public route.
+- Spend decision: use the 2026-08-14 official standard cost snapshot for the
+  three initially priced sizes, conservatively estimate text bytes and explicit
+  edit-image tokens, stop above USD 2/revision, six output jobs, or two attempts
+  per immutable job, require a successful managed private-storage reservation
+  keyed by the exact request hash before transport, and disable SDK retries.
+- Rights/truth decision: fact-only jobs send no pixels. Edit/reference jobs still
+  require exact private bytes, verified provider-upload plus requested operation
+  rights, and a positive input-cost estimate. Provider output remains
+  nondeployable until managed archive and later actual-byte/human QA complete.
+- External result: PR #132 Production is healthy, but Supabase is not logged in;
+  current Vercel Blob creation requires a permanent region and adds variables to
+  Production and Preview, conflicting with the accepted Production-only write
+  secret, while the trial is expired. No store, payment, secret, or paid API call
+  is performed by this implementation PR.
+- Risk/rollback: high-risk/manual. Remove the provider composition/revoke any
+  later key to roll back. Provider spend and external configuration retain exact
+  post-merge operator gates.
+
 ## 2026-08-14 - Accept managed creative storage and provider Architecture
 
 - Owner decision: manually merge PR #131 as

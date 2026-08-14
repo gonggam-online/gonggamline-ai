@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { deflateSync } from "node:zlib";
 import type {
   ComputedArtifactReview,
+  CreativeProviderExecution,
   CreativeProviderApproval,
   CreativeProviderKind,
   CreativeRenderJob,
@@ -9,13 +10,14 @@ import type {
 } from "@/shared/domain/listing-creative";
 import { evaluateCreativeRenderJobRights } from "@/engines/listing/creative-rights";
 
-type ProviderRenderResult = Readonly<{
+export type ProviderRenderResult = Readonly<{
   bytes: Uint8Array;
   providerKind: CreativeProviderKind;
   providerId: string;
   modelVersion: string;
   termsVersion: string;
   durableAssetReference: string | null;
+  execution: CreativeProviderExecution | null;
 }>;
 
 export interface ListingCreativeProvider {
@@ -114,6 +116,7 @@ export class DeterministicFixtureCreativeProvider implements ListingCreativeProv
       modelVersion: this.approval.modelVersion,
       termsVersion: this.approval.termsVersion,
       durableAssetReference: null,
+      execution: null,
     };
   }
 }
@@ -201,6 +204,7 @@ export async function executeCreativeRenderJob(
     providerApprovalReference: provider.approval.approvalReference,
     providerModelVersion: output.modelVersion,
     providerTermsVersion: output.termsVersion,
+    providerExecution: output.execution,
     deployability: !fixtureOnly && durableOutputReady
       ? "DEPLOYABLE"
       : fixtureOnly

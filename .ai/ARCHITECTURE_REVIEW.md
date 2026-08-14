@@ -1,5 +1,25 @@
 # Architecture review
 
+## Listing Image API adapter implementation review - 2026-08-14
+
+- Accepted Architecture: PR #131 / merge `4fd2271`; storage implementation PR
+  #132 / merge `5d2a6ad`. No new domain, public API, database, queue, or runtime
+  lifecycle is introduced by this provider slice.
+- Implementation: injected OpenAI Image API transport, pinned snapshot, strict
+  approval identity, operation-specific rights, exact input resolver, estimated/
+  actual cost evidence, retry/output/revision limits, a required managed-storage
+  immutable dispatch reservation, and sanitized execution metadata. CI/Preview
+  use fake bytes and make no provider call.
+- Cloud-first: code/evidence lives in GitHub; actual output must be archived in
+  the approved Supabase private master before review or publication. No local
+  generated file is authoritative.
+- Current external stop: Supabase login is absent, Vercel Blob region and
+  Production+Preview token behavior need an exact amendment, the Vercel trial is
+  expired, and no OpenAI project key/budget is verified. The adapter cannot
+  compose in Production without all required server secrets and storage.
+- Risk: high-risk/manual. No auto-merge, paid call, secret/config write, public
+  publication, Product Creation, or WING submission is authorized by the PR.
+
 ## Accepted Listing Managed Creative Asset and Image Provider v1 - 2026-08-14
 
 - Status: accepted by repository-owner manual merge of PR #131 on 2026-08-14;
