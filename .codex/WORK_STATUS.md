@@ -39,10 +39,11 @@
   browser workflow `31792785327` passed 44 tests with two intentional skips;
   evidence artifact `9216198363` has SHA-256
   `ac68c83cde0cbb01160a83e47d9e628ff67415a2a594947dbc3e0cae4dbf4341`.
-- Current progress: 8/12 steps complete. Merge/base, task branch/governance,
+- Current progress: 9/12 steps complete. Merge/base, task branch/governance,
   exact Production smoke, external/DB audit, code-gap audit, generic
   QA/approval/publication/mapper implementation, test/UI coverage, full local
-  gates and mobile visual QA are complete. Delivery is current.
+  gates, mobile visual QA and high-risk Draft PR delivery are complete. Exact
+  external configuration and real execution remain stopped.
 - External stop conditions: do not invent the irreversible Vercel Blob region,
   expose its write token to Preview, enter billing data, or create secrets while
   the accepted Production-only boundary cannot be proven. Supabase and OpenAI
@@ -59,10 +60,19 @@
   mobile Chromium E2E `1/1` PASS with four decoded images, no horizontal
   overflow, no console/page/API/request error; diff/encoding/product-hardcode
   review PASS.
-- Exact next action: commit and push the reviewed change, open the high-risk
-  Draft PR with `manual-merge-required`, and wait for exact-head CI/Vercel
-  Preview. No paid call, external publication, Production mutation or WING
-  write occurs in this PR.
+- Delivery: implementation commit `e17ab6d` is pushed in Draft PR #134 with
+  `manual-merge-required`. Its exact-head CI run `31794818745` passed all eight
+  jobs. Preview deployment `5905018588` is Ready at
+  `https://gonggamline-8q2773viq-gg-online.vercel.app`; browser run
+  `31794818751` passed 44 tests. Evidence artifact `9216968103` has SHA-256
+  `c5f145d5d1ac6a730993721ce454ff904eb95d199c5df8243ca5c9b4ef6af3ca`
+  and expires 2026-08-28. Direct `/listing/review` inspection found the four
+  decoded fixture images, readable Korean and explicit non-live gates.
+- Exact next action: after manual merge, configure the approved managed private
+  archive/public mirror and Production-only provider secret/budget, then run one
+  bounded rights-eligible synthetic paid smoke before any KK946 generation.
+  No paid call, external publication, Production mutation or WING write occurs
+  in this PR.
 
 ## 2026-08-14 Listing GPT Image provider adapter implementation
 
