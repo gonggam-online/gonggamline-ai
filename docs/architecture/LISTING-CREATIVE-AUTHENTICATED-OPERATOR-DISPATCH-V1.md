@@ -43,6 +43,8 @@ v1/<subjectHash>/<revisionDigest>/operator/<dispatchPlanDigest>/prepared.json
 v1/<subjectHash>/<revisionDigest>/operator/<dispatchPlanDigest>/authorized/<authorizationDigest>.json
 v1/<subjectHash>/<revisionDigest>/operator/<dispatchPlanDigest>/reserved.json
 v1/<subjectHash>/<revisionDigest>/operator/<dispatchPlanDigest>/review-handoff.json
+v1/<subjectHash>/<revisionDigest>/operator/<dispatchPlanDigest>/failed/<failureDigest>.json
+v1/operator-global/<fiveMinuteWindow>/reserved.json
 ```
 
 Every manifest contains a schema version, canonical digest, product/evidence/
@@ -80,6 +82,11 @@ recomputes the prepared manifest, records the immutable authorization, reserves
 the whole plan before the first transport call, and then invokes the pinned
 provider. It archives and re-inspects every output byte before creating a
 `REVIEW_REQUIRED` handoff with short-lived signed private review URLs.
+
+`GET /api/admin/listing/creative-dispatch?preparedPlanReference=...` is a
+protected read-only recovery boundary. It reloads the immutable private handoff
+and reissues short-lived review URLs after browser loss, response failure, or
+URL expiry. It cannot generate, approve, publish, map, or write commerce data.
 
 Both mutations require all of the following:
 

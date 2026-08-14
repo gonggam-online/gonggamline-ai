@@ -1,5 +1,31 @@
 # Decision log
 
+## 2026-08-14 - Implement private Listing creative operator runtime
+
+- Runtime decision: implement the accepted S3-16 two-phase boundary as a
+  product-agnostic PREPARE mutation, explicit bounded paid-dispatch mutation,
+  and protected read/re-sign endpoint. Every successful dispatch stops at
+  private `REVIEW_REQUIRED`; there is no human PASS, candidate selection,
+  content approval, public publication, mapper call, live-write approval, or
+  Coupang/WING call.
+- Durable-state decision: Supabase private Storage owns immutable prepared,
+  authorization, whole-plan, five-minute distributed global-slot, failure, and
+  review-handoff manifests. Signed URLs are disposable projections and can be
+  reissued from the private handoff. Vercel Blob is not composed for private
+  rendering.
+- Fact/privacy decision: only allowlisted `PROVEN` visible-product fact values
+  enter fact-only prompts. Fact IDs remain evidence bindings but are excluded
+  from prompt text. URL/path, contact, secret-like, private-marker, supplier
+  account, raw provider, registration payload, base64, and private object
+  references are excluded from API responses.
+- Billing observation: newer owner-supplied authenticated evidence verifies a
+  stored payment method and shows the final Pro upgrade checkout, but also
+  shows `Pro Trial` and an unexecuted `Upgrade` action. Paid Pro activation is
+  therefore not yet proven. No billing identifier or payment detail is stored.
+- Risk/authority: high-risk/manual implementation. Code and fake CI may proceed;
+  the first Production provider dispatch, Pro subscription charge, public
+  publication, and commerce write each remain distinct manual gates.
+
 ## 2026-08-14 - Accept operator dispatch and correct Vercel billing state
 
 - Architecture acceptance: repository owner squash-merged PR #137 as
@@ -10,11 +36,10 @@
   deployment `5907391571` completed successfully and browser smoke run
   `31807000133` passed 44/44 checks. Evidence artifact `9221619734` has SHA-256
   `0e2d3c2100f9907889c3ee0a78113a841d196250e1423f6fb100979f0f56925d`.
-- Billing correction: owner-supplied authenticated Vercel Billing evidence for
-  the active team shows `Hobby Plan` / `Active` and `Upgrade to Pro`. The earlier
-  `Pro Trial` observation came from a different or stale billing context and is
-  not authoritative for this project. Payment-method state is not established
-  by the supplied evidence.
+- Billing correction: initial owner-supplied evidence showed `Hobby Plan` /
+  `Active`. Later authenticated evidence verifies a payment method and displays
+  a Pro-trial/final-upgrade checkout, but does not prove that the final paid
+  upgrade action completed.
 - Official applicability: Blob is available within Hobby's included limits, but
   Hobby has no paid overage and is described by Vercel as personal,
   non-commercial use. Commercial Vercel Blob publication therefore remains

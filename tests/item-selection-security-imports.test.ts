@@ -26,6 +26,7 @@ test("A08: the service-role constructor has only approved repository importers",
 
   assert.deepEqual(importers, [
     "services/listing-creative-asset.repository.ts",
+    "services/listing-creative-operator.repository.ts",
     "services/item-selection-run.repository.ts",
     "services/product-mutation.repository.ts",
   ].sort());
@@ -36,7 +37,7 @@ test("A08: client components cannot reach protected server modules", () => {
     const source = readFileSync(file, "utf8");
     if (/^\s*["']use client["'];/m.test(source)) {
       assert.doesNotMatch(source,
-        /service-role\.server|item-selection-run\.repository|listing-creative-asset\.repository|product-mutation\.repository/);
+        /service-role\.server|item-selection-run\.repository|listing-creative-(?:asset|operator)\.repository|product-mutation\.repository/);
     }
   }
 });

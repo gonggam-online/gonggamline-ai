@@ -10,6 +10,10 @@ import {
   SupabasePrivateListingCreativeObjectStore,
   VercelPublicListingCreativeObjectStore,
 } from "@/lib/listing/creative-object-stores.server";
+import type {
+  CreativeObjectLocation,
+  PublicListingCreativeObjectStore,
+} from "@/engines/listing/creative-storage";
 import { createGuardedServiceRoleClient } from "@/lib/supabase/service-role.server";
 
 export function createProductionManagedListingCreativeStorage(
@@ -28,4 +32,33 @@ export function createProductionManagedListingCreativeStorage(
   );
   const publicStore = new VercelPublicListingCreativeObjectStore(blobAuthentication);
   return new ManagedListingCreativeStorage(privateStore, publicStore);
+}
+
+class PublicationDisabledListingCreativeObjectStore
+implements PublicListingCreativeObjectStore {
+  async putImmutable(): Promise<CreativeObjectLocation> {
+    throw new CreativeStorageError("PUBLIC_MIRROR_NOT_APPROVED");
+  }
+
+  async read(): Promise<Uint8Array | null> {
+    throw new CreativeStorageError("PUBLIC_MIRROR_NOT_APPROVED");
+  }
+
+  async remove(): Promise<void> {
+    throw new CreativeStorageError("PUBLIC_MIRROR_NOT_APPROVED");
+  }
+}
+
+export function createProductionManagedListingCreativePrivateStorage(
+  guardContext: AdminGuardContext,
+): ManagedListingCreativeStorage {
+  if (process.env.VERCEL_ENV !== "production") {
+    throw new CreativeStorageError("STORAGE_CONFIGURATION_UNAVAILABLE");
+  }
+  return new ManagedListingCreativeStorage(
+    new SupabasePrivateListingCreativeObjectStore(
+      createGuardedServiceRoleClient(guardContext),
+    ),
+    new PublicationDisabledListingCreativeObjectStore(),
+  );
 }

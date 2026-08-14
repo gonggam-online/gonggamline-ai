@@ -1,5 +1,29 @@
 # Architecture review
 
+## Listing creative operator runtime implementation - 2026-08-14
+
+- Scope: implement the accepted S3-16 PREPARE, bounded Production dispatch,
+  private archive/handoff, protected signed-URL recovery, and read-only operator
+  review UI. The runtime is generic; product-specific values enter only through
+  the typed external adapter.
+- Security: fresh AAL2 admin authentication, exact origin, exact JSON, two
+  purpose-bound CSRF tokens, bounded bodies, per-admin/global rate limits,
+  immutable operator/plan digests, five-minute distributed global slot, and
+  reservation before provider composition. Preview/CI cannot compose the real
+  provider.
+- State/recovery: Supabase private Storage is authoritative for plan,
+  authorization, reservations, failure evidence, generated masters, and review
+  handoff. The protected GET boundary reissues short-lived URLs after response
+  or URL expiry. Vercel Blob remains outside this private phase.
+- Stop state: actual bytes must pass computed QA and private archive verification
+  before `REVIEW_REQUIRED`. Human checks have no default values. Publication,
+  registration mapping, live-write approval, and WING remain unavailable.
+- Billing evidence: a payment method is verified, while the authenticated UI
+  still presents a Pro trial and final `Upgrade` action. Paid Pro activation is
+  not claimed, and no sensitive billing detail is retained.
+- Risk: high-risk/manual. Exact fake-only CI and Preview are required; the first
+  paid Production dispatch remains separately approved after merge/deploy.
+
 ## Accepted authenticated Listing creative operator dispatch - 2026-08-14
 
 - Status: accepted by repository-owner squash merge of PR #137 as
@@ -32,9 +56,10 @@
 
 ## Vercel paid-billing observation - 2026-08-14
 
-- Authenticated UI evidence supplied by the owner: the active team Billing page
-  shows `Hobby Plan` / `Active` and presents `Upgrade to Pro`. The screenshot
-  does not establish whether a payment method is stored.
+- Authenticated UI evidence supplied by the owner first showed `Hobby Plan` /
+  `Active`; later evidence verifies a payment method and displays the final Pro
+  checkout. Because the action still says `Upgrade`, paid Pro activation is not
+  established.
 - Official boundary: Vercel Blob is available within Hobby's included limits,
   but Hobby has no on-demand overage and Vercel describes it as personal,
   non-commercial use. A commercial product-asset delivery dependency therefore

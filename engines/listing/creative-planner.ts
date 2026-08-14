@@ -32,13 +32,27 @@ export type ListingCreativePlanningInput = Readonly<{
 const SAFE_FACT_FIELD = /^[A-Za-z][A-Za-z0-9_.-]{0,63}$/;
 const SAFE_FACT_ID = /^[A-Za-z0-9][A-Za-z0-9:._-]{0,199}$/;
 const CONTROL_CHARACTER = /[\u0000-\u001f\u007f]/u;
+const EMAIL_LIKE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/iu;
+const URL_OR_PATH_LIKE = /(?:https?:\/\/|www\.|file:\/\/|[A-Z]:\\|\/Users\/|\/home\/)/iu;
+const PHONE_LIKE = /(?:\+?\d[\d ()-]{7,}\d)/u;
+const SECRET_LIKE = /(?:sk-[A-Za-z0-9_-]{10,}|gh[opusr]_[A-Za-z0-9]{10,}|BEGIN [A-Z ]*PRIVATE KEY)/u;
+const PRIVATE_MARKER = /(?:private|secret|supplier[_ -]?account|provider[_ -]?(?:payload|request)|return[_ -]?address)/iu;
 const PRIVATE_OR_OPERATIONAL_FIELD =
   /(?:account|address|advertis|approval|contact|email|inventory|phone|price|reorder|return|rights|shipping|stock|vendor)/iu;
 
 function normalizedFactValue(value: string | number | boolean | null): string {
   if (value === null) return "";
   const normalized = String(value).normalize("NFC").replace(/\s+/g, " ").trim();
-  if (CONTROL_CHARACTER.test(normalized) || normalized.length > 500) {
+  if (
+    normalized.length === 0
+    || CONTROL_CHARACTER.test(normalized)
+    || normalized.length > 500
+    || EMAIL_LIKE.test(normalized)
+    || URL_OR_PATH_LIKE.test(normalized)
+    || PHONE_LIKE.test(normalized)
+    || SECRET_LIKE.test(normalized)
+    || PRIVATE_MARKER.test(normalized)
+  ) {
     throw new Error("CREATIVE_FACT_VALUE_INVALID");
   }
   return normalized;
@@ -46,7 +60,11 @@ function normalizedFactValue(value: string | number | boolean | null): string {
 
 export function materializeCreativeFactConstraints(
   input: ListingContentInput,
-): Readonly<{ factIds: readonly string[]; constraints: readonly string[] }> {
+): Readonly<{
+  factIds: readonly string[];
+  constraints: readonly string[];
+  facts: readonly Readonly<{ field: string; value: string; factIds: readonly string[] }>[];
+}> {
   if (
     input.creativeFactFields.length === 0
     || new Set(input.creativeFactFields).size !== input.creativeFactFields.length
@@ -66,13 +84,20 @@ export function materializeCreativeFactConstraints(
       throw new Error("CREATIVE_FACT_COVERAGE_INVALID");
     }
     return Object.freeze({
+      field,
+      value: values[0],
       factIds: Object.freeze(factIds),
-      constraint: `factIds=${factIds.join(",")}; field=${field}; value=${values[0]}`,
+      constraint: `field=${field}; value=${values[0]}`,
     });
   });
   return Object.freeze({
     factIds: Object.freeze([...new Set(selected.flatMap(({ factIds }) => factIds))]),
     constraints: Object.freeze(selected.map(({ constraint }) => constraint)),
+    facts: Object.freeze(selected.map(({ field, value, factIds }) => ({
+      field,
+      value,
+      factIds,
+    }))),
   });
 }
 
@@ -247,8 +272,10 @@ export function buildExternalCreativeReviewPacket(input: Readonly<{
         || !artifact.durableAssetReference
         || artifact.publicAssetReference !== null
         || artifact.productRepresentationReview !== null
-        || artifact.providerExecution === null
-        || Object.entries(artifact.review)
+      || artifact.providerExecution === null
+      || artifact.providerExecution.operation !== "GENERATE"
+      || artifact.providerExecution.usage.inputImageTokens !== 0
+      || Object.entries(artifact.review)
           .filter(([name]) => name !== "deployability")
           .some(([, result]) => result !== "PASS");
     })

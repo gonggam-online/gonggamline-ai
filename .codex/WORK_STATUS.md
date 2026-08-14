@@ -1,5 +1,56 @@
 # Work status
 
+## 2026-08-14 S3-16 Listing creative operator runtime
+
+- Objective/revenue impact: make the merged fact-only GPT Image provider
+  operable for every approved product through one bounded Production operator
+  action, preserve actual bytes in the approved private store, and expose them
+  for product-representation review without publishing or writing WING.
+- Branch/base: `codex/feat/listing-creative-operator-runtime` from exact
+  `origin/main` `b6065c2dcbb02ae0b7901388351d9cc85b1d11fe` (merged PR #138).
+- Risk: high-risk/manual due to admin auth, Production paid-provider composition,
+  and durable private manifests. Auto-merge is prohibited. The first paid call,
+  public publication, content approval, and commerce write remain separate.
+- Root-cause order: (1) external configuration: OpenAI funding/key and Supabase
+  private store exist; a Vercel payment method is verified but paid Pro
+  activation is not; (2) database: no DB/RLS expansion, Supabase private Storage
+  remains authoritative; (3) code: the merged provider/archive parts lacked a
+  governed operator route, distributed reservation, sanitized handoff recovery,
+  and real review surface.
+- Cloud-first gate: immutable prepared/authorized/global-reserved/plan-reserved/
+  failure/review manifests and generated masters belong to private Supabase
+  Storage. GitHub owns code/contracts/tests. Browser JSON, signed URLs, local
+  checkout, and test assets are disposable and contain no durable authority.
+- Progress: 11/12 steps. Governance/base audit; external/DB/code classification;
+  typed operator contracts; allowlisted fact-value materialization; immutable
+  plan/authorization/reservation/handoff engine; Supabase repository and
+  private-only provider composition; PREPARE/DISPATCH/re-sign API plus operator
+  review UI are implemented. No paid or Production write has run.
+- Validation: lint has zero errors and four pre-existing Revenue-test warnings;
+  typecheck passes; full unit/integration tests pass 666/666; production build
+  passes with 87 generated pages/routes; `git diff --check` passes. Local browser
+  QA at desktop and 390px mobile widths found no overflow, console warnings, or
+  errors; the initial UI exposes only disabled PREPARE and no approval/publish/
+  WING controls.
+- Delivery: implementation commit `d6b1c23d9f3f8f08e71d26829c45b285df819d88`
+  is pushed in Draft PR #139 with `manual-merge-required`, clean merge status,
+  and auto-merge disabled. Exact-head CI run `31810910011` passed all eight
+  jobs. Preview deployment `5908124349` is Ready; browser run `31810910092`
+  passed. Evidence artifact `9223120592` expires 2026-08-28; the mobile Listing
+  screenshot SHA-256 is
+  `85907f78b3ae9bfa60bd0123d1958c629395277cead1d3080314b9b75b7ef976`.
+- Preview direct review: `/admin/listing/creative-dispatch` renders the expected
+  Korean UI with PREPARE disabled until input, no overflow or console errors,
+  and no approval/publication/WING controls. Anonymous API probes are denied by
+  the Preview/auth boundary before service execution.
+- Exact next action: repository owner manually reviews and merges PR #139. Then
+  verify exact `origin/main` and Production health/UI/API before separately
+  authorizing the first paid private dispatch. Do not invoke the provider from
+  this PR branch.
+- Remaining risks: distributed five-minute slot intentionally serializes paid
+  runs; partial provider output remains private and non-retryable; human product
+  accuracy review and selected-candidate publication are later phases.
+
 ## 2026-08-14 PR #137 merge and Vercel billing correction
 
 - Objective/revenue impact: accept the only governed Production operator
