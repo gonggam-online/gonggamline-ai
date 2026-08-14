@@ -1,5 +1,61 @@
 # Work status
 
+## 2026-08-14 Generic Listing creative optimization Architecture
+
+- Objective/revenue impact: make conversion-oriented visual content the default
+  for every selected/procurement-approved product, while preserving the fastest
+  eligible unchanged-image registration packet and avoiding unlicensed pixels.
+- Branch/base: `codex/feat/listing-creative-optimization` from merged
+  `origin/main` `5cf73a75a3e35373aa7779a3b8f43cbdf05b7dcb`.
+- Risk: normal-risk documentation/contract-test PR with mandatory manual
+  Architecture approval. Future provider/paid/secret, managed asset storage,
+  DB/Auth/RLS, Production, and commerce-write work is high-risk/manual.
+- Root-cause classification: (1) external: no approved image/video provider,
+  terms/model snapshot, paid cap, secret, or managed asset store; (2) database:
+  legacy `listing_drafts` cannot persist immutable asset rights/revisions/
+  approvals/learning; (3) code: v2 accepts pre-rendered metadata and shot briefs
+  but does not acquire/render bytes, compute QA, or bind selected creative assets.
+- Scope: Architecture Story, owner amendment, Decision Log/Sprint registration,
+  official rights/conversion research, and architecture regression tests.
+- Non-goals: runtime/provider implementation, web image download, actual image
+  generation/editing/video, operational asset persistence, migrations, secrets,
+  paid calls, WING/Coupang writes, price/stock/ad/order changes, or KK946 values
+  in production code.
+- Rights result: public visibility, silence, or same-product identity does not
+  confer third-party edit/generative-reference rights. The maximum automated
+  contract admits operation-specific express grants, own/commissioned assets,
+  verified open/public-domain licences, and fact-only independent generation.
+  Verified supplier unchanged-use remains automatic; unknown edit rights exclude
+  only derivatives and do not block an eligible original minimum packet.
+- Cloud-first: GitHub owns source, Story, synthetic tests, PR, and CI evidence.
+  Operational asset bytes need an approved private object store/CDN and recovery
+  evidence; immutable revisions/approvals/learning need a separate approved DB/
+  Auth/RLS Story. Local test/build/browser artifacts are disposable.
+- Progress: 10/11 steps complete. Governance/base checks, code/DB/external audit,
+  current official research, proposed Story, rights taxonomy, candidate/renderer/
+  QA/provider/storage/UI/learning contract, regression design, full validation,
+  and diff/encoding/sensitive-data review are complete. GitHub delivery and
+  exact-head observation remain.
+- Changed files: proposed creative Architecture Story, owner amendment,
+  Architecture Review, Decision Log, Sprint 03, architecture test, and this
+  status.
+- Blocker/owner boundary: the Architecture PR must be manually reviewed and
+  merged before steps 1-4 runtime implementation. Real provider, managed storage,
+  DB/Auth/RLS, paid/secret/config, and marketplace write retain separate approval.
+- Recovery: push the coherent branch and retain exact-head CI/Preview evidence in
+  GitHub. No unique local durable business state is created.
+- Validation: focused architecture tests pass `6/6`; lint passes with zero errors
+  and four pre-existing Revenue-test warnings; typecheck passes; production build
+  passes all 86 routes; mobile Listing review Chromium E2E passes `1/1` with no
+  page/console/API/request/overflow failure. Full tests pass `604/604` on the
+  binding rerun. The first full run hit the known orchestrator termination timing
+  edge once; its isolated rerun passed `19/19` before the full green rerun.
+  `git diff --check` and UTF-8 replacement-character review pass; no secret,
+  account identifier, raw provider payload, PII, or binary business asset is added.
+- Exact next action: finish tests/diff review, commit/push a Draft manual PR,
+  validate exact-head CI/Preview, then request repository-owner Architecture
+  merge before beginning the pure v3 implementation branch.
+
 ## 2026-08-13 Generic Listing Content/Conversion pipeline
 
 - Objective/revenue impact: implement the accepted evidence-first Listing

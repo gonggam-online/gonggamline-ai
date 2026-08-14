@@ -1,5 +1,29 @@
 # Architecture review
 
+## Proposed Listing Creative Optimization Pipeline v1 - 2026-08-14
+
+- Status: proposed; repository-owner manual Architecture approval is required
+  before runtime implementation.
+- Revenue gate: make rights-cleared creative optimization the generic default
+  after minimum registration fitness, with two reviewable candidates and
+  profit/return-guarded learning rather than a KK946-only path.
+- Root cause: the existing pure builder validates claimed asset metadata and
+  shot briefs; it has no binary renderer/provider, computed visual QA, managed
+  object store, immutable creative approval, or selected-set-only mapper.
+- Rights decision: supplier unchanged-use remains frictionless when expressly
+  granted. Public visibility or lack of a prohibition never grants editing,
+  provider-upload, or generative-reference rights. Competitor/web pixels are
+  observation-only; verified operation capabilities are used automatically.
+- Cloud-first: GitHub owns this Story, contract tests, PR, and CI. Operational
+  assets require a separately approved managed object store/CDN; revision,
+  approval, rights dependency, and learning state require a separate
+  Database/Auth/RLS Story. Local artifacts are disposable.
+- Risk: this documentation PR is normal-risk but manual due to the Architecture
+  gate. Provider/paid/secret, storage, DB/RLS/Auth, Production, and commerce-
+  write steps remain separate high-risk/manual approvals.
+- Story: [Listing Creative Optimization Pipeline v1](../docs/architecture/LISTING-CREATIVE-OPTIMIZATION-PIPELINE-V1.md).
+- Rollback: Git revert; no runtime or external state is changed.
+
 ## KK946 six-unit E2E listing readiness - 2026-08-12
 
 - Status: documentation/evidence implementation only; execution awaits an exact

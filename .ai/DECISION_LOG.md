@@ -1,5 +1,29 @@
 # Decision log
 
+## 2026-08-14 - Propose generic rights-cleared creative optimization
+
+- Decision proposal: after minimum registration fitness, run creative baseline
+  evaluation for every selected/procurement-approved product and produce at
+  least two digest-bound image/detail candidates; optional video remains out of
+  the Coupang payload until exact channel support is proven.
+- Rights decision: maximize each expressly verified supplier/licence/ownership
+  capability. Preserve automatic unchanged supplier use, but do not treat public
+  access, silence, same-product identity, or internal risk acceptance as a
+  reproduction/edit/provider-upload/generative-reference grant. Competitor and
+  arbitrary web pixels are observation-only.
+- Truthfulness decision: prompt, outline, fixture, caller-provided QA, or simple
+  upscale is not a rendered deployable asset. QA is computed from artifact bytes
+  and the selected candidate alone enters the mapper after digest-bound content
+  approval; live-write approval remains separate.
+- Architecture boundary: this PR approves no implementation or external action.
+  Pure contracts/planner/fake renderer/review UI may follow only after manual
+  Architecture merge. Real provider/paid/secret, managed object storage/CDN,
+  Database/Auth/RLS, and live registration each require separate high-risk
+  Architecture and manual PRs.
+- Cloud-first/rollback: GitHub owns this decision and CI evidence; local output
+  is temporary. Operational assets and state have no approved durable owner yet.
+  Roll back with Git revert.
+
 ## 2026-08-13 - Separate minimum Listing registration fitness from conversion optimization
 
 - Owner amendment: an active versioned supplier trust profile automatically

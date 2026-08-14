@@ -25,6 +25,15 @@ Requires approved Sprint 02 packet, category metadata, brand/certification evide
 4. S3-04 (M): preview, evidence, and approval-readiness UI.
 5. S3-05 (M): fake Coupang adapter contract, idempotency, failure tests.
 6. S3-06 (high-risk, manual): separately approved sandbox/real registration rollout.
+7. S3-07 (Architecture, manual): generic rights-capability and creative-
+   optimization lifecycle, managed artifact, provider, QA, approval, and
+   learning boundaries.
+8. S3-08 (M, after S3-07 merge): pure v3 creative contracts, candidate planner,
+   deterministic fixture renderer, computed QA, selected-set mapper, and review
+   UI using synthetic non-KK fixtures.
+9. S3-09 (high-risk, manual): managed object storage/CDN, real provider and paid
+   use, secrets, and immutable Database/Auth/RLS persistence as separately
+   approved Stories/PRs.
 
 ## Done
 
