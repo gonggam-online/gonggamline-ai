@@ -2,7 +2,8 @@
 
 ## Goal and value
 
-Generate a traceable listing draft package—title, keywords, copy, image brief, and category attributes—then validate it without publishing.
+Generate a traceable listing draft package—title, keywords, copy, rendered
+creative assets, and category attributes—then validate it without publishing.
 
 ## Scope
 
@@ -55,6 +56,16 @@ Requires approved Sprint 02 packet, category metadata, brand/certification evide
     issue short-lived private review URLs, and require digest-valid human
     product-representation review before selection/publication. KK946 remains an
     acceptance adapter; supplier pixels and private WING fields are excluded.
+15. S3-15 (Architecture, high-risk, manual): authorize the Production-only,
+    two-phase authenticated operator dispatch. PREPARE is non-billable;
+    AUTHORIZE_AND_DISPATCH requires fresh AAL2, purpose-bound CSRF, an immutable
+    private authorization and whole-plan reservation, and stops at
+    `REVIEW_REQUIRED`. No general-purpose generation route or same-request
+    approval/publication/WING action is allowed.
+16. S3-16 (high-risk, manual, after S3-15 merge): implement the protected
+    operator routes, private manifest repository, review handoff UI, and
+    fake-only CI/Preview coverage; after merge, execute one bounded Production
+    fact-only revision to private review only.
 
 ## Done
 

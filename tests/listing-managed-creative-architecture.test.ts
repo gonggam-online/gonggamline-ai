@@ -10,6 +10,13 @@ const architecture = readFileSync(
   ),
   "utf8",
 );
+const dispatchAmendment = readFileSync(
+  path.join(
+    process.cwd(),
+    "docs/architecture/LISTING-CREATIVE-AUTHENTICATED-OPERATOR-DISPATCH-V1.md",
+  ),
+  "utf8",
+);
 
 test("managed creative architecture is generic and cloud-first", () => {
   assert.match(architecture, /every selected and procurement-approved product/);
@@ -74,8 +81,60 @@ test("secrets stay server-only and architecture does not perform external writes
 
   assert.match(architecture, /never appear in `NEXT_PUBLIC_\*`/);
   assert.match(architecture, /performs no bucket\/store creation/);
-  assert.match(architecture, /No public\s+generation route/);
+  assert.match(
+    architecture,
+    /No\s+unauthenticated or general-purpose generation route/,
+  );
   assert.match(architecture, /Preview and CI use deterministic fakes/);
+});
+
+test("operator dispatch is two-phase, production-only, durable, and review-only", () => {
+  assert.match(dispatchAmendment, /PREPARE \(no paid call\)/);
+  assert.match(dispatchAmendment, /AUTHORIZE_AND_DISPATCH \(bounded paid call\)/);
+  assert.match(dispatchAmendment, /`VERCEL_ENV=production`/);
+  assert.match(
+    dispatchAmendment,
+    /fresh `aal2` authentication no older than 60 seconds/,
+  );
+  assert.match(dispatchAmendment, /listing-creative-dispatch-prepare/);
+  assert.match(
+    dispatchAmendment,
+    /immutable whole-plan reservation before any provider transport/,
+  );
+  assert.match(dispatchAmendment, /`REVIEW_REQUIRED`/);
+  assert.match(
+    dispatchAmendment,
+    /must\s+not default any human product-representation check to PASS/,
+  );
+  assert.match(
+    dispatchAmendment,
+    /create live-write approval, or call Coupang\/WING/,
+  );
+});
+
+test("operator dispatch preserves cloud-first and product-general boundaries", () => {
+  assert.match(
+    dispatchAmendment,
+    /Supabase Storage private bucket `listing-creative-private-v1`/,
+  );
+  assert.match(
+    dispatchAmendment,
+    /Create-only conflict means `409 ALREADY_RESERVED`/,
+  );
+  assert.match(dispatchAmendment, /zero provider calls/);
+  assert.match(dispatchAmendment, /stores no raw\s+provider payload/);
+  assert.match(
+    dispatchAmendment,
+    /Fact-only jobs send zero supplier, competitor, or web pixels/,
+  );
+  assert.match(
+    dispatchAmendment,
+    /KK946 may appear only in external\s+adapter fixtures/,
+  );
+  assert.match(
+    dispatchAmendment,
+    /Concurrent, scheduled, unattended, bulk, or multi-operator execution remains\s+blocked/,
+  );
 });
 
 test("provider inputs and outputs remain rights and truth gated", () => {
