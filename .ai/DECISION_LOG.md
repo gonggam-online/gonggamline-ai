@@ -1,5 +1,27 @@
 # Decision log
 
+## 2026-08-14 - Accept creative Architecture and implement actual-byte fixture boundary
+
+- Owner approval: PR #127 was manually merged as commit
+  `b463028a9d79ca44a863475c2ad8df99bb37f53a`; ordered Architecture steps 1-4
+  are now implementation-authorized.
+- Implementation decision: use product-agnostic v3 render jobs, two candidate
+  sets, a deterministic raster PNG fixture provider, artifact-byte SHA-256 and
+  decoded dimension/MIME QA, explicit `FIXTURE_ONLY` deployability, and a mapper
+  that rejects fixture or digest-mismatched approval packets.
+- KK946 decision: reintegrate PR #126's external adapter/unchanged supplier
+  packet on current main, excluding its unrelated orchestrator shutdown change.
+  The minimum packet can remain registration-ready while fixture creative output
+  remains nondeployable and conversion optimization stays pending.
+- External boundary: a real image provider still lacks an approved model/terms,
+  paid cap, server-only secret and managed object store/CDN. No provider call,
+  web-image download, asset upload, persistent approval, Production mutation or
+  WING/Coupang submission is performed by this implementation.
+- Cloud-first/rollback: GitHub owns code, synthetic fixtures, PR and CI evidence;
+  in-memory/test raster output is disposable. Revert the implementation commits
+  to roll back; no operational asset or external state exists to reconcile.
+
+
 ## 2026-08-14 - Propose generic rights-cleared creative optimization
 
 - Decision proposal: after minimum registration fitness, run creative baseline

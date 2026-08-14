@@ -1,9 +1,14 @@
 # Architecture review
 
-## Proposed Listing Creative Optimization Pipeline v1 - 2026-08-14
+## Accepted Listing Creative Optimization Pipeline v1 - 2026-08-14
 
-- Status: proposed; repository-owner manual Architecture approval is required
-  before runtime implementation.
+- Status: accepted by repository-owner manual merge of PR #127 on 2026-08-14;
+  merge commit `b463028a9d79ca44a863475c2ad8df99bb37f53a`.
+- Implementation authorization: ordered steps 1-4 only (pure v3 contracts,
+  generic planner, deterministic fixture renderer/computed QA, selected-set
+  mapper, and fixture-preview review UI). Real provider, paid/secret/config,
+  managed object storage/CDN, Database/Auth/RLS, Production and commerce writes
+  remain separate Architecture/manual gates.
 - Revenue gate: make rights-cleared creative optimization the generic default
   after minimum registration fitness, with two reviewable candidates and
   profit/return-guarded learning rather than a KK946-only path.
