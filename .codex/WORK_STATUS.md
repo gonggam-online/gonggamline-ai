@@ -31,11 +31,12 @@
   Operational asset bytes need an approved private object store/CDN and recovery
   evidence; immutable revisions/approvals/learning need a separate approved DB/
   Auth/RLS Story. Local test/build/browser artifacts are disposable.
-- Progress: 10/11 steps complete. Governance/base checks, code/DB/external audit,
+- Progress: 11/11 Architecture-delivery steps complete. Governance/base checks, code/DB/external audit,
   current official research, proposed Story, rights taxonomy, candidate/renderer/
   QA/provider/storage/UI/learning contract, regression design, full validation,
-  and diff/encoding/sensitive-data review are complete. GitHub delivery and
-  exact-head observation remain.
+  diff/encoding/sensitive-data review, GitHub delivery, and first-head exact CI/
+  Preview observation are complete. Runtime implementation correctly remains
+  gated by manual Architecture merge.
 - Changed files: proposed creative Architecture Story, owner amendment,
   Architecture Review, Decision Log, Sprint 03, architecture test, and this
   status.
@@ -52,9 +53,17 @@
   edge once; its isolated rerun passed `19/19` before the full green rerun.
   `git diff --check` and UTF-8 replacement-character review pass; no secret,
   account identifier, raw provider payload, PII, or binary business asset is added.
-- Exact next action: finish tests/diff review, commit/push a Draft manual PR,
-  validate exact-head CI/Preview, then request repository-owner Architecture
-  merge before beginning the pure v3 implementation branch.
+- Delivery: commit `a9879fb` is pushed on Draft PR #127; the PR is mergeable,
+  labelled `manual-merge-required`, and has no auto-merge. All first-head CI,
+  disposable DB/security replays, build, Vercel, and Preview browser checks pass.
+  Preview run `31760601697` tested 44 routes at
+  `https://gonggamline-9tew524jh-gg-online.vercel.app` with no reported page/API/
+  console/non-abort request failure. Artifact `9204468366` has SHA-256
+  `f34ae938d7ee792f24233d501d3b4960ba442d9001f63a9ba88f5485ce9295ca`
+  and expires 2026-08-28.
+- Exact next action: publish this evidence checkpoint, confirm its exact-head
+  checks, then request repository-owner manual Architecture merge. Only after
+  merge may the pure v3 contract/planner/fake-renderer implementation branch begin.
 
 ## 2026-08-13 Generic Listing Content/Conversion pipeline
 
