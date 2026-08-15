@@ -5856,3 +5856,19 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Remaining risks: provider terms and copyright scope can change; operational
   evidence storage, automated discovery, publication, and takedown SLA are not
   implemented or authorized.
+# 2026-08-15 Listing creative dispatch timeout hardening
+
+- Objective/revenue impact: make the governed fact-only Production dispatch finish within the Vercel 300-second limit so the first approved product can reach private `REVIEW_REQUIRED` without retrying a paid request.
+- Branch/base: `codex/fix/listing-creative-dispatch-timeout` from current merged operator runtime (`origin/main` `a504b28f54198ba0fc62595425e8dd42f555dc0f` plus the prior status checkpoint).
+- Risk: high-risk/manual because the path invokes a paid provider and writes private Production artifacts; this PR changes execution scheduling only and does not authorize a new paid call, publication, content approval, or WING write.
+- Root-cause order: external configuration is healthy enough to reach the provider; database/storage are the approved Supabase private archive and create-only manifests; code is the confirmed failure because four sequential renders exceeded Vercel's 300-second Production limit.
+- Cloud-first gate: no new durable state. Supabase private Storage remains authoritative for prepared/authorized/reserved/failure/review manifests and generated masters; GitHub owns code/tests/status; local browser and test output are disposable.
+- Scope: bounded concurrent job execution with all-or-nothing handoff semantics, timeout regression coverage, sanitized failure evidence, and delivery/Preview verification.
+- Non-goals: no automatic retry, no new provider/config/secret, no schema/RLS change, no public Blob publication, no content/live approval, and no WING write.
+- Progress: 6/10 steps complete (governance/base audit, Production timeout evidence, concurrent render helper, focused tests/typecheck, full tests/lint/build, and diff/secret review).
+- Current step: commit/push and create the high-risk manual PR, then wait for exact-head Preview gates.
+- Blocker/owner action after delivery: manually review/merge the high-risk PR; only then perform a separate paid dispatch after provider usage/partial-charge status is checked.
+- Exact Production evidence: Vercel error log `Vercel Runtime Timeout Error: Task timed out after 300 seconds` for `POST /api/admin/listing/creative-dispatch`, status 504, deployment `dpl_BD4FjCFYWhW2Sturgp6wwWC3h4jc`.
+- Changed files so far: `services/listing-creative-render.service.ts`, `services/listing-creative-operator-dispatch.service.ts`, `services/listing-creative-dispatch.service.ts`, and `tests/listing-creative-qa-approval.test.ts`.
+- Focused validation so far: 14/14 creative QA/operator tests passed; typecheck passed.
+- Full validation: lint passed with zero errors and four pre-existing unrelated warnings; typecheck passed; full tests 667/667 passed; production build passed with 87 routes; `git diff --check` passed; changed production sources contain no provider secret, KK946 value, or private adapter marker.

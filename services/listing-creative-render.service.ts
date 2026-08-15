@@ -18,6 +18,31 @@ export type ArchivedCreativeRenderResult = Readonly<{
   archived: ArchivedListingCreativeAsset;
 }>;
 
+/**
+ * Executes one already-reserved creative plan concurrently. `Promise.all`
+ * preserves the input order, so archive sequence and handoff digests remain
+ * deterministic while the four provider calls share the bounded route window.
+ * There is deliberately no retry here: a partial paid plan remains a failed
+ * immutable dispatch and is recorded by its caller.
+ */
+export async function executeAndArchiveCreativeRenders(input: Readonly<{
+  jobs: readonly CreativeRenderJob[];
+  provider: ListingCreativeProvider;
+  storage: ManagedListingCreativeStorage;
+  revisionDigest: string;
+  occurredAt: string;
+  archiveSequenceStart: number;
+}>): Promise<readonly ArchivedCreativeRenderResult[]> {
+  return Promise.all(input.jobs.map((job, index) => executeAndArchiveCreativeRender({
+    job,
+    provider: input.provider,
+    storage: input.storage,
+    revisionDigest: input.revisionDigest,
+    occurredAt: input.occurredAt,
+    archiveSequence: input.archiveSequenceStart + index,
+  })));
+}
+
 export async function executeAndArchiveCreativeRender(input: Readonly<{
   job: CreativeRenderJob;
   provider: ListingCreativeProvider;

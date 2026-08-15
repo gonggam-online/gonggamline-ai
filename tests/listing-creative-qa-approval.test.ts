@@ -38,7 +38,10 @@ import {
   InMemoryPublicListingCreativeObjectStore,
 } from "../engines/listing/creative-storage-fake.ts";
 import { buildListingContentPacket } from "../engines/listing/content-pipeline.ts";
-import { executeAndArchiveCreativeRender } from "../services/listing-creative-render.service.ts";
+import {
+  executeAndArchiveCreativeRender,
+  executeAndArchiveCreativeRenders,
+} from "../services/listing-creative-render.service.ts";
 import { publishSelectedCreativeCandidate } from "../services/listing-creative-publication.service.ts";
 import type {
   CreativeProviderApproval,
@@ -98,6 +101,22 @@ class FakeExternalImageProvider implements ListingCreativeProvider {
         },
       },
     };
+  }
+}
+
+class ConcurrentProbeProvider extends FakeExternalImageProvider {
+  active = 0;
+  maximumActive = 0;
+
+  override async render(job: CreativeRenderJob): Promise<ProviderRenderResult> {
+    this.active += 1;
+    this.maximumActive = Math.max(this.maximumActive, this.active);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 15));
+      return await super.render(job);
+    } finally {
+      this.active -= 1;
+    }
   }
 }
 
@@ -238,6 +257,42 @@ test("actual-byte QA rejects corrupt PNG CRC or trailing bytes", () => {
   assert.equal(inspectCreativeArtifactBytes(crcCorrupt).pngStructure, "FAIL");
   const trailing = Uint8Array.from([...valid, 0]);
   assert.equal(inspectCreativeArtifactBytes(trailing).pngStructure, "FAIL");
+});
+
+test("reserved creative jobs archive concurrently in deterministic input order", async () => {
+  const planning = planningInputFromListingContent(genericListingInput());
+  const packet = await buildFixtureCreativeReviewPacket(planning);
+  const candidate = packet.candidates[0];
+  const privateStore = new InMemoryPrivateListingCreativeObjectStore();
+  const storage = new ManagedListingCreativeStorage(
+    privateStore,
+    new InMemoryPublicListingCreativeObjectStore(),
+  );
+  const provider = new ConcurrentProbeProvider();
+  const jobs = candidate.renderJobs.map((job) => Object.freeze({
+    ...job,
+    provider: EXTERNAL_APPROVAL,
+  }));
+
+  const results = await executeAndArchiveCreativeRenders({
+    jobs,
+    provider,
+    storage,
+    revisionDigest: packet.revisionId,
+    occurredAt: "2026-08-14T11:05:00.000Z",
+    archiveSequenceStart: 40,
+  });
+
+  assert.equal(results.length, jobs.length);
+  assert.ok(provider.maximumActive > 1);
+  assert.deepEqual(
+    results.map(({ artifact }) => `${artifact.candidateSetId}:${artifact.role}`),
+    jobs.map(({ candidateSetId, role }) => `${candidateSetId}:${role}`),
+  );
+  assert.deepEqual(
+    results.map(({ archived }) => archived.manifest.event.sequence),
+    jobs.map((_, index) => 40 + index),
+  );
 });
 
 test("human product review must pass every factual and visual gate", async () => {

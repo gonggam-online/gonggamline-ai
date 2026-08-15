@@ -12,7 +12,7 @@ import {
 } from "@/engines/listing/creative-operator";
 import type { ManagedListingCreativeStorage } from "@/engines/listing/creative-storage";
 import type { AdminGuardContext } from "@/lib/auth/admin-request-guard.server";
-import { executeAndArchiveCreativeRender } from "@/services/listing-creative-render.service";
+import { executeAndArchiveCreativeRenders } from "@/services/listing-creative-render.service";
 import {
   createProductionListingCreativeOperatorRepository,
   type ListingCreativeOperatorRepository,
@@ -204,20 +204,16 @@ export async function authorizeAndDispatchListingCreativeOperatorPlan(
       reservations: plan.jobs.map((job, sequence) => ({ jobId: job.jobId, sequence })),
     });
     const jobs = bindAuthorizedCreativeJobs(plan, providerContext.providerApproval);
-    const artifacts: RenderedCreativeArtifact[] = [];
-    const archived: ArchivedListingCreativeAsset[] = [];
-    for (const [index, job] of jobs.entries()) {
-      const result = await executeAndArchiveCreativeRender({
-        job,
-        provider: providerContext.provider,
-        storage: providerContext.storage,
-        revisionDigest: plan.reference.revisionDigest,
-        occurredAt: clock().toISOString(),
-        archiveSequence: 100 + index,
-      });
-      artifacts.push(result.artifact);
-      archived.push(result.archived);
-    }
+    const results = await executeAndArchiveCreativeRenders({
+      jobs,
+      provider: providerContext.provider,
+      storage: providerContext.storage,
+      revisionDigest: plan.reference.revisionDigest,
+      occurredAt: clock().toISOString(),
+      archiveSequenceStart: 100,
+    });
+    const artifacts: RenderedCreativeArtifact[] = results.map(({ artifact }) => artifact);
+    const archived: ArchivedListingCreativeAsset[] = results.map(({ archived: asset }) => asset);
     const handoff = createListingCreativeOperatorReviewHandoff({
       plan,
       authorization,
