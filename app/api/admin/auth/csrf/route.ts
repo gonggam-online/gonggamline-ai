@@ -29,6 +29,7 @@ const PURPOSES = new Set<AdminCsrfPurpose>([
   "product-competition-batch",
   "listing-creative-dispatch-prepare",
   "listing-creative-dispatch",
+  "listing-creative-adapter-export",
 ]);
 
 export async function GET(request: Request): Promise<Response> {

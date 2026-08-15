@@ -1830,3 +1830,11 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Rollback: stop dispatch, revoke the project key, remove the Vercel variable,
   revert the implementation PR, and preserve private manifest evidence according
   to the accepted retention boundary.
+
+# 2026-08-15 - Owner-controlled Listing adapter export boundary
+
+- Category: high-risk/manual Listing adapter and confidential commerce-data boundary.
+- Decision: add an AAL2, exact-origin, CSRF-bound owner screen and server route that validates an external `{listingInput, commerce}` packet, evaluates registration readiness, and exposes a full Production export plus a separately redacted review export.
+- The route does not persist packet values, create approvals, invoke a paid provider, publish assets, or submit WING. The external adapter/WING source remains authoritative and must create a new revision when the prior export is unavailable.
+- Full export may contain private vendor, contact, address, and shipping-center fields and must remain inside the authenticated owner browser/approved remote handoff. Sanitized export is not valid Production input.
+- Risk/rollback: high-risk/manual; remove the route/page and CSRF purpose or revert the PR. No database migration or new local durable state is introduced.

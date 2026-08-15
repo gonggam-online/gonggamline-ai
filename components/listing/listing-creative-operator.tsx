@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 import {
@@ -108,6 +109,9 @@ export function ListingCreativeOperator() {
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold">1. External adapter packet</h2>
+        <p className="mt-2 text-sm text-slate-600">
+          packet이 없으면 <Link className="font-semibold text-indigo-700 underline" href="/admin/listing/creative-adapter">owner adapter Export 화면</Link>에서 먼저 검증하세요.
+        </p>
         <textarea
           aria-label="External adapter packet JSON"
           className="mt-3 min-h-52 w-full rounded-xl border border-slate-300 p-3 font-mono text-xs"

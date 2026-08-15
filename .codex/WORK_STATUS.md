@@ -1,5 +1,21 @@
 # Work status
 
+## 2026-08-15 Owner-controlled external adapter export PR
+
+- Objective/revenue impact: give an owner a recoverable, authenticated screen to validate an external WING adapter packet and copy/export the exact typed JSON needed by Production, removing the current packet-discovery dead end without fabricating facts.
+- Branch/base: `codex/feat/listing-creative-adapter-export` from `origin/main` `6455ff3326c4a65fd65606b728ffafcfb9900c19`.
+- Risk: high-risk/manual because the full export can contain confidential vendor/contact/address/shipping fields and is guarded by admin AAL2/CSRF/origin/rate limits. No WING write, paid provider call, publication, database migration, or secret change.
+- Root-cause class: code/operational boundary; Git and Production store only sanitized digests/handoffs, while no owner adapter export screen existed.
+- Cloud-first gate: no new durable state. GitHub owns code/docs; the authenticated browser download is disposable; the external adapter or approved remote handoff remains authoritative. Private fields are not logged or committed.
+- Scope: typed adapter export contract, pure packet parse/readiness/redaction, protected API, admin page with full/sanitized export and Production-copy action, tests and architecture decision.
+- Progress: 10/10 implementation/delivery steps complete; owner merge remains intentionally manual.
+- Current: PR #142 is open and all exact-head CI/Preview checks pass. Await owner review/merge; no Production or WING write is authorized in this PR.
+- Last commits: `fb2be2f` (implementation), `42c0a28` (validation checkpoint).
+- Delivery: pushed `codex/feat/listing-creative-adapter-export`; PR `https://github.com/gonggam-online/gonggamline-ai/pull/142`; label `manual-merge-required`; exact head `42c0a28ab01795a38b317936fafc29a7e89d1eb8`.
+- CI/Preview: ci-build, ci-db-baseline-replay, ci-item-selection-security, ci-lint, ci-r1-atomic-product-mutation, ci-security-audit, ci-tests, ci-typecheck, preview-browser-e2e and Vercel all PASS. Local browser E2E 1/1 PASS.
+- Blockers: none for code validation; owner must manually review/merge. Actual packet export still requires an external adapter input containing valid WING internal codes and separate approval references.
+- Non-goals: no reconstruction from Git fixtures, no WING submission, no paid generation, no private packet persistence.
+
 ## 2026-08-15 Expired creative-plan re-prepare
 
 - Objective/revenue impact: let an operator recover from an expired immutable
