@@ -1,5 +1,30 @@
 # Work status
 
+## 2026-08-15 Post-merge private review handoff recovery
+
+- Objective/revenue impact: after PR #144, let an operator recover a persisted
+  private `REVIEW_REQUIRED` handoff after a browser response loss or signed URL
+  expiry, using the existing protected GET/re-sign boundary. This removes a
+  non-revenue operational dead end without generating, publishing, approving,
+  mapping, or writing WING.
+- Branch/base: `codex/feat/listing-creative-dispatch-next` from merged
+  `origin/main` `cc769e4272d9adb8aaa9db156dc64805196904c5`.
+- Risk: normal-risk UI/read-only recovery; no new durable state, schema,
+  secret, provider call, paid usage, Production mutation, or commerce write.
+- Cloud-first: Supabase private creative storage remains authoritative for
+  handoffs and signed URLs; GitHub owns code/tests/status; the plan reference
+  typed into the browser is disposable and contains no packet or secret.
+- Plan: audit route/DTO; implement recovery input and GET call; expose the
+  prepared reference for copy/recovery; add source/unit/browser coverage; run
+  complete local gates; commit/push a focused PR; reconcile exact-head CI and
+  Preview; then report Production smoke separately.
+- Progress: 7/10 (merged-main audit, UI recovery implementation, focused/unit
+  coverage, full local tests, lint/typecheck/build, and browser E2E complete).
+- Current step: complete diff/security review, commit/push, create the focused
+  PR, and reconcile exact-head CI/Preview.
+- Non-goals: no automatic human QA PASS, content approval, live-write approval,
+  public publication, WING submission, or paid image generation.
+
 ## 2026-08-15 Current-source external adapter packet re-prepare
 
 - Objective/revenue impact: stop blocking the listing path on recovery of an

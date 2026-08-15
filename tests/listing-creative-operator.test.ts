@@ -182,9 +182,22 @@ test("operator production path stops at private human review and contains no pro
   assert.match(source, /REVIEW_REQUIRED/);
   assert.match(source, /contentApproved:\s*false/);
   assert.match(source, /liveWriteApproved:\s*false/);
+  assert.match(source, /loadListingCreativeOperatorReview/);
   assert.match(source, /reprepareExpiredPlanReference/);
   assert.match(source, /DISPATCH_REPREPARE_NOT_EXPIRED/);
   assert.match(source, /preparationAttemptDigest/);
+});
+
+test("operator review recovery remains read-only and reissues signed URLs", () => {
+  const source = readFileSync(
+    resolve(process.cwd(), "components/listing/listing-creative-operator.tsx"),
+    "utf8",
+  );
+  assert.match(source, /Private REVIEW_REQUIRED handoff/);
+  assert.match(source, /api\/admin\/listing\/creative-dispatch\?preparedPlanReference/);
+  assert.match(source, /검토 handoff 다시 불러오기/);
+  assert.match(source, /setPrepared\(null\)/);
+  assert.doesNotMatch(source, /publishApproved|mapApprovedCreativeRegistrationPayload|coupang-seller/);
 });
 
 test("dispatch route binds fresh admin, origin, JSON, CSRF and reservation before provider", () => {
