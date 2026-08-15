@@ -1,5 +1,37 @@
 # Work status
 
+## 2026-08-15 Expired creative-plan re-prepare
+
+- Objective/revenue impact: let an operator recover from an expired immutable
+  PREPARED plan without fabricating a new evidence packet, duplicating a paid
+  provider call, or weakening the review/WING boundaries.
+- Branch/base: `codex/fix/listing-creative-reprepare` from merged
+  `origin/main` `c06698861a78b43176703da71416809234e4cc9b`.
+- Risk: high-risk/manual because this changes the paid creative dispatch
+  authorization path and private durable manifests. No provider, publication,
+  or commerce write is run by this change.
+- Root cause order: external authentication was restored; the database/storage
+  was healthy; code intentionally rejected the same immutable plan after its
+  15-minute expiry but exposed no safe operator re-prepare action.
+- Scope: added an explicit optional `reprepareExpiredPlanReference` request,
+  same-packet/revision/evidence/category/policy checks against the expired
+  plan, a server-generated preparation-attempt digest, a new immutable plan
+  locator, and a UI action that appears only after `DISPATCH_ALREADY_RESERVED`.
+  Non-expired plans and changed packets fail closed.
+- Cloud-first gate: Supabase private Storage remains authoritative for old and
+  new manifests; no local durable state, raw provider payload, PII, secret, or
+  image bytes were added.
+- Validation so far: focused operator tests 7/7, typecheck PASS, lint PASS with
+  four pre-existing unrelated warnings, and `git diff --check` PASS. Full test,
+  production build, PR CI, Preview, and Production smoke remain pending.
+- Exact next action: complete full local gates, commit/push a manual-merge PR,
+  then verify exact-head Preview. After manual merge, sign in again, click the
+  explicit expired-plan re-prepare action, inspect the fresh expiry/digest, and
+  separately authorize one bounded paid dispatch only if provider usage review
+  permits it.
+- Remaining risks: the current browser session still shows the old expired
+  plan until this PR is merged; no automatic re-prepare or paid retry exists.
+
 ## 2026-08-15 PR #140 listing creative dispatch timeout hardening
 
 - Objective/revenue impact: remove the observed Vercel 300-second timeout from

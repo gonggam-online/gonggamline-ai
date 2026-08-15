@@ -10,6 +10,8 @@ export type PrepareListingCreativeDispatchRequest = Readonly<{
   schemaVersion: typeof LISTING_CREATIVE_OPERATOR_API_VERSION;
   listingInput: ListingContentInput;
   commerce: RegistrationCommerceFields;
+  /** Explicit operator action for replacing an expired immutable plan. */
+  reprepareExpiredPlanReference?: string;
 }>;
 
 export type AuthorizeListingCreativeDispatchRequest = Readonly<{
