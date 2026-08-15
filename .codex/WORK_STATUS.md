@@ -1,5 +1,18 @@
 # Work status
 
+## 2026-08-15 Owner-controlled external adapter export PR
+
+- Objective/revenue impact: give an owner a recoverable, authenticated screen to validate an external WING adapter packet and copy/export the exact typed JSON needed by Production, removing the current packet-discovery dead end without fabricating facts.
+- Branch/base: `codex/feat/listing-creative-adapter-export` from `origin/main` `6455ff3326c4a65fd65606b728ffafcfb9900c19`.
+- Risk: high-risk/manual because the full export can contain confidential vendor/contact/address/shipping fields and is guarded by admin AAL2/CSRF/origin/rate limits. No WING write, paid provider call, publication, database migration, or secret change.
+- Root-cause class: code/operational boundary; Git and Production store only sanitized digests/handoffs, while no owner adapter export screen existed.
+- Cloud-first gate: no new durable state. GitHub owns code/docs; the authenticated browser download is disposable; the external adapter or approved remote handoff remains authoritative. Private fields are not logged or committed.
+- Scope: typed adapter export contract, pure packet parse/readiness/redaction, protected API, admin page with full/sanitized export and Production-copy action, tests and architecture decision.
+- Progress: 8/10 steps complete (base audit, cloud/security design, contract/pure engine, protected route/UI, focused/full tests, typecheck/lint/build, browser E2E, diff/secret review).
+- Current: commit/push and create the high-risk manual PR; then wait for exact-head CI/Preview and owner merge.
+- Blockers: none for code validation; owner must manually review/merge. Actual packet export still requires an external adapter input containing valid WING internal codes and separate approval references.
+- Non-goals: no reconstruction from Git fixtures, no WING submission, no paid generation, no private packet persistence.
+
 ## 2026-08-15 Expired creative-plan re-prepare
 
 - Objective/revenue impact: let an operator recover from an expired immutable
