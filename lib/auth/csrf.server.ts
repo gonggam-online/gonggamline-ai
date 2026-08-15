@@ -19,7 +19,8 @@ export type AdminCsrfPurpose =
   | "product-competition-batch"
   | "listing-creative-dispatch-prepare"
   | "listing-creative-dispatch"
-  | "listing-creative-adapter-export";
+  | "listing-creative-adapter-export"
+  | "listing-live-write-approval";
 
 export type AdminCsrfToken = Readonly<{
   token: string;

@@ -179,7 +179,7 @@ export type ListingContentInput = Readonly<{
 }>;
 
 export type RegistrationCommerceFields = Readonly<{
-  liveWriteApproval: Readonly<{ approved: boolean; approvalReference: string; payloadDigest?: string }>;
+  liveWriteApproval: Readonly<{ approved: boolean; approvalReference: string; payloadDigest?: string; approvalExpiresAt?: string }>;
   vendorUserId: string;
   displayCategoryCode: number;
   saleStartedAt: string;
