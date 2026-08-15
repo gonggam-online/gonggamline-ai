@@ -51,3 +51,37 @@ test("re-prepare keeps live-write approval separate and fails closed when its re
     /ADAPTER_REPREPARE_LIVE_APPROVAL_MISMATCH/,
   );
 });
+
+test("re-prepare rejects a packet-bound approval digest that moved to another payload", () => {
+  const value = request();
+  assert.throws(
+    () => reprepareListingCreativeAdapterPacket({
+      ...value.packet,
+      commerce: {
+        ...value.packet.commerce,
+        liveWriteApproval: {
+          ...value.packet.commerce.liveWriteApproval,
+          payloadDigest: "0".repeat(64),
+        },
+      },
+    }, value.revision, "2026-08-15T00:00:00.000Z"),
+    /ADAPTER_REPREPARE_LIVE_APPROVAL_BINDING_MISMATCH/,
+  );
+});
+
+test("re-prepare rejects an expired packet-bound approval", () => {
+  const value = request();
+  assert.throws(
+    () => reprepareListingCreativeAdapterPacket({
+      ...value.packet,
+      commerce: {
+        ...value.packet.commerce,
+        liveWriteApproval: {
+          ...value.packet.commerce.liveWriteApproval,
+          approvalExpiresAt: "2026-08-14T00:00:00.000Z",
+        },
+      },
+    }, value.revision, "2026-08-15T00:00:00.000Z"),
+    /ADAPTER_REPREPARE_LIVE_APPROVAL_EXPIRED/,
+  );
+});

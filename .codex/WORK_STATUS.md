@@ -5991,3 +5991,67 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Changed files so far: `services/listing-creative-render.service.ts`, `services/listing-creative-operator-dispatch.service.ts`, `services/listing-creative-dispatch.service.ts`, and `tests/listing-creative-qa-approval.test.ts`.
 - Focused validation so far: 14/14 creative QA/operator tests passed; typecheck passed.
 - Full validation: lint passed with zero errors and four pre-existing unrelated warnings; typecheck passed; full tests 667/667 passed; production build passed with 87 routes; `git diff --check` passed; changed production sources contain no provider secret, KK946 value, or private adapter marker.
+
+# Current task snapshot — 2026-08-15 Owner live-write approval issuance
+
+- Objective: issue and persist an owner-confirmed live-write approval bound to
+  the current external adapter packet/revision so the existing re-prepare gate
+  can complete without invented references.
+- Branch/base: `codex/feat/owner-live-write-approval` from latest
+  `origin/main` `e62751c`.
+- Risk: high-risk/manual; commerce-write authorization, confidential packet
+  handling, authenticated Production route, and Supabase private object write.
+- Root-cause class: code/contract gap. The existing re-prepare input accepted a
+  reference but no route or durable issuer existed. No external configuration
+  or database migration is being compensated for.
+- Cloud-first: sanitized approval manifests are authoritative in the accepted
+  Supabase private creative bucket; GitHub owns code/contracts/docs; browser
+  input and local test output are disposable. No raw packet or secret is stored.
+- Scope: typed approval contract, normalized target/revision digests, private
+  create-only storage, AAL2/exact-origin/CSRF/rate-limited issuance route, and
+  re-prepare UI integration with explicit owner confirmation.
+- Non-goals: no automatic WING submission, paid image call, public publication,
+  content approval, registration mapping, DB migration/RLS change, or secret
+  configuration.
+- Progress: 8/9 steps complete (governance/base audit, contract/engine,
+  private storage service, protected route, UI integration, focused tests,
+  lint/typecheck/build, and complete diff review).
+- Current: commit/push and create a high-risk Draft PR with manual merge
+  required; the full suite has one unrelated pre-existing orchestrator timing
+  failure that is recorded below.
+- Blocker/owner action after delivery: manually review/merge the PR, then use
+  the Production re-prepare page to click the explicit owner issuance action.
+- Changed files: live-write approval domain/contract/engine/service/route,
+  CSRF purpose, re-prepare UI/verification, architecture/decision docs, and
+  focused tests.
+- Remaining risks: Supabase Production private bucket configuration and
+  owner allowlist must be present; approval issuance itself remains a manual
+  owner action and does not authorize the downstream WING write automatically.
+  Full suite result was 677/679: one A08 importer expectation was updated and
+  passes in isolation; the remaining failure is the pre-existing
+  `budget breach terminates the App Server before a late file mutation` timing
+  test in `tests/orchestrator-phase-3.test.ts`.
+- Delivery checkpoint: implementation commit `6c44c36` plus the E2E assertion
+  fix `3d1d5e2` are pushed to `codex/feat/owner-live-write-approval`; Draft PR
+  #144 is open with `manual-merge-required`. Vercel Preview deployed the exact
+  head and the local/browser smoke passes; the first remote Preview E2E failure
+  was an outdated assertion and is being re-run on `3d1d5e2`. Production
+  smoke, owner approval issuance, paid generation, and WING write have not
+  been executed.
+
+# CI baseline replay recovery — 2026-08-15
+
+- The exact-head PR check `ci-db-baseline-replay` first failed after migrations
+  000-025 applied because Supabase CLI received upstream HTTP 502 (`An invalid
+  response was received from the upstream server`) while restarting the
+  disposable stack. This is external CI/Supabase service instability, not a
+  migration or application-code failure.
+- The failed job was rerun without changing code. Run `31880795285` completed
+  successfully, including the full migration replay and stack teardown. All
+  other exact-head checks are green: tests, lint, build, typecheck, security
+  audit, item-selection security, atomic-product-mutation, Preview browser E2E,
+  and Vercel deployment.
+- HEAD remains `1914b41f4ec37b6eba381521c18b247ce4c3abbe`; no code or migration
+  change was made for the transient failure. PR #144 remains high-risk and
+  `manual-merge-required`; no Production commerce write, paid generation,
+  publication, or WING submission was performed.

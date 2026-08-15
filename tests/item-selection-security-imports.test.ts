@@ -27,6 +27,7 @@ test("A08: the service-role constructor has only approved repository importers",
   assert.deepEqual(importers, [
     "services/listing-creative-asset.repository.ts",
     "services/listing-creative-operator.repository.ts",
+    "services/listing-live-write-approval.service.ts",
     "services/item-selection-run.repository.ts",
     "services/product-mutation.repository.ts",
   ].sort());

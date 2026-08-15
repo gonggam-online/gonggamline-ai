@@ -30,6 +30,7 @@ const PURPOSES = new Set<AdminCsrfPurpose>([
   "listing-creative-dispatch-prepare",
   "listing-creative-dispatch",
   "listing-creative-adapter-export",
+  "listing-live-write-approval",
 ]);
 
 export async function GET(request: Request): Promise<Response> {

@@ -3,6 +3,7 @@ import {
   evaluateListingCreativeAdapterPacket,
   parseListingCreativeAdapterPacket,
 } from "@/engines/listing/creative-adapter-export";
+import { liveWriteApprovalTargetDigest } from "@/engines/listing/live-write-approval";
 import type {
   ListingCreativeAdapterPacket,
 } from "@/shared/contracts/listing-creative-adapter-export";
@@ -100,6 +101,10 @@ function validateRevisionBinding(
   if (liveApproval.approved && liveApproval.approvalReference !== revision.liveWriteApprovalReference) {
     throw new Error("ADAPTER_REPREPARE_LIVE_APPROVAL_MISMATCH");
   }
+  if (liveApproval.approved && liveApproval.payloadDigest
+    && liveApproval.payloadDigest !== liveWriteApprovalTargetDigest(packet)) {
+    throw new Error("ADAPTER_REPREPARE_LIVE_APPROVAL_BINDING_MISMATCH");
+  }
 }
 
 export function reprepareListingCreativeAdapterPacket(
@@ -108,6 +113,11 @@ export function reprepareListingCreativeAdapterPacket(
   generatedAt: string,
 ): ListingCreativeAdapterReprepareResult {
   validateRevisionBinding(packet, revision);
+  const approvalExpiresAt = packet.commerce.liveWriteApproval.approvalExpiresAt;
+  if (packet.commerce.liveWriteApproval.approved && approvalExpiresAt
+    && Date.parse(approvalExpiresAt) <= Date.parse(generatedAt)) {
+    throw new Error("ADAPTER_REPREPARE_LIVE_APPROVAL_EXPIRED");
+  }
   const readiness = evaluateListingCreativeAdapterPacket(packet);
   const revisionDigest = digestCanonicalJson({ revision, packetDigest: readiness.packetDigest }) ?? "";
   if (!SHA256.test(revisionDigest)) throw new Error("ADAPTER_REPREPARE_DIGEST_FAILED");

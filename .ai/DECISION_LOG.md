@@ -1862,3 +1862,24 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - The route does not persist packet values, create approvals, invoke a paid provider, publish assets, or submit WING. The external adapter/WING source remains authoritative and must create a new revision when the prior export is unavailable.
 - Full export may contain private vendor, contact, address, and shipping-center fields and must remain inside the authenticated owner browser/approved remote handoff. Sanitized export is not valid Production input.
 - Risk/rollback: high-risk/manual; remove the route/page and CSRF purpose or revert the PR. No database migration or new local durable state is introduced.
+
+# 2026-08-15 - Owner live-write approval issuance v1
+
+- Category: high-risk/manual commerce-write authorization and confidential
+  packet boundary.
+- Decision: add an authenticated owner-only issuance action to the re-prepare
+  screen. It re-evaluates the current packet, requires the exact confirmation
+  `APPROVE_WING_LIVE_WRITE`, computes a normalized packet target digest, and
+  issues a server-created approval reference bound to that digest and revision.
+- Durable state: sanitized approval manifests are create-only objects in the
+  accepted Supabase private creative bucket. Raw packet commerce fields,
+  supplier identifiers, addresses, phone numbers, secrets, and WING responses
+  are not persisted. The object path and approval digest provide recovery and
+  duplicate protection.
+- Separation: issuance does not invoke OpenAI, publish assets, create content
+  approval, map a registration payload, or submit WING. The returned reference
+  is inserted into the packet only after owner confirmation and is consumed by
+  the existing re-prepare gate.
+- Risk/rollback: manual merge required; revert the route/page/service and
+  revoke the CSRF purpose. No database migration or local durable state is
+  introduced. A changed packet or revision requires a new approval.
