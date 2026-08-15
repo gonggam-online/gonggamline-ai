@@ -6038,3 +6038,20 @@ perform the documented read-only Supabase schema and completeness inspection.
   was an outdated assertion and is being re-run on `3d1d5e2`. Production
   smoke, owner approval issuance, paid generation, and WING write have not
   been executed.
+
+# CI baseline replay recovery — 2026-08-15
+
+- The exact-head PR check `ci-db-baseline-replay` first failed after migrations
+  000-025 applied because Supabase CLI received upstream HTTP 502 (`An invalid
+  response was received from the upstream server`) while restarting the
+  disposable stack. This is external CI/Supabase service instability, not a
+  migration or application-code failure.
+- The failed job was rerun without changing code. Run `31880795285` completed
+  successfully, including the full migration replay and stack teardown. All
+  other exact-head checks are green: tests, lint, build, typecheck, security
+  audit, item-selection security, atomic-product-mutation, Preview browser E2E,
+  and Vercel deployment.
+- HEAD remains `1914b41f4ec37b6eba381521c18b247ce4c3abbe`; no code or migration
+  change was made for the transient failure. PR #144 remains high-risk and
+  `manual-merge-required`; no Production commerce write, paid generation,
+  publication, or WING submission was performed.
