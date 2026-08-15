@@ -1,5 +1,15 @@
 # Sprint 3 - Runtime Stabilization
 
+## Current-source adapter re-prepare
+
+- Added an authenticated, no-store owner workflow that creates a new external
+  adapter packet revision from current WING evidence instead of requiring an
+  older JSON export to be recovered.
+- Bound the new packet ID, evidence evaluation/timestamp, source reference,
+  content approval, and separate live-write approval with stable drift errors.
+- Kept private commerce values out of Git/logs and preserved separate WING,
+  paid-provider, publication, and live-write gates.
+
 # Generic Listing Content/Conversion pipeline owner amendment
 
 ## Added

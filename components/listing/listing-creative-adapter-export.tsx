@@ -89,6 +89,9 @@ export function ListingCreativeAdapterExport() {
           WING에서 승인된 값을 외부 adapter가 만든 typed packet으로 검증하고, Production 입력에 필요한 전체 JSON을 복사하거나 파일로 내려받는 화면입니다.
           서버에는 packet을 저장하지 않습니다.
         </p>
+        <p className="text-sm text-indigo-800">
+          이전 export를 찾을 수 없으면 <a className="font-semibold underline" href="/admin/listing/creative-adapter/reprepare">현재 WING 값으로 새 packet revision 생성</a>을 먼저 실행하세요.
+        </p>
       </header>
 
       <section className="rounded-2xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-950">
