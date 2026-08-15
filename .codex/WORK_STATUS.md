@@ -6031,7 +6031,10 @@ perform the documented read-only Supabase schema and completeness inspection.
   passes in isolation; the remaining failure is the pre-existing
   `budget breach terminates the App Server before a late file mutation` timing
   test in `tests/orchestrator-phase-3.test.ts`.
-- Delivery checkpoint: implementation commit `6c44c36` pushed to
-  `codex/feat/owner-live-write-approval`; Draft PR #144 is open with
-  `manual-merge-required`. Exact-head CI/Preview and Production smoke remain
-  post-PR gates and no owner approval or WING write has been executed.
+- Delivery checkpoint: implementation commit `6c44c36` plus the E2E assertion
+  fix `3d1d5e2` are pushed to `codex/feat/owner-live-write-approval`; Draft PR
+  #144 is open with `manual-merge-required`. Vercel Preview deployed the exact
+  head and the local/browser smoke passes; the first remote Preview E2E failure
+  was an outdated assertion and is being re-run on `3d1d5e2`. Production
+  smoke, owner approval issuance, paid generation, and WING write have not
+  been executed.
