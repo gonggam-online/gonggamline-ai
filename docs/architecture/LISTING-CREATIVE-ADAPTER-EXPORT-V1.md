@@ -14,7 +14,20 @@ Provide an authenticated owner boundary for validating an external supplier/WING
 
 ## Recovery and rollback
 
-The external adapter source/export remains the recovery source. If the packet is lost, re-run the owner-controlled adapter against the authenticated WING source and create a new packet revision. The Production creative dispatch screen must not reconstruct a packet from a digest, test fixture, or legacy draft.
+The external adapter source/export remains the recovery source. If an older
+packet export is unavailable or expired, the operator may use the separate
+authenticated re-prepare screen to bind a new packet revision to the current
+WING observation and owner approvals. The revision must carry a new packet ID,
+evidence evaluation ID/timestamp, source reference, content approval, and a
+separate live-write approval reference when applicable. The server verifies
+those bindings and then returns the packet to the existing Export validator;
+it does not reconstruct facts or private codes from a digest, test fixture, or
+legacy draft.
+
+Re-prepare is a no-store transfer boundary. The full packet is not persisted by
+this feature, and the external adapter/approved remote handoff remains the
+authoritative recovery source. WING submission, paid provider use, asset
+publication, and live commerce writes remain separate gates.
 
 Rollback is route/page removal and revocation of the CSRF purpose. No database migration or object-storage mutation is included.
 

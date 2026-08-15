@@ -1,5 +1,34 @@
 # Work status
 
+## 2026-08-15 Current-source external adapter packet re-prepare
+
+- Objective/revenue impact: stop blocking the listing path on recovery of an
+  old JSON export; let an owner create a fresh packet revision from current
+  WING evidence and continue through the existing Export validator.
+- Branch/base: `codex/feat/owner-packet-revision-reprepare` from latest
+  `origin/main` `f595982198254fa6a665234b0d1a44a286e59ad6`.
+- Risk: high-risk/manual because the packet can carry private commerce fields
+  and approval references. No WING write, paid provider call, publication,
+  database migration, secret change, or local durable state is introduced.
+- Root-cause class: code/operational procedure. The prior route only accepted
+  a complete historical packet and intentionally refused to reconstruct one.
+- Scope: generic revision-binding contract, authenticated no-store re-prepare
+  endpoint, owner UI, pure binding tests, and architecture/Decision Log update.
+- Current: implementation and local delivery gates complete; exact external
+  codes and current live-write approval remain owner-controlled inputs.
+- Validation: focused adapter tests 6/6, full tests 674/674, typecheck PASS,
+  lint PASS with four pre-existing unrelated warnings, production build PASS,
+  and local browser E2E 2/2 PASS.
+- Delivery checkpoint: branch is ready for a high-risk/manual PR. Preview and
+  Production deployment must not be described as complete until the owner
+  merges and the exact deployment smoke is run.
+- Last commit: `b6ae02c`; PR #143 is open as draft with
+  `manual-merge-required`. Exact-head CI and Preview browser E2E are PASS;
+  Production remains unchanged pending manual merge.
+- Recovery: GitHub branch/PR owns code and docs; the authenticated WING source
+  or approved remote adapter handoff owns private packet values. No packet is
+  written to Git or local durable storage.
+
 ## 2026-08-15 Owner-controlled external adapter export PR
 
 - Objective/revenue impact: give an owner a recoverable, authenticated screen to validate an external WING adapter packet and copy/export the exact typed JSON needed by Production, removing the current packet-discovery dead end without fabricating facts.

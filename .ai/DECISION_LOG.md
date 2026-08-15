@@ -1,5 +1,29 @@
 # Decision log
 
+## 2026-08-15 - Make current-source packet re-prepare the primary recovery path
+
+- Procedure decision: operators no longer need to recover an older external
+  adapter JSON export. They may create a new packet revision from the current
+  authenticated WING observation and owner-controlled commerce approvals, then
+  pass that revision through the existing adapter Export validation boundary.
+- Binding decision: the revision must bind a new `packetId`, evidence
+  `evaluationId` and `evaluatedAt`, source reference, content approval, and a
+  separate live-write approval reference. The server rejects stale packet IDs,
+  evaluation drift, and approval drift rather than mutating old history.
+- Privacy/durability decision: the re-prepare endpoint is authenticated,
+  no-store, and non-persistent. Full packets remain disposable confidential
+  transfer artifacts; the external adapter/WING source or an approved remote
+  handoff remains authoritative. No private packet is written to Git, logs, or
+  a local durable file.
+- Scope decision: this is product-agnostic and does not reconstruct facts,
+  private shipping codes, rights, assets, or approvals. Missing exact values
+  still produce a validation failure; WING submission, paid generation, and
+  publication remain separate gates.
+- Risk/authority: high-risk/manual because the packet can contain private
+  commerce fields and approval references. Code/fixture/Preview validation may
+  proceed; Production packet generation still requires the authenticated owner
+  boundary.
+
 ## 2026-08-14 - Implement private Listing creative operator runtime
 
 - Runtime decision: implement the accepted S3-16 two-phase boundary as a
