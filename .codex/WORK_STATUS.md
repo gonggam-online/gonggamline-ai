@@ -22,6 +22,9 @@
 - Delivery checkpoint: branch is ready for a high-risk/manual PR. Preview and
   Production deployment must not be described as complete until the owner
   merges and the exact deployment smoke is run.
+- Last commit: `b6ae02c`; PR #143 is open as draft with
+  `manual-merge-required`. Exact-head CI and Preview browser E2E are PASS;
+  Production remains unchanged pending manual merge.
 - Recovery: GitHub branch/PR owns code and docs; the authenticated WING source
   or approved remote adapter handoff owns private packet values. No packet is
   written to Git or local durable storage.
