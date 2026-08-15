@@ -18,12 +18,20 @@
   prepared reference for copy/recovery; add source/unit/browser coverage; run
   complete local gates; commit/push a focused PR; reconcile exact-head CI and
   Preview; then report Production smoke separately.
-- Progress: 7/10 (merged-main audit, UI recovery implementation, focused/unit
-  coverage, full local tests, lint/typecheck/build, and browser E2E complete).
-- Current step: complete diff/security review, commit/push, create the focused
-  PR, and reconcile exact-head CI/Preview.
+- Progress: 10/10 (merged-main audit, UI recovery implementation, focused/unit
+  coverage, full local tests, lint/typecheck/build, browser E2E, PR delivery,
+  exact-head CI, and Preview complete).
+- Current: PR #145 is ready for normal-risk auto-merge after all gates passed;
+  Production smoke remains post-merge and read-only.
 - Non-goals: no automatic human QA PASS, content approval, live-write approval,
   public publication, WING submission, or paid image generation.
+- Delivery checkpoint: commit `f030c9a` is pushed on
+  `codex/feat/listing-creative-dispatch-next`; PR #145 is open, labeled
+  `normal-risk`, and has exact-head Preview browser E2E, Vercel, build, lint,
+  typecheck, tests, security, item-selection, atomic-product-mutation, and
+  database-baseline checks PASS. The first database replay attempt received an
+  upstream Supabase CLI 502 after migrations applied; the failed job was
+  re-run unchanged and passed.
 
 ## 2026-08-15 Current-source external adapter packet re-prepare
 
