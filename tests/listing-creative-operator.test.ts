@@ -95,6 +95,32 @@ test("operator plan expires and cannot be authorized after the immutable window"
   );
 });
 
+test("explicit expired-plan reprepare seed creates a new immutable locator", () => {
+  const original = createPreparedListingCreativeDispatchPlan({
+    listingInput: genericListingInput(),
+    commerce: genericCommerceFields(),
+    administratorUserId: ADMINISTRATOR_ID,
+    preparedAt: NOW,
+  });
+  const reprepared = createPreparedListingCreativeDispatchPlan({
+    listingInput: genericListingInput(),
+    commerce: genericCommerceFields(),
+    administratorUserId: ADMINISTRATOR_ID,
+    preparedAt: "2026-08-15T04:58:00.000Z",
+    preparationAttemptDigest: "a".repeat(64),
+  });
+
+  assert.notEqual(reprepared.reference.dispatchPlanDigest, original.reference.dispatchPlanDigest);
+  assert.equal(reprepared.reference.subjectHash, original.reference.subjectHash);
+  assert.equal(reprepared.reference.revisionDigest, original.reference.revisionDigest);
+  assert.equal(reprepared.preparationAttemptDigest, "a".repeat(64));
+  validatePreparedListingCreativeDispatchPlan(
+    reprepared,
+    "2026-08-15T05:00:00.000Z",
+    ADMINISTRATOR_ID,
+  );
+});
+
 test("authorization and whole-plan reservation bind exact operator and plan", () => {
   const plan = createPreparedListingCreativeDispatchPlan({
     listingInput: genericListingInput(),
@@ -156,6 +182,9 @@ test("operator production path stops at private human review and contains no pro
   assert.match(source, /REVIEW_REQUIRED/);
   assert.match(source, /contentApproved:\s*false/);
   assert.match(source, /liveWriteApproved:\s*false/);
+  assert.match(source, /reprepareExpiredPlanReference/);
+  assert.match(source, /DISPATCH_REPREPARE_NOT_EXPIRED/);
+  assert.match(source, /preparationAttemptDigest/);
 });
 
 test("dispatch route binds fresh admin, origin, JSON, CSRF and reservation before provider", () => {

@@ -46,6 +46,8 @@ export type PreparedListingCreativeDispatchPlan = Readonly<{
   preparedByAdministratorHash: string;
   preparedAt: string;
   expiresAt: string;
+  /** Present only for an explicit post-expiry re-prepare attempt. */
+  preparationAttemptDigest?: string;
 }>;
 
 export type ListingCreativeDispatchAuthorization = Readonly<{

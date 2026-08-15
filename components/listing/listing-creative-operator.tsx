@@ -28,8 +28,9 @@ export function ListingCreativeOperator() {
   const [confirmation, setConfirmation] = useState("");
   const [busy, setBusy] = useState(false);
   const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [reprepareAvailable, setReprepareAvailable] = useState(false);
 
-  async function prepare() {
+  async function prepare(reprepareExpiredPlanReference?: string) {
     setBusy(true);
     setErrorCode(null);
     try {
@@ -46,14 +47,20 @@ export function ListingCreativeOperator() {
           schemaVersion: LISTING_CREATIVE_OPERATOR_API_VERSION,
           listingInput: parsed.listingInput,
           commerce: parsed.commerce,
+          ...(reprepareExpiredPlanReference === undefined
+            ? {}
+            : { reprepareExpiredPlanReference }),
         }),
       });
       const body = await response.json() as ApiEnvelope<ListingCreativeDispatchPreparedDto>;
       if (!response.ok || !body.data) throw new Error(body.error?.code ?? "PREPARE_FAILED");
       setPrepared(body.data);
       setReview(null);
+      setReprepareAvailable(false);
     } catch (error) {
-      setErrorCode(error instanceof Error ? error.message : "PREPARE_FAILED");
+      const code = error instanceof Error ? error.message : "PREPARE_FAILED";
+      setErrorCode(code);
+      setReprepareAvailable(code === "DISPATCH_ALREADY_RESERVED");
     } finally {
       setBusy(false);
     }
@@ -117,6 +124,16 @@ export function ListingCreativeOperator() {
         >
           비용 없이 PREPARE
         </button>
+        {reprepareAvailable && prepared ? (
+          <button
+            className="mt-3 ml-3 rounded-lg border border-amber-700 px-4 py-2 text-sm font-semibold text-amber-900 disabled:opacity-50"
+            disabled={busy}
+            onClick={() => void prepare(prepared.preparedPlanReference)}
+            type="button"
+          >
+            만료된 계획 재준비(동일 packet)
+          </button>
+        ) : null}
       </section>
 
       {prepared ? (

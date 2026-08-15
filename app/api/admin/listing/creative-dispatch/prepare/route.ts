@@ -20,7 +20,12 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const MAX_BODY_BYTES = 512 * 1024;
-const KEYS = new Set(["schemaVersion", "listingInput", "commerce"]);
+const KEYS = new Set([
+  "schemaVersion",
+  "listingInput",
+  "commerce",
+  "reprepareExpiredPlanReference",
+]);
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -33,6 +38,9 @@ function parse(value: unknown): PrepareListingCreativeDispatchRequest | null {
     || value.schemaVersion !== LISTING_CREATIVE_OPERATOR_API_VERSION
     || !record(value.listingInput)
     || !record(value.commerce)
+    || (value.reprepareExpiredPlanReference !== undefined
+      && (typeof value.reprepareExpiredPlanReference !== "string"
+        || value.reprepareExpiredPlanReference.length > 256))
   ) return null;
   return value as PrepareListingCreativeDispatchRequest;
 }
@@ -55,9 +63,11 @@ function failure(error: unknown): Response {
     || error instanceof AdminCsrfError
   ) return Response.json({ error: { code: error.code } }, { status: error.status });
   if (error instanceof ListingCreativeOperatorServiceError) {
+    const conflict = error.code === "DISPATCH_ALREADY_RESERVED"
+      || error.code === "DISPATCH_REPREPARE_NOT_EXPIRED";
     return Response.json(
       { error: { code: error.code, retryable: false } },
-      { status: error.code === "DISPATCH_ALREADY_RESERVED" ? 409 : 422 },
+      { status: conflict ? 409 : 422 },
     );
   }
   return Response.json({ error: { code: "INVALID_REQUEST", retryable: false } }, { status: 422 });

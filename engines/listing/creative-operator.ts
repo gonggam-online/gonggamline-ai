@@ -178,8 +178,12 @@ export function createPreparedListingCreativeDispatchPlan(input: Readonly<{
   commerce: RegistrationCommerceFields;
   administratorUserId: string;
   preparedAt: string;
+  preparationAttemptDigest?: string;
 }>): PreparedListingCreativeDispatchPlan {
   iso(input.preparedAt);
+  if (input.preparationAttemptDigest !== undefined && !SHA256.test(input.preparationAttemptDigest)) {
+    throw new ListingCreativeOperatorError("OPERATOR_PLAN_INVALID");
+  }
   const listing = buildListingContentPacket(input.listingInput, input.commerce);
   const binding = contentBinding(listing);
   const planning = planningInputFromListingContent(input.listingInput);
@@ -226,6 +230,9 @@ export function createPreparedListingCreativeDispatchPlan(input: Readonly<{
     preparedByAdministratorHash: listingCreativeAdministratorHash(input.administratorUserId),
     preparedAt: input.preparedAt,
     expiresAt: new Date(preparedAtMs + PLAN_TTL_MS).toISOString(),
+    ...(input.preparationAttemptDigest === undefined
+      ? {}
+      : { preparationAttemptDigest: input.preparationAttemptDigest }),
   });
   const dispatchPlanDigest = digestCanonicalJson(planDigestBody(body));
   if (!dispatchPlanDigest) throw new ListingCreativeOperatorError("OPERATOR_PLAN_INVALID");
@@ -270,6 +277,9 @@ export function validatePreparedListingCreativeDispatchPlan(
     || (administratorUserId !== undefined
       && plan.preparedByAdministratorHash !== listingCreativeAdministratorHash(administratorUserId))
   ) throw new ListingCreativeOperatorError("OPERATOR_PLAN_INVALID");
+  if (plan.preparationAttemptDigest !== undefined && !SHA256.test(plan.preparationAttemptDigest)) {
+    throw new ListingCreativeOperatorError("OPERATOR_PLAN_INVALID");
+  }
   iso(plan.preparedAt);
   iso(plan.expiresAt);
   if (Date.parse(plan.expiresAt) !== Date.parse(plan.preparedAt) + PLAN_TTL_MS) {

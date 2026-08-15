@@ -1,5 +1,7 @@
 import "server-only";
 
+import { createHash, randomBytes } from "node:crypto";
+
 import {
   bindAuthorizedCreativeJobs,
   createListingCreativeDispatchAuthorization,
@@ -8,6 +10,7 @@ import {
   createPreparedListingCreativeDispatchPlan,
   formatListingCreativeOperatorPlanReference,
   parseListingCreativeOperatorPlanReference,
+  ListingCreativeOperatorError,
   validatePreparedListingCreativeDispatchPlan,
 } from "@/engines/listing/creative-operator";
 import type { ManagedListingCreativeStorage } from "@/engines/listing/creative-storage";
@@ -32,6 +35,7 @@ import type {
   ListingCreativeOperatorPlanReference,
   ListingCreativeOperatorReviewDto,
   ListingCreativeOperatorReviewHandoff,
+  PreparedListingCreativeDispatchPlan,
 } from "@/shared/domain/listing-creative-operator";
 
 const REVIEW_URL_TTL_SECONDS = 15 * 60;
@@ -43,7 +47,9 @@ export class ListingCreativeOperatorServiceError extends Error {
     | "DISPATCH_ALREADY_RESERVED"
     | "DISPATCH_AUTHORIZATION_FAILED"
     | "DISPATCH_EXECUTION_FAILED"
-    | "DISPATCH_REVIEW_UNAVAILABLE") {
+    | "DISPATCH_REVIEW_UNAVAILABLE"
+    | "DISPATCH_REPREPARE_FAILED"
+    | "DISPATCH_REPREPARE_NOT_EXPIRED") {
     super(code);
     this.name = "ListingCreativeOperatorServiceError";
   }
@@ -104,21 +110,74 @@ export async function prepareListingCreativeOperatorDispatch(
     ?? createProductionListingCreativeOperatorRepository(context);
   const clock = dependencies.clock ?? (() => new Date());
   try {
+    const preparedAt = clock().toISOString();
+    let preparationAttemptDigest: string | undefined;
+    if (request.reprepareExpiredPlanReference !== undefined) {
+      let previous: PreparedListingCreativeDispatchPlan;
+      let expired = false;
+      try {
+        const previousReference = parseListingCreativeOperatorPlanReference(
+          request.reprepareExpiredPlanReference,
+        );
+        previous = await repository.loadPrepared(previousReference);
+        validatePreparedListingCreativeDispatchPlan(
+          previous,
+          preparedAt,
+          context.administratorUserId,
+        );
+      } catch (error) {
+        if (error instanceof ListingCreativeOperatorError
+          && error.code === "OPERATOR_PLAN_EXPIRED") {
+          expired = true;
+        } else {
+          throw new ListingCreativeOperatorServiceError("DISPATCH_REPREPARE_FAILED");
+        }
+      }
+      if (!expired) throw new ListingCreativeOperatorServiceError("DISPATCH_REPREPARE_NOT_EXPIRED");
+
+      const stablePlan = createPreparedListingCreativeDispatchPlan({
+        listingInput: request.listingInput,
+        commerce: request.commerce,
+        administratorUserId: context.administratorUserId,
+        preparedAt,
+      });
+      if (
+        stablePlan.reference.subjectHash !== previous!.reference.subjectHash
+        || stablePlan.reference.revisionDigest !== previous!.reference.revisionDigest
+        || stablePlan.reference.dispatchPlanDigest !== previous!.reference.dispatchPlanDigest
+        || stablePlan.packetIdDigest !== previous!.packetIdDigest
+        || stablePlan.evidenceEvaluationId !== previous!.evidenceEvaluationId
+        || stablePlan.policyDigest !== previous!.policyDigest
+        || stablePlan.categoryMetadataDigest !== previous!.categoryMetadataDigest
+      ) throw new ListingCreativeOperatorServiceError("DISPATCH_REPREPARE_FAILED");
+
+      preparationAttemptDigest = createPreparationAttemptDigest();
+    }
+
     const plan = createPreparedListingCreativeDispatchPlan({
       listingInput: request.listingInput,
       commerce: request.commerce,
       administratorUserId: context.administratorUserId,
-      preparedAt: clock().toISOString(),
+      preparedAt,
+      preparationAttemptDigest,
     });
     await repository.savePrepared(plan);
     return preparedDto(plan);
   } catch (error) {
+    if (error instanceof ListingCreativeOperatorServiceError) throw error;
     if (error && typeof error === "object"
       && "code" in error && error.code === "ALREADY_EXISTS") {
       throw new ListingCreativeOperatorServiceError("DISPATCH_ALREADY_RESERVED");
     }
     throw new ListingCreativeOperatorServiceError("DISPATCH_PREPARE_FAILED");
   }
+}
+
+function createPreparationAttemptDigest(): string {
+  return createHash("sha256")
+    .update("gonggamline-listing-creative-reprepare-v1:", "utf8")
+    .update(randomBytes(16))
+    .digest("hex");
 }
 
 async function reviewDto(
