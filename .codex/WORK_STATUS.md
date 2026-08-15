@@ -10,6 +10,7 @@
 - Scope: typed adapter export contract, pure packet parse/readiness/redaction, protected API, admin page with full/sanitized export and Production-copy action, tests and architecture decision.
 - Progress: 8/10 steps complete (base audit, cloud/security design, contract/pure engine, protected route/UI, focused/full tests, typecheck/lint/build, browser E2E, diff/secret review).
 - Current: commit/push and create the high-risk manual PR; then wait for exact-head CI/Preview and owner merge.
+- Last commit: `fb2be2f` (`feat: add owner-controlled adapter export screen`).
 - Blockers: none for code validation; owner must manually review/merge. Actual packet export still requires an external adapter input containing valid WING internal codes and separate approval references.
 - Non-goals: no reconstruction from Git fixtures, no WING submission, no paid generation, no private packet persistence.
 
