@@ -27,6 +27,7 @@ export function ListingCreativeOperator() {
   const [prepared, setPrepared] = useState<ListingCreativeDispatchPreparedDto | null>(null);
   const [review, setReview] = useState<ListingCreativeOperatorReviewDto | null>(null);
   const [confirmation, setConfirmation] = useState("");
+  const [recoveryReference, setRecoveryReference] = useState("");
   const [busy, setBusy] = useState(false);
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const [reprepareAvailable, setReprepareAvailable] = useState(false);
@@ -56,6 +57,7 @@ export function ListingCreativeOperator() {
       const body = await response.json() as ApiEnvelope<ListingCreativeDispatchPreparedDto>;
       if (!response.ok || !body.data) throw new Error(body.error?.code ?? "PREPARE_FAILED");
       setPrepared(body.data);
+      setRecoveryReference(body.data.preparedPlanReference);
       setReview(null);
       setReprepareAvailable(false);
     } catch (error) {
@@ -69,6 +71,8 @@ export function ListingCreativeOperator() {
 
   async function dispatch() {
     if (!prepared || confirmation !== "AUTHORIZE_PAID_IMAGE_GENERATION") return;
+    const preparedPlanReference = prepared.preparedPlanReference;
+    setRecoveryReference(preparedPlanReference);
     setBusy(true);
     setErrorCode(null);
     try {
@@ -91,6 +95,28 @@ export function ListingCreativeOperator() {
       setReview(body.data);
     } catch (error) {
       setErrorCode(error instanceof Error ? error.message : "DISPATCH_FAILED");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function recoverReview() {
+    const reference = recoveryReference.trim();
+    if (reference.length === 0) return;
+    setBusy(true);
+    setErrorCode(null);
+    try {
+      const response = await fetch(
+        `/api/admin/listing/creative-dispatch?preparedPlanReference=${encodeURIComponent(reference)}`,
+        { credentials: "same-origin", cache: "no-store" },
+      );
+      const body = await response.json() as ApiEnvelope<ListingCreativeOperatorReviewDto>;
+      if (!response.ok || !body.data) throw new Error(body.error?.code ?? "REVIEW_RECOVERY_FAILED");
+      setReview(body.data);
+      setPrepared(null);
+      setReprepareAvailable(false);
+    } catch (error) {
+      setErrorCode(error instanceof Error ? error.message : "REVIEW_RECOVERY_FAILED");
     } finally {
       setBusy(false);
     }
@@ -138,6 +164,35 @@ export function ListingCreativeOperator() {
             만료된 계획 재준비(동일 packet)
           </button>
         ) : null}
+        {prepared ? (
+          <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+            <p className="font-medium">PREPARED plan reference (검토 복구용)</p>
+            <code className="mt-2 block break-all font-mono text-xs">{prepared.preparedPlanReference}</code>
+          </div>
+        ) : null}
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+        <h2 className="text-lg font-semibold">Private REVIEW_REQUIRED handoff 복구</h2>
+        <p className="mt-2 text-sm text-slate-600">
+          브라우저 응답을 잃었거나 signed URL이 만료된 경우, 서버에 저장된 plan reference를
+          입력하면 새 비공개 검토 URL만 발급합니다. 생성·승인·게시·WING 쓰기는 실행하지 않습니다.
+        </p>
+        <input
+          aria-label="Prepared plan reference for review recovery"
+          className="mt-3 w-full rounded-lg border border-slate-300 bg-white p-3 font-mono text-xs"
+          onChange={(event) => setRecoveryReference(event.target.value)}
+          placeholder="v1.<subjectHash>.<revisionDigest>.<dispatchPlanDigest>"
+          value={recoveryReference}
+        />
+        <button
+          className="mt-3 rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-800 disabled:opacity-50"
+          disabled={busy || recoveryReference.trim().length === 0}
+          onClick={() => void recoverReview()}
+          type="button"
+        >
+          검토 handoff 다시 불러오기
+        </button>
       </section>
 
       {prepared ? (
