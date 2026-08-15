@@ -1,5 +1,47 @@
 # Work status
 
+## 2026-08-15 PR #140 listing creative dispatch timeout hardening
+
+- Objective/revenue impact: remove the observed Vercel 300-second timeout from
+  the governed paid creative dispatch without adding retries or weakening the
+  private-review, human-QA, publication, or WING boundaries.
+- Branch/base: `codex/fix/listing-creative-dispatch-timeout`; based on the
+  merged `origin/main` head at PR start; current head
+  `740f457aa03708d359610d3f0227e2cbb17080bf`.
+- Risk: high-risk/manual. This path invokes a paid image provider and writes
+  private Supabase review artifacts. PR #140 remains manual-merge-required;
+  auto-merge and WING/live commerce writes are prohibited.
+- Root cause order: external/provider configuration was sufficient to start the
+  call; no database defect was found; code executed four already-reserved
+  provider jobs serially, with a 120-second provider timeout per job, exceeding
+  Vercel's 300-second function limit. The Production attempt ended with a 504
+  `Vercel Runtime Timeout Error` and did not return `REVIEW_REQUIRED`.
+- Cloud-first gate: no new durable state. Supabase private Storage remains the
+  authoritative archive/review store; the concurrency change is code-only and
+  deterministic. No raw provider payload, signed URL, PII, or secret is stored
+  in Git or logs.
+- Scope: added a bounded `Promise.all` archive helper for the four jobs and
+  reused it in the governed operator and legacy test facade. Input order and
+  archive sequence remain deterministic; no automatic retry is introduced.
+- Validation: local focused creative/operator tests 14/14; full tests 667/667;
+  typecheck, lint (zero errors; four pre-existing warnings), production build
+  (87 routes), and `git diff --check` pass. Exact-head CI run `31863839641`
+  passed all jobs after one unrelated flaky security replay was rerun. Exact
+  Preview deployment `CoxXYNJriHFKukj3EbmCKEMiBCQ6` and browser E2E run
+  `31863839638` pass.
+- Delivery: PR #140 is open and ready, labeled `manual-merge-required`, with
+  merge commit `740f457aa03708d359610d3f0227e2cbb17080bf` pushed. No merge or
+  new Production paid dispatch has been performed from this branch.
+- Exact next action: owner manually merges PR #140, then checks OpenAI usage /
+  possible partial charge from the timed-out attempt before authorizing one new
+  bounded paid dispatch. After a successful `REVIEW_REQUIRED` handoff, a human
+  must complete product-representation QA; only then can selected publication,
+  registration mapping, and any separate WING live-write approval proceed.
+- Remaining risks: the prior timed-out invocation may have produced partial
+  provider usage/charges; this patch reduces wall-clock time but does not prove
+  provider billing outcome. Human representation review, selected-candidate
+  publication, and WING registration remain intentionally incomplete.
+
 ## 2026-08-14 S3-16 Listing creative operator runtime
 
 - Objective/revenue impact: make the merged fact-only GPT Image provider
@@ -5856,3 +5898,19 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Remaining risks: provider terms and copyright scope can change; operational
   evidence storage, automated discovery, publication, and takedown SLA are not
   implemented or authorized.
+# 2026-08-15 Listing creative dispatch timeout hardening
+
+- Objective/revenue impact: make the governed fact-only Production dispatch finish within the Vercel 300-second limit so the first approved product can reach private `REVIEW_REQUIRED` without retrying a paid request.
+- Branch/base: `codex/fix/listing-creative-dispatch-timeout` from current merged operator runtime (`origin/main` `a504b28f54198ba0fc62595425e8dd42f555dc0f` plus the prior status checkpoint).
+- Risk: high-risk/manual because the path invokes a paid provider and writes private Production artifacts; this PR changes execution scheduling only and does not authorize a new paid call, publication, content approval, or WING write.
+- Root-cause order: external configuration is healthy enough to reach the provider; database/storage are the approved Supabase private archive and create-only manifests; code is the confirmed failure because four sequential renders exceeded Vercel's 300-second Production limit.
+- Cloud-first gate: no new durable state. Supabase private Storage remains authoritative for prepared/authorized/reserved/failure/review manifests and generated masters; GitHub owns code/tests/status; local browser and test output are disposable.
+- Scope: bounded concurrent job execution with all-or-nothing handoff semantics, timeout regression coverage, sanitized failure evidence, and delivery/Preview verification.
+- Non-goals: no automatic retry, no new provider/config/secret, no schema/RLS change, no public Blob publication, no content/live approval, and no WING write.
+- Progress: 6/10 steps complete (governance/base audit, Production timeout evidence, concurrent render helper, focused tests/typecheck, full tests/lint/build, and diff/secret review).
+- Current step: commit/push and create the high-risk manual PR, then wait for exact-head Preview gates.
+- Blocker/owner action after delivery: manually review/merge the high-risk PR; only then perform a separate paid dispatch after provider usage/partial-charge status is checked.
+- Exact Production evidence: Vercel error log `Vercel Runtime Timeout Error: Task timed out after 300 seconds` for `POST /api/admin/listing/creative-dispatch`, status 504, deployment `dpl_BD4FjCFYWhW2Sturgp6wwWC3h4jc`.
+- Changed files so far: `services/listing-creative-render.service.ts`, `services/listing-creative-operator-dispatch.service.ts`, `services/listing-creative-dispatch.service.ts`, and `tests/listing-creative-qa-approval.test.ts`.
+- Focused validation so far: 14/14 creative QA/operator tests passed; typecheck passed.
+- Full validation: lint passed with zero errors and four pre-existing unrelated warnings; typecheck passed; full tests 667/667 passed; production build passed with 87 routes; `git diff --check` passed; changed production sources contain no provider secret, KK946 value, or private adapter marker.

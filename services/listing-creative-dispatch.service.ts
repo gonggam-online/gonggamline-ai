@@ -6,7 +6,7 @@ import {
 } from "@/engines/listing/creative-planner";
 import type { ListingCreativeProvider } from "@/engines/listing/creative-renderer";
 import type { ManagedListingCreativeStorage } from "@/engines/listing/creative-storage";
-import { executeAndArchiveCreativeRender } from "@/services/listing-creative-render.service";
+import { executeAndArchiveCreativeRenders } from "@/services/listing-creative-render.service";
 import type {
   ListingContentInput,
   ListingContentPacket,
@@ -62,20 +62,16 @@ export async function generateAndArchiveListingCreative(input: Readonly<{
   }
   const planning = planningInputFromListingContent(input.listingInput);
   const jobs = planExternalCreativeJobs(planning, input.provider.approval);
-  const artifacts: RenderedCreativeArtifact[] = [];
-  const archived: ArchivedListingCreativeAsset[] = [];
-  for (const [index, job] of jobs.entries()) {
-    const result = await executeAndArchiveCreativeRender({
-      job,
-      provider: input.provider,
-      storage: input.storage,
-      revisionDigest: planning.revisionId,
-      occurredAt: input.occurredAt,
-      archiveSequence: input.archiveSequenceStart + index,
-    });
-    artifacts.push(result.artifact);
-    archived.push(result.archived);
-  }
+  const results = await executeAndArchiveCreativeRenders({
+    jobs,
+    provider: input.provider,
+    storage: input.storage,
+    revisionDigest: planning.revisionId,
+    occurredAt: input.occurredAt,
+    archiveSequenceStart: input.archiveSequenceStart,
+  });
+  const artifacts: RenderedCreativeArtifact[] = results.map(({ artifact }) => artifact);
+  const archived: ArchivedListingCreativeAsset[] = results.map(({ archived: asset }) => asset);
   const creative = buildExternalCreativeReviewPacket({ planning, listing, jobs, artifacts });
   const privateReviewAssets = await Promise.all(archived.map(async (asset) => Object.freeze({
     artifactId: asset.descriptor.artifactId,
