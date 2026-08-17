@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   LISTING_CREATIVE_OPERATOR_API_VERSION,
   type ListingCreativeDispatchPreparedDto,
 } from "@/shared/contracts/listing-creative-operator-dispatch";
 import type { ListingCreativeOperatorReviewDto } from "@/shared/domain/listing-creative-operator";
+import type { AdminSessionStatusDto } from "@/shared/contracts/admin-session-status";
 
 type ApiEnvelope<T> = Readonly<{
   data?: T;
@@ -35,6 +36,46 @@ export function ListingCreativeOperator() {
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const [preflightStatus, setPreflightStatus] = useState<string | null>(null);
   const [reprepareAvailable, setReprepareAvailable] = useState(false);
+  const [sessionStatus, setSessionStatus] = useState<AdminSessionStatusDto | null>(null);
+  const [trustedBrowser, setTrustedBrowser] = useState(false);
+
+  async function refreshSessionStatus(): Promise<void> {
+    const response = await fetch("/api/admin/auth/session-status", {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+    if (!response.ok) {
+      setSessionStatus(null);
+      return;
+    }
+    const status = await response.json() as AdminSessionStatusDto;
+    setSessionStatus(status);
+    setTrustedBrowser(status.trustedBrowserPreference);
+  }
+
+  useEffect(() => {
+    void refreshSessionStatus();
+    const interval = window.setInterval(() => void refreshSessionStatus(), 20_000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  async function updateTrustedBrowser(enabled: boolean): Promise<void> {
+    setTrustedBrowser(enabled);
+    try {
+      const token = await csrf("admin-session");
+      const response = await fetch("/api/admin/auth/trusted-browser-preference", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "X-GonggamLine-CSRF": token },
+        body: JSON.stringify({ enabled }),
+      });
+      if (!response.ok) throw new Error("TRUSTED_BROWSER_PREFERENCE_FAILED");
+      await refreshSessionStatus();
+    } catch (error) {
+      setTrustedBrowser(!enabled);
+      setErrorCode(error instanceof Error ? error.message : "TRUSTED_BROWSER_PREFERENCE_FAILED");
+    }
+  }
 
   async function prepare(reprepareExpiredPlanReference?: string) {
     setBusy(true);
@@ -179,12 +220,38 @@ export function ListingCreativeOperator() {
         />
         <button
           className="mt-3 rounded-lg bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-          disabled={busy || adapterJson.trim().length === 0}
+          disabled={busy || adapterJson.trim().length === 0 || sessionStatus?.mutationReady === false}
           onClick={() => void prepare()}
           type="button"
         >
           비용 없이 PREPARE
         </button>
+        <div className="mt-4 rounded-lg border border-indigo-200 bg-indigo-50 p-3 text-sm text-indigo-950">
+          <p className="font-semibold">관리자 세션 상태</p>
+          <p className="mt-1">
+            {sessionStatus?.status === "MFA_VERIFIED"
+              ? `MFA 확인됨 · mutation 유효 ${sessionStatus.ageSeconds ?? 0}초`
+              : sessionStatus?.status === "REAUTH_REQUIRED"
+                ? "MFA 재인증이 필요합니다. 로그인 화면에서 TOTP를 다시 확인하세요."
+                : sessionStatus?.status === "MFA_REQUIRED"
+                  ? "MFA 확인 후 PREPARE와 유료 실행을 사용할 수 있습니다."
+                  : "관리자 세션을 확인하는 중입니다."}
+          </p>
+          {sessionStatus?.expiresAt ? (
+            <p className="mt-1 text-xs text-indigo-800">세션 만료 예정: {sessionStatus.expiresAt} · 만료 전 자동 갱신 시도</p>
+          ) : null}
+          <label className="mt-2 flex items-center gap-2 text-xs">
+            <input
+              checked={trustedBrowser}
+              onChange={(event) => void updateTrustedBrowser(event.target.checked)}
+              type="checkbox"
+            />
+            이 브라우저에서 세션 상태 알림 유지
+          </label>
+          <p className="mt-1 text-[11px] text-indigo-800">
+            신뢰 브라우저 설정은 알림 선호도만 저장하며, 유료 실행·WING 변경에는 항상 MFA가 필요합니다.
+          </p>
+        </div>
         <button
           className="mt-3 ml-3 rounded-lg border border-indigo-700 px-4 py-2 text-sm font-semibold text-indigo-900 disabled:opacity-50"
           disabled={busy}
@@ -264,7 +331,7 @@ export function ListingCreativeOperator() {
           />
           <button
             className="mt-3 rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-            disabled={busy || confirmation !== "AUTHORIZE_PAID_IMAGE_GENERATION"}
+            disabled={busy || confirmation !== "AUTHORIZE_PAID_IMAGE_GENERATION" || sessionStatus?.mutationReady === false}
             onClick={() => void dispatch()}
             type="button"
           >

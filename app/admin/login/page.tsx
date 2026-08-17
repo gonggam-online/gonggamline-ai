@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 import type {
   AdminMfaEnrollmentDto,
@@ -18,6 +18,11 @@ export default function AdminLoginPage() {
   const [mfaStatus, setMfaStatus] = useState<AdminMfaStatusDto | null>(null);
   const [enrollment, setEnrollment] =
     useState<AdminMfaEnrollmentDto | null>(null);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => void refreshMfaStatus(), 30_000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   async function issueMfaCsrf(): Promise<string | null> {
     const response = await fetch("/api/admin/auth/csrf?purpose=admin-mfa", {
@@ -50,7 +55,7 @@ export default function AdminLoginPage() {
     setMfaStatus(status);
     setMessage(
       status.assurance.current === "aal2"
-        ? "MFA verified."
+        ? "MFA verified. 세션은 자동 갱신되며, 유료·변경 작업은 만료 전 재인증이 안내됩니다."
         : status.enrollmentRequired
           ? "Enroll an authenticator before protected operations."
           : "Enter a current authenticator code to continue.",
