@@ -1,5 +1,27 @@
 # Work status
 
+## 2026-08-17 Provider preflight and dispatch failure classification
+
+- Objective: distinguish Production provider configuration, timeout/upstream,
+  and archive failures before any paid retry; expose a sanitized read-only
+  preflight contract and preserve the private-review/WING boundaries.
+- Branch/base: `codex/fix/listing-creative-provider-preflight` from the current
+  merged `origin/main` line. High-risk/manual because the route guards paid
+  Production dispatch and provider configuration.
+- Evidence: Vercel Production dispatch returned HTTP 502 after 129.8 seconds;
+  OpenAI Usage showed 0 image requests. No WING/public publication occurred.
+- Implemented: pure provider preflight, protected read-only preflight route,
+  stable provider timeout/upstream/configuration/archive error taxonomy, and
+  focused tests. No secret values or provider payloads were stored.
+- Validation: focused preflight/provider/architecture tests PASS; typecheck
+  PASS; full lint/build and PR delivery remain pending.
+- Current blocker: Production provider call must not be retried until the
+  preflight route is deployed and the OpenAI key/model/project access is
+  verified read-only. Existing failed plan remains immutable.
+- Next action: complete local gates, push a manual-merge PR, deploy exact head,
+  call preflight, then create a new plan and request a fresh bounded paid
+  approval only if preflight is READY.
+
 ## 2026-08-15 Post-merge private review handoff recovery
 
 - Objective/revenue impact: after PR #144, let an operator recover a persisted
