@@ -14,6 +14,9 @@ import type { ManagedListingCreativeStorage } from "@/engines/listing/creative-s
 import type { AdminGuardContext } from "@/lib/auth/admin-request-guard.server";
 import { OpenAiSdkListingImageTransport } from "@/lib/listing/openai-image-transport.server";
 import { createProductionManagedListingCreativePrivateStorage } from "@/services/listing-creative-asset.repository";
+import {
+  preflightProductionListingCreativeProvider,
+} from "@/engines/listing/provider-preflight";
 import type {
   CreativeProviderApproval,
   CreativeRenderJob,
@@ -24,6 +27,8 @@ export type ProductionListingImageProviderContext = Readonly<{
   providerApproval: CreativeProviderApproval;
   storage: ManagedListingCreativeStorage;
 }>;
+
+export type { ListingCreativeProviderPreflight } from "@/engines/listing/provider-preflight";
 
 const SHA256 = /^[a-f0-9]{64}$/;
 
@@ -88,9 +93,11 @@ export function createProductionListingImageProviderContext(input: Readonly<{
   inputResolver?: OpenAiListingImageInputResolver;
 }>): ProductionListingImageProviderContext {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
+  const preflight = preflightProductionListingCreativeProvider(process.env);
   if (
     process.env.VERCEL_ENV !== "production"
-    || !apiKey
+    ||
+    preflight.status !== "READY"
     || !SHA256.test(input.authorizationDigest)
     || !SHA256.test(input.dispatchPlanDigest)
   ) throw new Error("OPENAI_IMAGE_CONFIGURATION_UNAVAILABLE");

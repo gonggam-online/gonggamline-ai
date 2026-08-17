@@ -16,6 +16,8 @@ import {
 import type { ManagedListingCreativeStorage } from "@/engines/listing/creative-storage";
 import type { AdminGuardContext } from "@/lib/auth/admin-request-guard.server";
 import { executeAndArchiveCreativeRenders } from "@/services/listing-creative-render.service";
+import { CreativeStorageError } from "@/engines/listing/creative-storage";
+import { OpenAiListingImageError } from "@/engines/listing/openai-image-provider";
 import {
   createProductionListingCreativeOperatorRepository,
   type ListingCreativeOperatorRepository,
@@ -47,6 +49,10 @@ export class ListingCreativeOperatorServiceError extends Error {
     | "DISPATCH_ALREADY_RESERVED"
     | "DISPATCH_AUTHORIZATION_FAILED"
     | "DISPATCH_EXECUTION_FAILED"
+    | "DISPATCH_PROVIDER_CONFIGURATION_UNAVAILABLE"
+    | "DISPATCH_PROVIDER_TIMEOUT"
+    | "DISPATCH_PROVIDER_UPSTREAM"
+    | "DISPATCH_ARCHIVE_FAILED"
     | "DISPATCH_REVIEW_UNAVAILABLE"
     | "DISPATCH_REPREPARE_FAILED"
     | "DISPATCH_REPREPARE_NOT_EXPIRED") {
@@ -173,6 +179,30 @@ export async function prepareListingCreativeOperatorDispatch(
   }
 }
 
+function classifyExecutionFailure(error: unknown):
+  | "DISPATCH_PROVIDER_CONFIGURATION_UNAVAILABLE"
+  | "DISPATCH_PROVIDER_TIMEOUT"
+  | "DISPATCH_PROVIDER_UPSTREAM"
+  | "DISPATCH_ARCHIVE_FAILED"
+  | "DISPATCH_EXECUTION_FAILED" {
+  if (error instanceof CreativeStorageError) return "DISPATCH_ARCHIVE_FAILED";
+  if (error instanceof OpenAiListingImageError) return "DISPATCH_PROVIDER_UPSTREAM";
+  if (error instanceof Error) {
+    const message = error.message.toLowerCase();
+    const status = "status" in error && typeof error.status === "number" ? error.status : null;
+    if (message.includes("configuration_unavailable") || message.includes("api key")) {
+      return "DISPATCH_PROVIDER_CONFIGURATION_UNAVAILABLE";
+    }
+    if (message.includes("timeout") || message.includes("timed out") || status === 408) {
+      return "DISPATCH_PROVIDER_TIMEOUT";
+    }
+    if (status !== null && (status === 401 || status === 403 || status >= 500)) {
+      return "DISPATCH_PROVIDER_UPSTREAM";
+    }
+  }
+  return "DISPATCH_EXECUTION_FAILED";
+}
+
 function createPreparationAttemptDigest(): string {
   return createHash("sha256")
     .update("gonggamline-listing-creative-reprepare-v1:", "utf8")
@@ -284,11 +314,12 @@ export async function authorizeAndDispatchListingCreativeOperatorPlan(
     await repository.saveReviewHandoff(handoff);
     return await reviewDto(handoff, providerContext.storage);
   } catch (error) {
+    const failureCode = classifyExecutionFailure(error);
     try {
       await repository.saveFailure({
         reference,
         authorizationDigest,
-        failureCode: "DISPATCH_EXECUTION_FAILED",
+        failureCode,
         failedAt: clock().toISOString(),
       });
     } catch {
@@ -298,7 +329,7 @@ export async function authorizeAndDispatchListingCreativeOperatorPlan(
       && "code" in error && error.code === "ALREADY_EXISTS") {
       throw new ListingCreativeOperatorServiceError("DISPATCH_ALREADY_RESERVED");
     }
-    throw new ListingCreativeOperatorServiceError("DISPATCH_EXECUTION_FAILED");
+    throw new ListingCreativeOperatorServiceError(failureCode);
   }
 }
 

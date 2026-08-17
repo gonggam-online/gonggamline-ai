@@ -61,7 +61,12 @@ function failure(error: unknown): Response {
   if (error instanceof ListingCreativeOperatorServiceError) {
     const status = error.code === "DISPATCH_ALREADY_RESERVED" ? 409
       : error.code === "DISPATCH_NOT_FOUND" ? 404
-        : error.code === "DISPATCH_EXECUTION_FAILED" ? 502 : 422;
+        : error.code === "DISPATCH_ARCHIVE_FAILED" ? 500
+          : error.code === "DISPATCH_PROVIDER_TIMEOUT" ? 504
+            : error.code === "DISPATCH_PROVIDER_CONFIGURATION_UNAVAILABLE"
+              ? 503
+              : error.code === "DISPATCH_PROVIDER_UPSTREAM"
+                || error.code === "DISPATCH_EXECUTION_FAILED" ? 502 : 422;
     return Response.json({ error: { code: error.code, retryable: false } }, { status });
   }
   return Response.json({ error: { code: "DISPATCH_UNAVAILABLE", retryable: false } }, { status: 503 });
