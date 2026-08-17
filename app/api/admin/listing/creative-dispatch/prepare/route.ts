@@ -6,6 +6,7 @@ import {
   requireJsonContentType,
 } from "@/lib/auth/admin-request-guard.server";
 import { adminRateLimiter } from "@/lib/auth/admin-rate-limit.server";
+import { probeProductionListingCreativeProvider } from "@/engines/listing/provider-preflight";
 import { AdminCsrfError, verifyAdminCsrfToken } from "@/lib/auth/csrf.server";
 import {
   ListingCreativeOperatorServiceError,
@@ -89,6 +90,13 @@ export async function POST(request: Request): Promise<Response> {
     }
     const body = parse(await boundedJson(request));
     if (!body) return Response.json({ error: { code: "INVALID_REQUEST" } }, { status: 422 });
+    const preflight = await probeProductionListingCreativeProvider(process.env);
+    if (preflight.status !== "READY") {
+      return Response.json({ error: { code: "PROVIDER_PREFLIGHT_NOT_READY", status: preflight.status } }, {
+        status: 503,
+        headers: { "Cache-Control": "no-store" },
+      });
+    }
     const result = await prepareListingCreativeOperatorDispatch(context, body);
     return Response.json({ data: result }, {
       status: 201,

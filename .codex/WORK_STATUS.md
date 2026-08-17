@@ -1,5 +1,20 @@
 # Work status
 
+## 2026-08-17 Production model-access preflight gate
+
+- Objective: perform a non-billable OpenAI model metadata check in Production
+  and refuse packet PREPARE unless the pinned model is accessible.
+- Branch/base: `codex/fix/listing-creative-provider-preflight` after PR #146
+  merge commit `5f7785a`; this follow-up is high-risk/manual because it gates
+  paid image generation and calls only the provider metadata endpoint.
+- Implemented: sanitized preflight status taxonomy, 5-second timeout, no
+  prompt/image payload, and a PREPARE 503 gate for every non-READY result.
+- Validation: preflight tests, typecheck, and lint (four pre-existing warnings)
+  PASS. Production route from the merged build returns authentication-required
+  when unauthenticated; no paid call or WING write occurred.
+- Next action: deliver this follow-up, deploy it, authenticate the operator,
+  confirm READY, then create a fresh plan and obtain the separate paid phrase.
+
 ## 2026-08-17 Provider preflight and dispatch failure classification
 
 - Objective: distinguish Production provider configuration, timeout/upstream,
