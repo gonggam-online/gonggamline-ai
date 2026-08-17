@@ -10,7 +10,10 @@ import {
 } from "@/shared/contracts/listing-creative-operator-dispatch";
 import type { ListingCreativeOperatorReviewDto } from "@/shared/domain/listing-creative-operator";
 
-type ApiEnvelope<T> = Readonly<{ data?: T; error?: Readonly<{ code: string }> }>;
+type ApiEnvelope<T> = Readonly<{
+  data?: T;
+  error?: Readonly<{ code: string; status?: string }>;
+}>;
 
 async function csrf(purpose: string): Promise<string> {
   const response = await fetch(`/api/admin/auth/csrf?purpose=${encodeURIComponent(purpose)}`, {
@@ -30,6 +33,7 @@ export function ListingCreativeOperator() {
   const [recoveryReference, setRecoveryReference] = useState("");
   const [busy, setBusy] = useState(false);
   const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [preflightStatus, setPreflightStatus] = useState<string | null>(null);
   const [reprepareAvailable, setReprepareAvailable] = useState(false);
 
   async function prepare(reprepareExpiredPlanReference?: string) {
@@ -55,7 +59,11 @@ export function ListingCreativeOperator() {
         }),
       });
       const body = await response.json() as ApiEnvelope<ListingCreativeDispatchPreparedDto>;
-      if (!response.ok || !body.data) throw new Error(body.error?.code ?? "PREPARE_FAILED");
+      if (!response.ok || !body.data) {
+        if (body.error?.status) setPreflightStatus(body.error.status);
+        throw new Error(body.error?.code ?? "PREPARE_FAILED");
+      }
+      setPreflightStatus("READY");
       setPrepared(body.data);
       setRecoveryReference(body.data.preparedPlanReference);
       setReview(null);
@@ -64,6 +72,29 @@ export function ListingCreativeOperator() {
       const code = error instanceof Error ? error.message : "PREPARE_FAILED";
       setErrorCode(code);
       setReprepareAvailable(code === "DISPATCH_ALREADY_RESERVED");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function runPreflight() {
+    setBusy(true);
+    setErrorCode(null);
+    try {
+      const response = await fetch("/api/admin/listing/creative-dispatch/preflight", {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      const body = await response.json() as ApiEnvelope<Readonly<{
+        status: string;
+        providerId: string;
+        modelVersion: string;
+        paidCallAttempted: false;
+      }>>;
+      if (!body.data) throw new Error(body.error?.code ?? "PREFLIGHT_FAILED");
+      setPreflightStatus(body.data.status);
+    } catch (error) {
+      setErrorCode(error instanceof Error ? error.message : "PREFLIGHT_FAILED");
     } finally {
       setBusy(false);
     }
@@ -154,6 +185,20 @@ export function ListingCreativeOperator() {
         >
           비용 없이 PREPARE
         </button>
+        <button
+          className="mt-3 ml-3 rounded-lg border border-indigo-700 px-4 py-2 text-sm font-semibold text-indigo-900 disabled:opacity-50"
+          disabled={busy}
+          onClick={() => void runPreflight()}
+          type="button"
+        >
+          Production provider preflight
+        </button>
+        {preflightStatus ? (
+          <p className="mt-3 rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm">
+            provider preflight: <strong>{preflightStatus}</strong>
+            {preflightStatus !== "READY" ? " — 계획 생성과 유료 호출이 차단됩니다." : " — 계획 생성이 허용됩니다."}
+          </p>
+        ) : null}
         {reprepareAvailable && prepared ? (
           <button
             className="mt-3 ml-3 rounded-lg border border-amber-700 px-4 py-2 text-sm font-semibold text-amber-900 disabled:opacity-50"
