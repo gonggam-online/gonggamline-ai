@@ -1,5 +1,22 @@
 # Work status
 
+## 2026-08-17 Preflight diagnostics in operator UI
+
+- Objective: make provider configuration failures self-diagnosing before a
+  packet plan is attempted, avoiding repeated opaque `PROVIDER_PREFLIGHT_NOT_READY`
+  cycles.
+- Branch/base: `codex/fix/provider-preflight-ui-diagnostics` from Production
+  merge `d33d637` (PR #147). Normal-risk UI/read-only diagnostics, retaining
+  the high-risk paid dispatch and secret boundaries.
+- Implemented: explicit Production provider preflight action, visible status,
+  and propagation of the sanitized backend preflight status on PREPARE failure.
+  No key value, prompt, image, paid call, publication, or WING write is exposed.
+- Validation: typecheck PASS; lint PASS with four pre-existing warnings;
+  provider preflight tests PASS.
+- Next action: deliver this small UI follow-up; separately obtain owner
+  confirmation immediately before changing OpenAI key permissions or creating
+  a replacement key.
+
 ## 2026-08-17 Production model-access preflight gate
 
 - Objective: perform a non-billable OpenAI model metadata check in Production
