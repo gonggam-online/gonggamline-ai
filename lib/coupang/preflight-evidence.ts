@@ -8,6 +8,7 @@ import {
   type CoupangEvidenceErrorCode,
   type EvidenceReadResult,
   type EvidenceSource,
+  type LogisticsAddressSelector,
   type MarketplacePreflightEvidenceV2,
   type OutboundLocationEvidence,
   type ReturnCenterEvidence,
@@ -34,6 +35,43 @@ function record(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
     ? value as Record<string, unknown>
     : null;
+}
+
+function normalized(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const result = value.normalize("NFC").trim().replace(/\\s+/gu, " ").toLocaleLowerCase("ko-KR");
+  return result.length > 0 ? result : null;
+}
+
+function selectorIsValid(selector: LogisticsAddressSelector): boolean {
+  return Boolean(normalized(selector.zipCode) && normalized(selector.address) &&
+    (!selector.placeName || normalized(selector.placeName)) &&
+    (!selector.addressDetail || normalized(selector.addressDetail)));
+}
+
+function addressMatches(value: unknown, selector: LogisticsAddressSelector): boolean {
+  const item = record(value);
+  if (!item || !selectorIsValid(selector)) return false;
+  const zipCode = normalized(item.zipCode ?? item.zip ?? item.postalCode);
+  const address = normalized(item.address ?? item.address1 ?? item.roadAddress);
+  const detail = normalized(item.addressDetail ?? item.detailAddress ?? item.address2);
+  if (zipCode !== normalized(selector.zipCode) || address !== normalized(selector.address)) return false;
+  if (selector.addressDetail && detail !== normalized(selector.addressDetail)) return false;
+  return true;
+}
+
+function placeNameMatches(value: unknown, selector: LogisticsAddressSelector): boolean {
+  if (!selector.placeName) return true;
+  const item = record(value);
+  const name = normalized(item?.shippingPlaceName ?? item?.placeName ?? item?.centerName);
+  return name === normalized(selector.placeName);
+}
+
+function locationMatches(value: unknown, selector: LogisticsAddressSelector): boolean {
+  const item = record(value);
+  const addresses = item?.placeAddresses;
+  if (!Array.isArray(addresses)) return false;
+  return placeNameMatches(item, selector) && addresses.some((address) => addressMatches(address, selector));
 }
 
 function digest(value: unknown): `sha256:${string}` | null {
@@ -99,6 +137,36 @@ export function decodeOutboundEvidence(input: Readonly<{
   }) } : { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
 }
 
+export function decodeOutboundEvidenceByAddress(input: Readonly<{
+  raw: unknown;
+  vendorRef: string;
+  selector: LogisticsAddressSelector;
+  observedAt: string;
+  sourceUrl: string;
+}>): EvidenceReadResult<OutboundLocationEvidence> {
+  const root = record(input.raw);
+  if (!root || !Array.isArray(root.content) || root.content.length > PAGE_SIZE || !selectorIsValid(input.selector)) {
+    return { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
+  }
+  const matches = root.content.filter((item) => {
+    const value = record(item);
+    return value && value.usable === true && locationMatches(value, input.selector);
+  });
+  if (matches.length === 0) return { ok: false, code: "EVIDENCE_NOT_FOUND" };
+  if (matches.length !== 1) return { ok: false, code: "EVIDENCE_CONFLICT" };
+  const code = record(matches[0])?.outboundShippingPlaceCode;
+  if (!(typeof code === "number" || typeof code === "string") || !SAFE_CODE.test(String(code))) {
+    return { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
+  }
+  const evidenceSource = source(input.observedAt, input.sourceUrl, input.raw);
+  return evidenceSource ? { ok: true, evidence: Object.freeze({
+    vendorRef: input.vendorRef,
+    outboundShippingPlaceCode: String(code),
+    usable: true,
+    source: evidenceSource,
+  }) } : { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
+}
+
 export function decodeReturnEvidence(input: Readonly<{
   pages: readonly unknown[];
   exhausted?: boolean;
@@ -129,6 +197,41 @@ export function decodeReturnEvidence(input: Readonly<{
   return evidenceSource ? { ok: true, evidence: Object.freeze({
     vendorRef: input.vendorRef,
     returnCenterCode: input.selectedCode,
+    source: evidenceSource,
+  }) } : { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
+}
+
+export function decodeReturnEvidenceByAddress(input: Readonly<{
+  pages: readonly unknown[];
+  exhausted?: boolean;
+  vendorRef: string;
+  selector: LogisticsAddressSelector;
+  observedAt: string;
+  sourceUrl: string;
+}>): EvidenceReadResult<ReturnCenterEvidence> {
+  if (input.pages.length === 0 || input.pages.length > MAX_RETURN_PAGES || !selectorIsValid(input.selector)) {
+    return { ok: false, code: "EVIDENCE_LIMIT_EXCEEDED" };
+  }
+  const matches: string[] = [];
+  for (const page of input.pages) {
+    const root = record(page);
+    if (!root || !Array.isArray(root.data) || root.data.length > PAGE_SIZE) {
+      return { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
+    }
+    for (const value of root.data) {
+      const item = record(value);
+      const code = item?.returnCenterCode;
+      if ((typeof code === "number" || typeof code === "string") && SAFE_CODE.test(String(code)) && locationMatches(item, input.selector)) {
+        matches.push(String(code));
+      }
+    }
+  }
+  if (matches.length === 0) return { ok: false, code: input.exhausted ? "EVIDENCE_LIMIT_EXCEEDED" : "EVIDENCE_NOT_FOUND" };
+  if (matches.length !== 1) return { ok: false, code: "EVIDENCE_CONFLICT" };
+  const evidenceSource = source(input.observedAt, input.sourceUrl, input.pages);
+  return evidenceSource ? { ok: true, evidence: Object.freeze({
+    vendorRef: input.vendorRef,
+    returnCenterCode: matches[0],
     source: evidenceSource,
   }) } : { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
 }
@@ -192,6 +295,18 @@ export function createCoupangEvidenceReader(dependencies: Readonly<{
       }
     },
 
+    async readOutboundByAddress(selector: LogisticsAddressSelector): Promise<EvidenceReadResult<OutboundLocationEvidence>> {
+      if (!selectorIsValid(selector)) return { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
+      let identity: VendorIdentity;
+      try { identity = resolveVendorIdentity(); } catch { return { ok: false, code: "CONFIGURATION_UNAVAILABLE" }; }
+      try {
+        const searchParams = selector.placeName ? new URLSearchParams({ placeNames: selector.placeName }) : undefined;
+        const result = await transport<unknown>({ method: "GET", path: OUTBOUND_PATH, searchParams });
+        if (!result.ok) return { ok: false, code: classify(result.status) };
+        return decodeOutboundEvidenceByAddress({ raw: result.data, vendorRef: identity.vendorRef, selector, observedAt: now().toISOString(), sourceUrl: `${HOST}${OUTBOUND_PATH}${searchParams ? `?${searchParams.toString()}` : ""}` });
+      } catch { return { ok: false, code: "NETWORK_UNAVAILABLE" }; }
+    },
+
     async readReturnCenter(selectedCode: string): Promise<EvidenceReadResult<ReturnCenterEvidence>> {
       if (!SAFE_CODE.test(selectedCode)) return { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
       let identity: VendorIdentity;
@@ -226,6 +341,29 @@ export function createCoupangEvidenceReader(dependencies: Readonly<{
       } catch {
         return { ok: false, code: "NETWORK_UNAVAILABLE" };
       }
+    },
+
+    async readReturnCenterByAddress(selector: LogisticsAddressSelector): Promise<EvidenceReadResult<ReturnCenterEvidence>> {
+      if (!selectorIsValid(selector)) return { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
+      let identity: VendorIdentity;
+      try { identity = resolveVendorIdentity(); } catch { return { ok: false, code: "CONFIGURATION_UNAVAILABLE" }; }
+      try {
+        const path = RETURN_PATH_TEMPLATE.replace("{vendorId}", encodeURIComponent(identity.vendorId));
+        const pages: unknown[] = [];
+        let exhausted = false;
+        for (let pageNum = 1; pageNum <= MAX_RETURN_PAGES; pageNum += 1) {
+          const searchParams = new URLSearchParams({ pageNum: String(pageNum), pageSize: String(PAGE_SIZE) });
+          const result = await transport<unknown>({ method: "GET", path, searchParams });
+          if (!result.ok) return { ok: false, code: classify(result.status) };
+          pages.push(result.data);
+          const root = record(result.data);
+          if (!root || !Array.isArray(root.data)) return { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
+          if (root.data.some((entry) => locationMatches(entry, selector))) break;
+          if (root.data.length < PAGE_SIZE) break;
+          if (pageNum === MAX_RETURN_PAGES) exhausted = true;
+        }
+        return decodeReturnEvidenceByAddress({ pages, exhausted, vendorRef: identity.vendorRef, selector, observedAt: now().toISOString(), sourceUrl: `${HOST}${RETURN_PATH_TEMPLATE}` });
+      } catch { return { ok: false, code: "NETWORK_UNAVAILABLE" }; }
     },
   });
 }

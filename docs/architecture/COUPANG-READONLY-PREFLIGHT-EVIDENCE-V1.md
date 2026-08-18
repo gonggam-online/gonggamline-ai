@@ -65,6 +65,10 @@ Observed 2026-08-08 from official Coupang documentation:
    `GET /v2/providers/openapi/apis/api/v5/vendors/{vendorId}/returnShippingCenters`.
    It is vendor-scoped and supports `pageNum`/`pageSize` up to 50. Responses
    contain courier, fee, and error fields that are not required here.
+   The Korean operator references are [출고지 조회](https://developers.coupang.com/ko/api/logistics/query-a-shipping-location)
+   and [반품지 목록 조회](https://developers.coupang.com/ko/api/logistics/query-a-list-of-return-locations).
+   `vendorId` is the Coupang-issued seller company code (the WING
+   additional-sales-information 업체코드), not the WING login user ID.
 4. [Product Creation](https://developers.coupang.com/en/api/products/product-creation)
    requires category, shipping/return, notices, options, and other category-
    compliant data. It is POST and remains outside this Story.
@@ -80,6 +84,9 @@ In scope after approval:
 - strict decoders for the three read-only response families;
 - server-only typed adapters using the existing Coupang client/configuration;
 - exact category and outbound-code lookup plus bounded return-code discovery;
+- address-book lookup for outbound and return codes by exact normalized postal
+  code, address, optional detail address, and optional place name; display-name
+  only matching is prohibited and ambiguous matches fail closed;
 - normalized evidence with canonical SHA-256 fingerprints;
 - a pure KK946 adapter that combines an immutable Listing revision reference,
   selected codes, normalized evidence, and the existing preflight;
@@ -137,6 +144,13 @@ type CoupangEvidenceReader = Readonly<{
   }): Promise<ReturnEvidenceReadResult>;
 }>;
 ```
+
+The server-only reader also exposes `readOutboundByAddress` and
+`readReturnCenterByAddress`. These operations issue only the documented GET
+requests, use the configured seller company code for the return endpoint, and
+keep selector values and provider address/contact fields out of normalized
+evidence. The Listing `vendorUserId` field is not a substitute for Coupang's
+`vendorId`; any mapping between them must be explicit and typed.
 
 - HTTP method is fixed to `GET` in each operation.
 - Host remains `api-gateway.coupang.com` through the existing client.

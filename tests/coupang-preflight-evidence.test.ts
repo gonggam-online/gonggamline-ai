@@ -6,7 +6,9 @@ import {
   createCoupangEvidenceReader,
   createOpaqueCoupangVendorRef,
   decodeOutboundEvidence,
+  decodeOutboundEvidenceByAddress,
   decodeReturnEvidence,
+  decodeReturnEvidenceByAddress,
 } from "../lib/coupang/preflight-evidence.ts";
 import { mapCoupangEvidenceToProductPreflight } from "../engines/listing/coupang-preflight-adapter.ts";
 import type { CoupangCategorySnapshot } from "../shared/contracts/coupang-category-snapshot.ts";
@@ -57,6 +59,32 @@ test("duplicate or unusable outbound evidence fails closed", () => {
   }
 });
 
+test("address lookup selects exactly one usable outbound location without retaining address data", () => {
+  const result = decodeOutboundEvidenceByAddress({
+    raw: { content: [
+      { outboundShippingPlaceCode: "OUT-1", shippingPlaceName: "개미창고", usable: true, placeAddresses: [{ zipCode: "12345", address: "서울시 중구 세종대로", addressDetail: "101호", companyContactNumber: "discard" }] },
+      { outboundShippingPlaceCode: "OUT-2", shippingPlaceName: "다른 출고지", usable: true, placeAddresses: [{ zipCode: "99999", address: "부산시 해운대구", addressDetail: "202호" }] },
+    ] },
+    vendorRef,
+    selector: { placeName: "개미창고", zipCode: "12345", address: "서울시 중구 세종대로", addressDetail: "101호" },
+    observedAt,
+    sourceUrl: "https://api-gateway.coupang.com/outbound?placeNames=%EA%B0%9C%EB%AF%B8%EC%B0%BD%EA%B3%A0",
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.ok && result.evidence.outboundShippingPlaceCode, "OUT-1");
+  assert.doesNotMatch(JSON.stringify(result), /서울시|12345|101호|discard/);
+});
+
+test("ambiguous address lookup never guesses an outbound code", () => {
+  const result = decodeOutboundEvidenceByAddress({
+    raw: { content: [
+      { outboundShippingPlaceCode: "OUT-1", shippingPlaceName: "개미창고", usable: true, placeAddresses: [{ zipCode: "12345", address: "서울시 중구 세종대로" }] },
+      { outboundShippingPlaceCode: "OUT-2", shippingPlaceName: "개미창고", usable: true, placeAddresses: [{ zipCode: "12345", address: "서울시 중구 세종대로" }] },
+    ] }, vendorRef, selector: { placeName: "개미창고", zipCode: "12345", address: "서울시 중구 세종대로" }, observedAt, sourceUrl: "fixture",
+  });
+  assert.deepEqual(result, { ok: false, code: "EVIDENCE_CONFLICT" });
+});
+
 test("return decoder discards contact, address, courier and fee fields", () => {
   const result = decodeReturnEvidence({
     pages: [{ code: 200, data: [{ returnCenterCode: "RET-1", address: "discard", phone: "discard", fee: 9, courier: "discard" }] }],
@@ -67,6 +95,18 @@ test("return decoder discards contact, address, courier and fee fields", () => {
   });
   assert.equal(result.ok, true);
   assert.doesNotMatch(JSON.stringify(result), /address|phone|courier|fee|discard/);
+});
+
+test("address lookup selects a return center across bounded pages", () => {
+  const result = decodeReturnEvidenceByAddress({
+    pages: [
+      { code: 200, data: [{ returnCenterCode: "RET-1", shippingPlaceName: "다른 반품지", placeAddresses: [{ zipCode: "99999", address: "부산시 해운대구" }] }] },
+      { code: 200, data: [{ returnCenterCode: "RET-2", shippingPlaceName: "개미창고 반품", placeAddresses: [{ zipCode: "12345", address: "서울시 중구 세종대로", addressDetail: "101호" }], fee: 3000, courier: "discard" }] },
+    ], vendorRef, selector: { placeName: "개미창고 반품", zipCode: "12345", address: "서울시 중구 세종대로", addressDetail: "101호" }, observedAt, sourceUrl: "fixture",
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.ok && result.evidence.returnCenterCode, "RET-2");
+  assert.doesNotMatch(JSON.stringify(result), /서울시|12345|101호|discard/);
 });
 
 test("return lookup reports bounded exhaustion rather than absence", async () => {
@@ -103,6 +143,27 @@ test("outbound reader uses one exact GET and never emits configured vendor ID", 
   assert.deepEqual(calls, ["GET /v2/providers/marketplace_openapi/apis/api/v2/vendor/shipping-place/outbound?placeCodes=OUT-1"]);
   assert.equal(result.ok, true);
   assert.doesNotMatch(JSON.stringify(result), /fixture-vendor-secret/);
+});
+
+test("address readers use official lookup semantics and keep vendor identity opaque", async () => {
+  const calls: string[] = [];
+  const reader = createCoupangEvidenceReader({
+    now: () => new Date(observedAt), resolveVendorIdentity: () => ({ vendorId: "fixture-vendor-secret", vendorRef }),
+    transport: async <T>(options: { method: "GET"; path: string; searchParams?: URLSearchParams }) => {
+      calls.push(`${options.method} ${options.path}?${options.searchParams?.toString()}`);
+      const data = options.path.includes("returnShippingCenters")
+        ? { code: 200, data: [{ returnCenterCode: "RET-1", shippingPlaceName: "개미창고 반품", placeAddresses: [{ zipCode: "12345", address: "서울시 중구 세종대로" }] }] }
+        : { content: [{ outboundShippingPlaceCode: "OUT-1", shippingPlaceName: "개미창고", usable: true, placeAddresses: [{ zipCode: "12345", address: "서울시 중구 세종대로" }] }] };
+      return { ok: true, status: 200, data: data as T, raw: data };
+    },
+  });
+  const selector = { placeName: "개미창고", zipCode: "12345", address: "서울시 중구 세종대로" };
+  const outbound = await reader.readOutboundByAddress(selector);
+  const returns = await reader.readReturnCenterByAddress({ ...selector, placeName: "개미창고 반품" });
+  assert.equal(outbound.ok, true); assert.equal(returns.ok, true);
+  assert.match(calls[0], /placeNames=%EA%B0%9C%EB%AF%B8%EC%B0%BD%EA%B3%A0/);
+  assert.match(calls[1], /returnShippingCenters\?pageNum=1&pageSize=50/);
+  assert.doesNotMatch(JSON.stringify({ outbound, returns }), /fixture-vendor-secret|서울시|12345/);
 });
 
 test("configuration and provider failures have distinct taxonomy", async () => {
