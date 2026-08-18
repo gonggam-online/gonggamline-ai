@@ -4,7 +4,9 @@ import { useState } from "react";
 
 import {
   LISTING_CREATIVE_ADAPTER_EXPORT_API_VERSION,
+  LISTING_CREATIVE_ADAPTER_ENRICH_API_VERSION,
   type ListingCreativeAdapterExportDto,
+  type ListingCreativeAdapterEnrichmentResult,
 } from "@/shared/contracts/listing-creative-adapter-export";
 
 type ApiResponse = Readonly<{
@@ -13,8 +15,8 @@ type ApiResponse = Readonly<{
   error?: Readonly<{ code: string }>;
 }>;
 
-async function csrf(): Promise<string> {
-  const response = await fetch("/api/admin/auth/csrf?purpose=listing-creative-adapter-export", {
+async function csrf(purpose: "listing-creative-adapter-export" | "listing-creative-adapter-enrich" = "listing-creative-adapter-export"): Promise<string> {
+  const response = await fetch(`/api/admin/auth/csrf?purpose=${purpose}`, {
     credentials: "same-origin",
     cache: "no-store",
   });
@@ -40,6 +42,7 @@ export function ListingCreativeAdapterExport() {
   const [busy, setBusy] = useState(false);
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const [logisticsJson, setLogisticsJson] = useState("");
 
   async function runExport(): Promise<void> {
     setBusy(true);
@@ -65,6 +68,36 @@ export function ListingCreativeAdapterExport() {
       setSanitized(body.sanitizedReview);
     } catch (error) {
       setErrorCode(error instanceof Error ? error.message : "ADAPTER_EXPORT_FAILED");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function enrichByAddress(): Promise<void> {
+    setBusy(true);
+    setErrorCode(null);
+    setCopyStatus(null);
+    try {
+      const token = await csrf("listing-creative-adapter-enrich");
+      const response = await fetch("/api/admin/listing/creative-adapter/enrich", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "X-GonggamLine-CSRF": token },
+        body: JSON.stringify({
+          schemaVersion: LISTING_CREATIVE_ADAPTER_ENRICH_API_VERSION,
+          packet: JSON.parse(input) as unknown,
+          logistics: JSON.parse(logisticsJson) as unknown,
+        }),
+      });
+      const body = await response.json() as Readonly<{ data?: ListingCreativeAdapterEnrichmentResult; error?: Readonly<{ code: string }> }>;
+      if (!response.ok || !body.data) throw new Error(body.error?.code ?? "ADAPTER_ENRICH_FAILED");
+      const enriched = body.data;
+      setInput(JSON.stringify(enriched.packet, null, 2));
+      setFull({ schemaVersion: LISTING_CREATIVE_ADAPTER_EXPORT_API_VERSION, exportKind: "FULL_PACKET", packet: enriched.packet, readiness: enriched.readiness, generatedAt: enriched.generatedAt });
+      setSanitized(null);
+      setCopyStatus("주소 매칭으로 출고지·반품지 코드를 확인하고 private 저장소에 저장했습니다.");
+    } catch (error) {
+      setErrorCode(error instanceof Error ? error.message : "ADAPTER_ENRICH_FAILED");
     } finally {
       setBusy(false);
     }
@@ -115,6 +148,27 @@ export function ListingCreativeAdapterExport() {
           type="button"
         >
           {busy ? "검증 중..." : "검증하고 Export 준비"}
+        </button>
+      </section>
+
+      <section className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 shadow-sm">
+        <h2 className="text-lg font-semibold">주소 기반 배송 코드 확인</h2>
+        <p className="mt-1 text-sm text-indigo-950">WING 주소록의 출고지·반품지 관찰값만 입력하면 서버가 Coupang read-only API로 코드를 매칭합니다. Secret과 원본 API 응답은 화면·로그·packet에 저장하지 않습니다.</p>
+        <textarea
+          aria-label="WING logistics address selectors JSON"
+          className="mt-3 min-h-32 w-full rounded-xl border border-indigo-300 bg-white p-3 font-mono text-xs"
+          onChange={(event) => setLogisticsJson(event.target.value)}
+          placeholder={'{"outbound":{"placeName":"...","zipCode":"...","address":"...","addressDetail":"..."},"returnCenter":{"placeName":"...","zipCode":"...","address":"...","addressDetail":"..."}}'}
+          spellCheck={false}
+          value={logisticsJson}
+        />
+        <button
+          className="mt-3 rounded-lg border border-indigo-700 px-4 py-2 text-sm font-semibold text-indigo-900 disabled:opacity-50"
+          disabled={busy || input.trim().length === 0 || logisticsJson.trim().length === 0}
+          onClick={() => void enrichByAddress()}
+          type="button"
+        >
+          {busy ? "주소 매칭 중..." : "주소로 배송 코드 확인 후 저장"}
         </button>
       </section>
 

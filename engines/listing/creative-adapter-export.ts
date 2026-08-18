@@ -27,7 +27,10 @@ function requiredString(value: unknown, path: string): string {
   return value;
 }
 
-export function parseListingCreativeAdapterPacket(value: unknown): ListingCreativeAdapterPacket {
+export function parseListingCreativeAdapterPacket(
+  value: unknown,
+  options: Readonly<{ allowUnresolvedLogistics?: boolean }> = {},
+): ListingCreativeAdapterPacket {
   const root = requiredRecord(value, "packet");
   if (Object.keys(root).some((key) => key !== "listingInput" && key !== "commerce")) {
     throw new Error("ADAPTER_PACKET_UNKNOWN_KEY");
@@ -37,8 +40,14 @@ export function parseListingCreativeAdapterPacket(value: unknown): ListingCreati
   requiredString(listingInput.packetId, "listingInput.packetId");
   requiredString(listingInput.subjectId, "listingInput.subjectId");
   requiredString(commerce.vendorUserId, "commerce.vendorUserId");
-  requiredString(commerce.outboundShippingPlaceCode, "commerce.outboundShippingPlaceCode");
-  requiredString(commerce.returnCenterCode, "commerce.returnCenterCode");
+  if (options.allowUnresolvedLogistics) {
+    if (typeof commerce.outboundShippingPlaceCode !== "string" || typeof commerce.returnCenterCode !== "string") {
+      throw new Error("ADAPTER_PACKET_INVALID:commerce.logisticsCodes");
+    }
+  } else {
+    requiredString(commerce.outboundShippingPlaceCode, "commerce.outboundShippingPlaceCode");
+    requiredString(commerce.returnCenterCode, "commerce.returnCenterCode");
+  }
   requiredString(commerce.returnZipCode, "commerce.returnZipCode");
   requiredString(commerce.returnAddress, "commerce.returnAddress");
   requiredString(commerce.returnAddressDetail, "commerce.returnAddressDetail");

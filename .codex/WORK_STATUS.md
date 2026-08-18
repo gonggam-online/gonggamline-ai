@@ -6208,3 +6208,15 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Verification: focused logistics tests 14/14 PASS; typecheck PASS; production build PASS.
 - External result: Vercel direct call reached Coupang but was rejected by IP allowlist; local read-only call succeeded without Vercel Static IP cost. No raw credentials or addresses committed.
 - Current: commit, push, and high-risk/manual PR delivery.
+# Current task snapshot — WING adapter logistics enrichment — 2026-08-18
+
+- Objective: remove repeated manual shipping-code lookup by enriching an owner-controlled adapter packet with exact WING address selectors through Coupang read-only APIs, then persist the digest-bound packet in Supabase private storage.
+- Branch/base: `codex/feat/wing-adapter-ingestion` from `origin/main` `e7d6055`.
+- Risk: high-risk/manual; authenticated admin route, confidential logistics data, external seller API, and private packet persistence. No WING write, paid provider call, or public publication.
+- Root-cause class: code/integration boundary. WING browser state cannot be safely scraped server-side; the approved server boundary must receive only the owner-controlled packet and address selectors, resolve codes server-side, and persist sanitized evidence.
+- Cloud-first: Supabase private packet storage remains authoritative; Vercel runtime secrets hold Coupang credentials; GitHub owns contracts/tests; browser values are transient and never logged or committed.
+- Planned steps: (1) contract audit, (2) address-enrichment contract, (3) pure resolver bridge, (4) protected API/CSRF, (5) export UI, (6) negative/fixture tests, (7) lint/typecheck/tests/build, (8) browser smoke, (9) diff/secret review, (10) commit/push/manual PR.
+- Completed: steps 1–8. Address code enrichment now requires explicit selectors, calls only existing read-only evidence readers, binds evidence to the packet, persists the result through the existing private recovery repository, and is covered by unit, full-suite, build, and browser checks.
+- Current: final diff/secret review, commit/push, and high-risk manual PR delivery.
+- Non-goals: browser-cookie extraction, raw WING scraping, secret transfer, automatic live-write approval, WING submission, paid image generation, or local durable state.
+- Owner action after delivery: Production must have `COUPANG_ACCESS_KEY`, `COUPANG_SECRET_KEY`, and `COUPANG_VENDOR_ID`; the operator supplies the WING address selectors inside the authenticated Production boundary once per packet.

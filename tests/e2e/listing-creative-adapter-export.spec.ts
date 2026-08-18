@@ -5,6 +5,8 @@ test("owner adapter export page exposes a bounded packet handoff", async ({ page
   await expect(page.getByRole("heading", { name: "External adapter packet Export" })).toBeVisible();
   await expect(page.getByRole("textbox", { name: "Owner external adapter packet JSON" })).toBeVisible();
   await expect(page.getByRole("button", { name: /Export/ })).toBeDisabled();
+  await expect(page.getByRole("heading", { name: "주소 기반 배송 코드 확인" })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "WING logistics address selectors JSON" })).toBeVisible();
   await expect(page.locator("main").getByText(/packet/).first()).toBeVisible();
 });
 
