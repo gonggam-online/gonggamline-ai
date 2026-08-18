@@ -6299,3 +6299,32 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Completed: steps 1–7; commit `c413288` pushed and PR #156 opened. Local full suite 708/708, build, lint, typecheck, diff, and adapter/reprepare E2E pass. No Production, WING, paid provider, secret, or live commerce write.
 - Intended behavior: minimum exact-category payload can be `REGISTRATION_READY` with content/live approval warnings; actual live submission still requires explicit confirmation and owner live-write approval.
 - Current: PR #156 CI/Preview checks are still running; manual merge required after exact-head checks pass.
+
+# Post-registration learning binding — 2026-08-18
+
+- Objective: connect a completed WING registration to the append-only learning
+  loop without submitting or mutating WING again.
+- Branch/base: `codex/feat/post-registration-learning-binding` from
+  `origin/main` `17098bb`.
+- Risk: high-risk/manual because the next integration writes confidential
+  Production registration evidence to managed storage; this checkpoint itself
+  adds only a pure typed contract and tests.
+- Root-cause class: code contract. Existing `ListingRevisionMetrics` and
+  sequential guardrails existed, but no immutable observation tied the real
+  seller product ID to packet/content/revision digests.
+- Cloud-first: no new durable state or secret was added. The intended owner is
+  the existing Supabase private operational boundary; the current commit is
+  deliberately pure until the DB/event write Story is manually approved.
+- Completed: steps 1–7/10 — boot/policy audit, origin/main branch, learning
+  inventory, registration observation contract, digest/identity validation,
+  cold-start guard (`AWAITING_TRAFFIC`, `winnerDeclared:false`), focused/full
+  tests, typecheck, lint, and production build.
+- Evidence: 710 tests passed, typecheck passed, build passed, lint passed with
+  four pre-existing unused-variable warnings, no WING/API/paid calls.
+- Current: final diff/secret review, commit/push, high-risk manual PR.
+- Non-goals: no WING write, no automatic metrics fabrication, no winner
+  declaration, no schema migration, no Production deployment from this branch.
+- Next: owner review of the append-only Supabase event integration Story;
+  after manual merge, record the actual registered seller product ID and
+  packet/revision digests through the protected server boundary, then add a
+  read-only monitoring card and real metric ingestion adapters.
