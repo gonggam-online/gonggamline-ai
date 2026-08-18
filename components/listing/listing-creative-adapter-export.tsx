@@ -87,10 +87,10 @@ export function ListingCreativeAdapterExport() {
         <h1 className="text-3xl font-bold">External adapter packet Export</h1>
         <p className="max-w-3xl text-sm text-slate-600">
           WING에서 승인된 값을 외부 adapter가 만든 typed packet으로 검증하고, Production 입력에 필요한 전체 JSON을 복사하거나 파일로 내려받는 화면입니다.
-          서버에는 packet을 저장하지 않습니다.
+          검증이 통과한 packet은 digest에 결속된 Supabase private 저장소에 암호화된 접근 경계로 저장되어, 작업이 중단되어도 digest로 복구할 수 있습니다.
         </p>
         <p className="text-sm text-indigo-800">
-          이전 export를 찾을 수 없으면 <a className="font-semibold underline" href="/admin/listing/creative-adapter/reprepare">현재 WING 값으로 새 packet revision 생성</a>을 먼저 실행하세요.
+          이전 export를 찾을 수 없으면 <a className="font-semibold underline" href="/admin/listing/creative-adapter/reprepare">저장된 packet 복구 또는 현재 WING 값으로 새 revision 생성</a>을 사용하세요.
         </p>
       </header>
 
