@@ -1884,6 +1884,24 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   revoke the CSRF purpose. No database migration or local durable state is
   introduced. A changed packet or revision requires a new approval.
 
+# 2026-08-17 - Admin session continuity without MFA bypass
+
+- Category: high-risk/manual authentication UX and paid-commerce boundary.
+- Decision: add a server session-status endpoint that refreshes near-expiry
+  Supabase sessions, exposes sanitized AAL/age/mutation-readiness state, and
+  lets the operator UI poll before PREPARE or paid dispatch. The login screen
+  also refreshes MFA status periodically and explains the re-authentication
+  window.
+- Trusted browser: an owner-controlled, HttpOnly preference cookie is allowed
+  only as a notification preference. It never elevates AAL, bypasses MFA, or
+  authorizes paid generation, WING writes, publication, or other mutations.
+- Durable state: Supabase Auth remains the session source of truth; the
+  preference cookie is non-authoritative and recoverable by re-login. No local
+  durable state, auth metadata mutation, or MFA weakening is introduced.
+- Risk/rollback: high-risk/manual; revert the session-status route, preference
+  route, and UI changes. Production deployment and any auth configuration
+  change require separate owner review.
+
 # 2026-08-18 - Owner adapter packet recovery amendment
 
 - Category: high-risk/manual confidential commerce-data persistence and

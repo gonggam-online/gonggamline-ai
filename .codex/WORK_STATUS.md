@@ -25,7 +25,6 @@
   in chat, logs, or Git.
 - Next action: commit and push the high-risk/manual PR, then add the missing
   Preview service-role secret in Vercel and verify the exact Preview build.
-
 ## 2026-08-17 Preflight diagnostics in operator UI
 
 - Objective: make provider configuration failures self-diagnosing before a
@@ -6168,6 +6167,24 @@ perform the documented read-only Supabase schema and completeness inspection.
   change was made for the transient failure. PR #144 remains high-risk and
   `manual-merge-required`; no Production commerce write, paid generation,
   publication, or WING submission was performed.
+# 2026-08-17 — Admin session continuity UX
+
+- Objective: reduce repeated admin sign-in friction without removing MFA or
+  weakening paid/WING mutation gates.
+- Branch: `codex/auth/session-continuity-ux`.
+- Risk: high-risk/manual authentication change; no Production auth/config write
+  or commerce write performed.
+- Root-cause class: code/UI session observability and refresh; trusted-browser
+  preference is non-authoritative cookie state.
+- Completed: session-status contract/route with near-expiry refresh, operator
+  polling/status gate, login MFA status polling, owner-controlled preference
+  route, decision log, unit test.
+- Verification: lint passed with existing warnings; typecheck passed; 687 tests
+  passed; targeted mobile E2E passed; production build passed.
+- Current: full diff review and PR delivery remain.
+- Next: commit/push, create high-risk manual-merge PR, then Preview review.
+- Non-goals: SSO provider setup, MFA bypass, trusted-device authorization,
+  paid generation, WING submission, or auth secret/config changes.
 
 # Coupang address-based logistics lookup — 2026-08-18
 
