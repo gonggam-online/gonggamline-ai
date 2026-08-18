@@ -98,6 +98,25 @@ contract is type-only in this Story. Persistence requires a separate
 Database/Auth/RLS Architecture and manual PR. Local build/browser outputs are
 disposable.
 
+## Packet recovery amendment (2026-08-18)
+
+The earlier owner-controlled adapter export decision incorrectly treated a
+conversation-only handoff as recoverable. A validated full adapter packet is
+confidential commerce data and must be recoverable without requiring the owner
+to re-enter WING values after a browser/session interruption. The export route
+therefore persists the exact packet, readiness record, and packet digest as an
+immutable JSON object in the approved Supabase private bucket. The object is
+addressed only by its SHA-256 packet digest, is readable only after the normal
+administrator guard, and is never logged, returned by a list endpoint, or
+copied into Git. Recovery re-computes the digest before returning the packet.
+
+This amendment does not authorize WING submission, paid provider calls, public
+publication, or live-write approval. It is a high-risk/manual storage boundary:
+Preview and Production must each have an approved Supabase service-role secret
+in their environment, and a storage outage must remain visible as
+`ADAPTER_PACKET_RECOVERY_STORAGE_UNAVAILABLE` rather than silently falling
+back to local or conversation state.
+
 ## Rollback
 
 Revert this implementation before any live use. A later approved packet must be
@@ -136,8 +155,9 @@ Architecture PR is manually approved and merged.
 - Append-only metrics and guardrails: `shared/domain/listing-learning.ts` and
   `engines/listing/learning.ts`.
 - Operator presentation: `components/listing/listing-content-review.tsx` and
-  `/listing/review`. The route intentionally does not persist or load business
-  packets until the separate Database/Auth/RLS Story is approved.
+  `/listing/review`. Owner adapter packets are persisted and recovered through
+  `services/listing-creative-adapter-recovery.service.ts` and the protected
+  adapter recovery route; legacy `listing_drafts` remain non-authoritative.
 - Acceptance evidence: `tests/listing-content-pipeline.test.ts`,
   `tests/listing-supplier-trust-and-learning.test.ts`, and
   `tests/kk946-listing-content-acceptance.test.ts`.

@@ -1,5 +1,31 @@
 # Work status
 
+## 2026-08-18 Packet recovery and Preview configuration audit
+
+- Objective: remove the conversation-only external adapter packet dead end and
+  verify the Preview Supabase configuration that caused browser API 500s.
+- Branch/base: `codex/feat/packet-recovery-and-preview-diagnostics` from the
+  current `origin/main` after PR #151.
+- Risk: high-risk/manual. Packet data is confidential commerce data; this work
+  must not submit WING, call a paid provider, change prices/stock, or weaken
+  authentication. Any durable packet storage requires an approved managed
+  owner and recovery contract.
+- Root-cause classification: external configuration (Preview lacks
+  `SUPABASE_SERVICE_ROLE_KEY`) and code/architecture (adapter packets are
+  explicitly not persisted, so a stopped session cannot recover them).
+- Cloud-first target: existing Supabase private creative bucket, with private
+  object paths, immutable digests, short-lived signed recovery URLs, no raw
+  packet logging, and no local authoritative copy. Vercel remains the
+  environment-secret owner.
+- Current progress: external configuration evidence collected; immutable
+  digest-bound packet persistence/recovery, operator recovery UI, architecture
+  amendment, and regression tests implemented.
+- Blockers/owner action: a Preview-scoped `SUPABASE_SERVICE_ROLE_KEY` must be
+  provisioned from the approved secret source; the value must never be exposed
+  in chat, logs, or Git.
+- Next action: commit and push the high-risk/manual PR, then add the missing
+  Preview service-role secret in Vercel and verify the exact Preview build.
+
 ## 2026-08-17 Preflight diagnostics in operator UI
 
 - Objective: make provider configuration failures self-diagnosing before a

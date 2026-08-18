@@ -45,6 +45,7 @@ async function csrf(purpose: string): Promise<string> {
 
 export function ListingCreativeAdapterReprepare() {
   const [packetJson, setPacketJson] = useState("");
+  const [recoveryDigest, setRecoveryDigest] = useState("");
   const [revision, setRevision] = useState<RevisionState>({
     packetId: "",
     evaluationId: "",
@@ -131,6 +132,29 @@ export function ListingCreativeAdapterReprepare() {
     }
   }
 
+  async function recoverPacket(): Promise<void> {
+    setBusy(true);
+    setError(null);
+    setResult(null);
+    setCopyStatus(null);
+    try {
+      const digest = recoveryDigest.trim();
+      const response = await fetch(`/api/admin/listing/creative-adapter/recovery?packetDigest=${encodeURIComponent(digest)}`, {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      const body = await response.json() as Readonly<{ data?: { packet: unknown; readiness: { packetId: string; packetDigest: string } }; error?: { code: string } }>;
+      if (!response.ok || !body.data) throw new Error(body.error?.code ?? "ADAPTER_PACKET_RECOVERY_FAILED");
+      setPacketJson(JSON.stringify(body.data.packet, null, 2));
+      setRevision((current) => ({ ...current, packetId: body.data?.readiness.packetId ?? current.packetId }));
+      setCopyStatus(`저장된 packet을 복구했습니다 · ${body.data.readiness.packetDigest}`);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "ADAPTER_PACKET_RECOVERY_FAILED");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function copyPacket(): Promise<void> {
     if (!result) return;
     await navigator.clipboard.writeText(JSON.stringify(result.packet, null, 2));
@@ -167,6 +191,14 @@ export function ListingCreativeAdapterReprepare() {
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold">2. Current WING adapter packet</h2>
         <p className="mt-1 text-sm text-slate-600">여기에는 <code>{"{listingInput, commerce}"}</code> 객체만 입력합니다.</p>
+        <div className="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 p-3 text-sm text-indigo-950">
+          <p className="font-semibold">저장된 packet 복구</p>
+          <p className="mt-1">이전에 Export 준비를 완료했다면 JSON을 다시 붙여넣지 말고 packet digest(64자리)를 입력해 복구할 수 있습니다.</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <input aria-label="Saved packet digest" className={`${inputClass} max-w-xl`} value={recoveryDigest} onChange={(event) => setRecoveryDigest(event.target.value)} placeholder="sha256 digest" />
+            <button className="rounded-lg border border-indigo-700 px-4 py-2 text-sm font-semibold text-indigo-800 disabled:opacity-50" disabled={busy || recoveryDigest.trim().length === 0} onClick={() => void recoverPacket()} type="button">저장 packet 복구</button>
+          </div>
+        </div>
         <textarea aria-label="New WING adapter packet JSON" className="mt-3 min-h-80 w-full rounded-lg border border-slate-300 p-3 font-mono text-xs" value={packetJson} onChange={(e) => setPacketJson(e.target.value)} spellCheck={false} placeholder={'{"listingInput": {...}, "commerce": {...}}'} />
         <div className="mt-3 flex flex-wrap gap-3">
           <button className="rounded-lg border border-indigo-700 px-4 py-2 text-sm font-semibold text-indigo-800 disabled:opacity-50" disabled={busy || packetJson.trim().length === 0 || approval !== null} onClick={() => void issueLiveWriteApproval()} type="button">Owner live-write 승인 발급</button>

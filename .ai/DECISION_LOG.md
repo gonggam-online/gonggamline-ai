@@ -1883,3 +1883,25 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Risk/rollback: manual merge required; revert the route/page/service and
   revoke the CSRF purpose. No database migration or local durable state is
   introduced. A changed packet or revision requires a new approval.
+
+# 2026-08-18 - Owner adapter packet recovery amendment
+
+- Category: high-risk/manual confidential commerce-data persistence and
+  recovery.
+- Finding: the prior export boundary deliberately did not persist full
+  packets, which made a stopped browser session require re-entry of the same
+  WING/private values and prevented reliable automation recovery.
+- Decision: after successful packet validation, persist the exact packet and
+  readiness record as an immutable, digest-addressed JSON object in the
+  approved Supabase private creative bucket. A protected recovery GET returns
+  the packet only for an authenticated administrator and re-computes the
+  packet digest before release. No list endpoint, local fallback, raw logging,
+  Git export, provider call, WING write, or publication is introduced.
+- Required configuration: Preview and Production each need the approved
+  `SUPABASE_SERVICE_ROLE_KEY` in their Vercel environment. Missing storage
+  configuration returns the stable
+  `ADAPTER_PACKET_RECOVERY_STORAGE_UNAVAILABLE` error; it must not be hidden.
+- Risk/rollback: manual merge required. Revert the persistence/recovery route
+  and UI, then retain or remove the private objects according to the approved
+  Supabase retention procedure. Secret values and packet contents remain out
+  of chat, logs, and Git.
