@@ -1,5 +1,85 @@
 # Work status
 
+## 2026-08-18 Coupang read-only egress preflight
+
+- Objective: make the read-only Coupang logistics execution boundary
+  diagnosable and continuously usable instead of repeatedly retrying an
+  unknown key/IP failure.
+- Branch/base: `codex/fix/coupang-readonly-egress-preflight` from merged
+  `origin/main` `f86f6ea3`.
+- Risk: high-risk/manual. This touches authenticated external API access and
+  Production networking, but performs only one bounded GET probe; no secret,
+  WING write, product write, or paid provider call is introduced.
+- Root cause: external configuration. Coupang requires HMAC credentials and an
+  IP allowlist; default Vercel egress is dynamic. Code cannot manufacture a
+  valid allowlist or permission.
+- Implemented: sanitized typed preflight service, protected admin read route,
+  operator UI status action, focused tests, and a Vercel Static IP/Coupang
+  allowlist runbook. The existing owner-confirmed packet fallback remains the
+  zero-additional-cost path.
+- Current: local validation pending. External owner actions are Vercel Static
+  IPs add-on in `icn1`, Coupang allowlist update, and confirmation that the
+  key's Logistics read scope is enabled.
+- Next action: run focused/full gates, push a manual-merge PR, then after the
+  owner completes the external setup call the preflight once and use the
+  existing packet address enrichment only if it returns `READY`.
+
+## 2026-08-18 One-time owner-confirmed logistics persistence
+
+- Objective: remove the recurring Production-to-Coupang address lookup from
+  the critical path. A verified WING outbound/return code is bound once to a
+  typed packet and recovered from the existing Supabase private immutable
+  store thereafter.
+- Branch/base: `codex/fix/owner-confirmed-logistics-persistence` from the
+  current `origin/main`.
+- Risk: high-risk/manual. This changes an authenticated private packet path;
+  it does not submit WING, call a paid provider, change secrets, or weaken
+  category/live-write/rights gates.
+- Root-cause classification: external configuration (Coupang API
+  authentication/allowlist) plus code/operational design (every run retried
+  the same lookup and no owner-confirmed evidence path existed).
+- Cloud-first source of truth: existing Supabase private immutable packet
+  object store; browser input is disposable and no raw packet/secret is stored
+  in Git or logs.
+- Implemented: typed owner-confirmed evidence importer, authenticated route,
+  private persistence, digest-bound evidence mode/selectors/approval metadata,
+  operator UI, architecture amendment, and negative/positive unit tests.
+- Validation: focused manual-logistics tests 3/3; full tests 702/702;
+  typecheck PASS; lint PASS with four pre-existing warnings; production build
+  PASS; diff check PASS.
+- Current: code is ready for a manual-merge PR. Production configuration and
+  exact WING code entry remain owner-controlled. No code can safely invent the
+  missing return-center code or bypass Coupang's API boundary.
+- Next action: review/push PR, wait for exact-head CI and Preview, then merge
+  manually. After deployment, enter the two exact WING codes once in the new
+  owner-confirmed section; subsequent packet recovery/export reuses the saved
+  digest without address API calls.
+
+## 2026-08-18 Packet recovery and Preview configuration audit
+
+- Objective: remove the conversation-only external adapter packet dead end and
+  verify the Preview Supabase configuration that caused browser API 500s.
+- Branch/base: `codex/feat/packet-recovery-and-preview-diagnostics` from the
+  current `origin/main` after PR #151.
+- Risk: high-risk/manual. Packet data is confidential commerce data; this work
+  must not submit WING, call a paid provider, change prices/stock, or weaken
+  authentication. Any durable packet storage requires an approved managed
+  owner and recovery contract.
+- Root-cause classification: external configuration (Preview lacks
+  `SUPABASE_SERVICE_ROLE_KEY`) and code/architecture (adapter packets are
+  explicitly not persisted, so a stopped session cannot recover them).
+- Cloud-first target: existing Supabase private creative bucket, with private
+  object paths, immutable digests, short-lived signed recovery URLs, no raw
+  packet logging, and no local authoritative copy. Vercel remains the
+  environment-secret owner.
+- Current progress: external configuration evidence collected; immutable
+  digest-bound packet persistence/recovery, operator recovery UI, architecture
+  amendment, and regression tests implemented.
+- Blockers/owner action: a Preview-scoped `SUPABASE_SERVICE_ROLE_KEY` must be
+  provisioned from the approved secret source; the value must never be exposed
+  in chat, logs, or Git.
+- Next action: commit and push the high-risk/manual PR, then add the missing
+  Preview service-role secret in Vercel and verify the exact Preview build.
 ## 2026-08-17 Preflight diagnostics in operator UI
 
 - Objective: make provider configuration failures self-diagnosing before a
@@ -6142,3 +6222,114 @@ perform the documented read-only Supabase schema and completeness inspection.
   change was made for the transient failure. PR #144 remains high-risk and
   `manual-merge-required`; no Production commerce write, paid generation,
   publication, or WING submission was performed.
+# 2026-08-17 — Admin session continuity UX
+
+- Objective: reduce repeated admin sign-in friction without removing MFA or
+  weakening paid/WING mutation gates.
+- Branch: `codex/auth/session-continuity-ux`.
+- Risk: high-risk/manual authentication change; no Production auth/config write
+  or commerce write performed.
+- Root-cause class: code/UI session observability and refresh; trusted-browser
+  preference is non-authoritative cookie state.
+- Completed: session-status contract/route with near-expiry refresh, operator
+  polling/status gate, login MFA status polling, owner-controlled preference
+  route, decision log, unit test.
+- Verification: lint passed with existing warnings; typecheck passed; 687 tests
+  passed; targeted mobile E2E passed; production build passed.
+- Current: full diff review and PR delivery remain.
+- Next: commit/push, create high-risk manual-merge PR, then Preview review.
+- Non-goals: SSO provider setup, MFA bypass, trusted-device authorization,
+  paid generation, WING submission, or auth secret/config changes.
+
+# Coupang address-based logistics lookup — 2026-08-18
+
+- Objective: use official read-only Coupang logistics APIs to resolve outbound and return codes from approved WING address descriptors.
+- Branch/base: `codex/feat/coupang-address-location-lookup` from `origin/main` `52cebecc`.
+- Risk: high-risk/manual due external seller integration and confidential logistics data boundary; no writes or secret/config changes.
+- Root cause: existing reader only accepted caller-supplied codes; it could not match WING address records to official API responses.
+- Completed: typed address selector, exact normalized address matching, bounded GET-only outbound/return lookup, ambiguity/failure taxonomy, sanitized tests, Korean official-doc references (8/8 steps).
+- Verification: focused logistics tests PASS; full suite 689 PASS; lint PASS; typecheck PASS after production build; production build PASS; diff check PASS.
+- Durable state: none added. Raw addresses/provider bodies remain transient; existing sanitized evidence digest is the only normalized output.
+- External boundary: no Coupang call was made from this workstation, no WING write, no product submission, and no credential/configuration change.
+- Owner action after review: Production must already contain approved `COUPANG_ACCESS_KEY`, `COUPANG_SECRET_KEY`, and `COUPANG_VENDOR_ID` in Vercel secret storage. Run the server-side read-only adapter against exact WING address descriptors; never paste secrets into chat.
+- Current: commit, push, and high-risk/manual PR delivery remain.
+
+# Coupang v5 return envelope correction — 2026-08-18
+
+- Objective: preserve the cost-free local read-only path and make the decoder accept the actual Coupang v5 `data.content` return-center envelope.
+- Branch/base: `codex/fix/coupang-return-response-shape` from `origin/main` `101c9aa`.
+- Risk: high-risk/manual external seller integration; no write, billing, secret, or environment mutation in this code change.
+- Completed: return decoder and bounded address resolver accept both legacy fixture `data[]` and official `data.content[]`; official live read from the allowlisted local IP resolved one outbound and one return code by exact address match.
+- Verification: focused logistics tests 14/14 PASS; typecheck PASS; production build PASS.
+- External result: Vercel direct call reached Coupang but was rejected by IP allowlist; local read-only call succeeded without Vercel Static IP cost. No raw credentials or addresses committed.
+- Current: commit, push, and high-risk/manual PR delivery.
+# Current task snapshot — WING adapter logistics enrichment — 2026-08-18
+
+- Objective: remove repeated manual shipping-code lookup by enriching an owner-controlled adapter packet with exact WING address selectors through Coupang read-only APIs, then persist the digest-bound packet in Supabase private storage.
+- Branch/base: `codex/feat/wing-adapter-ingestion` from `origin/main` `e7d6055`.
+- Risk: high-risk/manual; authenticated admin route, confidential logistics data, external seller API, and private packet persistence. No WING write, paid provider call, or public publication.
+- Root-cause class: code/integration boundary. WING browser state cannot be safely scraped server-side; the approved server boundary must receive only the owner-controlled packet and address selectors, resolve codes server-side, and persist sanitized evidence.
+- Cloud-first: Supabase private packet storage remains authoritative; Vercel runtime secrets hold Coupang credentials; GitHub owns contracts/tests; browser values are transient and never logged or committed.
+- Planned steps: (1) contract audit, (2) address-enrichment contract, (3) pure resolver bridge, (4) protected API/CSRF, (5) export UI, (6) negative/fixture tests, (7) lint/typecheck/tests/build, (8) browser smoke, (9) diff/secret review, (10) commit/push/manual PR.
+- Completed: steps 1–8. Address code enrichment now requires explicit selectors, calls only existing read-only evidence readers, binds evidence to the packet, persists the result through the existing private recovery repository, and is covered by unit, full-suite, build, and browser checks.
+- Current: final diff/secret review, commit/push, and high-risk manual PR delivery.
+- Non-goals: browser-cookie extraction, raw WING scraping, secret transfer, automatic live-write approval, WING submission, paid image generation, or local durable state.
+- Owner action after delivery: Production must have `COUPANG_ACCESS_KEY`, `COUPANG_SECRET_KEY`, and `COUPANG_VENDOR_ID`; the operator supplies the WING address selectors inside the authenticated Production boundary once per packet.
+
+# Coupang read-only egress preflight — 2026-08-18
+
+- Objective: make the Coupang logistics read path continuously diagnosable without repeated manual retries, while preserving a strict no-write boundary.
+- Branch/base: `codex/fix/coupang-readonly-egress-preflight` from `origin/main` `f86f6ea3`.
+- Risk: high-risk/manual; external seller API, IP allowlist, Production secret/configuration, and authenticated admin route.
+- Root-cause class: external configuration first. Vercel serverless egress is not a stable allowlisted IP by default; Coupang requires HMAC credentials and allowlisted caller IPs.
+- Completed: typed read-only preflight service and protected admin route; stable classification for missing credentials, auth/IP rejection, upstream outage, and contract drift; operator UI action; official static-egress runbook; focused tests.
+- Verification: focused preflight 3/3 PASS; full lint PASS (existing unrelated warnings only); typecheck PASS; full test/build command PASS; `git diff --check` PASS.
+- Durable state: no new local state. Existing Vercel Production secrets and Supabase private packet evidence remain authoritative; preflight response is sanitized and not persisted.
+- External owner action: enable Vercel Pro Static IPs for Production in `icn1`, add both assigned egress IPs to Coupang WING Open API allowlist, confirm Logistics read scope, redeploy, then run the single preflight button. If paid static egress is not approved, use the existing one-time owner-confirmed packet fallback instead.
+- Current: commit `a864f55`, pushed, PR #155 open with `manual-merge-required`; CI/Preview rerunning after the final documentation amendment. No Coupang/WING write or paid image generation executed.
+
+# Minimum Coupang registration gate amendment — 2026-08-18
+
+- Objective: remove internal adapter friction that exceeds current Coupang registration requirements while preserving factual, rights, payload, and live-write safety.
+- Branch/base: `codex/feat/minimum-coupang-registration-gate` from `origin/main` `846426a`.
+- Risk: high-risk/manual; registration mapper, approval semantics, and external commerce-write boundary.
+- Root-cause class: code/policy contract. Offline `REGISTRATION_READY` was coupled to human content approval and live-write approval even though those are not Coupang payload fields.
+- Durable state: no new state. Existing Supabase private packet recovery remains authoritative; Git stores the amendment and tests.
+- Planned steps: (1) gate audit, (2) owner amendment, (3) automatic evidence-backed candidate, (4) optional reprepare approval reference, (5) live-write separation, (6) tests, (7) full gates, (8) manual PR/Preview report.
+- Completed: steps 1–7; commit `c413288` pushed and PR #156 opened. Local full suite 708/708, build, lint, typecheck, diff, and adapter/reprepare E2E pass. No Production, WING, paid provider, secret, or live commerce write.
+- Intended behavior: minimum exact-category payload can be `REGISTRATION_READY` with content/live approval warnings; actual live submission still requires explicit confirmation and owner live-write approval.
+- Current: PR #156 CI/Preview checks are still running; manual merge required after exact-head checks pass.
+
+# 2026-08-18 S3-17 Post-registration sales-learning binding
+
+- Objective: connect a completed WING registration to the append-only learning
+  loop without submitting or mutating WING again.
+- Branch/base: `codex/feat/post-registration-learning-binding` from
+  `origin/main` `17098bb`.
+- Risk: high-risk/manual because the next integration writes confidential
+  Production registration evidence to managed storage; this checkpoint itself
+  adds only a pure typed contract and tests.
+- Root-cause class: code contract. Existing `ListingRevisionMetrics` and
+  sequential guardrails existed, but no immutable observation tied the real
+  seller product ID to packet/content/revision digests.
+- Cloud-first: no new durable state or secret was added. The intended owner is
+  the existing Supabase private operational boundary; the current commit is
+  deliberately pure until the DB/event write Story is manually approved.
+- Completed: steps 1–7/10 — boot/policy audit, origin/main branch, learning
+  inventory, registration observation contract, digest/identity validation,
+  cold-start guard (`AWAITING_TRAFFIC`, `winnerDeclared:false`), focused/full
+  tests, typecheck, lint, and production build.
+- Evidence: 710 tests passed, typecheck passed, build passed, lint passed with
+  four pre-existing unused-variable warnings, no WING/API/paid calls.
+- Current: final diff/secret review, commit/push, high-risk manual PR.
+- Non-goals: no WING write, no automatic metrics fabrication, no winner
+  declaration, no schema migration, no Production deployment from this branch.
+- Next: owner review of the append-only Supabase event integration Story;
+  after manual merge, record the actual registered seller product ID and
+  packet/revision digests through the protected server boundary, then add a
+  read-only monitoring card and real metric ingestion adapters.
+- Merge preparation: PR #157 exact head `f933916` is clean; CI lint, tests,
+  typecheck, build, security audit, DB baseline replay, item-selection security,
+  R1 atomic mutation, Preview browser E2E, and Vercel Preview all PASS.
+- Approval boundary: `manual-merge-required` remains; no auto-merge or
+  Production deployment was performed.

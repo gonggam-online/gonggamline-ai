@@ -255,14 +255,17 @@ export function buildListingContentPacket(input: ListingContentInput, commerce?:
     { variantId: "A", title: titleValueA, titleTokens: titleA, keywords: keywordA.map(({ text }) => text), keywordCandidates: keywordA, creativePlan: ["PACKSHOT", "SCALE", "COMPONENTS", "DETAIL"] as const, detailPlan: detailPlan.map(({ blockType }) => blockType), rationale: ["구매 핵심 사실과 공식 title front-loading prior를 우선", "상품 관련성·정확성 중심 검색어 후보", "실제 권리와 사실 범위의 shot만 선택"], confidence: "MEDIUM" as const },
     { variantId: "B", title: titleValueB, titleTokens: titleB, keywords: keywordB.map(({ text }) => text), keywordCandidates: keywordB, creativePlan: ["PACKSHOT", "CONTEXT", "FEATURE", "DETAIL"] as const, detailPlan: detailPlan.map(({ blockType }) => blockType), rationale: ["customer/search intent mapping을 더 강하게 반영", "시장 관측은 패턴 신호로만 사용하고 문구·이미지는 복제하지 않음", "실측 seller metrics 전에는 우수성을 주장하지 않음"], confidence: "LOW" as const },
   ];
-  const selectedVariantId = input.contentApproval?.selectedVariantId ?? "";
+  // The evidence-backed purchase-first candidate is the deterministic
+  // registration default. Human conversion approval can refine it later, but
+  // it must not block an otherwise valid offline Coupang payload.
+  const selectedVariantId = input.contentApproval?.selectedVariantId || "A";
   const selected = candidates.find(({ variantId }) => variantId === selectedVariantId);
   const contentApproved = input.contentApproval?.decision === "APPROVED_FOR_PAYLOAD_MAPPING" && Boolean(selected) && input.contentApproval.reviewerReference.length > 0 && input.contentApproval.evidenceEvaluationId === input.evidence.evaluationId && input.contentApproval.policyDigest === input.policy.digest && input.contentApproval.categoryMetadataDigest === input.category.metadataDigest;
-  if (!contentApproved) issue(issues, "CONTENT_APPROVAL_REQUIRED", "contentApproval.selectedVariantId", "정확한 evidence/category/policy 버전과 한 후보를 묶은 사람의 콘텐츠 승인이 필요합니다.");
+  if (!contentApproved) issue(issues, "CONTENT_APPROVAL_PENDING", "contentApproval.selectedVariantId", "증거 기반 기본 후보로 등록 payload를 준비했습니다. 전환 최적화를 위해 사람의 후보 승인을 추가할 수 있습니다.", "WARNING");
 
   let registrationPayload: Record<string, unknown> | null = null;
   if (commerce && selected) {
-    if (!commerce.liveWriteApproval.approved || !commerce.liveWriteApproval.approvalReference) issue(issues, "LIVE_WRITE_APPROVAL_REQUIRED", "commerce.liveWriteApproval", "선택 variant와 payload에 대한 별도 live commerce-write 승인이 필요합니다.");
+    if (!commerce.liveWriteApproval.approved || !commerce.liveWriteApproval.approvalReference) issue(issues, "LIVE_WRITE_APPROVAL_REQUIRED", "commerce.liveWriteApproval", "offline payload는 준비됐지만 실제 Coupang 제출 전 별도 live-write 승인이 필요합니다.", "WARNING");
     const mappedAttributes = [...commerce.attributes, ...commerce.searchFilters].filter((entry, index, entries) => entries.findIndex((candidate) => candidate.name === entry.name && candidate.value === entry.value) === index);
     for (const [group, entries] of [["attributes", mappedAttributes], ["options", commerce.options], ["notices", commerce.notices]] as const) {
       for (const entry of entries) if (prohibited(`${entry.name} ${entry.value}`, input.policy)) issue(issues, "PROHIBITED_REGISTRATION_FIELD", `commerce.${group}.${entry.name}`, "선택 payload가 금칙어·권리 미확인 상표·근거 없는 claim을 사용합니다.");

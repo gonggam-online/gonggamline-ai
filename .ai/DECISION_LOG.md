@@ -1883,3 +1883,65 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Risk/rollback: manual merge required; revert the route/page/service and
   revoke the CSRF purpose. No database migration or local durable state is
   introduced. A changed packet or revision requires a new approval.
+
+# 2026-08-17 - Admin session continuity without MFA bypass
+
+- Category: high-risk/manual authentication UX and paid-commerce boundary.
+- Decision: add a server session-status endpoint that refreshes near-expiry
+  Supabase sessions, exposes sanitized AAL/age/mutation-readiness state, and
+  lets the operator UI poll before PREPARE or paid dispatch. The login screen
+  also refreshes MFA status periodically and explains the re-authentication
+  window.
+- Trusted browser: an owner-controlled, HttpOnly preference cookie is allowed
+  only as a notification preference. It never elevates AAL, bypasses MFA, or
+  authorizes paid generation, WING writes, publication, or other mutations.
+- Durable state: Supabase Auth remains the session source of truth; the
+  preference cookie is non-authoritative and recoverable by re-login. No local
+  durable state, auth metadata mutation, or MFA weakening is introduced.
+- Risk/rollback: high-risk/manual; revert the session-status route, preference
+  route, and UI changes. Production deployment and any auth configuration
+  change require separate owner review.
+
+# 2026-08-18 - Owner adapter packet recovery amendment
+
+- Category: high-risk/manual confidential commerce-data persistence and
+  recovery.
+- Finding: the prior export boundary deliberately did not persist full
+  packets, which made a stopped browser session require re-entry of the same
+  WING/private values and prevented reliable automation recovery.
+- Decision: after successful packet validation, persist the exact packet and
+  readiness record as an immutable, digest-addressed JSON object in the
+  approved Supabase private creative bucket. A protected recovery GET returns
+  the packet only for an authenticated administrator and re-computes the
+  packet digest before release. No list endpoint, local fallback, raw logging,
+  Git export, provider call, WING write, or publication is introduced.
+- Required configuration: Preview and Production each need the approved
+  `SUPABASE_SERVICE_ROLE_KEY` in their Vercel environment. Missing storage
+  configuration returns the stable
+  `ADAPTER_PACKET_RECOVERY_STORAGE_UNAVAILABLE` error; it must not be hidden.
+- Risk/rollback: manual merge required. Revert the persistence/recovery route
+  and UI, then retain or remove the private objects according to the approved
+  Supabase retention procedure. Secret values and packet contents remain out
+  of chat, logs, and Git.
+
+# 2026-08-18 - Address-based WING adapter logistics enrichment
+
+- Category: high-risk/manual authenticated seller integration and confidential
+  logistics-data boundary.
+- Decision: add a protected owner adapter enrichment route that accepts the
+  typed packet plus WING-observed outbound/return address selectors, resolves
+  `outboundShippingPlaceCode` and `returnCenterCode` through the existing
+  server-side Coupang GET-only evidence reader, and persists the resulting
+  digest-bound packet in the approved Supabase private store.
+- The browser session itself is never scraped or forwarded to the server.
+  Raw Coupang responses, contact details, API credentials, and address
+  selectors are transient; only the selected codes and sanitized evidence
+  provenance are retained in the packet. Ambiguous, stale, unavailable, or
+  unauthorized provider results fail closed and never guess a code.
+- The route does not submit WING, issue live-write approval, call OpenAI, or
+  publish assets. Existing owner authentication, exact-origin, CSRF, rate
+  limit, and manual-merge boundaries remain mandatory.
+- Risk/rollback: manual merge required. Revert the enrichment route, contract,
+  UI, and tests; private packet objects remain governed by the existing
+  Supabase retention/recovery procedure. Production requires the already
+  approved Coupang credentials and no new secret or local durable state.

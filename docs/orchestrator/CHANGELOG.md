@@ -1,5 +1,12 @@
 # Orchestrator changelog
 
+## 2026-08-18 — S3-17 post-registration learning binding
+
+- Standardized the next workroom stage name as S3-17 after the merged S3-16
+  operator dispatch and first real WING registration.
+- The stage owns immutable registration-result correlation and append-only
+  sales-learning monitoring; it does not authorize another marketplace write.
+
 ## 2026-08-14 - External commerce asset rights policy dependency
 
 - Added the v1.1 dependency that separates lawful asset discovery from publication and derivative authorization.

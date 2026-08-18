@@ -20,6 +20,7 @@ export type AdminCsrfPurpose =
   | "listing-creative-dispatch-prepare"
   | "listing-creative-dispatch"
   | "listing-creative-adapter-export"
+  | "listing-creative-adapter-enrich"
   | "listing-live-write-approval";
 
 export type AdminCsrfToken = Readonly<{

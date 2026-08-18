@@ -98,6 +98,52 @@ contract is type-only in this Story. Persistence requires a separate
 Database/Auth/RLS Architecture and manual PR. Local build/browser outputs are
 disposable.
 
+## Packet recovery amendment (2026-08-18)
+
+The earlier owner-controlled adapter export decision incorrectly treated a
+conversation-only handoff as recoverable. A validated full adapter packet is
+confidential commerce data and must be recoverable without requiring the owner
+to re-enter WING values after a browser/session interruption. The export route
+therefore persists the exact packet, readiness record, and packet digest as an
+immutable JSON object in the approved Supabase private bucket. The object is
+addressed only by its SHA-256 packet digest, is readable only after the normal
+administrator guard, and is never logged, returned by a list endpoint, or
+copied into Git. Recovery re-computes the digest before returning the packet.
+
+This amendment does not authorize WING submission, paid provider calls, public
+publication, or live-write approval. It is a high-risk/manual storage boundary:
+Preview and Production must each have an approved Supabase service-role secret
+in their environment, and a storage outage must remain visible as
+`ADAPTER_PACKET_RECOVERY_STORAGE_UNAVAILABLE` rather than silently falling
+back to local or conversation state.
+
+## Minimum-friction registration amendment (2026-08-18)
+
+The owner further directs that the internal adapter must not impose a stricter
+registration gate than the current Coupang category/schema/policy contract.
+`REGISTRATION_READY` now means that the exact-category registration payload is
+complete, factual conflicts are resolved, selected assets/claims are lawful,
+and the payload validator passes. It is an offline mapping state, not an
+authorization to submit.
+
+The following are no longer registration blockers:
+
+- missing human conversion-candidate approval when the deterministic default
+  candidate is evidence-backed and policy-clean;
+- missing `contentApprovalReference` during packet re-prepare;
+- missing separate live-write approval while preparing or exporting a dry-run
+  payload; and
+- cold-start optimization, optional creative coverage, or unchanged-only image
+  use when the selected original asset is allowed.
+
+These remain visible as `WARNING` or `OPTIMIZATION_PENDING`. The live commerce
+write route still requires its explicit confirmation and owner live-write
+approval immediately before any external submission. Prohibited/unlicensed
+payload content, missing exact-category mandatory fields, unresolved purchase
+fact conflicts, schema/payload failures, and legacy `listing_drafts` casting
+remain blockers. This keeps automation friction low without converting a
+validated draft into an unapproved marketplace write.
+
 ## Rollback
 
 Revert this implementation before any live use. A later approved packet must be
@@ -136,8 +182,9 @@ Architecture PR is manually approved and merged.
 - Append-only metrics and guardrails: `shared/domain/listing-learning.ts` and
   `engines/listing/learning.ts`.
 - Operator presentation: `components/listing/listing-content-review.tsx` and
-  `/listing/review`. The route intentionally does not persist or load business
-  packets until the separate Database/Auth/RLS Story is approved.
+  `/listing/review`. Owner adapter packets are persisted and recovered through
+  `services/listing-creative-adapter-recovery.service.ts` and the protected
+  adapter recovery route; legacy `listing_drafts` remain non-authoritative.
 - Acceptance evidence: `tests/listing-content-pipeline.test.ts`,
   `tests/listing-supplier-trust-and-learning.test.ts`, and
   `tests/kk946-listing-content-acceptance.test.ts`.
