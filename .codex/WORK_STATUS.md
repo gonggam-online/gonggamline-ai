@@ -1,5 +1,29 @@
 # Work status
 
+## 2026-08-18 Coupang read-only egress preflight
+
+- Objective: make the read-only Coupang logistics execution boundary
+  diagnosable and continuously usable instead of repeatedly retrying an
+  unknown key/IP failure.
+- Branch/base: `codex/fix/coupang-readonly-egress-preflight` from merged
+  `origin/main` `f86f6ea3`.
+- Risk: high-risk/manual. This touches authenticated external API access and
+  Production networking, but performs only one bounded GET probe; no secret,
+  WING write, product write, or paid provider call is introduced.
+- Root cause: external configuration. Coupang requires HMAC credentials and an
+  IP allowlist; default Vercel egress is dynamic. Code cannot manufacture a
+  valid allowlist or permission.
+- Implemented: sanitized typed preflight service, protected admin read route,
+  operator UI status action, focused tests, and a Vercel Static IP/Coupang
+  allowlist runbook. The existing owner-confirmed packet fallback remains the
+  zero-additional-cost path.
+- Current: local validation pending. External owner actions are Vercel Static
+  IPs add-on in `icn1`, Coupang allowlist update, and confirmation that the
+  key's Logistics read scope is enabled.
+- Next action: run focused/full gates, push a manual-merge PR, then after the
+  owner completes the external setup call the preflight once and use the
+  existing packet address enrichment only if it returns `READY`.
+
 ## 2026-08-18 One-time owner-confirmed logistics persistence
 
 - Objective: remove the recurring Production-to-Coupang address lookup from
@@ -6251,3 +6275,15 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Current: final diff/secret review, commit/push, and high-risk manual PR delivery.
 - Non-goals: browser-cookie extraction, raw WING scraping, secret transfer, automatic live-write approval, WING submission, paid image generation, or local durable state.
 - Owner action after delivery: Production must have `COUPANG_ACCESS_KEY`, `COUPANG_SECRET_KEY`, and `COUPANG_VENDOR_ID`; the operator supplies the WING address selectors inside the authenticated Production boundary once per packet.
+
+# Coupang read-only egress preflight — 2026-08-18
+
+- Objective: make the Coupang logistics read path continuously diagnosable without repeated manual retries, while preserving a strict no-write boundary.
+- Branch/base: `codex/fix/coupang-readonly-egress-preflight` from `origin/main` `f86f6ea3`.
+- Risk: high-risk/manual; external seller API, IP allowlist, Production secret/configuration, and authenticated admin route.
+- Root-cause class: external configuration first. Vercel serverless egress is not a stable allowlisted IP by default; Coupang requires HMAC credentials and allowlisted caller IPs.
+- Completed: typed read-only preflight service and protected admin route; stable classification for missing credentials, auth/IP rejection, upstream outage, and contract drift; operator UI action; official static-egress runbook; focused tests.
+- Verification: focused preflight 3/3 PASS; full lint PASS (existing unrelated warnings only); typecheck PASS; full test/build command PASS; `git diff --check` PASS.
+- Durable state: no new local state. Existing Vercel Production secrets and Supabase private packet evidence remain authoritative; preflight response is sanitized and not persisted.
+- External owner action: enable Vercel Pro Static IPs for Production in `icn1`, add both assigned egress IPs to Coupang WING Open API allowlist, confirm Logistics read scope, redeploy, then run the single preflight button. If paid static egress is not approved, use the existing one-time owner-confirmed packet fallback instead.
+- Current: commit `a864f55`, pushed, PR #155 open with `manual-merge-required`; CI/Preview rerunning after the final documentation amendment. No Coupang/WING write or paid image generation executed.
