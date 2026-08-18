@@ -171,6 +171,7 @@ export function ListingCreativeAdapterExport() {
           WING에서 승인된 값을 외부 adapter가 만든 typed packet으로 검증하고, Production 입력에 필요한 전체 JSON을 복사하거나 파일로 내려받는 화면입니다.
           검증이 통과한 packet은 digest에 결속된 Supabase private 저장소에 암호화된 접근 경계로 저장되어, 작업이 중단되어도 digest로 복구할 수 있습니다.
         </p>
+        <p className="text-sm text-indigo-800">등록 적합성은 exact category·필수 필드·사실 충돌·payload 검증으로 판정합니다. content/live approval과 전환 최적화는 별도 경고이며 실제 제출 직전에만 live-write 승인이 필요합니다.</p>
         <p className="text-sm text-indigo-800">
           이전 export를 찾을 수 없으면 <a className="font-semibold underline" href="/admin/listing/creative-adapter/reprepare">저장된 packet 복구 또는 현재 WING 값으로 새 revision 생성</a>을 사용하세요.
         </p>

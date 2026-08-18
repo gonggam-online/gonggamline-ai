@@ -53,18 +53,13 @@ test("owner approval is issued only when the live-write blocker is the remaining
   assert.equal(record.scope, "COUPANG_WING_LIVE_WRITE");
 });
 
-test("owner approval fails closed when content approval or another blocker is unresolved", () => {
+test("owner approval remains blocked by payload failures but not by optional content approval", () => {
   const { packet, revision } = candidate();
   const listingWithoutApproval = Object.fromEntries(
     Object.entries(packet.listingInput).filter(([key]) => key !== "contentApproval"),
   ) as typeof packet.listingInput;
-  assert.throws(
-    () => validateLiveWriteApprovalCandidate({
-      ...packet,
-      listingInput: listingWithoutApproval,
-    }, revision),
-    /LIVE_WRITE_APPROVAL_CONTENT_MISMATCH/,
-  );
+  const noContentApprovalRevision = { ...revision, contentApprovalReference: "" };
+  assert.match(validateLiveWriteApprovalCandidate({ ...packet, listingInput: listingWithoutApproval }, noContentApprovalRevision), /^[a-f0-9]{64}$/);
   assert.throws(
     () => validateLiveWriteApprovalCandidate({
       ...packet,
