@@ -14,7 +14,7 @@ test("governance makes measurable revenue the first planning gate", () => {
   const directive = read(".ai/CTO_MASTER_DIRECTIVE.md");
   const priority = read(".ai/business-priority.md");
 
-  assert.match(agents, /best next development step for producing[\s\S]*revenue quickly/i);
+  assert.match(agents, /Time-to-Value → Time-to-Revenue → 운영 자동화 → 확장/i);
   assert.match(directive, /shortest safe,[\s\S]*path to the first and next sale/i);
   assert.match(priority, /earliest currently blocked step[\s\S]*measurable sale/i);
 });
