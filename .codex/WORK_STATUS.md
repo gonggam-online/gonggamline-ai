@@ -6142,3 +6142,16 @@ perform the documented read-only Supabase schema and completeness inspection.
   change was made for the transient failure. PR #144 remains high-risk and
   `manual-merge-required`; no Production commerce write, paid generation,
   publication, or WING submission was performed.
+
+# Coupang address-based logistics lookup — 2026-08-18
+
+- Objective: use official read-only Coupang logistics APIs to resolve outbound and return codes from approved WING address descriptors.
+- Branch/base: `codex/feat/coupang-address-location-lookup` from `origin/main` `52cebecc`.
+- Risk: high-risk/manual due external seller integration and confidential logistics data boundary; no writes or secret/config changes.
+- Root cause: existing reader only accepted caller-supplied codes; it could not match WING address records to official API responses.
+- Completed: typed address selector, exact normalized address matching, bounded GET-only outbound/return lookup, ambiguity/failure taxonomy, sanitized tests, Korean official-doc references (8/8 steps).
+- Verification: focused logistics tests PASS; full suite 689 PASS; lint PASS; typecheck PASS after production build; production build PASS; diff check PASS.
+- Durable state: none added. Raw addresses/provider bodies remain transient; existing sanitized evidence digest is the only normalized output.
+- External boundary: no Coupang call was made from this workstation, no WING write, no product submission, and no credential/configuration change.
+- Owner action after review: Production must already contain approved `COUPANG_ACCESS_KEY`, `COUPANG_SECRET_KEY`, and `COUPANG_VENDOR_ID` in Vercel secret storage. Run the server-side read-only adapter against exact WING address descriptors; never paste secrets into chat.
+- Current: commit, push, and high-risk/manual PR delivery remain.
