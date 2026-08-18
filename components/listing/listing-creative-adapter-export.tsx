@@ -47,6 +47,7 @@ export function ListingCreativeAdapterExport() {
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const [logisticsJson, setLogisticsJson] = useState("");
   const [manualLogisticsJson, setManualLogisticsJson] = useState("");
+  const [logisticsPreflight, setLogisticsPreflight] = useState<string | null>(null);
 
   async function runExport(): Promise<void> {
     setBusy(true);
@@ -102,6 +103,21 @@ export function ListingCreativeAdapterExport() {
       setCopyStatus("주소 매칭으로 출고지·반품지 코드를 확인하고 private 저장소에 저장했습니다.");
     } catch (error) {
       setErrorCode(error instanceof Error ? error.message : "ADAPTER_ENRICH_FAILED");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function runLogisticsPreflight(): Promise<void> {
+    setBusy(true);
+    setErrorCode(null);
+    try {
+      const response = await fetch("/api/admin/listing/creative-adapter/logistics/preflight", { credentials: "same-origin", cache: "no-store" });
+      const body = await response.json() as Readonly<{ data?: Readonly<{ status: string; detail: string; staticEgressRequired: boolean }>; error?: Readonly<{ code: string }> }>;
+      if (!response.ok || !body.data) throw new Error(body.error?.code ?? "COUPANG_LOGISTICS_PREFLIGHT_FAILED");
+      setLogisticsPreflight(`${body.data.status} · ${body.data.detail}${body.data.staticEgressRequired ? " · Vercel Static IP/allowlist 필요" : ""}`);
+    } catch (error) {
+      setErrorCode(error instanceof Error ? error.message : "COUPANG_LOGISTICS_PREFLIGHT_FAILED");
     } finally {
       setBusy(false);
     }
@@ -194,6 +210,8 @@ export function ListingCreativeAdapterExport() {
       <section className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 shadow-sm">
         <h2 className="text-lg font-semibold">주소 기반 배송 코드 확인</h2>
         <p className="mt-1 text-sm text-indigo-950">WING 주소록의 출고지·반품지 관찰값만 입력하면 서버가 Coupang read-only API로 코드를 매칭합니다. Secret과 원본 API 응답은 화면·로그·packet에 저장하지 않습니다.</p>
+        <button className="mt-3 rounded-lg border border-indigo-700 px-4 py-2 text-sm font-semibold text-indigo-900 disabled:opacity-50" disabled={busy} onClick={() => void runLogisticsPreflight()} type="button">Coupang 물류 API 연결 확인</button>
+        {logisticsPreflight ? <p className="mt-2 text-xs font-semibold text-indigo-950" role="status">{logisticsPreflight}</p> : null}
         <textarea
           aria-label="WING logistics address selectors JSON"
           className="mt-3 min-h-32 w-full rounded-xl border border-indigo-300 bg-white p-3 font-mono text-xs"
