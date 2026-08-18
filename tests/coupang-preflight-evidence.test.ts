@@ -97,6 +97,18 @@ test("return decoder discards contact, address, courier and fee fields", () => {
   assert.doesNotMatch(JSON.stringify(result), /address|phone|courier|fee|discard/);
 });
 
+test("return decoder accepts the official v5 data.content envelope", () => {
+  const result = decodeReturnEvidence({
+    pages: [{ code: 200, data: { content: [{ returnCenterCode: "RET-V5", shippingPlaceName: "개미창고 반품", placeAddresses: [{ returnZipCode: "12345", returnAddress: "서울시 중구 세종대로", returnAddressDetail: "101호" }] }] } }],
+    vendorRef,
+    selectedCode: "RET-V5",
+    observedAt,
+    sourceUrl: "https://api-gateway.coupang.com/vendors/{vendorId}/returnShippingCenters",
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.ok && result.evidence.returnCenterCode, "RET-V5");
+});
+
 test("address lookup selects a return center across bounded pages", () => {
   const result = decodeReturnEvidenceByAddress({
     pages: [
@@ -107,6 +119,18 @@ test("address lookup selects a return center across bounded pages", () => {
   assert.equal(result.ok, true);
   assert.equal(result.ok && result.evidence.returnCenterCode, "RET-2");
   assert.doesNotMatch(JSON.stringify(result), /서울시|12345|101호|discard/);
+});
+
+test("address lookup matches the official v5 return address fields", () => {
+  const result = decodeReturnEvidenceByAddress({
+    pages: [{ code: 200, data: { content: [{ returnCenterCode: "RET-V5", shippingPlaceName: "개미창고 반품", placeAddresses: [{ returnZipCode: "12345", returnAddress: "서울시 중구 세종대로", returnAddressDetail: "101호" }] }] } }],
+    vendorRef,
+    selector: { placeName: "개미창고 반품", zipCode: "12345", address: "서울시 중구 세종대로", addressDetail: "101호" },
+    observedAt,
+    sourceUrl: "fixture",
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.ok && result.evidence.returnCenterCode, "RET-V5");
 });
 
 test("return lookup reports bounded exhaustion rather than absence", async () => {

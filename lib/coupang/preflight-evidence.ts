@@ -52,9 +52,9 @@ function selectorIsValid(selector: LogisticsAddressSelector): boolean {
 function addressMatches(value: unknown, selector: LogisticsAddressSelector): boolean {
   const item = record(value);
   if (!item || !selectorIsValid(selector)) return false;
-  const zipCode = normalized(item.zipCode ?? item.zip ?? item.postalCode);
-  const address = normalized(item.address ?? item.address1 ?? item.roadAddress);
-  const detail = normalized(item.addressDetail ?? item.detailAddress ?? item.address2);
+  const zipCode = normalized(item.zipCode ?? item.returnZipCode ?? item.zip ?? item.postalCode);
+  const address = normalized(item.address ?? item.returnAddress ?? item.address1 ?? item.roadAddress);
+  const detail = normalized(item.addressDetail ?? item.returnAddressDetail ?? item.detailAddress ?? item.address2);
   if (zipCode !== normalized(selector.zipCode) || address !== normalized(selector.address)) return false;
   if (selector.addressDetail && detail !== normalized(selector.addressDetail)) return false;
   return true;
@@ -72,6 +72,12 @@ function locationMatches(value: unknown, selector: LogisticsAddressSelector): bo
   const addresses = item?.placeAddresses;
   if (!Array.isArray(addresses)) return false;
   return placeNameMatches(item, selector) && addresses.some((address) => addressMatches(address, selector));
+}
+
+function returnItems(root: Record<string, unknown>): readonly unknown[] | null {
+  if (Array.isArray(root.data)) return root.data;
+  const data = record(root.data);
+  return data && Array.isArray(data.content) ? data.content : null;
 }
 
 function digest(value: unknown): `sha256:${string}` | null {
@@ -181,11 +187,12 @@ export function decodeReturnEvidence(input: Readonly<{
   const matches: string[] = [];
   for (const page of input.pages) {
     const root = record(page);
-    if (!root || !Array.isArray(root.data) || root.data.length > PAGE_SIZE ||
+    const items = root ? returnItems(root) : null;
+    if (!root || !items || items.length > PAGE_SIZE ||
       !(typeof root.code === "number" || typeof root.code === "string")) {
       return { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
     }
-    for (const value of root.data) {
+    for (const value of items) {
       const item = record(value);
       if (item?.returnCenterCode === input.selectedCode) matches.push(input.selectedCode);
     }
@@ -215,10 +222,11 @@ export function decodeReturnEvidenceByAddress(input: Readonly<{
   const matches: string[] = [];
   for (const page of input.pages) {
     const root = record(page);
-    if (!root || !Array.isArray(root.data) || root.data.length > PAGE_SIZE) {
+    const items = root ? returnItems(root) : null;
+    if (!root || !items || items.length > PAGE_SIZE) {
       return { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
     }
-    for (const value of root.data) {
+    for (const value of items) {
       const item = record(value);
       const code = item?.returnCenterCode;
       if ((typeof code === "number" || typeof code === "string") && SAFE_CODE.test(String(code)) && locationMatches(item, input.selector)) {
@@ -325,9 +333,10 @@ export function createCoupangEvidenceReader(dependencies: Readonly<{
           if (!result.ok) return { ok: false, code: classify(result.status) };
           pages.push(result.data);
           const root = record(result.data);
-          if (!root || !Array.isArray(root.data)) return { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
-          if (root.data.some((entry) => record(entry)?.returnCenterCode === selectedCode)) break;
-          if (root.data.length < PAGE_SIZE) break;
+          const items = root ? returnItems(root) : null;
+          if (!root || !items) return { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
+          if (items.some((entry) => record(entry)?.returnCenterCode === selectedCode)) break;
+          if (items.length < PAGE_SIZE) break;
           if (pageNum === MAX_RETURN_PAGES) exhausted = true;
         }
         return decodeReturnEvidence({
@@ -357,9 +366,10 @@ export function createCoupangEvidenceReader(dependencies: Readonly<{
           if (!result.ok) return { ok: false, code: classify(result.status) };
           pages.push(result.data);
           const root = record(result.data);
-          if (!root || !Array.isArray(root.data)) return { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
-          if (root.data.some((entry) => locationMatches(entry, selector))) break;
-          if (root.data.length < PAGE_SIZE) break;
+          const items = root ? returnItems(root) : null;
+          if (!root || !items) return { ok: false, code: "RESPONSE_CONTRACT_ERROR" };
+          if (items.some((entry) => locationMatches(entry, selector))) break;
+          if (items.length < PAGE_SIZE) break;
           if (pageNum === MAX_RETURN_PAGES) exhausted = true;
         }
         return decodeReturnEvidenceByAddress({ pages, exhausted, vendorRef: identity.vendorRef, selector, observedAt: now().toISOString(), sourceUrl: `${HOST}${RETURN_PATH_TEMPLATE}` });
