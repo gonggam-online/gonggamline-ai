@@ -6328,3 +6328,8 @@ perform the documented read-only Supabase schema and completeness inspection.
   after manual merge, record the actual registered seller product ID and
   packet/revision digests through the protected server boundary, then add a
   read-only monitoring card and real metric ingestion adapters.
+- Merge preparation: PR #157 exact head `f933916` is clean; CI lint, tests,
+  typecheck, build, security audit, DB baseline replay, item-selection security,
+  R1 atomic mutation, Preview browser E2E, and Vercel Preview all PASS.
+- Approval boundary: `manual-merge-required` remains; no auto-merge or
+  Production deployment was performed.
