@@ -1,0 +1,61 @@
+name: Sync Global Codex Core
+
+on:
+  schedule:
+    - cron: "17 0 * * *"
+  workflow_dispatch:
+  repository_dispatch:
+    types:
+      - global-core-updated
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-global-core
+  cancel-in-progress: true
+
+env:
+  SOURCE_REPOSITORY: gonggam-online/codex-governance
+  SOURCE_PATH: global/GLOBAL_CORE.md
+  TARGET_PATH: AGENTS.md
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Download canonical global core
+        env:
+          GOVERNANCE_REPO_TOKEN: ${{ secrets.GOVERNANCE_REPO_READ_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${GOVERNANCE_REPO_TOKEN}" || {
+            echo "::error::GOVERNANCE_REPO_READ_TOKEN is not configured."
+            exit 1
+          }
+          curl --fail --silent --show-error --location +            --header "Authorization: Bearer ${GOVERNANCE_REPO_TOKEN}" +            --header "Accept: application/vnd.github.raw+json" +            "https://api.github.com/repos/${SOURCE_REPOSITORY}/contents/${SOURCE_PATH}?ref=main" +            --output .global-core.next
+          test -s .global-core.next
+          grep -q '^# \[코덱스개발\] 최상위 운영지시문 v2\.3' .global-core.next
+
+      - name: Apply and commit changed core
+        shell: bash
+        run: |
+          set -euo pipefail
+          if cmp -s "${TARGET_PATH}" .global-core.next; then
+            echo "GLOBAL CORE is already current."
+            rm -f .global-core.next
+            exit 0
+          fi
+          cp .global-core.next "${TARGET_PATH}"
+          rm -f .global-core.next
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${TARGET_PATH}"
+          git commit -m "chore: sync global codex core"
+          git push origin HEAD:main

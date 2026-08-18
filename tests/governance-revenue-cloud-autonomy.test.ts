@@ -14,7 +14,7 @@ test("governance makes measurable revenue the first planning gate", () => {
   const directive = read(".ai/CTO_MASTER_DIRECTIVE.md");
   const priority = read(".ai/business-priority.md");
 
-  assert.match(agents, /best next development step for producing[\s\S]*revenue quickly/i);
+  assert.match(agents, /Time-to-Value → Time-to-Revenue → 운영 자동화 → 확장/i);
   assert.match(directive, /shortest safe,[\s\S]*path to the first and next sale/i);
   assert.match(priority, /earliest currently blocked step[\s\S]*measurable sale/i);
 });
@@ -41,7 +41,8 @@ test("autonomy cannot weaken high-risk approval boundaries", () => {
   const agents = read("AGENTS.md");
   const standard = read(".ai/CODEX_OPERATING_STANDARD.md");
 
-  assert.match(agents, /preserving every high-risk and[\s\S]*approval boundary/i);
+  assert.match(agents, /# 12\. Critical Lane[\s\S]*Production[\s\S]*Secret[\s\S]*Codex의 Sandbox·Approval·보안정책을 우회하지 않는다/i);
+  assert.match(agents, /셀프학습은 승인되지 않은 모델 재훈련이나 검증되지 않은 자동 판단을 의미하지 않는다/i);
   assert.match(standard, /does not authorize Production, database\/schema\/migration\/RLS\/Auth/i);
   assert.match(standard, /exact target, evidence,[\s\S]*rollback, and remaining risk/i);
 });
