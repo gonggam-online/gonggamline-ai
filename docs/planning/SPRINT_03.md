@@ -66,6 +66,10 @@ Requires approved Sprint 02 packet, category metadata, brand/certification evide
     operator routes, private manifest repository, review handoff UI, and
     fake-only CI/Preview coverage; after merge, execute one bounded Production
     fact-only revision to private review only.
+17. S3-17 (high-risk, manual, after S3-16 merge): bind the completed
+    marketplace registration result to the immutable packet/revision/content
+    digests, then add append-only sales-learning ingestion and read-only
+    monitoring. No automatic winner, duplicate listing, or marketplace write.
 
 ## Done
 

@@ -6300,7 +6300,7 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Intended behavior: minimum exact-category payload can be `REGISTRATION_READY` with content/live approval warnings; actual live submission still requires explicit confirmation and owner live-write approval.
 - Current: PR #156 CI/Preview checks are still running; manual merge required after exact-head checks pass.
 
-# Post-registration learning binding — 2026-08-18
+# 2026-08-18 S3-17 Post-registration sales-learning binding
 
 - Objective: connect a completed WING registration to the append-only learning
   loop without submitting or mutating WING again.
