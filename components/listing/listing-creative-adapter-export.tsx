@@ -5,8 +5,11 @@ import { useState } from "react";
 import {
   LISTING_CREATIVE_ADAPTER_EXPORT_API_VERSION,
   LISTING_CREATIVE_ADAPTER_ENRICH_API_VERSION,
+  LISTING_CREATIVE_ADAPTER_MANUAL_LOGISTICS_API_VERSION,
   type ListingCreativeAdapterExportDto,
   type ListingCreativeAdapterEnrichmentResult,
+  type ListingCreativeAdapterPacket,
+  type ListingCreativeAdapterReadiness,
 } from "@/shared/contracts/listing-creative-adapter-export";
 
 type ApiResponse = Readonly<{
@@ -43,6 +46,7 @@ export function ListingCreativeAdapterExport() {
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const [logisticsJson, setLogisticsJson] = useState("");
+  const [manualLogisticsJson, setManualLogisticsJson] = useState("");
 
   async function runExport(): Promise<void> {
     setBusy(true);
@@ -103,6 +107,35 @@ export function ListingCreativeAdapterExport() {
     }
   }
 
+  async function importOwnerConfirmedLogistics(): Promise<void> {
+    setBusy(true);
+    setErrorCode(null);
+    setCopyStatus(null);
+    try {
+      const token = await csrf("listing-creative-adapter-enrich");
+      const response = await fetch("/api/admin/listing/creative-adapter/logistics/import", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "X-GonggamLine-CSRF": token },
+        body: JSON.stringify({
+          schemaVersion: LISTING_CREATIVE_ADAPTER_MANUAL_LOGISTICS_API_VERSION,
+          packet: JSON.parse(input) as unknown,
+          evidence: JSON.parse(manualLogisticsJson) as unknown,
+        }),
+      });
+      const body = await response.json() as Readonly<{ data?: { packet: ListingCreativeAdapterPacket; readiness: ListingCreativeAdapterReadiness }; error?: Readonly<{ code: string }> }>;
+      if (!response.ok || !body.data) throw new Error(body.error?.code ?? "ADAPTER_MANUAL_LOGISTICS_FAILED");
+      setInput(JSON.stringify(body.data.packet, null, 2));
+      setFull({ schemaVersion: LISTING_CREATIVE_ADAPTER_EXPORT_API_VERSION, exportKind: "FULL_PACKET", packet: body.data.packet, readiness: body.data.readiness, generatedAt: new Date().toISOString() });
+      setSanitized(null);
+      setCopyStatus("WING 확인 코드를 packet에 결속하고 private 저장소에 저장했습니다. 이후에는 주소 API 재조회 없이 digest로 복구됩니다.");
+    } catch (error) {
+      setErrorCode(error instanceof Error ? error.message : "ADAPTER_MANUAL_LOGISTICS_FAILED");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function copyFullPacket(): Promise<void> {
     if (!full) return;
     try {
@@ -149,6 +182,13 @@ export function ListingCreativeAdapterExport() {
         >
           {busy ? "검증 중..." : "검증하고 Export 준비"}
         </button>
+      </section>
+
+      <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+        <h2 className="text-lg font-semibold">주소 API 장애 시 1회 WING 코드 결속</h2>
+        <p className="mt-1 text-sm text-emerald-950">WING에서 확인한 출고·반품 코드를 owner 승인 참조와 함께 한 번만 입력합니다. 서버는 코드를 private packet에 digest로 저장하며 이후 Production이 Coupang 주소 API를 반복 호출하지 않습니다.</p>
+        <textarea aria-label="Owner confirmed WING logistics evidence JSON" className="mt-3 min-h-32 w-full rounded-xl border border-emerald-300 bg-white p-3 font-mono text-xs" onChange={(event) => setManualLogisticsJson(event.target.value)} placeholder={'{"vendorId":"...","observedAt":"...","sourceReference":"wing:draft:...","approvalReference":"owner:logistics:...","outbound":{"code":"...","selector":{"placeName":"...","zipCode":"...","address":"...","addressDetail":"..."}},"returnCenter":{"code":"...","selector":{"placeName":"...","zipCode":"...","address":"...","addressDetail":"..."}}}'} spellCheck={false} value={manualLogisticsJson} />
+        <button className="mt-3 rounded-lg border border-emerald-700 px-4 py-2 text-sm font-semibold text-emerald-900 disabled:opacity-50" disabled={busy || input.trim().length === 0 || manualLogisticsJson.trim().length === 0} onClick={() => void importOwnerConfirmedLogistics()} type="button">WING 코드 1회 결속·저장</button>
       </section>
 
       <section className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 shadow-sm">

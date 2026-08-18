@@ -202,6 +202,12 @@ export type RegistrationCommerceFields = Readonly<{
   options: readonly Readonly<{ name: string; value: string; factIds: readonly string[] }>[];
   searchFilters: readonly Readonly<{ name: string; value: string; factIds: readonly string[] }>[];
   logisticsEvidence?: MarketplacePreflightEvidenceV2;
+  logisticsEvidenceMode?: "COUPANG_READ_ONLY" | "OWNER_CONFIRMED_WING";
+  logisticsAddressSelectors?: Readonly<{
+    outbound: Readonly<{ placeName?: string; zipCode: string; address: string; addressDetail?: string }>;
+    returnCenter: Readonly<{ placeName?: string; zipCode: string; address: string; addressDetail?: string }>;
+  }>;
+  logisticsApprovalReference?: string;
 }>;
 
 export type ListingPipelineIssue = Readonly<{

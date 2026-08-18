@@ -1,5 +1,36 @@
 # Work status
 
+## 2026-08-18 One-time owner-confirmed logistics persistence
+
+- Objective: remove the recurring Production-to-Coupang address lookup from
+  the critical path. A verified WING outbound/return code is bound once to a
+  typed packet and recovered from the existing Supabase private immutable
+  store thereafter.
+- Branch/base: `codex/fix/owner-confirmed-logistics-persistence` from the
+  current `origin/main`.
+- Risk: high-risk/manual. This changes an authenticated private packet path;
+  it does not submit WING, call a paid provider, change secrets, or weaken
+  category/live-write/rights gates.
+- Root-cause classification: external configuration (Coupang API
+  authentication/allowlist) plus code/operational design (every run retried
+  the same lookup and no owner-confirmed evidence path existed).
+- Cloud-first source of truth: existing Supabase private immutable packet
+  object store; browser input is disposable and no raw packet/secret is stored
+  in Git or logs.
+- Implemented: typed owner-confirmed evidence importer, authenticated route,
+  private persistence, digest-bound evidence mode/selectors/approval metadata,
+  operator UI, architecture amendment, and negative/positive unit tests.
+- Validation: focused manual-logistics tests 3/3; full tests 702/702;
+  typecheck PASS; lint PASS with four pre-existing warnings; production build
+  PASS; diff check PASS.
+- Current: code is ready for a manual-merge PR. Production configuration and
+  exact WING code entry remain owner-controlled. No code can safely invent the
+  missing return-center code or bypass Coupang's API boundary.
+- Next action: review/push PR, wait for exact-head CI and Preview, then merge
+  manually. After deployment, enter the two exact WING codes once in the new
+  owner-confirmed section; subsequent packet recovery/export reuses the saved
+  digest without address API calls.
+
 ## 2026-08-18 Packet recovery and Preview configuration audit
 
 - Objective: remove the conversation-only external adapter packet dead end and
