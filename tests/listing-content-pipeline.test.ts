@@ -122,20 +122,32 @@ test("legacy listing_drafts can never be cast to registration-ready", () => {
   assert.equal(isLegacyListingDraft(buildListingContentPacket(genericListingInput(), genericCommerceFields())), false);
 });
 
-test("missing exact live commerce approval is the fifth stable registration blocker", () => {
+test("missing live commerce approval is a submission warning, not an offline registration blocker", () => {
   const commerce = { ...genericCommerceFields(), liveWriteApproval: { approved: false, approvalReference: "" } };
   const result = buildListingContentPacket(genericListingInput(), commerce);
-  assert.equal(result.status, "REGISTRATION_BLOCKED");
-  assert.ok(result.issues.some(({ code, path, severity }) => code === "LIVE_WRITE_APPROVAL_REQUIRED" && path === "commerce.liveWriteApproval" && severity === "BLOCKER"));
+  assert.equal(result.status, "REGISTRATION_READY");
+  assert.ok(result.registrationPayload);
+  assert.ok(result.issues.some(({ code, path, severity }) => code === "LIVE_WRITE_APPROVAL_REQUIRED" && path === "commerce.liveWriteApproval" && severity === "WARNING"));
 });
 
-test("every registration blocker maps to exactly one of the five owner-approved classes", () => {
+test("registration blockers remain limited to payload and fact failures", () => {
   const commerce = { ...genericCommerceFields(), liveWriteApproval: { approved: false, approvalReference: "" }, attributes: [], searchFilters: [], notices: [] };
   const result = buildListingContentPacket(genericListingInput(), commerce);
   const allowed = new Set(["REQUIRED_FIELD_MISSING", "CORE_FACT_CONFLICT", "PROHIBITED_PAYLOAD_CONTENT", "PAYLOAD_VALIDATION_FAILED", "LIVE_WRITE_APPROVAL_MISSING"]);
   assert.ok(result.issues.some(({ severity }) => severity === "BLOCKER"));
   assert.ok(result.issues.filter(({ severity }) => severity === "BLOCKER").every(({ blockerClass }) => blockerClass !== null && allowed.has(blockerClass)));
+  assert.ok(!result.issues.some(({ code, severity }) => code === "LIVE_WRITE_APPROVAL_REQUIRED" && severity === "BLOCKER"));
   assert.ok(result.issues.filter(({ severity }) => severity !== "BLOCKER").every(({ blockerClass }) => blockerClass === null));
+});
+
+test("evidence-backed default candidate is registration-ready without human content approval", () => {
+  const input = genericListingInput();
+  const result = buildListingContentPacket({ ...input, contentApproval: undefined }, { ...genericCommerceFields(), liveWriteApproval: { approved: false, approvalReference: "" } });
+  assert.equal(result.selectedVariantId, "A");
+  assert.equal(result.status, "REGISTRATION_READY");
+  assert.ok(result.registrationPayload);
+  assert.equal(result.approval.contentApproved, false);
+  assert.ok(result.issues.some(({ code, severity }) => code === "CONTENT_APPROVAL_PENDING" && severity === "WARNING"));
 });
 
 test("production pipeline contains no product-specific KK946 constant", () => {

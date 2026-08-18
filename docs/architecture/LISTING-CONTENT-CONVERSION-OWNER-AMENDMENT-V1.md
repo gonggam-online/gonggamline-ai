@@ -117,6 +117,33 @@ in their environment, and a storage outage must remain visible as
 `ADAPTER_PACKET_RECOVERY_STORAGE_UNAVAILABLE` rather than silently falling
 back to local or conversation state.
 
+## Minimum-friction registration amendment (2026-08-18)
+
+The owner further directs that the internal adapter must not impose a stricter
+registration gate than the current Coupang category/schema/policy contract.
+`REGISTRATION_READY` now means that the exact-category registration payload is
+complete, factual conflicts are resolved, selected assets/claims are lawful,
+and the payload validator passes. It is an offline mapping state, not an
+authorization to submit.
+
+The following are no longer registration blockers:
+
+- missing human conversion-candidate approval when the deterministic default
+  candidate is evidence-backed and policy-clean;
+- missing `contentApprovalReference` during packet re-prepare;
+- missing separate live-write approval while preparing or exporting a dry-run
+  payload; and
+- cold-start optimization, optional creative coverage, or unchanged-only image
+  use when the selected original asset is allowed.
+
+These remain visible as `WARNING` or `OPTIMIZATION_PENDING`. The live commerce
+write route still requires its explicit confirmation and owner live-write
+approval immediately before any external submission. Prohibited/unlicensed
+payload content, missing exact-category mandatory fields, unresolved purchase
+fact conflicts, schema/payload failures, and legacy `listing_drafts` casting
+remain blockers. This keeps automation friction low without converting a
+validated draft into an unapproved marketplace write.
+
 ## Rollback
 
 Revert this implementation before any live use. A later approved packet must be

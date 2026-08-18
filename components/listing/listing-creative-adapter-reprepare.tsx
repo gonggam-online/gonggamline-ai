@@ -167,12 +167,12 @@ export function ListingCreativeAdapterReprepare() {
         <p className="text-sm font-semibold text-indigo-700">Owner-controlled adapter</p>
         <h1 className="text-3xl font-bold">새 external adapter packet revision</h1>
         <p className="max-w-3xl text-sm text-slate-600">
-          현재 WING에서 확인한 packet을 새 revision으로 묶습니다. 이 화면은 WING에 제출하지 않으며, live-write 승인은 별도 명시 확인 후 원격 감사 저장소에 기록됩니다.
+          현재 WING에서 확인한 packet을 새 revision으로 묶습니다. 등록 payload 준비에는 별도 content approval이 필요하지 않으며, 실제 WING 제출만 별도 live-write 승인을 요구합니다.
         </p>
       </header>
 
       <section className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
-        배송 코드·반품 코드·연락처·주소는 추정하지 마세요. live-write 승인 발급은 현재 packet과 content approval에 결속된 owner 확인을 남기며, 유료 이미지 생성이나 WING 제출을 자동 실행하지 않습니다.
+        배송 코드·반품 코드·연락처·주소는 추정하지 마세요. cold-start 최적화와 content approval은 warning으로 남길 수 있지만, 실제 live-write 승인 발급은 현재 packet에 결속된 owner 확인을 남기며 유료 이미지 생성이나 WING 제출을 자동 실행하지 않습니다.
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -183,7 +183,7 @@ export function ListingCreativeAdapterReprepare() {
           <label className="text-sm">WING 관찰 시각 (ISO 8601)<input className={inputClass} value={revision.evaluatedAt} onChange={(e) => setRevisionField("evaluatedAt", e.target.value)} /></label>
           <label className="text-sm">WING/adapter source reference<input className={inputClass} value={revision.sourceReference} onChange={(e) => setRevisionField("sourceReference", e.target.value)} /></label>
           <label className="text-sm">생성 사유<select className={inputClass} value={revision.reason} onChange={(e) => setRevisionField("reason", e.target.value as RevisionState["reason"])}><option value="CURRENT_WING_REVIEW">현재 WING 재검토</option><option value="SOURCE_REFRESH">source refresh</option><option value="EXPIRED_PACKET_REPLACEMENT">만료 packet 교체</option></select></label>
-          <label className="text-sm">content approval reference<input className={inputClass} value={revision.contentApprovalReference} onChange={(e) => setRevisionField("contentApprovalReference", e.target.value)} /></label>
+          <label className="text-sm">content approval reference (선택)<input className={inputClass} value={revision.contentApprovalReference} onChange={(e) => setRevisionField("contentApprovalReference", e.target.value)} /></label>
           <label className="text-sm md:col-span-2">live-write approval reference (발급 후 자동 입력)<input className={inputClass} value={revision.liveWriteApprovalReference} onChange={(e) => setRevisionField("liveWriteApprovalReference", e.target.value)} /></label>
         </div>
       </section>

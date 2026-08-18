@@ -44,6 +44,19 @@ test("re-prepare rejects stale packet IDs and approval drift", () => {
   );
 });
 
+test("re-prepare does not require a human content approval reference", () => {
+  const value = request();
+  const withoutContentApproval = Object.fromEntries(
+    Object.entries(value.packet.listingInput).filter(([key]) => key !== "contentApproval"),
+  ) as typeof value.packet.listingInput;
+  const packet = { ...value.packet, listingInput: withoutContentApproval };
+  const revision = { ...value.revision, contentApprovalReference: "" };
+  const parsed = parseListingCreativeAdapterReprepareRequest({ ...value, packet, revision });
+  const result = reprepareListingCreativeAdapterPacket(parsed.packet, parsed.revision, "2026-08-15T00:00:00.000Z");
+  assert.match(result.revisionDigest, /^[a-f0-9]{64}$/);
+  assert.equal(result.readiness.status, "REGISTRATION_READY");
+});
+
 test("re-prepare keeps live-write approval separate and fails closed when its reference disagrees", () => {
   const value = request();
   assert.throws(

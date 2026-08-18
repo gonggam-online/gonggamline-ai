@@ -10,7 +10,6 @@ import {
 } from "@/shared/domain/listing-live-write-approval";
 
 const SHA256 = /^[a-f0-9]{64}$/;
-const LIVE_WRITE_CODE = "LIVE_WRITE_APPROVAL_REQUIRED";
 
 function requiredString(value: string, path: string): string {
   if (typeof value !== "string" || value.trim().length === 0) {
@@ -69,7 +68,7 @@ export function validateLiveWriteApprovalCandidate(
   if (packet.listingInput.evidence.evaluatedAt !== revision.evaluatedAt) {
     throw new Error("LIVE_WRITE_APPROVAL_TIMESTAMP_MISMATCH");
   }
-  if (packet.listingInput.contentApproval?.reviewerReference !== revision.contentApprovalReference) {
+  if ((packet.listingInput.contentApproval?.reviewerReference ?? "") !== revision.contentApprovalReference) {
     throw new Error("LIVE_WRITE_APPROVAL_CONTENT_MISMATCH");
   }
   if (packet.commerce.liveWriteApproval.approved || packet.commerce.liveWriteApproval.approvalReference.trim() !== "") {
@@ -78,12 +77,8 @@ export function validateLiveWriteApprovalCandidate(
 
   const content = buildListingContentPacket(packet.listingInput, packet.commerce);
   const blockers = content.issues.filter(({ severity }) => severity === "BLOCKER");
-  const nonLiveBlockers = blockers.filter(({ code }) => code !== LIVE_WRITE_CODE);
-  if (nonLiveBlockers.length > 0) {
+  if (blockers.length > 0) {
     throw new Error("LIVE_WRITE_APPROVAL_NOT_ELIGIBLE");
-  }
-  if (blockers.every(({ code }) => code !== LIVE_WRITE_CODE)) {
-    throw new Error("LIVE_WRITE_APPROVAL_ALREADY_SATISFIED");
   }
   return liveWriteApprovalTargetDigest(packet);
 }

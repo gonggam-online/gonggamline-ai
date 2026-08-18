@@ -6287,3 +6287,15 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Durable state: no new local state. Existing Vercel Production secrets and Supabase private packet evidence remain authoritative; preflight response is sanitized and not persisted.
 - External owner action: enable Vercel Pro Static IPs for Production in `icn1`, add both assigned egress IPs to Coupang WING Open API allowlist, confirm Logistics read scope, redeploy, then run the single preflight button. If paid static egress is not approved, use the existing one-time owner-confirmed packet fallback instead.
 - Current: commit `a864f55`, pushed, PR #155 open with `manual-merge-required`; CI/Preview rerunning after the final documentation amendment. No Coupang/WING write or paid image generation executed.
+
+# Minimum Coupang registration gate amendment — 2026-08-18
+
+- Objective: remove internal adapter friction that exceeds current Coupang registration requirements while preserving factual, rights, payload, and live-write safety.
+- Branch/base: `codex/feat/minimum-coupang-registration-gate` from `origin/main` `846426a`.
+- Risk: high-risk/manual; registration mapper, approval semantics, and external commerce-write boundary.
+- Root-cause class: code/policy contract. Offline `REGISTRATION_READY` was coupled to human content approval and live-write approval even though those are not Coupang payload fields.
+- Durable state: no new state. Existing Supabase private packet recovery remains authoritative; Git stores the amendment and tests.
+- Planned steps: (1) gate audit, (2) owner amendment, (3) automatic evidence-backed candidate, (4) optional reprepare approval reference, (5) live-write separation, (6) tests, (7) full gates, (8) manual PR/Preview report.
+- Completed: steps 1–7; commit `c413288` pushed and PR #156 opened. Local full suite 708/708, build, lint, typecheck, diff, and adapter/reprepare E2E pass. No Production, WING, paid provider, secret, or live commerce write.
+- Intended behavior: minimum exact-category payload can be `REGISTRATION_READY` with content/live approval warnings; actual live submission still requires explicit confirmation and owner live-write approval.
+- Current: PR #156 CI/Preview checks are still running; manual merge required after exact-head checks pass.

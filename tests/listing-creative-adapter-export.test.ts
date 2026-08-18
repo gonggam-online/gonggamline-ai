@@ -35,6 +35,21 @@ test("adapter evaluation returns a stable packet digest and readiness counts", (
   assert.ok(readiness.blockerCount >= 0);
 });
 
+test("adapter minimum gate does not require content or live-write approval", () => {
+  const input = genericListingInput();
+  const withoutContentApproval = Object.fromEntries(
+    Object.entries(input).filter(([key]) => key !== "contentApproval"),
+  ) as typeof input;
+  const parsed = parseListingCreativeAdapterPacket({
+    listingInput: withoutContentApproval,
+    commerce: { ...genericCommerceFields(), liveWriteApproval: { approved: false, approvalReference: "" } },
+  });
+  const readiness = evaluateListingCreativeAdapterPacket(parsed);
+  assert.equal(readiness.status, "REGISTRATION_READY");
+  assert.equal(readiness.blockerCount, 0);
+  assert.ok(readiness.warningCount > 0);
+});
+
 test("sanitized adapter review removes private refs without changing full packet", () => {
   const parsed = parseListingCreativeAdapterPacket(packet());
   const sanitized = sanitizeListingCreativeAdapterPacket(parsed);

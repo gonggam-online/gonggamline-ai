@@ -52,7 +52,7 @@ function parseRevision(value: unknown): ListingCreativeAdapterRevisionMetadata {
     evaluatedAt: requiredString(revision.evaluatedAt, "revision.evaluatedAt"),
     sourceReference: requiredString(revision.sourceReference, "revision.sourceReference"),
     reason,
-    contentApprovalReference: requiredString(revision.contentApprovalReference, "revision.contentApprovalReference"),
+    contentApprovalReference: typeof revision.contentApprovalReference === "string" ? revision.contentApprovalReference : "",
     liveWriteApprovalReference,
   });
 }
@@ -91,7 +91,7 @@ function validateRevisionBinding(
     throw new Error("ADAPTER_REPREPARE_REVISION_TIMESTAMP_MISMATCH");
   }
   const contentApproval = packet.listingInput.contentApproval;
-  if (!contentApproval || contentApproval.reviewerReference !== revision.contentApprovalReference) {
+  if ((contentApproval?.reviewerReference ?? "") !== revision.contentApprovalReference) {
     throw new Error("ADAPTER_REPREPARE_CONTENT_APPROVAL_MISMATCH");
   }
   const liveApproval = packet.commerce.liveWriteApproval;
