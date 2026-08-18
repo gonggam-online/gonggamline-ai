@@ -17,6 +17,7 @@ import {
   type ListingCreativeAdapterExportDto,
   type ListingCreativeAdapterExportRequest,
 } from "@/shared/contracts/listing-creative-adapter-export";
+import { persistOwnerAdapterPacket } from "@/services/listing-creative-adapter-recovery.repository";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -53,6 +54,10 @@ function failure(error: unknown): Response {
   if (error instanceof AdminRequestGuardError || error instanceof AdminUnsupportedMediaTypeError || error instanceof AdminCsrfError) {
     return Response.json({ error: { code: error.code } }, { status: error.status });
   }
+  if (error instanceof Error && (error.message.includes("STORAGE_CONFIGURATION_UNAVAILABLE")
+    || error.message === "Protected data access is unavailable.")) {
+    return Response.json({ error: { code: "ADAPTER_PACKET_RECOVERY_STORAGE_UNAVAILABLE" } }, { status: 503 });
+  }
   if (error instanceof Error && error.message.startsWith("ADAPTER_")) {
     return Response.json({ error: { code: error.message } }, { status: 422 });
   }
@@ -70,6 +75,7 @@ export async function POST(request: Request): Promise<Response> {
     if (!rate.allowed || !global.allowed) return Response.json({ error: { code: "RATE_LIMITED" } }, { status: 429 });
     const input = parseRequest(await boundedJson(request));
     const readiness = evaluateListingCreativeAdapterPacket(input.packet);
+    await persistOwnerAdapterPacket(context, input.packet, readiness, new Date().toISOString());
     const response: ListingCreativeAdapterExportDto = Object.freeze({
       schemaVersion: LISTING_CREATIVE_ADAPTER_EXPORT_API_VERSION,
       exportKind: "FULL_PACKET",

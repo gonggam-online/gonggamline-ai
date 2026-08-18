@@ -1,5 +1,30 @@
 # Work status
 
+## 2026-08-18 Packet recovery and Preview configuration audit
+
+- Objective: remove the conversation-only external adapter packet dead end and
+  verify the Preview Supabase configuration that caused browser API 500s.
+- Branch/base: `codex/feat/packet-recovery-and-preview-diagnostics` from the
+  current `origin/main` after PR #151.
+- Risk: high-risk/manual. Packet data is confidential commerce data; this work
+  must not submit WING, call a paid provider, change prices/stock, or weaken
+  authentication. Any durable packet storage requires an approved managed
+  owner and recovery contract.
+- Root-cause classification: external configuration (Preview lacks
+  `SUPABASE_SERVICE_ROLE_KEY`) and code/architecture (adapter packets are
+  explicitly not persisted, so a stopped session cannot recover them).
+- Cloud-first target: existing Supabase private creative bucket, with private
+  object paths, immutable digests, short-lived signed recovery URLs, no raw
+  packet logging, and no local authoritative copy. Vercel remains the
+  environment-secret owner.
+- Current progress: external configuration evidence collected; immutable
+  digest-bound packet persistence/recovery, operator recovery UI, architecture
+  amendment, and regression tests implemented.
+- Blockers/owner action: a Preview-scoped `SUPABASE_SERVICE_ROLE_KEY` must be
+  provisioned from the approved secret source; the value must never be exposed
+  in chat, logs, or Git.
+- Next action: commit and push the high-risk/manual PR, then add the missing
+  Preview service-role secret in Vercel and verify the exact Preview build.
 ## 2026-08-17 Preflight diagnostics in operator UI
 
 - Objective: make provider configuration failures self-diagnosing before a
@@ -6160,3 +6185,26 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Next: commit/push, create high-risk manual-merge PR, then Preview review.
 - Non-goals: SSO provider setup, MFA bypass, trusted-device authorization,
   paid generation, WING submission, or auth secret/config changes.
+
+# Coupang address-based logistics lookup — 2026-08-18
+
+- Objective: use official read-only Coupang logistics APIs to resolve outbound and return codes from approved WING address descriptors.
+- Branch/base: `codex/feat/coupang-address-location-lookup` from `origin/main` `52cebecc`.
+- Risk: high-risk/manual due external seller integration and confidential logistics data boundary; no writes or secret/config changes.
+- Root cause: existing reader only accepted caller-supplied codes; it could not match WING address records to official API responses.
+- Completed: typed address selector, exact normalized address matching, bounded GET-only outbound/return lookup, ambiguity/failure taxonomy, sanitized tests, Korean official-doc references (8/8 steps).
+- Verification: focused logistics tests PASS; full suite 689 PASS; lint PASS; typecheck PASS after production build; production build PASS; diff check PASS.
+- Durable state: none added. Raw addresses/provider bodies remain transient; existing sanitized evidence digest is the only normalized output.
+- External boundary: no Coupang call was made from this workstation, no WING write, no product submission, and no credential/configuration change.
+- Owner action after review: Production must already contain approved `COUPANG_ACCESS_KEY`, `COUPANG_SECRET_KEY`, and `COUPANG_VENDOR_ID` in Vercel secret storage. Run the server-side read-only adapter against exact WING address descriptors; never paste secrets into chat.
+- Current: commit, push, and high-risk/manual PR delivery remain.
+
+# Coupang v5 return envelope correction — 2026-08-18
+
+- Objective: preserve the cost-free local read-only path and make the decoder accept the actual Coupang v5 `data.content` return-center envelope.
+- Branch/base: `codex/fix/coupang-return-response-shape` from `origin/main` `101c9aa`.
+- Risk: high-risk/manual external seller integration; no write, billing, secret, or environment mutation in this code change.
+- Completed: return decoder and bounded address resolver accept both legacy fixture `data[]` and official `data.content[]`; official live read from the allowlisted local IP resolved one outbound and one return code by exact address match.
+- Verification: focused logistics tests 14/14 PASS; typecheck PASS; production build PASS.
+- External result: Vercel direct call reached Coupang but was rejected by IP allowlist; local read-only call succeeded without Vercel Static IP cost. No raw credentials or addresses committed.
+- Current: commit, push, and high-risk/manual PR delivery.

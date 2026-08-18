@@ -36,6 +36,14 @@ export type ReturnCenterEvidence = Readonly<{
   source: EvidenceSource;
 }>;
 
+/** WING address-book fields used for read-only code resolution. */
+export type LogisticsAddressSelector = Readonly<{
+  placeName?: string;
+  zipCode: string;
+  address: string;
+  addressDetail?: string;
+}>;
+
 export type MarketplacePreflightEvidenceV2 = Readonly<{
   categorySnapshot: CoupangCategorySnapshot;
   outbound: OutboundLocationEvidence;
