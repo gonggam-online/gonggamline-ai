@@ -2,6 +2,7 @@ import type {
   ListingContentInput,
   RegistrationCommerceFields,
 } from "@/shared/domain/listing-content";
+import type { LogisticsAddressSelector, MarketplacePreflightEvidenceV2 } from "@/shared/contracts/coupang-preflight-evidence";
 
 export const LISTING_CREATIVE_ADAPTER_EXPORT_API_VERSION =
   "gonggamline-listing-creative-adapter-export-v1" as const;
@@ -9,6 +10,26 @@ export const LISTING_CREATIVE_ADAPTER_EXPORT_API_VERSION =
 export type ListingCreativeAdapterPacket = Readonly<{
   listingInput: ListingContentInput;
   commerce: RegistrationCommerceFields;
+}>;
+
+export const LISTING_CREATIVE_ADAPTER_ENRICH_API_VERSION =
+  "gonggamline-listing-creative-adapter-enrich-v1" as const;
+
+export type ListingCreativeAdapterEnrichmentRequest = Readonly<{
+  schemaVersion: typeof LISTING_CREATIVE_ADAPTER_ENRICH_API_VERSION;
+  packet: unknown;
+  logistics: Readonly<{
+    outbound: LogisticsAddressSelector;
+    returnCenter: LogisticsAddressSelector;
+  }>;
+}>;
+
+export type ListingCreativeAdapterEnrichmentResult = Readonly<{
+  schemaVersion: typeof LISTING_CREATIVE_ADAPTER_ENRICH_API_VERSION;
+  packet: ListingCreativeAdapterPacket;
+  readiness: ListingCreativeAdapterReadiness;
+  evidence: MarketplacePreflightEvidenceV2;
+  generatedAt: string;
 }>;
 
 export type ListingCreativeAdapterExportRequest = Readonly<{

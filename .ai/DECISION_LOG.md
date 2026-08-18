@@ -1923,3 +1923,25 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   and UI, then retain or remove the private objects according to the approved
   Supabase retention procedure. Secret values and packet contents remain out
   of chat, logs, and Git.
+
+# 2026-08-18 - Address-based WING adapter logistics enrichment
+
+- Category: high-risk/manual authenticated seller integration and confidential
+  logistics-data boundary.
+- Decision: add a protected owner adapter enrichment route that accepts the
+  typed packet plus WING-observed outbound/return address selectors, resolves
+  `outboundShippingPlaceCode` and `returnCenterCode` through the existing
+  server-side Coupang GET-only evidence reader, and persists the resulting
+  digest-bound packet in the approved Supabase private store.
+- The browser session itself is never scraped or forwarded to the server.
+  Raw Coupang responses, contact details, API credentials, and address
+  selectors are transient; only the selected codes and sanitized evidence
+  provenance are retained in the packet. Ambiguous, stale, unavailable, or
+  unauthorized provider results fail closed and never guess a code.
+- The route does not submit WING, issue live-write approval, call OpenAI, or
+  publish assets. Existing owner authentication, exact-origin, CSRF, rate
+  limit, and manual-merge boundaries remain mandatory.
+- Risk/rollback: manual merge required. Revert the enrichment route, contract,
+  UI, and tests; private packet objects remain governed by the existing
+  Supabase retention/recovery procedure. Production requires the already
+  approved Coupang credentials and no new secret or local durable state.

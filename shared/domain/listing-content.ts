@@ -1,4 +1,5 @@
 import type { CoupangCategorySnapshot } from "@/shared/contracts/coupang-category-snapshot";
+import type { MarketplacePreflightEvidenceV2 } from "@/shared/contracts/coupang-preflight-evidence";
 import type { ListingEvidencePacket } from "@/shared/domain/listing-evidence";
 
 export const LISTING_CONTENT_PACKET_VERSION = "gonggamline-listing-content-v2" as const;
@@ -200,6 +201,7 @@ export type RegistrationCommerceFields = Readonly<{
   attributes: readonly Readonly<{ name: string; value: string; factIds: readonly string[] }>[];
   options: readonly Readonly<{ name: string; value: string; factIds: readonly string[] }>[];
   searchFilters: readonly Readonly<{ name: string; value: string; factIds: readonly string[] }>[];
+  logisticsEvidence?: MarketplacePreflightEvidenceV2;
 }>;
 
 export type ListingPipelineIssue = Readonly<{
