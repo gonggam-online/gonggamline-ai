@@ -6155,3 +6155,13 @@ perform the documented read-only Supabase schema and completeness inspection.
 - External boundary: no Coupang call was made from this workstation, no WING write, no product submission, and no credential/configuration change.
 - Owner action after review: Production must already contain approved `COUPANG_ACCESS_KEY`, `COUPANG_SECRET_KEY`, and `COUPANG_VENDOR_ID` in Vercel secret storage. Run the server-side read-only adapter against exact WING address descriptors; never paste secrets into chat.
 - Current: commit, push, and high-risk/manual PR delivery remain.
+
+# Coupang v5 return envelope correction — 2026-08-18
+
+- Objective: preserve the cost-free local read-only path and make the decoder accept the actual Coupang v5 `data.content` return-center envelope.
+- Branch/base: `codex/fix/coupang-return-response-shape` from `origin/main` `101c9aa`.
+- Risk: high-risk/manual external seller integration; no write, billing, secret, or environment mutation in this code change.
+- Completed: return decoder and bounded address resolver accept both legacy fixture `data[]` and official `data.content[]`; official live read from the allowlisted local IP resolved one outbound and one return code by exact address match.
+- Verification: focused logistics tests 14/14 PASS; typecheck PASS; production build PASS.
+- External result: Vercel direct call reached Coupang but was rejected by IP allowlist; local read-only call succeeded without Vercel Static IP cost. No raw credentials or addresses committed.
+- Current: commit, push, and high-risk/manual PR delivery.
