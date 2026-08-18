@@ -41,7 +41,8 @@ test("autonomy cannot weaken high-risk approval boundaries", () => {
   const agents = read("AGENTS.md");
   const standard = read(".ai/CODEX_OPERATING_STANDARD.md");
 
-  assert.match(agents, /preserving every high-risk and[\s\S]*approval boundary/i);
+  assert.match(agents, /# 12\. Critical Lane[\s\S]*Production[\s\S]*Secret[\s\S]*Codex's Sandbox·Approval/i);
+  assert.match(agents, /셀프학습은 승인되지 않은 모델 재훈련이나 검증되지 않은 자동 판단을 의미하지 않는다/i);
   assert.match(standard, /does not authorize Production, database\/schema\/migration\/RLS\/Auth/i);
   assert.match(standard, /exact target, evidence,[\s\S]*rollback, and remaining risk/i);
 });
