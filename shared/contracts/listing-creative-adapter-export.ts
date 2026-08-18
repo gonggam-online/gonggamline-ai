@@ -32,6 +32,22 @@ export type ListingCreativeAdapterEnrichmentResult = Readonly<{
   generatedAt: string;
 }>;
 
+export const LISTING_CREATIVE_ADAPTER_MANUAL_LOGISTICS_API_VERSION =
+  "gonggamline-listing-creative-adapter-manual-logistics-v1" as const;
+
+export type ListingCreativeAdapterManualLogisticsRequest = Readonly<{
+  schemaVersion: typeof LISTING_CREATIVE_ADAPTER_MANUAL_LOGISTICS_API_VERSION;
+  packet: unknown;
+  evidence: Readonly<{
+    vendorId: string;
+    observedAt: string;
+    sourceReference: string;
+    approvalReference: string;
+    outbound: Readonly<{ code: string; selector: LogisticsAddressSelector }>;
+    returnCenter: Readonly<{ code: string; selector: LogisticsAddressSelector }>;
+  }>;
+}>;
+
 export type ListingCreativeAdapterExportRequest = Readonly<{
   schemaVersion: typeof LISTING_CREATIVE_ADAPTER_EXPORT_API_VERSION;
   packet: ListingCreativeAdapterPacket;
