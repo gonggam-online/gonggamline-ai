@@ -26,3 +26,12 @@
   rights-uncleared evidence stays fail-closed and requires manual review.
 - No marketplace, purchase, listing, paid, asset-publication, or Production
   write is authorized. Live integration remains separately approved.
+
+# Item Selection Shadow review UI v1
+
+- Added an administrator-only comparison panel to the existing Item Selection
+  page for exact market-product evidence.
+- The panel displays the Shadow decision, eligibility, confidence-adjusted
+  score, missing facts, and the unchanged operational verdict.
+- Requests remain read-only and default to incomplete profitability and
+  unknown rights, so the panel cannot authorize a live recommendation.
