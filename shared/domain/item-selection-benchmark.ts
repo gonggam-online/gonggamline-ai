@@ -13,6 +13,7 @@ export type ItemSelectionBenchmarkPrediction = Readonly<{
   providerItemNumber: string;
   verdict: ItemSelectionVerdict;
   score: number | null;
+  predictedContributionMarginRate: number | null;
 }>;
 
 export type ItemSelectionBenchmarkResult = Readonly<{
@@ -66,6 +67,9 @@ function assertPrediction(prediction: ItemSelectionBenchmarkPrediction): void {
   if (prediction.score !== null && (!Number.isFinite(prediction.score) || prediction.score < 0 || prediction.score > 100)) {
     throw new RangeError("score must be between 0 and 100 or null.");
   }
+  if (prediction.predictedContributionMarginRate !== null && (!Number.isFinite(prediction.predictedContributionMarginRate) || prediction.predictedContributionMarginRate < -1 || prediction.predictedContributionMarginRate > 1)) {
+    throw new RangeError("predictedContributionMarginRate must be between -1 and 1 or null.");
+  }
 }
 
 function orderedPredictions(
@@ -113,8 +117,8 @@ export function evaluateItemSelectionBenchmark(
   const ndcgAtK = idcg === 0 ? null : rounded(dcg / idcg);
   const marginErrors = cutoff.flatMap((prediction) => {
     const candidate = candidates.find((item) => item.providerItemNumber === prediction.providerItemNumber);
-    return candidate?.observedContributionMarginRate !== null && candidate?.observedContributionMarginRate !== undefined && prediction.score !== null
-      ? [Math.abs(prediction.score / 100 - candidate.observedContributionMarginRate)]
+    return candidate?.observedContributionMarginRate !== null && candidate?.observedContributionMarginRate !== undefined && prediction.predictedContributionMarginRate !== null
+      ? [Math.abs(prediction.predictedContributionMarginRate - candidate.observedContributionMarginRate)]
       : [];
   });
   const labeledCandidateCount = candidates.filter((candidate) => candidate.relevance > 0 || candidate.observedContributionMarginRate !== null).length;
