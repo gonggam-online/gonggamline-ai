@@ -1,5 +1,17 @@
 # Work status
 
+## 2026-08-19 Item Selection Shadow review UI
+
+- Objective: expose the merged read-only Shadow packet in the existing admin
+  Item Selection page without changing live verdicts.
+- Branch/base: `codex/feat/item-selection-shadow-ui` from merged
+  `origin/main` `e0257b4b003c5777ab3febda39b41c1053c98759`.
+- Risk: high-risk/manual. The panel has no write, paid, marketplace, asset,
+  purchase, or Production authority and defaults unknown rights/profitability.
+- Validation: 719 tests passed, typecheck/lint/build/diff check passed.
+- Next action: open a manual-merge PR; do not connect the panel to live verdict
+  changes without a separate approved Story.
+
 ## 2026-08-19 Item Selection Shadow review bridge
 
 - Objective: expose an exact-evidence, administrator-only comparison packet

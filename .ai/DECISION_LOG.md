@@ -1987,3 +1987,11 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - No database mutation, marketplace write, purchase, listing, paid call,
   asset publication, or Production enablement is authorized. Live verdict
   integration requires a separate approved Story and manual merge.
+
+# 2026-08-19 - Item Selection Shadow review UI
+
+- Decision: expose the merged read-only Shadow packet in the existing admin
+  Item Selection page for exact market-product comparison.
+- The panel defaults profitability to not evaluated and rights to unknown;
+  it cannot authorize or mutate an operational verdict, purchase, listing,
+  marketplace write, paid call, asset publication, or Production action.

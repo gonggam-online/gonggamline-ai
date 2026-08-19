@@ -24,6 +24,21 @@ type ListEnvelope = Readonly<{
   page: Readonly<{ nextCursor: string | null }>;
 }>;
 
+type ShadowReviewPacket = Readonly<{
+  version: string;
+  providerItemNumber: string;
+  currentVerdict: ItemSelectionVerdict;
+  currentScore: number | null;
+  operationalVerdictChanged: false;
+  requiresManualReview: true;
+  shadow: Readonly<{
+    decision: "PRIORITIZE_FOR_REVIEW" | "WATCH" | "DO_NOT_PRIORITIZE";
+    eligibility: "SHADOW_CANDIDATE" | "INSUFFICIENT_DATA" | "BLOCKED";
+    confidenceAdjustedScore: number | null;
+    missingFacts: readonly string[];
+  }>;
+}>;
+
 const STATUS_LABELS: Record<ItemSelectionRunStatus, string> = {
   RUNNING: "실행 중",
   COMPLETED: "완료",
@@ -84,6 +99,8 @@ export function ItemSelectionAdmin() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [shadowPacket, setShadowPacket] = useState<ShadowReviewPacket | null>(null);
+  const [shadowLoading, setShadowLoading] = useState(false);
 
   const loadRuns = useCallback(async (cursor?: string) => {
     setLoading(true);
@@ -168,6 +185,40 @@ export function ItemSelectionAdmin() {
     }
   }
 
+  async function reviewShadow(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    setShadowLoading(true);
+    setError("");
+    const form = new FormData(event.currentTarget);
+    const marketProductId = Number(form.get("marketProductId"));
+    const providerItemNumber = String(form.get("providerItemNumber"));
+    const currentVerdict = String(form.get("currentVerdict")) as ItemSelectionVerdict;
+    const currentScoreValue = String(form.get("currentScore"));
+    try {
+      const response = await fetch("/api/admin/item-selection/shadow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          marketProductId,
+          providerItemNumber,
+          currentVerdict,
+          currentScore: currentScoreValue ? Number(currentScoreValue) : null,
+          profitabilityStatus: "NOT_EVALUATED",
+          contributionMarginRate: null,
+          rightsStatus: "UNKNOWN",
+        }),
+      });
+      if (!response.ok) throw new Error(await parseError(response));
+      const body = (await response.json()) as Readonly<{ data: ShadowReviewPacket }>;
+      setShadowPacket(body.data);
+    } catch (caught) {
+      setShadowPacket(null);
+      setError(caught instanceof Error ? caught.message : errorMessage(500));
+    } finally {
+      setShadowLoading(false);
+    }
+  }
+
   const visibleRuns = useMemo(
     () => statusFilter === "ALL" ? runs : runs.filter((item) => item.status === statusFilter),
     [runs, statusFilter],
@@ -249,6 +300,28 @@ export function ItemSelectionAdmin() {
               ))}</div>}
             </div>
           )}
+        </DashboardSection>
+
+        <DashboardSection headingId="shadow-review" title="시장정보 Shadow 비교" description="정확한 시장 근거를 기존 판정과 비교합니다. 운영 판정은 변경되지 않습니다.">
+          <form className="item-selection-admin__form" onSubmit={reviewShadow}>
+            <label>시장 상품 ID<input name="marketProductId" type="number" min="1" required disabled={shadowLoading} /></label>
+            <label>공급처 상품번호<input name="providerItemNumber" inputMode="numeric" pattern="[0-9]{1,20}" required disabled={shadowLoading} /></label>
+            <label>현재 판정<select name="currentVerdict" defaultValue="MANUAL_REVIEW" disabled={shadowLoading}>{Object.entries(VERDICT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+            <label>현재 점수<input name="currentScore" type="number" step="0.01" disabled={shadowLoading} /></label>
+            <button type="submit" disabled={shadowLoading}>{shadowLoading ? "비교 중…" : "Shadow 비교"}</button>
+          </form>
+          <p className="item-selection-admin__notice">이 화면은 관리자 검토용입니다. 수익성·권리 정보를 확인하지 않은 요청은 우선순위를 확정하지 않습니다.</p>
+          {shadowPacket ? <DashboardCard title="Shadow 결과" headingId="shadow-result">
+            <dl className="item-selection-admin__facts">
+              <div><dt>상품번호</dt><dd>{shadowPacket.providerItemNumber}</dd></div>
+              <div><dt>시장 판정</dt><dd>{shadowPacket.shadow.decision}</dd></div>
+              <div><dt>적격성</dt><dd>{shadowPacket.shadow.eligibility}</dd></div>
+              <div><dt>신뢰 보정 점수</dt><dd>{shadowPacket.shadow.confidenceAdjustedScore ?? "확인 필요"}</dd></div>
+              <div><dt>운영 판정 변경</dt><dd>{shadowPacket.operationalVerdictChanged ? "변경됨" : "변경 없음"}</dd></div>
+              <div><dt>수동 검토</dt><dd>{shadowPacket.requiresManualReview ? "필요" : "불필요"}</dd></div>
+            </dl>
+            {shadowPacket.shadow.missingFacts.length > 0 ? <p className="item-selection-admin__notice">남은 근거: {shadowPacket.shadow.missingFacts.join(", ")}</p> : null}
+          </DashboardCard> : null}
         </DashboardSection>
       </DashboardContent>
     </DashboardLayout>
