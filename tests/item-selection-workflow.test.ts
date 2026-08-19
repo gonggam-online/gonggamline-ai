@@ -121,6 +121,13 @@ test("size 30 is one bounded provider list call and one atomic finalization", as
   assert.equal(finalizedInput?.evaluations.length, 30);
   assert(finalizedInput?.evaluations.every(({ verdict }) => verdict === "MANUAL_REVIEW"));
   assert(finalizedInput?.evaluations.every(({ canonicalSnapshotText }) => canonicalSnapshotText.length < 100_000));
+  const firstSnapshot = JSON.parse(finalizedInput?.evaluations[0]?.canonicalSnapshotText ?? "{}") as {
+    profitabilityInput?: { variableCosts?: Array<{ id?: string; amountKrw?: number | null }> };
+  };
+  const supplierInbound = firstSnapshot.profitabilityInput?.variableCosts?.find(
+    ({ id }) => id === "supplierToFulfillmentInbound",
+  );
+  assert.equal(supplierInbound?.amountKrw, 3_000);
   assert.equal(result.run.persistedEvaluationCount, 30);
 });
 
