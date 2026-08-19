@@ -66,11 +66,17 @@ For a substantial task:
 
 1. Plan 8–15 verifiable steps.
 2. Calculate progress as `completed steps / total steps × 100`.
-3. Report at task start, meaningful checkpoints, before an approval boundary,
-   and at terminal completion. Do not generate updates so frequently that they
-   slow implementation.
-4. Never report elapsed-time guesses or describe incomplete work as complete.
-5. Keep `.codex/WORK_STATUS.md` consistent with the same completed/current/
+3. Continue the authorized execution loop silently by default. Do not send
+   routine progress, unchanged status, intermediate CI updates, or a simple
+   statement that work is still incomplete. Send a user-facing message only
+   once at terminal completion, or immediately before a genuinely blocking
+   owner action. A checkpoint belongs in `.codex/WORK_STATUS.md`, not in chat.
+4. If a safe in-scope subtask is blocked, keep executing independent safe work
+   and defer the user-facing summary until the Story reaches a terminal state.
+   Never use a progress message as a substitute for completing the stated
+   objective.
+5. Never report elapsed-time guesses or describe incomplete work as complete.
+6. Keep `.codex/WORK_STATUS.md` consistent with the same completed/current/
    blocked state.
 
 Small tasks may use a shorter step list while retaining evidence-based

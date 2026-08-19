@@ -40,5 +40,16 @@ owner authority, an architecture decision, a secret/configuration change, or a
 high-risk approval is required. Report the exact owner action without revealing
 secret values.
 
+## Continuation and reporting discipline
+
+Once a Story is authorized, keep executing its safe implementation,
+verification, and delivery loop until the real terminal state. Do not interrupt
+the loop with routine chat updates, unchanged CI snapshots, or a bare report
+that the objective has not yet been reached. Record checkpoints in
+`.codex/WORK_STATUS.md` and send one user-facing summary at terminal
+completion. If an owner action genuinely blocks only one boundary, continue
+all independent safe work and report the exact action once it is the remaining
+terminal blocker.
+
 Every completed Story appends relevant architecture decisions, technical debt,
 known issues, and future work to [`DECISION_LOG.md`](DECISION_LOG.md).

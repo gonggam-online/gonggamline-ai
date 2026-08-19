@@ -1,5 +1,18 @@
 # Work status
 
+## 2026-08-19 Continuation and reporting discipline
+
+- Objective: reduce non-value-adding interruptions while preserving required
+  safety and manual high-risk boundaries.
+- Branch/base: `codex/docs/streamlined-progress-governance` from merged
+  `origin/main` `1114cd5a03b68264be3a0570efb0751bbcdb22e6`.
+- Implemented: operating standard and autonomous-development rules now make
+  silent continuation the default; checkpoints stay in this file and chat is
+  reserved for terminal completion or a genuinely blocking owner action.
+- Safety preserved: Production, DB/Auth/RLS, secrets/configuration, paid,
+  commerce-write, destructive, and high-risk manual boundaries remain binding.
+- Next action: validate and deliver this documentation-only governance update.
+
 ## 2026-08-19 Item Selection Shadow review UI
 
 - Objective: expose the merged read-only Shadow packet in the existing admin
