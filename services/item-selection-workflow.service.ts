@@ -13,6 +13,10 @@ import {
 import type { AdminGuardContext } from "../lib/auth/admin-request-guard.server";
 import { SupplierCatalogService } from "./supplier-catalog.service";
 import {
+  loadItemSelectionMarketEnrichment,
+  type MarketEnrichmentRecord,
+} from "./item-selection-market-enrichment.service";
+import {
   ITEM_SELECTION_EVALUATOR_VERSION,
   ITEM_SELECTION_HARD_GATES,
   ITEM_SELECTION_RULESET_VERSION,
@@ -20,6 +24,7 @@ import {
   type ItemSelectionScoreInputs,
 } from "../shared/domain/item-selection";
 import type { SupplierCatalogItem } from "../shared/domain/supplier-catalog";
+import { enrichItemSelectionScores } from "../shared/domain/item-selection-market-enrichment";
 import {
   ITEM_SELECTION_CANDIDATE_FAILURES_SCHEMA_VERSION,
   ITEM_SELECTION_EVIDENCE_SCHEMA_VERSION,
@@ -36,6 +41,7 @@ export type RunItemSelectionRequestV1 = Readonly<{
   proposedSalePriceKrw?: number;
   costProfileVersion?: string;
   retryOfRunId?: string;
+  marketIntelligenceMode?: "OFF" | "ENRICH";
 }>;
 
 export class ItemSelectionWorkflowError extends Error {
@@ -50,6 +56,7 @@ type Dependencies = Readonly<{
   clock?: () => number;
   createRun?: typeof import("./item-selection-run.repository")["createItemSelectionRun"];
   finalizeRun?: typeof import("./item-selection-run.repository")["finalizeItemSelectionRun"];
+  loadMarketEnrichment?: typeof loadItemSelectionMarketEnrichment;
 }>;
 
 const EMPTY_SCORES: ItemSelectionScoreInputs = Object.freeze({
@@ -136,6 +143,7 @@ function toWrite(
   originalPosition: number,
   request: RunItemSelectionRequestV1,
   observedAt: string,
+  marketEnrichment: MarketEnrichmentRecord | null,
 ): ItemSelectionEvaluationWriteV1 {
   const providerFacts = mapSupplierProfitabilityFacts(item, {
     observedAt,
@@ -155,7 +163,9 @@ function toWrite(
       evidence: [],
       missingFacts: [`rights.${gate}`],
     })),
-    scores: EMPTY_SCORES,
+    scores: marketEnrichment
+      ? enrichItemSelectionScores(EMPTY_SCORES, marketEnrichment.metric)
+      : EMPTY_SCORES,
     profitability: toItemSelectionProfitabilityPolicyInput(profitResult),
   };
   const evaluatorOutput = evaluateItemSelection(evaluatorInput);
@@ -251,6 +261,7 @@ export async function runItemSelection(
     : await import("./item-selection-run.repository");
   const createRun = dependencies.createRun ?? repository!.createItemSelectionRun;
   const finalizeRun = dependencies.finalizeRun ?? repository!.finalizeItemSelectionRun;
+  const marketMode = request.marketIntelligenceMode ?? "OFF";
   const normalizedKeyword = request.keyword.trim().replace(/\s+/g, " ");
   const fingerprint = sha256(stableJson({
     requester: context.administratorUserId,
@@ -259,6 +270,7 @@ export async function runItemSelection(
     size: request.size,
     proposedSalePriceKrw: request.proposedSalePriceKrw ?? null,
     costProfileVersion: request.costProfileVersion ?? null,
+    marketIntelligenceMode: marketMode,
     rulesetVersion: ITEM_SELECTION_RULESET_VERSION,
   }));
   const created = await createRun(context, {
@@ -315,6 +327,14 @@ export async function runItemSelection(
   }
 
   const observedAt = new Date(clock()).toISOString();
+  let marketByProviderItem = new Map<string, MarketEnrichmentRecord>();
+  if (marketMode === "ENRICH") {
+    try {
+      marketByProviderItem = new Map(await (dependencies.loadMarketEnrichment ?? loadItemSelectionMarketEnrichment)(items.map((item) => item.providerItemId)));
+    } catch {
+      marketByProviderItem = new Map();
+    }
+  }
   const evaluations: ItemSelectionEvaluationWriteV1[] = [];
   const failures: Array<{
     providerItemNumber: string;
@@ -326,7 +346,7 @@ export async function runItemSelection(
   }> = [];
   items.forEach((item, index) => {
     try {
-      evaluations.push(toWrite(item, index, request, observedAt));
+      evaluations.push(toWrite(item, index, request, observedAt, marketByProviderItem.get(item.providerItemId) ?? null));
     } catch {
       failures.push({
         providerItemNumber: item.providerItemId,

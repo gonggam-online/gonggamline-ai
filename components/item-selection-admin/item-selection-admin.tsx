@@ -167,6 +167,7 @@ export function ItemSelectionAdmin() {
           keyword: String(form.get("keyword")),
           size: Number(form.get("size")),
           ...(price > 0 ? { proposedSalePriceKrw: price } : {}),
+          marketIntelligenceMode: "ENRICH",
           ...(retrySelected && typeof retryOfRunId === "string" && retryOfRunId
             ? { retryOfRunId }
             : {}),

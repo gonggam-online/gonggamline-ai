@@ -1,5 +1,18 @@
 # Work status
 
+## 2026-08-19 Item Selection market enrichment v1
+
+- Objective: apply the new Market Intelligence rules to administrator Item
+  Selection runs while preserving exact identity and existing hard gates.
+- Branch/base: `codex/feat/item-selection-market-enrichment` from merged
+  `origin/main` `38ff8aae978d3f0b334cd6db24d8fcc6b260a023`.
+- Implemented: exact vendor-item evidence loader, pure score mapping,
+  ENRICH request mode inside the existing canonical snapshot contract, and
+  regression coverage.
+- Validation: focused tests 6/6, typecheck, lint, build, and diff check pass.
+- Boundary: API default remains OFF; no commerce, Production, rights bypass,
+  or automatic marketplace action is authorized.
+
 ## 2026-08-19 Continuation and reporting discipline
 
 - Objective: reduce non-value-adding interruptions while preserving required
