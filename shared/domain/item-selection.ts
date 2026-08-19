@@ -411,6 +411,7 @@ export function compareItemSelectionEvaluations(
   return (
     VERDICT_ORDER[left.verdict] - VERDICT_ORDER[right.verdict] ||
     compareNullableDescending(left.score.totalScore, right.score.totalScore) ||
+    compareNullableDescending(left.score.availableDataScore, right.score.availableDataScore) ||
     compareNullableDescending(
       left.profitability.contributionMarginRate,
       right.profitability.contributionMarginRate

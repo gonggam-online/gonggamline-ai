@@ -6433,3 +6433,17 @@ perform the documented read-only Supabase schema and completeness inspection.
   R1 atomic mutation, Preview browser E2E, and Vercel Preview all PASS.
 - Approval boundary: `manual-merge-required` remains; no auto-merge or
   Production deployment was performed.
+# 2026-08-19 — Market-enriched Item Selection evidence ordering
+
+- Objective: make the administrator Item Selection result visibly prioritize
+  stronger market evidence while preserving fail-closed rights and
+  profitability gates.
+- Branch: `codex/feat/item-selection-market-enrichment`.
+- Scope: normal-risk read-only evaluation ordering; no schema, external write,
+  purchase, listing, paid, or Production decision change.
+- Completed: persisted evaluations now sort by verdict, complete score,
+  available-data score, profitability tie-breaks, and deterministic identity;
+  focused workflow test added; architecture/changelog updated.
+- Validation: full suite 722/722, typecheck, lint, build, diff check, and
+  focused Item Selection Playwright 2/2 passed.
+- Next: commit, push, PR delivery, exact CI/Preview, then Production smoke.

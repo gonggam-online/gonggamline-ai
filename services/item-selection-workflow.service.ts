@@ -20,6 +20,7 @@ import {
   ITEM_SELECTION_EVALUATOR_VERSION,
   ITEM_SELECTION_HARD_GATES,
   ITEM_SELECTION_RULESET_VERSION,
+  compareItemSelectionEvaluations,
   evaluateItemSelection,
   type ItemSelectionScoreInputs,
 } from "../shared/domain/item-selection";
@@ -144,7 +145,10 @@ function toWrite(
   request: RunItemSelectionRequestV1,
   observedAt: string,
   marketEnrichment: MarketEnrichmentRecord | null,
-): ItemSelectionEvaluationWriteV1 {
+): Readonly<{
+  write: ItemSelectionEvaluationWriteV1;
+  evaluation: ReturnType<typeof evaluateItemSelection>;
+}> {
   const providerFacts = mapSupplierProfitabilityFacts(item, {
     observedAt,
     supplierVatTreatment: "VAT_INCLUSIVE_NON_DEDUCTIBLE",
@@ -227,7 +231,7 @@ function toWrite(
     rightsEvidence: [],
   };
   const normalized = profitResult.scenarios.normalizedScenario;
-  return {
+  const write: ItemSelectionEvaluationWriteV1 = {
     providerItemNumber: item.providerItemId,
     originalPosition,
     verdict: evaluatorOutput.verdict,
@@ -244,6 +248,7 @@ function toWrite(
     canonicalSnapshotText: stableJson(snapshot),
     canonicalEvidenceText: stableJson(evidence),
   };
+  return { write, evaluation: evaluatorOutput };
 }
 
 export async function runItemSelection(
@@ -335,7 +340,10 @@ export async function runItemSelection(
       marketByProviderItem = new Map();
     }
   }
-  const evaluations: ItemSelectionEvaluationWriteV1[] = [];
+  const evaluations: Array<Readonly<{
+    write: ItemSelectionEvaluationWriteV1;
+    evaluation: ReturnType<typeof evaluateItemSelection>;
+  }>> = [];
   const failures: Array<{
     providerItemNumber: string;
     originalPosition: number;
@@ -358,6 +366,8 @@ export async function runItemSelection(
       });
     }
   });
+  evaluations.sort((left, right) => compareItemSelectionEvaluations(left.evaluation, right.evaluation));
+  const persistedEvaluations = evaluations.map(({ write }) => write);
   const terminalStatus = evaluations.length === 0 && failures.length > 0
     ? "FAILED"
     : failures.length > 0
@@ -372,7 +382,7 @@ export async function runItemSelection(
     expectedProfitabilityPolicyVersion: ITEM_SELECTION_PROFITABILITY_POLICY_VERSION,
     expectedProfitabilityCalculationContractVersion:
       ITEM_SELECTION_PROFITABILITY_CALCULATION_CONTRACT_VERSION,
-    evaluations,
+    evaluations: persistedEvaluations,
     candidateFailuresCanonicalText: stableJson({
       schemaVersion: ITEM_SELECTION_CANDIDATE_FAILURES_SCHEMA_VERSION,
       failures,

@@ -4,6 +4,7 @@ import test from "node:test";
 import { DomeggookError } from "../lib/domeggook/errors.ts";
 import type { AdminGuardContext } from "../lib/auth/admin-request-guard.server.ts";
 import { SupplierCatalogService } from "../services/supplier-catalog.service.ts";
+import type { MarketEnrichmentRecord } from "../services/item-selection-market-enrichment.service.ts";
 import { runItemSelection } from "../services/item-selection-workflow.service.ts";
 import type {
   FinalizeItemSelectionRunWriteV1,
@@ -129,6 +130,34 @@ test("size 30 is one bounded provider list call and one atomic finalization", as
   );
   assert.equal(supplierInbound?.amountKrw, 3_000);
   assert.equal(result.run.persistedEvaluationCount, 30);
+});
+
+test("market-enriched evaluations are persisted in deterministic score order", async () => {
+  let finalized: FinalizeItemSelectionRunWriteV1 | undefined;
+  const items = [item(0, "1000"), item(1, "1001"), item(2, "1002")];
+  const market: ReadonlyMap<string, MarketEnrichmentRecord> = new Map([
+    ["1000", { marketProductId: 10, observedAt: "2026-08-03T00:00:00.000Z", metric: { opportunityScore: 40, demandScore: 40, growthScore: 40, supplyScore: 40, confidence: 40 } }],
+    ["1001", { marketProductId: 11, observedAt: "2026-08-03T00:00:00.000Z", metric: { opportunityScore: 90, demandScore: 90, growthScore: 90, supplyScore: 90, confidence: 90 } }],
+    ["1002", { marketProductId: 12, observedAt: "2026-08-03T00:00:00.000Z", metric: { opportunityScore: 70, demandScore: 70, growthScore: 70, supplyScore: 70, confidence: 70 } }],
+  ]);
+  await runItemSelection(context, {
+    provider: "domeggook",
+    keyword: "테스트 상품",
+    size: 10,
+    marketIntelligenceMode: "ENRICH",
+  }, "m".repeat(64), {
+    catalog: catalog(items, []),
+    async loadMarketEnrichment() { return market; },
+    async createRun(_context, input) {
+      return { run: run({ requestFingerprint: input.requestFingerprint }), created: true };
+    },
+    async finalizeRun(_context, input) {
+      finalized = input;
+      return run({ status: input.terminalStatus, persistedEvaluationCount: input.evaluations.length });
+    },
+  });
+  const providerOrder = (finalized?.evaluations ?? []).map((evaluation) => evaluation.providerItemNumber);
+  assert.deepEqual(providerOrder, ["1001", "1002", "1000"]);
 });
 
 test("deduplicates before observation and persists a partial run for item-scoped failure", async () => {

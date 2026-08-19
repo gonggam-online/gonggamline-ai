@@ -55,3 +55,10 @@
 - User-facing reporting is reserved for terminal completion or a genuinely
   blocking owner action; required safety and manual high-risk boundaries are
   unchanged.
+
+# Item Selection evidence ordering v1
+
+- ENRICH-mode evaluations are now persisted in deterministic verdict and score
+  order, using available-data score when complete score is unavailable.
+- The ordering only prioritizes candidates for review; missing profitability,
+  rights, and hard-gate evidence still prevents an automatic recommendation.
