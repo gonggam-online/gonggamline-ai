@@ -17,10 +17,12 @@
 - Validation: test suite 710/710 PASS, typecheck PASS, lint PASS, production
   build PASS, and Item Selection browser E2E 2/2 PASS. Existing unrelated user
   changes remain uncommitted and untouched.
-- Current: focused diff is ready for a manual-merge-required PR. Actual Gaemi
-  profile binding for non-KK946 items remains evidence-bound and fail-closed.
-- Next action: commit only the declared policy/workflow/test/docs files, push,
-  and open the high-risk/manual PR; do not merge or perform commerce writes.
+- Current: PR #161 is open with `manual-merge-required`; exact-head CI, Preview,
+  and Preview browser gates are PASS. Actual Gaemi profile binding for
+  non-KK946 items remains evidence-bound and fail-closed.
+- Next action: repository owner must manually merge PR #161. After merge, run
+  the exact Production smoke before claiming the dashboard is updated; no
+  commerce write is authorized by this task.
 
 ## 2026-08-18 Coupang read-only egress preflight
 
