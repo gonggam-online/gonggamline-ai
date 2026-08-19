@@ -1,5 +1,7 @@
 import { supabase } from "../lib/supabase";
 import { analyzeMarketProduct } from "./market-analysis.service";
+import { collectConfiguredMarketObservations } from "./market-observation-collector.service";
+import { saveMarketObservation } from "./market-observation.service";
 import type { CollectorRunResult } from "../types/collector";
 
 function nextRun(intervalMinutes: number) {
@@ -67,6 +69,60 @@ export async function runDueCollectionJobs(limit = 20): Promise<{ results: Colle
         status: "success",
         message: `내부 실매출 피드백 큐 점검 완료: ${keyword}`,
       };
+    } else if (job.collector_key === "official-api-adapter" || job.collector_key === "public-observation-adapter") {
+      const startedAt = new Date().toISOString();
+      const { data: run, error: runError } = await supabase.from("market_collection_runs").insert({
+        collector: job.collector_key,
+        keyword_id: job.market_keyword_id,
+        status: "started",
+        requested_count: 1,
+        started_at: startedAt,
+      }).select("id").single();
+      if (runError) throw new Error(runError.message);
+      try {
+        const collected = await collectConfiguredMarketObservations({
+          collectorKey: job.collector_key,
+          keyword,
+        });
+        let saved = 0;
+        let analyzed = 0;
+        for (const observation of collected.observations) {
+          const persisted = await saveMarketObservation(observation);
+          saved += 1;
+          if (await analyzeMarketProduct(persisted.productId)) analyzed += 1;
+        }
+        const completedAt = new Date().toISOString();
+        await supabase.from("market_collection_runs").update({
+          status: saved === collected.observations.length ? "success" : "partial",
+          requested_count: collected.observations.length,
+          saved_count: saved,
+          finished_at: completedAt,
+        }).eq("id", run.id);
+        result = {
+          collectorKey: job.collector_key,
+          requested: collected.observations.length,
+          saved,
+          analyzed,
+          status: saved === collected.observations.length ? "success" : "partial",
+          message: `${keyword} 관측 ${saved}건 저장 및 분석 완료`,
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "MARKET_COLLECTOR_FAILED";
+        const blocked = /ENDPOINT_UNAVAILABLE|FORBIDDEN|RATE_LIMITED/.test(message);
+        await supabase.from("market_collection_runs").update({
+          status: blocked ? "blocked" : "failed",
+          error_message: message,
+          finished_at: new Date().toISOString(),
+        }).eq("id", run.id);
+        result = {
+          collectorKey: job.collector_key,
+          requested: 1,
+          saved: 0,
+          analyzed: 0,
+          status: "skipped",
+          message: blocked ? `실시간 관측 차단: ${message}` : `실시간 관측 실패: ${message}`,
+        };
+      }
     } else {
       result = {
         collectorKey: job.collector_key,

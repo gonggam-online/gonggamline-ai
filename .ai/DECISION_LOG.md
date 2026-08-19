@@ -1963,3 +1963,17 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   UI, and tests; private packet objects remain governed by the existing
   Supabase retention/recovery procedure. Production requires the already
   approved Coupang credentials and no new secret or local durable state.
+
+# 2026-08-19 - Owner approval: bounded Market Intelligence collection v1
+
+- The owner approved implementation of the first high-risk Market Intelligence
+  Story: read-only official/public observations with evidence persistence. The
+  implementation must fail closed on missing configuration, malformed data,
+  403, and 429 and must not change Item Selection operational verdicts.
+- Exact provider endpoint, lawful terms/robots policy, retention, cost ceiling,
+  Secret/configuration placement, and Production enablement remain separate
+  owner gates. No marketplace write, paid call, purchase, listing, or live
+  verdict change is authorized by this decision.
+- Risk/rollback: high-risk/manual merge. Revert the collector service, route
+  guard, tests, and architecture document; preserve existing Shadow evaluator
+  and live Item Selection behavior.
