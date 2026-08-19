@@ -35,3 +35,12 @@
   score, missing facts, and the unchanged operational verdict.
 - Requests remain read-only and default to incomplete profitability and
   unknown rights, so the panel cannot authorize a live recommendation.
+
+# Engineering operating discipline
+
+- Authorized Stories now continue silently through safe implementation,
+  verification, and delivery. Routine intermediate chat reports are replaced
+  by durable `.codex/WORK_STATUS.md` checkpoints.
+- User-facing reporting is reserved for terminal completion or a genuinely
+  blocking owner action; required safety and manual high-risk boundaries are
+  unchanged.

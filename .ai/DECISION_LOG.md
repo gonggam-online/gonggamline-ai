@@ -1995,3 +1995,12 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - The panel defaults profitability to not evaluated and rights to unknown;
   it cannot authorize or mutate an operational verdict, purchase, listing,
   marketplace write, paid call, asset publication, or Production action.
+
+# 2026-08-19 - Continuation and reporting discipline
+
+- Decision: authorized Stories continue through safe implementation,
+  verification, and delivery without routine chat interruptions.
+- Checkpoints remain durable in `.codex/WORK_STATUS.md`; user-facing messages
+  are limited to terminal completion or a genuinely blocking owner action.
+- This streamlining does not waive Production, database/Auth/RLS, secret,
+  paid, commerce-write, destructive, or high-risk manual boundaries.
