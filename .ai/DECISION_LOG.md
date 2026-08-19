@@ -1977,3 +1977,13 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
 - Risk/rollback: high-risk/manual merge. Revert the collector service, route
   guard, tests, and architecture document; preserve existing Shadow evaluator
   and live Item Selection behavior.
+
+# 2026-08-19 - Item Selection Shadow review bridge
+
+- Decision: add a read-only administrator comparison packet between exact
+  market evidence and the current Item Selection result.
+- The packet cannot change verdicts or scores; incomplete, stale, or
+  rights-uncleared evidence remains blocked or requires manual review.
+- No database mutation, marketplace write, purchase, listing, paid call,
+  asset publication, or Production enablement is authorized. Live verdict
+  integration requires a separate approved Story and manual merge.

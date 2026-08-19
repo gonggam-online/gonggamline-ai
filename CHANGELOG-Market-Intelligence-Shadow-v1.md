@@ -17,3 +17,12 @@
 - Protected collection execution with the existing owner AAL2, exact-origin,
   CSRF, and rate-limit controls. Item Selection operational verdicts remain
   unchanged; live verdict integration is a separate Story.
+
+# Item Selection Shadow review v1
+
+- Added an administrator-only, read-only comparison packet joining exact
+  market evidence to the existing Item Selection result.
+- Operational verdicts and scores remain unchanged; incomplete, stale, or
+  rights-uncleared evidence stays fail-closed and requires manual review.
+- No marketplace, purchase, listing, paid, asset-publication, or Production
+  write is authorized. Live integration remains separately approved.

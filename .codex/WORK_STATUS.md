@@ -1,5 +1,19 @@
 # Work status
 
+## 2026-08-19 Item Selection Shadow review bridge
+
+- Objective: expose an exact-evidence, administrator-only comparison packet
+  without changing Item Selection operational verdicts.
+- Branch/base: `codex/feat/item-selection-shadow-review` from merged
+  `origin/main` `2f7d9f162566fe106e455371c4fa2c5857db1907`.
+- Risk: high-risk/manual. The route is read-only and has no marketplace,
+  purchase, paid, listing, asset-publication, or Production authority.
+- Implemented: pure comparison bridge, Supabase evidence reader, owner admin
+  read route, focused regression tests, architecture/changelog/decision docs.
+- Current validation: typecheck PASS; remaining lint/tests/build and PR gates.
+- Next action: complete validation, then open a manual-merge PR. Do not merge
+  automatically or connect the packet to live verdict writes.
+
 ## 2026-08-19 Market Intelligence collection v1
 
 - Objective: implement the first owner-approved, read-only real-time market
