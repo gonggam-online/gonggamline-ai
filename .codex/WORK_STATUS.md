@@ -1,5 +1,25 @@
 # Work status
 
+## 2026-08-19 Market Research Plan v1
+
+- Objective: continue Item Selection market discovery with official, public,
+  supplier, paid, and manual lanes while keeping evidence, cost, and approval
+  state explicit and preventing high thresholds from discarding promising
+  candidates.
+- Branch: `codex/feat/market-discovery-evidence-contract` (existing dirty user
+  work preserved; only the files listed below were changed by this task).
+- Implemented: deterministic `market-research-plan` source/task contract and
+  `market-research-packet` opportunity-plus-next-research packet; exports,
+  architecture note, changelog, and regression tests.
+- Validation: focused tests PASS (9/9), related market/shadow tests PASS
+  (13/13), full suite PASS (738/738), typecheck PASS, lint PASS, production
+  build PASS.
+- Safety: no network, scraping, paid call, Secret, DB write, commerce write,
+  Production mutation, or operational verdict/ranking change. Unapproved paid
+  sources remain `APPROVAL_REQUIRED`.
+- Next action: separately approve exact providers, terms/robots, cost ceiling,
+  Secret placement, and managed evidence executor before enabling live reads.
+
 ## 2026-08-19 Item Selection competitive benchmark v1
 
 - Objective: make market competitiveness measurable against an immutable labeled

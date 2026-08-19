@@ -55,6 +55,14 @@ Google Trends API와 YouTube Data API의 사용 가능성은 공식 문서와 �
 
 ## 지속 학습과 실시간 적용
 
+`shared/domain/market-research-plan.ts`와
+`shared/domain/market-research-packet.ts`는 위 source lane을 후보별 다음
+연구 태스크로 정렬한다. 공식·공개·공급자·유료 소스를 같은 계약으로 다루되,
+승인되지 않은 유료 소스와 설정되지 않은 endpoint는 호출하지 않고 정확한
+승인/설정 blocker로 남긴다. 시장성이 있지만 수익성·물류 증거가 덜 완성된
+후보는 `RESEARCH_NEXT` 패킷으로 유지하여 높은 기준 때문에 후보군이 공집합이
+되는 것을 방지한다. 이 패킷은 운영 verdict나 추천 순위를 바꾸지 않는다.
+
 `shared/domain/market-learning-loop.ts`는 benchmark, 공개 관측, 판매 피드백,
 운영자 검토에서 얻은 lesson을 증거 digest·정책 버전·관측 시각과 함께
 결정론적으로 통합한다. `SHADOW` packet은 즉시 shadow review와 benchmark에
