@@ -1,5 +1,23 @@
 # Decision log
 
+## 2026-08-19 - Propose Market Intelligence ↔ Item Selection Shadow Evaluation v1
+
+- Proposal: use the existing market time-series metrics as an evidence-gated,
+  deterministic Shadow signal beside Item Selection; do not change the live
+  verdict until calibration and an explicit contract approval exist.
+- Safety: missing core market facts, stale observations, unknown rights, and
+  unconfirmed profitability remain non-authoritative or fail closed. The pure
+  evaluator performs no external call, persistence, schedule, purchase,
+  listing, advertising, price, or Production action.
+- Architecture gate: future official/public collectors, managed evidence
+  storage, Queue/schedule, secrets/configuration, RLS, and sales feedback each
+  require their own approved boundary and recovery evidence.
+- Evidence standard: no claim of superiority over GPT, Gemini, or Claude is
+  valid until a common candidate benchmark and realised-sale backtest measure
+  precision@k, margin error, freshness coverage, and operator agreement.
+- Status: proposed; implementation is limited to the pure Shadow evaluator,
+  sanitized fixtures, tests, and Architecture documentation.
+
 ## 2026-08-15 - Make current-source packet re-prepare the primary recovery path
 
 - Procedure decision: operators no longer need to recover an older external
