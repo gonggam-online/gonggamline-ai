@@ -17,21 +17,21 @@ const candidates = [
 
 test("benchmark reports top-k ranking quality without changing predictions", () => {
   const result = evaluateItemSelectionBenchmark(candidates, [
-    { providerItemNumber: "100", verdict: "RECOMMEND", score: 90 },
-    { providerItemNumber: "105", verdict: "RECOMMEND", score: 88 },
-    { providerItemNumber: "102", verdict: "CONDITIONAL", score: 72 },
-    { providerItemNumber: "101", verdict: "MANUAL_REVIEW", score: null },
+    { providerItemNumber: "100", verdict: "RECOMMEND", score: 90, predictedContributionMarginRate: 0.31 },
+    { providerItemNumber: "105", verdict: "RECOMMEND", score: 88, predictedContributionMarginRate: 0.27 },
+    { providerItemNumber: "102", verdict: "CONDITIONAL", score: 72, predictedContributionMarginRate: 0.2 },
+    { providerItemNumber: "101", verdict: "MANUAL_REVIEW", score: null, predictedContributionMarginRate: null },
   ], 3);
   assert.equal(result.precisionAtK, 1);
   assert.equal(result.recallAtK, 1);
   assert.equal(result.coverage, 0.6667);
-  assert.equal(result.meanAbsoluteMarginError, 0.56);
+  assert.equal(result.meanAbsoluteMarginError, 0.0133);
   assert.equal(result.eligibleForDecision, false);
 });
 
 test("benchmark rejects unknown identifiers and invalid labels", () => {
   assert.throws(() => evaluateItemSelectionBenchmark(candidates, [
-    { providerItemNumber: "999", verdict: "RECOMMEND", score: 80 },
+    { providerItemNumber: "999", verdict: "RECOMMEND", score: 80, predictedContributionMarginRate: null },
   ], 3), /benchmark candidates/);
   assert.throws(() => evaluateItemSelectionBenchmark([
     { providerItemNumber: "100", relevance: 4, observedContributionMarginRate: null },
@@ -42,14 +42,14 @@ test("comparison reports engine lift against a fixed baseline", () => {
   const comparison = compareItemSelectionBenchmarks(
     candidates,
     [
-      { providerItemNumber: "100", verdict: "RECOMMEND", score: 90 },
-      { providerItemNumber: "105", verdict: "RECOMMEND", score: 88 },
-      { providerItemNumber: "102", verdict: "CONDITIONAL", score: 72 },
+      { providerItemNumber: "100", verdict: "RECOMMEND", score: 90, predictedContributionMarginRate: 0.31 },
+      { providerItemNumber: "105", verdict: "RECOMMEND", score: 88, predictedContributionMarginRate: 0.27 },
+      { providerItemNumber: "102", verdict: "CONDITIONAL", score: 72, predictedContributionMarginRate: 0.2 },
     ],
     [
-      { providerItemNumber: "101", verdict: "RECOMMEND", score: 91 },
-      { providerItemNumber: "100", verdict: "CONDITIONAL", score: 70 },
-      { providerItemNumber: "104", verdict: "CONDITIONAL", score: 69 },
+      { providerItemNumber: "101", verdict: "RECOMMEND", score: 91, predictedContributionMarginRate: null },
+      { providerItemNumber: "100", verdict: "CONDITIONAL", score: 70, predictedContributionMarginRate: 0.1 },
+      { providerItemNumber: "104", verdict: "CONDITIONAL", score: 69, predictedContributionMarginRate: null },
     ],
     3,
   );

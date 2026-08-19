@@ -1,5 +1,21 @@
 # Work status
 
+## 2026-08-19 Item Selection competitive benchmark v1
+
+- Objective: make market competitiveness measurable against an immutable labeled
+  dataset and a fixed baseline without changing operational verdicts.
+- Branch/PR: `codex/feat/item-selection-competitive-benchmark`, PR #170, merged
+  commit `4ff13cb546e3944420294769ebb7a25d2d4a2266`.
+- Implemented: read-only Precision@K, Recall@K, NDCG@K, coverage, margin-error,
+  and engine-vs-baseline lift calculations with strict candidate/label validation.
+- Validation: focused benchmark 3/3, full test suite PASS, typecheck PASS,
+  lint PASS, production build PASS, diff check PASS.
+- Safety: no DB, external API, commerce, paid, Production, or verdict-write
+  authority; existing user changes remain uncommitted and untouched.
+- Remaining: the merged Production smoke workflow is still running; actual
+  market-competitiveness evidence requires an approved immutable dataset with
+  real sales/return/settlement outcomes.
+
 ## 2026-08-19 Item Selection market enrichment v1
 
 - Objective: apply the new Market Intelligence rules to administrator Item

@@ -9,7 +9,7 @@
 - `precisionAtK`: 상위 K개 중 실제 유효 후보 비율
 - `recallAtK`: 전체 유효 후보 중 상위 K개가 포착한 비율
 - `ndcgAtK`: 유효성 등급(0~3)을 반영한 순위 품질
-- `meanAbsoluteMarginError`: 예측 점수와 관측 기여마진율의 평균 절대 오차
+- `meanAbsoluteMarginError`: 별도로 제공된 예측 기여마진율과 관측 기여마진율의 평균 절대 오차. 일반 총점은 마진 예측값으로 취급하지 않는다.
 - `coverage`: 평가 후보 중 엔진 결과가 존재하는 비율
 
 구현은 `shared/domain/item-selection-benchmark.ts`의 순수 함수에 있다. 라벨은 승인된 immutable 평가 데이터셋에서만 공급해야 하며, 라벨이 없는 결과는 시장 경쟁력 증거로 취급하지 않는다.
