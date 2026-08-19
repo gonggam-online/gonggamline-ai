@@ -36,6 +36,17 @@
 - Requests remain read-only and default to incomplete profitability and
   unknown rights, so the panel cannot authorize a live recommendation.
 
+# Item Selection market enrichment v1
+
+- Administrator Item Selection runs now request exact, read-only Market
+  Intelligence enrichment by provider item number.
+- Opportunity, demand, growth, supply, and confidence metrics populate the
+  existing score areas when evidence exists; missing facts remain unavailable
+  and are recorded in the canonical snapshot.
+- The API default remains `OFF` for compatibility. No rights gate, purchase,
+  listing, marketplace write, paid call, or Production verdict authority was
+  added.
+
 # Engineering operating discipline
 
 - Authorized Stories now continue silently through safe implementation,

@@ -23,7 +23,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const CURSOR = /^([A-Za-z0-9_-]+)$/;
 const BODY_KEYS = new Set([
   "provider", "keyword", "size", "proposedSalePriceKrw", "costProfileVersion",
-  "retryOfRunId",
+  "retryOfRunId", "marketIntelligenceMode",
 ]);
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -36,6 +36,7 @@ function parseBody(value: unknown): RunItemSelectionRequestV1 | null {
   const price = value.proposedSalePriceKrw;
   const costProfile = value.costProfileVersion;
   const retry = value.retryOfRunId;
+  const marketMode = value.marketIntelligenceMode;
   if (
     value.provider !== "domeggook" ||
     typeof keyword !== "string" || keyword.trim() !== keyword ||
@@ -43,7 +44,8 @@ function parseBody(value: unknown): RunItemSelectionRequestV1 | null {
     ![10, 20, 30].includes(value.size as number) ||
     (price !== undefined && (!Number.isSafeInteger(price) || (price as number) < 1)) ||
     (costProfile !== undefined && costProfile !== ITEM_SELECTION_PROFITABILITY_POLICY_VERSION) ||
-    (retry !== undefined && (typeof retry !== "string" || !UUID.test(retry)))
+    (retry !== undefined && (typeof retry !== "string" || !UUID.test(retry))) ||
+    (marketMode !== undefined && marketMode !== "OFF" && marketMode !== "ENRICH")
   ) return null;
   return value as RunItemSelectionRequestV1;
 }

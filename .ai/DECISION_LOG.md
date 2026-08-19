@@ -1996,6 +1996,14 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   it cannot authorize or mutate an operational verdict, purchase, listing,
   marketplace write, paid call, asset publication, or Production action.
 
+# 2026-08-19 - Item Selection market enrichment v1
+
+- Decision: connect administrator Item Selection runs to exact Market
+  Intelligence metrics in read-only `ENRICH` mode.
+- The mapping is evidence-bound and fail-closed for missing facts; the public
+  API remains `OFF` by default and rights/profitability/commerce gates remain
+  authoritative.
+
 # 2026-08-19 - Continuation and reporting discipline
 
 - Decision: authorized Stories continue through safe implementation,
