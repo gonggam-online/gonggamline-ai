@@ -18,7 +18,7 @@ export async function loadItemSelectionMarketEnrichment(
   if (productError) throw productError;
   const eligible = (products ?? []).filter((product) =>
     typeof product.vendor_item_id === "string" &&
-    (product.source === "coupang_public" || product.source === "naver_official" || product.source === "manual"),
+    (product.source === "coupang_public" || product.source === "naver_official" || product.source === "dataforseo_naver" || product.source === "manual"),
   );
   if (eligible.length === 0) return new Map();
   const ids = eligible.map((product) => product.id as number);

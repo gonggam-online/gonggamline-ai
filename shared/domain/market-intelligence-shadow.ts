@@ -13,7 +13,7 @@ export type ShadowEligibility =
 
 export type MarketIntelligenceMetricSnapshot = Readonly<{
   observedAt: string;
-  source: "coupang_public" | "naver_official" | "manual" | "internal_sales";
+  source: "coupang_public" | "naver_official" | "youtube_public" | "dataforseo_naver" | "manual" | "internal_sales";
   opportunityScore: number | null;
   demandScore: number | null;
   growthScore: number | null;

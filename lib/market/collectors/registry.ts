@@ -30,6 +30,27 @@ export const collectorRegistry: CollectorDefinition[] = [
     description: "공식적으로 허용된 API를 동일한 관측 포맷으로 연결하기 위한 확장 포인트입니다.",
   },
   {
+    key: "naver-shopping-api",
+    name: "Naver Shopping 공식 API",
+    sourceType: "official_api",
+    supportsAutomatic: true,
+    description: "서버 Secret으로 Naver Shopping 메타데이터를 read-only 수집합니다.",
+  },
+  {
+    key: "youtube-data-api",
+    name: "YouTube Data API 공개 메타데이터",
+    sourceType: "public_observation",
+    supportsAutomatic: true,
+    description: "영상 바이트·자산권리 없이 제목·게시시점·검색순위만 연구합니다.",
+  },
+  {
+    key: "dataforseo-naver-serp",
+    name: "DataForSEO Naver SERP",
+    sourceType: "paid_api",
+    supportsAutomatic: true,
+    description: "비용 ceiling이 설정된 경우에만 Naver 경쟁 SERP를 read-only 수집합니다.",
+  },
+  {
     key: "public-observation-adapter",
     name: "공개 페이지 관측 어댑터",
     sourceType: "public_observation",

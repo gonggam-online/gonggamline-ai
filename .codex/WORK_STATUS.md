@@ -1,5 +1,23 @@
 # Work status
 
+## 2026-08-20 External Market Intelligence providers v1
+
+- Objective: connect approved read-only Naver Shopping, YouTube Data API, and
+  DataForSEO Naver SERP lanes to the existing market collection contract.
+- Implemented: server-only credential-injected adapters, bounded Naver/YouTube
+  queries, DataForSEO per-request cost ceiling, native collector selection,
+  source typing, registry entries, architecture/decision/changelog updates,
+  and 6 adapter regression tests.
+- Validation: adapter/collector tests 9/9, typecheck PASS, targeted lint PASS.
+- External status: no runtime Secret values exist in this checkout or GitHub
+  repository. Vercel CLI is unavailable and no live provider call was made.
+  GitHub contains only existing governance secrets, not provider credentials.
+- Required owner action before live use: set Vercel Production Secrets, set
+  provider quota/budget, then enable exactly one provider with
+  `MARKET_EXTERNAL_PROVIDER_ENABLED=true`. YouTube remains reference-only.
+- Risk: high-risk/manual because Secrets, external reads, and paid quota are
+  involved; no automatic merge or Production enablement is authorized.
+
 ## 2026-08-19 Market Research Plan v1
 
 - Objective: continue Item Selection market discovery with official, public,

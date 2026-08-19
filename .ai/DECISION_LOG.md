@@ -1,5 +1,26 @@
 # Decision log
 
+## 2026-08-20 - Accept read-only external Market Intelligence providers v1
+
+- Decision: connect Naver Shopping Search, YouTube Data API, and DataForSEO
+  Naver Organic SERP as separate server-only read lanes for Item Selection
+  research and Shadow evaluation.
+- Authority: Vercel Production Environment owns provider Secrets; provider
+  consoles own quota, terms, and billing. No Secret value is stored in Git,
+  Supabase rows, local files, client code, or test fixtures.
+- Cost: Naver is quota-limited and non-paid; YouTube search is bounded to 10
+  results per query and tracked against the official quota; DataForSEO requires
+  a configured per-request USD ceiling and remains disabled until credentials
+  and budget are present.
+- Safety: native execution requires `MARKET_EXTERNAL_PROVIDER_ENABLED=true`;
+  missing credentials, 403/429, malformed responses, YouTube asset requests,
+  and cost-ceiling violations fail closed. No scraping bypass, asset download,
+  marketplace write, price change, Production verdict change, or commerce
+  action is authorized.
+- Status: implementation is high-risk/manual because it reads external data and
+  uses Secrets/paid quota. The code is delivered for exact configuration and
+  read-only smoke review; Production enablement remains a separate owner gate.
+
 ## 2026-08-19 - Propose Market Intelligence ↔ Item Selection Shadow Evaluation v1
 
 - Proposal: use the existing market time-series metrics as an evidence-gated,

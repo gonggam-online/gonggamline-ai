@@ -59,6 +59,7 @@ export type ProductConfiguration = Readonly<{
 
 const SOURCE_WEIGHT: Record<MarketDiscoverySourceKind, number> = {
   official_api: 1,
+  paid_api: 0.98,
   public_dataset: 0.95,
   manual: 0.85,
   public_page: 0.75,
