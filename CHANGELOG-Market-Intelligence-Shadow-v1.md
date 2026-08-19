@@ -42,7 +42,7 @@
   Intelligence enrichment by provider item number.
 - Opportunity, demand, growth, supply, and confidence metrics populate the
   existing score areas when evidence exists; missing facts remain unavailable
-  and are recorded in the canonical snapshot.
+  within the existing canonical snapshot contract.
 - The API default remains `OFF` for compatibility. No rights gate, purchase,
   listing, marketplace write, paid call, or Production verdict authority was
   added.

@@ -144,7 +144,6 @@ function toWrite(
   request: RunItemSelectionRequestV1,
   observedAt: string,
   marketEnrichment: MarketEnrichmentRecord | null,
-  marketEnrichmentStatus: "APPLIED" | "UNAVAILABLE" | "NOT_REQUESTED",
 ): ItemSelectionEvaluationWriteV1 {
   const providerFacts = mapSupplierProfitabilityFacts(item, {
     observedAt,
@@ -176,8 +175,6 @@ function toWrite(
     profitabilityResult: stableJson(profitResult),
     evaluatorInput: stableJson(evaluatorInput),
     evaluatorOutput: stableJson(evaluatorOutput),
-    marketEnrichment: stableJson(marketEnrichment),
-    marketEnrichmentStatus,
   };
   const stageHashes = {
     providerFacts: sha256(stages.providerFacts),
@@ -196,8 +193,6 @@ function toWrite(
       profitabilityCalculationContractVersion:
         ITEM_SELECTION_PROFITABILITY_CALCULATION_CONTRACT_VERSION,
       providerItemNumber: item.providerItemId,
-      marketEnrichment,
-      marketEnrichmentStatus,
       originalPosition,
       hashes: stageHashes,
     })),
@@ -214,8 +209,6 @@ function toWrite(
     profitabilityResult: profitResult,
     evaluatorInput,
     evaluatorOutput,
-    marketEnrichment,
-    marketEnrichmentStatus,
     hashes,
     originalPosition,
   };
@@ -335,13 +328,11 @@ export async function runItemSelection(
 
   const observedAt = new Date(clock()).toISOString();
   let marketByProviderItem = new Map<string, MarketEnrichmentRecord>();
-  let marketEnrichmentStatus: "APPLIED" | "UNAVAILABLE" | "NOT_REQUESTED" = "NOT_REQUESTED";
   if (marketMode === "ENRICH") {
     try {
       marketByProviderItem = new Map(await (dependencies.loadMarketEnrichment ?? loadItemSelectionMarketEnrichment)(items.map((item) => item.providerItemId)));
-      marketEnrichmentStatus = marketByProviderItem.size > 0 ? "APPLIED" : "UNAVAILABLE";
     } catch {
-      marketEnrichmentStatus = "UNAVAILABLE";
+      marketByProviderItem = new Map();
     }
   }
   const evaluations: ItemSelectionEvaluationWriteV1[] = [];
@@ -355,7 +346,7 @@ export async function runItemSelection(
   }> = [];
   items.forEach((item, index) => {
     try {
-      evaluations.push(toWrite(item, index, request, observedAt, marketByProviderItem.get(item.providerItemId) ?? null, marketEnrichmentStatus));
+      evaluations.push(toWrite(item, index, request, observedAt, marketByProviderItem.get(item.providerItemId) ?? null));
     } catch {
       failures.push({
         providerItemNumber: item.providerItemId,
