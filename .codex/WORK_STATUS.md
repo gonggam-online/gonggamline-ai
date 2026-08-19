@@ -17,6 +17,9 @@
 - Safety: no network, scraping, paid call, Secret, DB write, commerce write,
   Production mutation, or operational verdict/ranking change. Unapproved paid
   sources remain `APPROVAL_REQUIRED`.
+- Delivery: commit `1d400b7`, pushed; PR #174 is open and Preview checks pass.
+  Repository auto-merge is unavailable because branch protection is not
+  configured; no direct merge was forced.
 - Next action: separately approve exact providers, terms/robots, cost ceiling,
   Secret placement, and managed evidence executor before enabling live reads.
 
