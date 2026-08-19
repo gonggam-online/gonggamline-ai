@@ -1,5 +1,27 @@
 # Work status
 
+## 2026-08-19 Item Selection logistics evidence wiring
+
+- Objective: make the generic Item Selection profitability snapshot retain the
+  observed supplier shipping charge, while documenting the evidence-bound
+  Gaemi/K Coupang logistics reference from KK946 without generalizing product-
+  specific rates.
+- Branch/base: `codex/fix/item-selection-logistics-costs` from `origin/main`.
+- Risk: high-risk/manual because profitability inputs affect purchase
+  eligibility; no purchase, listing, payment, provider, database, or
+  Production write is authorized.
+- Implemented: policy v4 version/effective-date bump; supplier shipping is now
+  mapped to `supplierToFulfillmentInbound`; regression coverage asserts the
+  persisted snapshot contains the observed charge; v4 policy/changelog records
+  KK946's actual Gaemi and WING evidence boundaries.
+- Validation: test suite 710/710 PASS, typecheck PASS, lint PASS, production
+  build PASS, and Item Selection browser E2E 2/2 PASS. Existing unrelated user
+  changes remain uncommitted and untouched.
+- Current: focused diff is ready for a manual-merge-required PR. Actual Gaemi
+  profile binding for non-KK946 items remains evidence-bound and fail-closed.
+- Next action: commit only the declared policy/workflow/test/docs files, push,
+  and open the high-risk/manual PR; do not merge or perform commerce writes.
+
 ## 2026-08-18 Coupang read-only egress preflight
 
 - Objective: make the read-only Coupang logistics execution boundary

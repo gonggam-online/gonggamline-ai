@@ -114,7 +114,11 @@ function profitabilityInput(
     variableCosts: [
       missingMoney("inboundInspectionStorage"),
       missingMoney("pickPackPackagingLabelSet"),
-      missingMoney("supplierToFulfillmentInbound"),
+      {
+        ...providerFacts.supplierShippingCost,
+        id: "supplierToFulfillmentInbound",
+        includedIn: [],
+      },
       missingMoney("otherOrderVariableCost"),
     ],
     advertisingActual: { rate: null, observedDays: 0, validOrders: 0 },

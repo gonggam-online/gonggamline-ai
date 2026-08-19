@@ -125,7 +125,7 @@ function gates(
 test("exposes the immutable approved policy values", () => {
   assert.equal(
     ITEM_SELECTION_PROFITABILITY_POLICY_VERSION,
-    "gonggamline-profitability-2026-08-12-v3",
+    "gonggamline-profitability-2026-08-19-v4",
   );
   assert.equal(ITEM_SELECTION_PROFITABILITY_POLICY.fallbackMarketplaceFeeRate, 0.109);
   assert.equal(ITEM_SELECTION_PROFITABILITY_POLICY.monthlyCoupangServiceFeeKrw, 55_000);

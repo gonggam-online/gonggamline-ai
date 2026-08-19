@@ -1,8 +1,8 @@
 export const ITEM_SELECTION_PROFITABILITY_POLICY_VERSION =
-  "gonggamline-profitability-2026-08-12-v3" as const;
+  "gonggamline-profitability-2026-08-19-v4" as const;
 
 export const ITEM_SELECTION_PROFITABILITY_POLICY_EFFECTIVE_DATE =
-  "2026-08-12" as const;
+  "2026-08-19" as const;
 
 export const ITEM_SELECTION_PROFITABILITY_POLICY = Object.freeze({
   fallbackMarketplaceFeeRate: 0.109,
