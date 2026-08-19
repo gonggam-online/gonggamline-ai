@@ -22,6 +22,9 @@ test("maps exact market metrics into existing score areas", () => {
     confidence: 88,
   });
   assert.equal(result.competitiveness.status, "AVAILABLE");
+  assert("normalizedScore" in result.competitiveness);
+  assert("normalizedScore" in result.demand);
+  assert("normalizedScore" in result.supplyStability);
   assert.equal(result.competitiveness.normalizedScore, 82);
   assert.equal(result.demand.normalizedScore, 77);
   assert.equal(result.supplyStability.normalizedScore, 88);
@@ -37,6 +40,7 @@ test("does not invent scores for missing market facts", () => {
     confidence: null,
   });
   assert.equal(result.competitiveness.status, "UNAVAILABLE");
+  assert("normalizedScore" in result.demand);
   assert.equal(result.demand.normalizedScore, 60);
   assert.equal(result.conversionPotential.status, "UNAVAILABLE");
 });
