@@ -1,5 +1,29 @@
 # Work status
 
+## 2026-08-19 Market Intelligence collection v1
+
+- Objective: implement the first owner-approved, read-only real-time market
+  observation lane without changing Item Selection operational verdicts.
+- Branch/base: `codex/feat/market-intelligence-collection` from merged
+  `origin/main` `5c9b512a35bb0ab8f3024811b550d2076a174831`.
+- Risk: high-risk/manual. External HTTPS reads and Supabase evidence writes are
+  bounded; no marketplace write, paid call, purchase, listing, or Production
+  verdict change is included.
+- Implemented: strict configured HTTPS observation envelope, source binding,
+  50-item cap, fail-closed missing/malformed/403/429 handling, collection-run
+  evidence, owner AAL2/exact-origin/CSRF/rate-limit protection, and focused
+  tests/docs/decision record.
+- Validation: focused tests 7/7, full tests PASS, typecheck PASS, lint PASS,
+  production build PASS, diff check PASS. PR #163 is open with
+  `manual-merge-required`; CI checks and Vercel Preview deployment pass while
+  Preview browser validation remains in progress on the hosted runner.
+- Remaining owner gates: exact provider endpoint, lawful terms/robots policy,
+  retention/cost ceiling, Secret placement, and Production enablement. Shadow
+  scores and live operational verdicts remain unchanged.
+- Next action: wait for exact Preview browser result, then owner manually
+  reviews/merges PR #163. Do not auto-merge or start verdict integration in this
+  Story.
+
 ## 2026-08-19 Item Selection logistics evidence wiring
 
 - Objective: make the generic Item Selection profitability snapshot retain the
