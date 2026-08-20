@@ -1,5 +1,41 @@
 # Work status
 
+## 2026-08-20 Evidence-bound Persuasive Story Architecture v1 (16A)
+
+- Objective/revenue impact: turn verified product/customer/use-context evidence
+  into a conversion-oriented story packet for 16B without inventing claims,
+  accelerating a truthful first-sale content path.
+- Branch/base: `codex/feat/evidence-bound-persuasive-story` from `origin/main`
+  merge `8602e72bcf76947253983b4eeaecf04516180d0b` (PR #178).
+- Risk/root cause: normal-risk additive pure domain capability; no external or
+  database failure is compensated for.
+- Scope: nine versioned blocks, sentence provenance, persona/intent mapping,
+  objection coverage, prohibited-claim quarantine, candidate ranking/digest,
+  approved-phrasing human revision, and 16B Shadow packet export.
+- Non-goals: LLM/provider call, DB/Auth/RLS, public API/UI, listing submission,
+  price, advertising, order, procurement, Secret, paid call, Production, or
+  commerce write.
+- Predecessor evidence: 15A `kk946-keywords-v1` and digest
+  `9808c36fff368d26fe0731f356548199b11c0e14e92c65a1b998305cc87415a4`;
+  15B head `6d65d6462651001fe6a65702d818f9ee11184f9d`; merged evidence kernel and
+  owner-approved conversion amendment independently verified.
+- Completed: 9/10 checkpoints — governance/base audit, predecessor gate,
+  branch/risk, contract implementation, fixture tests, focused validation,
+  full regression/build, local browser attempt, and complete diff/secret review.
+- Validation: focused 16A 6/6 PASS; full tests 775/775 PASS; lint PASS with four
+  pre-existing Revenue test warnings; typecheck PASS; production build PASS
+  with 90 routes. The focused Listing Playwright test started twice but the
+  runner did not terminate after its 20-second test timeout; no pass/fail
+  result was produced and only the processes created by these attempts were
+  stopped. Exact configured Preview browser remains binding.
+- Changed files: persuasive-story domain/export/test, Architecture review,
+  Decision Log, changelog, and this status record.
+- Exact next action: commit/push/open the normal-risk PR, then wait for exact
+  CI/Vercel Preview/browser gates.
+- Remaining risks: real persona evidence remains only as strong as the bound
+  upstream evidence; policy/category freshness must be re-evaluated by the
+  consumer and no Shadow packet is publication authority.
+
 ## 2026-08-20 Evidence-bound Coupang Title & Keyword Ranking v1 (15B)
 
 - Objective: produce a deterministic, versioned Shadow packet for Coupang

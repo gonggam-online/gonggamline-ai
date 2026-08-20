@@ -1,5 +1,22 @@
 # Decision log
 
+## 2026-08-20 - Evidence-bound Persuasive Story Architecture v1
+
+- Decision: project only verified product, customer, use-context, category,
+  policy, keyword, and title evidence into a fixed nine-block conversion story.
+- Contract: every sentence retains claim/fact/source/digest provenance; blocks
+  retain persona, intent, objection, and version mappings; candidates expose a
+  deterministic score breakdown, rank, and packet digest for 16B.
+- Failure policy: `UNKNOWN`, `CONFLICT`, `PROHIBITED`, missing provenance,
+  forbidden terms, prohibited claim patterns, missing blocks, unverified
+  personas, and uncovered required objections quarantine the candidate.
+- Human/LLM boundary: revision can only select a pre-approved phrasing and
+  records reviewer/time/selection. New efficacy, numbers, reviews, scarcity,
+  comparison, or other unsupported language cannot enter the packet.
+- Boundary/risk: normal-risk pure Shadow code/tests, always
+  `executionEligible=false`; no provider, DB/Auth/RLS, Secret, paid,
+  marketplace, Production, pricing, procurement, or commerce-write authority.
+
 ## 2026-08-20 - Evidence-bound Coupang Title & Keyword Ranking v1
 
 - Decision: generate title and search-keyword candidates only from the exact

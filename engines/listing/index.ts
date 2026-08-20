@@ -9,6 +9,21 @@ export {
   type RankedTitleCandidate,
   type TitleRankingPolicy,
 } from "@/shared/domain/evidence-bound-title-ranking";
+export {
+  applyHumanStoryRevision,
+  buildEvidenceBoundPersuasiveStoryPacket,
+  PERSUASIVE_STORY_PACKET_VERSION,
+  STORY_BLOCK_ORDER,
+  type EvidenceBoundPersuasiveStoryPacket,
+  type HumanStoryRevision,
+  type RankedStoryCandidate,
+  type StoryBlock,
+  type StoryClaim,
+  type StoryIntent,
+  type StoryObjection,
+  type StoryPersona,
+  type StoryPolicy,
+} from "@/shared/domain/evidence-bound-persuasive-story";
 
 export const descriptor: EngineDescriptor = {
   id: "listing",
