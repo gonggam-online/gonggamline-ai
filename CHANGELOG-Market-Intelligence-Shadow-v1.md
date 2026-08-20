@@ -62,3 +62,13 @@
   order, using available-data score when complete score is unavailable.
 - The ordering only prioritizes candidates for review; missing profitability,
   rights, and hard-gate evidence still prevents an automatic recommendation.
+# Evidence-bound Coupang Title & Keyword Ranking v1
+
+- Added a version/digest-bound Shadow packet for Coupang title and search
+  keyword candidates consumed from the 15A Keyword Intelligence packet.
+- Added provenance for verified product/category facts and keyword evidence,
+  deterministic score breakdowns, stable tie-breaking, and output digests.
+- Added fail-closed quarantine for unknown/conflicting evidence, forbidden
+  terms, competitor marks, unsupported claims, overlength, and keyword stuffing.
+- No Item Selection score/ranking, provider call, Secret, paid request,
+  listing submission, Production, or commerce behavior changed.

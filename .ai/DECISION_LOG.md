@@ -1,5 +1,22 @@
 # Decision log
 
+## 2026-08-20 - Evidence-bound Coupang Title & Keyword Ranking v1
+
+- Decision: generate title and search-keyword candidates only from the exact
+  versioned 15A keyword packet and verified product/category facts.
+- Contract: bind `keywordSetVersion` and packet digest; record fact IDs and
+  keyword evidence digests; expose relevance, purchase-intent, readability,
+  evidence, and policy score breakdowns with deterministic tie-breaking.
+- Failure policy: version/digest drift rejects before generation; unknown,
+  conflicting, prohibited, stale, forbidden-term, competitor-mark,
+  unsupported-claim, overlength, or stuffing outputs are `QUARANTINED`.
+- Boundary: `SHADOW` only and `executionEligible=false`; existing Item
+  Selection scores, live recommendation order, listing writes, and commerce
+  actions remain unchanged.
+- Risk: normal-risk pure code/tests. Provider calls, Secret/configuration,
+  paid calls, durable evidence, and operational ranking changes retain their
+  separate approval/manual-merge boundaries.
+
 ## 2026-08-20 - Competitive Keyword Intelligence v1 Shadow packet
 
 - Decision: extend the accepted Market Intelligence domain with a pure,

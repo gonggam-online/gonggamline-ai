@@ -1,5 +1,14 @@
 import type { EngineDescriptor } from "@/shared/contracts/engine";
 import type { ListingDraftContent, ListingGenerationInput } from "@/shared/domain/listing";
+export {
+  buildEvidenceBoundTitleRankingPacket,
+  keywordPacketDigest,
+  type EvidenceBoundTitleRankingPacket,
+  type ProductEvidenceFact,
+  type RankedKeywordCandidate,
+  type RankedTitleCandidate,
+  type TitleRankingPolicy,
+} from "@/shared/domain/evidence-bound-title-ranking";
 
 export const descriptor: EngineDescriptor = {
   id: "listing",
