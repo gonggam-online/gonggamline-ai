@@ -1,5 +1,21 @@
 # Decision log
 
+## 2026-08-20 - Product Creative Generation and Scoring Shadow v1
+
+- Decision: add a pure, provider-neutral creative planning and scoring packet
+  inside the approved Listing domain. It binds exact keyword/title digests,
+  category/policy evidence, source asset digests, rights grants, and each edit
+  operation before emitting deterministic Shadow briefs.
+- Rights are asset- and operation-scoped. Unknown, conflicting, prohibited,
+  stale, or revoked evidence quarantines only that asset lane; unaffected
+  rights-cleared assets continue. Public-reference-only assets never enter a
+  derivative candidate.
+- Human approval records a selection but cannot make the packet executable.
+  Rollback discards the Shadow packet; no binary, provider output, durable
+  asset, Item Selection score, or operational decision is created.
+- Risk/rollback: normal-risk additive pure domain logic. Revert the domain
+  export, tests, fixture, changelog, and this decision record.
+
 ## 2026-08-20 - Evidence-bound Persuasive Story Architecture v1
 
 - Decision: project only verified product, customer, use-context, category,

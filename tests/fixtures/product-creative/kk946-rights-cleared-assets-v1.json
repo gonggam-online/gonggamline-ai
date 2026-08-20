@@ -1,0 +1,55 @@
+[
+  {
+    "assetId": "kk946-front-photo",
+    "assetDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "sourceReference": "evidence:fixture:kk946:front-photo",
+    "productFactIds": ["fact-color-black", "fact-count-one", "fact-product-identity"],
+    "state": "VERIFIED",
+    "rights": {
+      "grantReference": "evidence:fixture:grant:kk946-front-photo",
+      "grantDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "grantorReference": "evidence:fixture:grantor:manufacturer",
+      "reviewedAt": "2026-08-19T00:00:00.000Z",
+      "expiresAt": "2026-09-20T00:00:00.000Z",
+      "revoked": false,
+      "usePermission": "ALLOWED",
+      "editPermissions": {
+        "ORIGINAL_USE": "ALLOWED",
+        "CROP_SQUARE": "ALLOWED",
+        "BACKGROUND_REMOVE": "UNKNOWN",
+        "BRIGHTNESS_ADJUST": "ALLOWED"
+      }
+    },
+    "visualEvidence": {
+      "productIdentityMatch": 100,
+      "productCoveragePercent": 82,
+      "mobileLegibility": 94,
+      "competitorDifferentiation": 76,
+      "conversionUsefulness": 88
+    }
+  },
+  {
+    "assetId": "kk946-public-reference",
+    "assetDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "sourceReference": "evidence:fixture:kk946:public-reference",
+    "productFactIds": ["fact-product-identity"],
+    "state": "UNKNOWN",
+    "rights": {
+      "grantReference": "evidence:fixture:grant:unknown",
+      "grantDigest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "grantorReference": "evidence:fixture:grantor:unknown",
+      "reviewedAt": "2026-08-19T00:00:00.000Z",
+      "expiresAt": "2026-09-20T00:00:00.000Z",
+      "revoked": false,
+      "usePermission": "UNKNOWN",
+      "editPermissions": { "ORIGINAL_USE": "UNKNOWN" }
+    },
+    "visualEvidence": {
+      "productIdentityMatch": 100,
+      "productCoveragePercent": 75,
+      "mobileLegibility": 80,
+      "competitorDifferentiation": 90,
+      "conversionUsefulness": 80
+    }
+  }
+]
