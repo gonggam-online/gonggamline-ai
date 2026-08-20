@@ -1,5 +1,7 @@
 import type { SupplierQuote, SourcingCostInput, SourcingDecision } from "@/shared/domain/sourcing";
 
+export * from "@/shared/domain/supplier-quote-comparison";
+
 const safe = (value: number) => Number.isFinite(value) ? Math.max(0, value) : 0;
 
 export function calculateDetailedSourcing(input: SourcingCostInput, targetSellingPrice: number) {
