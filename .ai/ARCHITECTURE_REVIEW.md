@@ -1,5 +1,16 @@
 # Architecture review
 
+## Evidence-bound Persuasive Story v2 — 15C admission amendment
+
+- Reuses the merged nine-block 16A architecture and adds exact upstream version
+  and digest admission for 15A keywords, 15B titles, and 15C creative evidence.
+- Carries verified creative IDs and asset/grant/edit provenance; creative scores
+  contribute to the disclosed story score without altering Item Selection.
+- UNKNOWN/CONFLICT/PROHIBITED or stale text evidence is quarantined. Creative
+  time, category, policy, version, or digest mismatch fails composition closed.
+- Remains pure and SHADOW-only: no provider, Secret, paid call, network,
+  DB/Auth/RLS, upload, Production, listing, or commerce write.
+
 ## Product Creative Generation and Scoring Shadow v1 — 2026-08-20
 
 - Approved boundary: existing Listing domain and merged evidence/policy

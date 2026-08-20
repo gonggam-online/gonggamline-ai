@@ -1,5 +1,14 @@
 # Evidence-bound Persuasive Story Architecture v1
 
+## v2 creative-evidence binding
+
+- Binds exact 15A keyword, 15B title, and 15C creative packet versions and
+  digests; version, digest, category, policy, or generation-time drift fails.
+- Carries verified creative candidate, source-asset, rights-grant, and exact
+  edit-operation provenance into the 16B handoff packet.
+- Adds creative evidence to candidate score breakdowns and requires fresh claim
+  and persona evidence, quarantining stale facts instead of promoting them.
+
 ## Added
 
 - deterministic, versioned story blocks for problem/context, empathy, solution,

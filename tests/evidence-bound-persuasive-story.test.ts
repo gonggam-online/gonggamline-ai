@@ -1,5 +1,14 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
+
+import {
+  buildProductCreativePacket,
+  type CreativeAssetEvidence,
+  type CreativePolicySnapshot,
+} from "../shared/domain/evidence-bound-product-creative.ts";
+import { KEYWORD_INTELLIGENCE_PACKET_VERSION } from "../shared/domain/competitive-keyword-intelligence.ts";
+import { EVIDENCE_BOUND_TITLE_RANKING_VERSION } from "../shared/domain/evidence-bound-title-ranking.ts";
 
 import {
   applyHumanStoryRevision,
@@ -10,6 +19,9 @@ import {
 
 const digest = "a".repeat(64);
 const keywordDigest = "9808c36fff368d26fe0731f356548199b11c0e14e92c65a1b998305cc87415a4";
+const titleDigest = "7a71c429c203961be4eb6c6b35bfcf3731d0143e04add7af07bc43df1e8f5c22";
+const creativeDigest = "3c73e2d0b8664f02db80f759f69a7f0fd2f07c1deecbca9794f00d1e9558e8dd";
+const generatedAt = "2026-08-20T00:00:00.000Z";
 
 const phrasing: Record<(typeof STORY_BLOCK_ORDER)[number], readonly [string, string]> = {
   PROBLEM_CONTEXT: ["흩어진 충전기와 케이블을 한곳에 정리해야 하는 상황입니다.", "충전기와 케이블이 흩어지는 상황을 정리해 보세요."],
@@ -31,21 +43,57 @@ const claims: readonly StoryClaim[] = STORY_BLOCK_ORDER.map((blockType, index) =
   factIds: [`fact-${index}`],
   sourceReferences: [`evidence:fixture:${index}`],
   evidenceDigests: [digest],
+  observedAt: "2026-08-19T00:00:00.000Z",
+  validUntil: "2026-09-20T00:00:00.000Z",
 }));
+
+const creativePolicy: CreativePolicySnapshot = {
+  policyVersion: "coupang-category-image-policy-v1",
+  categoryId: "coupang:pouch",
+  state: "APPROVED",
+  categoryEvidenceDigest: "f".repeat(64),
+  marketplacePolicyDigest: "1".repeat(64),
+  observedAt: "2026-08-19T00:00:00.000Z",
+  expiresAt: "2026-09-20T00:00:00.000Z",
+  allowedOperations: ["ORIGINAL_USE", "CROP_SQUARE", "BACKGROUND_REMOVE", "BRIGHTNESS_ADJUST"],
+  minProductCoveragePercent: 70,
+  maxProductCoveragePercent: 95,
+};
+
+function creativePacket() {
+  const assets = JSON.parse(readFileSync(new URL("./fixtures/product-creative/kk946-rights-cleared-assets-v1.json", import.meta.url), "utf8")) as readonly CreativeAssetEvidence[];
+  return buildProductCreativePacket({
+    candidateId: "KK946",
+    generatedAt,
+    keywordSetVersion: "kk946-keywords-v1",
+    keywordPacketDigest: keywordDigest,
+    expectedKeywordPacketDigest: keywordDigest,
+    keywordRelevanceScore: 100,
+    titlePacketDigest: titleDigest,
+    expectedTitlePacketDigest: titleDigest,
+    policySnapshot: creativePolicy,
+    assets,
+  });
+}
 
 function input(overrides: Partial<Parameters<typeof buildEvidenceBoundPersuasiveStoryPacket>[0]> = {}) {
   return {
     categoryId: "coupang:pouch",
     storyVersion: "kk946-story-v1",
+    keywordPacketVersion: KEYWORD_INTELLIGENCE_PACKET_VERSION,
     keywordSetVersion: "kk946-keywords-v1",
     keywordPacketDigest: keywordDigest,
     expectedKeywordPacketDigest: keywordDigest,
-    titlePacketDigest: "b".repeat(64),
-    generatedAt: "2026-08-20T00:00:00.000Z",
+    titlePacketVersion: EVIDENCE_BOUND_TITLE_RANKING_VERSION,
+    titlePacketDigest: titleDigest,
+    expectedTitlePacketDigest: titleDigest,
+    creativePacket: creativePacket(),
+    expectedCreativePacketDigest: creativeDigest,
+    generatedAt,
     claims,
-    personas: [{ personaId: "cable-organizer", label: "충전기·케이블 정리가 필요한 고객", state: "VERIFIED" as const, evidenceDigests: [digest], intents: ["DISCOVERY", "CONSIDERATION", "PURCHASE"] as const }],
+    personas: [{ personaId: "cable-organizer", label: "충전기·케이블 정리가 필요한 고객", state: "VERIFIED" as const, evidenceDigests: [digest], intents: ["DISCOVERY", "CONSIDERATION", "PURCHASE"] as const, observedAt: "2026-08-19T00:00:00.000Z", validUntil: "2026-09-20T00:00:00.000Z" }],
     objections: [{ objectionId: "color-variance", personaIds: ["cable-organizer"], intents: ["CONSIDERATION"] as const, questionClaimId: "claim-6", answerClaimIds: ["claim-6"], required: true }],
-    policy: { policyVersion: "coupang-policy-v1", categoryEvidenceDigest: "c".repeat(64), marketplacePolicyDigest: "d".repeat(64), forbiddenTerms: ["완치"], prohibitedClaimPatterns: ["최고|100%\\s*보장"] },
+    policy: { policyVersion: "coupang-policy-v1", categoryEvidenceDigest: creativePolicy.categoryEvidenceDigest, marketplacePolicyDigest: creativePolicy.marketplacePolicyDigest, forbiddenTerms: ["완치"], prohibitedClaimPatterns: ["최고|100%\\s*보장"] },
     ...overrides,
   };
 }
@@ -56,11 +104,20 @@ test("16A emits ranked versioned Shadow-only blocks with sentence provenance and
   assert.equal(packet.mode, "SHADOW");
   assert.equal(packet.executionEligible, false);
   assert.equal(packet.keywordSetVersion, "kk946-keywords-v1");
+  assert.equal(packet.keywordPacketVersion, KEYWORD_INTELLIGENCE_PACKET_VERSION);
   assert.equal(packet.keywordPacketDigest, keywordDigest);
+  assert.equal(packet.titlePacketDigest, titleDigest);
+  assert.equal(packet.titlePacketVersion, EVIDENCE_BOUND_TITLE_RANKING_VERSION);
+  assert.equal(packet.creativePacketDigest, creativeDigest);
+  assert.equal(packet.creativePacketVersion, "gonggamline-evidence-bound-product-creative-v1");
+  assert.deepEqual(packet.creativeBindings.operations, ["BRIGHTNESS_ADJUST", "CROP_SQUARE", "ORIGINAL_USE"]);
+  assert.ok(packet.candidates.every(({ blocks }) => blocks.filter(({ blockType }) => ["SOLUTION", "CORE_BENEFIT", "USE_SCENE", "CONTENTS_USAGE"].includes(blockType)).every(({ creativeCandidateIds }) => creativeCandidateIds.length === 3)));
   assert.deepEqual(packet.candidates[0]?.blocks.map(({ blockType }) => blockType), STORY_BLOCK_ORDER);
   assert.ok(packet.candidates.every(({ blocks }) => blocks.every(({ personaIds, intents, sentences }) => personaIds.length === 1 && intents.length === 3 && sentences.every(({ provenance }) => provenance.factIds.length > 0))));
   assert.deepEqual(packet.candidates[0]?.coveredObjectionIds, ["color-variance"]);
+  assert.ok((packet.candidates[0]?.scoreBreakdown.creativeEvidence ?? 0) > 0);
   assert.match(packet.digest, /^[a-f0-9]{64}$/);
+  assert.equal(packet.digest, "22a38251b9ddf256d7d06d519f10df0383b289ecf1395f16a66df50e6bda4a3c");
 });
 
 test("UNKNOWN, CONFLICT, PROHIBITED and invented prohibited language fail closed", () => {
@@ -82,6 +139,17 @@ test("digest drift and unverified persona/objection coverage are rejected or qua
   const packet = buildEvidenceBoundPersuasiveStoryPacket(input({ personas: [{ ...input().personas[0], state: "UNKNOWN" }] }));
   assert.equal(packet.status, "QUARANTINED");
   assert.ok(packet.candidates.every(({ exclusionReasons }) => exclusionReasons.includes("VERIFIED_PERSONA_MISSING") && exclusionReasons.includes("OBJECTION_PERSONA_UNVERIFIED:color-variance")));
+  assert.throws(() => buildEvidenceBoundPersuasiveStoryPacket(input({ expectedTitlePacketDigest: "0".repeat(64) })), /TITLE_PACKET_DIGEST_MISMATCH/);
+  assert.throws(() => buildEvidenceBoundPersuasiveStoryPacket(input({ expectedCreativePacketDigest: "0".repeat(64) })), /CREATIVE_PACKET_DIGEST_MISMATCH/);
+});
+
+test("stale claim, persona, creative time and creative policy binding fail closed", () => {
+  const staleClaims = claims.map((claim, index) => index === 0 ? { ...claim, validUntil: "2026-08-19T00:00:00.000Z" } : claim);
+  assert.equal(buildEvidenceBoundPersuasiveStoryPacket(input({ claims: staleClaims })).status, "QUARANTINED");
+  const stalePersona = [{ ...input().personas[0], validUntil: "2026-08-19T00:00:00.000Z" }];
+  assert.equal(buildEvidenceBoundPersuasiveStoryPacket(input({ personas: stalePersona })).status, "QUARANTINED");
+  assert.throws(() => buildEvidenceBoundPersuasiveStoryPacket(input({ generatedAt: "2026-08-20T00:00:01.000Z" })), /CREATIVE_PACKET_TIME_MISMATCH/);
+  assert.throws(() => buildEvidenceBoundPersuasiveStoryPacket(input({ policy: { ...input().policy, categoryEvidenceDigest: "e".repeat(64) } })), /CREATIVE_PACKET_POLICY_BINDING_MISMATCH/);
 });
 
 test("candidate ranking and digest are deterministic across input ordering", () => {
