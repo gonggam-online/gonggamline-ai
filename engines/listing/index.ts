@@ -1,6 +1,12 @@
 import type { EngineDescriptor } from "@/shared/contracts/engine";
 import type { ListingDraftContent, ListingGenerationInput } from "@/shared/domain/listing";
 export {
+  buildListingGeneratorV2Packet,
+  LISTING_GENERATOR_V2_PACKET_VERSION,
+  type ListingGeneratorV2Input,
+  type ListingGeneratorV2Packet,
+} from "@/shared/domain/listing-generator-v2";
+export {
   ASSET_ERROR_ISOLATION_POLICY_DIGEST,
   ASSET_RIGHTS_POLICY_DIGEST,
   buildProductCreativePacket,
