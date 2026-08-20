@@ -78,7 +78,7 @@ function fixture() {
   return { keywordPacket, titlePacket, creativePacket, storyPacket, detailPagePacket, expectedDigests };
 }
 
-function input() {
+export function listingGeneratorV2FixtureInput() {
   const packets = fixture();
   return { ...packets, subject: { reference: "SYNTHETIC-P001", evidenceClass: "SYNTHETIC_FIXTURE" as const }, generatedAt,
     currentPolicy: { categoryId: "synthetic:organizer", categoryEvidenceDigest: hash("2"), marketplacePolicyDigest: hash("3"), state: "APPROVED" as const, observedAt: "2026-08-20T00:00:00.000Z", validUntil: "2026-09-20T00:00:00.000Z" },
@@ -86,8 +86,8 @@ function input() {
 }
 
 test("Listing Generator v2 composes all five exact packets into a deterministic rendered review packet", () => {
-  const first = buildListingGeneratorV2Packet(input());
-  const second = buildListingGeneratorV2Packet(input());
+  const first = buildListingGeneratorV2Packet(listingGeneratorV2FixtureInput());
+  const second = buildListingGeneratorV2Packet(listingGeneratorV2FixtureInput());
   assert.deepEqual(first, second);
   assert.equal(first.version, "gonggamline-listing-generator-v2-competitive-review-v1");
   assert.equal(first.mode, "SHADOW_REVIEW");
@@ -104,7 +104,7 @@ test("Listing Generator v2 composes all five exact packets into a deterministic 
 });
 
 test("digest, policy, rights and predecessor drift fail closed", () => {
-  const valid = input();
+  const valid = listingGeneratorV2FixtureInput();
   assert.throws(() => buildListingGeneratorV2Packet({ ...valid, expectedDigests: { ...valid.expectedDigests, title: hash("0") } }), /TITLE_PACKET_DIGEST_BINDING_INVALID/);
   assert.throws(() => buildListingGeneratorV2Packet({ ...valid, currentPolicy: { ...valid.currentPolicy, marketplacePolicyDigest: hash("0") } }), /CURRENT_POLICY_BINDING_INVALID/);
   assert.throws(() => buildListingGeneratorV2Packet({ ...valid, currentRights: [{ ...valid.currentRights[0], state: "REVOKED" }] }), /CURRENT_RIGHTS_NOT_VERIFIED/);
@@ -113,7 +113,7 @@ test("digest, policy, rights and predecessor drift fail closed", () => {
 });
 
 test("packet exposes review and rollback metadata without legacy or Item Selection mutation surfaces", () => {
-  const packet = buildListingGeneratorV2Packet(input());
+  const packet = buildListingGeneratorV2Packet(listingGeneratorV2FixtureInput());
   assert.equal(packet.humanReview.required, true);
   assert.equal(packet.humanReview.status, "PENDING");
   assert.equal(packet.rollback.strategy, "DISCARD_SHADOW_PACKET");
