@@ -3,6 +3,9 @@ import test from "node:test";
 
 import { approveConversionDetailPagePacket, buildConversionDetailPagePacket, type DetailPageAsset } from "../shared/domain/evidence-bound-conversion-detail-page.ts";
 import { applyHumanStoryRevision, buildEvidenceBoundPersuasiveStoryPacket, STORY_BLOCK_ORDER, type StoryClaim } from "../shared/domain/evidence-bound-persuasive-story.ts";
+import { KEYWORD_INTELLIGENCE_PACKET_VERSION } from "../shared/domain/competitive-keyword-intelligence.ts";
+import { EVIDENCE_BOUND_TITLE_RANKING_VERSION } from "../shared/domain/evidence-bound-title-ranking.ts";
+import { buildStoryCreativeFixture, STORY_FIXTURE_CREATIVE_DIGEST, STORY_FIXTURE_KEYWORD_DIGEST, STORY_FIXTURE_TITLE_DIGEST } from "./fixtures/product-creative/story-creative-fixture.ts";
 
 const digest = (character: string) => character.repeat(64);
 const claims: readonly StoryClaim[] = STORY_BLOCK_ORDER.map((blockType, index) => ({
@@ -13,21 +16,28 @@ const claims: readonly StoryClaim[] = STORY_BLOCK_ORDER.map((blockType, index) =
   factIds: [`fact-${index}`],
   sourceReferences: [`evidence:fixture:${index}`],
   evidenceDigests: [digest("a")],
+  observedAt: "2026-08-19T00:00:00.000Z",
+  validUntil: "2026-09-20T00:00:00.000Z",
 }));
 
 function approvedStory() {
   const packet = buildEvidenceBoundPersuasiveStoryPacket({
-    categoryId: "coupang:kk946",
+    categoryId: "coupang:pouch",
     storyVersion: "kk946-story-v1",
+    keywordPacketVersion: KEYWORD_INTELLIGENCE_PACKET_VERSION,
     keywordSetVersion: "kk946-keywords-v1",
-    keywordPacketDigest: "9808c36fff368d26fe0731f356548199b11c0e14e92c65a1b998305cc87415a4",
-    expectedKeywordPacketDigest: "9808c36fff368d26fe0731f356548199b11c0e14e92c65a1b998305cc87415a4",
-    titlePacketDigest: digest("b"),
+    keywordPacketDigest: STORY_FIXTURE_KEYWORD_DIGEST,
+    expectedKeywordPacketDigest: STORY_FIXTURE_KEYWORD_DIGEST,
+    titlePacketVersion: EVIDENCE_BOUND_TITLE_RANKING_VERSION,
+    titlePacketDigest: STORY_FIXTURE_TITLE_DIGEST,
+    expectedTitlePacketDigest: STORY_FIXTURE_TITLE_DIGEST,
+    creativePacket: buildStoryCreativeFixture(),
+    expectedCreativePacketDigest: STORY_FIXTURE_CREATIVE_DIGEST,
     generatedAt: "2026-08-20T00:00:00.000Z",
     claims,
-    personas: [{ personaId: "organizer", label: "정리가 필요한 고객", state: "VERIFIED", evidenceDigests: [digest("a")], intents: ["DISCOVERY", "CONSIDERATION", "PURCHASE"] }],
+    personas: [{ personaId: "organizer", label: "정리가 필요한 고객", state: "VERIFIED", evidenceDigests: [digest("a")], intents: ["DISCOVERY", "CONSIDERATION", "PURCHASE"], observedAt: "2026-08-19T00:00:00.000Z", validUntil: "2026-09-20T00:00:00.000Z" }],
     objections: [{ objectionId: "faq", personaIds: ["organizer"], intents: ["CONSIDERATION"], questionClaimId: "claim-6", answerClaimIds: ["claim-6"], required: true }],
-    policy: { policyVersion: "coupang-policy-v1", categoryEvidenceDigest: digest("c"), marketplacePolicyDigest: digest("d"), forbiddenTerms: [], prohibitedClaimPatterns: [] },
+    policy: { policyVersion: "coupang-policy-v1", categoryEvidenceDigest: digest("f"), marketplacePolicyDigest: digest("1"), forbiddenTerms: [], prohibitedClaimPatterns: [] },
   });
   return applyHumanStoryRevision(packet, { candidateId: packet.candidates[0]?.candidateId ?? "", reviewerReference: "reviewer:story-owner", reviewedAt: "2026-08-20T01:00:00.000Z", selections: [] }, claims);
 }

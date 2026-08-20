@@ -1,7 +1,15 @@
 import { createHash } from "node:crypto";
 
+import {
+  PRODUCT_CREATIVE_PACKET_VERSION,
+  productCreativePacketDigest,
+  type ProductCreativePacket,
+} from "@/shared/domain/evidence-bound-product-creative";
+import { KEYWORD_INTELLIGENCE_PACKET_VERSION } from "@/shared/domain/competitive-keyword-intelligence";
+import { EVIDENCE_BOUND_TITLE_RANKING_VERSION } from "@/shared/domain/evidence-bound-title-ranking";
+
 export const PERSUASIVE_STORY_PACKET_VERSION =
-  "gonggamline-evidence-bound-persuasive-story-v1" as const;
+  "gonggamline-evidence-bound-persuasive-story-v2" as const;
 
 export const STORY_BLOCK_ORDER = [
   "PROBLEM_CONTEXT",
@@ -27,6 +35,8 @@ export type StoryClaim = Readonly<{
   factIds: readonly string[];
   sourceReferences: readonly string[];
   evidenceDigests: readonly string[];
+  observedAt: string;
+  validUntil: string;
 }>;
 
 export type StoryPersona = Readonly<{
@@ -35,6 +45,8 @@ export type StoryPersona = Readonly<{
   state: EvidenceState;
   evidenceDigests: readonly string[];
   intents: readonly StoryIntent[];
+  observedAt: string;
+  validUntil: string;
 }>;
 
 export type StoryObjection = Readonly<{
@@ -73,6 +85,7 @@ export type StoryBlock = Readonly<{
   personaIds: readonly string[];
   intents: readonly StoryIntent[];
   objectionIds: readonly string[];
+  creativeCandidateIds: readonly string[];
   sentences: readonly StorySentence[];
 }>;
 
@@ -87,6 +100,7 @@ export type RankedStoryCandidate = Readonly<{
     objectionCoverage: number;
     provenanceCoverage: number;
     policy: number;
+    creativeEvidence: number;
   }>;
   blocks: readonly StoryBlock[];
   coveredObjectionIds: readonly string[];
@@ -97,9 +111,21 @@ export type EvidenceBoundPersuasiveStoryPacket = Readonly<{
   version: typeof PERSUASIVE_STORY_PACKET_VERSION;
   categoryId: string;
   storyVersion: string;
+  keywordPacketVersion: typeof KEYWORD_INTELLIGENCE_PACKET_VERSION;
   keywordSetVersion: string;
   keywordPacketDigest: string;
+  titlePacketVersion: typeof EVIDENCE_BOUND_TITLE_RANKING_VERSION;
   titlePacketDigest: string;
+  creativePacketVersion: typeof PRODUCT_CREATIVE_PACKET_VERSION;
+  creativePacketDigest: string;
+  creativeBindings: Readonly<{
+    candidateIds: readonly string[];
+    assetDigests: readonly string[];
+    grantDigests: readonly string[];
+    operations: readonly string[];
+    categoryEvidenceDigest: string;
+    marketplacePolicyDigest: string;
+  }>;
   claimSetDigest: string;
   mode: "SHADOW";
   status: "READY" | "QUARANTINED";
@@ -164,7 +190,14 @@ function policyReasons(text: string, policy: StoryPolicy): readonly string[] {
   return sortedUnique(reasons);
 }
 
-function claimReasons(claim: StoryClaim, policy: StoryPolicy): readonly string[] {
+function isFresh(observedAt: string, validUntil: string, now: Date): boolean {
+  const observed = Date.parse(observedAt);
+  const expires = Date.parse(validUntil);
+  return Number.isFinite(observed) && Number.isFinite(expires)
+    && observed <= now.getTime() && now.getTime() <= expires;
+}
+
+function claimReasons(claim: StoryClaim, policy: StoryPolicy, now: Date): readonly string[] {
   const reasons: string[] = [];
   if (claim.state !== "VERIFIED") reasons.push(`CLAIM_${claim.state}`);
   if (claim.approvedPhrasings.length === 0) reasons.push("APPROVED_PHRASING_MISSING");
@@ -175,6 +208,7 @@ function claimReasons(claim: StoryClaim, policy: StoryPolicy): readonly string[]
   if (claim.evidenceDigests.length === 0 || claim.evidenceDigests.some((value) => !validDigest(value))) {
     reasons.push("EVIDENCE_DIGEST_INVALID");
   }
+  if (!isFresh(claim.observedAt, claim.validUntil, now)) reasons.push("CLAIM_EVIDENCE_STALE");
   for (const phrasing of claim.approvedPhrasings) reasons.push(...policyReasons(phrasing, policy));
   return sortedUnique(reasons);
 }
@@ -187,19 +221,38 @@ const TEMPLATE_VARIANTS = [
 export function buildEvidenceBoundPersuasiveStoryPacket(input: Readonly<{
   categoryId: string;
   storyVersion: string;
+  keywordPacketVersion: typeof KEYWORD_INTELLIGENCE_PACKET_VERSION;
   keywordSetVersion: string;
   keywordPacketDigest: string;
   expectedKeywordPacketDigest: string;
+  titlePacketVersion: typeof EVIDENCE_BOUND_TITLE_RANKING_VERSION;
   titlePacketDigest: string;
+  expectedTitlePacketDigest: string;
+  creativePacket: ProductCreativePacket;
+  expectedCreativePacketDigest: string;
   generatedAt: string;
   claims: readonly StoryClaim[];
   personas: readonly StoryPersona[];
   objections: readonly StoryObjection[];
   policy: StoryPolicy;
 }>): EvidenceBoundPersuasiveStoryPacket {
+  if (input.keywordPacketVersion !== KEYWORD_INTELLIGENCE_PACKET_VERSION) throw new Error("KEYWORD_PACKET_VERSION_MISMATCH");
+  if (input.titlePacketVersion !== EVIDENCE_BOUND_TITLE_RANKING_VERSION) throw new Error("TITLE_PACKET_VERSION_MISMATCH");
   if (input.keywordPacketDigest !== input.expectedKeywordPacketDigest) {
     throw new Error("KEYWORD_PACKET_DIGEST_MISMATCH");
   }
+  if (input.titlePacketDigest !== input.expectedTitlePacketDigest) throw new Error("TITLE_PACKET_DIGEST_MISMATCH");
+  if (input.creativePacket.version !== PRODUCT_CREATIVE_PACKET_VERSION) throw new Error("CREATIVE_PACKET_VERSION_MISMATCH");
+  if (productCreativePacketDigest(input.creativePacket) !== input.creativePacket.digest
+      || input.creativePacket.digest !== input.expectedCreativePacketDigest) throw new Error("CREATIVE_PACKET_DIGEST_MISMATCH");
+  if (input.creativePacket.mode !== "SHADOW" || input.creativePacket.executionEligible !== false
+      || input.creativePacket.status === "QUARANTINED") throw new Error("CREATIVE_PACKET_NOT_ADMISSIBLE");
+  if (input.creativePacket.keywordSetVersion !== input.keywordSetVersion
+      || input.creativePacket.keywordPacketDigest !== input.keywordPacketDigest
+      || input.creativePacket.titlePacketDigest !== input.titlePacketDigest) throw new Error("CREATIVE_PACKET_INPUT_BINDING_MISMATCH");
+  if (input.creativePacket.policySnapshot.categoryId !== input.categoryId
+      || input.creativePacket.policySnapshot.categoryEvidenceDigest !== input.policy.categoryEvidenceDigest
+      || input.creativePacket.policySnapshot.marketplacePolicyDigest !== input.policy.marketplacePolicyDigest) throw new Error("CREATIVE_PACKET_POLICY_BINDING_MISMATCH");
   for (const [name, value] of [
     ["keywordPacketDigest", input.keywordPacketDigest],
     ["titlePacketDigest", input.titlePacketDigest],
@@ -210,16 +263,22 @@ export function buildEvidenceBoundPersuasiveStoryPacket(input: Readonly<{
   }
   const generatedAt = new Date(input.generatedAt);
   if (!Number.isFinite(generatedAt.getTime())) throw new RangeError("generatedAt is invalid.");
+  if (input.creativePacket.generatedAt !== generatedAt.toISOString()) throw new Error("CREATIVE_PACKET_TIME_MISMATCH");
 
   const claims = [...input.claims].sort((left, right) => left.claimId.localeCompare(right.claimId));
   if (new Set(claims.map(({ claimId }) => claimId)).size !== claims.length) throw new Error("DUPLICATE_CLAIM_ID");
   const claimById = new Map(claims.map((claim) => [claim.claimId, claim]));
-  const reasonsByClaim = new Map(claims.map((claim) => [claim.claimId, claimReasons(claim, input.policy)]));
+  const reasonsByClaim = new Map(claims.map((claim) => [claim.claimId, claimReasons(claim, input.policy, generatedAt)]));
   const admittedClaims = claims.filter((claim) => reasonsByClaim.get(claim.claimId)?.length === 0);
   const admittedPersonas = input.personas
-    .filter((persona) => persona.state === "VERIFIED" && persona.evidenceDigests.length > 0 && persona.evidenceDigests.every(validDigest))
+    .filter((persona) => persona.state === "VERIFIED" && persona.evidenceDigests.length > 0
+      && persona.evidenceDigests.every(validDigest) && isFresh(persona.observedAt, persona.validUntil, generatedAt))
     .sort((left, right) => left.personaId.localeCompare(right.personaId));
   const admittedPersonaIds = new Set(admittedPersonas.map(({ personaId }) => personaId));
+  const verifiedCreativeCandidates = input.creativePacket.candidates.filter(({ status }) => status === "VERIFIED");
+  if (verifiedCreativeCandidates.length === 0) throw new Error("CREATIVE_CANDIDATE_MISSING");
+  const storyCreativeCandidateIds = sortedUnique(verifiedCreativeCandidates.map(({ candidateId }) => candidateId));
+  const creativeBlockTypes = new Set<StoryBlockType>(["SOLUTION", "CORE_BENEFIT", "USE_SCENE", "CONTENTS_USAGE"]);
 
   const candidates = TEMPLATE_VARIANTS.map((template): RankedStoryCandidate => {
     const candidateReasons: string[] = [];
@@ -236,6 +295,7 @@ export function buildEvidenceBoundPersuasiveStoryPacket(input: Readonly<{
         personaIds: sortedUnique(admittedPersonas.map(({ personaId }) => personaId)),
         intents: sortedUnique(admittedPersonas.flatMap(({ intents }) => intents)) as readonly StoryIntent[],
         objectionIds: sortedUnique(objectionIds),
+        creativeCandidateIds: creativeBlockTypes.has(blockType) ? storyCreativeCandidateIds : Object.freeze([]),
         sentences: Object.freeze(blockClaims.map((claim): StorySentence => Object.freeze({
           sentenceId: `${template.id}:${claim.claimId}:0`,
           text: claim.approvedPhrasings[0] ?? "",
@@ -269,6 +329,7 @@ export function buildEvidenceBoundPersuasiveStoryPacket(input: Readonly<{
     const requiredObjections = input.objections.filter(({ required }) => required);
     const objectionCoverage = requiredObjections.length === 0 ? 100 : Math.round((requiredObjections.filter(({ objectionId }) => coveredObjectionIds.includes(objectionId)).length / requiredObjections.length) * 100);
     const provenanceCoverage = admittedClaims.length === 0 ? 0 : 100;
+    const creativeEvidence = Math.round(verifiedCreativeCandidates.reduce((total, candidate) => total + (candidate.score ?? 0), 0) / verifiedCreativeCandidates.length);
     const uniqueReasons = sortedUnique(candidateReasons);
     const policyScore = uniqueReasons.length === 0 ? 100 : 0;
     const status = uniqueReasons.length === 0 ? "VERIFIED" as const : "QUARANTINED" as const;
@@ -276,8 +337,8 @@ export function buildEvidenceBoundPersuasiveStoryPacket(input: Readonly<{
       candidateId: `${input.categoryId}:${template.id}`,
       rank: 0,
       status,
-      score: status === "VERIFIED" ? Math.round((blockCoverage * 0.3 + personaIntentCoverage * 0.2 + objectionCoverage * 0.2 + provenanceCoverage * 0.2 + policyScore * 0.1 + template.boost) * 100) / 100 : null,
-      scoreBreakdown: Object.freeze({ blockCoverage, personaIntentCoverage, objectionCoverage, provenanceCoverage, policy: policyScore }),
+      score: status === "VERIFIED" ? Math.round((blockCoverage * 0.25 + personaIntentCoverage * 0.15 + objectionCoverage * 0.15 + provenanceCoverage * 0.15 + policyScore * 0.1 + creativeEvidence * 0.2 + template.boost) * 100) / 100 : null,
+      scoreBreakdown: Object.freeze({ blockCoverage, personaIntentCoverage, objectionCoverage, provenanceCoverage, policy: policyScore, creativeEvidence }),
       blocks: Object.freeze(blocks),
       coveredObjectionIds,
       exclusionReasons: uniqueReasons,
@@ -289,9 +350,21 @@ export function buildEvidenceBoundPersuasiveStoryPacket(input: Readonly<{
     version: PERSUASIVE_STORY_PACKET_VERSION,
     categoryId: input.categoryId,
     storyVersion: input.storyVersion,
+    keywordPacketVersion: input.keywordPacketVersion,
     keywordSetVersion: input.keywordSetVersion,
     keywordPacketDigest: input.keywordPacketDigest,
+    titlePacketVersion: input.titlePacketVersion,
     titlePacketDigest: input.titlePacketDigest,
+    creativePacketVersion: input.creativePacket.version,
+    creativePacketDigest: input.creativePacket.digest,
+    creativeBindings: Object.freeze({
+      candidateIds: storyCreativeCandidateIds,
+      assetDigests: sortedUnique(verifiedCreativeCandidates.map(({ provenance }) => provenance.sourceAssetDigest)),
+      grantDigests: sortedUnique(verifiedCreativeCandidates.map(({ provenance }) => provenance.grantDigest)),
+      operations: sortedUnique(verifiedCreativeCandidates.map(({ operation }) => operation)),
+      categoryEvidenceDigest: input.creativePacket.policySnapshot.categoryEvidenceDigest,
+      marketplacePolicyDigest: input.creativePacket.policySnapshot.marketplacePolicyDigest,
+    }),
     claimSetDigest: sha256(claims),
     mode: "SHADOW" as const,
     status: candidates.every(({ status }) => status === "VERIFIED") ? "READY" as const : "QUARANTINED" as const,

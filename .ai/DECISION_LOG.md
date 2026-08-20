@@ -1,5 +1,16 @@
 # Decision log
 
+## 2026-08-20 - Persuasive Story 15C binding amendment v2
+
+- Decision: amend merged 16A instead of creating parallel architecture. Bind
+  15A/15B/15C versions and digests, propagate only verified creative candidates
+  with asset/grant/edit provenance, and include creative evidence in scoring.
+- Safety: stale claim/persona evidence is quarantined; creative time, category,
+  policy, version, or digest drift rejects composition. Output remains SHADOW,
+  `executionEligible=false`, with no persistence or commerce surface.
+- Compatibility: 16B synthetic fixtures consume v2; Item Selection scores,
+  rankings, and operating decisions remain untouched.
+
 ## 2026-08-20 - Product Creative Generation and Scoring Shadow v1
 
 - Decision: add a pure, provider-neutral creative planning and scoring packet

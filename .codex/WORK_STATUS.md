@@ -1,5 +1,26 @@
 # Work status
 
+## 2026-08-20 Persuasive Story 15C binding amendment v2 (16A)
+
+- Branch/base: `codex/feat/persuasive-story-creative-binding` from 15C merge
+  `d17731be00b300926b0e162613c2456117db33a0`; normal-risk pure-domain amendment.
+- Inputs: 15A `kk946-keywords-v1` / `9808c36fff368d26fe0731f356548199b11c0e14e92c65a1b998305cc87415a4`;
+  15B `7a71c429c203961be4eb6c6b35bfcf3731d0143e04add7af07bc43df1e8f5c22`;
+  15C `gonggamline-evidence-bound-product-creative-v1` /
+  `3c73e2d0b8664f02db80f759f69a7f0fd2f07c1deecbca9794f00d1e9558e8dd`.
+- Implemented: v2 bindings, claim/persona freshness quarantine, creative
+  asset/grant/edit provenance, score breakdown, stable digest/tie-break, and
+  updated 16B synthetic fixtures.
+- Validation: focused 16A 7/7 and 16A+16B 14/14 PASS; full tests 790/790;
+  typecheck PASS; lint PASS with four pre-existing Revenue warnings; production
+  build PASS with 90 routes; Chromium detail-page/no-write 1/1 PASS; diff and
+  prohibited-surface audit PASS. Remote gates remain.
+- Synthetic v2 packet: `gonggamline-evidence-bound-persuasive-story-v2`, digest
+  `22a38251b9ddf256d7d06d519f10df0383b289ecf1395f16a66df50e6bda4a3c`.
+- Boundary: SHADOW-only, `executionEligible=false`; no provider/LLM, Secret,
+  paid call, scraping, upload, DB/Auth/RLS, Production, listing, or commerce
+  write. This task does not start 16B.
+
 ## 2026-08-20 Product Creative Generation and Scoring Shadow v1 (15C)
 
 - Objective/revenue impact: rank truthful, rights-cleared visual directions for
