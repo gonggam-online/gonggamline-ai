@@ -1,5 +1,17 @@
 # Decision log
 
+## 2026-08-20 — Compose Stage 15A-16B outputs only at an exact Shadow boundary
+
+- Decision: Listing Generator v2 accepts complete upstream packets instead of
+  regenerating keywords, titles, creative briefs, story text, or detail HTML.
+- Reason: exact packet composition preserves the specialized rankings and
+  provenance while avoiding the legacy string-join, outline-only, thumbnail-
+  brief, and payload-drift failure modes.
+- Safety: current policy and rights attestations must still match every asset,
+  grant, and edit operation. Review metadata cannot enable execution or publish.
+- Compatibility/rollback: the addition is an exported pure function. Revert the
+  additive module/export/tests/docs; no operational state needs reconciliation.
+
 ## 2026-08-20 - Persuasive Story 15C binding amendment v2
 
 - Decision: amend merged 16A instead of creating parallel architecture. Bind

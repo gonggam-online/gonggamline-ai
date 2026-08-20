@@ -6776,3 +6776,35 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Research-only; no operational verdict, commerce, or Production mutation.
 - Next: configure approved providers, collect read-only evidence, then compare
   predictions against an immutable pre-sales benchmark and later sales labels.
+
+# Stage 16 Listing Generator v2 — 2026-08-20
+
+- Objective: integrate terminal 15A/15B/15C/16A/16B evidence into one
+  deterministic Competitive Review Packet for the Stage 20 handoff.
+- Branch/base: `codex/feat/listing-generator-v2-review-packet` from
+  `origin/main` `d9a760e0d6806df31910b89b6c006a720aeec9ef`.
+- Risk/root cause: normal-risk additive pure Listing domain change. Code/contract
+  gap in the legacy join/outline/brief generator; no external configuration or
+  database failure is being compensated for.
+- Scope: exact digest/transitive binding, fresh category/policy and rights
+  drift checks, provenance-linked rendered review packet, five-part score,
+  human-review and rollback metadata. Synthetic fixtures only.
+- Non-goals: no Item Selection mutation, DB/Auth/RLS, API, provider, paid call,
+  scrape, upload, publication, Production, listing, or commerce write.
+- Progress: 7/10 checkpoints complete — START/gates, worktree/base, architecture
+  audit/risk, implementation, focused tests, full local gates, and diff/security
+  review. Current: commit/push/PR and exact remote gates.
+- Changed files: Listing v2 domain/export/test, architecture/decision/work
+  status, and changelog.
+- Verification: focused Listing v2 3/3 PASS; full suite 793/793 PASS; lint PASS
+  with four pre-existing test warnings; typecheck PASS; production build PASS
+  (90 routes); focused Chromium render 1/1 PASS; item-selection/R1/DB baseline
+  security tests 29/29 PASS; `git diff --check` PASS.
+- Packet: version `gonggamline-listing-generator-v2-competitive-review-v1`;
+  synthetic deterministic fixture digest
+  `e5e69b5e9903d3a6ca5012d8840a8cebc611ca8346edf16591c7b4c0590f5306`.
+- Durable state: GitHub branch/PR/CI will own code and evidence; local
+  node_modules/build/test output is disposable and untracked.
+- Next exact action: commit/push/open normal-risk PR, then wait for exact
+  CI/Preview/browser gates and post-merge Production smoke.
+- Remaining risk: remote gates and exact rendered packet digest not yet final.

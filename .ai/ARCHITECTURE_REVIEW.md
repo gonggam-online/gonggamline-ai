@@ -1,5 +1,23 @@
 # Architecture review
 
+## Stage 16 Listing Generator v2 competitive review packet — 2026-08-20
+
+- Reuses the approved Listing domain and exact 15A, 15B, 15C, 16A, and 16B
+  packet contracts. It adds no Domain, public API, database, Queue, lifecycle,
+  provider, storage, or external integration.
+- The pure composer recomputes every predecessor digest, checks all transitive
+  bindings, and binds a fresh category/policy snapshot plus current asset,
+  grant, and edit-operation rights attestations.
+- Unknown, conflicting, prohibited, revoked, stale, mismatched, or mojibake
+  evidence fails closed. Only rights-cleared rendered assets enter the review
+  packet.
+- The result is deterministic, versioned, provenance-linked, and includes a
+  five-part competitiveness score breakdown, human-review instructions, and
+  discard-only rollback metadata.
+- Risk is normal: `SHADOW_REVIEW`, `executionEligible=false`, no publication or
+  listing authority, no Item Selection change, and no Production/commerce
+  write. The legacy generator, `listing.service`, and public APIs are unchanged.
+
 ## Evidence-bound Persuasive Story v2 — 15C admission amendment
 
 - Reuses the merged nine-block 16A architecture and adds exact upstream version
