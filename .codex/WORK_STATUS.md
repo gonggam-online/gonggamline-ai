@@ -1,5 +1,30 @@
 # Work status
 
+## 2026-08-20 Evidence-bound Coupang Title & Keyword Ranking v1 (15B)
+
+- Objective: produce a deterministic, versioned Shadow packet for Coupang
+  title and search-keyword candidates from the exact 15A packet plus verified
+  product/category facts.
+- Branch/base: `codex/feat/evidence-bound-coupang-title-ranking` from
+  `origin/main` containing merged 15A commit `1d7ef97`.
+- Risk/root cause: normal-risk additive pure ranking; no external or database
+  failure is compensated for and no operational verdict is changed.
+- Scope: exact keywordSetVersion/digest binding, evidence provenance,
+  deterministic candidate scoring, policy/claim/mark/stuffing quarantine, and
+  Shadow-only packet export.
+- Non-goals: provider calls, Secret/configuration, scraping, paid calls,
+  product selection, purchase, listing submission, price/rank mutation, or
+  Production/commerce writes.
+- Completed: 15A contract/fixture audit; title/keyword ranking implementation;
+  digest/version drift guards; policy and evidence fail-closed tests; stable
+  ranking and provenance tests.
+- Validation so far: focused 15B suite 5/5, typecheck PASS, changed-file lint
+  PASS. Full tests, build, complete diff review, PR and remote gates remain.
+- Exact next action: run full tests/lint/typecheck/build and browser baseline,
+  then commit/push/open a normal-risk PR and wait for exact CI/Preview gates.
+- Handoff: only after terminal evidence, provide the packet digest and
+  `keywordSetVersion` to 16A; no 16A start is authorized from this branch.
+
 ## 2026-08-20 Competitive Keyword Intelligence v1
 
 - Objective: export a reproducible, evidence-bound keyword packet for 15B and
