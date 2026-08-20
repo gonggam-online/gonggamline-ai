@@ -17,6 +17,33 @@
 - Classification: normal-risk additive pure domain/test change. Rollback is Git
   revert; no operational state or generated binary exists to reconcile.
 
+## Stage 16B evidence-bound conversion detail page and visual QA — 2026-08-20
+
+- Approved boundary: consumes the merged 16A persuasive-story contract and the
+  existing Listing Content/Creative asset, rights, approval, and exact-category
+  policy contracts. No new Domain, lifecycle, public API, persistence, Queue,
+  or external integration is introduced.
+- Revenue path: converts approved title, keyword, story, and creative evidence
+  into the smallest renderable conversion-review package needed before Listing
+  Generator integration, without granting publication authority.
+- Scope: deterministic versioned HTML/image/content package, claim and asset
+  digest binding, alt text, mobile/desktop render observations, clipping,
+  encoding and legibility gates, conversion score breakdown, preview comparison,
+  exact human approval binding, and immutable `SHADOW`/no-publish output.
+- Failure contract: upstream digest drift rejects composition; unknown,
+  prohibited, revoked, inaccurate, broken, clipped, or unreadable assets and
+  renders quarantine this package. Independent upstream research and Item
+  Selection/ranking contracts remain unchanged.
+- External asset policy: 12D v1.1 and 12E v1 are consumed. Public-reference-only
+  material is not admitted, rights failures cannot be bypassed, and no provider,
+  download, upload, durable operational store, retry, or publication behavior
+  is implemented.
+- Risk: normal-risk additive pure domain and hermetic browser validation. No
+  DB/Auth/RLS, Secret, paid call, Production mutation, price, advertising,
+  order, procurement, listing submission, or commerce write.
+- Rollback: revert the additive domain/test/docs commit; no runtime or external
+  state requires reconciliation.
+
 ## Evidence-bound Persuasive Story Architecture v1 — 2026-08-20
 
 - Approved boundary reused: the merged Listing evidence kernel and
