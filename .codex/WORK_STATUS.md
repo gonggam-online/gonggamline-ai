@@ -1,5 +1,48 @@
 # Work status
 
+## 2026-08-20 Conversion-focused Detail Page and Visual QA (16B)
+
+- Objective/revenue impact: turn the approved 15A/15B/15C/16A/category-policy
+  evidence chain into a renderable, conversion-reviewed detail-page package for
+  Stage 16 Listing Generator integration, shortening the truthful first-sale
+  path without authorizing publication.
+- Branch/base: `codex/feat/conversion-detail-page-visual-qa` from exact latest
+  `origin/main` `daac6bfc55cec4f7e9fbf5c3e8b5f16ce7973414` (16A PR #179 merge).
+- Risk/root cause: normal-risk additive pure domain capability; code/capability
+  gap only. No external configuration or database failure is masked.
+- Scope: deterministic versioned HTML/image/content package, upstream/block/
+  asset digests, alt text, claim provenance, responsive observations, clipping/
+  encoding/legibility gates, conversion-readiness breakdown, preview comparison,
+  exact human approval, and SHADOW/no-publish invariants.
+- Non-goals: provider/LLM, Secret, paid call, scraping, durable operational
+  asset store, upload, public API/UI, DB/Auth/RLS/Queue, Item Selection/ranking
+  changes, listing submission, price, advertising, order, procurement,
+  Production, or commerce write.
+- Predecessor evidence: 16A head
+  `7d3d38efc134eb61a761e2226adf006ad8714f99`, merge
+  `daac6bfc55cec4f7e9fbf5c3e8b5f16ce7973414`, packet
+  `gonggamline-evidence-bound-persuasive-story-v1`; keyword set
+  `kk946-keywords-v1`, digest
+  `9808c36fff368d26fe0731f356548199b11c0e14e92c65a1b998305cc87415a4`.
+  The 12D v1.1 and 12E v1 policies are consumed without expanding authority.
+- Completed: 8/10 checkpoints — governance/predecessor audit, safe branch/risk,
+  existing Listing contract audit, packet implementation, focused validation,
+  responsive Chromium validation, full regression/build, and complete diff/
+  secret/generated-output review.
+- Validation: focused 16B 7/7 PASS; full tests 782/782 PASS; typecheck PASS;
+  lint PASS with zero errors and four pre-existing Revenue test warnings;
+  production build PASS with 90 routes; isolated Chromium mobile/desktop
+  render and no-write test 1/1 PASS. The first configured Playwright attempt
+  reached the test but its local Next webServer did not terminate, matching the
+  previously recorded 16A runner behavior; webServer-free isolation passed.
+- Changed files: 16B domain module, focused unit and Chromium E2E tests,
+  Architecture review, changelog, and this status record.
+- Exact next action: commit/push/open the normal-risk PR, then wait for exact
+  CI/Vercel Preview/browser gates before merge eligibility.
+- Remaining risks: real 15C assets and human approval must bind their exact
+  operational digests at integration time; SHADOW output is never publication
+  permission; category/policy/rights revocation requires recomputation.
+
 ## 2026-08-20 Evidence-bound Persuasive Story Architecture v1 (16A)
 
 - Objective/revenue impact: turn verified product/customer/use-context evidence
