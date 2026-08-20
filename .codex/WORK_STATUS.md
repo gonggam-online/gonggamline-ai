@@ -1,5 +1,48 @@
 # Work status
 
+## 2026-08-20 Product Creative Generation and Scoring Shadow v1 (15C)
+
+- Objective/revenue impact: rank truthful, rights-cleared visual directions for
+  faster Coupang creative review without generating or publishing an asset.
+- Branch/base: `codex/feat/product-creative-generation-scoring` from
+  `origin/main` `daac6bfc55cec4f7e9fbf5c3e8b5f16ce7973414`, containing merged 15A/15B.
+- Risk/root cause: normal-risk additive pure domain capability; no external,
+  database, or operational failure is compensated for.
+- Scope: exact 15A/15B digest bindings, approved category/policy snapshot,
+  asset/grant manifest, per-operation edit permission, deterministic creative
+  briefs and six-part scores, stable tie-break/digest, asset-scoped quarantine,
+  human review, and discard-only rollback.
+- Non-goals: image/provider/LLM call, Secret, paid call, scraping, download,
+  upload, persistence, DB/Auth/RLS, Item Selection mutation, listing, price,
+  advertising, order, procurement, Production, or commerce write.
+- Policy bindings: rights policy
+  `cb06faeb826d3fc3e51c12b4faf5d3c9123d1258670f253b242671fcfd6921c`;
+  isolation policy
+  `cb2c15f8973586df4dc7ae1d022568901beaf54822743e3c36b704fc7728ed1c`.
+- Predecessor bindings: 15A `kk946-keywords-v1`, packet digest
+  `9808c36fff368d26fe0731f356548199b11c0e14e92c65a1b998305cc87415a4`;
+  deterministic 15B synthetic title packet digest
+  `7a71c429c203961be4eb6c6b35bfcf3731d0143e04add7af07bc43df1e8f5c22`.
+- Completed: 8/10 checkpoints — governance/base audit, predecessor/policy
+  audit, branch/risk selection, implementation, synthetic fixture/tests,
+  focused validation, full regression/build/security review, and diff review.
+- Validation: focused 15C 7/7 PASS; product-neutral regression 23/23 PASS;
+  full tests 782/782 PASS; lint PASS with four pre-existing Revenue warnings;
+  typecheck PASS; production build PASS with 90 routes; tracked secret,
+  generated-output, explicit-`any`, and `git diff --check` audits PASS. Local DB
+  replay was not run because Supabase CLI 2.110.0 is unavailable; exact CI is
+  binding. Focused local Listing Playwright started but did not terminate or
+  produce a pass/fail result; only that test session was stopped, and exact
+  configured Preview browser remains binding.
+- Synthetic packet: version
+  `gonggamline-evidence-bound-product-creative-v1`, digest
+  `3c73e2d0b8664f02db80f759f69a7f0fd2f07c1deecbca9794f00d1e9558e8dd`.
+- Current: commit/push/open the normal-risk PR, then wait for exact CI, Vercel
+  Preview, and Preview browser gates.
+- Remaining risks: synthetic visual evidence does not validate a real asset;
+  real rights grants, policy freshness, and visual measurements require later
+  approved evidence. A Shadow review is never publication authority.
+
 ## 2026-08-20 Evidence-bound Persuasive Story Architecture v1 (16A)
 
 - Objective/revenue impact: turn verified product/customer/use-context evidence

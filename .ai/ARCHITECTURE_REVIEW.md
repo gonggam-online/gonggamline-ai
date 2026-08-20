@@ -1,5 +1,22 @@
 # Architecture review
 
+## Product Creative Generation and Scoring Shadow v1 — 2026-08-20
+
+- Approved boundary: existing Listing domain and merged evidence/policy
+  architecture. This adds one pure packet builder and no new Domain, database,
+  Queue, lifecycle, public API, external integration, provider, or asset store.
+- Input/output: exact 15A/15B digests plus approved category/policy and
+  rights-cleared synthetic asset evidence produce deterministic Shadow briefs,
+  provenance, score breakdowns, human-review metadata, and a versioned digest.
+- Failure contract: policy or rights `UNKNOWN`, `CONFLICT`, `PROHIBITED`, stale,
+  or revoked states fail closed at the asset lane; valid independent assets
+  continue. Unsupported edit operations never become candidates.
+- Operational isolation: `executionEligible=false`; no Item Selection score or
+  rank changes and no provider, persistence, publication, Production, or
+  commerce-write path is reachable.
+- Classification: normal-risk additive pure domain/test change. Rollback is Git
+  revert; no operational state or generated binary exists to reconcile.
+
 ## Evidence-bound Persuasive Story Architecture v1 — 2026-08-20
 
 - Approved boundary reused: the merged Listing evidence kernel and
