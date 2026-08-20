@@ -1,155 +1,81 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-
-import { approveConversionDetailPagePacket, buildConversionDetailPagePacket, type DetailPageAsset } from "../shared/domain/evidence-bound-conversion-detail-page.ts";
-import { applyHumanStoryRevision, buildEvidenceBoundPersuasiveStoryPacket, STORY_BLOCK_ORDER, type StoryClaim } from "../shared/domain/evidence-bound-persuasive-story.ts";
-import { KEYWORD_INTELLIGENCE_PACKET_VERSION } from "../shared/domain/competitive-keyword-intelligence.ts";
-import { EVIDENCE_BOUND_TITLE_RANKING_VERSION } from "../shared/domain/evidence-bound-title-ranking.ts";
-import { buildStoryCreativeFixture, STORY_FIXTURE_CREATIVE_DIGEST, STORY_FIXTURE_KEYWORD_DIGEST, STORY_FIXTURE_TITLE_DIGEST } from "./fixtures/product-creative/story-creative-fixture.ts";
+import { approveConversionDetailPagePacket, buildConversionDetailPagePacket } from "../shared/domain/evidence-bound-conversion-detail-page.ts";
+import { buildConversionDetailPageFixtureInput, DETAIL_FIXTURE_ASSET, STORY_DIGEST } from "./fixtures/conversion-detail-page.ts";
 
 const digest = (character: string) => character.repeat(64);
-const claims: readonly StoryClaim[] = STORY_BLOCK_ORDER.map((blockType, index) => ({
-  claimId: `claim-${index}`,
-  blockType,
-  state: "VERIFIED",
-  approvedPhrasings: [`검증된 ${blockType} 문장입니다.`, `승인된 ${blockType} 대체 문장입니다.`],
-  factIds: [`fact-${index}`],
-  sourceReferences: [`evidence:fixture:${index}`],
-  evidenceDigests: [digest("a")],
-  observedAt: "2026-08-19T00:00:00.000Z",
-  validUntil: "2026-09-20T00:00:00.000Z",
-}));
 
-function approvedStory() {
-  const packet = buildEvidenceBoundPersuasiveStoryPacket({
-    categoryId: "coupang:pouch",
-    storyVersion: "kk946-story-v1",
-    keywordPacketVersion: KEYWORD_INTELLIGENCE_PACKET_VERSION,
-    keywordSetVersion: "kk946-keywords-v1",
-    keywordPacketDigest: STORY_FIXTURE_KEYWORD_DIGEST,
-    expectedKeywordPacketDigest: STORY_FIXTURE_KEYWORD_DIGEST,
-    titlePacketVersion: EVIDENCE_BOUND_TITLE_RANKING_VERSION,
-    titlePacketDigest: STORY_FIXTURE_TITLE_DIGEST,
-    expectedTitlePacketDigest: STORY_FIXTURE_TITLE_DIGEST,
-    creativePacket: buildStoryCreativeFixture(),
-    expectedCreativePacketDigest: STORY_FIXTURE_CREATIVE_DIGEST,
-    generatedAt: "2026-08-20T00:00:00.000Z",
-    claims,
-    personas: [{ personaId: "organizer", label: "정리가 필요한 고객", state: "VERIFIED", evidenceDigests: [digest("a")], intents: ["DISCOVERY", "CONSIDERATION", "PURCHASE"], observedAt: "2026-08-19T00:00:00.000Z", validUntil: "2026-09-20T00:00:00.000Z" }],
-    objections: [{ objectionId: "faq", personaIds: ["organizer"], intents: ["CONSIDERATION"], questionClaimId: "claim-6", answerClaimIds: ["claim-6"], required: true }],
-    policy: { policyVersion: "coupang-policy-v1", categoryEvidenceDigest: digest("f"), marketplacePolicyDigest: digest("1"), forbiddenTerms: [], prohibitedClaimPatterns: [] },
-  });
-  return applyHumanStoryRevision(packet, { candidateId: packet.candidates[0]?.candidateId ?? "", reviewerReference: "reviewer:story-owner", reviewedAt: "2026-08-20T01:00:00.000Z", selections: [] }, claims);
-}
-
-const asset: DetailPageAsset = {
-  assetId: "kk946-main",
-  artifactDigest: digest("e"),
-  approvalDigest: digest("f"),
-  role: "MAIN",
-  publicReference: "https://assets.invalid/kk946-main.png",
-  altText: "검증된 블랙 미니 수납 파우치 정면 이미지",
-  factIds: ["fact-2", "fact-5"],
-  rights: "VERIFIED",
-  productAccuracy: "PASS",
-  decode: "PASS",
-  encoding: "PASS",
-  crop: "PASS",
-  mobileSafe: "PASS",
-};
-
-function input(overrides: Partial<Parameters<typeof buildConversionDetailPagePacket>[0]> = {}) {
-  const story = approvedStory();
-  return {
-    packageVersion: "kk946-detail-page-v1",
-    productReference: "product:kk946",
-    title: "블랙 미니 수납 파우치",
-    keywordSetVersion: "kk946-keywords-v1",
-    keywordPacketDigest: "9808c36fff368d26fe0731f356548199b11c0e14e92c65a1b998305cc87415a4",
-    expectedKeywordPacketDigest: "9808c36fff368d26fe0731f356548199b11c0e14e92c65a1b998305cc87415a4",
-    titlePacketDigest: digest("b"),
-    expectedTitlePacketDigest: digest("b"),
-    story,
-    expectedStoryPacketDigest: story.digest,
-    categoryPolicyDigest: digest("c"),
-    expectedCategoryPolicyDigest: digest("c"),
-    marketplacePolicyDigest: digest("d"),
-    creativePacketDigest: digest("e"),
-    expectedCreativePacketDigest: digest("e"),
-    assets: [asset],
-    viewportQa: [
-      { viewport: "MOBILE_360" as const, renderedWidth: 360, horizontalOverflowPixels: 0, clippedElementCount: 0, minimumBodyFontPixels: 16, unreadableTextCount: 0, brokenImageCount: 0, encodingReplacementCharacterCount: 0 },
-      { viewport: "DESKTOP_1280" as const, renderedWidth: 780, horizontalOverflowPixels: 0, clippedElementCount: 0, minimumBodyFontPixels: 16, unreadableTextCount: 0, brokenImageCount: 0, encodingReplacementCharacterCount: 0 },
-    ],
-    generatedAt: "2026-08-20T02:00:00.000Z",
-    ...overrides,
-  };
-}
-
-test("16B emits renderable versioned HTML/image/content and conversion QA package", () => {
-  const packet = buildConversionDetailPagePacket(input());
+test("16B v2 emits exact 15A/15B/15C/16A-bound renderable Shadow package", () => {
+  const packet = buildConversionDetailPagePacket(buildConversionDetailPageFixtureInput());
+  assert.equal(packet.version, "gonggamline-evidence-bound-conversion-detail-page-v2");
   assert.equal(packet.status, "REVIEW_READY");
   assert.equal(packet.mode, "SHADOW");
+  assert.equal(packet.executionEligible, false);
   assert.equal(packet.publicationAuthorized, false);
   assert.equal(packet.listingSubmission, null);
+  assert.equal(packet.keywordPacketDigest, "9808c36fff368d26fe0731f356548199b11c0e14e92c65a1b998305cc87415a4");
+  assert.equal(packet.titlePacketDigest, "7a71c429c203961be4eb6c6b35bfcf3731d0143e04add7af07bc43df1e8f5c22");
+  assert.equal(packet.creativePacketDigest, "3c73e2d0b8664f02db80f759f69a7f0fd2f07c1deecbca9794f00d1e9558e8dd");
+  assert.equal(packet.storyPacketDigest, STORY_DIGEST);
   assert.equal(packet.content.length, 9);
-  assert.equal(packet.assets[0]?.altText, asset.altText);
-  assert.match(packet.html, /<!doctype html>/);
-  assert.match(packet.html, /@media\(max-width:420px\)/);
+  assert.ok(packet.content.every(({ sentences }) => sentences.every(({ sourceReferences }) => sourceReferences.every((value) => value.startsWith("evidence:")))));
+  assert.equal(packet.assets[0]?.editOperation, "CROP_SQUARE");
   assert.equal(packet.previewComparison.responsive, true);
-  assert.equal(packet.previewComparison.contentEquivalent, true);
   assert.equal(packet.conversionReadiness.score, 100);
-  assert.ok(Object.values(packet.conversionReadiness.breakdown).every((score) => score === 100));
-  assert.match(packet.digest, /^[a-f0-9]{64}$/);
+  assert.equal(packet.digest, "c669ca8c2853494141a7343792da6fc5e59ec7dbdda1308ccd204649fb4eb587");
 });
 
-test("digest drift fails before composition", () => {
-  assert.throws(() => buildConversionDetailPagePacket(input({ expectedCreativePacketDigest: digest("0") })), /CREATIVE_PACKET_DIGEST_MISMATCH/);
-  assert.throws(() => buildConversionDetailPagePacket(input({ expectedCategoryPolicyDigest: digest("0") })), /CATEGORY_POLICY_PACKET_DIGEST_MISMATCH/);
-  assert.throws(() => buildConversionDetailPagePacket(input({ expectedStoryPacketDigest: digest("0") })), /STORY_PACKET_DIGEST_MISMATCH/);
+test("every upstream digest and story binding fails closed on drift", () => {
+  const fixture = buildConversionDetailPageFixtureInput();
+  assert.throws(() => buildConversionDetailPagePacket({ ...fixture, expectedCreativePacketDigest: digest("0") }), /CREATIVE_PACKET_DIGEST_MISMATCH/);
+  assert.throws(() => buildConversionDetailPagePacket({ ...fixture, expectedStoryPacketDigest: digest("0") }), /STORY_PACKET_DIGEST_MISMATCH/);
+  assert.throws(() => buildConversionDetailPagePacket({ ...fixture, creativePacketDigest: digest("0"), expectedCreativePacketDigest: digest("0") }), /STORY_CREATIVE_BINDING_MISMATCH/);
+  assert.throws(() => buildConversionDetailPagePacket({ ...fixture, marketplacePolicyDigest: digest("0") }), /STORY_POLICY_BINDING_MISMATCH/);
 });
 
-test("rights, accuracy, clipping, encoding and legibility failures quarantine only the package", () => {
-  const badAsset = { ...asset, rights: "UNKNOWN" as const, productAccuracy: "REVIEW_REQUIRED" as const, encoding: "FAIL" as const };
-  const mobile = input().viewportQa[0];
-  const packet = buildConversionDetailPagePacket(input({ assets: [badAsset], viewportQa: [{ ...mobile, clippedElementCount: 1, minimumBodyFontPixels: 14, encodingReplacementCharacterCount: 1 }, input().viewportQa[1]] }));
+test("claim/source/asset/grant/edit-operation mismatches quarantine and exclude the asset", () => {
+  for (const asset of [{ ...DETAIL_FIXTURE_ASSET, creativeCandidateId: "unknown:crop_square" }, { ...DETAIL_FIXTURE_ASSET, sourceAssetDigest: digest("0") }, { ...DETAIL_FIXTURE_ASSET, grantDigest: digest("0") }, { ...DETAIL_FIXTURE_ASSET, editOperation: "BACKGROUND_REMOVE" }]) {
+    const packet = buildConversionDetailPagePacket(buildConversionDetailPageFixtureInput({ assets: [asset] }));
+    assert.equal(packet.status, "QUARANTINED");
+    assert.doesNotMatch(packet.html, /assets\.invalid\/kk946-main\.png/);
+    assert.ok(packet.conversionReadiness.blockingReasons.some((reason) => reason.includes("MISMATCH")));
+  }
+});
+
+test("unknown/prohibited/revoked rights and visual failures stay fail closed", () => {
+  for (const rights of ["UNKNOWN", "PROHIBITED", "REVOKED"] as const) {
+    const packet = buildConversionDetailPagePacket(buildConversionDetailPageFixtureInput({ assets: [{ ...DETAIL_FIXTURE_ASSET, rights }] }));
+    assert.equal(packet.status, "QUARANTINED");
+    assert.ok(packet.conversionReadiness.blockingReasons.includes(`ASSET_RIGHTS_${rights}:kk946-main`));
+    assert.doesNotMatch(packet.html, /assets\.invalid\/kk946-main\.png/);
+  }
+  const viewportQa = buildConversionDetailPageFixtureInput().viewportQa;
+  const packet = buildConversionDetailPagePacket(buildConversionDetailPageFixtureInput({ viewportQa: [{ ...viewportQa[0], clippedElementCount: 1, minimumBodyFontPixels: 14 }, viewportQa[1]] }));
   assert.equal(packet.status, "QUARANTINED");
-  assert.ok(packet.conversionReadiness.blockingReasons.includes("ASSET_RIGHTS_UNKNOWN:kk946-main"));
   assert.ok(packet.conversionReadiness.blockingReasons.includes("VIEWPORT_QA_FAILED:MOBILE_360"));
-  assert.doesNotMatch(packet.html, /assets\.invalid\/kk946-main\.png/);
-  assert.equal(packet.publicationAuthorized, false);
-  assert.equal(packet.keywordSetVersion, "kk946-keywords-v1");
 });
 
-test("non-HTTPS or copy-unbound assets are quarantined and excluded from render HTML", () => {
-  const packet = buildConversionDetailPagePacket(input({ assets: [{ ...asset, publicReference: "data:image/png;base64,abc", factIds: ["unbound-fact"] }] }));
-  assert.equal(packet.status, "QUARANTINED");
-  assert.ok(packet.conversionReadiness.blockingReasons.includes("ASSET_REFERENCE_NOT_HTTPS:kk946-main"));
-  assert.ok(packet.conversionReadiness.blockingReasons.includes("ASSET_COPY_FACT_MISMATCH:kk946-main"));
-  assert.doesNotMatch(packet.html, /data:image/);
-});
-
-test("packet and preview digests are stable across asset and viewport ordering", () => {
-  const extra = { ...asset, assetId: "kk946-detail", role: "DETAIL" as const, artifactDigest: digest("1") };
-  const first = buildConversionDetailPagePacket(input({ assets: [asset, extra] }));
-  const second = buildConversionDetailPagePacket(input({ assets: [extra, asset], viewportQa: [...input().viewportQa].reverse() }));
+test("ordering, HTML and packet digests are deterministic", () => {
+  const extra = { ...DETAIL_FIXTURE_ASSET, assetId: "kk946-detail", role: "DETAIL" as const, artifactDigest: digest("2") };
+  const first = buildConversionDetailPagePacket(buildConversionDetailPageFixtureInput({ assets: [DETAIL_FIXTURE_ASSET, extra] }));
+  const second = buildConversionDetailPagePacket(buildConversionDetailPageFixtureInput({ assets: [extra, DETAIL_FIXTURE_ASSET], viewportQa: [...buildConversionDetailPageFixtureInput().viewportQa].reverse() }));
   assert.deepEqual(first, second);
 });
 
-test("human approval binds the exact packet and remains SHADOW/no-publish", () => {
-  const packet = buildConversionDetailPagePacket(input());
+test("human approval binds exact detail packet but never enables execution or publish", () => {
+  const packet = buildConversionDetailPagePacket(buildConversionDetailPageFixtureInput());
   const approved = approveConversionDetailPagePacket(packet, { approvalReference: "approval:16b-owner", reviewerReference: "reviewer:owner", approvedAt: "2026-08-20T03:00:00.000Z", boundPacketDigest: packet.digest });
   assert.equal(approved.status, "APPROVED_SHADOW");
+  assert.equal(approved.executionEligible, false);
   assert.equal(approved.publicationAuthorized, false);
   assert.equal(approved.listingSubmission, null);
+  assert.equal(approved.digest, "c81942d7b6e0d9ee5eae279137c27654339ecb81539ea790173f2cc7e8bb75f0");
   assert.throws(() => approveConversionDetailPagePacket(packet, { approvalReference: "approval:16b-owner", reviewerReference: "reviewer:owner", approvedAt: "2026-08-20T03:00:00.000Z", boundPacketDigest: digest("0") }), /DETAIL_PAGE_APPROVAL_BINDING_INVALID/);
 });
 
-test("HTML escapes approved content and never exposes a commerce-write surface", () => {
-  const packet = buildConversionDetailPagePacket(input({ title: "파우치 <script>alert(1)</script>" }));
+test("synthetic HTML is escaped and exposes no operational decision surface", () => {
+  const packet = buildConversionDetailPagePacket(buildConversionDetailPageFixtureInput({ title: "fixture <script>alert(1)</script>" }));
   assert.doesNotMatch(packet.html, /<script>/);
   assert.match(packet.html, /&lt;script&gt;/);
-  assert.equal("price" in packet, false);
-  assert.equal("itemSelectionScore" in packet, false);
-  assert.equal("publish" in packet, false);
+  for (const forbidden of ["price", "itemSelectionScore", "publish", "upload", "provider"]) assert.equal(forbidden in packet, false);
 });
