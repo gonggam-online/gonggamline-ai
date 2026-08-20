@@ -17,6 +17,17 @@
   ordering integration.
 - Story: [Multi-Supplier Sourcing and Quote Comparison v1](../docs/architecture/MULTI-SUPPLIER-SOURCING-AND-QUOTE-COMPARISON-V1.md).
 
+## 2026-08-20 - Authorize pure quote comparison slice
+
+- Owner instruction authorizes the first implementation slice only: a pure,
+  provider-neutral canonical offer contract and Domeggook-baseline comparison
+  using sanitized or manually verified evidence.
+- This slice does not authorize external supplier requests, Secret/configuration
+  changes, database/API writes, live verdict changes, orders, or Production.
+- Every alternative remains `executionEligible: false`; the existing Domeggook
+  purchase path is unchanged. Provider-specific adapters require separate
+  approval and manual-merge PRs.
+
 ## 2026-08-20 - Accept read-only external Market Intelligence providers v1
 
 - Decision: connect Naver Shopping Search, YouTube Data API, and DataForSEO
