@@ -1,4 +1,5 @@
 import type { MarketObservationInput, MarketSource } from "../types/market";
+import { collectExternalMarketProvider, type ExternalMarketProvider, type ExternalProviderCredentials } from "../lib/market/external-provider-adapters";
 
 export type MarketObservationCollectorKey = "official-api-adapter" | "public-observation-adapter";
 
@@ -63,10 +64,17 @@ function normalizeObservation(value: unknown, source: MarketSource, keyword: str
 }
 
 export async function collectConfiguredMarketObservations(
-  input: Readonly<{ collectorKey: MarketObservationCollectorKey; keyword: string; endpoint?: string; apiKey?: string; request?: typeof fetch }>,
+  input: Readonly<{ collectorKey: MarketObservationCollectorKey; keyword: string; endpoint?: string; apiKey?: string; provider?: ExternalMarketProvider; credentials?: ExternalProviderCredentials; request?: typeof fetch }>,
 ): Promise<MarketObservationCollectorResult> {
   const keyword = input.keyword.trim();
   if (keyword.length < 2 || keyword.length > 100) throw new Error("MARKET_KEYWORD_INVALID");
+  const nativeProvider = input.provider ?? (process.env.MARKET_EXTERNAL_PROVIDER as ExternalMarketProvider | undefined);
+  if (!input.endpoint && nativeProvider) {
+    if (!input.provider && process.env.MARKET_EXTERNAL_PROVIDER_ENABLED !== "true") throw new Error("MARKET_EXTERNAL_PROVIDER_DISABLED");
+    if (nativeProvider === "youtube_data") throw new Error("MARKET_PROVIDER_SIGNAL_ONLY");
+    const external = await collectExternalMarketProvider(nativeProvider, keyword, { credentials: input.credentials, request: input.request });
+    return Object.freeze({ observations: Object.freeze([...external.observations]), endpoint: `native:${nativeProvider}`, source: nativeProvider === "dataforseo_naver" ? "dataforseo_naver" : "naver_official" });
+  }
   const endpoint = (input.endpoint ?? process.env.COUPANG_MARKET_DATA_ENDPOINT)?.trim();
   if (!endpoint || !/^https:\/\//i.test(endpoint)) throw new Error("MARKET_COLLECTOR_ENDPOINT_UNAVAILABLE");
   const request = input.request ?? fetch;

@@ -1,5 +1,60 @@
 # Work status
 
+## 2026-08-20 Multi-supplier sourcing architecture gate
+
+- Objective: market-wide candidate discovery with Domeggook baseline and
+  verified alternative wholesale quote comparison.
+- Current step: Architecture proposal recorded; runtime implementation is
+  intentionally blocked pending Architecture and provider-specific approval.
+- Risk: high-risk because external integrations and profitability/sourcing
+  decisions are involved.
+- Durable state: no new runtime state; proposal and decision are GitHub-owned.
+- Existing user changes: preserved and untouched.
+- Next action: owner approves the Architecture Story and supplies provider-
+  specific terms, read scope, quota/cost, Secret store, retention, and managed
+  executor decisions; then implement the pure comparator first.
+
+## 2026-08-20 External Market Intelligence providers v1
+
+- Objective: connect approved read-only Naver Shopping, YouTube Data API, and
+  DataForSEO Naver SERP lanes to the existing market collection contract.
+- Implemented: server-only credential-injected adapters, bounded Naver/YouTube
+  queries, DataForSEO per-request cost ceiling, native collector selection,
+  source typing, registry entries, architecture/decision/changelog updates,
+  and 6 adapter regression tests.
+- Validation: adapter/collector tests 9/9, typecheck PASS, targeted lint PASS.
+- External status: no runtime Secret values exist in this checkout or GitHub
+  repository. Vercel CLI is unavailable and no live provider call was made.
+  GitHub contains only existing governance secrets, not provider credentials.
+- Required owner action before live use: set Vercel Production Secrets, set
+  provider quota/budget, then enable exactly one provider with
+  `MARKET_EXTERNAL_PROVIDER_ENABLED=true`. YouTube remains reference-only.
+- Risk: high-risk/manual because Secrets, external reads, and paid quota are
+  involved; no automatic merge or Production enablement is authorized.
+
+## 2026-08-19 Market Research Plan v1
+
+- Objective: continue Item Selection market discovery with official, public,
+  supplier, paid, and manual lanes while keeping evidence, cost, and approval
+  state explicit and preventing high thresholds from discarding promising
+  candidates.
+- Branch: `codex/feat/market-discovery-evidence-contract` (existing dirty user
+  work preserved; only the files listed below were changed by this task).
+- Implemented: deterministic `market-research-plan` source/task contract and
+  `market-research-packet` opportunity-plus-next-research packet; exports,
+  architecture note, changelog, and regression tests.
+- Validation: focused tests PASS (9/9), related market/shadow tests PASS
+  (13/13), full suite PASS (738/738), typecheck PASS, lint PASS, production
+  build PASS.
+- Safety: no network, scraping, paid call, Secret, DB write, commerce write,
+  Production mutation, or operational verdict/ranking change. Unapproved paid
+  sources remain `APPROVAL_REQUIRED`.
+- Delivery: commit `1d400b7`, pushed; PR #174 is open and Preview checks pass.
+  Repository auto-merge is unavailable because branch protection is not
+  configured; no direct merge was forced.
+- Next action: separately approve exact providers, terms/robots, cost ceiling,
+  Secret placement, and managed evidence executor before enabling live reads.
+
 ## 2026-08-19 Item Selection competitive benchmark v1
 
 - Objective: make market competitiveness measurable against an immutable labeled
@@ -6463,3 +6518,13 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Validation: full suite 722/722, typecheck, lint, build, diff check, and
   focused Item Selection Playwright 2/2 passed.
 - Next: commit, push, PR delivery, exact CI/Preview, then Production smoke.
+## 2026-08-20 - Sales-free presales engine hardening
+
+- Added `presales-opportunity-ranking` and a presales research packet.
+- Strong market candidates remain prioritized when economics are incomplete;
+  uncertainty, freshness, source diversity, contactability, and rights state
+  are explicit.
+- Known negative economics and rights failure remain blocked.
+- Research-only; no operational verdict, commerce, or Production mutation.
+- Next: configure approved providers, collect read-only evidence, then compare
+  predictions against an immutable pre-sales benchmark and later sales labels.

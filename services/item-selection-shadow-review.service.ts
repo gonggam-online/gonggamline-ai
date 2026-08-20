@@ -18,7 +18,7 @@ export async function readItemSelectionShadowReview(
   if (snapshotError) throw new Error(snapshotError.message);
   if (!product || !metric || !snapshots?.[0]?.observed_at) throw new Error("MARKET_SHADOW_EVIDENCE_NOT_FOUND");
 
-  const source = product.source === "naver_official" || product.source === "coupang_public" || product.source === "manual" || product.source === "internal_sales"
+  const source = product.source === "naver_official" || product.source === "coupang_public" || product.source === "youtube_public" || product.source === "dataforseo_naver" || product.source === "manual" || product.source === "internal_sales"
     ? product.source
     : "manual";
   return buildItemSelectionShadowReview({

@@ -3,6 +3,7 @@ export const MARKET_DISCOVERY_EVIDENCE_VERSION =
 
 export type MarketDiscoverySourceKind =
   | "official_api"
+  | "paid_api"
   | "public_dataset"
   | "public_page"
   | "short_video_public"
@@ -73,7 +74,7 @@ function policyErrors(policy: MarketDiscoveryPolicy): string[] {
   if (policy.captchaOrAntiBotPresent) errors.push("source.antiBot");
   if (policy.authenticatedAccess) errors.push("source.authenticatedAccess");
   if (!Number.isFinite(policy.minimumIntervalSeconds) || policy.minimumIntervalSeconds < 60) errors.push("source.minimumInterval");
-  if (policy.kind === "official_api" && policy.accessMode !== "APPROVED_API") errors.push("source.apiAuthority");
+  if ((policy.kind === "official_api" || policy.kind === "paid_api") && policy.accessMode !== "APPROVED_API") errors.push("source.apiAuthority");
   if (policy.kind === "manual" && policy.accessMode !== "MANUAL") errors.push("source.manualAuthority");
   return errors;
 }

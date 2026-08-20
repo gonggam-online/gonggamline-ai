@@ -69,7 +69,7 @@ export async function runDueCollectionJobs(limit = 20): Promise<{ results: Colle
         status: "success",
         message: `내부 실매출 피드백 큐 점검 완료: ${keyword}`,
       };
-    } else if (job.collector_key === "official-api-adapter" || job.collector_key === "public-observation-adapter") {
+    } else if (job.collector_key === "official-api-adapter" || job.collector_key === "public-observation-adapter" || job.collector_key === "naver-shopping-api" || job.collector_key === "dataforseo-naver-serp") {
       const startedAt = new Date().toISOString();
       const { data: run, error: runError } = await supabase.from("market_collection_runs").insert({
         collector: job.collector_key,
@@ -80,8 +80,10 @@ export async function runDueCollectionJobs(limit = 20): Promise<{ results: Colle
       }).select("id").single();
       if (runError) throw new Error(runError.message);
       try {
+        const isNaver = job.collector_key === "naver-shopping-api";
         const collected = await collectConfiguredMarketObservations({
-          collectorKey: job.collector_key,
+          collectorKey: isNaver ? "official-api-adapter" : "public-observation-adapter",
+          provider: isNaver ? "naver_shopping" : "dataforseo_naver",
           keyword,
         });
         let saved = 0;

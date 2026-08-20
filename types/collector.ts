@@ -3,7 +3,7 @@ export type CollectorStatus = "ready" | "disabled" | "cooldown" | "blocked" | "e
 export type CollectorDefinition = {
   key: string;
   name: string;
-  sourceType: "official_api" | "public_observation" | "manual" | "internal" | "demo";
+  sourceType: "official_api" | "paid_api" | "public_observation" | "manual" | "internal" | "demo";
   supportsAutomatic: boolean;
   description: string;
 };

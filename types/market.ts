@@ -1,4 +1,4 @@
-export type MarketSource = "coupang_public" | "naver_official" | "manual" | "internal_sales";
+export type MarketSource = "coupang_public" | "naver_official" | "youtube_public" | "dataforseo_naver" | "manual" | "internal_sales";
 export type CollectionStatus = "active" | "paused" | "cooldown" | "blocked";
 
 export type MarketKeyword = {

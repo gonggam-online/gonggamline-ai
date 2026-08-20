@@ -1,5 +1,43 @@
 # Decision log
 
+## 2026-08-20 - Propose multi-supplier sourcing and quote comparison v1
+
+- Proposal: discover candidates market-wide, retain Domeggook as the default
+  sourcing baseline, and compare verified alternative wholesale offers using a
+  normalized landed-cost contract.
+- Scope: architecture only. No new supplier API, secret, database migration,
+  quote persistence, purchase, listing, price, Production, Gaemi, or Coupang
+  write is authorized until this Story is approved.
+- Safety: non-Domeggook offers remain advisory; automatic procurement remains
+  Domeggook-only. Missing/stale/conflicting identity, rights, or economics
+  evidence fails closed.
+- Required owner gates: provider terms/robots, exact account and read scope,
+  quota/cost ceiling, Secret store, managed execution boundary, retention,
+  recovery, and separate approval for any operational verdict or supplier
+  ordering integration.
+- Story: [Multi-Supplier Sourcing and Quote Comparison v1](../docs/architecture/MULTI-SUPPLIER-SOURCING-AND-QUOTE-COMPARISON-V1.md).
+
+## 2026-08-20 - Accept read-only external Market Intelligence providers v1
+
+- Decision: connect Naver Shopping Search, YouTube Data API, and DataForSEO
+  Naver Organic SERP as separate server-only read lanes for Item Selection
+  research and Shadow evaluation.
+- Authority: Vercel Production Environment owns provider Secrets; provider
+  consoles own quota, terms, and billing. No Secret value is stored in Git,
+  Supabase rows, local files, client code, or test fixtures.
+- Cost: Naver is quota-limited and non-paid; YouTube search is bounded to 10
+  results per query and tracked against the official quota; DataForSEO requires
+  a configured per-request USD ceiling and remains disabled until credentials
+  and budget are present.
+- Safety: native execution requires `MARKET_EXTERNAL_PROVIDER_ENABLED=true`;
+  missing credentials, 403/429, malformed responses, YouTube asset requests,
+  and cost-ceiling violations fail closed. No scraping bypass, asset download,
+  marketplace write, price change, Production verdict change, or commerce
+  action is authorized.
+- Status: implementation is high-risk/manual because it reads external data and
+  uses Secrets/paid quota. The code is delivered for exact configuration and
+  read-only smoke review; Production enablement remains a separate owner gate.
+
 ## 2026-08-19 - Propose Market Intelligence ↔ Item Selection Shadow Evaluation v1
 
 - Proposal: use the existing market time-series metrics as an evidence-gated,
@@ -2012,3 +2050,14 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   are limited to terminal completion or a genuinely blocking owner action.
 - This streamlining does not waive Production, database/Auth/RLS, secret,
   paid, commerce-write, destructive, or high-risk manual boundaries.
+## 2026-08-20 - Sales-free presales ranking mode
+
+- Before internal sales/return/settlement evidence exists, preserve strong
+  market candidates in a bounded research queue instead of rejecting every
+  candidate with incomplete unit economics.
+- The queue uses point/lower/upper market scores, source diversity, freshness,
+  evidence coverage, contactability, and rights state.
+- Only known negative economics and rights FAIL are hard blockers in this mode;
+  UNKNOWN rights remain research-only and never authorize publication.
+- This mode is read-only and does not change operational verdicts, ranking,
+  procurement, listing, or Production behavior.
