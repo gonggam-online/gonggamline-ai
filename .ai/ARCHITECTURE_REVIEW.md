@@ -1,5 +1,25 @@
 # Architecture review
 
+## Evidence-bound Persuasive Story Architecture v1 — 2026-08-20
+
+- Approved boundary reused: the merged Listing evidence kernel and
+  owner-approved conversion amendment; no new Domain, Database, Queue,
+  lifecycle, public API, or external integration is introduced.
+- Dependency contract: consumes exact 15A keyword digest, 15B title packet
+  digest, verified product/persona/use-context claims, and category/policy
+  evidence digests; emits a deterministic Shadow-only packet for 16B.
+- Truth boundary: only pre-approved phrasing of `VERIFIED` claims may enter a
+  block. Unknown, conflicting, prohibited, unprovenanced, or policy-blocked
+  claims are quarantined and receive no candidate score.
+- Human/LLM boundary: human revision selects only an existing approved
+  phrasing and is audit-bound. An LLM may propose upstream wording but cannot
+  create facts, efficacy, numbers, reviews, scarcity, or comparative advantage.
+- Risk: normal-risk additive pure domain logic and fixtures. No price,
+  marketplace decision/write, DB/Auth/RLS, Secret, paid call, or Production
+  behavior changes.
+- Rollback: revert the additive module/export/tests/docs; existing Listing,
+  Market, Competition, Item Selection, and Sales Learning remain unchanged.
+
 ## Competitive Keyword Intelligence v1 - 2026-08-20
 
 - Owner/boundary: existing Market Intelligence domain and the approved Naver,
