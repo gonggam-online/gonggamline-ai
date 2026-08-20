@@ -1,5 +1,13 @@
 # Work status
 
+## 2026-08-20 Pure supplier quote comparison slice
+
+- Implementing the approved pure canonical-offer comparator and manual-verified
+  alternative lane; no external calls or procurement writes.
+- Existing user changes remain restored and untouched.
+- Next: complete focused/full validation, then deliver as manual-merge code
+  because profitability and sourcing outputs are high-risk.
+
 ## 2026-08-20 Multi-supplier sourcing architecture gate
 
 - Objective: market-wide candidate discovery with Domeggook baseline and
