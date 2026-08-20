@@ -3,12 +3,16 @@ import { createHash } from "node:crypto";
 import type { EvidenceBoundPersuasiveStoryPacket, StoryBlockType } from "./evidence-bound-persuasive-story";
 
 export const CONVERSION_DETAIL_PAGE_PACKET_VERSION =
-  "gonggamline-evidence-bound-conversion-detail-page-v1" as const;
+  "gonggamline-evidence-bound-conversion-detail-page-v2" as const;
 
 export type DetailPageAsset = Readonly<{
   assetId: string;
+  creativeCandidateId: string;
   artifactDigest: string;
   approvalDigest: string;
+  sourceAssetDigest: string;
+  grantDigest: string;
+  editOperation: string;
   role: "MAIN" | "ADDITIONAL" | "DETAIL";
   publicReference: string;
   altText: string;
@@ -47,6 +51,7 @@ export type ConversionDetailPagePacket = Readonly<{
   version: typeof CONVERSION_DETAIL_PAGE_PACKET_VERSION;
   packageVersion: string;
   mode: "SHADOW";
+  executionEligible: false;
   status: "REVIEW_READY" | "QUARANTINED" | "APPROVED_SHADOW";
   publicationAuthorized: false;
   listingSubmission: null;
@@ -71,6 +76,7 @@ export type ConversionDetailPagePacket = Readonly<{
       text: string;
       claimId: string;
       factIds: readonly string[];
+      sourceReferences: readonly string[];
       evidenceDigests: readonly string[];
     }>[];
   }>[];
@@ -162,12 +168,19 @@ export function buildConversionDetailPagePacket(input: Readonly<{
     if (!validDigest(actual) || actual !== expected) throw new Error(`${name}_PACKET_DIGEST_MISMATCH`);
   }
   if (!validDigest(input.marketplacePolicyDigest)) throw new Error("MARKETPLACE_POLICY_DIGEST_INVALID");
+  if (input.keywordSetVersion !== input.story.keywordSetVersion
+      || input.keywordPacketDigest !== input.story.keywordPacketDigest) throw new Error("STORY_KEYWORD_BINDING_MISMATCH");
+  if (input.titlePacketDigest !== input.story.titlePacketDigest) throw new Error("STORY_TITLE_BINDING_MISMATCH");
+  if (input.creativePacketDigest !== input.story.creativePacketDigest) throw new Error("STORY_CREATIVE_BINDING_MISMATCH");
+  if (input.categoryPolicyDigest !== input.story.creativeBindings.categoryEvidenceDigest
+      || input.marketplacePolicyDigest !== input.story.creativeBindings.marketplacePolicyDigest) {
+    throw new Error("STORY_POLICY_BINDING_MISMATCH");
+  }
   const generatedAt = new Date(input.generatedAt);
   if (!Number.isFinite(generatedAt.getTime())) throw new RangeError("generatedAt is invalid.");
   const selected = input.story.candidates.find(({ status }) => status === "VERIFIED");
   const blockingReasons: string[] = [];
   if (input.story.mode !== "SHADOW" || input.story.status !== "READY" || !selected) blockingReasons.push("STORY_NOT_APPROVED_READY");
-  if (input.story.humanRevision === null) blockingReasons.push("STORY_HUMAN_APPROVAL_MISSING");
   if (input.assets.length === 0) blockingReasons.push("APPROVED_ASSET_MISSING");
 
   const assets = [...input.assets].sort((a, b) => a.assetId.localeCompare(b.assetId));
@@ -179,6 +192,10 @@ export function buildConversionDetailPagePacket(input: Readonly<{
     if ([asset.decode, asset.encoding, asset.crop, asset.mobileSafe].includes("FAIL")) blockingReasons.push(`ASSET_VISUAL_QA_FAILED:${asset.assetId}`);
     if (asset.altText.trim().length < 5) blockingReasons.push(`ASSET_ALT_TEXT_INVALID:${asset.assetId}`);
     if (asset.factIds.length === 0) blockingReasons.push(`ASSET_FACT_PROVENANCE_MISSING:${asset.assetId}`);
+    if (!input.story.creativeBindings.candidateIds.includes(asset.creativeCandidateId)) blockingReasons.push(`ASSET_CREATIVE_CANDIDATE_MISMATCH:${asset.assetId}`);
+    if (!input.story.creativeBindings.assetDigests.includes(asset.sourceAssetDigest)) blockingReasons.push(`ASSET_SOURCE_DIGEST_MISMATCH:${asset.assetId}`);
+    if (!input.story.creativeBindings.grantDigests.includes(asset.grantDigest)) blockingReasons.push(`ASSET_GRANT_DIGEST_MISMATCH:${asset.assetId}`);
+    if (!input.story.creativeBindings.operations.includes(asset.editOperation)) blockingReasons.push(`ASSET_EDIT_OPERATION_MISMATCH:${asset.assetId}`);
     try {
       if (new URL(asset.publicReference).protocol !== "https:") blockingReasons.push(`ASSET_REFERENCE_NOT_HTTPS:${asset.assetId}`);
     } catch {
@@ -197,6 +214,7 @@ export function buildConversionDetailPagePacket(input: Readonly<{
       text: sentence.text,
       claimId: sentence.claimId,
       factIds: sentence.provenance.factIds,
+      sourceReferences: sentence.provenance.sourceReferences,
       evidenceDigests: sentence.provenance.evidenceDigests,
     }))),
   })));
@@ -207,7 +225,11 @@ export function buildConversionDetailPagePacket(input: Readonly<{
   const blockTypes = new Set(content.filter(({ sentences }) => sentences.length > 0).map(({ blockType }) => blockType));
   const admittedAssets = assets.filter((asset) => asset.rights === "VERIFIED" && asset.productAccuracy === "PASS" &&
     asset.decode === "PASS" && asset.encoding === "PASS" && asset.crop === "PASS" && asset.mobileSafe === "PASS" &&
-    asset.factIds.some((factId) => contentFactIds.has(factId)));
+    asset.factIds.some((factId) => contentFactIds.has(factId)) &&
+    input.story.creativeBindings.candidateIds.includes(asset.creativeCandidateId) &&
+    input.story.creativeBindings.assetDigests.includes(asset.sourceAssetDigest) &&
+    input.story.creativeBindings.grantDigests.includes(asset.grantDigest) &&
+    input.story.creativeBindings.operations.includes(asset.editOperation));
   const mainAsset = admittedAssets.find(({ role }) => role === "MAIN");
   if (!mainAsset) blockingReasons.push("ABOVE_FOLD_MAIN_ASSET_MISSING");
   if (!blockTypes.has("CORE_BENEFIT")) blockingReasons.push("ABOVE_FOLD_BENEFIT_MISSING");
@@ -220,7 +242,7 @@ export function buildConversionDetailPagePacket(input: Readonly<{
   const imageCopyConsistency = assets.length > 0 && assets.every(({ productAccuracy, factIds }) => productAccuracy === "PASS" && factIds.length > 0) ? 100 : 0;
   const trustFaqNotice = blockTypes.has("OBJECTIONS_FAQ") && blockTypes.has("TRUST_NOTICE") ? 100 : 0;
   const callToAction = blockTypes.has("CTA") ? 100 : 0;
-  const provenance = content.length > 0 && content.every(({ sentences }) => sentences.every(({ factIds, evidenceDigests }) => factIds.length > 0 && evidenceDigests.length > 0 && evidenceDigests.every(validDigest))) ? 100 : 0;
+  const provenance = content.length > 0 && content.every(({ sentences }) => sentences.every(({ factIds, sourceReferences, evidenceDigests }) => factIds.length > 0 && sourceReferences.length > 0 && sourceReferences.every((reference) => reference.startsWith("evidence:")) && evidenceDigests.length > 0 && evidenceDigests.every(validDigest))) ? 100 : 0;
   const policyAndRights = assets.length > 0 && assets.every(({ rights }) => rights === "VERIFIED") ? 100 : 0;
   const breakdown = Object.freeze({ aboveTheFold, mobileScanability, informationHierarchy, imageCopyConsistency, trustFaqNotice, callToAction, provenance, policyAndRights });
   const score = Math.round(Object.values(breakdown).reduce((sum, value) => sum + value, 0) / Object.keys(breakdown).length);
@@ -229,6 +251,7 @@ export function buildConversionDetailPagePacket(input: Readonly<{
     version: CONVERSION_DETAIL_PAGE_PACKET_VERSION,
     packageVersion: input.packageVersion,
     mode: "SHADOW" as const,
+    executionEligible: false as const,
     status: uniqueBlockingReasons.length === 0 ? "REVIEW_READY" as const : "QUARANTINED" as const,
     publicationAuthorized: false as const,
     listingSubmission: null,

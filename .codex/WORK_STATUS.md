@@ -1,5 +1,43 @@
 # Work status
 
+## 2026-08-20 Stage 16B exact 15C/16A binding correction
+
+- Objective/revenue impact: make the merged 16B detail-page package consume the
+  newly terminal 15C/16A evidence chain exactly, so Stage 16 can integrate one
+  truthful conversion package without asset-rights drift.
+- Branch/base: `codex/feat/conversion-detail-page-exact-bindings` from
+  `origin/main` `83cdf7aa24fb3ff92cdbec6ea11a78b9f74d6f49` (PR #182 merge).
+- Risk/root cause: normal-risk code/contract correction. Earlier v1 accepted
+  independent creative metadata instead of verifying 16A structural bindings.
+- Scope: v2 packet; exact 15A/15B/15C/16A digest and policy bindings;
+  claim/source/asset/grant/edit-operation traceability; fail-closed exclusion;
+  stable output digest; synthetic fixture; responsive no-write browser QA.
+- Non-goals: Stage 16 integration, Product fact promotion, provider, Secret,
+  paid call, scraping, external site, upload, publication, DB/Auth/RLS/Queue,
+  Item Selection/operating decision, Production, or commerce write.
+- Predecessors: 15A merge `1d7ef97e75be601a83d7dcd9f0bd2885b79cc8b4`,
+  digest `9808c36fff368d26fe0731f356548199b11c0e14e92c65a1b998305cc87415a4`;
+  15B head `6d65d6462651001fe6a65702d818f9ee11184f9d`, digest
+  `7a71c429c203961be4eb6c6b35bfcf3731d0143e04add7af07bc43df1e8f5c22`;
+  15C merge `d17731be00b300926b0e162613c2456117db33a0`, digest
+  `3c73e2d0b8664f02db80f759f69a7f0fd2f07c1deecbca9794f00d1e9558e8dd`;
+  16A merge `83cdf7aa24fb3ff92cdbec6ea11a78b9f74d6f49`, digest
+  `22a38251b9ddf256d7d06d519f10df0383b289ecf1395f16a66df50e6bda4a3c`.
+- Completed: 8/10 checkpoints — terminal predecessor verification, safe branch,
+  v1 gap audit, v2 implementation, exact canonical fixture, focused validation,
+  responsive no-write Chromium, full regression/build, and diff/security review.
+- Validation: focused 15C+16A+16B 21/21 PASS; full tests 790/790 PASS; lint PASS
+  with zero errors and four pre-existing Revenue warnings; typecheck PASS;
+  production build PASS with 90 routes; Chromium mobile/desktop 1/1 PASS.
+  Review-ready digest
+  `c669ca8c2853494141a7343792da6fc5e59ec7dbdda1308ccd204649fb4eb587`;
+  approved SHADOW digest
+  `c81942d7b6e0d9ee5eae279137c27654339ecb81539ea790173f2cc7e8bb75f0`.
+- Exact next action: normal-risk commit/push/PR, then exact CI/Preview/Production
+  gates and Stage 16 handoff evidence.
+- Remaining risks: only synthetic data is proven; Stage 16 requires a new
+  coordinator START and exact real-input binding. SHADOW is not publication.
+
 ## 2026-08-20 Persuasive Story 15C binding amendment v2 (16A)
 
 - Branch/base: `codex/feat/persuasive-story-creative-binding` from 15C merge

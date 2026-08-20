@@ -30,6 +30,13 @@
 
 ## Stage 16B evidence-bound conversion detail page and visual QA — 2026-08-20
 
+Amendment after terminal 15C/16A ordering: v2 consumes the merged 15C Product
+Creative packet through 16A's structural creative bindings. Render admission
+now requires exact creative candidate, source asset digest, grant digest, edit
+operation, category-policy digest, and marketplace-policy digest matches. This
+closes the earlier v1 gap that accepted separately asserted creative metadata.
+The boundary and normal-risk classification are unchanged.
+
 - Approved boundary: consumes the merged 16A persuasive-story contract and the
   existing Listing Content/Creative asset, rights, approval, and exact-category
   policy contracts. No new Domain, lifecycle, public API, persistence, Queue,
