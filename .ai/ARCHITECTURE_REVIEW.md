@@ -1,5 +1,29 @@
 # Architecture review
 
+## Competitive Keyword Intelligence v1 - 2026-08-20
+
+- Owner/boundary: existing Market Intelligence domain and the approved Naver,
+  YouTube, DataForSEO read-only source lanes. The change adds a pure Shadow
+  projection, not a new Domain, public API, database, Queue, lifecycle, or
+  external transport.
+- Source of truth: sanitized provider records enter the existing approved
+  adapter boundary. The versioned packet contains only bounded metrics, HTTPS
+  source references, timestamps, freshness, and SHA-256 evidence digests.
+- Determinism: NFC/text normalization, explicit alias maps, stable source and
+  keyword ordering, canonical JSON, fixed weights, and deterministic tie
+  breaking produce the same digest for the same semantic input.
+- Safety: missing metrics remain unknown. Stale, conflicting, or unknown/
+  prohibited-rights evidence is quarantined without a score. Provider 403,
+  429, malformed/empty responses, and cost-ceiling breaches fail closed.
+- Compatibility: no Item Selection DTO, score, verdict, API, or persistence
+  contract changes. Downstream consumers must bind both `keywordSetVersion`
+  and packet digest and treat the packet as Shadow research evidence only.
+- Cloud/recovery: GitHub/CI owns code, fixture, and review evidence. Local test
+  output is disposable. No provider raw response or Secret is retained;
+  recovery is checkout plus deterministic fixture replay.
+- Rollback: remove the additive module, fixture, tests, and documentation;
+  existing market collection and Item Selection behavior remains unchanged.
+
 ## Listing creative operator runtime implementation - 2026-08-14
 
 - Scope: implement the accepted S3-16 PREPARE, bounded Production dispatch,

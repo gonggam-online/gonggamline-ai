@@ -1,0 +1,52 @@
+{
+  "version": "gonggamline-competitive-keyword-intelligence-v1",
+  "keywordSetVersion": "kk946-keywords-v1",
+  "candidateId": "KK946",
+  "mode": "SHADOW",
+  "status": "READY",
+  "generatedAt": "2026-08-20T00:00:00.000Z",
+  "keywords": [
+    {
+      "canonical": "케이블 파우치",
+      "variants": ["cable pouch", "케이블 파우치", "케이블파우치"],
+      "kinds": ["CORE", "RELATED", "PROBLEM_USE_CASE"],
+      "state": "VERIFIED",
+      "score": 75.97,
+      "scoreBreakdown": {
+        "demand": 82,
+        "competitionOpportunity": 62,
+        "trend": 71,
+        "contentGap": 64,
+        "profitability": 76,
+        "relevance": 100,
+        "confidence": 100
+      },
+      "evidence": [
+        {
+          "provider": "DATAFORSEO",
+          "sourceReference": "https://fixture.example/dataforseo/1",
+          "observedAt": "2026-08-19T00:00:00.000Z",
+          "freshness": "FRESH",
+          "evidenceDigest": "28ba9d18bdcfc08fcbf3173cc1a80ce17b34c8db5e44c1fa31b0d4f4219f562f"
+        },
+        {
+          "provider": "NAVER",
+          "sourceReference": "https://fixture.example/naver/1",
+          "observedAt": "2026-08-19T00:00:00.000Z",
+          "freshness": "FRESH",
+          "evidenceDigest": "66ba7afbc273ad952bbbe7f348ee7376e577f4332f3b911399271b373acf31e7"
+        },
+        {
+          "provider": "YOUTUBE",
+          "sourceReference": "https://fixture.example/youtube/1",
+          "observedAt": "2026-08-19T00:00:00.000Z",
+          "freshness": "FRESH",
+          "evidenceDigest": "ec73d9976ddaa913cd8386db9f234c9a7bc4d406292e56a37c6ac11d742d8fb0"
+        }
+      ],
+      "exclusionReasons": []
+    }
+  ],
+  "exclusions": [],
+  "digest": "9808c36fff368d26fe0731f356548199b11c0e14e92c65a1b998305cc87415a4"
+}

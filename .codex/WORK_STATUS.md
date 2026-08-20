@@ -1,5 +1,39 @@
 # Work status
 
+## 2026-08-20 Competitive Keyword Intelligence v1
+
+- Objective: export a reproducible, evidence-bound keyword packet for 15B and
+  16A without changing operational selection or ranking.
+- Branch/base: `codex/feat/competitive-keyword-intelligence` from
+  `origin/main` `c37ccfb5434a4bbf02bb3cbae956b02f9a0a16cb`.
+- Prerequisites: 13B PR #87 merge `673b820c`; Stage 14 terminal bridge PR #109
+  merge `c01ffd03`; exact CI, Preview browser, and Vercel gates passed.
+- Risk/root cause: normal-risk, additive non-destructive analytics inside the
+  approved Market Intelligence boundary; no external/database failure is
+  being compensated for.
+- Cloud-first: GitHub owns contract, fixture, decision, CI, and recovery.
+  Provider raw responses are transient; local test/build output is disposable.
+- Completed: architecture/current-state audit; canonicalization; provider
+  envelope validation; freshness/conflict/rights fail-closed scoring; stable
+  digest/ranking; 15B fixture; focused tests; documentation.
+- Validation: focused/regression 17/17; full tests 764/764; lint PASS with four
+  pre-existing Revenue test warnings and zero errors; typecheck PASS; production
+  build PASS (90 static pages/routes generated); diff/secret review PASS.
+- Browser: Item Selection and 40 other Chromium checks passed. Seven unrelated
+  page-health checks fail because this local worktree intentionally has no
+  Supabase configuration (`Supabase is unconfigured`); two checks skipped.
+  No keyword module route/UI was added, and the relevant Item Selection browser
+  tests passed. Exact configured Vercel Preview remains the binding browser gate.
+- Current: commit/push the reviewed files, open the normal-risk PR, and wait for
+  exact CI/Vercel Preview/browser checks before merge.
+- Changed files: keyword domain module, focused test, KK946 synthetic fixture,
+  architecture/decision/changelog/status documents.
+- External use: zero provider calls, zero paid cost, zero Secret reads/writes,
+  zero scraping, zero marketplace/Production mutation.
+- Remaining risks: real search demand depends on later approved provider
+  execution; alias maps require human-reviewed domain vocabulary; provider
+  terms and freshness thresholds require periodic policy review.
+
 ## 2026-08-20 Pure supplier quote comparison slice
 
 - Implementing the approved pure canonical-offer comparator and manual-verified
