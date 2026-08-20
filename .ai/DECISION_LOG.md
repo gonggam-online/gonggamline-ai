@@ -1,5 +1,25 @@
 # Decision log
 
+## 2026-08-20 - Competitive Keyword Intelligence v1 Shadow packet
+
+- Decision: extend the accepted Market Intelligence domain with a pure,
+  deterministic keyword packet for 15B title ranking and 16A story research.
+- Contract: explicit aliases normalize spelling, spacing, language variants,
+  and synonyms; no inferred trend word or keyword stuffing is generated.
+  Demand, competition opportunity, trend, content gap, relevance, confidence,
+  provenance, freshness, and exclusion reasons remain independently visible.
+- Failure policy: missing core metrics are `UNKNOWN`; stale, conflicting,
+  unknown/prohibited-rights evidence is `QUARANTINED` and receives no score.
+- Boundary: `SHADOW` only. Existing Item Selection verdicts, scores, live
+  recommendation order, commerce actions, and provider transports are
+  unchanged. Synthetic fixtures perform no API, Secret, scraping, or paid call.
+- Cloud-first: GitHub owns the versioned contract, fixture, tests, decision,
+  and CI evidence. Provider raw responses remain transient in an approved
+  runtime and are not introduced as local or Git durable state.
+- Risk: normal-risk non-destructive analytics. Any real provider execution,
+  Secret/configuration, durable evidence storage, or operational ranking
+  integration keeps its separate approved/manual boundary.
+
 ## 2026-08-20 - Propose multi-supplier sourcing and quote comparison v1
 
 - Proposal: discover candidates market-wide, retain Domeggook as the default
