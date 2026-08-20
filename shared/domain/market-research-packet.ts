@@ -9,6 +9,11 @@ import {
   type MarketResearchPlan,
   type MarketResearchSource,
 } from "./market-research-plan";
+import {
+  assessPresalesOpportunity,
+  type PresalesOpportunityAssessment,
+  type PresalesOpportunityCandidate,
+} from "./presales-opportunity-ranking";
 
 export const MARKET_RESEARCH_PACKET_VERSION =
   "gonggamline-market-research-packet-v1" as const;
@@ -19,6 +24,13 @@ export type MarketResearchPacket = Readonly<{
   plan: MarketResearchPlan;
   recommendation: "REVIEW_NOW" | "RESEARCH_NEXT" | "DO_NOT_PRIORITIZE";
   reasons: readonly string[];
+}>;
+
+export type PresalesMarketResearchPacket = Readonly<{
+  version: "gonggamline-presales-market-research-packet-v1";
+  assessment: PresalesOpportunityAssessment;
+  plan: MarketResearchPlan;
+  recommendation: "PRIORITY_RESEARCH" | "VALIDATE_ECONOMICS" | "WATCH" | "BLOCKED";
 }>;
 
 /**
@@ -55,5 +67,29 @@ export function buildMarketResearchPacket(
         ? "추가 근거 태스크가 없습니다."
         : `다음 연구 태스크 ${plan.tasks.length}건을 출처·비용·승인 상태와 함께 정렬했습니다.`,
     ]),
+  });
+}
+
+/**
+ * Builds the sales-free research packet. It keeps a strong candidate in the
+ * queue when economics are missing, while retaining rights and known-negative
+ * economics as hard blockers.
+ */
+export function buildPresalesMarketResearchPacket(
+  candidate: MarketResearchCandidate,
+  opportunity: PresalesOpportunityCandidate,
+  sources: readonly MarketResearchSource[],
+  now = new Date(),
+): PresalesMarketResearchPacket {
+  if (candidate.providerItemNumber !== opportunity.providerItemNumber) {
+    throw new RangeError("candidate and opportunity item numbers must match.");
+  }
+  const assessment = assessPresalesOpportunity(opportunity, now);
+  const plan = buildMarketResearchPlan(candidate, sources);
+  return Object.freeze({
+    version: "gonggamline-presales-market-research-packet-v1",
+    assessment,
+    plan,
+    recommendation: assessment.tier,
   });
 }

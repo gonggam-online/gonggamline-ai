@@ -6504,3 +6504,13 @@ perform the documented read-only Supabase schema and completeness inspection.
 - Validation: full suite 722/722, typecheck, lint, build, diff check, and
   focused Item Selection Playwright 2/2 passed.
 - Next: commit, push, PR delivery, exact CI/Preview, then Production smoke.
+## 2026-08-20 - Sales-free presales engine hardening
+
+- Added `presales-opportunity-ranking` and a presales research packet.
+- Strong market candidates remain prioritized when economics are incomplete;
+  uncertainty, freshness, source diversity, contactability, and rights state
+  are explicit.
+- Known negative economics and rights failure remain blocked.
+- Research-only; no operational verdict, commerce, or Production mutation.
+- Next: configure approved providers, collect read-only evidence, then compare
+  predictions against an immutable pre-sales benchmark and later sales labels.

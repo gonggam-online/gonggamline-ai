@@ -14,3 +14,13 @@
 No live provider call was made in this environment because the approved Vercel
 Production Secret values are not present. No DB migration, marketplace write,
 Production verdict change, asset download, or commerce action was added.
+# Follow-up: sales-free presales ranking
+
+- Added a bounded presales opportunity assessment that keeps strong market
+  candidates in a validation queue when unit economics are incomplete.
+- Added source diversity, freshness, evidence coverage, uncertainty bounds,
+  contactability, rights status, and category-diverse portfolio selection.
+- Known rights failure and known negative economics remain blockers; missing
+  sales data is not treated as a reason to discard a promising candidate.
+- The new packet is research-only and cannot alter operational verdicts or
+  authorize commerce/Production actions.

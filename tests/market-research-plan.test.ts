@@ -6,7 +6,7 @@ import {
   MARKET_RESEARCH_PLAN_VERSION,
   type MarketResearchSource,
 } from "../shared/domain/market-research-plan.ts";
-import { buildMarketResearchPacket } from "../shared/domain/market-research-packet.ts";
+import { buildMarketResearchPacket, buildPresalesMarketResearchPacket } from "../shared/domain/market-research-packet.ts";
 
 const sources: readonly MarketResearchSource[] = [
   {
@@ -118,4 +118,36 @@ test("builds a research-next packet instead of discarding a promising candidate"
   assert.equal(packet.recommendation, "RESEARCH_NEXT");
   assert.equal(packet.opportunity.status, "COST_CONFIRMATION_REQUIRED");
   assert.equal(packet.plan.tasks.length, 2);
+});
+
+test("sales-free packet prioritizes a strong candidate without pretending economics are proven", () => {
+  const packet = buildPresalesMarketResearchPacket({
+    providerItemNumber: "125",
+    keyword: "싱크대 수납",
+    category: "주방용품",
+    missingSignals: ["economics"],
+  }, {
+    providerItemNumber: "125",
+    title: "싱크대 수납 선반",
+    category: "주방용품",
+    rightsStatus: "UNKNOWN",
+    contactable: true,
+    observations: [{
+      sourceKind: "official_api",
+      observedAt: "2026-08-19T00:00:00.000Z",
+      demandScore: 82,
+      growthScore: 74,
+      competitionScore: 35,
+      supplyScore: 75,
+      contentVelocityScore: 70,
+      reviewVelocityScore: 60,
+      price: 19900,
+      confidence: 85,
+    }],
+    economics: { salePrice: null, productCost: null, inboundCost: null, fulfillmentCost: null, marketplaceFee: null, returnAllowance: null },
+    complementTags: ["organization"],
+  }, sources, new Date("2026-08-19T12:00:00.000Z"));
+  assert.equal(packet.recommendation, "PRIORITY_RESEARCH");
+  assert.equal(packet.assessment.market.marginRate, null);
+  assert.ok(packet.assessment.missingFacts.includes("profitability.unitEconomics"));
 });

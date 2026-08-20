@@ -2033,3 +2033,14 @@ Architecture Decisions, Technical Debt, Known Issues, and Future Work.
   are limited to terminal completion or a genuinely blocking owner action.
 - This streamlining does not waive Production, database/Auth/RLS, secret,
   paid, commerce-write, destructive, or high-risk manual boundaries.
+## 2026-08-20 - Sales-free presales ranking mode
+
+- Before internal sales/return/settlement evidence exists, preserve strong
+  market candidates in a bounded research queue instead of rejecting every
+  candidate with incomplete unit economics.
+- The queue uses point/lower/upper market scores, source diversity, freshness,
+  evidence coverage, contactability, and rights state.
+- Only known negative economics and rights FAIL are hard blockers in this mode;
+  UNKNOWN rights remain research-only and never authorize publication.
+- This mode is read-only and does not change operational verdicts, ranking,
+  procurement, listing, or Production behavior.
