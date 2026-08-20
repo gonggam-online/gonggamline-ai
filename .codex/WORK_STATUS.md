@@ -1,5 +1,19 @@
 # Work status
 
+## 2026-08-20 Multi-supplier sourcing architecture gate
+
+- Objective: market-wide candidate discovery with Domeggook baseline and
+  verified alternative wholesale quote comparison.
+- Current step: Architecture proposal recorded; runtime implementation is
+  intentionally blocked pending Architecture and provider-specific approval.
+- Risk: high-risk because external integrations and profitability/sourcing
+  decisions are involved.
+- Durable state: no new runtime state; proposal and decision are GitHub-owned.
+- Existing user changes: preserved and untouched.
+- Next action: owner approves the Architecture Story and supplies provider-
+  specific terms, read scope, quota/cost, Secret store, retention, and managed
+  executor decisions; then implement the pure comparator first.
+
 ## 2026-08-20 External Market Intelligence providers v1
 
 - Objective: connect approved read-only Naver Shopping, YouTube Data API, and

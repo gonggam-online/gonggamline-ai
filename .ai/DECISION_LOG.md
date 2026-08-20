@@ -1,5 +1,22 @@
 # Decision log
 
+## 2026-08-20 - Propose multi-supplier sourcing and quote comparison v1
+
+- Proposal: discover candidates market-wide, retain Domeggook as the default
+  sourcing baseline, and compare verified alternative wholesale offers using a
+  normalized landed-cost contract.
+- Scope: architecture only. No new supplier API, secret, database migration,
+  quote persistence, purchase, listing, price, Production, Gaemi, or Coupang
+  write is authorized until this Story is approved.
+- Safety: non-Domeggook offers remain advisory; automatic procurement remains
+  Domeggook-only. Missing/stale/conflicting identity, rights, or economics
+  evidence fails closed.
+- Required owner gates: provider terms/robots, exact account and read scope,
+  quota/cost ceiling, Secret store, managed execution boundary, retention,
+  recovery, and separate approval for any operational verdict or supplier
+  ordering integration.
+- Story: [Multi-Supplier Sourcing and Quote Comparison v1](../docs/architecture/MULTI-SUPPLIER-SOURCING-AND-QUOTE-COMPARISON-V1.md).
+
 ## 2026-08-20 - Accept read-only external Market Intelligence providers v1
 
 - Decision: connect Naver Shopping Search, YouTube Data API, and DataForSEO
