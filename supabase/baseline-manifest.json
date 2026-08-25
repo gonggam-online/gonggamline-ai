@@ -131,6 +131,11 @@
       "order": 25,
       "file": "025_item_selection_finalization_composite_fix.sql",
       "sha256": "9e6b7efe8ca8476fcf9f378be7495037bb48940ad9a897cf593f7af09411ee2b"
+    },
+    {
+      "order": 26,
+      "file": "026_market_watchlist_activation.sql",
+      "sha256": "dda24e1de1ad0c39afc7063969bd0654a8f47894817086cbc0e4775d4c0bb026"
     }
   ],
   "promotedSources": {
