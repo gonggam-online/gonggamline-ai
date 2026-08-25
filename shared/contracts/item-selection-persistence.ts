@@ -224,6 +224,18 @@ export interface ItemSelectionEvaluationExplainabilityV1 {
     readonly estimatedFacts: readonly string[];
     readonly missingFacts: readonly string[];
     readonly nextActions: readonly string[];
+    readonly discoveryEstimate: {
+      readonly status: "ESTIMATED" | "UNAVAILABLE";
+      readonly breakEvenSellingPriceKrw: number | null;
+      readonly conditionalSellingPriceKrw: number | null;
+      readonly recommendSellingPriceKrw: number | null;
+      readonly supplierInboundPerUnitKrw: number | null;
+      readonly inboundInspectionPerUnitKrw: number | null;
+      readonly fulfillmentPerUnitKrw: number | null;
+      readonly profitabilityPotentialScore: number | null;
+      readonly missingActualFacts: readonly string[];
+      readonly assumptions: readonly string[];
+    } | null;
   };
   readonly hardGates: readonly {
     readonly gate: string;

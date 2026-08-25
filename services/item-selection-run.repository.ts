@@ -97,10 +97,22 @@ function mapExplainability(row: DbRecord): ItemSelectionEvaluationExplainability
     const output = snapshot.evaluatorOutput as DbRecord;
     const score = output.score as DbRecord;
     const profitability = output.profitability as DbRecord;
-    const normalized = record(profitability.scenarios)
-      ? (profitability.scenarios as DbRecord).normalizedScenario
+    const profitabilityResult = record(snapshot.profitabilityResult)
+      ? snapshot.profitabilityResult as DbRecord
+      : profitability;
+    const normalized = record(profitabilityResult.scenarios)
+      ? (profitabilityResult.scenarios as DbRecord).normalizedScenario
       : null;
     const normalizedRecord = record(normalized) ? normalized : null;
+    const discovery = record(profitabilityResult.discoveryProfitabilityEstimate)
+      ? profitabilityResult.discoveryProfitabilityEstimate as DbRecord
+      : null;
+    const floors = discovery && record(discovery.floorSellingPriceKrw)
+      ? discovery.floorSellingPriceKrw as DbRecord
+      : null;
+    const discoveryCosts = discovery && record(discovery.costsPerUnitKrw)
+      ? discovery.costsPerUnitKrw as DbRecord
+      : null;
     const gates = Array.isArray(output.hardGates) ? output.hardGates : [];
     const areas = Array.isArray(score.areas) ? score.areas : [];
     const evidence = typeof row.canonical_evidence_text === "string" ? JSON.parse(row.canonical_evidence_text) : null;
@@ -132,6 +144,18 @@ function mapExplainability(row: DbRecord): ItemSelectionEvaluationExplainability
         estimatedFacts: stringArray(profitability.estimatedFacts),
         missingFacts: stringArray(profitability.missingFacts),
         nextActions: stringArray(profitability.nextActions),
+        discoveryEstimate: discovery ? {
+          status: discovery.status === "ESTIMATED" ? "ESTIMATED" as const : "UNAVAILABLE" as const,
+          breakEvenSellingPriceKrw: floors ? numberOrNull(floors.breakEven) : null,
+          conditionalSellingPriceKrw: floors ? numberOrNull(floors.conditional) : null,
+          recommendSellingPriceKrw: floors ? numberOrNull(floors.recommend) : null,
+          supplierInboundPerUnitKrw: discoveryCosts ? numberOrNull(discoveryCosts.supplierInboundBase) : null,
+          inboundInspectionPerUnitKrw: discoveryCosts ? numberOrNull(discoveryCosts.inboundInspectionBase) : null,
+          fulfillmentPerUnitKrw: discoveryCosts ? numberOrNull(discoveryCosts.fulfillmentBase) : null,
+          profitabilityPotentialScore: numberOrNull(discovery.profitabilityPotentialScore),
+          missingActualFacts: stringArray(discovery.missingActualFacts),
+          assumptions: stringArray(discovery.assumptions),
+        } : null,
       },
       hardGates: Object.freeze(gates.flatMap((gate) => {
         if (!record(gate) || typeof gate.gate !== "string" || typeof gate.reasonCode !== "string") return [];
