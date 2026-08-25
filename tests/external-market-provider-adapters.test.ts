@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  collectDataForSeoCoupangPrices,
   collectDataForSeoNaverSignals,
   collectExternalMarketProvider,
   collectNaverShopping,
@@ -55,6 +56,23 @@ test("DataForSEO Naver adapter maps paid SERP output without storing credentials
   assert.equal(result.observations[0]?.source, "dataforseo_naver");
   assert.equal(result.estimatedCostUsd, 0.0006);
   assert.equal(result.discoverySignals[0]?.sourceKind, "paid_api");
+});
+
+test("DataForSEO Google adapter retains only public Coupang offers with KRW prices", async () => {
+  const result = await collectDataForSeoCoupangPrices("욕실 코너 선반", {
+    credentials: { dataForSeoLogin: "login", dataForSeoPassword: "password", dataForSeoMaxCostUsd: 0.01 },
+    request: async (_input, init) => {
+      assert.match(String(init?.body), /욕실 코너 선반 쿠팡/);
+      return response({ tasks: [{ cost: 0.002, result: [{ items: [
+        { type: "organic", title: "쿠팡 욕실 코너 선반", url: "https://www.coupang.com/vp/products/1", domain: "coupang.com", rank_absolute: 1, price: { current: 12900, currency: "KRW" } },
+        { type: "organic", title: "다른 판매처", url: "https://example.com/2", domain: "example.com", rank_absolute: 2, price: { current: 1000, currency: "KRW" } },
+      ] }] }] });
+    },
+  });
+  assert.equal(result.observations.length, 1);
+  assert.equal(result.observations[0]?.source, "coupang_public");
+  assert.equal(result.observations[0]?.snapshot.price, 12_900);
+  assert.equal(result.estimatedCostUsd, 0.002);
 });
 
 test("missing credentials fail before any external request", async () => {
