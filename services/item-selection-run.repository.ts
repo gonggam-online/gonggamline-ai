@@ -113,6 +113,9 @@ function mapExplainability(row: DbRecord): ItemSelectionEvaluationExplainability
     const discoveryCosts = discovery && record(discovery.costsPerUnitKrw)
       ? discovery.costsPerUnitKrw as DbRecord
       : null;
+    const marketSellingPrice = discovery && record(discovery.marketSellingPrice)
+      ? discovery.marketSellingPrice as DbRecord
+      : null;
     const gates = Array.isArray(output.hardGates) ? output.hardGates : [];
     const areas = Array.isArray(score.areas) ? score.areas : [];
     const evidence = typeof row.canonical_evidence_text === "string" ? JSON.parse(row.canonical_evidence_text) : null;
@@ -155,6 +158,20 @@ function mapExplainability(row: DbRecord): ItemSelectionEvaluationExplainability
           profitabilityPotentialScore: numberOrNull(discovery.profitabilityPotentialScore),
           missingActualFacts: stringArray(discovery.missingActualFacts),
           assumptions: stringArray(discovery.assumptions),
+          marketSellingPrice: marketSellingPrice ? {
+            status: marketSellingPrice.status === "AVAILABLE" ? "AVAILABLE" as const : "UNAVAILABLE" as const,
+            predictedSellingPriceKrw: numberOrNull(marketSellingPrice.predictedSellingPriceKrw),
+            lowSellingPriceKrw: numberOrNull(marketSellingPrice.lowSellingPriceKrw),
+            highSellingPriceKrw: numberOrNull(marketSellingPrice.highSellingPriceKrw),
+            observationCount: numberOrNull(marketSellingPrice.observationCount) ?? 0,
+            observedAt: stringOrNull(marketSellingPrice.observedAt),
+            sourceReference: stringOrNull(marketSellingPrice.sourceReference),
+            sampleOffers: Object.freeze(Array.isArray(marketSellingPrice.sampleOffers)
+              ? marketSellingPrice.sampleOffers.flatMap((offer) => record(offer) && typeof offer.title === "string" && typeof offer.priceKrw === "number"
+                ? [{ title: offer.title, priceKrw: offer.priceKrw, url: stringOrNull(offer.url) }]
+                : [])
+              : []),
+          } : null,
         } : null,
       },
       hardGates: Object.freeze(gates.flatMap((gate) => {

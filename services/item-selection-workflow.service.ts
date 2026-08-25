@@ -17,6 +17,10 @@ import {
   type MarketEnrichmentRecord,
 } from "./item-selection-market-enrichment.service";
 import {
+  loadCoupangMarketPriceEstimates,
+} from "./coupang-market-price.service";
+import type { CoupangMarketPriceEstimate } from "../shared/domain/coupang-market-price";
+import {
   ITEM_SELECTION_EVALUATOR_VERSION,
   ITEM_SELECTION_HARD_GATES,
   ITEM_SELECTION_RULESET_VERSION,
@@ -66,6 +70,7 @@ type Dependencies = Readonly<{
   createRun?: typeof import("./item-selection-run.repository")["createItemSelectionRun"];
   finalizeRun?: typeof import("./item-selection-run.repository")["finalizeItemSelectionRun"];
   loadMarketEnrichment?: typeof loadItemSelectionMarketEnrichment;
+  loadCoupangMarketPrices?: typeof loadCoupangMarketPriceEstimates;
 }>;
 
 const MARKET_ENRICHMENT_TIMEOUT_MS = 5_000;
@@ -240,19 +245,26 @@ function profitabilityInput(
   request: RunItemSelectionRequestV1,
   observedAt: string,
 ): ItemSelectionProfitabilityInput {
-  const price = request.proposedSalePriceKrw;
+  const operatorPrice = request.proposedSalePriceKrw;
+  const marketPrice = discoveryEstimate.marketSellingPrice?.status === "AVAILABLE"
+    ? discoveryEstimate.marketSellingPrice.predictedSellingPriceKrw
+    : null;
   return {
-    finalSellingPrice: price === undefined
+    finalSellingPrice: operatorPrice === undefined && marketPrice === null
       ? missingMoney("finalSellingPrice")
       : {
           id: "finalSellingPrice",
-          amountKrw: price,
-          sourceType: "OPERATOR_INPUT",
-          sourceReference: "item-selection-run-request",
-          effectiveFrom: observedAt,
+          amountKrw: operatorPrice ?? marketPrice,
+          sourceType: operatorPrice === undefined ? "MARKETPLACE_PUBLIC" : "OPERATOR_INPUT",
+          sourceReference: operatorPrice === undefined
+            ? discoveryEstimate.marketSellingPrice?.sourceReference ?? null
+            : "item-selection-run-request",
+          effectiveFrom: operatorPrice === undefined
+            ? discoveryEstimate.marketSellingPrice?.observedAt ?? observedAt
+            : observedAt,
           vatTreatment: "VAT_INCLUSIVE_NON_DEDUCTIBLE",
           includedIn: [],
-          confirmationStatus: "CONFIRMED",
+          confirmationStatus: operatorPrice === undefined ? "ESTIMATED" : "CONFIRMED",
         },
     supplierUnitCost: providerFacts.supplierUnitCost,
     minimumOrderQuantity: item.minimumOrderQuantity,
@@ -293,6 +305,7 @@ function toWrite(
   request: RunItemSelectionRequestV1,
   observedAt: string,
   marketEnrichment: MarketEnrichmentRecord | null,
+  coupangMarketPrice: CoupangMarketPriceEstimate | null,
 ): Readonly<{
   write: ItemSelectionEvaluationWriteV1;
   evaluation: ReturnType<typeof evaluateItemSelection>;
@@ -302,7 +315,7 @@ function toWrite(
     supplierVatTreatment: "VAT_INCLUSIVE_NON_DEDUCTIBLE",
     shippingVatTreatment: "VAT_INCLUSIVE_NON_DEDUCTIBLE",
   });
-  const discoveryProfitabilityEstimate = estimateItemSelectionDiscoveryProfitability(item, cohort);
+  const discoveryProfitabilityEstimate = estimateItemSelectionDiscoveryProfitability(item, cohort, coupangMarketPrice);
   const profitInput = profitabilityInput(item, providerFacts, discoveryProfitabilityEstimate, request, observedAt);
   const profitResult = calculateItemSelectionProfitability(profitInput);
   const evaluatorInput = {
@@ -319,10 +332,10 @@ function toWrite(
     })),
     scores: marketEnrichment
       ? enrichItemSelectionScores(
-          publicCatalogOpportunityScores(item, cohort, originalPosition, observedAt),
+          publicCatalogOpportunityScores(item, cohort, originalPosition, observedAt, coupangMarketPrice),
           marketEnrichment.metric,
         )
-      : publicCatalogOpportunityScores(item, cohort, originalPosition, observedAt),
+      : publicCatalogOpportunityScores(item, cohort, originalPosition, observedAt, coupangMarketPrice),
     profitability: toItemSelectionProfitabilityPolicyInput(profitResult),
   };
   const evaluatorOutput = evaluateItemSelection(evaluatorInput);
@@ -483,15 +496,17 @@ export async function runItemSelection(
 
   const observedAt = new Date(clock()).toISOString();
   let marketByProviderItem = new Map<string, MarketEnrichmentRecord>();
+  let coupangPriceByProviderItem = new Map<string, CoupangMarketPriceEstimate>();
   if (marketMode === "ENRICH") {
-    try {
-      marketByProviderItem = new Map(await withTimeout(
+    const [marketResult, coupangPriceResult] = await Promise.allSettled([
+      withTimeout(
         (dependencies.loadMarketEnrichment ?? loadItemSelectionMarketEnrichment)(items.map((item) => item.providerItemId)),
         MARKET_ENRICHMENT_TIMEOUT_MS,
-      ));
-    } catch {
-      marketByProviderItem = new Map();
-    }
+      ),
+      (dependencies.loadCoupangMarketPrices ?? loadCoupangMarketPriceEstimates)(items),
+    ]);
+    if (marketResult.status === "fulfilled") marketByProviderItem = new Map(marketResult.value);
+    if (coupangPriceResult.status === "fulfilled") coupangPriceByProviderItem = new Map(coupangPriceResult.value);
   }
   const evaluations: Array<Readonly<{
     write: ItemSelectionEvaluationWriteV1;
@@ -507,7 +522,15 @@ export async function runItemSelection(
   }> = [];
   items.forEach((item, index) => {
     try {
-      evaluations.push(toWrite(item, items, index, request, observedAt, marketByProviderItem.get(item.providerItemId) ?? null));
+      evaluations.push(toWrite(
+        item,
+        items,
+        index,
+        request,
+        observedAt,
+        marketByProviderItem.get(item.providerItemId) ?? null,
+        coupangPriceByProviderItem.get(item.providerItemId) ?? null,
+      ));
     } catch {
       failures.push({
         providerItemNumber: item.providerItemId,

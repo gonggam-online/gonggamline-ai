@@ -6,6 +6,7 @@ import type { AdminGuardContext } from "../lib/auth/admin-request-guard.server.t
 import { SupplierCatalogService } from "../services/supplier-catalog.service.ts";
 import type { MarketEnrichmentRecord } from "../services/item-selection-market-enrichment.service.ts";
 import { runItemSelection } from "../services/item-selection-workflow.service.ts";
+import { COUPANG_MARKET_PRICE_ESTIMATE_VERSION } from "../shared/domain/coupang-market-price.ts";
 import type {
   FinalizeItemSelectionRunWriteV1,
   ItemSelectionRunDtoV1,
@@ -204,6 +205,58 @@ test("market-enriched evaluations preserve deterministic source identity order f
     (finalized?.evaluations ?? []).map((evaluation) => evaluation.originalPosition),
     [0, 1, 2],
   );
+});
+
+test("uses a current public Coupang observation as the estimated selling price when the operator leaves price empty", async () => {
+  let finalized: FinalizeItemSelectionRunWriteV1 | undefined;
+  const candidate = item(0, "1000");
+  await runItemSelection(context, {
+    provider: "domeggook",
+    keyword: "주방 정리 선반",
+    size: 10,
+    marketIntelligenceMode: "ENRICH",
+  }, "p".repeat(64), {
+    catalog: catalog([candidate], []),
+    async loadMarketEnrichment() { return new Map(); },
+    async loadCoupangMarketPrices() {
+      return new Map([[candidate.providerItemId, {
+        version: COUPANG_MARKET_PRICE_ESTIMATE_VERSION,
+        status: "AVAILABLE" as const,
+        matchType: "TITLE_MATCHED" as const,
+        query: candidate.name ?? "",
+        observedAt: "2026-08-25T00:00:00.000Z",
+        predictedSellingPriceKrw: 19_900,
+        lowSellingPriceKrw: 17_900,
+        highSellingPriceKrw: 21_900,
+        observationCount: 5,
+        sourceReference: "naver-shopping-official:coupang-public-offers",
+        sampleOffers: [],
+      }]]);
+    },
+    async createRun(_context, input) {
+      return { run: run({ requestFingerprint: input.requestFingerprint }), created: true };
+    },
+    async finalizeRun(_context, input) {
+      finalized = input;
+      return run({ status: input.terminalStatus, persistedEvaluationCount: input.evaluations.length });
+    },
+  });
+  const snapshot = JSON.parse(finalized?.evaluations[0]?.canonicalSnapshotText ?? "{}") as {
+    profitabilityInput?: { finalSellingPrice?: { amountKrw?: number; sourceType?: string; confirmationStatus?: string } };
+    profitabilityResult?: { discoveryProfitabilityEstimate?: { marketSellingPrice?: { observationCount?: number } } };
+  };
+  assert.deepEqual(snapshot.profitabilityInput?.finalSellingPrice, {
+    amountKrw: 19_900,
+    confirmationStatus: "ESTIMATED",
+    effectiveFrom: "2026-08-25T00:00:00.000Z",
+    id: "finalSellingPrice",
+    includedIn: [],
+    sourceReference: "naver-shopping-official:coupang-public-offers",
+    sourceType: "MARKETPLACE_PUBLIC",
+    vatTreatment: "VAT_INCLUSIVE_NON_DEDUCTIBLE",
+  });
+  assert.equal(snapshot.profitabilityResult?.discoveryProfitabilityEstimate?.marketSellingPrice?.observationCount, 5);
+  assert.notEqual(finalized?.evaluations[0]?.normalizedProfitKrwMicros, null);
 });
 
 test("deduplicates before observation and persists a partial run for item-scoped failure", async () => {

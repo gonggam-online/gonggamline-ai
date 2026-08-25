@@ -1,6 +1,7 @@
 import type { ItemSelectionEvidence, ItemSelectionScoreInputs } from "./item-selection";
 import type { SupplierCatalogItem } from "./supplier-catalog";
 import { estimateItemSelectionDiscoveryProfitability } from "./item-selection-discovery-profitability";
+import type { CoupangMarketPriceEstimate } from "./coupang-market-price";
 
 function clamp(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value * 10) / 10));
@@ -89,6 +90,7 @@ export function publicCatalogOpportunityScores(
   cohort: readonly SupplierCatalogItem[],
   originalPosition: number,
   observedAt: string,
+  marketSellingPrice: CoupangMarketPriceEstimate | null = null,
 ): ItemSelectionScoreInputs {
   const reference = item.productUrl;
   const positionRange = Math.max(1, cohort.length - 1);
@@ -97,7 +99,19 @@ export function publicCatalogOpportunityScores(
   const conversionPotential = listingCompleteness(item);
   const logisticsFit = logisticsScore(item);
   const supplyStability = supplyScore(item);
-  const profitability = estimateItemSelectionDiscoveryProfitability(item, cohort);
+  const profitability = estimateItemSelectionDiscoveryProfitability(item, cohort, marketSellingPrice);
+  const observedMarketPrice = marketSellingPrice?.status === "AVAILABLE"
+    ? marketSellingPrice.predictedSellingPriceKrw
+    : null;
+  const marketProfitabilityScore = observedMarketPrice === null
+    ? null
+    : observedMarketPrice >= (profitability.floorSellingPriceKrw.recommend ?? Number.POSITIVE_INFINITY)
+      ? 90
+      : observedMarketPrice >= (profitability.floorSellingPriceKrw.conditional ?? Number.POSITIVE_INFINITY)
+        ? 75
+        : observedMarketPrice >= (profitability.floorSellingPriceKrw.breakEven ?? Number.POSITIVE_INFINITY)
+          ? 55
+          : 20;
 
   return {
     competitiveness: {
@@ -111,16 +125,24 @@ export function publicCatalogOpportunityScores(
       ),
     },
     profitability: {
-      ...(profitability.status === "ESTIMATED" && profitability.profitabilityPotentialScore !== null
+      ...(profitability.status === "ESTIMATED" && (marketProfitabilityScore ?? profitability.profitabilityPotentialScore) !== null
         ? {
             status: "AVAILABLE" as const,
-            normalizedScore: profitability.profitabilityPotentialScore,
-            evidence: evidence(
-              "supplierPriceKrw,shippingFeeKrw,minimumOrderQuantity,approvedCostAssumptions",
-              "공개 조달비와 승인된 보수적 비용 가정으로 필요한 판매가 하한을 계산해 후보군 안에서 비교한 사전 수익성 점수입니다. 확정 이익이 아닙니다.",
-              observedAt,
-              reference,
-            ),
+            normalizedScore: marketProfitabilityScore ?? profitability.profitabilityPotentialScore ?? 0,
+            evidence: marketProfitabilityScore === null
+              ? evidence(
+                  "supplierPriceKrw,shippingFeeKrw,minimumOrderQuantity,approvedCostAssumptions",
+                  "공개 조달비와 승인된 보수적 비용 가정으로 필요한 판매가 하한을 계산해 후보군 안에서 비교한 사전 수익성 점수입니다. 확정 이익이 아닙니다.",
+                  observedAt,
+                  reference,
+                )
+              : [{
+                  sourceType: "MARKETPLACE_PUBLIC",
+                  sourceField: "coupangObservedPriceMedian",
+                  summary: "현재 공개 쿠팡 관찰 가격 중앙값을 손익분기·조건부·추천 판매가 하한과 비교한 사전 수익성 점수입니다.",
+                  observedAt: marketSellingPrice?.observedAt ?? observedAt,
+                  reference: marketSellingPrice?.sourceReference ?? null,
+                }],
           }
         : { status: "UNAVAILABLE" as const, missingFacts: ["supplierUnitCost"] }),
     },
