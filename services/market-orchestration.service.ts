@@ -69,7 +69,7 @@ export async function runDueCollectionJobs(limit = 20): Promise<{ results: Colle
         status: "success",
         message: `내부 실매출 피드백 큐 점검 완료: ${keyword}`,
       };
-    } else if (job.collector_key === "official-api-adapter" || job.collector_key === "public-observation-adapter" || job.collector_key === "naver-shopping-api" || job.collector_key === "dataforseo-naver-serp") {
+    } else if (job.collector_key === "official-api-adapter" || job.collector_key === "public-observation-adapter" || job.collector_key === "naver-shopping-api" || job.collector_key === "dataforseo-naver-serp" || job.collector_key === "youtube-public-signals") {
       const startedAt = new Date().toISOString();
       const { data: run, error: runError } = await supabase.from("market_collection_runs").insert({
         collector: job.collector_key,
@@ -81,9 +81,10 @@ export async function runDueCollectionJobs(limit = 20): Promise<{ results: Colle
       if (runError) throw new Error(runError.message);
       try {
         const isNaver = job.collector_key === "naver-shopping-api";
+        const isYoutube = job.collector_key === "youtube-public-signals";
         const collected = await collectConfiguredMarketObservations({
           collectorKey: isNaver ? "official-api-adapter" : "public-observation-adapter",
-          provider: isNaver ? "naver_shopping" : "dataforseo_naver",
+          provider: isNaver ? "naver_shopping" : isYoutube ? "youtube_data" : "dataforseo_naver",
           keyword,
         });
         let saved = 0;
@@ -92,6 +93,19 @@ export async function runDueCollectionJobs(limit = 20): Promise<{ results: Colle
           const persisted = await saveMarketObservation(observation);
           saved += 1;
           if (await analyzeMarketProduct(persisted.productId)) analyzed += 1;
+        }
+        if (isYoutube) {
+          for (const signal of collected.discoverySignals) {
+            const { error: signalError } = await supabase.from("market_signals").insert({
+              market_keyword_id: job.market_keyword_id,
+              signal_type: "YOUTUBE_PUBLIC_TREND",
+              severity: "medium",
+              title: signal.title,
+              evidence: signal,
+              detected_at: signal.observedAt,
+            });
+            if (!signalError) saved += 1;
+          }
         }
         const completedAt = new Date().toISOString();
         await supabase.from("market_collection_runs").update({

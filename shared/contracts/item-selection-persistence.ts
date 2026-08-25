@@ -201,6 +201,48 @@ export interface ItemSelectionEvaluationDtoV1 {
   readonly snapshotSha256: Sha256Hex;
   readonly providerEvidenceSha256: Sha256Hex;
   readonly createdAt: string;
+  /** Sanitized, read-only explanation; canonical evidence text is never exposed. */
+  readonly explainability: ItemSelectionEvaluationExplainabilityV1 | null;
+}
+
+export interface ItemSelectionEvaluationExplainabilityV1 {
+  readonly score: {
+    readonly totalScore: number | null;
+    readonly availableDataScore: number | null;
+    readonly scoreCoverage: number;
+    readonly areas: readonly {
+      readonly area: string;
+      readonly status: "AVAILABLE" | "UNAVAILABLE";
+      readonly normalizedScore: number | null;
+      readonly weightedContribution: number | null;
+    }[];
+  };
+  readonly profitability: {
+    readonly status: "CONFIRMED" | "ESTIMATED" | "INCOMPLETE";
+    readonly contributionProfitKrw: number | null;
+    readonly contributionMarginRate: number | null;
+    readonly estimatedFacts: readonly string[];
+    readonly missingFacts: readonly string[];
+    readonly nextActions: readonly string[];
+  };
+  readonly hardGates: readonly {
+    readonly gate: string;
+    readonly status: "PASS" | "FAIL" | "UNKNOWN" | "NOT_APPLICABLE";
+    readonly reasonCode: string;
+    readonly missingFacts: readonly string[];
+  }[];
+  readonly recommendationReasons: readonly string[];
+  readonly risks: readonly string[];
+  readonly missingFacts: readonly string[];
+  readonly provider: {
+    readonly itemNumber: string;
+    readonly supplierPriceKrw: number | null;
+    readonly shippingFeeKrw: number | null;
+    readonly minimumOrderQuantity: number | null;
+    readonly stockStatus: string | null;
+    readonly productUrl: string | null;
+    readonly observedAt: string | null;
+  };
 }
 
 export interface ItemSelectionRunDtoV1 {

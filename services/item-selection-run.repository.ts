@@ -9,6 +9,7 @@ import type {
   ItemSelectionEvaluationDtoV1,
   ItemSelectionRunDtoV1,
   ItemSelectionRunWriteV1,
+  ItemSelectionEvaluationExplainabilityV1,
   ReconcileStaleItemSelectionRunWriteV1,
 } from "../shared/contracts/item-selection-persistence";
 
@@ -39,6 +40,7 @@ const EVALUATION_COLUMNS = [
   "normalized_profit_krw_micros", "snapshot_sha256",
   "provider_evidence_sha256", "created_at",
 ].join(",");
+const DETAIL_EVALUATION_COLUMNS = `${EVALUATION_COLUMNS},canonical_snapshot_text,canonical_evidence_text`;
 
 function repositoryError(error: PostgrestError): ItemSelectionRunRepositoryError {
   if (error.code === "P0002") return new ItemSelectionRunRepositoryError("NOT_FOUND");
@@ -68,7 +70,96 @@ function integer(row: DbRecord, key: string): number {
   return value as number;
 }
 
-function mapEvaluation(row: DbRecord): ItemSelectionEvaluationDtoV1 {
+function record(value: unknown): value is DbRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function numberOrNull(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function stringOrNull(value: unknown): string | null {
+  return typeof value === "string" ? value : null;
+}
+
+function stringArray(value: unknown): readonly string[] {
+  return Array.isArray(value)
+    ? Object.freeze(value.filter((entry): entry is string => typeof entry === "string"))
+    : Object.freeze([]);
+}
+
+function mapExplainability(row: DbRecord): ItemSelectionEvaluationExplainabilityV1 | null {
+  if (typeof row.canonical_snapshot_text !== "string") return null;
+  try {
+    const snapshot: unknown = JSON.parse(row.canonical_snapshot_text);
+    if (!record(snapshot) || !record(snapshot.evaluatorOutput) ||
+        !record(snapshot.evaluatorOutput.score) || !record(snapshot.evaluatorOutput.profitability)) return null;
+    const output = snapshot.evaluatorOutput as DbRecord;
+    const score = output.score as DbRecord;
+    const profitability = output.profitability as DbRecord;
+    const normalized = record(profitability.scenarios)
+      ? (profitability.scenarios as DbRecord).normalizedScenario
+      : null;
+    const normalizedRecord = record(normalized) ? normalized : null;
+    const gates = Array.isArray(output.hardGates) ? output.hardGates : [];
+    const areas = Array.isArray(score.areas) ? score.areas : [];
+    const evidence = typeof row.canonical_evidence_text === "string" ? JSON.parse(row.canonical_evidence_text) : null;
+    const evidenceRecord = record(evidence) ? evidence : {};
+    const facts = record(evidenceRecord.facts) ? evidenceRecord.facts : {};
+    return Object.freeze({
+      score: {
+        totalScore: numberOrNull(score.totalScore),
+        availableDataScore: numberOrNull(score.availableDataScore),
+        scoreCoverage: numberOrNull(score.scoreCoverage) ?? 0,
+        areas: Object.freeze(areas.flatMap((area) => {
+          if (!record(area) || typeof area.area !== "string") return [];
+          return [{
+            area: area.area,
+            status: area.status === "AVAILABLE" ? "AVAILABLE" as const : "UNAVAILABLE" as const,
+            normalizedScore: numberOrNull(area.normalizedScore),
+            weightedContribution: numberOrNull(area.weightedContribution),
+          }];
+        })),
+      },
+      profitability: {
+        status: profitability.status === "CONFIRMED"
+          ? ("CONFIRMED" as const)
+          : profitability.status === "ESTIMATED"
+            ? ("ESTIMATED" as const)
+            : ("INCOMPLETE" as const),
+        contributionProfitKrw: normalizedRecord ? numberOrNull(normalizedRecord.contributionProfitDisplayKrw) : null,
+        contributionMarginRate: normalizedRecord ? numberOrNull(normalizedRecord.contributionMarginRateRaw) : null,
+        estimatedFacts: stringArray(profitability.estimatedFacts),
+        missingFacts: stringArray(profitability.missingFacts),
+        nextActions: stringArray(profitability.nextActions),
+      },
+      hardGates: Object.freeze(gates.flatMap((gate) => {
+        if (!record(gate) || typeof gate.gate !== "string" || typeof gate.reasonCode !== "string") return [];
+        const status: "PASS" | "FAIL" | "UNKNOWN" | "NOT_APPLICABLE" =
+          gate.status === "PASS" || gate.status === "FAIL" || gate.status === "NOT_APPLICABLE"
+            ? gate.status
+            : "UNKNOWN";
+        return [{ gate: gate.gate, status, reasonCode: gate.reasonCode, missingFacts: stringArray(gate.missingFacts) }];
+      })),
+      recommendationReasons: stringArray(output.recommendationReasons),
+      risks: stringArray(output.risks),
+      missingFacts: stringArray(output.missingFacts),
+      provider: {
+        itemNumber: typeof output.providerItemNumber === "string" ? output.providerItemNumber : text(row, "provider_item_number"),
+        supplierPriceKrw: numberOrNull(facts.supplierPriceKrw),
+        shippingFeeKrw: numberOrNull(facts.shippingFeeKrw),
+        minimumOrderQuantity: numberOrNull(facts.minimumOrderQuantity),
+        stockStatus: stringOrNull(facts.stockStatus),
+        productUrl: stringOrNull(facts.productUrl),
+        observedAt: stringOrNull(evidenceRecord.observedAt),
+      },
+    });
+  } catch {
+    return null;
+  }
+}
+
+function mapEvaluation(row: DbRecord, includeExplainability = false): ItemSelectionEvaluationDtoV1 {
   return Object.freeze({
     evaluationId: text(row, "id"),
     providerItemNumber: text(row, "provider_item_number"),
@@ -82,6 +173,7 @@ function mapEvaluation(row: DbRecord): ItemSelectionEvaluationDtoV1 {
     snapshotSha256: text(row, "snapshot_sha256"),
     providerEvidenceSha256: text(row, "provider_evidence_sha256"),
     createdAt: text(row, "created_at"),
+    explainability: includeExplainability ? mapExplainability(row) : null,
   });
 }
 
@@ -94,14 +186,14 @@ async function mapRun(
   if (includeEvaluations) {
     const result = await client
       .from("item_selection_evaluations")
-      .select(EVALUATION_COLUMNS)
+      .select(DETAIL_EVALUATION_COLUMNS)
       .eq("run_id", text(row, "id"))
       .order("original_position", { ascending: true })
       .order("provider_item_number", { ascending: true })
       .limit(30);
     if (result.error) throw repositoryError(result.error);
     evaluations = Object.freeze(
-      (result.data as unknown as DbRecord[]).map(mapEvaluation),
+      (result.data as unknown as DbRecord[]).map((evaluation) => mapEvaluation(evaluation, true)),
     );
   }
   return Object.freeze({
