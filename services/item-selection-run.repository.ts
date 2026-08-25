@@ -160,6 +160,11 @@ function mapExplainability(row: DbRecord): ItemSelectionEvaluationExplainability
           assumptions: stringArray(discovery.assumptions),
           marketSellingPrice: marketSellingPrice ? {
             status: marketSellingPrice.status === "AVAILABLE" ? "AVAILABLE" as const : "UNAVAILABLE" as const,
+            matchType: marketSellingPrice.matchType === "TITLE_MATCHED"
+              ? "TITLE_MATCHED" as const
+              : marketSellingPrice.matchType === "KEYWORD_COMPARABLE"
+                ? "KEYWORD_COMPARABLE" as const
+                : "UNAVAILABLE" as const,
             predictedSellingPriceKrw: numberOrNull(marketSellingPrice.predictedSellingPriceKrw),
             lowSellingPriceKrw: numberOrNull(marketSellingPrice.lowSellingPriceKrw),
             highSellingPriceKrw: numberOrNull(marketSellingPrice.highSellingPriceKrw),

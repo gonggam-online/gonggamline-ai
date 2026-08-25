@@ -21,7 +21,7 @@ const candidate: SupplierCatalogItem = {
 };
 
 test("uses only title-matched public Coupang offers and returns a robust median", async () => {
-  const estimates = await loadCoupangMarketPriceEstimates([candidate], async (keyword) => ({
+  const estimates = await loadCoupangMarketPriceEstimates([candidate], "주방 정리 선반", async (keyword) => ({
     provider: "naver_shopping",
     requestCount: 1,
     quotaUnits: 1,
@@ -44,11 +44,28 @@ test("uses only title-matched public Coupang offers and returns a robust median"
 });
 
 test("fails open as unavailable without inventing a selling price", async () => {
-  const estimates = await loadCoupangMarketPriceEstimates([candidate], async () => {
+  const estimates = await loadCoupangMarketPriceEstimates([candidate], "주방 정리 선반", async () => {
     throw new Error("NAVER_CREDENTIALS_MISSING");
   });
   assert.equal(estimates.get("1000")?.status, "UNAVAILABLE");
   assert.equal(estimates.get("1000")?.predictedSellingPriceKrw, null);
+});
+
+test("uses the run keyword Coupang comparison group when a candidate title has no direct match", async () => {
+  const estimates = await loadCoupangMarketPriceEstimates([candidate], "욕실 수납", async (keyword) => ({
+    provider: "naver_shopping",
+    requestCount: 1,
+    quotaUnits: 1,
+    estimatedCostUsd: 0,
+    discoverySignals: [],
+    observations: keyword.startsWith("욕실 수납")
+      ? [observation(keyword, "쿠팡(주)", "욕실 청소 브러시", 19_900, 1)]
+      : [],
+  }));
+  const estimate = estimates.get("1000");
+  assert.equal(estimate?.status, "AVAILABLE");
+  assert.equal(estimate?.matchType, "KEYWORD_COMPARABLE");
+  assert.equal(estimate?.predictedSellingPriceKrw, 19_900);
 });
 
 function observation(keyword: string, sellerName: string, title: string, price: number, rank: number) {

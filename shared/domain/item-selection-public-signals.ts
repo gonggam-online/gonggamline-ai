@@ -103,7 +103,7 @@ export function publicCatalogOpportunityScores(
   const observedMarketPrice = marketSellingPrice?.status === "AVAILABLE"
     ? marketSellingPrice.predictedSellingPriceKrw
     : null;
-  const marketProfitabilityScore = observedMarketPrice === null
+  const rawMarketProfitabilityScore = observedMarketPrice === null
     ? null
     : observedMarketPrice >= (profitability.floorSellingPriceKrw.recommend ?? Number.POSITIVE_INFINITY)
       ? 90
@@ -112,6 +112,11 @@ export function publicCatalogOpportunityScores(
         : observedMarketPrice >= (profitability.floorSellingPriceKrw.breakEven ?? Number.POSITIVE_INFINITY)
           ? 55
           : 20;
+  const marketProfitabilityScore = rawMarketProfitabilityScore === null
+    ? null
+    : marketSellingPrice?.matchType === "KEYWORD_COMPARABLE"
+      ? Math.min(70, rawMarketProfitabilityScore)
+      : rawMarketProfitabilityScore;
 
   return {
     competitiveness: {
