@@ -68,6 +68,26 @@ test("uses the run keyword Coupang comparison group when a candidate title has n
   assert.equal(estimate?.predictedSellingPriceKrw, 19_900);
 });
 
+test("falls back to one bounded paid Coupang public search when Naver has no Coupang offers", async () => {
+  let paidCalls = 0;
+  const estimates = await loadCoupangMarketPriceEstimates(
+    [candidate],
+    "욕실 수납",
+    async () => ({ provider: "naver_shopping", requestCount: 1, quotaUnits: 1, estimatedCostUsd: 0, discoverySignals: [], observations: [] }),
+    async (keyword) => {
+      paidCalls += 1;
+      return {
+        requestCount: 1,
+        estimatedCostUsd: 0.002,
+        observations: [observation(keyword, "쿠팡", "욕실 청소 브러시", 18_900, 1)],
+      };
+    },
+  );
+  assert.equal(paidCalls, 1);
+  assert.equal(estimates.get("1000")?.matchType, "KEYWORD_COMPARABLE");
+  assert.equal(estimates.get("1000")?.predictedSellingPriceKrw, 18_900);
+});
+
 function observation(keyword: string, sellerName: string, title: string, price: number, rank: number) {
   return {
     source: "naver_official" as const,

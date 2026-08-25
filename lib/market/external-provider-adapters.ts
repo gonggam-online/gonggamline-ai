@@ -21,6 +21,12 @@ export type ExternalProviderResult = Readonly<{
   estimatedCostUsd: number;
 }>;
 
+export type CoupangPublicPriceSearchResult = Readonly<{
+  observations: readonly MarketObservationInput[];
+  requestCount: number;
+  estimatedCostUsd: number;
+}>;
+
 type Requester = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
 function credentialsFromEnvironment(): ExternalProviderCredentials {
@@ -165,6 +171,105 @@ export async function collectNaverShopping(
     }];
   });
   return Object.freeze({ provider: "naver_shopping", observations: Object.freeze(observations), discoverySignals: Object.freeze([]), requestCount: 1, quotaUnits: 1, estimatedCostUsd: 0 });
+}
+
+function nestedSerpItems(value: unknown): Record<string, unknown>[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry): Record<string, unknown>[] => {
+    if (typeof entry !== "object" || entry === null) return [];
+    const record = entry as Record<string, unknown>;
+    return [record, ...nestedSerpItems(record.items)];
+  });
+}
+
+/**
+ * Reads current public Coupang price snippets exposed by Google through the
+ * approved bounded DataForSEO Live SERP API. This is a search observation,
+ * not a Coupang seller API call and never performs a marketplace write.
+ */
+export async function collectDataForSeoCoupangPrices(
+  keyword: string,
+  options: Readonly<{ credentials?: ExternalProviderCredentials; request?: Requester }> = {},
+): Promise<CoupangPublicPriceSearchResult> {
+  const query = boundedKeyword(keyword);
+  const credentials = options.credentials ?? credentialsFromEnvironment();
+  const login = required(credentials.dataForSeoLogin, "DATAFORSEO_CREDENTIALS_MISSING");
+  const password = required(credentials.dataForSeoPassword, "DATAFORSEO_CREDENTIALS_MISSING");
+  const maxCostUsd = credentials.dataForSeoMaxCostUsd;
+  if (maxCostUsd === undefined || !Number.isFinite(maxCostUsd) || maxCostUsd <= 0) {
+    throw new Error("DATAFORSEO_COST_CEILING_MISSING");
+  }
+  const basic = Buffer.from(`${login}:${password}`, "utf8").toString("base64");
+  const response = await (options.request ?? fetch)("https://api.dataforseo.com/v3/serp/google/organic/live/advanced", {
+    method: "POST",
+    headers: { Accept: "application/json", "Content-Type": "application/json", Authorization: `Basic ${basic}` },
+    body: JSON.stringify([{
+      keyword: `${query} 쿠팡`,
+      location_name: "South Korea",
+      language_code: "ko",
+      device: "desktop",
+      depth: 10,
+    }]),
+    cache: "no-store",
+  });
+  const body = await jsonResponse(response, "DATAFORSEO_GOOGLE_COUPANG");
+  const task = typeof body === "object" && body !== null && Array.isArray((body as { tasks?: unknown }).tasks)
+    ? (body as { tasks: unknown[] }).tasks[0]
+    : null;
+  const taskCost = typeof task === "object" && task !== null ? number((task as Record<string, unknown>).cost) ?? 0 : 0;
+  if (taskCost > maxCostUsd) throw new Error("DATAFORSEO_COST_CEILING_EXCEEDED");
+  const result = typeof task === "object" && task !== null && Array.isArray((task as { result?: unknown }).result)
+    ? (task as { result: unknown[] }).result[0]
+    : null;
+  const topLevelItems = typeof result === "object" && result !== null ? (result as Record<string, unknown>).items : [];
+  const timestamp = observedAt();
+  const observations = nestedSerpItems(topLevelItems).flatMap((record, index): MarketObservationInput[] => {
+    const title = text(record.title);
+    const url = text(record.url, 2_000);
+    const domain = text(record.domain, 300);
+    const source = text(record.source, 300);
+    const sellerIdentity = `${domain ?? ""} ${url ?? ""} ${source ?? ""}`;
+    const priceRecord = typeof record.price === "object" && record.price !== null
+      ? record.price as Record<string, unknown>
+      : null;
+    const currentPrice = number(priceRecord?.current);
+    const currency = text(priceRecord?.currency, 20)?.toUpperCase();
+    if (!title || currentPrice === null || currentPrice <= 0 || !/(^|\.)coupang\.com|쿠팡/i.test(sellerIdentity)) return [];
+    if (currency && currency !== "KRW") return [];
+    const externalProductId = text(record.product_id, 200) ?? text(record.data_docid, 200) ?? url ?? `coupang-serp-${index + 1}`;
+    return [{
+      source: "coupang_public",
+      keyword: query,
+      observedAt: timestamp,
+      product: {
+        externalProductId,
+        vendorItemId: null,
+        url,
+        title,
+        brand: null,
+        sellerName: source ?? domain ?? "쿠팡",
+        category: null,
+        thumbnailUrl: null,
+      },
+      snapshot: {
+        rank: number(record.rank_absolute) ?? number(record.rank_group) ?? index + 1,
+        isAd: null,
+        price: currentPrice,
+        listPrice: number(priceRecord?.regular),
+        rating: typeof record.rating === "object" && record.rating !== null ? number((record.rating as Record<string, unknown>).value) : null,
+        reviewCount: typeof record.rating === "object" && record.rating !== null ? number((record.rating as Record<string, unknown>).votes_count) : null,
+        rocketType: null,
+        isSoldOut: null,
+        deliveryDays: null,
+        optionCount: null,
+      },
+    }];
+  });
+  const unique = [...new Map(observations.map((entry) => [
+    `${entry.product.externalProductId}:${entry.snapshot.price}`,
+    entry,
+  ])).values()];
+  return Object.freeze({ observations: Object.freeze(unique), requestCount: 1, estimatedCostUsd: taskCost });
 }
 
 export async function collectYouTubeVideoSignals(

@@ -1,4 +1,7 @@
-import { collectNaverShopping } from "../lib/market/external-provider-adapters";
+import {
+  collectDataForSeoCoupangPrices,
+  collectNaverShopping,
+} from "../lib/market/external-provider-adapters";
 import {
   COUPANG_MARKET_PRICE_ESTIMATE_VERSION,
   type CoupangMarketPriceEstimate,
@@ -7,6 +10,7 @@ import type { SupplierCatalogItem } from "../shared/domain/supplier-catalog";
 import type { MarketObservationInput } from "../types/market";
 
 type NaverCollector = typeof collectNaverShopping;
+type PaidCoupangCollector = typeof collectDataForSeoCoupangPrices;
 
 const CONCURRENCY = 5;
 const MAX_CANDIDATES = 30;
@@ -166,6 +170,7 @@ export async function loadCoupangMarketPriceEstimates(
   items: readonly SupplierCatalogItem[],
   keyword = "",
   collect: NaverCollector = collectNaverShopping,
+  collectPaidCoupang: PaidCoupangCollector = collectDataForSeoCoupangPrices,
 ): Promise<ReadonlyMap<string, CoupangMarketPriceEstimate>> {
   const result = new Map<string, CoupangMarketPriceEstimate>();
   const bounded = items.slice(0, MAX_CANDIDATES);
@@ -180,6 +185,17 @@ export async function loadCoupangMarketPriceEstimates(
       broadObservations = broadResults.flatMap((entry) =>
         entry.status === "fulfilled" ? entry.value.observations : []
       );
+      const hasCoupangObservation = broadObservations.some((observation) =>
+        /(쿠팡|coupang)/i.test(`${observation.product.sellerName ?? ""} ${observation.product.url ?? ""}`)
+      );
+      if (!hasCoupangObservation) {
+        try {
+          const paidResult = await withTimeout(collectPaidCoupang(broadQuery));
+          broadObservations = [...broadObservations, ...paidResult.observations];
+        } catch {
+          // A bounded paid fallback is optional; Naver/candidate evaluation continues.
+        }
+      }
     } catch {
       broadObservations = [];
     }

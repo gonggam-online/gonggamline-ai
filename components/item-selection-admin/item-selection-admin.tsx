@@ -426,7 +426,7 @@ export function ItemSelectionAdmin() {
                         <div><dt>3PL 추정 / 개</dt><dd>{item.explainability.profitability.discoveryEstimate.fulfillmentPerUnitKrw?.toLocaleString("ko-KR")}원</dd></div>
                       </dl>
                       {(item.explainability.profitability.discoveryEstimate.marketSellingPrice?.sampleOffers.length ?? 0) > 0 ? <details><summary>가격 산출에 사용한 쿠팡 관찰 상품</summary><ul>{item.explainability.profitability.discoveryEstimate.marketSellingPrice?.sampleOffers.map((offer, index) => <li key={`${offer.title}-${index}`}>{offer.url ? <a href={offer.url} target="_blank" rel="noreferrer">{offer.title}</a> : offer.title} · {offer.priceKrw.toLocaleString("ko-KR")}원</li>)}</ul></details> : null}
-                      <p className="item-selection-admin__notice">쿠팡 예상가는 네이버 공식 쇼핑검색에 현재 노출된 쿠팡 판매 상품 중 제목이 일치하는 가격의 중앙값입니다. 공개 조달비와 승인된 보수적 비용 가정을 함께 적용하며, 최종 동일상품·옵션·배송비는 등록 전에 재확인합니다.</p>
+                      <p className="item-selection-admin__notice">쿠팡 예상가는 현재 공개 검색에 노출된 쿠팡 판매정보를 네이버 공식 쇼핑검색에서 우선 확인하고, 결과가 없을 때 승인된 DataForSEO 검색으로 보완한 가격 중앙값입니다. 상품명 유사 매칭과 검색어 비교군을 구분하며, 최종 동일상품·옵션·배송비는 등록 전에 재확인합니다.</p>
                     </> : null}
                     <h4>필수 게이트</h4>
                     <ul>{item.explainability.hardGates.map((gate) => <li key={gate.gate}>{gate.gate}: {GATE_STATUS_LABELS[gate.status] ?? gate.status} ({gate.reasonCode})</li>)}</ul>
