@@ -59,10 +59,24 @@ const STATUS_LABELS: Record<ItemSelectionRunStatus, string> = {
 };
 const VERDICT_LABELS: Record<ItemSelectionVerdict, string> = {
   RECOMMEND: "추천",
-  CONDITIONAL: "조건부",
+  CONDITIONAL: "기회 검토",
   MANUAL_REVIEW: "수동 확인",
   REJECT: "제외",
 };
+
+function runStatusLabel(run: Pick<ItemSelectionRunDtoV1, "status" | "failureCode">): string {
+  if (run.failureCode === "STALE_RUN_RECOVERED") return "복구 종결";
+  return STATUS_LABELS[run.status];
+}
+
+function failureCodeLabel(code: string | null): string {
+  if (code === null) return "없음";
+  if (code === "STALE_RUN_RECOVERED") return "이전 중단 실행 자동 복구";
+  if (code === "PROVIDER_UNAVAILABLE") return "공급처 일시 오류";
+  if (code === "FINALIZATION_FAILED") return "결과 저장 실패";
+  if (code === "EVALUATION_FAILED") return "후보 평가 실패";
+  return code;
+}
 const SCORE_AREA_LABELS: Record<string, string> = {
   competitiveness: "경쟁력",
   profitability: "수익성",
@@ -307,14 +321,21 @@ export function ItemSelectionAdmin() {
     [runs, statusFilter],
   );
   const evaluations = useMemo(
-    () => selected?.evaluations.filter((item) => verdictFilter === "ALL" || item.verdict === verdictFilter) ?? [],
+    () => [...(selected?.evaluations.filter((item) => verdictFilter === "ALL" || item.verdict === verdictFilter) ?? [])]
+      .sort((left, right) =>
+        (right.explainability?.score.availableDataScore ?? -1) -
+          (left.explainability?.score.availableDataScore ?? -1) ||
+        left.originalPosition - right.originalPosition ||
+        left.providerItemNumber.localeCompare(right.providerItemNumber),
+      ),
     [selected, verdictFilter],
   );
   const summary = useMemo(() => ({
     total: runs.length,
     completed: runs.filter((item) => item.status === "COMPLETED").length,
     partial: runs.filter((item) => item.status === "PARTIAL").length,
-    failed: runs.filter((item) => item.status === "FAILED").length,
+    failed: runs.filter((item) => item.status === "FAILED" && item.failureCode !== "STALE_RUN_RECOVERED").length,
+    recovered: runs.filter((item) => item.failureCode === "STALE_RUN_RECOVERED").length,
   }), [runs]);
 
   return (
@@ -342,7 +363,7 @@ export function ItemSelectionAdmin() {
             </button>)}</div>
             <small>추천어를 선택해 입력을 채운 뒤 평가를 실행합니다. 운영 순위나 추천 판정은 자동 변경되지 않습니다.</small>
           </div> : null}
-          <p className="item-selection-admin__notice">권리·비용 근거가 부족한 항목은 통과로 추정하지 않고 ‘수동 확인’으로 남습니다. <Link href="/discovery">시장 후보 발굴</Link> · <Link href="/sourcing">공급처·견적 비교</Link></p>
+          <p className="item-selection-admin__notice">공개 상품·가격·재고·검색 순서만으로도 모든 검색 후보에 기회 점수와 순위를 부여합니다. 권리·완전 수익성 확인은 실제 구매·등록 전에 별도로 진행됩니다. <Link href="/discovery">시장 후보 발굴</Link> · <Link href="/sourcing">공급처·견적 비교</Link></p>
           <div className="item-selection-admin__live" role="status" aria-live="polite">{message}</div>
         </DashboardSection>
 
@@ -350,7 +371,7 @@ export function ItemSelectionAdmin() {
 
         <DashboardSection headingId="run-history" title="실행 이력" description="현재 불러온 최근 20개 실행 기준 요약입니다.">
           <div className="item-selection-admin__summary" aria-label="실행 요약">
-            {Object.entries(summary).map(([key, value]) => <DashboardCard key={key}><strong>{value}</strong><span>{{ total: "전체", completed: "완료", partial: "일부 완료", failed: "실패" }[key as keyof typeof summary]}</span></DashboardCard>)}
+            {Object.entries(summary).map(([key, value]) => <DashboardCard key={key}><strong>{value}</strong><span>{{ total: "전체", completed: "완료", partial: "일부 완료", failed: "실패", recovered: "복구 종결" }[key as keyof typeof summary]}</span></DashboardCard>)}
           </div>
           <DashboardToolbar label="실행 이력 필터">
             <label>상태<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}><option value="ALL">전체</option>{Object.entries(STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
@@ -361,7 +382,7 @@ export function ItemSelectionAdmin() {
               {visibleRuns.map((item) => (
                 <button className="item-selection-admin__run" type="button" key={item.id} onClick={() => void openDetail(item.id)} aria-pressed={selected?.id === item.id}>
                   <span><strong>{item.keyword}</strong><small>{item.provider} · {item.requestedSize}개 요청</small></span>
-                  <span className={`item-selection-admin__badge item-selection-admin__badge--${item.status.toLowerCase()}`}>{STATUS_LABELS[item.status]}</span>
+                  <span className={`item-selection-admin__badge item-selection-admin__badge--${item.status.toLowerCase()}`}>{runStatusLabel(item)}</span>
                   <time dateTime={item.startedAt}>{formatDate(item.startedAt)}</time>
                   <span>{item.successfullyEvaluatedCount}/{item.observedCandidateCount} 평가</span>
                 </button>
@@ -375,21 +396,21 @@ export function ItemSelectionAdmin() {
           {detailLoading ? <DashboardLoading label="실행 상세를 불러오는 중" rows={5} /> : !selected ? <DashboardEmptyState title="실행을 선택해 주세요" description="이력에서 실행을 선택하면 상세 결과를 확인할 수 있습니다." /> : (
             <div className="item-selection-admin__detail">
               <dl className="item-selection-admin__facts">
-                <div><dt>검색어</dt><dd>{selected.keyword}</dd></div><div><dt>상태</dt><dd>{STATUS_LABELS[selected.status]}</dd></div>
+                <div><dt>검색어</dt><dd>{selected.keyword}</dd></div><div><dt>상태</dt><dd>{runStatusLabel(selected)}</dd></div>
                 <div><dt>시작</dt><dd>{formatDate(selected.startedAt)}</dd></div><div><dt>완료</dt><dd>{formatDate(selected.completedAt)}</dd></div>
                 <div><dt>관찰 / 성공 / 실패 / 제외</dt><dd>{selected.observedCandidateCount} / {selected.successfullyEvaluatedCount} / {selected.failedCandidateCount} / {selected.skippedCandidateCount}</dd></div>
-                <div><dt>실패 코드</dt><dd>{selected.failureCode ?? "없음"}</dd></div>
+                <div><dt>실패 사유</dt><dd>{failureCodeLabel(selected.failureCode)}</dd></div>
               </dl>
               {(selected.status === "FAILED" || selected.status === "PARTIAL") ? <p className="item-selection-admin__notice">이 실행을 재시도하려면 위 폼에 동일 조건을 입력하고 ‘명시적 재시도’ 항목을 선택하세요.</p> : null}
               <DashboardToolbar label="평가 결과 필터"><label>판정<select value={verdictFilter} onChange={(event) => setVerdictFilter(event.target.value as typeof verdictFilter)}><option value="ALL">전체</option>{Object.entries(VERDICT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label></DashboardToolbar>
-              {evaluations.length === 0 ? <DashboardEmptyState title="표시할 평가 결과가 없습니다" description="빈 결과이거나 선택한 판정 필터에 일치하는 항목이 없습니다." /> : <div className="item-selection-admin__evaluations">{evaluations.map((item) => (
-                <DashboardCard key={item.evaluationId} title={`후보 #${item.originalPosition + 1} · ${item.providerItemNumber}`} headingId={`evaluation-${item.evaluationId}`} actions={<span className={`item-selection-admin__badge item-selection-admin__badge--${item.verdict.toLowerCase()}`}>{VERDICT_LABELS[item.verdict]}</span>}>
-                  <dl className="item-selection-admin__facts"><div><dt>총점</dt><dd>{item.totalScoreUnits === null ? "확인 필요" : `${item.totalScoreUnits / 100}점`}</dd></div><div><dt>근거 범위</dt><dd>{item.coverageUnits / 100}%</dd></div><div><dt>기여이익</dt><dd>{item.normalizedProfitKrwMicros === null ? "확인 필요" : `${Math.round(Number(item.normalizedProfitKrwMicros) / 1_000_000).toLocaleString("ko-KR")}원`}</dd></div><div><dt>마진율</dt><dd>{item.normalizedMarginUnits === null ? "확인 필요" : `${item.normalizedMarginUnits / 100}%`}</dd></div></dl>
+              {evaluations.length === 0 ? <DashboardEmptyState title="표시할 평가 결과가 없습니다" description="빈 결과이거나 선택한 판정 필터에 일치하는 항목이 없습니다." /> : <div className="item-selection-admin__evaluations">{evaluations.map((item, rank) => (
+                <DashboardCard key={item.evaluationId} title={`기회 순위 #${rank + 1} · ${item.explainability?.provider.name ?? item.providerItemNumber}`} headingId={`evaluation-${item.evaluationId}`} actions={<span className={`item-selection-admin__badge item-selection-admin__badge--${item.verdict.toLowerCase()}`}>{VERDICT_LABELS[item.verdict]}</span>}>
+                  <dl className="item-selection-admin__facts"><div><dt>기회 점수</dt><dd>{item.explainability?.score.availableDataScore === null || item.explainability?.score.availableDataScore === undefined ? "확인 필요" : `${item.explainability.score.availableDataScore}점`}</dd></div><div><dt>확정 총점</dt><dd>{item.totalScoreUnits === null ? "판매 전 검증 필요" : `${item.totalScoreUnits / 100}점`}</dd></div><div><dt>근거 범위</dt><dd>{item.coverageUnits / 100}%</dd></div><div><dt>기여이익</dt><dd>{item.normalizedProfitKrwMicros === null ? "판매가 입력 후 확인" : `${Math.round(Number(item.normalizedProfitKrwMicros) / 1_000_000).toLocaleString("ko-KR")}원`}</dd></div></dl>
                   {item.explainability ? <>
                     <h4>점수 근거</h4>
                     <dl className="item-selection-admin__facts">{item.explainability.score.areas.map((area) => <div key={area.area}><dt>{SCORE_AREA_LABELS[area.area] ?? area.area}</dt><dd>{area.status === "AVAILABLE" && area.normalizedScore !== null ? `${area.normalizedScore.toFixed(1)}점 · 기여 ${area.weightedContribution?.toFixed(1) ?? "—"}` : "데이터 없음"}</dd></div>)}</dl>
                     <h4>수익성·공급처 근거</h4>
-                    <dl className="item-selection-admin__facts"><div><dt>수익성 상태</dt><dd>{item.explainability.profitability.status}</dd></div><div><dt>공급가</dt><dd>{item.explainability.provider.supplierPriceKrw === null ? "확인 필요" : `${item.explainability.provider.supplierPriceKrw.toLocaleString("ko-KR")}원`}</dd></div><div><dt>배송비</dt><dd>{item.explainability.provider.shippingFeeKrw === null ? "확인 필요" : `${item.explainability.provider.shippingFeeKrw.toLocaleString("ko-KR")}원`}</dd></div><div><dt>최소수량 / 재고</dt><dd>{item.explainability.provider.minimumOrderQuantity ?? "—"} / {item.explainability.provider.stockStatus ?? "확인 필요"}</dd></div></dl>
+                    <dl className="item-selection-admin__facts"><div><dt>상품번호 / 공급처</dt><dd>{item.providerItemNumber} / {item.explainability.provider.supplierName ?? "공개 식별 없음"}</dd></div><div><dt>공급처 검색 순서</dt><dd>{item.originalPosition + 1}번째</dd></div><div><dt>수익성 상태</dt><dd>{item.explainability.profitability.status}</dd></div><div><dt>공급가</dt><dd>{item.explainability.provider.supplierPriceKrw === null ? "확인 필요" : `${item.explainability.provider.supplierPriceKrw.toLocaleString("ko-KR")}원`}</dd></div><div><dt>배송비</dt><dd>{item.explainability.provider.shippingFeeKrw === null ? "확인 필요" : `${item.explainability.provider.shippingFeeKrw.toLocaleString("ko-KR")}원`}</dd></div><div><dt>최소수량 / 재고</dt><dd>{item.explainability.provider.minimumOrderQuantity ?? "—"} / {item.explainability.provider.stockStatus ?? "확인 필요"}</dd></div></dl>
                     <h4>필수 게이트</h4>
                     <ul>{item.explainability.hardGates.map((gate) => <li key={gate.gate}>{gate.gate}: {GATE_STATUS_LABELS[gate.status] ?? gate.status} ({gate.reasonCode})</li>)}</ul>
                     {item.explainability.missingFacts.length > 0 ? <p className="item-selection-admin__notice">남은 근거: {item.explainability.missingFacts.join(", ")}</p> : null}

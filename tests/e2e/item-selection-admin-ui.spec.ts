@@ -2,8 +2,8 @@ import { expect, test } from "@playwright/test";
 
 const run = {
   id: "11111111-1111-4111-8111-111111111111", provider: "domeggook", keyword: "캠핑 테이블",
-  requestedSize: 10, status: "PARTIAL", rulesetVersion: "gonggamline-item-selection-v1",
-  evaluatorVersion: "item-selection-evaluator-v1", profitabilityPolicyVersion: "item-selection-profitability-v1",
+  requestedSize: 10, status: "PARTIAL", rulesetVersion: "gonggamline-item-selection-v2",
+  evaluatorVersion: "item-selection-evaluator-v2", profitabilityPolicyVersion: "item-selection-profitability-v1",
   profitabilityCalculationContractVersion: "gonggamline-profitability-calculation-v1", requestFingerprint: "a".repeat(64),
   retryOfRunId: null, startedAt: "2026-08-03T01:00:00.000Z", completedAt: "2026-08-03T01:00:05.000Z",
   failureCode: "CANDIDATE_PARTIAL", observedCandidateCount: 2, successfullyEvaluatedCount: 1,
@@ -33,7 +33,7 @@ for (const viewport of [{ name: "desktop", width: 1280, height: 900 }, { name: "
     await page.goto("/admin/item-selection");
     await expect(page.getByRole("heading", { name: "상품 선정 평가" })).toBeVisible();
     await page.getByRole("button", { name: /캠핑 테이블/ }).click();
-    await expect(page.getByText("후보 #1 · 12345")).toBeVisible();
+    await expect(page.getByText("기회 순위 #1 · 12345")).toBeVisible();
     await expect(page.getByText("확인 필요").first()).toBeVisible();
     await page.getByLabel("검색어").fill("캠핑 의자");
     await page.getByRole("button", { name: "평가 실행" }).click();

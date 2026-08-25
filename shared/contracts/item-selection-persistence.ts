@@ -236,6 +236,9 @@ export interface ItemSelectionEvaluationExplainabilityV1 {
   readonly missingFacts: readonly string[];
   readonly provider: {
     readonly itemNumber: string;
+    readonly name: string | null;
+    readonly thumbnailUrl: string | null;
+    readonly supplierName: string | null;
     readonly supplierPriceKrw: number | null;
     readonly shippingFeeKrw: number | null;
     readonly minimumOrderQuantity: number | null;

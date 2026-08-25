@@ -50,8 +50,8 @@ function run(overrides: Partial<ItemSelectionRunDtoV1> = {}): ItemSelectionRunDt
     keyword: "테스트 상품",
     requestedSize: 30,
     status: "RUNNING",
-    rulesetVersion: "gonggamline-item-selection-v1",
-    evaluatorVersion: "item-selection-evaluator-v1",
+    rulesetVersion: "gonggamline-item-selection-v2",
+    evaluatorVersion: "item-selection-evaluator-v2",
     profitabilityPolicyVersion: "gonggamline-profitability-2026-07-27-v1",
     profitabilityCalculationContractVersion: "gonggamline-profitability-calculation-v1",
     requestFingerprint: "a".repeat(64),
@@ -120,7 +120,8 @@ test("size 30 is one bounded provider list call and one atomic finalization", as
   assert.equal(createdInput?.requestedSize, 30);
   assert.equal(finalizedInput?.terminalStatus, "COMPLETED");
   assert.equal(finalizedInput?.evaluations.length, 30);
-  assert(finalizedInput?.evaluations.every(({ verdict }) => verdict === "MANUAL_REVIEW"));
+  assert(finalizedInput?.evaluations.every(({ verdict }) => verdict === "CONDITIONAL"));
+  assert(finalizedInput?.evaluations.every(({ coverageUnits }) => coverageUnits === 750_000));
   assert(finalizedInput?.evaluations.every(({ canonicalSnapshotText }) => canonicalSnapshotText.length < 100_000));
   const firstSnapshot = JSON.parse(finalizedInput?.evaluations[0]?.canonicalSnapshotText ?? "{}") as {
     profitabilityInput?: { variableCosts?: Array<{ id?: string; amountKrw?: number | null }> };

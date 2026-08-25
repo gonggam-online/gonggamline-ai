@@ -21,9 +21,9 @@ import {
   ITEM_SELECTION_HARD_GATES,
   ITEM_SELECTION_RULESET_VERSION,
   evaluateItemSelection,
-  type ItemSelectionScoreInputs,
 } from "../shared/domain/item-selection";
 import type { SupplierCatalogItem } from "../shared/domain/supplier-catalog";
+import { publicCatalogOpportunityScores } from "../shared/domain/item-selection-public-signals";
 import { enrichItemSelectionScores } from "../shared/domain/item-selection-market-enrichment";
 import {
   ITEM_SELECTION_CANDIDATE_FAILURES_SCHEMA_VERSION,
@@ -63,15 +63,6 @@ type Dependencies = Readonly<{
   finalizeRun?: typeof import("./item-selection-run.repository")["finalizeItemSelectionRun"];
   loadMarketEnrichment?: typeof loadItemSelectionMarketEnrichment;
 }>;
-
-const EMPTY_SCORES: ItemSelectionScoreInputs = Object.freeze({
-  competitiveness: { status: "UNAVAILABLE", missingFacts: ["competitionAnalysis"] },
-  profitability: { status: "UNAVAILABLE", missingFacts: ["completeProfitability"] },
-  demand: { status: "UNAVAILABLE", missingFacts: ["measuredDemand"] },
-  conversionPotential: { status: "UNAVAILABLE", missingFacts: ["conversionEvidence"] },
-  logisticsFit: { status: "UNAVAILABLE", missingFacts: ["logisticsEvidence"] },
-  supplyStability: { status: "UNAVAILABLE", missingFacts: ["longitudinalSupplyEvidence"] },
-});
 
 const MARKET_ENRICHMENT_TIMEOUT_MS = 5_000;
 
@@ -204,6 +195,7 @@ function profitabilityInput(
 
 function toWrite(
   item: SupplierCatalogItem,
+  cohort: readonly SupplierCatalogItem[],
   originalPosition: number,
   request: RunItemSelectionRequestV1,
   observedAt: string,
@@ -222,6 +214,7 @@ function toWrite(
   const evaluatorInput = {
     providerItemNumber: item.providerItemId,
     originalPosition,
+    decisionLane: "DISCOVERY" as const,
     hardGates: ITEM_SELECTION_HARD_GATES.map((gate) => ({
       gate,
       status: "UNKNOWN" as const,
@@ -231,8 +224,11 @@ function toWrite(
       missingFacts: [`rights.${gate}`],
     })),
     scores: marketEnrichment
-      ? enrichItemSelectionScores(EMPTY_SCORES, marketEnrichment.metric)
-      : EMPTY_SCORES,
+      ? enrichItemSelectionScores(
+          publicCatalogOpportunityScores(item, cohort, originalPosition, observedAt),
+          marketEnrichment.metric,
+        )
+      : publicCatalogOpportunityScores(item, cohort, originalPosition, observedAt),
     profitability: toItemSelectionProfitabilityPolicyInput(profitResult),
   };
   const evaluatorOutput = evaluateItemSelection(evaluatorInput);
@@ -285,6 +281,10 @@ function toWrite(
     providerItemNumber: item.providerItemId,
     observedAt,
     facts: {
+      name: item.name,
+      thumbnailUrl: item.thumbnailUrl,
+      supplierId: item.supplierId,
+      supplierName: item.supplierName,
       supplierPriceKrw: item.supplierPriceKrw,
       shippingFeeKrw: item.shippingFeeKrw,
       minimumOrderQuantity: item.minimumOrderQuantity,
@@ -412,7 +412,7 @@ export async function runItemSelection(
   }> = [];
   items.forEach((item, index) => {
     try {
-      evaluations.push(toWrite(item, index, request, observedAt, marketByProviderItem.get(item.providerItemId) ?? null));
+      evaluations.push(toWrite(item, items, index, request, observedAt, marketByProviderItem.get(item.providerItemId) ?? null));
     } catch {
       failures.push({
         providerItemNumber: item.providerItemId,
