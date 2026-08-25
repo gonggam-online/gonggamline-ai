@@ -1,5 +1,5 @@
 export const COUPANG_MARKET_PRICE_ESTIMATE_VERSION =
-  "gonggamline-coupang-public-market-price-2026-08-25-v3" as const;
+  "gonggamline-coupang-public-market-price-2026-08-25-v4" as const;
 
 export type CoupangMarketPriceEstimate = Readonly<{
   version: typeof COUPANG_MARKET_PRICE_ESTIMATE_VERSION;
