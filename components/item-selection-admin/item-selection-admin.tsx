@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 import {
   DashboardCard,
@@ -22,6 +23,17 @@ import type { ItemSelectionVerdict } from "@/shared/domain/item-selection";
 type ListEnvelope = Readonly<{
   data: readonly ItemSelectionRunDtoV1[];
   page: Readonly<{ nextCursor: string | null }>;
+}>;
+
+type MarketKeywordSuggestion = Readonly<{
+  id: number;
+  keyword: string;
+  category: string | null;
+  priority: number;
+  demand_score: number | null;
+  competition_score: number | null;
+  opportunity_score: number | null;
+  collection_status: string;
 }>;
 
 type ShadowReviewPacket = Readonly<{
@@ -50,6 +62,20 @@ const VERDICT_LABELS: Record<ItemSelectionVerdict, string> = {
   CONDITIONAL: "조건부",
   MANUAL_REVIEW: "수동 확인",
   REJECT: "제외",
+};
+const SCORE_AREA_LABELS: Record<string, string> = {
+  competitiveness: "경쟁력",
+  profitability: "수익성",
+  demand: "수요",
+  conversionPotential: "전환 가능성",
+  logisticsFit: "물류 적합성",
+  supplyStability: "공급 안정성",
+};
+const GATE_STATUS_LABELS: Record<string, string> = {
+  PASS: "통과",
+  FAIL: "실패",
+  UNKNOWN: "확인 필요",
+  NOT_APPLICABLE: "해당 없음",
 };
 
 function formatDate(value: string | null): string {
@@ -107,6 +133,8 @@ export function ItemSelectionAdmin() {
   const [error, setError] = useState("");
   const [shadowPacket, setShadowPacket] = useState<ShadowReviewPacket | null>(null);
   const [shadowLoading, setShadowLoading] = useState(false);
+  const [keywordDraft, setKeywordDraft] = useState("");
+  const [keywordSuggestions, setKeywordSuggestions] = useState<readonly MarketKeywordSuggestion[]>([]);
 
   const loadRuns = useCallback(async (cursor?: string) => {
     setLoading(true);
@@ -129,6 +157,20 @@ export function ItemSelectionAdmin() {
   }, []);
 
   useEffect(() => { void loadRuns(); }, [loadRuns]);
+
+  useEffect(() => {
+    let active = true;
+    void fetch("/api/market/keywords", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) return;
+        const body = (await response.json()) as Readonly<{ success?: boolean; keywords?: readonly MarketKeywordSuggestion[] }>;
+        if (active && body.success && Array.isArray(body.keywords)) {
+          setKeywordSuggestions(body.keywords.filter((item) => item.collection_status === "active").slice(0, 8));
+        }
+      })
+      .catch(() => { /* keyword suggestions are optional and must not block evaluation */ });
+    return () => { active = false; };
+  }, []);
 
   async function openDetail(id: string): Promise<void> {
     setDetailLoading(true);
@@ -268,19 +310,26 @@ export function ItemSelectionAdmin() {
         eyebrow="ADMIN · SUPPLIER SCREENING"
         title="상품 선정 평가"
         titleId="item-selection-title"
-        description="공급처 후보를 제한된 범위에서 평가하고 변경 불가능한 실행 이력을 검토합니다. 상품 생성이나 마켓플레이스 등록은 수행하지 않습니다."
+        description="도매꾹 공급처 후보의 시장·수익성·권리 근거를 평가하고 변경 불가능한 실행 이력을 검토합니다. 시장 전체 후보 발굴과 공급처 견적 비교는 별도 화면에서 이어집니다."
       />
       <DashboardContent>
         <DashboardSection headingId="new-run" title="새 평가 실행" description="키워드별 최대 30개 후보만 조회합니다.">
           <form className="item-selection-admin__form" onSubmit={run}>
             <input type="hidden" name="retryOfRunId" value={selected?.status === "FAILED" || selected?.status === "PARTIAL" ? selected.id : ""} />
-            <label>검색어<input name="keyword" required minLength={2} maxLength={100} disabled={running} /></label>
+            <label>검색어<input name="keyword" value={keywordDraft} onChange={(event) => setKeywordDraft(event.target.value)} required minLength={2} maxLength={100} disabled={running} /></label>
             <label>후보 수<select name="size" defaultValue="10" disabled={running}><option value="10">10개</option><option value="20">20개</option><option value="30">30개</option></select></label>
             <label>제안 판매가 (선택)<input name="proposedSalePriceKrw" type="number" min="1" step="1" inputMode="numeric" disabled={running} /></label>
             <button type="submit" disabled={running}>{running ? "실행 중…" : "평가 실행"}</button>
             {(selected?.status === "FAILED" || selected?.status === "PARTIAL") ? <label className="item-selection-admin__retry"><input name="retrySelected" type="checkbox" disabled={running} />선택한 ‘{selected.keyword}’ 실행의 명시적 재시도로 연결</label> : null}
           </form>
-          <p className="item-selection-admin__notice">권리·비용 근거가 부족한 항목은 통과로 추정하지 않고 ‘수동 확인’으로 남습니다.</p>
+          {keywordSuggestions.length > 0 ? <div className="item-selection-admin__keyword-suggestions" aria-label="시장 키워드 추천">
+            <strong>시장 데이터 기반 추천 검색어</strong>
+            <div>{keywordSuggestions.map((suggestion) => <button key={suggestion.id} type="button" onClick={() => setKeywordDraft(suggestion.keyword)} disabled={running}>
+              <span>{suggestion.keyword}</span><small>{suggestion.opportunity_score !== null ? `기회 ${suggestion.opportunity_score}` : suggestion.demand_score !== null ? `수요 ${suggestion.demand_score}` : `우선순위 ${suggestion.priority}`}</small>
+            </button>)}</div>
+            <small>추천어를 선택해 입력을 채운 뒤 평가를 실행합니다. 운영 순위나 추천 판정은 자동 변경되지 않습니다.</small>
+          </div> : null}
+          <p className="item-selection-admin__notice">권리·비용 근거가 부족한 항목은 통과로 추정하지 않고 ‘수동 확인’으로 남습니다. <Link href="/discovery">시장 후보 발굴</Link> · <Link href="/sourcing">공급처·견적 비교</Link></p>
           <div className="item-selection-admin__live" role="status" aria-live="polite">{message}</div>
         </DashboardSection>
 
@@ -323,6 +372,16 @@ export function ItemSelectionAdmin() {
               {evaluations.length === 0 ? <DashboardEmptyState title="표시할 평가 결과가 없습니다" description="빈 결과이거나 선택한 판정 필터에 일치하는 항목이 없습니다." /> : <div className="item-selection-admin__evaluations">{evaluations.map((item) => (
                 <DashboardCard key={item.evaluationId} title={`후보 #${item.originalPosition + 1} · ${item.providerItemNumber}`} headingId={`evaluation-${item.evaluationId}`} actions={<span className={`item-selection-admin__badge item-selection-admin__badge--${item.verdict.toLowerCase()}`}>{VERDICT_LABELS[item.verdict]}</span>}>
                   <dl className="item-selection-admin__facts"><div><dt>총점</dt><dd>{item.totalScoreUnits === null ? "확인 필요" : `${item.totalScoreUnits / 100}점`}</dd></div><div><dt>근거 범위</dt><dd>{item.coverageUnits / 100}%</dd></div><div><dt>기여이익</dt><dd>{item.normalizedProfitKrwMicros === null ? "확인 필요" : `${Math.round(Number(item.normalizedProfitKrwMicros) / 1_000_000).toLocaleString("ko-KR")}원`}</dd></div><div><dt>마진율</dt><dd>{item.normalizedMarginUnits === null ? "확인 필요" : `${item.normalizedMarginUnits / 100}%`}</dd></div></dl>
+                  {item.explainability ? <>
+                    <h4>점수 근거</h4>
+                    <dl className="item-selection-admin__facts">{item.explainability.score.areas.map((area) => <div key={area.area}><dt>{SCORE_AREA_LABELS[area.area] ?? area.area}</dt><dd>{area.status === "AVAILABLE" && area.normalizedScore !== null ? `${area.normalizedScore.toFixed(1)}점 · 기여 ${area.weightedContribution?.toFixed(1) ?? "—"}` : "데이터 없음"}</dd></div>)}</dl>
+                    <h4>수익성·공급처 근거</h4>
+                    <dl className="item-selection-admin__facts"><div><dt>수익성 상태</dt><dd>{item.explainability.profitability.status}</dd></div><div><dt>공급가</dt><dd>{item.explainability.provider.supplierPriceKrw === null ? "확인 필요" : `${item.explainability.provider.supplierPriceKrw.toLocaleString("ko-KR")}원`}</dd></div><div><dt>배송비</dt><dd>{item.explainability.provider.shippingFeeKrw === null ? "확인 필요" : `${item.explainability.provider.shippingFeeKrw.toLocaleString("ko-KR")}원`}</dd></div><div><dt>최소수량 / 재고</dt><dd>{item.explainability.provider.minimumOrderQuantity ?? "—"} / {item.explainability.provider.stockStatus ?? "확인 필요"}</dd></div></dl>
+                    <h4>필수 게이트</h4>
+                    <ul>{item.explainability.hardGates.map((gate) => <li key={gate.gate}>{gate.gate}: {GATE_STATUS_LABELS[gate.status] ?? gate.status} ({gate.reasonCode})</li>)}</ul>
+                    {item.explainability.missingFacts.length > 0 ? <p className="item-selection-admin__notice">남은 근거: {item.explainability.missingFacts.join(", ")}</p> : null}
+                    {item.explainability.provider.productUrl ? <p><a href={item.explainability.provider.productUrl} target="_blank" rel="noreferrer">공급처 상품 원문 열기</a></p> : null}
+                  </> : <p className="item-selection-admin__notice">상세 근거를 사용할 수 없는 이전 실행입니다.</p>}
                   <details><summary>감사 식별자</summary><code>snapshot {item.snapshotSha256}</code><code>evidence {item.providerEvidenceSha256}</code></details>
                 </DashboardCard>
               ))}</div>}

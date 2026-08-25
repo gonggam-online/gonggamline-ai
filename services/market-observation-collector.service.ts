@@ -1,10 +1,12 @@
 import type { MarketObservationInput, MarketSource } from "../types/market";
+import type { MarketDiscoverySignal } from "../shared/domain/market-discovery-evidence";
 import { collectExternalMarketProvider, type ExternalMarketProvider, type ExternalProviderCredentials } from "../lib/market/external-provider-adapters";
 
 export type MarketObservationCollectorKey = "official-api-adapter" | "public-observation-adapter";
 
 export type MarketObservationCollectorResult = Readonly<{
   observations: readonly MarketObservationInput[];
+  discoverySignals: readonly MarketDiscoverySignal[];
   endpoint: string;
   source: MarketSource;
 }>;
@@ -73,7 +75,7 @@ export async function collectConfiguredMarketObservations(
     if (!input.provider && process.env.MARKET_EXTERNAL_PROVIDER_ENABLED !== "true") throw new Error("MARKET_EXTERNAL_PROVIDER_DISABLED");
     if (nativeProvider === "youtube_data") throw new Error("MARKET_PROVIDER_SIGNAL_ONLY");
     const external = await collectExternalMarketProvider(nativeProvider, keyword, { credentials: input.credentials, request: input.request });
-    return Object.freeze({ observations: Object.freeze([...external.observations]), endpoint: `native:${nativeProvider}`, source: nativeProvider === "dataforseo_naver" ? "dataforseo_naver" : "naver_official" });
+    return Object.freeze({ observations: Object.freeze([...external.observations]), discoverySignals: Object.freeze([...external.discoverySignals]), endpoint: `native:${nativeProvider}`, source: nativeProvider === "dataforseo_naver" ? "dataforseo_naver" : "naver_official" });
   }
   const endpoint = (input.endpoint ?? process.env.COUPANG_MARKET_DATA_ENDPOINT)?.trim();
   if (!endpoint || !/^https:\/\//i.test(endpoint)) throw new Error("MARKET_COLLECTOR_ENDPOINT_UNAVAILABLE");
@@ -101,6 +103,7 @@ export async function collectConfiguredMarketObservations(
     const source = sourceFor(input.collectorKey);
     return Object.freeze({
       observations: Object.freeze(body.observations.map((observation) => normalizeObservation(observation, source, keyword))),
+      discoverySignals: Object.freeze([]),
       endpoint,
       source,
     });

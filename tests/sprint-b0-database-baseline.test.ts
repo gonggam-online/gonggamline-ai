@@ -43,8 +43,8 @@ function verifyMigrationInventory(
   artifacts: MigrationArtifact[],
   readMigration: (fileName: string) => Buffer | string,
 ): void {
-  assert.equal(actualNames.length, 26, "migration directory must contain 26 SQL files");
-  assert.equal(artifacts.length, 26, "manifest must contain 26 migration artifacts");
+  assert.equal(actualNames.length, 27, "migration directory must contain 27 SQL files");
+  assert.equal(artifacts.length, 27, "manifest must contain 27 migration artifacts");
   assert.equal(
     new Set(artifacts.map(({ file }) => file)).size,
     artifacts.length,
@@ -214,3 +214,4 @@ test("replay runner is pinned and refuses Production markers", () => {
   assert.equal(runner.includes("db push"), false);
   assert.equal(runner.includes("--linked"), false);
 });
+
