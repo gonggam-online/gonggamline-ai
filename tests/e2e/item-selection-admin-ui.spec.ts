@@ -12,7 +12,7 @@ const run = {
 };
 const detail = { ...run, evaluations: [{
   evaluationId: "22222222-2222-4222-8222-222222222222", providerItemNumber: "12345", originalPosition: 0,
-  verdict: "MANUAL_REVIEW", totalScoreUnits: null, coverageUnits: 4500, normalizedMarginUnits: null,
+  verdict: "MANUAL_REVIEW", totalScoreUnits: null, coverageUnits: 450000, normalizedMarginUnits: null,
   normalizedProfitKrwMicros: null, snapshotSha256: "c".repeat(64), providerEvidenceSha256: "d".repeat(64),
   createdAt: "2026-08-03T01:00:05.000Z",
 }] };
@@ -35,6 +35,7 @@ for (const viewport of [{ name: "desktop", width: 1280, height: 900 }, { name: "
     await page.getByRole("button", { name: /캠핑 테이블/ }).click();
     await expect(page.getByText("기회 순위 #1 · 12345")).toBeVisible();
     await expect(page.getByText("확인 필요").first()).toBeVisible();
+    await expect(page.getByText("45%")).toBeVisible();
     await page.getByLabel("검색어").fill("캠핑 의자");
     await page.getByRole("button", { name: "평가 실행" }).click();
     await expect(page.locator(".item-selection-admin__live")).toContainText("일부 완료");
