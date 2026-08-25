@@ -49,3 +49,9 @@ test("unknown financial data stays visibly unknown", () => {
   assert.match(component, /모든 검색 후보에 기회 점수와 순위를 부여합니다/);
   assert.doesNotMatch(component, /Product.*create|Coupang.*write/i);
 });
+
+test("persisted score units are rendered on the zero-to-one-hundred scale", () => {
+  assert.match(component, /종합 평가 점수/);
+  assert.match(component, /totalScoreUnits \/ 10_000/);
+  assert.doesNotMatch(component, /확정 총점/);
+});
