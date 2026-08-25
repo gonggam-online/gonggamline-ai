@@ -262,3 +262,45 @@ export async function reconcileStaleItemSelectionRun(
   if (result.error) throw repositoryError(result.error);
   return mapRun(client, result.data as DbRecord, false);
 }
+
+/**
+ * Reconciles abandoned RUNNING aggregates opportunistically when an admin
+ * opens or starts the evaluation screen. The database owns the 30-minute
+ * threshold and the RPC remains the single audited mutation boundary.
+ */
+export async function reconcileStaleItemSelectionRuns(
+  context: AdminGuardContext,
+  limit = 20,
+): Promise<Readonly<{ inspected: number; recovered: number }>> {
+  const client = createGuardedServiceRoleClient(context);
+  const cutoff = new Date(Date.now() - 30 * 60 * 1_000).toISOString();
+  const result = await client
+    .from("item_selection_runs")
+    .select("id,request_fingerprint,requested_by_principal_id")
+    .eq("status", "RUNNING")
+    .eq("requested_by_principal_id", context.administratorUserId)
+    .lt("started_at", cutoff)
+    .order("started_at", { ascending: true })
+    .limit(Math.min(Math.max(limit, 1), 50));
+  if (result.error) throw repositoryError(result.error);
+
+  let recovered = 0;
+  for (const row of (result.data as unknown as DbRecord[])) {
+    try {
+      const reconciled = await reconcileStaleItemSelectionRun(context, {
+        runId: text(row, "id"),
+        expectedRequestFingerprint: text(row, "request_fingerprint"),
+        requestedByPrincipalId: text(row, "requested_by_principal_id"),
+      });
+      if (reconciled.status === "FAILED") {
+        recovered += 1;
+      }
+    } catch (error) {
+      // A concurrent finalization or a row that became non-stale is benign.
+      if (!(error instanceof ItemSelectionRunRepositoryError && error.kind === "CONFLICT")) {
+        throw error;
+      }
+    }
+  }
+  return Object.freeze({ inspected: result.data?.length ?? 0, recovered });
+}
