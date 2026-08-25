@@ -20,7 +20,6 @@ import {
   ITEM_SELECTION_EVALUATOR_VERSION,
   ITEM_SELECTION_HARD_GATES,
   ITEM_SELECTION_RULESET_VERSION,
-  compareItemSelectionEvaluations,
   evaluateItemSelection,
   type ItemSelectionScoreInputs,
 } from "../shared/domain/item-selection";
@@ -46,11 +45,16 @@ export type RunItemSelectionRequestV1 = Readonly<{
 }>;
 
 export class ItemSelectionWorkflowError extends Error {
-  constructor(readonly code: "PROVIDER_UNAVAILABLE" | "INTERNAL_ERROR") {
-    super("Item Selection workflow failed.");
+  constructor(
+    readonly code: "PROVIDER_UNAVAILABLE" | "INTERNAL_ERROR",
+    options?: ErrorOptions,
+  ) {
+    super("Item Selection workflow failed.", options);
     this.name = "ItemSelectionWorkflowError";
   }
 }
+
+const FINALIZATION_FAILURE_CODE = "FINALIZATION_FAILED";
 
 type Dependencies = Readonly<{
   catalog?: SupplierCatalogService;
@@ -376,9 +380,10 @@ export async function runItemSelection(
       failureCode: providerError.code,
       requestedByPrincipalId: context.administratorUserId,
     });
-    throw new ItemSelectionWorkflowError(
-      failed.status === "FAILED" ? "PROVIDER_UNAVAILABLE" : "INTERNAL_ERROR",
-    );
+    if (failed.status !== "FAILED") {
+      throw new ItemSelectionWorkflowError("INTERNAL_ERROR");
+    }
+    return Object.freeze({ run: failed, created: true });
   }
 
   const observedAt = new Date(clock()).toISOString();
@@ -419,33 +424,79 @@ export async function runItemSelection(
       });
     }
   });
-  evaluations.sort((left, right) => compareItemSelectionEvaluations(left.evaluation, right.evaluation));
-  const persistedEvaluations = evaluations.map(({ write }) => write);
+  // The database finalizer owns an immutable source-identity contract: the
+  // submitted array must be ordered by the provider's original positions.
+  // Ranking is a read-model concern and must never reorder this write packet.
+  const persistedEvaluations = evaluations
+    .map(({ write }) => write)
+    .sort((left, right) => left.originalPosition - right.originalPosition);
   const terminalStatus = evaluations.length === 0 && failures.length > 0
     ? "FAILED"
     : failures.length > 0
       ? "PARTIAL"
       : "COMPLETED";
-  const run = await finalizeRun(context, {
-    runId: created.run.id,
-    terminalStatus,
-    expectedRequestFingerprint: fingerprint,
-    expectedRulesetVersion: ITEM_SELECTION_RULESET_VERSION,
-    expectedEvaluatorVersion: ITEM_SELECTION_EVALUATOR_VERSION,
-    expectedProfitabilityPolicyVersion: ITEM_SELECTION_PROFITABILITY_POLICY_VERSION,
-    expectedProfitabilityCalculationContractVersion:
-      ITEM_SELECTION_PROFITABILITY_CALCULATION_CONTRACT_VERSION,
-    evaluations: persistedEvaluations,
-    candidateFailuresCanonicalText: stableJson({
-      schemaVersion: ITEM_SELECTION_CANDIDATE_FAILURES_SCHEMA_VERSION,
-      failures,
-    }),
-    observedCandidateCount: items.length,
-    successfullyEvaluatedCount: evaluations.length,
-    failedCandidateCount: failures.length,
-    skippedCandidateCount: 0,
-    failureCode: terminalStatus === "FAILED" ? "EVALUATION_FAILED" : null,
-    requestedByPrincipalId: context.administratorUserId,
-  });
-  return Object.freeze({ run, created: true });
+  try {
+    const run = await finalizeRun(context, {
+      runId: created.run.id,
+      terminalStatus,
+      expectedRequestFingerprint: fingerprint,
+      expectedRulesetVersion: ITEM_SELECTION_RULESET_VERSION,
+      expectedEvaluatorVersion: ITEM_SELECTION_EVALUATOR_VERSION,
+      expectedProfitabilityPolicyVersion: ITEM_SELECTION_PROFITABILITY_POLICY_VERSION,
+      expectedProfitabilityCalculationContractVersion:
+        ITEM_SELECTION_PROFITABILITY_CALCULATION_CONTRACT_VERSION,
+      evaluations: persistedEvaluations,
+      candidateFailuresCanonicalText: stableJson({
+        schemaVersion: ITEM_SELECTION_CANDIDATE_FAILURES_SCHEMA_VERSION,
+        failures,
+      }),
+      observedCandidateCount: items.length,
+      successfullyEvaluatedCount: evaluations.length,
+      failedCandidateCount: failures.length,
+      skippedCandidateCount: 0,
+      failureCode: terminalStatus === "FAILED" ? "EVALUATION_FAILED" : null,
+      requestedByPrincipalId: context.administratorUserId,
+    });
+    return Object.freeze({ run, created: true });
+  } catch (finalizationError) {
+    // A rejected terminal payload must not leave a durable RUNNING aggregate
+    // until the 30-minute stale reconciler runs. The first RPC is atomic, so a
+    // second, minimal FAILED finalization is safe when it rejected the packet.
+    const terminalFailures = items.map((candidate, originalPosition) => ({
+      providerItemNumber: candidate.providerItemId,
+      originalPosition,
+      failureStage: "FINALIZATION",
+      code: FINALIZATION_FAILURE_CODE,
+      retryable: true,
+      evidenceReference: null,
+    }));
+    try {
+      const failed = await finalizeRun(context, {
+        runId: created.run.id,
+        terminalStatus: "FAILED",
+        expectedRequestFingerprint: fingerprint,
+        expectedRulesetVersion: ITEM_SELECTION_RULESET_VERSION,
+        expectedEvaluatorVersion: ITEM_SELECTION_EVALUATOR_VERSION,
+        expectedProfitabilityPolicyVersion: ITEM_SELECTION_PROFITABILITY_POLICY_VERSION,
+        expectedProfitabilityCalculationContractVersion:
+          ITEM_SELECTION_PROFITABILITY_CALCULATION_CONTRACT_VERSION,
+        evaluations: [],
+        candidateFailuresCanonicalText: stableJson({
+          schemaVersion: ITEM_SELECTION_CANDIDATE_FAILURES_SCHEMA_VERSION,
+          failures: terminalFailures,
+        }),
+        observedCandidateCount: items.length,
+        successfullyEvaluatedCount: 0,
+        failedCandidateCount: items.length,
+        skippedCandidateCount: 0,
+        failureCode: FINALIZATION_FAILURE_CODE,
+        requestedByPrincipalId: context.administratorUserId,
+      });
+      return Object.freeze({ run: failed, created: true });
+    } catch {
+      throw new ItemSelectionWorkflowError("INTERNAL_ERROR", {
+        cause: finalizationError,
+      });
+    }
+  }
 }

@@ -204,6 +204,19 @@ export function ItemSelectionAdmin() {
         return;
       }
     }
+    try {
+      const response = await fetch(`/api/admin/item-selection/runs/${id}`, { cache: "no-store" });
+      if (!response.ok) return;
+      const body = (await response.json()) as Readonly<{ data: ItemSelectionRunDtoV1 }>;
+      setSelected(body.data);
+      await loadRuns();
+      if (body.data.status === "RUNNING") {
+        setMessage("평가가 예상 완료 시간을 초과했습니다. 실행 이력의 새로고침으로 복구 상태를 확인해 주세요.");
+      }
+    } catch {
+      // The durable run remains recoverable from history even if this final
+      // status read is interrupted.
+    }
   }
 
   async function run(event: FormEvent<HTMLFormElement>): Promise<void> {

@@ -130,9 +130,14 @@ export async function POST(request: Request): Promise<Response> {
             body,
             createHash("sha256").update(idempotencyKey, "utf8").digest("hex"),
           );
-        } catch {
-          // The workflow finalizes known failures; stale recovery handles a
-          // process termination before finalization.
+        } catch (error) {
+          // Never expose provider payloads or credentials. This marker keeps
+          // unexpected worker failures observable while stale recovery remains
+          // the last-resort process-termination boundary.
+          console.error("item_selection_background_failed", {
+            correlationId: context.correlationId,
+            code: error instanceof ItemSelectionWorkflowError ? error.code : "INTERNAL_ERROR",
+          });
         }
       });
     }

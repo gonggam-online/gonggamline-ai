@@ -41,6 +41,7 @@ test("history, filters, detail, and accessible states are present", () => {
   assert.match(component, /DashboardErrorState/);
   assert.match(component, /DashboardEmptyState/);
   assert.match(component, /aria-pressed/);
+  assert.match(component, /평가가 예상 완료 시간을 초과했습니다/);
 });
 
 test("unknown financial data stays visibly unknown", () => {

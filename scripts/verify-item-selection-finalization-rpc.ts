@@ -39,14 +39,16 @@ const catalogPort: SupplierCatalogPort = {
       provider: "domeggook",
       items: Array.from({ length: size }, (_, index) => ({
         provider: "domeggook" as const,
-        providerItemId: String(900000 + index),
+        // Deliberately reverse provider ids so any accidental score/id sort
+        // violates the database's original-position ordering contract.
+        providerItemId: String(900009 - index),
         name: `synthetic-${index}`,
         supplierPriceKrw: 5_000 + index,
         shippingFeeKrw: 3_000,
         minimumOrderQuantity: 1,
         stockStatus: "in_stock" as const,
         thumbnailUrl: null,
-        productUrl: `https://domeggook.com/item/${900000 + index}`,
+        productUrl: `https://domeggook.com/item/${900009 - index}`,
         supplierId: null,
         supplierName: null,
         availableOnDomeggook: true,

@@ -39,3 +39,9 @@ test("request and response capacity are explicitly capped", () => {
   assert(collection.includes("Cache-Control") && collection.includes("no-store"));
   assert.doesNotMatch(detail, /canonicalSnapshotText|canonicalEvidenceText/);
 });
+
+test("background failures remain observable without logging provider payloads", () => {
+  assert.match(collection, /item_selection_background_failed/);
+  assert.match(collection, /correlationId: context\.correlationId/);
+  assert.doesNotMatch(collection, /console\.error\([^\n]+body|console\.error\([^\n]+request/i);
+});
