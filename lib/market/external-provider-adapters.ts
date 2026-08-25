@@ -182,6 +182,16 @@ function nestedSerpItems(value: unknown): Record<string, unknown>[] {
   });
 }
 
+function krwPriceFromText(value: unknown): number | null {
+  if (typeof value !== "string") return null;
+  const wonSuffix = value.match(/(?:₩|KRW\s*)?([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{4,9})\s*원/i);
+  const wonPrefix = value.match(/₩\s*([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{4,9})/i);
+  const raw = wonSuffix?.[1] ?? wonPrefix?.[1];
+  if (!raw) return null;
+  const parsed = Number(raw.replaceAll(",", ""));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
 /**
  * Reads current public Coupang price snippets exposed by Google through the
  * approved bounded DataForSEO Live SERP API. This is a search observation,
@@ -232,7 +242,10 @@ export async function collectDataForSeoCoupangPrices(
     const priceRecord = typeof record.price === "object" && record.price !== null
       ? record.price as Record<string, unknown>
       : null;
-    const currentPrice = number(priceRecord?.current);
+    const currentPrice = number(priceRecord?.current)
+      ?? krwPriceFromText(priceRecord?.displayed_price)
+      ?? krwPriceFromText(record.description)
+      ?? krwPriceFromText(record.snippet);
     const currency = text(priceRecord?.currency, 20)?.toUpperCase();
     if (!title || currentPrice === null || currentPrice <= 0 || !/(^|\.)coupang\.com|쿠팡/i.test(sellerIdentity)) return [];
     if (currency && currency !== "KRW") return [];

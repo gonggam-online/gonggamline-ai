@@ -65,13 +65,15 @@ test("DataForSEO Google adapter retains only public Coupang offers with KRW pric
       assert.match(String(init?.body), /욕실 코너 선반 쿠팡/);
       return response({ tasks: [{ cost: 0.002, result: [{ items: [
         { type: "organic", title: "쿠팡 욕실 코너 선반", url: "https://www.coupang.com/vp/products/1", domain: "coupang.com", rank_absolute: 1, price: { current: 12900, currency: "KRW" } },
+        { type: "organic", title: "쿠팡 욕실 선반 특가", url: "https://www.coupang.com/vp/products/3", domain: "coupang.com", rank_absolute: 2, snippet: "현재 판매가 15,900원, 무료배송" },
         { type: "organic", title: "다른 판매처", url: "https://example.com/2", domain: "example.com", rank_absolute: 2, price: { current: 1000, currency: "KRW" } },
       ] }] }] });
     },
   });
-  assert.equal(result.observations.length, 1);
+  assert.equal(result.observations.length, 2);
   assert.equal(result.observations[0]?.source, "coupang_public");
   assert.equal(result.observations[0]?.snapshot.price, 12_900);
+  assert.equal(result.observations[1]?.snapshot.price, 15_900);
   assert.equal(result.estimatedCostUsd, 0.002);
 });
 
