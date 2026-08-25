@@ -132,7 +132,7 @@ test("size 30 is one bounded provider list call and one atomic finalization", as
   assert.equal(result.run.persistedEvaluationCount, 30);
 });
 
-test("market-enriched evaluations are persisted in deterministic score order", async () => {
+test("market-enriched evaluations preserve deterministic source identity order for atomic persistence", async () => {
   let finalized: FinalizeItemSelectionRunWriteV1 | undefined;
   const items = [item(0, "1000"), item(1, "1001"), item(2, "1002")];
   const market: ReadonlyMap<string, MarketEnrichmentRecord> = new Map([
@@ -157,7 +157,11 @@ test("market-enriched evaluations are persisted in deterministic score order", a
     },
   });
   const providerOrder = (finalized?.evaluations ?? []).map((evaluation) => evaluation.providerItemNumber);
-  assert.deepEqual(providerOrder, ["1001", "1002", "1000"]);
+  assert.deepEqual(providerOrder, ["1000", "1001", "1002"]);
+  assert.deepEqual(
+    (finalized?.evaluations ?? []).map((evaluation) => evaluation.originalPosition),
+    [0, 1, 2],
+  );
 });
 
 test("deduplicates before observation and persists a partial run for item-scoped failure", async () => {
@@ -183,14 +187,17 @@ test("deduplicates before observation and persists a partial run for item-scoped
   assert.doesNotMatch(finalized?.candidateFailuresCanonicalText ?? "", /Error|stack|테스트 상품/);
 });
 
-test("provider failure is persisted as FAILED and returned as sanitized unavailability", async () => {
+test("provider failure is persisted and returned as a terminal FAILED run", async () => {
   let terminal: string | undefined;
   const failingCatalog = new SupplierCatalogService({
     async searchItems() { throw new DomeggookError("TIMEOUT"); },
     async getItem() { return { status: "not_found", item: null }; },
   });
-  await assert.rejects(
-    runItemSelection(context, { provider: "domeggook", keyword: "테스트 상품", size: 10 }, "e".repeat(64), {
+  const result = await runItemSelection(
+    context,
+    { provider: "domeggook", keyword: "테스트 상품", size: 10 },
+    "e".repeat(64),
+    {
       catalog: failingCatalog,
       async createRun(_context, input) {
         return { run: run({ requestFingerprint: input.requestFingerprint }), created: true };
@@ -199,10 +206,42 @@ test("provider failure is persisted as FAILED and returned as sanitized unavaila
         terminal = input.terminalStatus;
         return run({ status: input.terminalStatus });
       },
-    }),
-    (error: unknown) => error instanceof Error && error.name === "ItemSelectionWorkflowError",
+    },
   );
   assert.equal(terminal, "FAILED");
+  assert.equal(result.run.status, "FAILED");
+});
+
+test("a rejected result packet is immediately finalized as FAILED instead of remaining RUNNING", async () => {
+  const finalizations: FinalizeItemSelectionRunWriteV1[] = [];
+  const result = await runItemSelection(context, {
+    provider: "domeggook",
+    keyword: "테스트 상품",
+    size: 10,
+  }, "9".repeat(64), {
+    catalog: catalog([item(0), item(1)], []),
+    async createRun(_context, input) {
+      return { run: run({ requestFingerprint: input.requestFingerprint }), created: true };
+    },
+    async finalizeRun(_context, input) {
+      finalizations.push(input);
+      if (finalizations.length === 1) throw new Error("simulated atomic finalizer rejection");
+      return run({
+        status: input.terminalStatus,
+        failureCode: input.failureCode,
+        observedCandidateCount: input.observedCandidateCount,
+        failedCandidateCount: input.failedCandidateCount,
+      });
+    },
+  });
+
+  assert.equal(finalizations.length, 2);
+  assert.equal(finalizations[0]?.terminalStatus, "COMPLETED");
+  assert.equal(finalizations[1]?.terminalStatus, "FAILED");
+  assert.equal(finalizations[1]?.failureCode, "FINALIZATION_FAILED");
+  assert.equal(finalizations[1]?.evaluations.length, 0);
+  assert.equal(finalizations[1]?.failedCandidateCount, 2);
+  assert.equal(result.run.status, "FAILED");
 });
 
 test("an identical idempotent replay does not call the provider or finalize again", async () => {
