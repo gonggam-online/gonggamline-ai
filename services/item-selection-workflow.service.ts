@@ -24,6 +24,10 @@ import {
 } from "../shared/domain/item-selection";
 import type { SupplierCatalogItem } from "../shared/domain/supplier-catalog";
 import { publicCatalogOpportunityScores } from "../shared/domain/item-selection-public-signals";
+import {
+  estimateItemSelectionDiscoveryProfitability,
+  type ItemSelectionDiscoveryProfitabilityEstimate,
+} from "../shared/domain/item-selection-discovery-profitability";
 import { enrichItemSelectionScores } from "../shared/domain/item-selection-market-enrichment";
 import {
   ITEM_SELECTION_CANDIDATE_FAILURES_SCHEMA_VERSION,
@@ -65,6 +69,9 @@ type Dependencies = Readonly<{
 }>;
 
 const MARKET_ENRICHMENT_TIMEOUT_MS = 5_000;
+const SUPPLIER_DETAIL_TIMEOUT_MS = 3_000;
+const SUPPLIER_DETAIL_CONCURRENCY = 5;
+const SUPPLIER_DETAIL_MAX_ITEMS = 5;
 
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -149,9 +156,87 @@ function missingMoney(id: string): MoneyFact {
   };
 }
 
+function needsDetailEnrichment(item: SupplierCatalogItem): boolean {
+  return item.shippingFeeKrw === null ||
+    item.minimumOrderQuantity === null ||
+    item.supplierPriceKrw === null;
+}
+
+function mergeCatalogDetail(
+  listed: SupplierCatalogItem,
+  detailed: SupplierCatalogItem,
+): SupplierCatalogItem {
+  return {
+    ...listed,
+    name: detailed.name ?? listed.name,
+    supplierPriceKrw: detailed.supplierPriceKrw ?? listed.supplierPriceKrw,
+    shippingFeeKrw: detailed.shippingFeeKrw ?? listed.shippingFeeKrw,
+    minimumOrderQuantity: detailed.minimumOrderQuantity ?? listed.minimumOrderQuantity,
+    stockStatus: detailed.stockStatus !== "unknown" ? detailed.stockStatus : listed.stockStatus,
+    thumbnailUrl: detailed.thumbnailUrl ?? listed.thumbnailUrl,
+    productUrl: detailed.productUrl ?? listed.productUrl,
+    supplierId: detailed.supplierId ?? listed.supplierId,
+    supplierName: detailed.supplierName ?? listed.supplierName,
+    availableOnDomeggook: detailed.availableOnDomeggook ?? listed.availableOnDomeggook,
+    supplyAvailable: detailed.supplyAvailable ?? listed.supplyAvailable,
+  };
+}
+
+async function enrichCatalogDetails(
+  catalog: SupplierCatalogService,
+  items: readonly SupplierCatalogItem[],
+): Promise<readonly SupplierCatalogItem[]> {
+  const enriched = [...items];
+  const detailItemIds = new Set(items
+    .filter(needsDetailEnrichment)
+    .slice(0, SUPPLIER_DETAIL_MAX_ITEMS)
+    .map(({ providerItemId }) => providerItemId));
+  for (let offset = 0; offset < items.length; offset += SUPPLIER_DETAIL_CONCURRENCY) {
+    const batch = items.slice(offset, offset + SUPPLIER_DETAIL_CONCURRENCY);
+    const results = await Promise.all(batch.map(async (item) => {
+      if (!detailItemIds.has(item.providerItemId)) return item;
+      try {
+        const detail = await withTimeout(catalog.getItem(item.providerItemId), SUPPLIER_DETAIL_TIMEOUT_MS);
+        return detail.status === "found" ? mergeCatalogDetail(item, detail.item) : item;
+      } catch {
+        return item;
+      }
+    }));
+    results.forEach((item, index) => { enriched[offset + index] = item; });
+  }
+  return Object.freeze(enriched);
+}
+
+function estimatedMoney(id: string, amountKrw: number, observedAt: string): MoneyFact {
+  return {
+    id,
+    amountKrw,
+    sourceType: "APPROVED_POLICY",
+    sourceReference: "gonggamline-discovery-profitability-2026-08-25-v1",
+    effectiveFrom: observedAt,
+    vatTreatment: "VAT_INCLUSIVE_NON_DEDUCTIBLE",
+    includedIn: [],
+    confirmationStatus: "ESTIMATED",
+  };
+}
+
+function notApplicableMoney(id: string): MoneyFact {
+  return {
+    id,
+    amountKrw: null,
+    sourceType: "APPROVED_POLICY",
+    sourceReference: "included-in-fulfillment-estimate",
+    effectiveFrom: null,
+    vatTreatment: "VAT_EXCLUSIVE",
+    includedIn: [],
+    confirmationStatus: "NOT_APPLICABLE",
+  };
+}
+
 function profitabilityInput(
   item: SupplierCatalogItem,
   providerFacts: ReturnType<typeof mapSupplierProfitabilityFacts>,
+  discoveryEstimate: ItemSelectionDiscoveryProfitabilityEstimate,
   request: RunItemSelectionRequestV1,
   observedAt: string,
 ): ItemSelectionProfitabilityInput {
@@ -174,14 +259,22 @@ function profitabilityInput(
     marketplaceFeeRate: null,
     fulfillment: { normalized: null, currentEffective: null },
     variableCosts: [
-      missingMoney("inboundInspectionStorage"),
-      missingMoney("pickPackPackagingLabelSet"),
-      {
-        ...providerFacts.supplierShippingCost,
-        id: "supplierToFulfillmentInbound",
-        includedIn: [],
-      },
-      missingMoney("otherOrderVariableCost"),
+      discoveryEstimate.status === "ESTIMATED"
+        ? estimatedMoney("inboundInspectionStorage", discoveryEstimate.costsPerUnitKrw.inboundInspectionBase, observedAt)
+        : missingMoney("inboundInspectionStorage"),
+      discoveryEstimate.status === "ESTIMATED"
+        ? notApplicableMoney("pickPackPackagingLabelSet")
+        : missingMoney("pickPackPackagingLabelSet"),
+      discoveryEstimate.status === "ESTIMATED" && discoveryEstimate.costsPerUnitKrw.supplierInboundBase !== null
+        ? estimatedMoney("supplierToFulfillmentInbound", discoveryEstimate.costsPerUnitKrw.supplierInboundBase, observedAt)
+        : {
+            ...providerFacts.supplierShippingCost,
+            id: "supplierToFulfillmentInbound",
+            includedIn: [],
+          },
+      discoveryEstimate.status === "ESTIMATED"
+        ? estimatedMoney("otherOrderVariableCost", discoveryEstimate.costsPerUnitKrw.otherBase, observedAt)
+        : missingMoney("otherOrderVariableCost"),
     ],
     advertisingActual: { rate: null, observedDays: 0, validOrders: 0 },
     returnLoss: {
@@ -209,7 +302,8 @@ function toWrite(
     supplierVatTreatment: "VAT_INCLUSIVE_NON_DEDUCTIBLE",
     shippingVatTreatment: "VAT_INCLUSIVE_NON_DEDUCTIBLE",
   });
-  const profitInput = profitabilityInput(item, providerFacts, request, observedAt);
+  const discoveryProfitabilityEstimate = estimateItemSelectionDiscoveryProfitability(item, cohort);
+  const profitInput = profitabilityInput(item, providerFacts, discoveryProfitabilityEstimate, request, observedAt);
   const profitResult = calculateItemSelectionProfitability(profitInput);
   const evaluatorInput = {
     providerItemNumber: item.providerItemId,
@@ -236,6 +330,7 @@ function toWrite(
     providerFacts: stableJson(providerFacts),
     profitabilityInput: stableJson(profitInput),
     profitabilityResult: stableJson(profitResult),
+    discoveryProfitabilityEstimate: stableJson(discoveryProfitabilityEstimate),
     evaluatorInput: stableJson(evaluatorInput),
     evaluatorOutput: stableJson(evaluatorOutput),
   };
@@ -243,6 +338,7 @@ function toWrite(
     providerFacts: sha256(stages.providerFacts),
     profitabilityInput: sha256(stages.profitabilityInput),
     profitabilityResult: sha256(stages.profitabilityResult),
+    discoveryProfitabilityEstimate: sha256(stages.discoveryProfitabilityEstimate),
     evaluatorInput: sha256(stages.evaluatorInput),
     evaluatorOutput: sha256(stages.evaluatorOutput),
   };
@@ -270,6 +366,7 @@ function toWrite(
     providerFacts,
     profitabilityInput: profitInput,
     profitabilityResult: profitResult,
+    discoveryProfitabilityEstimate,
     evaluatorInput,
     evaluatorOutput,
     hashes,
@@ -350,11 +447,12 @@ export async function runItemSelection(
   try {
     const result = await catalog.searchItems(normalizedKeyword, 1, request.size);
     const seen = new Set<string>();
-    items = result.items.filter((item) => {
+    const listedItems = result.items.filter((item) => {
       if (seen.has(item.providerItemId)) return false;
       seen.add(item.providerItemId);
       return true;
     }).slice(0, request.size);
+    items = await enrichCatalogDetails(catalog, listedItems);
   } catch (error) {
     const providerError = error instanceof DomeggookError
       ? error

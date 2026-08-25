@@ -1,7 +1,7 @@
 export const ITEM_SELECTION_RULESET_VERSION =
-  "gonggamline-item-selection-v2" as const;
+  "gonggamline-item-selection-v3" as const;
 
-export const ITEM_SELECTION_EVALUATOR_VERSION = "item-selection-evaluator-v2" as const;
+export const ITEM_SELECTION_EVALUATOR_VERSION = "item-selection-evaluator-v3" as const;
 
 export const ITEM_SELECTION_SCORE_WEIGHTS = {
   competitiveness: 45,

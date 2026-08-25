@@ -42,11 +42,22 @@ test("every public catalogue result receives a deterministic opportunity score",
   );
 
   assert.deepEqual(first, repeated);
-  assert.equal(first.profitability.status, "UNAVAILABLE");
-  for (const area of ["competitiveness", "demand", "conversionPotential", "logisticsFit", "supplyStability"] as const) {
+  assert.equal(first.profitability.status, "AVAILABLE");
+  for (const area of ["competitiveness", "profitability", "demand", "conversionPotential", "logisticsFit", "supplyStability"] as const) {
     assert.equal(first[area].status, "AVAILABLE");
     assert.equal(first[area].evidence[0]?.sourceType, "PUBLIC_SUPPLIER_CATALOG");
   }
+});
+
+test("lower required selling-price floor ranks above a higher-cost candidate", () => {
+  const cheaper = item({ providerItemId: "1001", supplierPriceKrw: 4_000 });
+  const expensive = item({ providerItemId: "1002", supplierPriceKrw: 12_000 });
+  const cohort = [cheaper, expensive];
+  const cheapScore = publicCatalogOpportunityScores(cheaper, cohort, 0, "2026-08-25T00:00:00.000Z");
+  const expensiveScore = publicCatalogOpportunityScores(expensive, cohort, 1, "2026-08-25T00:00:00.000Z");
+  assert.equal(cheapScore.profitability.status, "AVAILABLE");
+  assert.equal(expensiveScore.profitability.status, "AVAILABLE");
+  assert(cheapScore.profitability.normalizedScore > expensiveScore.profitability.normalizedScore);
 });
 
 test("lower comparable landed cost ranks above a higher-cost cohort item", () => {

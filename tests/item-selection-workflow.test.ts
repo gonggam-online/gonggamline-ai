@@ -121,7 +121,7 @@ test("size 30 is one bounded provider list call and one atomic finalization", as
   assert.equal(finalizedInput?.terminalStatus, "COMPLETED");
   assert.equal(finalizedInput?.evaluations.length, 30);
   assert(finalizedInput?.evaluations.every(({ verdict }) => verdict === "CONDITIONAL"));
-  assert(finalizedInput?.evaluations.every(({ coverageUnits }) => coverageUnits === 750_000));
+  assert(finalizedInput?.evaluations.every(({ coverageUnits }) => coverageUnits === 1_000_000));
   assert(finalizedInput?.evaluations.every(({ canonicalSnapshotText }) => canonicalSnapshotText.length < 100_000));
   const firstSnapshot = JSON.parse(finalizedInput?.evaluations[0]?.canonicalSnapshotText ?? "{}") as {
     profitabilityInput?: { variableCosts?: Array<{ id?: string; amountKrw?: number | null }> };
@@ -130,7 +130,48 @@ test("size 30 is one bounded provider list call and one atomic finalization", as
     ({ id }) => id === "supplierToFulfillmentInbound",
   );
   assert.equal(supplierInbound?.amountKrw, 3_000);
+  assert(finalizedInput?.evaluations.every(({ normalizedProfitKrwMicros }) => normalizedProfitKrwMicros !== null));
   assert.equal(result.run.persistedEvaluationCount, 30);
+});
+
+test("enriches missing public cost fields from a bounded detail read before scoring", async () => {
+  let finalized: FinalizeItemSelectionRunWriteV1 | undefined;
+  const listed = item(0);
+  listed.shippingFeeKrw = null;
+  listed.minimumOrderQuantity = null;
+  const detailCalls: string[] = [];
+  const port: SupplierCatalogPort = {
+    async searchItems() {
+      return {
+        provider: "domeggook",
+        items: [listed],
+        pagination: { page: 1, size: 10, totalItems: 1, hasNextPage: false },
+      };
+    },
+    async getItem(itemNo) {
+      detailCalls.push(itemNo);
+      return { status: "found", item: { ...listed, shippingFeeKrw: 3_000, minimumOrderQuantity: 6 } };
+    },
+  };
+  await runItemSelection(context, {
+    provider: "domeggook",
+    keyword: "테스트 상품",
+    size: 10,
+  }, "e".repeat(64), {
+    catalog: new SupplierCatalogService(port),
+    async createRun(_context, input) {
+      return { run: run({ requestFingerprint: input.requestFingerprint }), created: true };
+    },
+    async finalizeRun(_context, input) {
+      finalized = input;
+      return run({ status: input.terminalStatus, persistedEvaluationCount: input.evaluations.length });
+    },
+  });
+  assert.deepEqual(detailCalls, [listed.providerItemId]);
+  const snapshot = JSON.parse(finalized?.evaluations[0]?.canonicalSnapshotText ?? "{}") as {
+    discoveryProfitabilityEstimate?: { costsPerUnitKrw?: { supplierInboundBase?: number } };
+  };
+  assert.equal(snapshot.discoveryProfitabilityEstimate?.costsPerUnitKrw?.supplierInboundBase, 500);
 });
 
 test("market-enriched evaluations preserve deterministic source identity order for atomic persistence", async () => {

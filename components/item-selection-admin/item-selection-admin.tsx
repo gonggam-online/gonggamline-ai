@@ -410,7 +410,19 @@ export function ItemSelectionAdmin() {
                     <h4>점수 근거</h4>
                     <dl className="item-selection-admin__facts">{item.explainability.score.areas.map((area) => <div key={area.area}><dt>{SCORE_AREA_LABELS[area.area] ?? area.area}</dt><dd>{area.status === "AVAILABLE" && area.normalizedScore !== null ? `${area.normalizedScore.toFixed(1)}점 · 기여 ${area.weightedContribution?.toFixed(1) ?? "—"}` : "데이터 없음"}</dd></div>)}</dl>
                     <h4>수익성·공급처 근거</h4>
-                    <dl className="item-selection-admin__facts"><div><dt>상품번호 / 공급처</dt><dd>{item.providerItemNumber} / {item.explainability.provider.supplierName ?? "공개 식별 없음"}</dd></div><div><dt>공급처 검색 순서</dt><dd>{item.originalPosition + 1}번째</dd></div><div><dt>수익성 상태</dt><dd>{item.explainability.profitability.status}</dd></div><div><dt>공급가</dt><dd>{item.explainability.provider.supplierPriceKrw === null ? "확인 필요" : `${item.explainability.provider.supplierPriceKrw.toLocaleString("ko-KR")}원`}</dd></div><div><dt>배송비</dt><dd>{item.explainability.provider.shippingFeeKrw === null ? "확인 필요" : `${item.explainability.provider.shippingFeeKrw.toLocaleString("ko-KR")}원`}</dd></div><div><dt>최소수량 / 재고</dt><dd>{item.explainability.provider.minimumOrderQuantity ?? "—"} / {item.explainability.provider.stockStatus ?? "확인 필요"}</dd></div></dl>
+                    <dl className="item-selection-admin__facts"><div><dt>상품번호 / 공급처</dt><dd>{item.providerItemNumber} / {item.explainability.provider.supplierName ?? "공개 식별 없음"}</dd></div><div><dt>공급처 검색 순서</dt><dd>{item.originalPosition + 1}번째</dd></div><div><dt>수익성 상태</dt><dd>{item.explainability.profitability.status === "INCOMPLETE" && item.explainability.profitability.discoveryEstimate?.status === "ESTIMATED" ? "사전 추정 가능" : item.explainability.profitability.status}</dd></div><div><dt>공급가</dt><dd>{item.explainability.provider.supplierPriceKrw === null ? "확인 필요" : `${item.explainability.provider.supplierPriceKrw.toLocaleString("ko-KR")}원`}</dd></div><div><dt>배송비</dt><dd>{item.explainability.provider.shippingFeeKrw === null ? "공개값 없음 · 보수 추정" : `${item.explainability.provider.shippingFeeKrw.toLocaleString("ko-KR")}원`}</dd></div><div><dt>최소수량 / 재고</dt><dd>{item.explainability.provider.minimumOrderQuantity ?? "1개 가정"} / {item.explainability.provider.stockStatus ?? "확인 필요"}</dd></div></dl>
+                    {item.explainability.profitability.discoveryEstimate?.status === "ESTIMATED" ? <>
+                      <h4>사전 수익성 범위</h4>
+                      <dl className="item-selection-admin__facts">
+                        <div><dt>손익분기 판매가</dt><dd>{item.explainability.profitability.discoveryEstimate.breakEvenSellingPriceKrw?.toLocaleString("ko-KR")}원 이상</dd></div>
+                        <div><dt>조건부 판매가 하한</dt><dd>{item.explainability.profitability.discoveryEstimate.conditionalSellingPriceKrw?.toLocaleString("ko-KR")}원</dd></div>
+                        <div><dt>추천 판매가 하한</dt><dd>{item.explainability.profitability.discoveryEstimate.recommendSellingPriceKrw?.toLocaleString("ko-KR")}원</dd></div>
+                        <div><dt>배송비 안분 / 개</dt><dd>{item.explainability.profitability.discoveryEstimate.supplierInboundPerUnitKrw?.toLocaleString("ko-KR")}원</dd></div>
+                        <div><dt>검수·입고 추정 / 개</dt><dd>{item.explainability.profitability.discoveryEstimate.inboundInspectionPerUnitKrw?.toLocaleString("ko-KR")}원</dd></div>
+                        <div><dt>3PL 추정 / 개</dt><dd>{item.explainability.profitability.discoveryEstimate.fulfillmentPerUnitKrw?.toLocaleString("ko-KR")}원</dd></div>
+                      </dl>
+                      <p className="item-selection-admin__notice">공개 조달비와 승인된 보수적 비용 가정으로 계산한 탐색용 범위입니다. 실제 판매가·규격·카테고리 수수료·견적을 확인하면 다시 계산됩니다.</p>
+                    </> : null}
                     <h4>필수 게이트</h4>
                     <ul>{item.explainability.hardGates.map((gate) => <li key={gate.gate}>{gate.gate}: {GATE_STATUS_LABELS[gate.status] ?? gate.status} ({gate.reasonCode})</li>)}</ul>
                     {item.explainability.missingFacts.length > 0 ? <p className="item-selection-admin__notice">남은 근거: {item.explainability.missingFacts.join(", ")}</p> : null}

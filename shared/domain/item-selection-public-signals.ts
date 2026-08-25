@@ -1,5 +1,6 @@
 import type { ItemSelectionEvidence, ItemSelectionScoreInputs } from "./item-selection";
 import type { SupplierCatalogItem } from "./supplier-catalog";
+import { estimateItemSelectionDiscoveryProfitability } from "./item-selection-discovery-profitability";
 
 function clamp(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value * 10) / 10));
@@ -96,6 +97,7 @@ export function publicCatalogOpportunityScores(
   const conversionPotential = listingCompleteness(item);
   const logisticsFit = logisticsScore(item);
   const supplyStability = supplyScore(item);
+  const profitability = estimateItemSelectionDiscoveryProfitability(item, cohort);
 
   return {
     competitiveness: {
@@ -109,8 +111,18 @@ export function publicCatalogOpportunityScores(
       ),
     },
     profitability: {
-      status: "UNAVAILABLE",
-      missingFacts: ["completeProfitability"],
+      ...(profitability.status === "ESTIMATED" && profitability.profitabilityPotentialScore !== null
+        ? {
+            status: "AVAILABLE" as const,
+            normalizedScore: profitability.profitabilityPotentialScore,
+            evidence: evidence(
+              "supplierPriceKrw,shippingFeeKrw,minimumOrderQuantity,approvedCostAssumptions",
+              "공개 조달비와 승인된 보수적 비용 가정으로 필요한 판매가 하한을 계산해 후보군 안에서 비교한 사전 수익성 점수입니다. 확정 이익이 아닙니다.",
+              observedAt,
+              reference,
+            ),
+          }
+        : { status: "UNAVAILABLE" as const, missingFacts: ["supplierUnitCost"] }),
     },
     demand: {
       status: "AVAILABLE",

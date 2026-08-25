@@ -87,10 +87,10 @@ function evaluate(
   });
 }
 
-test("exports immutable v2 ruleset and evaluator versions", () => {
+test("exports immutable v3 ruleset and evaluator versions", () => {
   const result = evaluate();
   assert.equal(result.rulesetVersion, ITEM_SELECTION_RULESET_VERSION);
-  assert.equal(result.rulesetVersion, "gonggamline-item-selection-v2");
+  assert.equal(result.rulesetVersion, "gonggamline-item-selection-v3");
   assert.equal(result.evaluatorVersion, ITEM_SELECTION_EVALUATOR_VERSION);
 });
 
