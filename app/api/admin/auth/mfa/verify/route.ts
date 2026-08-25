@@ -14,6 +14,11 @@ import { AdminCsrfError, verifyAdminCsrfToken } from "@/lib/auth/csrf.server";
 import { createSupabaseSsrServerClient } from "@/lib/auth/supabase-ssr.server";
 import { cookies } from "next/headers";
 import { ADMIN_CSRF_COOKIE_NAME } from "@/lib/auth/csrf.server";
+import {
+  ADMIN_MFA_GRANT_COOKIE_NAME,
+  ADMIN_MFA_GRANT_COOKIE_OPTIONS,
+  issueAdminMfaGrant,
+} from "@/lib/auth/admin-mfa-grant.server";
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -54,7 +59,9 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ code: "AUTHORIZATION_DENIED" }, { status: 403 });
     }
     await requireAdminRequest(request, "mutation", { client });
-    (await cookies()).set(ADMIN_CSRF_COOKIE_NAME, "", {
+    const cookieStore = await cookies();
+    cookieStore.set(ADMIN_MFA_GRANT_COOKIE_NAME, issueAdminMfaGrant(context), ADMIN_MFA_GRANT_COOKIE_OPTIONS);
+    cookieStore.set(ADMIN_CSRF_COOKIE_NAME, "", {
       secure: true,
       httpOnly: true,
       sameSite: "strict",

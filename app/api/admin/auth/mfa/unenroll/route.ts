@@ -13,6 +13,8 @@ import {
 } from "@/lib/auth/admin-request-guard.server";
 import { AdminCsrfError, verifyAdminCsrfToken } from "@/lib/auth/csrf.server";
 import { createSupabaseSsrServerClient } from "@/lib/auth/supabase-ssr.server";
+import { cookies } from "next/headers";
+import { ADMIN_MFA_GRANT_COOKIE_NAME } from "@/lib/auth/admin-mfa-grant.server";
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -46,6 +48,13 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ code: "RATE_LIMITED" }, { status: 429 });
     }
     await unenrollAdminTotpFactor(client, factor.id);
+    (await cookies()).set(ADMIN_MFA_GRANT_COOKIE_NAME, "", {
+      secure: true,
+      httpOnly: true,
+      sameSite: "strict",
+      path: "/",
+      maxAge: 0,
+    });
     return Response.json({ unenrolled: true });
   } catch (error) {
     if (error instanceof SyntaxError) {

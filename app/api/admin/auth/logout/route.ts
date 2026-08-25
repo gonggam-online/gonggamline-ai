@@ -14,6 +14,7 @@ import {
   verifyAdminCsrfToken,
 } from "@/lib/auth/csrf.server";
 import { createSupabaseSsrServerClient } from "@/lib/auth/supabase-ssr.server";
+import { ADMIN_MFA_GRANT_COOKIE_NAME } from "@/lib/auth/admin-mfa-grant.server";
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -39,7 +40,15 @@ export async function POST(request: Request): Promise<Response> {
     if (error) {
       return Response.json({ code: "SIGN_OUT_FAILED" }, { status: 500 });
     }
-    (await cookies()).set(ADMIN_CSRF_COOKIE_NAME, "", {
+    const cookieStore = await cookies();
+    cookieStore.set(ADMIN_MFA_GRANT_COOKIE_NAME, "", {
+      secure: true,
+      httpOnly: true,
+      sameSite: "strict",
+      path: "/",
+      maxAge: 0,
+    });
+    cookieStore.set(ADMIN_CSRF_COOKIE_NAME, "", {
       secure: true,
       httpOnly: true,
       sameSite: "strict",

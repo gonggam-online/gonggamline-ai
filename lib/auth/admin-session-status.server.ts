@@ -8,6 +8,7 @@ export function buildAdminSessionStatus(
     expiresAt: string | null;
     refreshAttempted: boolean;
     trustedBrowserPreference: boolean;
+    mfaGrantValid?: boolean;
   }>,
 ): AdminSessionStatusDto {
   const ageSeconds = context === null
@@ -16,7 +17,7 @@ export function buildAdminSessionStatus(
   let status: AdminSessionStatus = "SIGNED_OUT";
   if (context !== null) {
     status = context.aal === "aal2"
-      ? (ageSeconds !== null && ageSeconds <= 60 ? "MFA_VERIFIED" : "REAUTH_REQUIRED")
+      ? (input.mfaGrantValid || (ageSeconds !== null && ageSeconds <= 60) ? "MFA_VERIFIED" : "REAUTH_REQUIRED")
       : "MFA_REQUIRED";
   }
   return Object.freeze({

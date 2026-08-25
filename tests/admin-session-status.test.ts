@@ -45,3 +45,25 @@ test("does not let the trusted-browser preference bypass reauthentication", () =
     assert.equal(status.mutationReady, false);
     Date.now = originalNow;
 });
+
+test("a verified MFA grant keeps mutation readiness after the short JWT freshness window", () => {
+    const originalNow = Date.now;
+    Date.now = () => 1_000_000;
+    const context = {
+      administratorUserId: "admin",
+      aal: "aal2" as const,
+      jwtIssuedAt: 999_000,
+      sessionIdentity: "session",
+      route: "/admin/item-selection",
+      correlationId: "corr",
+    };
+    const status = buildAdminSessionStatus(context, {
+      expiresAt: null,
+      refreshAttempted: false,
+      trustedBrowserPreference: false,
+      mfaGrantValid: true,
+    });
+    assert.equal(status.status, "MFA_VERIFIED");
+    assert.equal(status.mutationReady, true);
+    Date.now = originalNow;
+});
