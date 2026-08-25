@@ -69,6 +69,22 @@ const EMPTY_SCORES: ItemSelectionScoreInputs = Object.freeze({
   supplyStability: { status: "UNAVAILABLE", missingFacts: ["longitudinalSupplyEvidence"] },
 });
 
+const MARKET_ENRICHMENT_TIMEOUT_MS = 5_000;
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(() => reject(new Error("ITEM_SELECTION_STAGE_TIMEOUT")), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 function stableJson(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
@@ -80,6 +96,49 @@ function stableJson(value: unknown): string {
 
 function sha256(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+function requestFingerprint(
+  context: AdminGuardContext,
+  request: RunItemSelectionRequestV1,
+): { normalizedKeyword: string; marketMode: "OFF" | "ENRICH"; fingerprint: string } {
+  const normalizedKeyword = request.keyword.trim().replace(/\s+/g, " ");
+  const marketMode = request.marketIntelligenceMode ?? "OFF";
+  const fingerprint = sha256(stableJson({
+    requester: context.administratorUserId,
+    provider: request.provider,
+    keyword: normalizedKeyword,
+    size: request.size,
+    proposedSalePriceKrw: request.proposedSalePriceKrw ?? null,
+    costProfileVersion: request.costProfileVersion ?? null,
+    marketIntelligenceMode: marketMode,
+    rulesetVersion: ITEM_SELECTION_RULESET_VERSION,
+  }));
+  return { normalizedKeyword, marketMode, fingerprint };
+}
+
+/** Creates the durable RUNNING intent without doing provider work. */
+export async function createItemSelectionRunIntent(
+  context: AdminGuardContext,
+  request: RunItemSelectionRequestV1,
+  idempotencyKeyHash: string,
+): Promise<Readonly<{ run: ItemSelectionRunDtoV1; created: boolean }>> {
+  const { normalizedKeyword, fingerprint } = requestFingerprint(context, request);
+  const repository = await import("./item-selection-run.repository");
+  return repository.createItemSelectionRun(context, {
+    provider: request.provider,
+    keyword: normalizedKeyword,
+    requestedSize: request.size,
+    rulesetVersion: ITEM_SELECTION_RULESET_VERSION,
+    evaluatorVersion: ITEM_SELECTION_EVALUATOR_VERSION,
+    profitabilityPolicyVersion: ITEM_SELECTION_PROFITABILITY_POLICY_VERSION,
+    profitabilityCalculationContractVersion:
+      ITEM_SELECTION_PROFITABILITY_CALCULATION_CONTRACT_VERSION,
+    requestFingerprint: fingerprint,
+    idempotencyKeyHash,
+    retryOfRunId: request.retryOfRunId ?? null,
+    requestedByPrincipalId: context.administratorUserId,
+  });
 }
 
 function missingMoney(id: string): MoneyFact {
@@ -266,18 +325,7 @@ export async function runItemSelection(
     : await import("./item-selection-run.repository");
   const createRun = dependencies.createRun ?? repository!.createItemSelectionRun;
   const finalizeRun = dependencies.finalizeRun ?? repository!.finalizeItemSelectionRun;
-  const marketMode = request.marketIntelligenceMode ?? "OFF";
-  const normalizedKeyword = request.keyword.trim().replace(/\s+/g, " ");
-  const fingerprint = sha256(stableJson({
-    requester: context.administratorUserId,
-    provider: request.provider,
-    keyword: normalizedKeyword,
-    size: request.size,
-    proposedSalePriceKrw: request.proposedSalePriceKrw ?? null,
-    costProfileVersion: request.costProfileVersion ?? null,
-    marketIntelligenceMode: marketMode,
-    rulesetVersion: ITEM_SELECTION_RULESET_VERSION,
-  }));
+  const { normalizedKeyword, marketMode, fingerprint } = requestFingerprint(context, request);
   const created = await createRun(context, {
     provider: request.provider,
     keyword: normalizedKeyword,
@@ -304,7 +352,9 @@ export async function runItemSelection(
       return true;
     }).slice(0, request.size);
   } catch (error) {
-    if (!(error instanceof DomeggookError)) throw error;
+    const providerError = error instanceof DomeggookError
+      ? error
+      : new DomeggookError("PROVIDER_ERROR", { cause: error });
     const failed = await finalizeRun(context, {
       runId: created.run.id,
       terminalStatus: "FAILED",
@@ -323,7 +373,7 @@ export async function runItemSelection(
       successfullyEvaluatedCount: 0,
       failedCandidateCount: 0,
       skippedCandidateCount: 0,
-      failureCode: error.code,
+      failureCode: providerError.code,
       requestedByPrincipalId: context.administratorUserId,
     });
     throw new ItemSelectionWorkflowError(
@@ -335,7 +385,10 @@ export async function runItemSelection(
   let marketByProviderItem = new Map<string, MarketEnrichmentRecord>();
   if (marketMode === "ENRICH") {
     try {
-      marketByProviderItem = new Map(await (dependencies.loadMarketEnrichment ?? loadItemSelectionMarketEnrichment)(items.map((item) => item.providerItemId)));
+      marketByProviderItem = new Map(await withTimeout(
+        (dependencies.loadMarketEnrichment ?? loadItemSelectionMarketEnrichment)(items.map((item) => item.providerItemId)),
+        MARKET_ENRICHMENT_TIMEOUT_MS,
+      ));
     } catch {
       marketByProviderItem = new Map();
     }

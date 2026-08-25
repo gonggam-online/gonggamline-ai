@@ -73,6 +73,7 @@ function errorMessage(status: number, code?: string): string {
 
 async function parseError(response: Response): Promise<string> {
   let code: string | undefined;
+  let correlationId: string | undefined;
   try {
     const body: unknown = await response.json();
     if (typeof body === "object" && body !== null && "error" in body) {
@@ -81,11 +82,16 @@ async function parseError(response: Response): Promise<string> {
           typeof (error as { code?: unknown }).code === "string") {
         code = (error as { code: string }).code;
       }
+      if (typeof error === "object" && error !== null && "correlationId" in error &&
+          typeof (error as { correlationId?: unknown }).correlationId === "string") {
+        correlationId = (error as { correlationId: string }).correlationId;
+      }
     }
   } catch {
     // The UI deliberately exposes only stable, sanitized messages.
   }
-  return errorMessage(response.status, code);
+  const message = errorMessage(response.status, code);
+  return correlationId ? `${message} (추적 ID: ${correlationId})` : message;
 }
 
 export function ItemSelectionAdmin() {
@@ -140,6 +146,24 @@ export function ItemSelectionAdmin() {
     }
   }
 
+  async function pollRun(id: string): Promise<void> {
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 1_000));
+      try {
+        const response = await fetch(`/api/admin/item-selection/runs/${id}`, { cache: "no-store" });
+        if (!response.ok) return;
+        const body = (await response.json()) as Readonly<{ data: ItemSelectionRunDtoV1 }>;
+        setSelected(body.data);
+        if (body.data.status !== "RUNNING") {
+          await loadRuns();
+          return;
+        }
+      } catch {
+        return;
+      }
+    }
+  }
+
   async function run(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     setRunning(true);
@@ -175,9 +199,12 @@ export function ItemSelectionAdmin() {
       });
       if (!response.ok) throw new Error(await parseError(response));
       const body = (await response.json()) as Readonly<{ data: ItemSelectionRunDtoV1 }>;
-      setMessage(`${STATUS_LABELS[body.data.status]}: ${body.data.keyword} 실행을 저장했습니다.`);
+      setMessage(body.data.status === "RUNNING"
+        ? `실행을 접수했습니다: ${body.data.keyword} 평가를 처리 중입니다.`
+        : `${STATUS_LABELS[body.data.status]}: ${body.data.keyword} 실행을 저장했습니다.`);
       setSelected(body.data);
       await loadRuns();
+      if (body.data.status === "RUNNING") void pollRun(body.data.id);
     } catch (caught) {
       setMessage("");
       setError(caught instanceof Error ? caught.message : errorMessage(500));

@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { after } from "next/server";
 
 import {
   AdminRequestGuardError,
@@ -10,14 +11,19 @@ import {
 import { adminRateLimiter } from "../../../../../lib/auth/admin-rate-limit.server";
 import { AdminCsrfError, verifyAdminCsrfToken } from "../../../../../lib/auth/csrf.server";
 import { ITEM_SELECTION_PROFITABILITY_POLICY_VERSION } from "../../../../../lib/revenue/item-selection-profitability";
-import { listItemSelectionRuns } from "../../../../../services/item-selection-run.repository";
 import {
+  listItemSelectionRuns,
+  reconcileStaleItemSelectionRuns,
+} from "../../../../../services/item-selection-run.repository";
+import {
+  createItemSelectionRunIntent,
   ItemSelectionWorkflowError,
   runItemSelection,
   type RunItemSelectionRequestV1,
 } from "../../../../../services/item-selection-workflow.service";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const CURSOR = /^([A-Za-z0-9_-]+)$/;
@@ -50,26 +56,27 @@ function parseBody(value: unknown): RunItemSelectionRequestV1 | null {
   return value as RunItemSelectionRequestV1;
 }
 
-function errorResponse(error: unknown): Response {
+function errorResponse(error: unknown, correlationId?: string): Response {
+  const details = correlationId ? { correlationId } : {};
   if (error instanceof AdminRequestGuardError ||
       error instanceof AdminUnsupportedMediaTypeError ||
       error instanceof AdminCsrfError) {
-    return Response.json({ error: { code: error.code } }, { status: error.status });
+    return Response.json({ error: { code: error.code, ...details } }, { status: error.status });
   }
   if (error instanceof ItemSelectionWorkflowError) {
     return Response.json(
-      { error: { code: error.code, retryable: error.code === "PROVIDER_UNAVAILABLE" } },
+      { error: { code: error.code, retryable: error.code === "PROVIDER_UNAVAILABLE", ...details } },
       { status: error.code === "PROVIDER_UNAVAILABLE" ? 503 : 500 },
     );
   }
   if (record(error) && error.name === "ItemSelectionRunRepositoryError") {
     const status = error.kind === "CONFLICT" ? 409 : error.kind === "INVALID" ? 400 : 500;
     return Response.json(
-      { error: { code: status === 409 ? "DUPLICATE_RUN_ACTIVE" : status === 400 ? "VALIDATION_FAILED" : "INTERNAL_ERROR" } },
+      { error: { code: status === 409 ? "DUPLICATE_RUN_ACTIVE" : status === 400 ? "VALIDATION_FAILED" : "INTERNAL_ERROR", ...details } },
       { status },
     );
   }
-  return Response.json({ error: { code: "INTERNAL_ERROR" } }, { status: 500 });
+  return Response.json({ error: { code: "INTERNAL_ERROR", ...details } }, { status: 500 });
 }
 
 function rateLimited(retryAfterSeconds: number): Response {
@@ -80,8 +87,10 @@ function rateLimited(retryAfterSeconds: number): Response {
 }
 
 export async function POST(request: Request): Promise<Response> {
+  let correlationId: string | undefined;
   try {
     const context = await requireAdminRequest(request, "mutation");
+    correlationId = context.correlationId;
     requireExactAdminOrigin(request);
     requireJsonContentType(request);
     verifyAdminCsrfToken(request, "item-selection-create", context);
@@ -103,17 +112,36 @@ export async function POST(request: Request): Promise<Response> {
     }
     const body = parseBody(json);
     if (!body) return Response.json({ error: { code: "VALIDATION_FAILED" } }, { status: 400 });
-    const result = await runItemSelection(
+    try {
+      await reconcileStaleItemSelectionRuns(context);
+    } catch {
+      // Recovery is opportunistic; the requested evaluation must remain available.
+    }
+    const result = await createItemSelectionRunIntent(
       context,
       body,
       createHash("sha256").update(idempotencyKey, "utf8").digest("hex"),
     );
+    if (result.created && result.run.status === "RUNNING") {
+      after(async () => {
+        try {
+          await runItemSelection(
+            context,
+            body,
+            createHash("sha256").update(idempotencyKey, "utf8").digest("hex"),
+          );
+        } catch {
+          // The workflow finalizes known failures; stale recovery handles a
+          // process termination before finalization.
+        }
+      });
+    }
     return Response.json({ data: result.run }, {
-      status: result.created ? 201 : 200,
+      status: result.created ? 202 : 200,
       headers: { "Cache-Control": "no-store" },
     });
   } catch (error) {
-    return errorResponse(error);
+    return errorResponse(error, correlationId);
   }
 }
 
@@ -148,6 +176,12 @@ export async function GET(request: Request): Promise<Response> {
     }
     const limit = Number(rawLimit);
     if (limit > 50) return Response.json({ error: { code: "VALIDATION_FAILED" } }, { status: 400 });
+    try {
+      await reconcileStaleItemSelectionRuns(context);
+    } catch {
+      // Listing remains read-only from the operator's perspective even if
+      // opportunistic recovery is temporarily unavailable.
+    }
     const rawCursor = url.searchParams.get("cursor");
     const cursor = rawCursor === null ? null : decodeCursor(rawCursor);
     if (rawCursor !== null && cursor === null) {
