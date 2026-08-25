@@ -12,6 +12,7 @@ import {
   SupabaseSsrConfigurationError,
 } from "@/lib/auth/supabase-ssr.server";
 import { cookies } from "next/headers";
+import { ADMIN_MFA_GRANT_COOKIE_NAME } from "@/lib/auth/admin-mfa-grant.server";
 
 function failure(error: unknown): Response {
   if (
@@ -58,7 +59,15 @@ export async function POST(request: Request): Promise<Response> {
     if (error) {
       return Response.json({ code: "AUTHENTICATION_FAILED" }, { status: 400 });
     }
-    (await cookies()).set(ADMIN_CSRF_COOKIE_NAME, "", {
+    const cookieStore = await cookies();
+    cookieStore.set(ADMIN_MFA_GRANT_COOKIE_NAME, "", {
+      secure: true,
+      httpOnly: true,
+      sameSite: "strict",
+      path: "/",
+      maxAge: 0,
+    });
+    cookieStore.set(ADMIN_CSRF_COOKIE_NAME, "", {
       secure: true,
       httpOnly: true,
       sameSite: "strict",

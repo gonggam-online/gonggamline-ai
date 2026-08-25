@@ -6,6 +6,7 @@ import {
 } from "@/lib/auth/admin-request-guard.server";
 import { createSupabaseSsrServerClient } from "@/lib/auth/supabase-ssr.server";
 import { buildAdminSessionStatus } from "@/lib/auth/admin-session-status.server";
+import { hasValidAdminMfaGrant } from "@/lib/auth/admin-mfa-grant.server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -34,6 +35,7 @@ export async function GET(request: Request): Promise<Response> {
         : null,
       refreshAttempted,
       trustedBrowserPreference: preference,
+      mfaGrantValid: hasValidAdminMfaGrant(request, context),
     }), { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     if (error instanceof AdminRequestGuardError) {

@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { isAllowlistedAdminUser } from "./admin-allowlist.server";
+import { hasValidAdminMfaGrant } from "./admin-mfa-grant.server";
 import { createSupabaseSsrServerClient } from "./supabase-ssr.server";
 
 export type AdminAssuranceLevel = "aal1" | "aal2";
@@ -120,10 +121,16 @@ export async function requireAdminRequest(
   const claims = readVerifiedJwtClaims(session.access_token);
   const nowSeconds = Math.floor((options.clock ?? Date.now)() / 1_000);
   const authenticationAge = nowSeconds - claims.iat;
+  const freshAal2 = claims.aal === "aal2" && authenticationAge <= 60;
+  const sessionMfaGrant = assurance === "mutation" && claims.aal === "aal2"
+    ? hasValidAdminMfaGrant(request, {
+      administratorUserId: user.id.toLowerCase(),
+      sessionIdentity: claims.sessionIdentity,
+    }, options.clock)
+    : false;
   if (
     authenticationAge < 0 ||
-    (assurance === "mutation" &&
-      (claims.aal !== "aal2" || authenticationAge > 60))
+    (assurance === "mutation" && !freshAal2 && !sessionMfaGrant)
   ) {
     throw new AdminRequestGuardError(403);
   }

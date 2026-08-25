@@ -35,7 +35,8 @@ test("A02, A03, A07 and A10: verified identity, UUID allowlist and fresh AAL2 ar
   const guard = read("lib/auth/admin-request-guard.server.ts");
   assert.match(guard, /await client\.auth\.getUser\(\)/);
   assert.match(guard, /!isAllowlistedAdminUser\(user\.id\)/);
-  assert.match(guard, /claims\.aal !== "aal2" \|\| authenticationAge > 60/);
+  assert.match(guard, /freshAal2/);
+  assert.match(guard, /hasValidAdminMfaGrant/);
   assert.match(guard, /new AdminRequestGuardError\(401\)/);
   assert.match(guard, /new AdminRequestGuardError\(403\)/);
 
