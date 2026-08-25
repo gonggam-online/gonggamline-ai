@@ -169,9 +169,9 @@ test("enriches missing public cost fields from a bounded detail read before scor
   });
   assert.deepEqual(detailCalls, [listed.providerItemId]);
   const snapshot = JSON.parse(finalized?.evaluations[0]?.canonicalSnapshotText ?? "{}") as {
-    discoveryProfitabilityEstimate?: { costsPerUnitKrw?: { supplierInboundBase?: number } };
+    profitabilityResult?: { discoveryProfitabilityEstimate?: { costsPerUnitKrw?: { supplierInboundBase?: number } } };
   };
-  assert.equal(snapshot.discoveryProfitabilityEstimate?.costsPerUnitKrw?.supplierInboundBase, 500);
+  assert.equal(snapshot.profitabilityResult?.discoveryProfitabilityEstimate?.costsPerUnitKrw?.supplierInboundBase, 500);
 });
 
 test("market-enriched evaluations preserve deterministic source identity order for atomic persistence", async () => {

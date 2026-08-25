@@ -8,10 +8,9 @@ import type {
   ItemSelectionProfitabilityResult,
   SanitizedProviderProfitabilityFacts,
 } from "../../lib/revenue/item-selection-profitability";
-import type { ItemSelectionDiscoveryProfitabilityEstimate } from "../domain/item-selection-discovery-profitability";
 
 export const ITEM_SELECTION_PERSISTENCE_SCHEMA_VERSION =
-  "gonggamline-item-selection-snapshot-v2" as const;
+  "gonggamline-item-selection-snapshot-v1" as const;
 export const ITEM_SELECTION_EVIDENCE_SCHEMA_VERSION =
   "gonggamline-item-selection-evidence-v1" as const;
 export const ITEM_SELECTION_CANDIDATE_FAILURES_SCHEMA_VERSION =
@@ -30,7 +29,6 @@ export interface ItemSelectionPersistenceHashesV1 {
   readonly providerFacts: Sha256Hex;
   readonly profitabilityInput: Sha256Hex;
   readonly profitabilityResult: Sha256Hex;
-  readonly discoveryProfitabilityEstimate: Sha256Hex;
   readonly evaluatorInput: Sha256Hex;
   readonly evaluatorOutput: Sha256Hex;
   readonly aggregate: Sha256Hex;
@@ -46,7 +44,6 @@ export interface ItemSelectionPersistenceAggregateV1 {
   readonly providerFacts: SanitizedProviderProfitabilityFacts;
   readonly profitabilityInput: ItemSelectionProfitabilityInput;
   readonly profitabilityResult: ItemSelectionProfitabilityResult;
-  readonly discoveryProfitabilityEstimate: ItemSelectionDiscoveryProfitabilityEstimate;
   readonly evaluatorInput: EvaluateItemSelectionInput;
   readonly evaluatorOutput: ItemSelectionEvaluation;
   readonly hashes: ItemSelectionPersistenceHashesV1;

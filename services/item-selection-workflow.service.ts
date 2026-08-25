@@ -329,8 +329,7 @@ function toWrite(
   const stages = {
     providerFacts: stableJson(providerFacts),
     profitabilityInput: stableJson(profitInput),
-    profitabilityResult: stableJson(profitResult),
-    discoveryProfitabilityEstimate: stableJson(discoveryProfitabilityEstimate),
+    profitabilityResult: stableJson({ ...profitResult, discoveryProfitabilityEstimate }),
     evaluatorInput: stableJson(evaluatorInput),
     evaluatorOutput: stableJson(evaluatorOutput),
   };
@@ -338,7 +337,6 @@ function toWrite(
     providerFacts: sha256(stages.providerFacts),
     profitabilityInput: sha256(stages.profitabilityInput),
     profitabilityResult: sha256(stages.profitabilityResult),
-    discoveryProfitabilityEstimate: sha256(stages.discoveryProfitabilityEstimate),
     evaluatorInput: sha256(stages.evaluatorInput),
     evaluatorOutput: sha256(stages.evaluatorOutput),
   };
@@ -365,8 +363,7 @@ function toWrite(
       ITEM_SELECTION_PROFITABILITY_CALCULATION_CONTRACT_VERSION,
     providerFacts,
     profitabilityInput: profitInput,
-    profitabilityResult: profitResult,
-    discoveryProfitabilityEstimate,
+    profitabilityResult: { ...profitResult, discoveryProfitabilityEstimate },
     evaluatorInput,
     evaluatorOutput,
     hashes,

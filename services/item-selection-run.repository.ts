@@ -104,8 +104,8 @@ function mapExplainability(row: DbRecord): ItemSelectionEvaluationExplainability
       ? (profitabilityResult.scenarios as DbRecord).normalizedScenario
       : null;
     const normalizedRecord = record(normalized) ? normalized : null;
-    const discovery = record(snapshot.discoveryProfitabilityEstimate)
-      ? snapshot.discoveryProfitabilityEstimate as DbRecord
+    const discovery = record(profitabilityResult.discoveryProfitabilityEstimate)
+      ? profitabilityResult.discoveryProfitabilityEstimate as DbRecord
       : null;
     const floors = discovery && record(discovery.floorSellingPriceKrw)
       ? discovery.floorSellingPriceKrw as DbRecord
