@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { publicCatalogOpportunityScores } from "../shared/domain/item-selection-public-signals.ts";
 import type { SupplierCatalogItem } from "../shared/domain/supplier-catalog.ts";
+import { COUPANG_MARKET_PRICE_ESTIMATE_VERSION } from "../shared/domain/coupang-market-price.ts";
 
 function item(overrides: Partial<SupplierCatalogItem> = {}): SupplierCatalogItem {
   return {
@@ -70,4 +71,30 @@ test("lower comparable landed cost ranks above a higher-cost cohort item", () =>
   assert.equal(cheapScore.competitiveness.status, "AVAILABLE");
   assert.equal(expensiveScore.competitiveness.status, "AVAILABLE");
   assert(cheapScore.competitiveness.normalizedScore > expensiveScore.competitiveness.normalizedScore);
+});
+
+test("current Coupang price is compared with the required price floor", () => {
+  const candidate = item({ supplierPriceKrw: 5_000 });
+  const score = publicCatalogOpportunityScores(
+    candidate,
+    [candidate],
+    0,
+    "2026-08-25T00:00:00.000Z",
+    {
+      version: COUPANG_MARKET_PRICE_ESTIMATE_VERSION,
+      status: "AVAILABLE",
+      matchType: "TITLE_MATCHED",
+      query: "공개 상품",
+      observedAt: "2026-08-25T00:00:00.000Z",
+      predictedSellingPriceKrw: 5_000,
+      lowSellingPriceKrw: 4_900,
+      highSellingPriceKrw: 5_500,
+      observationCount: 3,
+      sourceReference: "naver-shopping-official:coupang-public-offers",
+      sampleOffers: [],
+    },
+  );
+  assert.equal(score.profitability.status, "AVAILABLE");
+  assert.equal(score.profitability.normalizedScore, 20);
+  assert.equal(score.profitability.evidence[0]?.sourceType, "MARKETPLACE_PUBLIC");
 });

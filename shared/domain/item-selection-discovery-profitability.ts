@@ -1,5 +1,6 @@
 import { ITEM_SELECTION_PROFITABILITY_POLICY } from "../../lib/revenue/item-selection-profitability";
 import type { SupplierCatalogItem } from "./supplier-catalog";
+import type { CoupangMarketPriceEstimate } from "./coupang-market-price";
 
 export const ITEM_SELECTION_DISCOVERY_PROFITABILITY_VERSION =
   "gonggamline-discovery-profitability-2026-08-25-v1" as const;
@@ -25,6 +26,7 @@ export type ItemSelectionDiscoveryProfitabilityEstimate = Readonly<{
   }>;
   rates: Readonly<{ base: number; stress: number }>;
   profitabilityPotentialScore: number | null;
+  marketSellingPrice: CoupangMarketPriceEstimate | null;
   assumptions: readonly string[];
   missingActualFacts: readonly string[];
   sourceReferences: readonly string[];
@@ -102,6 +104,7 @@ function potentialScore(item: SupplierCatalogItem, cohort: readonly SupplierCata
 export function estimateItemSelectionDiscoveryProfitability(
   item: SupplierCatalogItem,
   cohort: readonly SupplierCatalogItem[],
+  marketSellingPrice: CoupangMarketPriceEstimate | null = null,
 ): ItemSelectionDiscoveryProfitabilityEstimate {
   const estimate = rawEstimate(item);
   const missingActualFacts = [
@@ -131,6 +134,7 @@ export function estimateItemSelectionDiscoveryProfitability(
       },
       rates: { base: 0, stress: 0 },
       profitabilityPotentialScore: null,
+      marketSellingPrice,
       assumptions: Object.freeze([]),
       missingActualFacts: Object.freeze(["supplierUnitCost", ...missingActualFacts]),
       sourceReferences: Object.freeze(["item-selection-profitability-policy-v4"]),
@@ -157,11 +161,15 @@ export function estimateItemSelectionDiscoveryProfitability(
     },
     rates: { base: estimate.baseRate, stress: estimate.stressRate },
     profitabilityPotentialScore: potentialScore(item, cohort),
+    marketSellingPrice,
     assumptions: Object.freeze([
       "공개 공급가와 공개 배송비를 최소주문수량으로 안분합니다.",
       "배송비가 없으면 주문당 3,000원(기준)·5,000원(스트레스)을 추정합니다.",
       "검수·입고 250원(기준)·400원(스트레스), 3PL 3,000원·3,500원을 적용합니다.",
       "쿠팡 수수료 10.9%, 광고 12.5%·18%, 반품손실 4%·6%를 적용합니다.",
+      ...(marketSellingPrice?.status === "AVAILABLE"
+        ? ["네이버 공식 쇼핑검색에 현재 노출된 쿠팡 판매 상품의 제목 일치 가격 중앙값을 예상 실판매가로 사용합니다."]
+        : []),
     ]),
     missingActualFacts: Object.freeze(missingActualFacts),
     sourceReferences: Object.freeze([

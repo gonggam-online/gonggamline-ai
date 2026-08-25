@@ -235,6 +235,20 @@ export interface ItemSelectionEvaluationExplainabilityV1 {
       readonly profitabilityPotentialScore: number | null;
       readonly missingActualFacts: readonly string[];
       readonly assumptions: readonly string[];
+      readonly marketSellingPrice: {
+        readonly status: "AVAILABLE" | "UNAVAILABLE";
+        readonly predictedSellingPriceKrw: number | null;
+        readonly lowSellingPriceKrw: number | null;
+        readonly highSellingPriceKrw: number | null;
+        readonly observationCount: number;
+        readonly observedAt: string | null;
+        readonly sourceReference: string | null;
+        readonly sampleOffers: readonly {
+          readonly title: string;
+          readonly priceKrw: number;
+          readonly url: string | null;
+        }[];
+      } | null;
     } | null;
   };
   readonly hardGates: readonly {

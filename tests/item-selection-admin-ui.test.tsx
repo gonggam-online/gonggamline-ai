@@ -55,3 +55,10 @@ test("persisted score units are rendered on the zero-to-one-hundred scale", () =
   assert.match(component, /totalScoreUnits \/ 10_000/);
   assert.doesNotMatch(component, /확정 총점/);
 });
+
+test("current Coupang market price evidence is visible in profitability detail", () => {
+  assert.match(component, /쿠팡 예상 실판매가/);
+  assert.match(component, /쿠팡 관찰 가격 범위/);
+  assert.match(component, /네이버 공식 쇼핑검색/);
+  assert.match(component, /가격 산출에 사용한 쿠팡 관찰 상품/);
+});

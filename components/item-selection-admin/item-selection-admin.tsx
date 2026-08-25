@@ -414,6 +414,9 @@ export function ItemSelectionAdmin() {
                     {item.explainability.profitability.discoveryEstimate?.status === "ESTIMATED" ? <>
                       <h4>사전 수익성 범위</h4>
                       <dl className="item-selection-admin__facts">
+                        <div><dt>쿠팡 예상 실판매가</dt><dd>{item.explainability.profitability.discoveryEstimate.marketSellingPrice?.status === "AVAILABLE" ? `${item.explainability.profitability.discoveryEstimate.marketSellingPrice.predictedSellingPriceKrw?.toLocaleString("ko-KR")}원` : "검색 결과 없음"}</dd></div>
+                        <div><dt>쿠팡 관찰 가격 범위</dt><dd>{item.explainability.profitability.discoveryEstimate.marketSellingPrice?.status === "AVAILABLE" ? `${item.explainability.profitability.discoveryEstimate.marketSellingPrice.lowSellingPriceKrw?.toLocaleString("ko-KR")}~${item.explainability.profitability.discoveryEstimate.marketSellingPrice.highSellingPriceKrw?.toLocaleString("ko-KR")}원 · ${item.explainability.profitability.discoveryEstimate.marketSellingPrice.observationCount}건` : "확인 필요"}</dd></div>
+                        <div><dt>시장가격 관찰 시각</dt><dd>{item.explainability.profitability.discoveryEstimate.marketSellingPrice?.observedAt ? formatDate(item.explainability.profitability.discoveryEstimate.marketSellingPrice.observedAt) : "확인 필요"}</dd></div>
                         <div><dt>손익분기 판매가</dt><dd>{item.explainability.profitability.discoveryEstimate.breakEvenSellingPriceKrw?.toLocaleString("ko-KR")}원 이상</dd></div>
                         <div><dt>조건부 판매가 하한</dt><dd>{item.explainability.profitability.discoveryEstimate.conditionalSellingPriceKrw?.toLocaleString("ko-KR")}원</dd></div>
                         <div><dt>추천 판매가 하한</dt><dd>{item.explainability.profitability.discoveryEstimate.recommendSellingPriceKrw?.toLocaleString("ko-KR")}원</dd></div>
@@ -421,7 +424,8 @@ export function ItemSelectionAdmin() {
                         <div><dt>검수·입고 추정 / 개</dt><dd>{item.explainability.profitability.discoveryEstimate.inboundInspectionPerUnitKrw?.toLocaleString("ko-KR")}원</dd></div>
                         <div><dt>3PL 추정 / 개</dt><dd>{item.explainability.profitability.discoveryEstimate.fulfillmentPerUnitKrw?.toLocaleString("ko-KR")}원</dd></div>
                       </dl>
-                      <p className="item-selection-admin__notice">공개 조달비와 승인된 보수적 비용 가정으로 계산한 탐색용 범위입니다. 실제 판매가·규격·카테고리 수수료·견적을 확인하면 다시 계산됩니다.</p>
+                      {(item.explainability.profitability.discoveryEstimate.marketSellingPrice?.sampleOffers.length ?? 0) > 0 ? <details><summary>가격 산출에 사용한 쿠팡 관찰 상품</summary><ul>{item.explainability.profitability.discoveryEstimate.marketSellingPrice?.sampleOffers.map((offer, index) => <li key={`${offer.title}-${index}`}>{offer.url ? <a href={offer.url} target="_blank" rel="noreferrer">{offer.title}</a> : offer.title} · {offer.priceKrw.toLocaleString("ko-KR")}원</li>)}</ul></details> : null}
+                      <p className="item-selection-admin__notice">쿠팡 예상가는 네이버 공식 쇼핑검색에 현재 노출된 쿠팡 판매 상품 중 제목이 일치하는 가격의 중앙값입니다. 공개 조달비와 승인된 보수적 비용 가정을 함께 적용하며, 최종 동일상품·옵션·배송비는 등록 전에 재확인합니다.</p>
                     </> : null}
                     <h4>필수 게이트</h4>
                     <ul>{item.explainability.hardGates.map((gate) => <li key={gate.gate}>{gate.gate}: {GATE_STATUS_LABELS[gate.status] ?? gate.status} ({gate.reasonCode})</li>)}</ul>
