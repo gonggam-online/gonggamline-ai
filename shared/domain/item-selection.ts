@@ -1,7 +1,7 @@
 export const ITEM_SELECTION_RULESET_VERSION =
-  "gonggamline-item-selection-v1" as const;
+  "gonggamline-item-selection-v2" as const;
 
-export const ITEM_SELECTION_EVALUATOR_VERSION = "item-selection-evaluator-v1" as const;
+export const ITEM_SELECTION_EVALUATOR_VERSION = "item-selection-evaluator-v2" as const;
 
 export const ITEM_SELECTION_SCORE_WEIGHTS = {
   competitiveness: 45,
@@ -100,6 +100,8 @@ export type ProfitabilityPolicyInput = {
 export type EvaluateItemSelectionInput = {
   providerItemNumber: string;
   originalPosition: number;
+  /** DISCOVERY ranks public candidates but never grants commerce authority. */
+  decisionLane?: "COMMERCE" | "DISCOVERY";
   hardGates: readonly HardGateCheck[];
   scores: ItemSelectionScoreInputs;
   profitability: ProfitabilityPolicyInput;
@@ -247,32 +249,35 @@ export function calculateItemSelectionScore(
 function determineVerdict(
   hardGates: readonly HardGateCheck[],
   score: ItemSelectionScoreResult,
-  profitability: ProfitabilityPolicyInput
+  profitability: ProfitabilityPolicyInput,
+  decisionLane: "COMMERCE" | "DISCOVERY",
 ): ItemSelectionVerdict {
   if (hardGates.some(({ status }) => status === "FAIL")) return "REJECT";
-  if (hardGates.some(({ status }) => status === "UNKNOWN")) {
-    return "MANUAL_REVIEW";
+  if (decisionLane === "DISCOVERY") {
+    return score.availableDataScore !== null && score.scoreCoverage >= 0.5
+      ? "CONDITIONAL"
+      : "MANUAL_REVIEW";
   }
-  if (
-    profitability.status !== "CONFIRMED" ||
-    profitability.policyVersion === null ||
-    score.totalScore === null
-  ) {
-    return "MANUAL_REVIEW";
-  }
-  if (
+  const commerceEvidenceComplete =
+    !hardGates.some(({ status }) => status === "UNKNOWN") &&
+    profitability.status === "CONFIRMED" &&
+    profitability.policyVersion !== null &&
+    score.totalScore !== null;
+  if (commerceEvidenceComplete && score.totalScore !== null &&
     score.totalScore >= 75 &&
     profitability.meetsRecommendMinimums === true
   ) {
     return "RECOMMEND";
   }
-  if (
+  if (commerceEvidenceComplete && score.totalScore !== null &&
     score.totalScore >= 60 &&
     profitability.meetsConditionalMinimums === true
   ) {
     return "CONDITIONAL";
   }
-  return "REJECT";
+  if (commerceEvidenceComplete) return "REJECT";
+
+  return "MANUAL_REVIEW";
 }
 
 function uniqueSorted(values: readonly string[]): readonly string[] {
@@ -316,9 +321,15 @@ function explanations(
       `필수 하드게이트를 통과했고 총점 ${score.totalScore}점과 승인된 수익성 기준을 충족했습니다.`
     );
   } else if (verdict === "CONDITIONAL") {
-    recommendationReasons.push(
-      `필수 하드게이트를 통과했고 총점 ${score.totalScore}점으로 조건부 검토 대상입니다.`
-    );
+    if (score.totalScore === null || unknowns.length > 0 || profitability.status !== "CONFIRMED") {
+      recommendationReasons.push(
+        `공개 시장·공급처 신호 ${score.availableDataScore}점(근거 ${(score.scoreCoverage * 100).toFixed(0)}%)으로 기회 검토 대상입니다. 이 판정은 구매·등록 승인이 아닙니다.`
+      );
+    } else {
+      recommendationReasons.push(
+        `필수 하드게이트를 통과했고 총점 ${score.totalScore}점으로 조건부 검토 대상입니다.`
+      );
+    }
     if (profitability.meetsRecommendMinimums === false) {
       risks.push("승인된 최소 수익성 기준을 충족하지 못했습니다.");
     }
@@ -371,7 +382,12 @@ export function evaluateItemSelection(
 
   const hardGates = validateHardGates(input.hardGates);
   const score = calculateItemSelectionScore(input.scores);
-  const verdict = determineVerdict(hardGates, score, input.profitability);
+  const verdict = determineVerdict(
+    hardGates,
+    score,
+    input.profitability,
+    input.decisionLane ?? "COMMERCE",
+  );
 
   return {
     rulesetVersion: ITEM_SELECTION_RULESET_VERSION,

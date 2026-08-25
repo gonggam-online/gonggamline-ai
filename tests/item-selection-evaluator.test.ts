@@ -87,11 +87,35 @@ function evaluate(
   });
 }
 
-test("exports immutable v1 ruleset and evaluator versions", () => {
+test("exports immutable v2 ruleset and evaluator versions", () => {
   const result = evaluate();
   assert.equal(result.rulesetVersion, ITEM_SELECTION_RULESET_VERSION);
-  assert.equal(result.rulesetVersion, "gonggamline-item-selection-v1");
+  assert.equal(result.rulesetVersion, "gonggamline-item-selection-v2");
   assert.equal(result.evaluatorVersion, ITEM_SELECTION_EVALUATOR_VERSION);
+});
+
+test("discovery lane ranks public candidates without granting commerce approval", () => {
+  const result = evaluateItemSelection({
+    providerItemNumber: "101",
+    originalPosition: 0,
+    decisionLane: "DISCOVERY",
+    hardGates: gates({ resalePermission: "UNKNOWN", imageUsePermission: "UNKNOWN" }),
+    scores: scores(82, ["profitability"]),
+    profitability: {
+      status: "INCOMPLETE",
+      policyVersion: null,
+      meetsRecommendMinimums: null,
+      meetsConditionalMinimums: null,
+      contributionMarginRate: null,
+      estimatedFacts: [],
+      missingFacts: ["completeProfitability"],
+      nextActions: [],
+    },
+  });
+
+  assert.equal(result.verdict, "CONDITIONAL");
+  assert.match(result.recommendationReasons[0] ?? "", /기회 검토 대상/);
+  assert.match(result.recommendationReasons[0] ?? "", /구매·등록 승인이 아닙니다/);
 });
 
 test("calculates all six weighted score areas and full coverage", () => {

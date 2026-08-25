@@ -46,6 +46,6 @@ test("history, filters, detail, and accessible states are present", () => {
 
 test("unknown financial data stays visibly unknown", () => {
   assert.match(component, /확인 필요/);
-  assert.match(component, /권리·비용 근거가 부족한 항목/);
+  assert.match(component, /모든 검색 후보에 기회 점수와 순위를 부여합니다/);
   assert.doesNotMatch(component, /Product.*create|Coupang.*write/i);
 });

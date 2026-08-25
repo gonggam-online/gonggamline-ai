@@ -146,6 +146,9 @@ function mapExplainability(row: DbRecord): ItemSelectionEvaluationExplainability
       missingFacts: stringArray(output.missingFacts),
       provider: {
         itemNumber: typeof output.providerItemNumber === "string" ? output.providerItemNumber : text(row, "provider_item_number"),
+        name: stringOrNull(facts.name),
+        thumbnailUrl: stringOrNull(facts.thumbnailUrl),
+        supplierName: stringOrNull(facts.supplierName),
         supplierPriceKrw: numberOrNull(facts.supplierPriceKrw),
         shippingFeeKrw: numberOrNull(facts.shippingFeeKrw),
         minimumOrderQuantity: numberOrNull(facts.minimumOrderQuantity),
