@@ -237,6 +237,7 @@ export interface ItemSelectionEvaluationExplainabilityV1 {
       readonly assumptions: readonly string[];
       readonly marketSellingPrice: {
         readonly status: "AVAILABLE" | "UNAVAILABLE";
+        readonly matchType: "TITLE_MATCHED" | "KEYWORD_COMPARABLE" | "UNAVAILABLE";
         readonly predictedSellingPriceKrw: number | null;
         readonly lowSellingPriceKrw: number | null;
         readonly highSellingPriceKrw: number | null;

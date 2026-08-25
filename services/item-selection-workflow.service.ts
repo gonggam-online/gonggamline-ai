@@ -503,7 +503,7 @@ export async function runItemSelection(
         (dependencies.loadMarketEnrichment ?? loadItemSelectionMarketEnrichment)(items.map((item) => item.providerItemId)),
         MARKET_ENRICHMENT_TIMEOUT_MS,
       ),
-      (dependencies.loadCoupangMarketPrices ?? loadCoupangMarketPriceEstimates)(items),
+      (dependencies.loadCoupangMarketPrices ?? loadCoupangMarketPriceEstimates)(items, normalizedKeyword),
     ]);
     if (marketResult.status === "fulfilled") marketByProviderItem = new Map(marketResult.value);
     if (coupangPriceResult.status === "fulfilled") coupangPriceByProviderItem = new Map(coupangPriceResult.value);
