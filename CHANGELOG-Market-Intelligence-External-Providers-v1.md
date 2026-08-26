@@ -1,7 +1,22 @@
 # Market Intelligence External Providers v1
 
-- Added server-only Naver Shopping Search adapter for official product/rank/
-  price metadata.
+## NAVER API HUB compatibility
+
+- Replaced the retired Naver Developers Shopping Search URL/header contract
+  with NAVER API HUB Search Trend and optional Shopping Insight calls.
+- Added canonical `NAVER_API_HUB_CLIENT_ID` and
+  `NAVER_API_HUB_CLIENT_SECRET` variables while retaining the previous names as
+  a transition fallback.
+- Kept the existing `naver-shopping-api` collector key so deployed jobs do not
+  require a destructive data migration; it now routes to `naver_api_hub`.
+- Persisted NAVER API HUB output as relative trend signals only. It does not
+  invent product offers, prices, sellers, or ranks that the DataLab APIs do not
+  return.
+- Shopping Insight is called only when a validated numeric category ID is
+  configured; Search Trend remains usable without it.
+
+- The original version used Naver Shopping Search product/rank/price metadata;
+  that retired contract is superseded by the API HUB compatibility section.
 - Added YouTube Data API metadata adapter that returns reference-only discovery
   signals and never persists video bytes, views as reviews, or asset rights.
 - Added DataForSEO Naver Organic SERP adapter with Basic auth injection,

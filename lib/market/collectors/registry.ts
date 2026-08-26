@@ -31,10 +31,10 @@ export const collectorRegistry: CollectorDefinition[] = [
   },
   {
     key: "naver-shopping-api",
-    name: "Naver Shopping 공식 API",
+    name: "NAVER API HUB 트렌드",
     sourceType: "official_api",
     supportsAutomatic: true,
-    description: "서버 Secret으로 Naver Shopping 메타데이터를 read-only 수집합니다.",
+    description: "기존 collector key를 유지하면서 검색어 트렌드와 설정된 쇼핑 분야의 클릭 추이를 read-only 수집합니다.",
   },
   {
     key: "youtube-data-api",
