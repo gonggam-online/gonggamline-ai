@@ -60,6 +60,8 @@ test("runtime wiring continuously persists evidence, rebuilds intelligence and r
   const runtimeClient = readFileSync(new URL("../lib/supabase/market-runtime.server.ts", import.meta.url), "utf8");
   const page = readFileSync(new URL("../app/market/page.tsx", import.meta.url), "utf8");
   const cron = readFileSync(new URL("../app/api/market/cron/route.ts", import.meta.url), "utf8");
+  const manualRun = readFileSync(new URL("../app/api/market/jobs/run/route.ts", import.meta.url), "utf8");
+  const csrfRoute = readFileSync(new URL("../app/api/admin/auth/csrf/route.ts", import.meta.url), "utf8");
   assert.match(orchestration, /recordAutonomousCollectionEvidence/);
   assert.match(orchestration, /rebuildAutonomousMarketIntelligence/);
   assert.match(page, /\/api\/market\/intelligence/);
@@ -68,6 +70,9 @@ test("runtime wiring continuously persists evidence, rebuilds intelligence and r
   assert.match(page, /getAdminCsrfToken\(csrfPurpose\)/);
   assert.match(page, /"X-GonggamLine-CSRF": csrfToken/);
   assert.match(page, /"market-collection-run"/);
+  assert.match(manualRun, /requireAdminRequest\(request, "read"\)/);
+  assert.match(manualRun, /verifyAdminCsrfToken\(request, "market-collection-run", context\)/);
+  assert.match(csrfRoute, /purpose === "market-collection-run"[\s\S]*\? "read"/);
   assert.match(cron, /runDueCollectionJobs\(6\)/);
   assert.match(orchestration, /Math\.min\(10, Math\.floor\(limit\)\)/);
   assert.match(orchestration, /\.eq\("status", "running"\)\.lt\("last_run_at", staleLease\)/);

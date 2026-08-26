@@ -51,7 +51,8 @@ export async function GET(request: Request): Promise<Response> {
       request,
       purpose === "admin-session" ||
       purpose === "admin-mfa" ||
-      purpose === "admin-password-recovery"
+      purpose === "admin-password-recovery" ||
+      purpose === "market-collection-run"
         ? "read"
         : "mutation",
     );
