@@ -11,12 +11,12 @@ const architecture = readFileSync(
   "utf8",
 );
 
-test("architecture separates current capabilities from autonomous discovery gaps", () => {
+test("architecture records the implemented Shadow upgrade from the audited baseline", () => {
   assert.match(architecture, /## Current implementation inventory/);
   assert.match(architecture, /### Already usable/);
-  assert.match(architecture, /### Gaps that prevent autonomous discovery/);
+  assert.match(architecture, /### Implementation gaps addressed by v1/);
   assert.match(architecture, /fixed 24-keyword seed/);
-  assert.match(architecture, /does not itself execute external calls/);
+  assert.match(architecture, /Implemented Shadow runtime architecture/);
 });
 
 test("architecture defines evidence convergence and bounded keyword learning", () => {

@@ -500,7 +500,7 @@ export async function runItemSelection(
   if (marketMode === "ENRICH") {
     const [marketResult, coupangPriceResult] = await Promise.allSettled([
       withTimeout(
-        (dependencies.loadMarketEnrichment ?? loadItemSelectionMarketEnrichment)(items.map((item) => item.providerItemId)),
+        (dependencies.loadMarketEnrichment ?? loadItemSelectionMarketEnrichment)(items.map((item) => item.providerItemId), normalizedKeyword),
         MARKET_ENRICHMENT_TIMEOUT_MS,
       ),
       (dependencies.loadCoupangMarketPrices ?? loadCoupangMarketPriceEstimates)(items, normalizedKeyword),

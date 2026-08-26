@@ -2,9 +2,10 @@
 
 ## Status
 
-Proposed implementation architecture. This document defines the next runtime
-upgrade but does not itself execute external calls, change Production data, or
-apply a migration.
+Implemented Shadow runtime architecture. Runtime delivery is mapped to the
+versioned modules and additive migration in the implementation section below;
+the document itself remains a contract and never contains credentials or
+authorizes commerce actions.
 
 ## Objective
 
@@ -46,7 +47,7 @@ rights, supplier, and commerce claims explicitly unresolved.
 - Engine 1 now owns the market-data-based recommended search terms and can
   pass a selected term into Engine 2.
 
-### Gaps that prevent autonomous discovery
+### Implementation gaps addressed by v1
 
 1. The keyword universe is mainly the fixed 24-keyword seed. No controlled
    discovery-expansion loop promotes newly observed needs or phrases.
@@ -322,6 +323,26 @@ Required guards:
   unchanged until a separately reviewed integration rollout.
 
 ## Implementation stories
+
+### Runtime implementation map
+
+- `supabase/migrations/027_autonomous_market_discovery_engine.sql` owns the
+  additive evidence ledger, concepts, candidates, trend digests,
+  recommendation runs, and provider-usage state.
+- `lib/market/autonomous-intelligence.ts` owns deterministic normalization,
+  trend classification, bounded phrase extraction, scoring, stable tie-breaks,
+  and single/bundle research candidate generation.
+- `services/autonomous-market-discovery.service.ts` persists immutable provider
+  evidence, expands the keyword universe within the daily/active caps, rebuilds
+  versioned read models, and returns the latest safe fallback.
+- `services/market-orchestration.service.ts` owns bounded due-job execution,
+  stale-lease recovery, atomic job claims, provider failure isolation, and the
+  post-collection intelligence rebuild.
+- `/api/market/intelligence` and `/market` expose the Engine 1 demand brief,
+  trends, recommendations, unresolved checks, and the audited Engine 2 handoff.
+- `services/item-selection-market-enrichment.service.ts` consumes the latest
+  digest-bound trend evidence only when a direct product metric is unavailable;
+  it does not invent supply, margin, rights, or fulfillment facts.
 
 ### Story A — Trend evidence foundation
 

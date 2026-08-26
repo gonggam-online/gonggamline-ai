@@ -44,3 +44,18 @@ test("does not invent scores for missing market facts", () => {
   assert.equal(result.demand.normalizedScore, 60);
   assert.equal(result.conversionPotential.status, "UNAVAILABLE");
 });
+
+test("preserves a digest-bound autonomous trend reference in every available score", () => {
+  const evidence = [{ sourceType: "AUTONOMOUS_MARKET_TREND", sourceField: "output.trends", summary: "시장 트렌드", observedAt: "2026-08-26T00:00:00.000Z", reference: `sha256:${"a".repeat(64)}` }];
+  const result = enrichItemSelectionScores(empty, {
+    opportunityScore: 74,
+    demandScore: 70,
+    growthScore: 68,
+    supplyScore: null,
+    confidence: 66,
+    evidence,
+  });
+  assert.equal(result.competitiveness.status, "AVAILABLE");
+  if (result.competitiveness.status === "AVAILABLE") assert.deepEqual(result.competitiveness.evidence, evidence);
+  assert.equal(result.logisticsFit.status, "UNAVAILABLE");
+});

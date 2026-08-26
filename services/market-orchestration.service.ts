@@ -3,6 +3,7 @@ import { analyzeMarketProduct } from "./market-analysis.service";
 import { collectConfiguredMarketObservations } from "./market-observation-collector.service";
 import { saveMarketObservation } from "./market-observation.service";
 import type { CollectorRunResult } from "../types/collector";
+import { rebuildAutonomousMarketIntelligence, recordAutonomousCollectionEvidence } from "./autonomous-market-discovery.service";
 
 function nextRun(intervalMinutes: number) {
   return new Date(Date.now() + intervalMinutes * 60_000).toISOString();
@@ -39,8 +40,13 @@ export const PROVIDER_VERIFICATION_COLLECTOR_KEYS = Object.freeze([
   "youtube-public-signals",
 ] as const);
 
-export async function runDueCollectionJobs(limit = 20, collectorKey?: string): Promise<{ results: CollectorRunResult[] }> {
+export async function runDueCollectionJobs(limit = 20, collectorKey?: string, refreshIntelligence = true): Promise<{ results: CollectorRunResult[]; intelligence?: Record<string, unknown> }> {
   const now = new Date().toISOString();
+  const staleLease = new Date(Date.now() - 15 * 60_000).toISOString();
+  const recovered = await supabase.from("market_collection_jobs").update({ status: "active", updated_at: now })
+    .eq("status", "running").lt("last_run_at", staleLease);
+  if (recovered.error) throw new Error(recovered.error.message);
+  const boundedLimit = Math.max(1, Math.min(10, Math.floor(limit)));
   let dueJobsQuery = supabase
     .from("market_collection_jobs")
     .select("id,collector_key,market_keyword_id,interval_minutes,market_keywords(keyword)")
@@ -49,12 +55,20 @@ export async function runDueCollectionJobs(limit = 20, collectorKey?: string): P
   if (collectorKey) dueJobsQuery = dueJobsQuery.eq("collector_key", collectorKey);
   const { data: jobs, error } = await dueJobsQuery
     .order("priority", { ascending: false })
-    .limit(limit);
+    .limit(boundedLimit);
   if (error) throw new Error(error.message);
 
   const results: CollectorRunResult[] = [];
   for (const job of jobs ?? []) {
-    await supabase.from("market_collection_jobs").update({ status: "running", last_run_at: now, updated_at: now }).eq("id", job.id);
+    const { data: claimedJob, error: claimError } = await supabase
+      .from("market_collection_jobs")
+      .update({ status: "running", last_run_at: now, updated_at: now })
+      .eq("id", job.id)
+      .eq("status", "active")
+      .select("id")
+      .maybeSingle();
+    if (claimError) throw new Error(claimError.message);
+    if (!claimedJob) continue;
     const keywordRelation = Array.isArray(job.market_keywords) ? job.market_keywords[0] : job.market_keywords;
     const keyword = keywordRelation?.keyword ?? "미지정";
 
@@ -114,6 +128,11 @@ export async function runDueCollectionJobs(limit = 20, collectorKey?: string): P
           });
           if (!signalError) saved += 1;
         }
+        await recordAutonomousCollectionEvidence({
+          keywordId: Number(job.market_keyword_id),
+          keyword,
+          collected,
+        });
         const requested = collected.observations.length + collected.discoverySignals.length;
         const completedAt = new Date().toISOString();
         await supabase.from("market_collection_runs").update({
@@ -164,19 +183,35 @@ export async function runDueCollectionJobs(limit = 20, collectorKey?: string): P
       last_result: result,
       updated_at: new Date().toISOString(),
     }).eq("id", job.id);
+    if (result.status === "success" || result.status === "partial") {
+      await supabase.from("market_keywords").update({
+        last_collected_at: new Date().toISOString(),
+        result_count: result.saved,
+        updated_at: new Date().toISOString(),
+      }).eq("id", job.market_keyword_id);
+    }
+    await supabase.from("market_collectors").update({
+      last_run_at: now,
+      ...(result.status === "success" || result.status === "partial"
+        ? { status: "ready", last_success_at: new Date().toISOString(), failure_count: 0, last_error: null }
+        : { status: "error", last_error: result.message }),
+      updated_at: new Date().toISOString(),
+    }).eq("collector_key", job.collector_key);
     results.push(result);
   }
-  return { results };
+  const intelligence = refreshIntelligence && results.length ? await rebuildAutonomousMarketIntelligence() : undefined;
+  return intelligence ? { results, intelligence } : { results };
 }
 
 /** Runs exactly one due job for each configured external provider. */
-export async function runProviderVerificationJobs(): Promise<{ results: CollectorRunResult[] }> {
+export async function runProviderVerificationJobs(): Promise<{ results: CollectorRunResult[]; intelligence?: Record<string, unknown> }> {
   const results: CollectorRunResult[] = [];
   for (const collectorKey of PROVIDER_VERIFICATION_COLLECTOR_KEYS) {
-    const verification = await runDueCollectionJobs(1, collectorKey);
+    const verification = await runDueCollectionJobs(1, collectorKey, false);
     results.push(...verification.results);
   }
-  return { results };
+  const intelligence = results.length ? await rebuildAutonomousMarketIntelligence() : undefined;
+  return intelligence ? { results, intelligence } : { results };
 }
 
 export async function createDecision(productId: number) {

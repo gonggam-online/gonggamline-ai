@@ -11,7 +11,8 @@ test("provider verification is bounded to one job for each external collector", 
     "youtube-public-signals",
   ]);
   const source = readFileSync(new URL("../services/market-orchestration.service.ts", import.meta.url), "utf8");
-  assert.match(source, /runDueCollectionJobs\(1, collectorKey\)/);
+  assert.match(source, /runDueCollectionJobs\(1, collectorKey, false\)/);
+  assert.match(source, /rebuildAutonomousMarketIntelligence\(\)/);
   assert.match(source, /allowSignalOnly: isYoutube/);
 });
 

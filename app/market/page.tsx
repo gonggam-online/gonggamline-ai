@@ -11,6 +11,9 @@ type Warehouse = { featureSnapshots: number; feedbackEvents: number; gradeCounts
 type MarketProduct = { id: number; title: string; brand: string | null; seller_name: string | null; source: string; thumbnail_url: string | null; market_product_metrics: Metrics | Metrics[] | null };
 type Collector = { collector_key: string; name: string; source_type: string; status: string; supports_automatic: boolean; last_run_at: string | null; last_success_at: string | null; failure_count: number; last_error: string | null };
 type Job = { id: number; collector_key: string; status: string; priority: number; interval_minutes: number; next_run_at: string; last_result: Record<string, unknown>; market_keywords: { keyword: string } | { keyword: string }[] | null };
+type Trend = { concept: string; state: string; lane: string; score: number; confidence: number; demand: number; momentum: number; providers: string[]; reasons: string[] };
+type ItemRecommendation = { candidateId: string; title: string; form: string; lane: string; score: number; confidence: number; trendState: string; concept: string; reasons: string[]; unresolved: string[] };
+type Intelligence = { status: string; brief?: { headline: string; sourceCount: number; trendCount: number; itemCount: number }; trends?: Trend[]; items?: ItemRecommendation[]; discoveredKeywords?: string[]; completedAt?: string };
 
 export default function MarketPage() {
   const [summary, setSummary] = useState<Summary>({ keywordCount: 0, productCount: 0, snapshots24h: 0, alerts: [] });
@@ -18,6 +21,7 @@ export default function MarketPage() {
   const [products, setProducts] = useState<MarketProduct[]>([]);
   const [collectors, setCollectors] = useState<Collector[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [intelligence, setIntelligence] = useState<Intelligence>({ status: "EMPTY", trends: [], items: [] });
   const [warehouse, setWarehouse] = useState<Warehouse>({ featureSnapshots: 0, feedbackEvents: 0, gradeCounts: {}, top: [] });
   const [keyword, setKeyword] = useState("");
   const [message, setMessage] = useState("");
@@ -25,15 +29,16 @@ export default function MarketPage() {
   const [working, setWorking] = useState(false);
 
   async function load() {
-    const [summaryResponse, keywordResponse, productResponse, collectorResponse, warehouseResponse] = await Promise.all([
+    const [summaryResponse, keywordResponse, productResponse, collectorResponse, warehouseResponse, intelligenceResponse] = await Promise.all([
       fetch("/api/market/summary", { cache: "no-store" }),
       fetch("/api/market/keywords", { cache: "no-store" }),
       fetch("/api/market/products?limit=30", { cache: "no-store" }),
       fetch("/api/market/collectors", { cache: "no-store" }),
       fetch("/api/market/warehouse", { cache: "no-store" }),
+      fetch("/api/market/intelligence", { cache: "no-store" }),
     ]);
-    const [summaryData, keywordData, productData, collectorData, warehouseData] = await Promise.all([
-      summaryResponse.json(), keywordResponse.json(), productResponse.json(), collectorResponse.json(), warehouseResponse.json(),
+    const [summaryData, keywordData, productData, collectorData, warehouseData, intelligenceData] = await Promise.all([
+      summaryResponse.json(), keywordResponse.json(), productResponse.json(), collectorResponse.json(), warehouseResponse.json(), intelligenceResponse.json(),
     ]);
     if (summaryData.success) setSummary(summaryData.summary);
     if (keywordData.success) setKeywords(keywordData.keywords);
@@ -43,6 +48,7 @@ export default function MarketPage() {
       setJobs(collectorData.jobs ?? []);
     }
     if (warehouseData.success) setWarehouse(warehouseData.warehouse);
+    if (intelligenceData.success) setIntelligence(intelligenceData.intelligence);
   }
 
   useEffect(() => { void load(); }, []);
@@ -85,6 +91,18 @@ export default function MarketPage() {
 
     <section className="stat-grid market-stat-grid"><article><span>관찰 키워드</span><strong>{summary.keywordCount}</strong></article><article><span>추적 상품</span><strong>{summary.productCount}</strong></article><article><span>24시간 스냅샷</span><strong>{summary.snapshots24h}</strong></article><article><span>활성 Collector</span><strong>{collectors.filter((item) => item.status === "ready").length}</strong></article></section>
     {message && <div className="notice success-notice">{message}</div>}{error && <div className="notice error-notice">{error}</div>}
+
+    <section className="panel intelligence-panel" aria-labelledby="daily-market-brief-title">
+      <div className="section-heading"><div><p className="eyebrow">AUTONOMOUS DAILY BRIEF</p><h2 id="daily-market-brief-title">오늘의 고객 수요·구매 트렌드</h2><p>{intelligence.brief?.headline ?? (intelligence.status === "SCHEMA_PENDING" ? "자동 시장 인텔리전스 데이터 구조를 준비 중입니다." : "상시 수집 신호가 결합되면 오늘의 시장 브리프가 자동 생성됩니다.")}</p></div><span className={`collector-status status-${intelligence.status?.toLowerCase()}`}>{intelligence.status}</span></div>
+      <div className="stat-grid market-stat-grid"><article><span>독립 출처</span><strong>{intelligence.brief?.sourceCount ?? 0}</strong></article><article><span>추적 트렌드</span><strong>{intelligence.brief?.trendCount ?? 0}</strong></article><article><span>추천 아이템</span><strong>{intelligence.brief?.itemCount ?? 0}</strong></article><article><span>신규 탐색어</span><strong>{intelligence.discoveredKeywords?.length ?? 0}</strong></article></div>
+      {intelligence.trends?.length ? <div className="table-wrap"><table><thead><tr><th>수요 개념</th><th>상태</th><th>시장점수</th><th>수요/모멘텀</th><th>신뢰도</th><th>근거 출처</th></tr></thead><tbody>{intelligence.trends.slice(0, 10).map((trend) => <tr key={trend.concept}><td><strong>{trend.concept}</strong></td><td><span className={`grade grade-${trend.state === "BREAKOUT" || trend.state === "RISING" ? "S" : trend.state === "PERSISTENT" ? "A" : "B"}`}>{trend.state}</span></td><td>{Math.round(trend.score)}</td><td>{Math.round(trend.demand)} / {trend.momentum >= 0 ? "+" : ""}{Math.round(trend.momentum)}</td><td>{Math.round(trend.confidence)}%</td><td>{trend.providers.join(" · ")}</td></tr>)}</tbody></table></div> : <p className="empty-copy">서로 다른 출처의 유효 신호가 누적되면 상승·지속·계절·포화·하락 트렌드가 표시됩니다.</p>}
+      {intelligence.completedAt && <p className="panel-help">마지막 자동 분석: {new Date(intelligence.completedAt).toLocaleString("ko-KR")}</p>}
+    </section>
+
+    <section className="panel intelligence-panel" aria-labelledby="autonomous-item-recommendations-title">
+      <div className="section-heading"><div><h2 id="autonomous-item-recommendations-title">시장 트렌드 기반 추천 아이템</h2><p>실제 관측 상품을 고객 수요 개념과 결합해 단품·묶음 조사 후보로 정렬합니다. 원가와 물류비는 2번 엔진에서 검증합니다.</p></div><Link className="button-link secondary-button" href="/admin/item-selection">2. 상품선정·수익성 열기</Link></div>
+      {intelligence.items?.length ? <div className="table-wrap"><table><thead><tr><th>형태</th><th>추천 후보</th><th>트렌드</th><th>점수</th><th>신뢰도</th><th>다음 검증</th></tr></thead><tbody>{intelligence.items.slice(0, 20).map((item) => <tr key={item.candidateId}><td>{item.form === "bundle" ? "묶음" : "단품"}</td><td><Link href={`/admin/item-selection?keyword=${encodeURIComponent(item.concept)}`}><strong>{item.title}</strong></Link><small>{item.concept}</small></td><td>{item.trendState}</td><td>{Math.round(item.score)}</td><td>{Math.round(item.confidence)}%</td><td>{item.unresolved.map((value) => value.replaceAll("_", " ")).join(" · ")}</td></tr>)}</tbody></table></div> : <p className="empty-copy">시장 트렌드와 일치하는 실제 관측 상품이 확보되면 추천 아이템이 자동으로 표시됩니다.</p>}
+    </section>
 
     <section className="stat-grid market-stat-grid"><article><span>Feature 스냅샷</span><strong>{warehouse.featureSnapshots}</strong></article><article><span>운영 피드백</span><strong>{warehouse.feedbackEvents}</strong></article><article><span>S/A 등급</span><strong>{(warehouse.gradeCounts.S ?? 0) + (warehouse.gradeCounts.A ?? 0)}</strong></article><article><span>분석 상품</span><strong>{Object.values(warehouse.gradeCounts).reduce((sum, value) => sum + value, 0)}</strong></article></section>
 
