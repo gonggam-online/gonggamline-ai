@@ -19,7 +19,7 @@ test("listing review shows computed fixture artifacts and separate gates on mobi
   await page.setViewportSize({ width: 390, height: 844 });
   const response = await page.goto("/listing/review", { waitUntil: "networkidle" });
   expect(response?.status()).toBe(200);
-  await expect(page.getByRole("heading", { name: "증거 기반 Listing 검토" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "5-1. 증거 기반 콘텐츠 검토" })).toBeVisible();
   await expect(page.getByText("Registration readiness")).toBeVisible();
   await expect(page.getByText("Conversion readiness")).toBeVisible();
   await expect(page.getByText(/BLOCKER \/ WARNING \/ OPTIMIZATION_PENDING/)).toBeVisible();
