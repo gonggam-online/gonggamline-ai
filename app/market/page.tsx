@@ -15,6 +15,16 @@ type Trend = { concept: string; state: string; lane: string; score: number; conf
 type ItemRecommendation = { candidateId: string; title: string; form: string; lane: string; score: number; confidence: number; trendState: string; concept: string; reasons: string[]; unresolved: string[] };
 type Intelligence = { status: string; brief?: { headline: string; sourceCount: number; trendCount: number; itemCount: number }; trends?: Trend[]; items?: ItemRecommendation[]; discoveredKeywords?: string[]; completedAt?: string };
 
+async function getAdminCsrfToken(purpose: string): Promise<string> {
+  const response = await fetch(`/api/admin/auth/csrf?purpose=${encodeURIComponent(purpose)}`, {
+    cache: "no-store",
+    credentials: "same-origin",
+  });
+  const data = (await response.json().catch(() => ({}))) as { token?: string; error?: { code?: string } };
+  if (!response.ok || !data.token) throw new Error(data.error?.code || "CSRF_TOKEN_UNAVAILABLE");
+  return data.token;
+}
+
 export default function MarketPage() {
   const [summary, setSummary] = useState<Summary>({ keywordCount: 0, productCount: 0, snapshots24h: 0, alerts: [] });
   const [keywords, setKeywords] = useState<MarketKeyword[]>([]);
@@ -61,10 +71,18 @@ export default function MarketPage() {
     setKeyword(""); setMessage("관찰 키워드를 등록했습니다."); await load();
   }
 
-  async function runAction(path: string, body: object, successMessage: string) {
+  async function runAction(path: string, body: object, successMessage: string, csrfPurpose?: string) {
     setWorking(true); setError(""); setMessage("");
     try {
-      const response = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const csrfToken = csrfPurpose ? await getAdminCsrfToken(csrfPurpose) : null;
+      const response = await fetch(path, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-GonggamLine-CSRF": csrfToken } : {}),
+        },
+        body: JSON.stringify(body),
+      });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.message || "작업 실패");
       setMessage(successMessage); await load();
@@ -87,7 +105,7 @@ export default function MarketPage() {
     .slice(0, 8);
 
   return <main className="dashboard">
-    <section className="hero market-hero"><div><p className="eyebrow">ENGINE 1 · MARKET INTELLIGENCE</p><h1>1. 시장정보·아이템 발굴</h1><p className="hero-description">수집·시계열·Feature Warehouse·다차원 기회점수·AI 판단·실매출 피드백을 하나의 데이터 자산으로 축적합니다.</p></div><div className="hero-actions"><button disabled={working} onClick={() => runAction("/api/market/jobs/run", { limit: 20 }, "실행 가능한 수집 작업을 처리했습니다.")}>스케줄 실행</button><button disabled={working} onClick={() => runAction("/api/market/analyze", {}, "전체 시장 분석을 완료했습니다.")}>전체 분석</button><button className="secondary-button" disabled={working} onClick={() => runAction("/api/market/demo-seed", { keyword: keyword || "생활용품" }, "DEMO 데이터로 전체 파이프라인을 검증했습니다.")}>DEMO 검증</button></div></section>
+    <section className="hero market-hero"><div><p className="eyebrow">ENGINE 1 · MARKET INTELLIGENCE</p><h1>1. 시장정보·아이템 발굴</h1><p className="hero-description">수집·시계열·Feature Warehouse·다차원 기회점수·AI 판단·실매출 피드백을 하나의 데이터 자산으로 축적합니다.</p></div><div className="hero-actions"><button disabled={working} onClick={() => runAction("/api/market/jobs/run", { limit: 20 }, "실행 가능한 수집 작업을 처리했습니다.", "market-collection-run")}>스케줄 실행</button><button disabled={working} onClick={() => runAction("/api/market/analyze", {}, "전체 시장 분석을 완료했습니다.")}>전체 분석</button><button className="secondary-button" disabled={working} onClick={() => runAction("/api/market/demo-seed", { keyword: keyword || "생활용품" }, "DEMO 데이터로 전체 파이프라인을 검증했습니다.")}>DEMO 검증</button></div></section>
 
     <section className="stat-grid market-stat-grid"><article><span>관찰 키워드</span><strong>{summary.keywordCount}</strong></article><article><span>추적 상품</span><strong>{summary.productCount}</strong></article><article><span>24시간 스냅샷</span><strong>{summary.snapshots24h}</strong></article><article><span>활성 Collector</span><strong>{collectors.filter((item) => item.status === "ready").length}</strong></article></section>
     {message && <div className="notice success-notice">{message}</div>}{error && <div className="notice error-notice">{error}</div>}

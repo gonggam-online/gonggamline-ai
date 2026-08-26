@@ -65,6 +65,9 @@ test("runtime wiring continuously persists evidence, rebuilds intelligence and r
   assert.match(page, /\/api\/market\/intelligence/);
   assert.match(page, /오늘의 고객 수요·구매 트렌드/);
   assert.match(page, /시장 트렌드 기반 추천 아이템/);
+  assert.match(page, /getAdminCsrfToken\(csrfPurpose\)/);
+  assert.match(page, /"X-GonggamLine-CSRF": csrfToken/);
+  assert.match(page, /"market-collection-run"/);
   assert.match(cron, /runDueCollectionJobs\(6\)/);
   assert.match(orchestration, /Math\.min\(10, Math\.floor\(limit\)\)/);
   assert.match(orchestration, /\.eq\("status", "running"\)\.lt\("last_run_at", staleLease\)/);
