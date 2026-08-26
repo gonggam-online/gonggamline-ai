@@ -3,7 +3,6 @@ import { analyzeMarketProduct } from "./market-analysis.service";
 import { collectConfiguredMarketObservations } from "./market-observation-collector.service";
 import { saveMarketObservation } from "./market-observation.service";
 import type { CollectorRunResult } from "../types/collector";
-import { rebuildAutonomousMarketIntelligence, recordAutonomousCollectionEvidence } from "./autonomous-market-discovery.service";
 
 function nextRun(intervalMinutes: number) {
   return new Date(Date.now() + intervalMinutes * 60_000).toISOString();
@@ -128,6 +127,7 @@ export async function runDueCollectionJobs(limit = 20, collectorKey?: string, re
           });
           if (!signalError) saved += 1;
         }
+        const { recordAutonomousCollectionEvidence } = await import("./autonomous-market-discovery.service");
         await recordAutonomousCollectionEvidence({
           keywordId: Number(job.market_keyword_id),
           keyword,
@@ -199,7 +199,9 @@ export async function runDueCollectionJobs(limit = 20, collectorKey?: string, re
     }).eq("collector_key", job.collector_key);
     results.push(result);
   }
-  const intelligence = refreshIntelligence && results.length ? await rebuildAutonomousMarketIntelligence() : undefined;
+  const intelligence = refreshIntelligence && results.length
+    ? await (await import("./autonomous-market-discovery.service")).rebuildAutonomousMarketIntelligence()
+    : undefined;
   return intelligence ? { results, intelligence } : { results };
 }
 
@@ -210,7 +212,9 @@ export async function runProviderVerificationJobs(): Promise<{ results: Collecto
     const verification = await runDueCollectionJobs(1, collectorKey, false);
     results.push(...verification.results);
   }
-  const intelligence = results.length ? await rebuildAutonomousMarketIntelligence() : undefined;
+  const intelligence = results.length
+    ? await (await import("./autonomous-market-discovery.service")).rebuildAutonomousMarketIntelligence()
+    : undefined;
   return intelligence ? { results, intelligence } : { results };
 }
 
