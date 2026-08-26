@@ -19,6 +19,9 @@
   출력·로그에 credential을 내보내지 않는다.
 - `MARKET_EXTERNAL_PROVIDER_ENABLED=true`가 없으면 native provider 실행은
   중단된다. 기존 configured HTTPS endpoint 경로는 그대로 유지된다.
+- Vercel 예약 실행 인증의 canonical Secret은 `CRON_SECRET`이다. Vercel이
+  이 값을 Bearer Authorization 헤더로 자동 전달하며, `MARKET_CRON_SECRET`은
+  수동 호출 호환을 위한 읽기 fallback으로만 유지한다.
 - NAVER API HUB는 최근 30일의 일간 상대 추이를 수집한다. 2026-08-01
   종료된 Naver Developers Shopping Search API의 상품·가격 결과와 API HUB
   DataLab 추이는 서로 다른 계약이다. 따라서 API HUB 결과는 discovery
@@ -83,3 +86,8 @@ source policy를 갱신하고 다시 승인한다.
 계속 수집하고 Shopping Insight만 생략한다. 신규 키워드를 활성화할 때는
 네이버 가격비교의 현재 대표 분야와 `cat_id`를 확인한 뒤 정책과 테스트를
 함께 갱신한다.
+
+세 공급자의 운영 연결 검증은 인증된 `/api/market/cron?verify=providers`
+호출로 수행한다. 이 모드는 네이버, DataForSEO, YouTube의 due job을 각각
+정확히 1개만 실행하므로 유료·quota 호출 범위를 고정하며, 일반 예약 실행은
+기존처럼 한 번에 최대 20개 due job을 처리한다.
