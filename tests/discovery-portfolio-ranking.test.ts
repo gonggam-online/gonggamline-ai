@@ -13,6 +13,12 @@ test("portfolio ranking favors scalable evidenced candidates and remains determi
   assert.notEqual(first[1]?.lane, "SCALE_READY");
 });
 
+test("market-backed candidates stay actionable while economics are collected", () => {
+  const [candidate] = rankDiscoveryPortfolio({ trends: [{ candidateId: "open", title: "시장 발굴 후보", form: "set", score: 60, confidence: 73, trendState: "BREAKOUT", concept: "시장후보", reasons: ["복수 신호"], unresolved: ["SUPPLIER_QUOTE", "UNIT_ECONOMICS", "RIGHTS", "FULFILLMENT_COST"] }], evaluated: [] });
+  assert.equal(candidate?.lane, "VALIDATE_NEXT");
+  assert.equal(candidate?.profitScore, 32);
+});
+
 test("evaluated real products supersede the same trend while demo rows are excluded", () => {
   const evaluated = [{ id: 10, status: "candidate", decision_action: "approve", decision_score: 80, market_score: 85, growth_score: 80, supply_score: 70, profit_score: 72, risk_score: 30, confidence: 75, estimated_units_low: 300, estimated_units_high: 900, recommendation_reason: "근거 충분", risk_explanation: "제한적", market_products: { title: "욕실정리", category: "생활", brand: null, thumbnail_url: null } }, { id: 11, status: "candidate", decision_action: "review", decision_score: 60, market_score: 60, growth_score: 60, supply_score: 50, profit_score: 50, risk_score: 50, confidence: 50, estimated_units_low: 10, estimated_units_high: 20, recommendation_reason: "demo", risk_explanation: "demo", market_products: { title: "가짜", category: "데모 데이터", brand: null, thumbnail_url: null } }] as const;
   const result = rankDiscoveryPortfolio({ trends: [{ candidateId: "same", title: "욕실정리 상품군", form: "set", score: 75, confidence: 70, trendState: "RISING", concept: "욕실정리", reasons: [], unresolved: [] }], evaluated });
