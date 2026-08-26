@@ -40,6 +40,7 @@ type ProductRow = {
   title: string;
   category: string | null;
   source: string | null;
+  brand: string | null;
   market_product_metrics?: Record<string, unknown> | Record<string, unknown>[] | null;
 };
 
@@ -183,7 +184,7 @@ export async function rebuildAutonomousMarketIntelligence(): Promise<Record<stri
     const [snapshotResult, productResult] = await Promise.all([
       supabase.from("market_keyword_signal_snapshots").select("id,concept,provider,observed_at,demand_index,content_velocity,shopping_intent,competition_pressure,price_room,evidence_digest")
         .gte("observed_at", since).order("observed_at", { ascending: true }).limit(5_000),
-      supabase.from("market_products").select("id,title,category,source,market_product_metrics(opportunity_score,confidence)")
+      supabase.from("market_products").select("id,title,category,source,brand,market_product_metrics(opportunity_score,confidence)")
         .order("last_seen_at", { ascending: false }).limit(500),
     ]);
     if (snapshotResult.error) throw new Error(snapshotResult.error.message);
@@ -202,7 +203,7 @@ export async function rebuildAutonomousMarketIntelligence(): Promise<Record<stri
     const trend = buildMarketTrendDigest(evidence, { expectedProviders: 3, limit: 20 });
     const products: MarketProductCandidateInput[] = ((productResult.data ?? []) as ProductRow[]).map((row) => {
       const metric = productMetric(row);
-      return { id: Number(row.id), title: row.title, category: row.category, source: row.source, opportunityScore: numberOrNull(metric.opportunity_score), confidence: numberOrNull(metric.confidence) };
+      return { id: Number(row.id), title: row.title, category: row.category, source: row.source, brand: row.brand, opportunityScore: numberOrNull(metric.opportunity_score), confidence: numberOrNull(metric.confidence) };
     });
     const items = buildMarketItemRecommendations(trend.opportunities, products, 20);
     const keywordRows = await supabase.from("market_keywords").select("id,keyword,discovery_lane").limit(500);

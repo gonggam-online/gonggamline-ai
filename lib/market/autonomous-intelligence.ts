@@ -64,6 +64,7 @@ export type MarketProductCandidateInput = Readonly<{
   title: string;
   category?: string | null;
   source?: string | null;
+  brand?: string | null;
   opportunityScore?: number | null;
   confidence?: number | null;
 }>;
@@ -230,7 +231,8 @@ export function buildMarketItemRecommendations(
     if (opportunity.state === "DECLINING" || opportunity.state === "SATURATED") continue;
     const conceptTokens = normalizeMarketConcept(opportunity.concept).split(" ").filter((token) => token.length >= 2);
     const matching = products.filter((product) => {
-      if (normalizeMarketConcept(product.source ?? "").includes("demo")) return false;
+      const provenance = normalizeMarketConcept(`${product.source ?? ""} ${product.brand ?? ""}`);
+      if (provenance.includes("demo") || provenance.includes("공감데모")) return false;
       const title = normalizeMarketConcept(product.title);
       const compactTitle = title.replaceAll(" ", "");
       const compactConcept = opportunity.concept.replaceAll(" ", "");
