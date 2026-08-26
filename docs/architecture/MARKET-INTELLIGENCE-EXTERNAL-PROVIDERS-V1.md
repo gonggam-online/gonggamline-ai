@@ -9,7 +9,7 @@
 | Provider | 용도 | 인증 | 비용/쿼터 경계 |
 |---|---|---|---|
 | NAVER API HUB 검색어 트렌드 | 통합검색 상대 검색 추이 | `NAVER_API_HUB_CLIENT_ID`, `NAVER_API_HUB_CLIENT_SECRET` | 애플리케이션별 승인 API와 콘솔 쿼터 적용 |
-| NAVER API HUB 쇼핑 인사이트 | 명시한 쇼핑 분야의 키워드별 상대 클릭 추이 | 위 API HUB 키 + `NAVER_API_HUB_SHOPPING_CATEGORY_ID` | 카테고리를 추측하지 않으며 미설정 시 이 호출만 생략 |
+| NAVER API HUB 쇼핑 인사이트 | 검증된 쇼핑 분야의 키워드별 상대 클릭 추이 | 위 API HUB 키 + versioned keyword/category policy | 키워드별 검증 코드만 사용하며 미등록 키워드는 이 호출만 생략 |
 | YouTube Data API | 공개 영상 제목·게시시점·검색순위 연구 | `YOUTUBE_DATA_API_KEY` | `search.list` 1회 100 quota units, 기본 일일 10,000 units; 영상/자산 권리 없음 |
 | DataForSEO Naver Organic SERP | Naver SERP 경쟁·순위 보강 | `DATAFORSEO_LOGIN`, `DATAFORSEO_PASSWORD` | pay-as-you-go; 요청당 `DATAFORSEO_MAX_COST_USD_PER_REQUEST` 필수 |
 
@@ -51,8 +51,9 @@ source policy를 갱신하고 다시 승인한다.
 1. Vercel Production에 API HUB Client ID/Secret을 저장한다. 전환 기간에는
    기존 `NAVER_CLIENT_ID`/`NAVER_CLIENT_SECRET`도 fallback으로 읽지만 신규
    이름을 권장한다. 값은 원문 그대로 저장하며 Base64 변환하지 않는다.
-2. 쇼핑 인사이트가 필요하면 검증한 Naver Shopping `cat_id`만
-   `NAVER_API_HUB_SHOPPING_CATEGORY_ID`에 지정한다.
+2. 쇼핑 인사이트는 `lib/market/naver-shopping-category-policy.ts`의
+   검증된 키워드별 `cat_id`를 사용한다. 단일 전역 카테고리 환경변수는
+   서로 다른 키워드를 잘못 분류할 수 있으므로 런타임 기본값으로 읽지 않는다.
 3. `MARKET_EXTERNAL_PROVIDER`를 `naver_api_hub`로 선택하고
    `MARKET_EXTERNAL_PROVIDER_ENABLED=true` 설정
 4. read-only smoke로 1개 keyword, 1회 호출 확인
@@ -61,3 +62,24 @@ source policy를 갱신하고 다시 승인한다.
 
 중단은 enabled 플래그를 제거하고 provider key를 rotate하는 것으로
 수행한다. 기존 market evidence와 Item Selection verdict는 유지한다.
+
+## Naver Shopping keyword/category policy (2026-08-26)
+
+네이버 공식 Shopping Insight 계약은 `category`를 필수로 요구하며, 해당
+코드는 네이버 가격비교 카테고리의 `cat_id`와 일치해야 한다. 아래 매핑은
+각 활성 키워드의 네이버 가격비교 검색 카테고리 분포를 확인한 뒤 대표
+쇼핑 분야를 선택하고, 분야 코드 페이지에서 이름을 재검증한 결과다.
+
+| 코드 | 분야 | 키워드 |
+|---|---|---|
+| `50000001` | 패션잡화 | 여행정리 |
+| `50000003` | 디지털/가전 | 케이블정리, 무선청소기 |
+| `50000004` | 가구/인테리어 | 틈새수납, 소형조명 |
+| `50000007` | 스포츠/레저 | 여름쿨링, 겨울보온, 캠핑수납 |
+| `50000008` | 생활/건강 | 주방정리, 욕실정리, 먼지제거, 싱크대정리, 차량정리, 주방청소, 미끄럼방지, 냉장고정리, 다용도수납, 차량용수납, 정리용품, 다용도걸이, 차량청소, 생활보호용품, 소형생활용품, 장마용품, 휴대용보관, 생활용품 |
+
+정책 버전은 `gonggamline-naver-shopping-category-policy-2026-08-26`이다.
+미등록 키워드는 임의 추정하지 않는다. 이 경우 통합검색 Search Trend는
+계속 수집하고 Shopping Insight만 생략한다. 신규 키워드를 활성화할 때는
+네이버 가격비교의 현재 대표 분야와 `cat_id`를 확인한 뒤 정책과 테스트를
+함께 갱신한다.
