@@ -62,7 +62,7 @@ const bounded = (value: number) => Math.round(Math.max(0, Math.min(100, value)) 
 
 function lane(score: number, confidence: number, profit: number, risk: number, readiness: number): DiscoveryPortfolioLane {
   if (score >= 72 && confidence >= 58 && profit >= 52 && risk <= 55 && readiness >= 55) return "SCALE_READY";
-  if (score >= 52 && risk <= 75) return "VALIDATE_NEXT";
+  if (score >= 45 && confidence >= 35 && risk <= 85) return "VALIDATE_NEXT";
   return "WATCH";
 }
 
