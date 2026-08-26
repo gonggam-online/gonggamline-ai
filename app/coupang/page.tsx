@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 
 type ConnectionResult = {
   ok: boolean;
@@ -75,7 +74,6 @@ export default function CoupangPage() {
           <h1>6-1. 쿠팡 API 연동</h1>
           <p>인증 상태를 확인하고 내 마켓플레이스·로켓그로스 상품을 안전하게 조회합니다.</p>
         </div>
-        <div style={{display:"flex",gap:10,flexWrap:"wrap"}}><Link href="/dashboard" className="ghost-link">7대 엔진 전체보기</Link><Link href="/seller" className="ghost-link">6. 판매채널 운영</Link><Link href="/coupang/register" className="ghost-link">6-2 쿠팡 상품 등록</Link></div>
       </section>
 
       <section className="coupang-grid">

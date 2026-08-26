@@ -60,7 +60,7 @@ export default function WorkflowPage() {
   return <main className="dashboard">
     <section className="hero" style={{background:"linear-gradient(135deg,#102a43,#0f766e)"}}>
       <div><p className="eyebrow">COMMERCE WORKFLOW ENGINE · v9.5</p><h1>엔진 간 자동 Workflow 통합센터</h1><p className="hero-description">추천·소싱·발주·3PL·Listing·쿠팡 등록 데이터를 하나의 Workflow ID와 상태 머신으로 연결하고, 다음 업무를 자동 생성합니다.</p></div>
-      <div className="hero-actions"><Link className="button-link secondary-button" href="/dashboard">7대 엔진 전체보기</Link><Link className="button-link secondary-button" href="/workspace">4-1 물류 Workspace</Link><Link className="button-link secondary-button" href="/procurement">3-1 발주·입고 준비</Link><Link className="button-link secondary-button" href="/listing">5. 상품 콘텐츠 제작</Link><Link className="button-link secondary-button" href="/seller">6. 판매채널 운영</Link><button onClick={reconcile} disabled={loading}>{loading?"동기화 중":"전체 자동 동기화"}</button></div>
+      <div className="hero-actions"><button onClick={reconcile} disabled={loading}>{loading?"동기화 중":"전체 자동 동기화"}</button></div>
     </section>
     <section className="stat-grid"><article><span>전체 Workflow</span><strong>{workflows.length}</strong></article><article><span>활성 Workflow</span><strong>{workflows.filter(x=>x.status==="active").length}</strong></article><article><span>열린 업무</span><strong>{openTasks.length}</strong></article><article><span>완료·학습 단계</span><strong>{workflows.filter(x=>["selling","learning"].includes(x.current_stage)).length}</strong></article></section>
     {message && <div className="notice">{message}</div>}

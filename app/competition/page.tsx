@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 type Product = {
@@ -98,9 +97,6 @@ export default function CompetitionPage() {
       </div>
       <div className="hero-actions">
         <button onClick={batchAnalyze} disabled={batching}>{batching ? "분석 중…" : "미분석 상품 10개 자동 분석"}</button>
-        <Link className="button-link secondary-button" href="/dashboard">7대 엔진 전체보기</Link>
-        <Link className="button-link secondary-button" href="/admin/item-selection">2. 상품선정·수익성</Link>
-        <Link className="button-link secondary-button" href="/">2-2 상품 후보 관리</Link>
       </div>
     </section>
 

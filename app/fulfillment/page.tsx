@@ -16,7 +16,6 @@ export default function FulfillmentPage() {
     <main className="dashboard">
       <section className="hero fulfillment-hero">
         <div><p className="eyebrow">ENGINE 4 · FULFILLMENT</p><h1>4. 물류·재고·출고</h1><p className="hero-description">3PL 입고부터 검수·재고·주문수집·고객 출고·운송장·반품까지 하나의 물류 상태로 연결합니다.</p></div>
-        <div className="hero-actions"><Link className="button-link secondary-button" href="/dashboard">7대 엔진 전체보기</Link></div>
       </section>
       <section className="panel">
         <div className="section-heading"><div><h2>현재 연결된 물류 화면</h2><p>기존 URL과 기능을 유지하면서 4번 엔진 아래에 정리했습니다.</p></div></div>
