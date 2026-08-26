@@ -84,7 +84,7 @@ export async function runDueCollectionJobs(limit = 20): Promise<{ results: Colle
         const isYoutube = job.collector_key === "youtube-public-signals";
         const collected = await collectConfiguredMarketObservations({
           collectorKey: isNaver ? "official-api-adapter" : "public-observation-adapter",
-          provider: isNaver ? "naver_shopping" : isYoutube ? "youtube_data" : "dataforseo_naver",
+          provider: isNaver ? "naver_api_hub" : isYoutube ? "youtube_data" : "dataforseo_naver",
           keyword,
         });
         let saved = 0;
@@ -94,32 +94,31 @@ export async function runDueCollectionJobs(limit = 20): Promise<{ results: Colle
           saved += 1;
           if (await analyzeMarketProduct(persisted.productId)) analyzed += 1;
         }
-        if (isYoutube) {
-          for (const signal of collected.discoverySignals) {
-            const { error: signalError } = await supabase.from("market_signals").insert({
-              market_keyword_id: job.market_keyword_id,
-              signal_type: "YOUTUBE_PUBLIC_TREND",
-              severity: "medium",
-              title: signal.title,
-              evidence: signal,
-              detected_at: signal.observedAt,
-            });
-            if (!signalError) saved += 1;
-          }
+        for (const signal of collected.discoverySignals) {
+          const { error: signalError } = await supabase.from("market_signals").insert({
+            market_keyword_id: job.market_keyword_id,
+            signal_type: isYoutube ? "YOUTUBE_PUBLIC_TREND" : "NAVER_API_HUB_TREND",
+            severity: "medium",
+            title: signal.title,
+            evidence: signal,
+            detected_at: signal.observedAt,
+          });
+          if (!signalError) saved += 1;
         }
+        const requested = collected.observations.length + collected.discoverySignals.length;
         const completedAt = new Date().toISOString();
         await supabase.from("market_collection_runs").update({
-          status: saved === collected.observations.length ? "success" : "partial",
-          requested_count: collected.observations.length,
+          status: saved === requested ? "success" : "partial",
+          requested_count: requested,
           saved_count: saved,
           finished_at: completedAt,
         }).eq("id", run.id);
         result = {
           collectorKey: job.collector_key,
-          requested: collected.observations.length,
+          requested,
           saved,
           analyzed,
-          status: saved === collected.observations.length ? "success" : "partial",
+          status: saved === requested ? "success" : "partial",
           message: `${keyword} 관측 ${saved}건 저장 및 분석 완료`,
         };
       } catch (error) {

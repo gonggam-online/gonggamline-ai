@@ -102,14 +102,16 @@ async function withTimeout<T>(promise: Promise<T>): Promise<T> {
 
 async function estimateOne(
   item: SupplierCatalogItem,
-  collect: NaverCollector,
+  collect: NaverCollector | null,
   broadObservations: readonly MarketObservationInput[],
 ): Promise<CoupangMarketPriceEstimate> {
   const query = normalizedQuery(item.name ?? "");
   if (query.length < 2) return unavailable(query);
   try {
-    const result = await withTimeout(collect(query, { display: 30 }));
-    const coupangOffers = [...result.observations, ...broadObservations]
+    const directObservations = collect
+      ? (await withTimeout(collect(query, { display: 30 }))).observations
+      : [];
+    const coupangOffers = [...directObservations, ...broadObservations]
       .filter((observation) =>
         /(쿠팡|coupang)/i.test(observation.product.sellerName?.trim() ?? "") &&
         typeof observation.snapshot.price === "number" &&
@@ -149,7 +151,7 @@ async function estimateOne(
       lowSellingPriceKrw: percentile(prices, 0.25),
       highSellingPriceKrw: percentile(prices, 0.75),
       observationCount: prices.length,
-      sourceReference: "naver-shopping-official:coupang-public-offers",
+      sourceReference: "bounded-public-coupang-offers",
       sampleOffers: Object.freeze(matched.slice(0, 3).map(({ observation, similarity: score }) => Object.freeze({
         title: observation.product.title,
         priceKrw: observation.snapshot.price as number,
@@ -163,13 +165,14 @@ async function estimateOne(
 }
 
 /**
- * Reads current public shopping-search observations and keeps only offers whose
- * disclosed mall is Coupang. It never calls WING or performs a commerce write.
+ * Reads current public Coupang price snippets from bounded approved search
+ * providers. It never calls WING or performs a commerce write. NAVER API HUB
+ * DataLab trend responses are intentionally not used as product offers.
  */
 export async function loadCoupangMarketPriceEstimates(
   items: readonly SupplierCatalogItem[],
   keyword = "",
-  collect: NaverCollector = collectNaverShopping,
+  collect: NaverCollector | null = null,
   collectPaidCoupang: PaidCoupangCollector = collectDataForSeoCoupangPrices,
 ): Promise<ReadonlyMap<string, CoupangMarketPriceEstimate>> {
   const result = new Map<string, CoupangMarketPriceEstimate>();
@@ -178,13 +181,15 @@ export async function loadCoupangMarketPriceEstimates(
   const broadQuery = normalizedQuery(keyword);
   if (broadQuery.length >= 2) {
     try {
-      const broadResults = await Promise.allSettled([
-        withTimeout(collect(broadQuery, { display: 100 })),
-        withTimeout(collect(`${broadQuery} 쿠팡`, { display: 100 })),
-      ]);
-      broadObservations = broadResults.flatMap((entry) =>
-        entry.status === "fulfilled" ? entry.value.observations : []
-      );
+      if (collect) {
+        const broadResults = await Promise.allSettled([
+          withTimeout(collect(broadQuery, { display: 100 })),
+          withTimeout(collect(`${broadQuery} 쿠팡`, { display: 100 })),
+        ]);
+        broadObservations = broadResults.flatMap((entry) =>
+          entry.status === "fulfilled" ? entry.value.observations : []
+        );
+      }
       const hasCoupangObservation = broadObservations.some((observation) =>
         /(쿠팡|coupang)/i.test(`${observation.product.sellerName ?? ""} ${observation.product.url ?? ""}`)
       );
@@ -193,7 +198,7 @@ export async function loadCoupangMarketPriceEstimates(
           const paidResult = await withTimeout(collectPaidCoupang(broadQuery));
           broadObservations = [...broadObservations, ...paidResult.observations];
         } catch {
-          // A bounded paid fallback is optional; Naver/candidate evaluation continues.
+          // A bounded paid fallback is optional; candidate evaluation continues.
         }
       }
     } catch {

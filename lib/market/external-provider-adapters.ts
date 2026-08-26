@@ -1,11 +1,12 @@
 import type { MarketDiscoverySignal } from "../../shared/domain/market-discovery-evidence";
 import type { MarketObservationInput } from "../../types/market";
 
-export type ExternalMarketProvider = "naver_shopping" | "youtube_data" | "dataforseo_naver";
+export type ExternalMarketProvider = "naver_api_hub" | "naver_shopping" | "youtube_data" | "dataforseo_naver";
 
 export type ExternalProviderCredentials = Readonly<{
   naverClientId?: string;
   naverClientSecret?: string;
+  naverShoppingCategoryId?: string;
   youtubeApiKey?: string;
   dataForSeoLogin?: string;
   dataForSeoPassword?: string;
@@ -31,8 +32,9 @@ type Requester = (input: RequestInfo | URL, init?: RequestInit) => Promise<Respo
 
 function credentialsFromEnvironment(): ExternalProviderCredentials {
   return {
-    naverClientId: process.env.NAVER_CLIENT_ID,
-    naverClientSecret: process.env.NAVER_CLIENT_SECRET,
+    naverClientId: process.env.NAVER_API_HUB_CLIENT_ID ?? process.env.NAVER_CLIENT_ID,
+    naverClientSecret: process.env.NAVER_API_HUB_CLIENT_SECRET ?? process.env.NAVER_CLIENT_SECRET,
+    naverShoppingCategoryId: process.env.NAVER_API_HUB_SHOPPING_CATEGORY_ID,
     youtubeApiKey: process.env.YOUTUBE_DATA_API_KEY,
     dataForSeoLogin: process.env.DATAFORSEO_LOGIN,
     dataForSeoPassword: process.env.DATAFORSEO_PASSWORD,
@@ -66,12 +68,24 @@ function observedAt(): string {
   return new Date().toISOString();
 }
 
+function isoDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function trendWindow(now: Date): Readonly<{ startDate: string; endDate: string }> {
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - 29);
+  return { startDate: isoDate(start), endDate: isoDate(end) };
+}
+
 function discoverySignal(input: Readonly<{
   sourceId: string;
   sourceKind: "official_api" | "paid_api" | "short_video_public";
   query: string;
   externalProductId: string;
   title: string;
+  category?: string | null;
   sourceUrl: string | null;
   observedAt: string;
   rank: number | null;
@@ -84,7 +98,7 @@ function discoverySignal(input: Readonly<{
     query: input.query,
     externalProductId: input.externalProductId,
     title: input.title,
-    category: null,
+    category: input.category ?? null,
     sourceUrl: input.sourceUrl,
     observedAt: input.observedAt,
     rank: input.rank,
@@ -98,6 +112,7 @@ function discoverySignal(input: Readonly<{
 }
 
 async function jsonResponse(response: Response, code: string): Promise<unknown> {
+  if (response.status === 401) throw new Error(`${code}_UNAUTHORIZED`);
   if (response.status === 403) throw new Error(`${code}_FORBIDDEN`);
   if (response.status === 429) throw new Error(`${code}_RATE_LIMITED`);
   if (!response.ok) throw new Error(`${code}_HTTP_${response.status}`);
@@ -108,69 +123,141 @@ async function jsonResponse(response: Response, code: string): Promise<unknown> 
   }
 }
 
-export async function collectNaverShopping(
+type NaverTrendPoint = Readonly<{ period: string; ratio: number }>;
+
+function naverTrendPoints(value: unknown): NaverTrendPoint[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry): NaverTrendPoint[] => {
+    if (typeof entry !== "object" || entry === null) return [];
+    const record = entry as Record<string, unknown>;
+    const ratio = number(record.ratio);
+    if (typeof record.period !== "string" || ratio === null || ratio < 0 || ratio > 100) return [];
+    return [{ period: record.period, ratio }];
+  }).sort((left, right) => left.period.localeCompare(right.period));
+}
+
+function trendSignal(input: Readonly<{
+  sourceId: string;
+  query: string;
+  title: string;
+  category?: string | null;
+  sourceUrl: string;
+  timestamp: string;
+  points: readonly NaverTrendPoint[];
+}>): MarketDiscoverySignal | null {
+  if (input.points.length === 0) return null;
+  const first = input.points[0]?.ratio ?? 0;
+  const latest = input.points.at(-1)?.ratio ?? 0;
+  return discoverySignal({
+    sourceId: input.sourceId,
+    sourceKind: "official_api",
+    query: input.query,
+    externalProductId: `${input.sourceId}:${input.query}`,
+    title: input.title,
+    category: input.category,
+    sourceUrl: input.sourceUrl,
+    observedAt: input.timestamp,
+    rank: null,
+    popularityScore: latest,
+    contentVelocity: Math.max(0, Math.round((latest - first) * 1_000) / 1_000),
+  });
+}
+
+/**
+ * Collects relative search/click trends from NAVER API HUB. The discontinued
+ * Naver Developers Shopping Search endpoint returned product offers; API HUB
+ * DataLab endpoints do not. Therefore this adapter deliberately returns
+ * discovery signals only and never fabricates product, price, or seller rows.
+ */
+export async function collectNaverApiHubTrends(
   keyword: string,
-  options: Readonly<{ credentials?: ExternalProviderCredentials; request?: Requester; display?: number }> = {},
+  options: Readonly<{ credentials?: ExternalProviderCredentials; request?: Requester; now?: Date }> = {},
 ): Promise<ExternalProviderResult> {
   const query = boundedKeyword(keyword);
   const credentials = options.credentials ?? credentialsFromEnvironment();
   const clientId = required(credentials.naverClientId, "NAVER_CREDENTIALS_MISSING");
   const clientSecret = required(credentials.naverClientSecret, "NAVER_CREDENTIALS_MISSING");
-  const display = Math.min(100, Math.max(1, options.display ?? 30));
-  const url = new URL("https://openapi.naver.com/v1/search/shop.json");
-  url.searchParams.set("query", query);
-  url.searchParams.set("display", String(display));
-  url.searchParams.set("start", "1");
-  url.searchParams.set("sort", "sim");
-  const response = await (options.request ?? fetch)(url, {
-    method: "GET",
+  const categoryId = credentials.naverShoppingCategoryId?.trim();
+  if (categoryId && !/^\d{8,12}$/.test(categoryId)) throw new Error("NAVER_SHOPPING_CATEGORY_INVALID");
+  const request = options.request ?? fetch;
+  const now = options.now ?? new Date();
+  const window = trendWindow(now);
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "X-NCP-APIGW-API-KEY-ID": clientId,
+    "X-NCP-APIGW-API-KEY": clientSecret,
+  };
+  const searchUrl = "https://naverapihub.apigw.ntruss.com/search-trend/v1/search";
+  const searchResponse = await request(searchUrl, {
+    method: "POST",
     headers: {
-      Accept: "application/json",
-      "X-Naver-Client-Id": clientId,
-      "X-Naver-Client-Secret": clientSecret,
+      ...headers,
     },
+    body: JSON.stringify({ ...window, timeUnit: "date", keywordGroups: [{ groupName: query, keywords: [query] }] }),
     cache: "no-store",
   });
-  const body = await jsonResponse(response, "NAVER_SHOPPING");
-  if (typeof body !== "object" || body === null || !Array.isArray((body as { items?: unknown }).items)) {
-    throw new Error("NAVER_SHOPPING_RESPONSE_INVALID");
+  const searchBody = await jsonResponse(searchResponse, "NAVER_API_HUB_SEARCH_TREND");
+  if (typeof searchBody !== "object" || searchBody === null || !Array.isArray((searchBody as { results?: unknown }).results)) {
+    throw new Error("NAVER_API_HUB_SEARCH_TREND_RESPONSE_INVALID");
   }
-  const timestamp = observedAt();
-  const observations = (body as { items: unknown[] }).items.slice(0, display).flatMap((item, index): MarketObservationInput[] => {
-    if (typeof item !== "object" || item === null) return [];
-    const record = item as Record<string, unknown>;
-    const externalProductId = text(record.productId, 200);
-    const title = text(record.title);
-    if (!externalProductId || !title) return [];
-    return [{
-      source: "naver_official",
-      keyword: query,
-      observedAt: timestamp,
-      product: {
-        externalProductId,
-        vendorItemId: null,
-        url: text(record.link, 2_000),
-        title,
-        brand: text(record.brand),
-        sellerName: text(record.mallName),
-        category: null,
-        thumbnailUrl: text(record.image, 2_000),
-      },
-      snapshot: {
-        rank: index + 1,
-        isAd: null,
-        price: number(record.lprice),
-        listPrice: number(record.hprice),
-        rating: null,
-        reviewCount: null,
-        rocketType: null,
-        isSoldOut: null,
-        deliveryDays: null,
-        optionCount: null,
-      },
-    }];
+  const timestamp = now.toISOString();
+  const searchResult = (searchBody as { results: unknown[] }).results[0];
+  const searchRecord = typeof searchResult === "object" && searchResult !== null ? searchResult as Record<string, unknown> : {};
+  const signals: MarketDiscoverySignal[] = [];
+  const searchSignal = trendSignal({
+    sourceId: "naver-api-hub-search-trend",
+    query,
+    title: `${query} 통합검색 추이`,
+    sourceUrl: "https://api.ncloud-docs.com/docs/naver-api-hub-search-trend",
+    timestamp,
+    points: naverTrendPoints(searchRecord.data),
   });
-  return Object.freeze({ provider: "naver_shopping", observations: Object.freeze(observations), discoverySignals: Object.freeze([]), requestCount: 1, quotaUnits: 1, estimatedCostUsd: 0 });
+  if (searchSignal) signals.push(searchSignal);
+
+  let requestCount = 1;
+  if (categoryId) {
+    requestCount += 1;
+    const shoppingUrl = "https://naverapihub.apigw.ntruss.com/shopping/v1/category/keywords";
+    const shoppingResponse = await request(shoppingUrl, {
+      method: "POST",
+      headers: { ...headers },
+      body: JSON.stringify({ ...window, timeUnit: "date", category: categoryId, keyword: [{ name: query, param: [query] }] }),
+      cache: "no-store",
+    });
+    const shoppingBody = await jsonResponse(shoppingResponse, "NAVER_API_HUB_SHOPPING_INSIGHT");
+    if (typeof shoppingBody !== "object" || shoppingBody === null || !Array.isArray((shoppingBody as { results?: unknown }).results)) {
+      throw new Error("NAVER_API_HUB_SHOPPING_INSIGHT_RESPONSE_INVALID");
+    }
+    const shoppingResult = (shoppingBody as { results: unknown[] }).results[0];
+    const shoppingRecord = typeof shoppingResult === "object" && shoppingResult !== null ? shoppingResult as Record<string, unknown> : {};
+    const shoppingSignal = trendSignal({
+      sourceId: "naver-api-hub-shopping-insight",
+      query,
+      title: `${query} 쇼핑 클릭 추이`,
+      category: categoryId,
+      sourceUrl: "https://api.ncloud-docs.com/docs/naver-api-hub-shopping-insight-keywords",
+      timestamp,
+      points: naverTrendPoints(shoppingRecord.data),
+    });
+    if (shoppingSignal) signals.push(shoppingSignal);
+  }
+  return Object.freeze({
+    provider: "naver_api_hub",
+    observations: Object.freeze([]),
+    discoverySignals: Object.freeze(signals),
+    requestCount,
+    quotaUnits: requestCount,
+    estimatedCostUsd: 0,
+  });
+}
+
+/** @deprecated Compatibility alias for existing jobs created as naver-shopping-api. */
+export async function collectNaverShopping(
+  keyword: string,
+  options: Readonly<{ credentials?: ExternalProviderCredentials; request?: Requester; display?: number; now?: Date }> = {},
+): Promise<ExternalProviderResult> {
+  return collectNaverApiHubTrends(keyword, options);
 }
 
 function nestedSerpItems(value: unknown): Record<string, unknown>[] {
@@ -394,7 +481,7 @@ export async function collectExternalMarketProvider(
   keyword: string,
   options: Readonly<{ credentials?: ExternalProviderCredentials; request?: Requester }> = {},
 ): Promise<ExternalProviderResult> {
-  if (provider === "naver_shopping") return collectNaverShopping(keyword, options);
+  if (provider === "naver_api_hub" || provider === "naver_shopping") return collectNaverApiHubTrends(keyword, options);
   if (provider === "youtube_data") return collectYouTubeVideoSignals(keyword, options);
   return collectDataForSeoNaverSignals(keyword, options);
 }
