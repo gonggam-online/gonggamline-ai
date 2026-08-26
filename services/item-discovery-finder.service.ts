@@ -32,9 +32,29 @@ const numberOrNull = (value: unknown): number | null => {
 const record = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
 
 export async function getItemDiscoveryFinder(): Promise<Record<string, unknown>> {
-  const supabase = getMarketRuntimeClient();
-  const [intelligence, signalResult, productResult, keywordResult] = await Promise.all([
-    getLatestAutonomousMarketIntelligence(),
+  const intelligence = await getLatestAutonomousMarketIntelligence();
+  let supabase;
+  try {
+    supabase = getMarketRuntimeClient();
+  } catch (error) {
+    if (!(error instanceof Error) || error.message !== "MARKET_RUNTIME_STORAGE_UNAVAILABLE") throw error;
+    const opportunities = Array.isArray(intelligence.trends) ? intelligence.trends as MarketOpportunity[] : [];
+    return Object.freeze({
+      version: ITEM_DISCOVERY_WORKBENCH_VERSION,
+      generatedAt: new Date().toISOString(),
+      status: "STORAGE_UNAVAILABLE",
+      summary: { trackedKeywords: 0, trendCount: opportunities.length, actionableCount: 0, contentCount: 0, channelCount: 0, providerCount: 0 },
+      keywords: [],
+      keywordProfiles: buildKeywordFinderProfiles({ opportunities, signals: [], prices: [] }),
+      contentFeed: [],
+      channels: [],
+      priceObservations: [],
+      providerCoverage: [],
+      recommendations: Array.isArray(intelligence.items) ? intelligence.items : [],
+      completedAt: intelligence.completedAt ?? null,
+    });
+  }
+  const [signalResult, productResult, keywordResult] = await Promise.all([
     supabase.from("market_keyword_signal_snapshots")
       .select("concept,provider,observed_at,demand_index,content_velocity,shopping_intent,competition_pressure,price_room,evidence")
       .order("observed_at", { ascending: false }).limit(1_500),
