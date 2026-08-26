@@ -8,6 +8,7 @@ export const pageRoutes = [
   "/listing",
   "/listing/review",
   "/market",
+  "/market/finder",
   "/os",
   "/procurement",
   "/revenue",
