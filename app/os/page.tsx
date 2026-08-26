@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 type ProfitSnapshot={gross_revenue?:number|string|null;contribution_profit?:number|string|null;margin_rate?:number|string|null;roas?:number|string|null};
@@ -39,7 +38,7 @@ export default function CompanyOSPage(){
  const o=data?.overview,h=data?.health,e=data?.enterprise,b=e?.ceoBrief,p=e?.profit||o?.revenue||{},ready=e?.readiness||{};
  return <main className="os-shell enterprise-shell">
   <section className="os-hero enterprise-hero"><div><p className="eyebrow">GONGGAMLINE AI · AUTONOMOUS COMPANY OS</p><h1>AI Company Enterprise</h1><p>AI CEO가 우선순위를 결정하고, Manager와 Worker가 실행하며, 결과를 Memory와 Knowledge로 축적합니다.</p></div><div className="os-version"><span>VERSION</span><strong>v{e?.version||"11.0.0"}</strong><small>{h?.overall||"checking"} · 자율운영 {ready.automationReadiness||0}%</small></div></section>
-  <nav className="os-nav"><Link href="/dashboard">7대 엔진 전체보기</Link><Link href="/revenue">7. 성과분석·학습</Link><Link href="/">2-2 상품 후보</Link><Link href="/workflow">Workflow</Link><Link href="/seller">6. 판매채널 운영</Link><Link href="/system">Engine</Link><button onClick={()=>void load()} disabled={loading}>{loading?"확인 중":"전체 새로고침"}</button></nav>
+  <div className="os-nav"><button onClick={()=>void load()} disabled={loading}>{loading?"확인 중":"전체 새로고침"}</button></div>
   {error&&<div className="os-alert error">{error}<br/><small>018_autonomous_company_enterprise.sql 적용 여부를 확인하세요.</small></div>}
 
   <section className="ceo-grid">

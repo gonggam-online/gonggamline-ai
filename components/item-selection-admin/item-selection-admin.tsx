@@ -347,7 +347,6 @@ export function ItemSelectionAdmin() {
         description="도매꾹 공급처 후보의 시장·수익성·권리 근거를 평가하고 변경 불가능한 실행 이력을 검토합니다. 시장 전체 후보 발굴과 공급처 견적 비교는 별도 화면에서 이어집니다."
       />
       <DashboardContent>
-        <p className="item-selection-admin__notice"><Link href="/dashboard">7대 엔진 전체보기</Link> · <Link href="/competition">2-1 쿠팡 판매 경쟁력 분석</Link> · <Link href="/">2-2 상품 후보 관리</Link></p>
         <DashboardSection headingId="new-run" title="새 평가 실행" description="키워드별 최대 30개 후보만 조회합니다.">
           <form className="item-selection-admin__form" onSubmit={run}>
             <input type="hidden" name="retryOfRunId" value={selected?.status === "FAILED" || selected?.status === "PARTIAL" ? selected.id : ""} />

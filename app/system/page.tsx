@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { engineRegistry } from "@/engines/registry";
 
 export default function SystemArchitecturePage() {
@@ -9,17 +8,6 @@ export default function SystemArchitecturePage() {
         <p style={{ fontWeight: 800, letterSpacing: 1 }}>GONGGAMLINE AI · AI COMPANY OS ARCHITECTURE v10.0</p>
         <h1 style={{ fontSize: 36, margin: "10px 0" }}>엔진 중심 모듈 아키텍처</h1>
         <p>기존 기능을 중단하지 않고 Market·Discovery·Supplier·Procurement·Workflow·Bundle·Listing·Coupang·3PL·Learning 엔진으로 분리합니다.</p>
-        <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
-          <Link href="/dashboard" style={linkStyle}>7대 엔진 전체보기</Link>
-          <Link href="/os" style={linkStyle}>Company OS</Link>
-          <Link href="/market" style={linkStyle}>시장 데이터</Link>
-          <Link href="/discovery" style={linkStyle}>AI 상품추천</Link>
-          <Link href="/" style={linkStyle}>상품 운영</Link>
-          <Link href="/sourcing" style={linkStyle}>공급처·소싱</Link>
-          <Link href="/procurement" style={linkStyle}>조달·발주</Link>
-          <Link href="/workflow" style={linkStyle}>Workflow 통합</Link>
-          <Link href="/seller" style={linkStyle}>쿠팡 판매등록</Link>
-        </div>
       </section>
 
       <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 14, marginTop: 20 }}>
@@ -48,7 +36,6 @@ export default function SystemArchitecturePage() {
   );
 }
 
-const linkStyle = { background: "white", color: "#15357a", padding: "10px 14px", borderRadius: 9, textDecoration: "none", fontWeight: 700 };
 function Stat({ label, value }: { label: string; value: number }) {
   return <div style={{ background: "white", border: "1px solid #dbe3f0", borderRadius: 14, padding: 18 }}><div style={{ color: "#657286" }}>{label}</div><div style={{ fontSize: 30, fontWeight: 800 }}>{value}</div></div>;
 }

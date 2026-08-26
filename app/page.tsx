@@ -284,7 +284,7 @@ export default function HomePage() {
             관리합니다.
           </p>
         </div>
-        <div style={{display:"grid", gap:12}}><Link className="secondary-button" href="/dashboard">7대 엔진 전체보기</Link><Link className="secondary-button" href="/admin/item-selection">2. 상품선정·수익성</Link><Link className="secondary-button" href="/market">1. 시장정보·아이템 발굴</Link><Link className="secondary-button" href="/competition">2-1 쿠팡 경쟁력 분석</Link>
+        <div style={{display:"grid", gap:12}}>
         <div className="summary-card">
           <span>현재 조건 상품</span>
           <strong>{totalCount.toLocaleString("ko-KR")}</strong>

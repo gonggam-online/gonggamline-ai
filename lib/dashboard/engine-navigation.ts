@@ -90,3 +90,21 @@ export const PLATFORM_NAVIGATION = Object.freeze([
   { title: "상품 통합 Workspace", href: "/workspace", description: "상품 생애주기 전체 조회" },
   { title: "시스템 구조", href: "/system", description: "엔진 Registry·의존성·버전" },
 ]);
+
+export function normalizeDashboardPathname(pathname: string) {
+  return pathname !== "/" ? pathname.replace(/\/$/, "") : pathname;
+}
+
+export function isDashboardPageActive(pathname: string, href: string) {
+  const normalized = normalizeDashboardPathname(pathname);
+  if (href === "/") return normalized === "/";
+  return normalized === href || normalized.startsWith(`${href}/`);
+}
+
+export function findEngineForPathname(pathname: string) {
+  return ENGINE_NAVIGATION.find((engine) =>
+    [...engine.pages]
+      .sort((left, right) => right.href.length - left.href.length)
+      .some((page) => isDashboardPageActive(pathname, page.href)),
+  );
+}

@@ -314,7 +314,6 @@ export default function CoupangRegisterPage() {
           <h1>6-2. 쿠팡 상품 등록</h1>
           <p>상품 후보에서 전달된 상품명·가격·이미지를 등록 JSON 초안에 자동 반영하고, 카테고리 필수 항목을 이어서 구성합니다.</p>
         </div>
-        <div style={{display:"flex",gap:10,flexWrap:"wrap"}}><Link className="ghost-link" href="/dashboard">7대 엔진 전체보기</Link><Link className="ghost-link" href="/seller">6. 판매채널 운영</Link><Link className="ghost-link" href="/coupang">6-1 쿠팡 API 연동</Link></div>
       </header>
 
       {sourceProduct && (

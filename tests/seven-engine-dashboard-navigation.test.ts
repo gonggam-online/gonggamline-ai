@@ -3,7 +3,12 @@ import test from "node:test";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
-import { ENGINE_NAVIGATION, PLATFORM_NAVIGATION } from "../lib/dashboard/engine-navigation";
+import {
+  ENGINE_NAVIGATION,
+  PLATFORM_NAVIGATION,
+  findEngineForPathname,
+  isDashboardPageActive,
+} from "../lib/dashboard/engine-navigation";
 
 test("the dashboard exposes exactly seven numbered business engines", () => {
   assert.deepEqual(ENGINE_NAVIGATION.map((engine) => engine.number), ["1", "2", "3", "4", "5", "6", "7"]);
@@ -51,4 +56,23 @@ test("all seven main pages render their canonical numbered title", () => {
       : routeFile;
     assert.match(readFileSync(componentFile, "utf8"), new RegExp(`${engine.number}\\. ${engine.title}`));
   }
+});
+
+test("every main and subpage resolves to its owning engine", () => {
+  for (const engine of ENGINE_NAVIGATION) {
+    for (const page of engine.pages) {
+      assert.equal(findEngineForPathname(page.href)?.number, engine.number, page.href);
+      assert.equal(isDashboardPageActive(`${page.href === "/" ? "" : page.href}/`, page.href), true);
+    }
+  }
+  assert.equal(findEngineForPathname("/dashboard"), undefined);
+  assert.equal(findEngineForPathname("/system"), undefined);
+});
+
+test("the shared top navigation owns portal, main-page, and active-engine subpage links", () => {
+  const source = readFileSync(path.join(process.cwd(), "components", "navigation", "engine-top-navigation.tsx"), "utf8");
+  assert.match(source, /7대 엔진 통합 포털/);
+  assert.match(source, /engine\.pages\.filter\(\(page\) => !page\.primary\)/);
+  assert.match(source, /aria-current/);
+  assert.match(source, /data-engine-number/);
 });

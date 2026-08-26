@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import type { MarketKeyword } from "../../types/market";
 
@@ -71,7 +70,7 @@ export default function MarketPage() {
   }
 
   return <main className="dashboard">
-    <section className="hero market-hero"><div><p className="eyebrow">ENGINE 1 · MARKET INTELLIGENCE</p><h1>1. 시장정보·아이템 발굴</h1><p className="hero-description">수집·시계열·Feature Warehouse·다차원 기회점수·AI 판단·실매출 피드백을 하나의 데이터 자산으로 축적합니다.</p></div><div className="hero-actions"><Link className="button-link secondary-button" href="/dashboard">7대 엔진 전체보기</Link><Link className="button-link secondary-button" href="/">2-2 상품 후보</Link><Link className="button-link secondary-button" href="/discovery">1-1 시장 후보 발굴</Link><Link className="button-link secondary-button" href="/competition">2-1 경쟁력 분석</Link><button disabled={working} onClick={() => runAction("/api/market/jobs/run", { limit: 20 }, "실행 가능한 수집 작업을 처리했습니다.")}>스케줄 실행</button><button disabled={working} onClick={() => runAction("/api/market/analyze", {}, "전체 시장 분석을 완료했습니다.")}>전체 분석</button><button className="secondary-button" disabled={working} onClick={() => runAction("/api/market/demo-seed", { keyword: keyword || "생활용품" }, "DEMO 데이터로 전체 파이프라인을 검증했습니다.")}>DEMO 검증</button></div></section>
+    <section className="hero market-hero"><div><p className="eyebrow">ENGINE 1 · MARKET INTELLIGENCE</p><h1>1. 시장정보·아이템 발굴</h1><p className="hero-description">수집·시계열·Feature Warehouse·다차원 기회점수·AI 판단·실매출 피드백을 하나의 데이터 자산으로 축적합니다.</p></div><div className="hero-actions"><button disabled={working} onClick={() => runAction("/api/market/jobs/run", { limit: 20 }, "실행 가능한 수집 작업을 처리했습니다.")}>스케줄 실행</button><button disabled={working} onClick={() => runAction("/api/market/analyze", {}, "전체 시장 분석을 완료했습니다.")}>전체 분석</button><button className="secondary-button" disabled={working} onClick={() => runAction("/api/market/demo-seed", { keyword: keyword || "생활용품" }, "DEMO 데이터로 전체 파이프라인을 검증했습니다.")}>DEMO 검증</button></div></section>
 
     <section className="stat-grid market-stat-grid"><article><span>관찰 키워드</span><strong>{summary.keywordCount}</strong></article><article><span>추적 상품</span><strong>{summary.productCount}</strong></article><article><span>24시간 스냅샷</span><strong>{summary.snapshots24h}</strong></article><article><span>활성 Collector</span><strong>{collectors.filter((item) => item.status === "ready").length}</strong></article></section>
     {message && <div className="notice success-notice">{message}</div>}{error && <div className="notice error-notice">{error}</div>}
