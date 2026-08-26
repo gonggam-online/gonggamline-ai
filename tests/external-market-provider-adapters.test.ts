@@ -154,8 +154,8 @@ test("YouTube adapter captures channel, short-form and public engagement metadat
     request: async (input) => {
       const url = String(input);
       if (url.includes("/search")) return response({ items: [{ id: { videoId: "video-1" }, snippet: { title: "정리함 추천", publishedAt: "2026-08-19T00:00:00Z", channelId: "channel-1", channelTitle: "살림연구소", thumbnails: { medium: { url: "https://img.example/video.jpg" } } } }] });
-      if (url.includes("/videos")) return response({ items: [{ id: "video-1", snippet: { channelId: "channel-1", channelTitle: "살림연구소" }, statistics: { viewCount: "150000", likeCount: "3200", commentCount: "90" }, contentDetails: { duration: "PT42S" } }] });
-      return response({ items: [{ id: "channel-1", statistics: { subscriberCount: "870" } }] });
+      if (url.includes("/videos")) return response({ items: [{ id: "video-1", snippet: { channelId: "channel-1", channelTitle: "살림연구소", description: "회전 트레이 비교", tags: ["정리", "트레이"] }, statistics: { viewCount: "150000", likeCount: "3200", commentCount: "90" }, contentDetails: { duration: "PT42S" } }] });
+      return response({ items: [{ id: "channel-1", snippet: { country: "US" }, statistics: { subscriberCount: "870" } }] });
     },
   });
   assert.equal(result.requestCount, 3);
@@ -164,6 +164,9 @@ test("YouTube adapter captures channel, short-form and public engagement metadat
   assert.equal(result.discoverySignals[0]?.subscriberCount, 870);
   assert.equal(result.discoverySignals[0]?.durationSeconds, 42);
   assert.equal(result.discoverySignals[0]?.isShort, true);
+  assert.equal(result.discoverySignals[0]?.channelCountry, "US");
+  assert.equal(result.discoverySignals[0]?.description, "회전 트레이 비교");
+  assert.deepEqual(result.discoverySignals[0]?.tags, ["정리", "트레이"]);
 });
 
 test("DataForSEO Naver adapter maps paid SERP output without storing credentials", async () => {

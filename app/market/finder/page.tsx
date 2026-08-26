@@ -15,19 +15,25 @@ type KeywordProfile = {
 type ContentCard = {
   id: string; platform: string; keyword: string; title: string; sourceUrl: string | null; observedAt: string; channelTitle: string | null;
   thumbnailUrl: string | null; viewCount: number | null; contentVelocity: number | null; isShort: boolean | null; shoppingScore: number;
-  verdict: string; extractedProduct: string; referenceOnly: boolean;
+  verdict: string; extractedProduct: string; referenceOnly: boolean; channelCountry: string | null; marketZone: "DOMESTIC" | "OVERSEAS" | "UNKNOWN";
 };
 type Channel = { channelTitle: string; contentCount: number; totalViews: number; shortsRatio: number; latestAt: string; keywords: string[] };
 type Recommendation = { candidateId: string; title: string; form: string; score: number; confidence: number; trendState: string; concept: string; unresolved: string[] };
+type Cluster = { id: string; label: string; contentCount: number; totalViews: number; averageShoppingScore: number; keywords: string[]; marketZones: string[] };
+type FinderAlert = { id: string; severity: string; kind: string; title: string; detail: string; keyword: string };
+type WatchKeyword = { id: number; keyword: string; category: string | null; priority: number; collection_status: string; evidence_count: number | null };
+type CollectorHealth = { collector_key: string; name: string; status: string; last_success_at: string | null; last_error: string | null; failure_count: number };
 type Finder = {
   status: string; generatedAt: string; completedAt: string | null; summary: FinderSummary; keywordProfiles: KeywordProfile[]; contentFeed: ContentCard[];
-  channels: Channel[]; providerCoverage: string[]; recommendations: Recommendation[];
+  channels: Channel[]; providerCoverage: string[]; recommendations: Recommendation[]; contentClusters: Cluster[]; alerts: FinderAlert[]; keywords: WatchKeyword[]; collectorHealth: CollectorHealth[];
 };
 
 const tabs = [
   { id: "keywords", label: "키워드 분석", description: "수요·경쟁·시즌·가격" },
   { id: "content", label: "쇼핑 콘텐츠 레이더", description: "상품 영상·소재 신호" },
+  { id: "overseas", label: "해외 콘텐츠", description: "국가 근거 기반 탐색" },
   { id: "channels", label: "채널 모니터", description: "채널·업로드 흐름" },
+  { id: "watchlist", label: "워치리스트·알림", description: "폴더·수집 상태" },
   { id: "candidates", label: "발굴 후보", description: "상품군·단품·묶음" },
 ] as const;
 
@@ -44,6 +50,10 @@ export default function ItemDiscoveryFinderPage() {
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>("keywords");
   const [selectedKeyword, setSelectedKeyword] = useState("");
   const [query, setQuery] = useState("");
+  const [platform, setPlatform] = useState("ALL");
+  const [contentType, setContentType] = useState("ALL");
+  const [newKeyword, setNewKeyword] = useState("");
+  const [newCategory, setNewCategory] = useState("미분류");
   const [error, setError] = useState("");
 
   async function load() {
@@ -60,8 +70,29 @@ export default function ItemDiscoveryFinderPage() {
   const profile = finder?.keywordProfiles.find((item) => item.keyword === selectedKeyword) ?? finder?.keywordProfiles[0] ?? null;
   const filteredContent = useMemo(() => (finder?.contentFeed ?? []).filter((item) => {
     const needle = query.trim().toLocaleLowerCase("ko");
-    return !needle || `${item.title} ${item.keyword} ${item.extractedProduct} ${item.channelTitle ?? ""}`.toLocaleLowerCase("ko").includes(needle);
-  }), [finder, query]);
+    const matchesQuery = !needle || `${item.title} ${item.keyword} ${item.extractedProduct} ${item.channelTitle ?? ""}`.toLocaleLowerCase("ko").includes(needle);
+    const matchesPlatform = platform === "ALL" || item.platform === platform;
+    const matchesType = contentType === "ALL" || (contentType === "SHORT" ? item.isShort === true : item.isShort !== true);
+    return matchesQuery && matchesPlatform && matchesType;
+  }), [finder, query, platform, contentType]);
+  const overseasContent = filteredContent.filter((item) => item.marketZone === "OVERSEAS");
+
+  async function addWatchKeyword(event: React.FormEvent) {
+    event.preventDefault(); setError("");
+    const tokenResponse = await fetch("/api/admin/auth/csrf?purpose=market-keyword-write", { cache: "no-store", credentials: "same-origin" });
+    const tokenData = await tokenResponse.json() as { token?: string };
+    if (!tokenResponse.ok || !tokenData.token) throw new Error("키워드 등록 인증을 확인할 수 없습니다.");
+    const response = await fetch("/api/market/keywords", { method: "POST", headers: { "Content-Type": "application/json", "X-GonggamLine-CSRF": tokenData.token }, body: JSON.stringify({ keyword: newKeyword, category: newCategory, priority: 70 }) });
+    const data = await response.json() as { success?: boolean; message?: string };
+    if (!response.ok || !data.success) throw new Error(data.message || "키워드 등록 실패");
+    setNewKeyword(""); await load();
+  }
+
+  function exportCsv() {
+    const rows = [["keyword", "title", "platform", "market_zone", "channel", "views", "shopping_score", "source_url"], ...filteredContent.map((item) => [item.keyword, item.title, item.platform, item.marketZone, item.channelTitle ?? "", String(item.viewCount ?? ""), String(item.shoppingScore), item.sourceUrl ?? ""] )];
+    const csv = `\uFEFF${rows.map((row) => row.map((value) => `"${value.replaceAll('"', '""')}"`).join(",")).join("\n")}`;
+    const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); link.download = `item-discovery-${new Date().toISOString().slice(0, 10)}.csv`; link.click(); URL.revokeObjectURL(link.href);
+  }
 
   return <main className="dashboard finder-page">
     <section className="hero finder-hero">
@@ -108,13 +139,17 @@ export default function ItemDiscoveryFinderPage() {
         </section>
       </section>}
 
-      {activeTab === "content" && <section className="panel finder-content-panel"><div className="section-heading"><div><h2>쇼핑 콘텐츠 레이더</h2><p>공개 메타데이터만 분석하며 영상 자산은 복제하거나 게시하지 않습니다.</p></div><input aria-label="콘텐츠 검색" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="키워드·상품·채널 검색" /></div>
+      {activeTab === "content" && <section className="panel finder-content-panel"><div className="section-heading"><div><h2>쇼핑 콘텐츠 레이더</h2><p>공개 메타데이터만 분석하며 영상 자산은 복제하거나 게시하지 않습니다.</p></div><div className="finder-filter-bar"><input aria-label="콘텐츠 검색" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="키워드·상품·채널 검색" /><select aria-label="플랫폼 필터" value={platform} onChange={(event) => setPlatform(event.target.value)}><option value="ALL">전체 플랫폼</option><option value="YOUTUBE">YouTube</option><option value="NAVER_SERP">Naver SERP</option></select><select aria-label="콘텐츠 형식 필터" value={contentType} onChange={(event) => setContentType(event.target.value)}><option value="ALL">전체 형식</option><option value="SHORT">숏폼</option><option value="LONG">일반 영상</option></select><button className="secondary-button" onClick={exportCsv}>CSV 내보내기</button></div></div>
         <div className="finder-content-grid">{filteredContent.length ? filteredContent.map((item) => <article key={item.id} className="finder-content-card">{item.thumbnailUrl ? <img src={item.thumbnailUrl} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <div className="finder-content-placeholder">{item.platform}</div>}<div><div className="finder-card-meta"><span>{item.platform}</span>{item.isShort && <span>SHORT</span>}<b>{item.shoppingScore}점</b></div><h3>{item.title}</h3><p><strong>추출 상품:</strong> {item.extractedProduct}</p><small>{item.channelTitle ?? item.keyword} · {new Date(item.observedAt).toLocaleDateString("ko-KR")}</small><div className="finder-card-actions">{item.sourceUrl && <a href={item.sourceUrl} target="_blank" rel="noreferrer">원본 보기</a>}<Link href={`/admin/item-selection?keyword=${encodeURIComponent(item.extractedProduct)}`}>상품 평가</Link></div></div></article>) : <p className="empty-copy">YouTube·검색 콘텐츠 관측이 누적되면 상품 관련 소재가 표시됩니다.</p>}</div>
       </section>}
 
+      {activeTab === "overseas" && <section className="panel finder-content-panel"><div className="section-heading"><div><h2>해외 쇼핑 콘텐츠 탐색</h2><p>YouTube 공식 API의 채널 국가 근거가 KR이 아닌 공개 콘텐츠만 분리합니다. 국가 미표시는 추정하지 않습니다.</p></div><span className="finder-evidence-badge">{overseasContent.length}건</span></div>{overseasContent.length ? <div className="finder-content-grid">{overseasContent.map((item) => <article key={item.id} className="finder-content-card">{item.thumbnailUrl ? <img src={item.thumbnailUrl} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <div className="finder-content-placeholder">{item.platform}</div>}<div><div className="finder-card-meta"><span>{item.channelCountry}</span>{item.isShort && <span>SHORT</span>}<b>{item.shoppingScore}점</b></div><h3>{item.title}</h3><p><strong>추출 상품:</strong> {item.extractedProduct}</p><small>{item.channelTitle ?? item.keyword}</small><div className="finder-card-actions">{item.sourceUrl && <a href={item.sourceUrl} target="_blank" rel="noreferrer">원본 보기</a>}<Link href={`/admin/item-selection?keyword=${encodeURIComponent(item.extractedProduct)}`}>상품 평가</Link></div></div></article>)}</div> : <p className="empty-copy">국가가 확인된 해외 콘텐츠가 아직 없습니다. 기존 수집 주기를 유지하며 근거를 축적합니다.</p>}</section>}
+
       {activeTab === "channels" && <section className="panel"><div className="section-heading"><div><h2>채널 모니터</h2><p>YouTube 공식 API에서 확인한 공개 채널 흐름입니다.</p></div><span className="finder-evidence-badge">자동수집</span></div>{finder.channels.length ? <div className="table-wrap"><table><thead><tr><th>채널</th><th>관측 콘텐츠</th><th>조회수 합</th><th>쇼츠 비율</th><th>연관 키워드</th><th>최근 관측</th></tr></thead><tbody>{finder.channels.map((channel) => <tr key={channel.channelTitle}><td><strong>{channel.channelTitle}</strong></td><td>{channel.contentCount}</td><td>{channel.totalViews.toLocaleString("ko-KR")}</td><td>{channel.shortsRatio}%</td><td>{channel.keywords.join(" · ")}</td><td>{new Date(channel.latestAt).toLocaleDateString("ko-KR")}</td></tr>)}</tbody></table></div> : <p className="empty-copy">다음 YouTube 수집부터 채널·조회수·쇼츠 지표가 누적됩니다.</p>}</section>}
 
-      {activeTab === "candidates" && <section className="panel"><div className="section-heading"><div><h2>시장 근거 기반 발굴 후보</h2><p>높은 기준 때문에 빈 결과로 끝내지 않고, 상승 수요를 실제 조사 과제로 전환합니다.</p></div><Link className="button-link secondary-button" href="/discovery">후보 의사결정 열기</Link></div>{finder.recommendations.length ? <div className="finder-candidate-grid">{finder.recommendations.map((item) => <article key={item.candidateId}><div className="finder-card-meta"><span>{item.form === "bundle" ? "묶음" : item.form === "single" ? "단품" : "상품군"}</span><span>{item.trendState}</span><b>{Math.round(item.score)}점</b></div><h3>{item.title}</h3><p>{item.concept} · 신뢰도 {Math.round(item.confidence)}%</p><small>다음 확인: {item.unresolved.map((value) => value.replaceAll("_", " ")).join(" · ")}</small><Link className="button-link" href={`/admin/item-selection?keyword=${encodeURIComponent(item.concept)}`}>경쟁력·수익성 평가</Link></article>)}</div> : <p className="empty-copy">시장 신호가 확보되면 상품군 후보부터 항상 생성됩니다.</p>}</section>}
+      {activeTab === "watchlist" && <section className="finder-detail-stack"><section className="panel"><div className="section-heading"><div><h2>워치리스트 폴더</h2><p>새 키워드는 등록 즉시 네이버·YouTube·DataForSEO 수집 스케줄 3개와 연결됩니다.</p></div></div><form className="finder-filter-bar" onSubmit={(event) => void addWatchKeyword(event).catch((cause) => setError(cause instanceof Error ? cause.message : "등록 오류"))}><input required value={newKeyword} onChange={(event) => setNewKeyword(event.target.value)} placeholder="새 시장 키워드" aria-label="새 시장 키워드"/><input required value={newCategory} onChange={(event) => setNewCategory(event.target.value)} placeholder="폴더/카테고리" aria-label="워치리스트 폴더"/><button>추적 시작</button></form><div className="finder-watch-groups">{[...new Set(finder.keywords.map((item) => item.category || "미분류"))].map((category) => <article key={category}><h3>{category}</h3><div>{finder.keywords.filter((item) => (item.category || "미분류") === category).map((item) => <button key={item.id} onClick={() => { setSelectedKeyword(item.keyword); setActiveTab("keywords"); }}><strong>{item.keyword}</strong><small>우선 {item.priority} · 근거 {item.evidence_count ?? 0}</small></button>)}</div></article>)}</div></section><section className="finder-two-column"><article className="panel"><h2>자동 알림</h2>{finder.alerts.length ? <div className="signal-list">{finder.alerts.map((alert) => <button key={alert.id} className={`signal signal-${alert.severity === "HIGH" ? "critical" : alert.severity === "MEDIUM" ? "warning" : "info"}`} onClick={() => { setSelectedKeyword(alert.keyword); setActiveTab("keywords"); }}><strong>{alert.title}</strong><span>{alert.detail}</span></button>)}</div> : <p className="empty-copy">시장 신호가 축적되면 상승·콘텐츠 확산·근거 공백을 알려드립니다.</p>}</article><article className="panel"><h2>수집원 상태</h2><div className="signal-list">{finder.collectorHealth.map((collector) => <div key={collector.collector_key} className="signal"><strong>{collector.name}</strong><span>{collector.status} · 실패 {collector.failure_count}회{collector.last_success_at ? ` · 최근 성공 ${new Date(collector.last_success_at).toLocaleString("ko-KR")}` : ""}</span>{collector.last_error && <small>{collector.last_error}</small>}</div>)}</div></article></section></section>}
+
+      {activeTab === "candidates" && <section className="finder-detail-stack"><section className="panel"><div className="section-heading"><div><h2>시장 근거 기반 발굴 후보</h2><p>높은 기준 때문에 빈 결과로 끝내지 않고, 상승 수요를 실제 조사 과제로 전환합니다.</p></div><Link className="button-link secondary-button" href="/discovery">후보 의사결정 열기</Link></div>{finder.recommendations.length ? <div className="finder-candidate-grid">{finder.recommendations.map((item) => <article key={item.candidateId}><div className="finder-card-meta"><span>{item.form === "bundle" ? "묶음" : item.form === "single" ? "단품" : "상품군"}</span><span>{item.trendState}</span><b>{Math.round(item.score)}점</b></div><h3>{item.title}</h3><p>{item.concept} · 신뢰도 {Math.round(item.confidence)}%</p><small>다음 확인: {item.unresolved.map((value) => value.replaceAll("_", " ")).join(" · ")}</small><div className="finder-card-actions"><Link href={`/admin/item-selection?keyword=${encodeURIComponent(item.concept)}`}>경쟁력·수익성 평가</Link><Link href={`/sourcing?keyword=${encodeURIComponent(item.concept)}`}>공급처 탐색</Link></div></article>)}</div> : <p className="empty-copy">시장 신호가 확보되면 상품군 후보부터 항상 생성됩니다.</p>}</section><section className="panel"><div className="section-heading"><div><h2>반복 등장 상품 클러스터</h2><p>제목에서 추출한 상품 표현을 묶어 여러 콘텐츠에 반복되는 아이디어를 우선 표시합니다.</p></div></div>{finder.contentClusters.length ? <div className="finder-candidate-grid">{finder.contentClusters.map((cluster) => <article key={cluster.id}><h3>{cluster.label}</h3><p>콘텐츠 {cluster.contentCount}건 · 조회 {cluster.totalViews.toLocaleString("ko-KR")} · 쇼핑성 {cluster.averageShoppingScore}점</p><small>{cluster.keywords.join(" · ")} · {cluster.marketZones.join("/")}</small><div className="finder-card-actions"><Link href={`/admin/item-selection?keyword=${encodeURIComponent(cluster.label)}`}>상품 평가</Link><Link href={`/sourcing?keyword=${encodeURIComponent(cluster.label)}`}>유사 공급처 비교</Link></div></article>)}</div> : <p className="empty-copy">콘텐츠 근거가 수집되면 반복 상품 클러스터가 생성됩니다.</p>}</section></section>}
 
       <section className="panel finder-source-note"><div><h2>근거 출처와 적용 범위</h2><p>{finder.providerCoverage.length ? finder.providerCoverage.join(" · ") : "수집 근거 축적 중"}</p></div><p>공개 영상은 상품명·키워드·수요 연구에만 사용합니다. 이미지·영상의 다운로드, 편집 또는 상품페이지 게시는 별도의 권리 근거가 있어야 합니다.</p></section>
     </>}

@@ -4,6 +4,8 @@ import {
   ITEM_DISCOVERY_WORKBENCH_VERSION,
   buildKeywordFinderProfiles,
   buildShoppingContentFeed,
+  buildContentClusters,
+  buildFinderAlerts,
   type FinderPriceObservation,
   type FinderSignalRow,
 } from "../lib/market/item-discovery-workbench";
@@ -47,14 +49,17 @@ export async function getItemDiscoveryFinder(): Promise<Record<string, unknown>>
       keywords: [],
       keywordProfiles: buildKeywordFinderProfiles({ opportunities, signals: [], prices: [] }),
       contentFeed: [],
+      contentClusters: [],
+      alerts: [],
       channels: [],
       priceObservations: [],
       providerCoverage: [],
       recommendations: Array.isArray(intelligence.items) ? intelligence.items : [],
+      collectorHealth: [],
       completedAt: intelligence.completedAt ?? null,
     });
   }
-  const [signalResult, productResult, keywordResult] = await Promise.all([
+  const [signalResult, productResult, keywordResult, collectorResult] = await Promise.all([
     supabase.from("market_keyword_signal_snapshots")
       .select("concept,provider,observed_at,demand_index,content_velocity,shopping_intent,competition_pressure,price_room,evidence")
       .order("observed_at", { ascending: false }).limit(1_500),
@@ -64,10 +69,14 @@ export async function getItemDiscoveryFinder(): Promise<Record<string, unknown>>
     supabase.from("market_keywords")
       .select("id,keyword,category,priority,collection_status,collection_interval_minutes,last_collected_at,next_collection_at,discovery_lane,evidence_count")
       .order("priority", { ascending: false }).limit(200),
+    supabase.from("market_collectors")
+      .select("collector_key,name,status,last_success_at,last_error,failure_count")
+      .order("collector_key", { ascending: true }).limit(100),
   ]);
   if (signalResult.error) throw new Error(signalResult.error.message);
   if (productResult.error) throw new Error(productResult.error.message);
   if (keywordResult.error) throw new Error(keywordResult.error.message);
+  if (collectorResult.error) throw new Error(collectorResult.error.message);
 
   const signals: FinderSignalRow[] = (signalResult.data ?? []).map((row) => {
     const item = record(row);
@@ -105,6 +114,8 @@ export async function getItemDiscoveryFinder(): Promise<Record<string, unknown>>
   const opportunities = Array.isArray(intelligence.trends) ? intelligence.trends as MarketOpportunity[] : [];
   const contentFeed = buildShoppingContentFeed(signals, 40);
   const keywordProfiles = buildKeywordFinderProfiles({ opportunities, signals, prices });
+  const contentClusters = buildContentClusters(contentFeed);
+  const alerts = buildFinderAlerts(keywordProfiles, contentFeed);
   const channelMap = new Map<string, { channelTitle: string; contentCount: number; totalViews: number; shorts: number; latestAt: string; keywords: Set<string> }>();
   for (const content of contentFeed.filter((item) => item.platform === "YOUTUBE" && item.channelTitle)) {
     const key = content.channelTitle ?? "";
@@ -141,10 +152,13 @@ export async function getItemDiscoveryFinder(): Promise<Record<string, unknown>>
     keywords: keywordResult.data ?? [],
     keywordProfiles,
     contentFeed,
+    contentClusters,
+    alerts,
     channels,
     priceObservations: prices.slice(0, 100),
     providerCoverage,
     recommendations: Array.isArray(intelligence.items) ? intelligence.items : [],
+    collectorHealth: collectorResult.data ?? [],
     completedAt: intelligence.completedAt ?? null,
   });
 }

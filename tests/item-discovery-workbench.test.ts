@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 
-import { buildKeywordFinderProfiles, buildShoppingContentFeed, extractProductPhrase } from "../lib/market/item-discovery-workbench.ts";
+import { buildContentClusters, buildFinderAlerts, buildKeywordFinderProfiles, buildShoppingContentFeed, classifyContentMarket, extractProductPhrase } from "../lib/market/item-discovery-workbench.ts";
 import type { MarketOpportunity } from "../lib/market/autonomous-intelligence.ts";
 
 const opportunity: MarketOpportunity = {
@@ -41,6 +42,7 @@ test("shopping content feed ranks product evidence and preserves reference-only 
       channelTitle: "살림연구소",
       viewCount: 123_456,
       isShort: true,
+      channelCountry: "US",
     },
   }]);
   assert.equal(feed.length, 1);
@@ -48,6 +50,7 @@ test("shopping content feed ranks product evidence and preserves reference-only 
   assert.equal(feed[0]?.verdict, "SHOPPING_CONTENT");
   assert.equal(feed[0]?.referenceOnly, true);
   assert.match(feed[0]?.extractedProduct ?? "", /싱크대 주방정리 회전 트레이/);
+  assert.equal(feed[0]?.marketZone, "OVERSEAS");
 });
 
 test("generic entertainment is not promoted as shopping content", () => {
@@ -83,4 +86,33 @@ test("keyword finder profile combines trend, real monthly evidence, price and Yo
 
 test("product phrase extraction removes promotional wrappers deterministically", () => {
   assert.equal(extractProductPhrase("[광고] 욕실 코너 선반 추천템 #shorts", "욕실정리"), "욕실 코너 선반");
+});
+
+test("channel country is classified without guessing missing evidence", () => {
+  assert.equal(classifyContentMarket("KR"), "DOMESTIC");
+  assert.equal(classifyContentMarket("US"), "OVERSEAS");
+  assert.equal(classifyContentMarket(null), "UNKNOWN");
+});
+
+test("content clusters and alerts turn repeated public signals into investigation work", () => {
+  const content = buildShoppingContentFeed([{
+    concept: "주방정리", provider: "youtube-data-api", observedAt: "2026-08-26T00:00:00.000Z", demandIndex: 80, contentVelocity: 72, shoppingIntent: null, competitionPressure: null, priceRoom: null,
+    evidence: { title: "주방정리 회전 트레이 추천", viewCount: 50_000, isShort: true, channelCountry: "KR" },
+  }]);
+  assert.equal(buildContentClusters(content)[0]?.contentCount, 1);
+  const profiles = buildKeywordFinderProfiles({ opportunities: [opportunity], signals: [], prices: [] });
+  assert.equal(buildFinderAlerts(profiles, [])[0]?.kind, "MARKET_BREAKOUT");
+  assert.ok(buildFinderAlerts(profiles, []).some((item) => item.kind === "EVIDENCE_GAP"));
+});
+
+test("watchlist registration is AAL1 secured and creates all bounded provider jobs", () => {
+  const route = readFileSync(new URL("../app/api/market/keywords/route.ts", import.meta.url), "utf8");
+  const page = readFileSync(new URL("../app/market/finder/page.tsx", import.meta.url), "utf8");
+  const csrf = readFileSync(new URL("../app/api/admin/auth/csrf/route.ts", import.meta.url), "utf8");
+  assert.match(route, /requireAdminRequest\(request, "read"\)/);
+  assert.match(route, /requireExactAdminOrigin\(request\)/);
+  assert.match(route, /verifyAdminCsrfToken\(request, "market-keyword-write", context\)/);
+  for (const collector of ["naver-shopping-api", "youtube-public-signals", "dataforseo-naver-serp"]) assert.match(route, new RegExp(collector));
+  assert.match(page, /X-GonggamLine-CSRF/);
+  assert.match(csrf, /purpose === "market-keyword-write"/);
 });

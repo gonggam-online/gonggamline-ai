@@ -22,6 +22,9 @@ type SignalLike = Readonly<{
   contentVelocity: number | null;
   channelId?: string | null;
   channelTitle?: string | null;
+  channelCountry?: string | null;
+  description?: string | null;
+  tags?: readonly string[] | null;
   thumbnailUrl?: string | null;
   viewCount?: number | null;
   likeCount?: number | null;
@@ -107,6 +110,9 @@ export async function recordAutonomousCollectionEvidence(input: Readonly<{
       title: signal.title,
       channelId: signal.channelId ?? null,
       channelTitle: signal.channelTitle ?? null,
+      channelCountry: signal.channelCountry ?? null,
+      description: signal.description ?? null,
+      tags: signal.tags ?? [],
       thumbnailUrl: signal.thumbnailUrl ?? null,
       viewCount: signal.viewCount ?? null,
       likeCount: signal.likeCount ?? null,

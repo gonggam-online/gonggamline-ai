@@ -93,6 +93,9 @@ function discoverySignal(input: Readonly<{
   contentVelocity: number | null;
   channelId?: string | null;
   channelTitle?: string | null;
+  channelCountry?: string | null;
+  description?: string | null;
+  tags?: readonly string[] | null;
   thumbnailUrl?: string | null;
   viewCount?: number | null;
   likeCount?: number | null;
@@ -118,6 +121,9 @@ function discoverySignal(input: Readonly<{
     contentVelocity: input.contentVelocity,
     channelId: input.channelId ?? null,
     channelTitle: input.channelTitle ?? null,
+    channelCountry: input.channelCountry ?? null,
+    description: input.description ?? null,
+    tags: input.tags ?? [],
     thumbnailUrl: input.thumbnailUrl ?? null,
     viewCount: input.viewCount ?? null,
     likeCount: input.likeCount ?? null,
@@ -450,9 +456,10 @@ export async function collectYouTubeVideoSignals(
     return channelId ? [channelId] : [];
   }))];
   const subscribersByChannel = new Map<string, number>();
+  const countryByChannel = new Map<string, string>();
   if (channelIds.length) {
     const channelUrl = new URL("https://www.googleapis.com/youtube/v3/channels");
-    channelUrl.searchParams.set("part", "statistics");
+    channelUrl.searchParams.set("part", "snippet,statistics");
     channelUrl.searchParams.set("id", channelIds.join(","));
     channelUrl.searchParams.set("key", key);
     const channelBody = await jsonResponse(await request(channelUrl, { method: "GET", cache: "no-store" }), "YOUTUBE_CHANNELS");
@@ -465,6 +472,9 @@ export async function collectYouTubeVideoSignals(
       const statistics = typeof record.statistics === "object" && record.statistics !== null ? record.statistics as Record<string, unknown> : {};
       const subscriberCount = number(statistics.subscriberCount);
       if (channelId && subscriberCount !== null) subscribersByChannel.set(channelId, subscriberCount);
+      const channelSnippet = typeof record.snippet === "object" && record.snippet !== null ? record.snippet as Record<string, unknown> : {};
+      const country = text(channelSnippet.country, 10);
+      if (channelId && country) countryByChannel.set(channelId, country.toUpperCase());
     }
   }
   const signals = searchItems.flatMap((item, index): MarketDiscoverySignal[] => {
@@ -487,6 +497,11 @@ export async function collectYouTubeVideoSignals(
     const searchSnippet = typeof videoRecord.snippet === "object" && videoRecord.snippet !== null ? videoRecord.snippet as Record<string, unknown> : {};
     const channelId = text(detailsSnippet.channelId, 200) ?? text(searchSnippet.channelId, 200);
     const channelTitle = text(detailsSnippet.channelTitle, 300) ?? text(searchSnippet.channelTitle, 300);
+    const description = text(detailsSnippet.description, 2_000) ?? text(searchSnippet.description, 2_000);
+    const tags = Array.isArray(detailsSnippet.tags) ? detailsSnippet.tags.flatMap((value): string[] => {
+      const tag = text(value, 100);
+      return tag ? [tag] : [];
+    }).slice(0, 30) : [];
     const contentDetails = typeof videoDetails.contentDetails === "object" && videoDetails.contentDetails !== null ? videoDetails.contentDetails as Record<string, unknown> : {};
     const durationSeconds = isoDurationSeconds(contentDetails.duration);
     const thumbnails = typeof searchSnippet.thumbnails === "object" && searchSnippet.thumbnails !== null ? searchSnippet.thumbnails as Record<string, unknown> : {};
@@ -501,6 +516,8 @@ export async function collectYouTubeVideoSignals(
       rank: index + 1, popularityScore, contentVelocity, channelId, channelTitle, thumbnailUrl,
       viewCount: views, likeCount: likes, commentCount: comments,
       subscriberCount: channelId ? subscribersByChannel.get(channelId) ?? null : null,
+      channelCountry: channelId ? countryByChannel.get(channelId) ?? null : null,
+      description, tags,
       durationSeconds, isShort: durationSeconds === null ? null : durationSeconds <= 180,
     })];
   });

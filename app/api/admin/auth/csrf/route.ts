@@ -28,6 +28,7 @@ const PURPOSES = new Set<AdminCsrfPurpose>([
   "product-automatic-competition",
   "product-competition-batch",
   "market-collection-run",
+  "market-keyword-write",
   "listing-creative-dispatch-prepare",
   "listing-creative-dispatch",
   "listing-creative-adapter-export",
@@ -52,7 +53,8 @@ export async function GET(request: Request): Promise<Response> {
       purpose === "admin-session" ||
       purpose === "admin-mfa" ||
       purpose === "admin-password-recovery" ||
-      purpose === "market-collection-run"
+      purpose === "market-collection-run" ||
+      purpose === "market-keyword-write"
         ? "read"
         : "mutation",
     );

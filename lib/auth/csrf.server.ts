@@ -18,6 +18,7 @@ export type AdminCsrfPurpose =
   | "product-automatic-competition"
   | "product-competition-batch"
   | "market-collection-run"
+  | "market-keyword-write"
   | "listing-creative-dispatch-prepare"
   | "listing-creative-dispatch"
   | "listing-creative-adapter-export"
