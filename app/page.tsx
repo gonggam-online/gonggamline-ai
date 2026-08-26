@@ -277,14 +277,14 @@ export default function HomePage() {
     <main className="dashboard">
       <section className="hero">
         <div>
-          <p className="eyebrow">GONGGAMLINE AI · PRODUCT OPS</p>
-          <h1>상품 후보 관리 시스템</h1>
+          <p className="eyebrow">ENGINE 2-2 · PRODUCT CANDIDATES</p>
+          <h1>2-2. 상품 후보 관리</h1>
           <p className="hero-description">
             수집, 선별, 즐겨찾기, 샘플 후보와 판매 승인까지 한 화면에서
             관리합니다.
           </p>
         </div>
-        <div style={{display:"grid", gap:12}}><Link className="secondary-button" href="/market">시장 데이터 엔진</Link><Link className="secondary-button" href="/competition">쿠팡 경쟁력 분석</Link>
+        <div style={{display:"grid", gap:12}}><Link className="secondary-button" href="/dashboard">7대 엔진 전체보기</Link><Link className="secondary-button" href="/admin/item-selection">2. 상품선정·수익성</Link><Link className="secondary-button" href="/market">1. 시장정보·아이템 발굴</Link><Link className="secondary-button" href="/competition">2-1 쿠팡 경쟁력 분석</Link>
         <div className="summary-card">
           <span>현재 조건 상품</span>
           <strong>{totalCount.toLocaleString("ko-KR")}</strong>

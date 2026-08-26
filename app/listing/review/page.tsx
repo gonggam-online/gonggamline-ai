@@ -1,6 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ListingCreativeReview } from "@/components/listing/listing-creative-review";
 import { buildFixtureCreativeReviewPacket } from "@/engines/listing/creative-planner";
+
+export const metadata: Metadata = {
+  title: "5-1. 증거 기반 콘텐츠 검토 | 공감라인 AI",
+};
 
 export default async function ListingReviewPage() {
   const creativePacket = await buildFixtureCreativeReviewPacket({
@@ -22,14 +27,15 @@ export default async function ListingReviewPage() {
     <main className="dashboard">
       <section className="hero" style={{ background: "linear-gradient(135deg,#123047,#0f766e)" }}>
         <div>
-          <p className="eyebrow">LISTING CONTENT REVIEW</p>
-          <h1>증거 기반 Listing 검토</h1>
+          <p className="eyebrow">ENGINE 5-1 · CONTENT REVIEW</p>
+          <h1>5-1. 증거 기반 콘텐츠 검토</h1>
           <p className="hero-description">
             등록 적합성과 전환 준비도를 분리하고, 실제 artifact digest에 결합된 한 후보만 승인하도록 검토합니다.
           </p>
         </div>
         <div className="hero-actions">
-          <Link className="button-link secondary-button" href="/listing">Listing 초안으로 돌아가기</Link>
+          <Link className="button-link secondary-button" href="/dashboard">7대 엔진 전체보기</Link>
+          <Link className="button-link secondary-button" href="/listing">5. 상품 콘텐츠 제작</Link>
         </div>
       </section>
 

@@ -92,13 +92,15 @@ export default function CompetitionPage() {
   return <main className="dashboard">
     <section className="hero competition-hero">
       <div>
-        <p className="eyebrow">GONGGAMLINE AI v2.1</p>
-        <h1>쿠팡 판매 경쟁력 분석</h1>
+        <p className="eyebrow">ENGINE 2-1 · COUPANG COMPETITION</p>
+        <h1>2-1. 쿠팡 판매 경쟁력 분석</h1>
         <p className="hero-description">상품별 자동 분석과 수동 실데이터 입력을 함께 지원합니다. 외부 시장 데이터 공급원이 연결되지 않은 경우 결과에 반드시 ‘추정치’로 표시됩니다.</p>
       </div>
       <div className="hero-actions">
         <button onClick={batchAnalyze} disabled={batching}>{batching ? "분석 중…" : "미분석 상품 10개 자동 분석"}</button>
-        <Link className="button-link secondary-button" href="/">상품 관리로 돌아가기</Link>
+        <Link className="button-link secondary-button" href="/dashboard">7대 엔진 전체보기</Link>
+        <Link className="button-link secondary-button" href="/admin/item-selection">2. 상품선정·수익성</Link>
+        <Link className="button-link secondary-button" href="/">2-2 상품 후보 관리</Link>
       </div>
     </section>
 

@@ -97,8 +97,8 @@ export default function RevenueCenterPage() {
 
   const m = data?.metrics;
   return <main className="revenue-shell">
-    <section className="revenue-hero"><div><p className="eyebrow">BLUEPRINT v2.0 · SPRINT 2</p><h1>Revenue Center</h1><p>Queue를 실제 Worker가 선점·실행·기록하고 결과를 Opportunity와 AI Memory에 반영합니다.</p></div><div><strong>Runtime Execution</strong><span>{data?.sprint || "초기화 중"}</span></div></section>
-    <nav className="os-nav"><Link href="/os">AI Company OS</Link><Link href="/">상품 운영</Link><Link href="/workflow">Workflow</Link><button onClick={() => void executeQueue(1)} disabled={executing}>{executing ? "Worker 실행 중" : "다음 Job 실행"}</button><button onClick={() => void executeQueue(5)} disabled={executing}>최대 5건 실행</button><button onClick={() => void load()}>{loading ? "확인 중" : "새로고침"}</button></nav>
+    <section className="revenue-hero"><div><p className="eyebrow">ENGINE 7 · PERFORMANCE & LEARNING</p><h1>7. 성과분석·학습</h1><p>Queue를 실제 Worker가 선점·실행·기록하고 결과를 Opportunity와 AI Memory에 반영합니다.</p></div><div><strong>Runtime Execution</strong><span>{data?.sprint || "초기화 중"}</span></div></section>
+    <nav className="os-nav"><Link href="/dashboard">7대 엔진 전체보기</Link><Link href="/dashboard/revenue">7-1 상품 성과 Revenue Dashboard</Link><Link href="/os">AI Company OS</Link><Link href="/">2-2 상품 후보</Link><Link href="/workflow">Workflow</Link><button onClick={() => void executeQueue(1)} disabled={executing}>{executing ? "Worker 실행 중" : "다음 Job 실행"}</button><button onClick={() => void executeQueue(5)} disabled={executing}>최대 5건 실행</button><button onClick={() => void load()}>{loading ? "확인 중" : "새로고침"}</button></nav>
     {error && <div className="os-alert error">{error}<br/><small>019_sprint1_revenue_core_foundation.sql을 먼저 적용하세요.</small></div>}
     {message && <div className="os-alert success">{message}</div>}
 
