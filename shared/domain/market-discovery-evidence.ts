@@ -38,6 +38,15 @@ export type MarketDiscoverySignal = Readonly<{
   popularityScore: number | null;
   engagementRate: number | null;
   contentVelocity: number | null;
+  channelId?: string | null;
+  channelTitle?: string | null;
+  thumbnailUrl?: string | null;
+  viewCount?: number | null;
+  likeCount?: number | null;
+  commentCount?: number | null;
+  subscriberCount?: number | null;
+  durationSeconds?: number | null;
+  isShort?: boolean | null;
   assetRights: "UNKNOWN" | "REFERENCE_ONLY" | "VERIFIED";
 }>;
 
@@ -102,6 +111,11 @@ export function admitMarketDiscoverySignal(
   boundedOrNull(signal.popularityScore, 0, 100, "popularityScore", errors);
   boundedOrNull(signal.engagementRate, 0, 1, "engagementRate", errors);
   boundedOrNull(signal.contentVelocity, 0, 1_000_000, "contentVelocity", errors);
+  boundedOrNull(signal.viewCount ?? null, 0, 100_000_000_000, "viewCount", errors);
+  boundedOrNull(signal.likeCount ?? null, 0, 100_000_000_000, "likeCount", errors);
+  boundedOrNull(signal.commentCount ?? null, 0, 100_000_000_000, "commentCount", errors);
+  boundedOrNull(signal.subscriberCount ?? null, 0, 100_000_000_000, "subscriberCount", errors);
+  boundedOrNull(signal.durationSeconds ?? null, 0, 86_400, "durationSeconds", errors);
   const missingFacts = signal.assetRights === "VERIFIED" ? [] : ["asset.rightsGrant"];
   const reasons = errors.map((error) => `수집 근거가 허용되지 않거나 유효하지 않습니다: ${error}`);
   if (signal.assetRights !== "VERIFIED") reasons.push("공개 콘텐츠는 상품 사실·키워드 연구에만 사용하며 자산 복제·편집·게시 권한을 부여하지 않습니다.");

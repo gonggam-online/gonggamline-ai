@@ -20,6 +20,15 @@ type SignalLike = Readonly<{
   rank: number | null;
   popularityScore: number | null;
   contentVelocity: number | null;
+  channelId?: string | null;
+  channelTitle?: string | null;
+  thumbnailUrl?: string | null;
+  viewCount?: number | null;
+  likeCount?: number | null;
+  commentCount?: number | null;
+  subscriberCount?: number | null;
+  durationSeconds?: number | null;
+  isShort?: boolean | null;
 }>;
 
 type SignalSnapshotRow = {
@@ -96,6 +105,15 @@ export async function recordAutonomousCollectionEvidence(input: Readonly<{
       popularityScore: signal.popularityScore,
       contentVelocity: signal.contentVelocity,
       title: signal.title,
+      channelId: signal.channelId ?? null,
+      channelTitle: signal.channelTitle ?? null,
+      thumbnailUrl: signal.thumbnailUrl ?? null,
+      viewCount: signal.viewCount ?? null,
+      likeCount: signal.likeCount ?? null,
+      commentCount: signal.commentCount ?? null,
+      subscriberCount: signal.subscriberCount ?? null,
+      durationSeconds: signal.durationSeconds ?? null,
+      isShort: signal.isShort ?? null,
     };
     const digest = evidenceDigest(payload);
     const isShopping = provider.includes("shopping");

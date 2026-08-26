@@ -148,6 +148,24 @@ test("YouTube adapter returns reference-only discovery signals and never treats 
   assert.equal(result.discoverySignals[0]?.reviewCount, null);
 });
 
+test("YouTube adapter captures channel, short-form and public engagement metadata", async () => {
+  const result = await collectYouTubeVideoSignals("정리함", {
+    credentials: { youtubeApiKey: "key" },
+    request: async (input) => {
+      const url = String(input);
+      if (url.includes("/search")) return response({ items: [{ id: { videoId: "video-1" }, snippet: { title: "정리함 추천", publishedAt: "2026-08-19T00:00:00Z", channelId: "channel-1", channelTitle: "살림연구소", thumbnails: { medium: { url: "https://img.example/video.jpg" } } } }] });
+      if (url.includes("/videos")) return response({ items: [{ id: "video-1", snippet: { channelId: "channel-1", channelTitle: "살림연구소" }, statistics: { viewCount: "150000", likeCount: "3200", commentCount: "90" }, contentDetails: { duration: "PT42S" } }] });
+      return response({ items: [{ id: "channel-1", statistics: { subscriberCount: "870" } }] });
+    },
+  });
+  assert.equal(result.requestCount, 3);
+  assert.equal(result.discoverySignals[0]?.channelTitle, "살림연구소");
+  assert.equal(result.discoverySignals[0]?.viewCount, 150_000);
+  assert.equal(result.discoverySignals[0]?.subscriberCount, 870);
+  assert.equal(result.discoverySignals[0]?.durationSeconds, 42);
+  assert.equal(result.discoverySignals[0]?.isShort, true);
+});
+
 test("DataForSEO Naver adapter maps paid SERP output without storing credentials", async () => {
   let authorization = "";
   const result = await collectDataForSeoNaverSignals("수납 정리함", {

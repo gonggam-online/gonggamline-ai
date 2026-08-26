@@ -91,6 +91,15 @@ function discoverySignal(input: Readonly<{
   rank: number | null;
   popularityScore: number | null;
   contentVelocity: number | null;
+  channelId?: string | null;
+  channelTitle?: string | null;
+  thumbnailUrl?: string | null;
+  viewCount?: number | null;
+  likeCount?: number | null;
+  commentCount?: number | null;
+  subscriberCount?: number | null;
+  durationSeconds?: number | null;
+  isShort?: boolean | null;
 }>): MarketDiscoverySignal {
   return {
     sourceId: input.sourceId,
@@ -107,8 +116,24 @@ function discoverySignal(input: Readonly<{
     popularityScore: input.popularityScore,
     engagementRate: null,
     contentVelocity: input.contentVelocity,
+    channelId: input.channelId ?? null,
+    channelTitle: input.channelTitle ?? null,
+    thumbnailUrl: input.thumbnailUrl ?? null,
+    viewCount: input.viewCount ?? null,
+    likeCount: input.likeCount ?? null,
+    commentCount: input.commentCount ?? null,
+    subscriberCount: input.subscriberCount ?? null,
+    durationSeconds: input.durationSeconds ?? null,
+    isShort: input.isShort ?? null,
     assetRights: "UNKNOWN",
   };
+}
+
+function isoDurationSeconds(value: unknown): number | null {
+  if (typeof value !== "string") return null;
+  const match = value.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
+  if (!match) return null;
+  return Number(match[1] ?? 0) * 3_600 + Number(match[2] ?? 0) * 60 + Number(match[3] ?? 0);
 }
 
 async function jsonResponse(response: Response, code: string): Promise<unknown> {
@@ -401,10 +426,10 @@ export async function collectYouTubeVideoSignals(
     const videoId = text((id as Record<string, unknown>).videoId, 200);
     return videoId ? [videoId] : [];
   });
-  const statisticsById = new Map<string, Record<string, unknown>>();
+  const videoById = new Map<string, Record<string, unknown>>();
   if (videoIds.length) {
     const videoUrl = new URL("https://www.googleapis.com/youtube/v3/videos");
-    videoUrl.searchParams.set("part", "statistics");
+    videoUrl.searchParams.set("part", "snippet,statistics,contentDetails");
     videoUrl.searchParams.set("id", videoIds.join(","));
     videoUrl.searchParams.set("key", key);
     const videoBody = await jsonResponse(await request(videoUrl, { method: "GET", cache: "no-store" }), "YOUTUBE_VIDEOS");
@@ -414,9 +439,32 @@ export async function collectYouTubeVideoSignals(
       if (typeof item !== "object" || item === null) continue;
       const record = item as Record<string, unknown>;
       const videoId = text(record.id, 200);
-      if (videoId && typeof record.statistics === "object" && record.statistics !== null) {
-        statisticsById.set(videoId, record.statistics as Record<string, unknown>);
-      }
+      if (videoId) videoById.set(videoId, record);
+    }
+  }
+  const channelIds = [...new Set(searchItems.flatMap((item): string[] => {
+    if (typeof item !== "object" || item === null) return [];
+    const snippet = (item as Record<string, unknown>).snippet;
+    if (typeof snippet !== "object" || snippet === null) return [];
+    const channelId = text((snippet as Record<string, unknown>).channelId, 200);
+    return channelId ? [channelId] : [];
+  }))];
+  const subscribersByChannel = new Map<string, number>();
+  if (channelIds.length) {
+    const channelUrl = new URL("https://www.googleapis.com/youtube/v3/channels");
+    channelUrl.searchParams.set("part", "statistics");
+    channelUrl.searchParams.set("id", channelIds.join(","));
+    channelUrl.searchParams.set("key", key);
+    const channelBody = await jsonResponse(await request(channelUrl, { method: "GET", cache: "no-store" }), "YOUTUBE_CHANNELS");
+    const channelItems = typeof channelBody === "object" && channelBody !== null && Array.isArray((channelBody as { items?: unknown }).items)
+      ? (channelBody as { items: unknown[] }).items : [];
+    for (const item of channelItems) {
+      if (typeof item !== "object" || item === null) continue;
+      const record = item as Record<string, unknown>;
+      const channelId = text(record.id, 200);
+      const statistics = typeof record.statistics === "object" && record.statistics !== null ? record.statistics as Record<string, unknown> : {};
+      const subscriberCount = number(statistics.subscriberCount);
+      if (channelId && subscriberCount !== null) subscribersByChannel.set(channelId, subscriberCount);
     }
   }
   const signals = searchItems.flatMap((item, index): MarketDiscoverySignal[] => {
@@ -428,14 +476,35 @@ export async function collectYouTubeVideoSignals(
     const title = text(snippet?.title);
     if (!videoId || !title) return [];
     const publishedAt = typeof snippet?.publishedAt === "string" && Number.isFinite(Date.parse(snippet.publishedAt)) ? snippet.publishedAt : timestamp;
-    const statistics = statisticsById.get(videoId);
+    const videoDetails = videoById.get(videoId) ?? {};
+    const statistics = typeof videoDetails.statistics === "object" && videoDetails.statistics !== null
+      ? videoDetails.statistics as Record<string, unknown> : {};
     const views = number(statistics?.viewCount);
+    const likes = number(statistics?.likeCount);
+    const comments = number(statistics?.commentCount);
+    const videoRecord = searchItems[index] && typeof searchItems[index] === "object" ? searchItems[index] as Record<string, unknown> : {};
+    const detailsSnippet = typeof videoDetails.snippet === "object" && videoDetails.snippet !== null ? videoDetails.snippet as Record<string, unknown> : {};
+    const searchSnippet = typeof videoRecord.snippet === "object" && videoRecord.snippet !== null ? videoRecord.snippet as Record<string, unknown> : {};
+    const channelId = text(detailsSnippet.channelId, 200) ?? text(searchSnippet.channelId, 200);
+    const channelTitle = text(detailsSnippet.channelTitle, 300) ?? text(searchSnippet.channelTitle, 300);
+    const contentDetails = typeof videoDetails.contentDetails === "object" && videoDetails.contentDetails !== null ? videoDetails.contentDetails as Record<string, unknown> : {};
+    const durationSeconds = isoDurationSeconds(contentDetails.duration);
+    const thumbnails = typeof searchSnippet.thumbnails === "object" && searchSnippet.thumbnails !== null ? searchSnippet.thumbnails as Record<string, unknown> : {};
+    const mediumThumbnail = typeof thumbnails.medium === "object" && thumbnails.medium !== null ? thumbnails.medium as Record<string, unknown> : {};
+    const thumbnailUrl = text(mediumThumbnail.url, 2_000);
     const ageDays = Math.max(1, (Date.parse(timestamp) - Date.parse(publishedAt)) / 86_400_000);
     const popularityScore = views === null ? null : Math.min(100, Math.round(Math.log10(Math.max(1, views)) / 7 * 10_000) / 100);
     const contentVelocity = views === null ? null : Math.min(100, Math.round(Math.log10(Math.max(1, views / ageDays)) / 5 * 10_000) / 100);
-    return [discoverySignal({ sourceId: "youtube-data-api", sourceKind: "short_video_public", query, externalProductId: videoId, title, sourceUrl: `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`, observedAt: publishedAt, rank: index + 1, popularityScore, contentVelocity })];
+    return [discoverySignal({
+      sourceId: "youtube-data-api", sourceKind: "short_video_public", query, externalProductId: videoId, title,
+      sourceUrl: `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`, observedAt: publishedAt,
+      rank: index + 1, popularityScore, contentVelocity, channelId, channelTitle, thumbnailUrl,
+      viewCount: views, likeCount: likes, commentCount: comments,
+      subscriberCount: channelId ? subscribersByChannel.get(channelId) ?? null : null,
+      durationSeconds, isShort: durationSeconds === null ? null : durationSeconds <= 180,
+    })];
   });
-  const requestCount = videoIds.length ? 2 : 1;
+  const requestCount = 1 + (videoIds.length ? 1 : 0) + (channelIds.length ? 1 : 0);
   return Object.freeze({ provider: "youtube_data", observations: Object.freeze([]), discoverySignals: Object.freeze(signals), requestCount, quotaUnits: requestCount, estimatedCostUsd: 0 });
 }
 
