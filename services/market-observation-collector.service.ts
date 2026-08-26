@@ -9,6 +9,10 @@ export type MarketObservationCollectorResult = Readonly<{
   discoverySignals: readonly MarketDiscoverySignal[];
   endpoint: string;
   source: MarketSource;
+  provider: ExternalMarketProvider | "configured_endpoint";
+  requestCount: number;
+  quotaUnits: number;
+  estimatedCostUsd: number;
 }>;
 
 type CollectorResponse = Readonly<{ observations?: unknown }>;
@@ -75,7 +79,7 @@ export async function collectConfiguredMarketObservations(
     if (!input.provider && process.env.MARKET_EXTERNAL_PROVIDER_ENABLED !== "true") throw new Error("MARKET_EXTERNAL_PROVIDER_DISABLED");
     if (nativeProvider === "youtube_data" && !input.allowSignalOnly) throw new Error("MARKET_PROVIDER_SIGNAL_ONLY");
     const external = await collectExternalMarketProvider(nativeProvider, keyword, { credentials: input.credentials, request: input.request });
-    return Object.freeze({ observations: Object.freeze([...external.observations]), discoverySignals: Object.freeze([...external.discoverySignals]), endpoint: `native:${nativeProvider}`, source: nativeProvider === "dataforseo_naver" ? "dataforseo_naver" : "naver_official" });
+    return Object.freeze({ observations: Object.freeze([...external.observations]), discoverySignals: Object.freeze([...external.discoverySignals]), endpoint: `native:${nativeProvider}`, source: nativeProvider === "dataforseo_naver" ? "dataforseo_naver" : "naver_official", provider: nativeProvider, requestCount: external.requestCount, quotaUnits: external.quotaUnits, estimatedCostUsd: external.estimatedCostUsd });
   }
   const endpoint = (input.endpoint ?? process.env.COUPANG_MARKET_DATA_ENDPOINT)?.trim();
   if (!endpoint || !/^https:\/\//i.test(endpoint)) throw new Error("MARKET_COLLECTOR_ENDPOINT_UNAVAILABLE");
@@ -106,6 +110,10 @@ export async function collectConfiguredMarketObservations(
       discoverySignals: Object.freeze([]),
       endpoint,
       source,
+      provider: "configured_endpoint",
+      requestCount: 1,
+      quotaUnits: 0,
+      estimatedCostUsd: 0,
     });
   } finally {
     clearTimeout(timeout);

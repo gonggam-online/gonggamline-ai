@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const verificationMode = request.nextUrl.searchParams.get("verify") === "providers";
     const result = verificationMode
       ? await runProviderVerificationJobs()
-      : await runDueCollectionJobs(20);
+      : await runDueCollectionJobs(6);
     return NextResponse.json({ success: true, mode: verificationMode ? "provider_verification" : "scheduled", ...result });
   } catch (error) {
     return NextResponse.json({ success: false, message: error instanceof Error ? error.message : "시장 수집 실행 실패" }, { status: 500 });

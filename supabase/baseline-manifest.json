@@ -136,6 +136,11 @@
       "order": 26,
       "file": "026_market_watchlist_activation.sql",
       "sha256": "dda24e1de1ad0c39afc7063969bd0654a8f47894817086cbc0e4775d4c0bb026"
+    },
+    {
+      "order": 27,
+      "file": "027_autonomous_market_discovery_engine.sql",
+      "sha256": "5bbe80f3379b94a06add97ae2228c22422c7607414e727c45642651d75d18f9f"
     }
   ],
   "promotedSources": {

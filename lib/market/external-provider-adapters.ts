@@ -394,6 +394,31 @@ export async function collectYouTubeVideoSignals(
     ? (searchBody as { items: unknown[] }).items
     : [];
   const timestamp = observedAt();
+  const videoIds = searchItems.flatMap((item): string[] => {
+    if (typeof item !== "object" || item === null) return [];
+    const id = (item as Record<string, unknown>).id;
+    if (typeof id !== "object" || id === null) return [];
+    const videoId = text((id as Record<string, unknown>).videoId, 200);
+    return videoId ? [videoId] : [];
+  });
+  const statisticsById = new Map<string, Record<string, unknown>>();
+  if (videoIds.length) {
+    const videoUrl = new URL("https://www.googleapis.com/youtube/v3/videos");
+    videoUrl.searchParams.set("part", "statistics");
+    videoUrl.searchParams.set("id", videoIds.join(","));
+    videoUrl.searchParams.set("key", key);
+    const videoBody = await jsonResponse(await request(videoUrl, { method: "GET", cache: "no-store" }), "YOUTUBE_VIDEOS");
+    const videoItems = typeof videoBody === "object" && videoBody !== null && Array.isArray((videoBody as { items?: unknown }).items)
+      ? (videoBody as { items: unknown[] }).items : [];
+    for (const item of videoItems) {
+      if (typeof item !== "object" || item === null) continue;
+      const record = item as Record<string, unknown>;
+      const videoId = text(record.id, 200);
+      if (videoId && typeof record.statistics === "object" && record.statistics !== null) {
+        statisticsById.set(videoId, record.statistics as Record<string, unknown>);
+      }
+    }
+  }
   const signals = searchItems.flatMap((item, index): MarketDiscoverySignal[] => {
     if (typeof item !== "object" || item === null) return [];
     const record = item as Record<string, unknown>;
@@ -403,9 +428,15 @@ export async function collectYouTubeVideoSignals(
     const title = text(snippet?.title);
     if (!videoId || !title) return [];
     const publishedAt = typeof snippet?.publishedAt === "string" && Number.isFinite(Date.parse(snippet.publishedAt)) ? snippet.publishedAt : timestamp;
-    return [discoverySignal({ sourceId: "youtube-data-api", sourceKind: "short_video_public", query, externalProductId: videoId, title, sourceUrl: `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`, observedAt: publishedAt, rank: index + 1, popularityScore: null, contentVelocity: null })];
+    const statistics = statisticsById.get(videoId);
+    const views = number(statistics?.viewCount);
+    const ageDays = Math.max(1, (Date.parse(timestamp) - Date.parse(publishedAt)) / 86_400_000);
+    const popularityScore = views === null ? null : Math.min(100, Math.round(Math.log10(Math.max(1, views)) / 7 * 10_000) / 100);
+    const contentVelocity = views === null ? null : Math.min(100, Math.round(Math.log10(Math.max(1, views / ageDays)) / 5 * 10_000) / 100);
+    return [discoverySignal({ sourceId: "youtube-data-api", sourceKind: "short_video_public", query, externalProductId: videoId, title, sourceUrl: `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`, observedAt: publishedAt, rank: index + 1, popularityScore, contentVelocity })];
   });
-  return Object.freeze({ provider: "youtube_data", observations: Object.freeze([]), discoverySignals: Object.freeze(signals), requestCount: 1, quotaUnits: 100, estimatedCostUsd: 0 });
+  const requestCount = videoIds.length ? 2 : 1;
+  return Object.freeze({ provider: "youtube_data", observations: Object.freeze([]), discoverySignals: Object.freeze(signals), requestCount, quotaUnits: requestCount, estimatedCostUsd: 0 });
 }
 
 export async function collectDataForSeoNaverSignals(
