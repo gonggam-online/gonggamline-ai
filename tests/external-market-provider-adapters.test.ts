@@ -212,3 +212,17 @@ test("YouTube cannot be silently persisted through the market snapshot contract"
     credentials: { youtubeApiKey: "key" },
   }), /MARKET_PROVIDER_SIGNAL_ONLY/);
 });
+
+test("an explicit orchestration opt-in admits YouTube discovery signals without observations", async () => {
+  const result = await collectConfiguredMarketObservations({
+    collectorKey: "public-observation-adapter",
+    keyword: "주방정리",
+    provider: "youtube_data",
+    allowSignalOnly: true,
+    credentials: { youtubeApiKey: "key" },
+    request: async () => response({ items: [{ id: { videoId: "video-1" }, snippet: { title: "주방정리 공개 영상" } }] }),
+  });
+  assert.equal(result.observations.length, 0);
+  assert.equal(result.discoverySignals.length, 1);
+  assert.equal(result.discoverySignals[0]?.sourceKind, "short_video_public");
+});

@@ -33,13 +33,21 @@ export async function createCollectionJob(input: { collectorKey: string; keyword
   return data;
 }
 
-export async function runDueCollectionJobs(limit = 20): Promise<{ results: CollectorRunResult[] }> {
+export const PROVIDER_VERIFICATION_COLLECTOR_KEYS = Object.freeze([
+  "naver-shopping-api",
+  "dataforseo-naver-serp",
+  "youtube-public-signals",
+] as const);
+
+export async function runDueCollectionJobs(limit = 20, collectorKey?: string): Promise<{ results: CollectorRunResult[] }> {
   const now = new Date().toISOString();
-  const { data: jobs, error } = await supabase
+  let dueJobsQuery = supabase
     .from("market_collection_jobs")
     .select("id,collector_key,market_keyword_id,interval_minutes,market_keywords(keyword)")
     .eq("status", "active")
-    .lte("next_run_at", now)
+    .lte("next_run_at", now);
+  if (collectorKey) dueJobsQuery = dueJobsQuery.eq("collector_key", collectorKey);
+  const { data: jobs, error } = await dueJobsQuery
     .order("priority", { ascending: false })
     .limit(limit);
   if (error) throw new Error(error.message);
@@ -86,6 +94,7 @@ export async function runDueCollectionJobs(limit = 20): Promise<{ results: Colle
           collectorKey: isNaver ? "official-api-adapter" : "public-observation-adapter",
           provider: isNaver ? "naver_api_hub" : isYoutube ? "youtube_data" : "dataforseo_naver",
           keyword,
+          allowSignalOnly: isYoutube,
         });
         let saved = 0;
         let analyzed = 0;
@@ -156,6 +165,16 @@ export async function runDueCollectionJobs(limit = 20): Promise<{ results: Colle
       updated_at: new Date().toISOString(),
     }).eq("id", job.id);
     results.push(result);
+  }
+  return { results };
+}
+
+/** Runs exactly one due job for each configured external provider. */
+export async function runProviderVerificationJobs(): Promise<{ results: CollectorRunResult[] }> {
+  const results: CollectorRunResult[] = [];
+  for (const collectorKey of PROVIDER_VERIFICATION_COLLECTOR_KEYS) {
+    const verification = await runDueCollectionJobs(1, collectorKey);
+    results.push(...verification.results);
   }
   return { results };
 }

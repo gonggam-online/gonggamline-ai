@@ -66,14 +66,14 @@ function normalizeObservation(value: unknown, source: MarketSource, keyword: str
 }
 
 export async function collectConfiguredMarketObservations(
-  input: Readonly<{ collectorKey: MarketObservationCollectorKey; keyword: string; endpoint?: string; apiKey?: string; provider?: ExternalMarketProvider; credentials?: ExternalProviderCredentials; request?: typeof fetch }>,
+  input: Readonly<{ collectorKey: MarketObservationCollectorKey; keyword: string; endpoint?: string; apiKey?: string; provider?: ExternalMarketProvider; credentials?: ExternalProviderCredentials; request?: typeof fetch; allowSignalOnly?: boolean }>,
 ): Promise<MarketObservationCollectorResult> {
   const keyword = input.keyword.trim();
   if (keyword.length < 2 || keyword.length > 100) throw new Error("MARKET_KEYWORD_INVALID");
   const nativeProvider = input.provider ?? (process.env.MARKET_EXTERNAL_PROVIDER as ExternalMarketProvider | undefined);
   if (!input.endpoint && nativeProvider) {
     if (!input.provider && process.env.MARKET_EXTERNAL_PROVIDER_ENABLED !== "true") throw new Error("MARKET_EXTERNAL_PROVIDER_DISABLED");
-    if (nativeProvider === "youtube_data") throw new Error("MARKET_PROVIDER_SIGNAL_ONLY");
+    if (nativeProvider === "youtube_data" && !input.allowSignalOnly) throw new Error("MARKET_PROVIDER_SIGNAL_ONLY");
     const external = await collectExternalMarketProvider(nativeProvider, keyword, { credentials: input.credentials, request: input.request });
     return Object.freeze({ observations: Object.freeze([...external.observations]), discoverySignals: Object.freeze([...external.discoverySignals]), endpoint: `native:${nativeProvider}`, source: nativeProvider === "dataforseo_naver" ? "dataforseo_naver" : "naver_official" });
   }
