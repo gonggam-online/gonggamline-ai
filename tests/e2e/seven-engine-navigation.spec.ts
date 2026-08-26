@@ -5,7 +5,7 @@ test("shared navigation expands only the current engine and keeps one portal lin
 
   const navigation = page.getByRole("navigation", { name: "7대 엔진 통합 메뉴" });
   await expect(navigation.getByRole("link", { name: /7대 엔진 통합 포털/ })).toBeVisible();
-  await expect(navigation.getByRole("link", { name: "1-2. 시장 후보 발굴·의사결정" })).toHaveAttribute("aria-current", "page");
+  await expect(navigation.getByRole("link", { name: "1. 시장정보·아이템 발굴" })).toHaveAttribute("aria-current", "page");
   await expect(navigation.getByRole("link", { name: "2. 상품선정·수익성" })).toBeVisible();
   await expect(navigation.getByRole("link", { name: "7. 성과분석·학습" })).toBeVisible();
   await expect(navigation.getByRole("link", { name: /5-1\./ })).toHaveCount(0);

@@ -80,7 +80,7 @@ test("the shared top navigation owns portal, main-page, and active-engine subpag
 test("engine 1 owns market keyword recommendations and hands selection input to engine 2", () => {
   const market = readFileSync(path.join(process.cwd(), "app", "market", "page.tsx"), "utf8");
   const selection = readFileSync(path.join(process.cwd(), "components", "item-selection-admin", "item-selection-admin.tsx"), "utf8");
-  assert.match(market, /시장 데이터 기반 추천 검색어/);
+  assert.match(market, /판매 후보 우선순위/);
   assert.match(market, /\/admin\/item-selection\?keyword=/);
   assert.doesNotMatch(selection, /fetch\("\/api\/market\/keywords"/);
 });

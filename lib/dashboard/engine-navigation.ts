@@ -19,9 +19,7 @@ export const ENGINE_NAVIGATION: readonly EngineNavigationGroup[] = Object.freeze
     title: "시장정보·아이템 발굴",
     description: "상시 시장 트렌드와 공개 수요 신호를 수집하고 판매 후보를 발굴합니다.",
     pages: Object.freeze([
-      { number: "1", title: "시장정보·아이템 발굴", href: "/market", description: "시장 키워드·수집기·트렌드·분석 운영", primary: true },
-      { number: "1-1", title: "아이템 발굴 워크벤치", href: "/market/finder", description: "키워드·쇼핑 콘텐츠·채널·가격 통합 발굴" },
-      { number: "1-2", title: "시장 후보 발굴·의사결정", href: "/discovery", description: "시장 Feature 기반 단품·묶음 후보 발굴" },
+      { number: "1", title: "시장정보·아이템 발굴", href: "/market", description: "트렌드→판매후보 우선순위→근거검토→후속 실행 통합", primary: true },
     ]),
   },
   {

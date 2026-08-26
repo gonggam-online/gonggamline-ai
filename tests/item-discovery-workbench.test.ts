@@ -105,14 +105,12 @@ test("content clusters and alerts turn repeated public signals into investigatio
   assert.ok(buildFinderAlerts(profiles, []).some((item) => item.kind === "EVIDENCE_GAP"));
 });
 
-test("watchlist registration is AAL1 secured and creates all bounded provider jobs", () => {
+test("watchlist registration remains AAL1 secured and creates all bounded provider jobs", () => {
   const route = readFileSync(new URL("../app/api/market/keywords/route.ts", import.meta.url), "utf8");
-  const page = readFileSync(new URL("../app/market/finder/page.tsx", import.meta.url), "utf8");
   const csrf = readFileSync(new URL("../app/api/admin/auth/csrf/route.ts", import.meta.url), "utf8");
   assert.match(route, /requireAdminRequest\(request, "read"\)/);
   assert.match(route, /requireExactAdminOrigin\(request\)/);
   assert.match(route, /verifyAdminCsrfToken\(request, "market-keyword-write", context\)/);
   for (const collector of ["naver-shopping-api", "youtube-public-signals", "dataforseo-naver-serp"]) assert.match(route, new RegExp(collector));
-  assert.match(page, /X-GonggamLine-CSRF/);
   assert.match(csrf, /purpose === "market-keyword-write"/);
 });

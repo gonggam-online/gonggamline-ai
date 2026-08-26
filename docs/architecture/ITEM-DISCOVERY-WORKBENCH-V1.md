@@ -40,3 +40,18 @@ This is an original implementation. It does not copy another service's source co
 Discovery UIs should reduce research fragmentation without weakening evidence semantics. The reusable pattern is: preserve raw source observations, derive deterministic view models, label incomplete histories honestly, and hand off candidate intent without promoting it to an execution decision.
 
 The v2 learning is that deeper discovery does not require multiplying paid or quota-heavy calls. The existing bounded YouTube request can request channel country and video description/tags in the same metadata calls, then build domestic/overseas lanes, clusters, filters, and alerts locally. New watchlist entries must create their provider schedules at registration time; a keyword without jobs is not an active watchlist.
+
+## v3 unified decision dashboard
+
+Engine 1 is now one operator page at `/market`. The former `/market/finder` and `/discovery` routes redirect to the relevant section instead of maintaining duplicate dashboards. The visible workflow is fixed to the business decision order:
+
+1. inspect the latest market trends;
+2. compare the automatically ranked selling candidates;
+3. inspect score components, evidence, and unresolved work;
+4. hand the chosen concept to profitability validation or supplier sourcing.
+
+The portfolio score combines market strength, growth, profitability evidence, large-catalog scalability, execution readiness, risk, and confidence. It retains three lanes: **large-catalog review**, **validate next**, and **watch**. Real evaluated products supersede a matching market concept, synthetic/demo products never enter the operator portfolio, and ties remain deterministic.
+
+The revenue principle is qualified portfolio throughput: discover and review multiple viable products fast enough to support high-volume listing, while never converting missing profitability, rights, or supplier evidence into an automatic listing approval. Batch selection therefore exports a review shortlist; downstream Engine 2 and Engine 3 remain the canonical profitability and sourcing authorities.
+
+Reusable learning: workflow duplication makes evidence harder to compare. A single read model should compose market signals and evaluated products, preserve their different provenance, and let detail change in-place without forcing an operator to reconcile three screens.

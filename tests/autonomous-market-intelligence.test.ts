@@ -104,12 +104,9 @@ test("runtime wiring continuously persists evidence, rebuilds intelligence and r
   assert.match(orchestration, /recordAutonomousCollectionEvidence/);
   assert.match(orchestration, /rebuildAutonomousMarketIntelligence/);
   assert.doesNotMatch(orchestration, /refreshIntelligence && results\.length/);
-  assert.match(page, /\/api\/market\/intelligence/);
-  assert.match(page, /오늘의 고객 수요·구매 트렌드/);
-  assert.match(page, /시장 트렌드 기반 추천 아이템/);
-  assert.match(page, /getAdminCsrfToken\(csrfPurpose\)/);
-  assert.match(page, /"X-GonggamLine-CSRF": csrfToken/);
-  assert.match(page, /"market-collection-run"/);
+  assert.match(page, /\/api\/market\/discovery-dashboard/);
+  assert.match(page, /최근 시장 트렌드/);
+  assert.match(page, /판매 후보 우선순위/);
   assert.match(manualRun, /requireAdminRequest\(request, "read"\)/);
   assert.match(manualRun, /verifyAdminCsrfToken\(request, "market-collection-run", context\)/);
   assert.match(csrfRoute, /purpose === "market-collection-run"[\s\S]*\? "read"/);
