@@ -73,7 +73,7 @@ test("demo products never become evidence-backed product recommendations", () =>
     { concept: "주방 정리", provider: "youtube", observedAt: now.toISOString(), demandIndex: 70, contentVelocity: 80, evidenceId: "y1" },
   ], { now, expectedProviders: 2 });
   const items = buildMarketItemRecommendations(digest.opportunities, [
-    { id: 1, title: "실리콘 주방 정리 트레이", source: "demo-generator", opportunityScore: 99, confidence: 99 },
+    { id: 1, title: "실리콘 주방 정리 트레이", source: "manual", brand: "공감데모", opportunityScore: 99, confidence: 99 },
   ]);
   assert.equal(items.length, 1);
   assert.equal(items[0].form, "set");
