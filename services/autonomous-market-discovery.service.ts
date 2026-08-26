@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import { supabase } from "../lib/supabase";
+import { getMarketRuntimeClient } from "../lib/supabase/market-runtime.server";
 import {
   MARKET_INTELLIGENCE_VERSION,
   buildMarketItemRecommendations,
@@ -61,6 +61,7 @@ export async function recordAutonomousCollectionEvidence(input: Readonly<{
   keyword: string;
   collected: MarketObservationCollectorResult;
 }>): Promise<void> {
+  const supabase = getMarketRuntimeClient();
   const usageDay = new Date().toISOString().slice(0, 10);
   const existing = await supabase.from("market_provider_usage").select("request_count,quota_units,reported_cost_usd")
     .eq("provider", input.collected.provider).eq("usage_day", usageDay).maybeSingle();
@@ -117,6 +118,7 @@ export async function recordAutonomousCollectionEvidence(input: Readonly<{
 }
 
 async function expandKeywordWatchlist(): Promise<readonly string[]> {
+  const supabase = getMarketRuntimeClient();
   const activeResult = await supabase.from("market_keywords").select("id,keyword,collection_status").eq("collection_status", "active").limit(110);
   if (activeResult.error) throw new Error(activeResult.error.message);
   const active = (activeResult.data ?? []) as Array<{ id: number; keyword: string; collection_status: string }>;
@@ -173,6 +175,7 @@ function productMetric(row: ProductRow): Record<string, unknown> {
 }
 
 export async function rebuildAutonomousMarketIntelligence(): Promise<Record<string, unknown>> {
+  const supabase = getMarketRuntimeClient();
   const startedAt = new Date().toISOString();
   try {
     const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
@@ -295,11 +298,19 @@ export async function rebuildAutonomousMarketIntelligence(): Promise<Record<stri
 }
 
 export async function getLatestAutonomousMarketIntelligence(): Promise<Record<string, unknown>> {
-  const result = await supabase.from("market_recommendation_runs").select("id,version,digest,status,recommendation_count,output,completed_at")
-    .in("status", ["COMPLETE", "PARTIAL", "EMPTY"]).order("completed_at", { ascending: false }).limit(1).maybeSingle();
-  if (result.error) {
-    if (schemaUnavailable(result.error)) return { status: "SCHEMA_PENDING", trends: [], items: [] };
-    throw new Error(result.error.message);
+  try {
+    const supabase = getMarketRuntimeClient();
+    const result = await supabase.from("market_recommendation_runs").select("id,version,digest,status,recommendation_count,output,completed_at")
+      .in("status", ["COMPLETE", "PARTIAL", "EMPTY"]).order("completed_at", { ascending: false }).limit(1).maybeSingle();
+    if (result.error) {
+      if (schemaUnavailable(result.error)) return { status: "SCHEMA_PENDING", trends: [], items: [] };
+      throw new Error(result.error.message);
+    }
+    return result.data ? { ...(result.data.output as Record<string, unknown>), runId: result.data.id, digest: result.data.digest, completedAt: result.data.completed_at } : { status: "EMPTY", trends: [], items: [] };
+  } catch (error) {
+    if (error instanceof Error && error.message === "MARKET_RUNTIME_STORAGE_UNAVAILABLE") {
+      return { status: "STORAGE_UNAVAILABLE", trends: [], items: [] };
+    }
+    throw error;
   }
-  return result.data ? { ...(result.data.output as Record<string, unknown>), runId: result.data.id, digest: result.data.digest, completedAt: result.data.completed_at } : { status: "EMPTY", trends: [], items: [] };
 }

@@ -56,6 +56,8 @@ test("observed products become ranked single and bundle research candidates", ()
 
 test("runtime wiring continuously persists evidence, rebuilds intelligence and renders it in Engine 1", () => {
   const orchestration = readFileSync(new URL("../services/market-orchestration.service.ts", import.meta.url), "utf8");
+  const persistence = readFileSync(new URL("../services/autonomous-market-discovery.service.ts", import.meta.url), "utf8");
+  const runtimeClient = readFileSync(new URL("../lib/supabase/market-runtime.server.ts", import.meta.url), "utf8");
   const page = readFileSync(new URL("../app/market/page.tsx", import.meta.url), "utf8");
   const cron = readFileSync(new URL("../app/api/market/cron/route.ts", import.meta.url), "utf8");
   assert.match(orchestration, /recordAutonomousCollectionEvidence/);
@@ -67,6 +69,11 @@ test("runtime wiring continuously persists evidence, rebuilds intelligence and r
   assert.match(orchestration, /Math\.min\(10, Math\.floor\(limit\)\)/);
   assert.match(orchestration, /\.eq\("status", "running"\)\.lt\("last_run_at", staleLease\)/);
   assert.match(orchestration, /\.eq\("id", job\.id\)[\s\S]*\.eq\("status", "active"\)[\s\S]*\.maybeSingle\(\)/);
+  assert.match(persistence, /getMarketRuntimeClient/);
+  assert.match(persistence, /status: "STORAGE_UNAVAILABLE"/);
+  assert.match(runtimeClient, /SUPABASE_SERVICE_ROLE_KEY/);
+  assert.match(runtimeClient, /import "server-only"/);
+  assert.doesNotMatch(runtimeClient, /NEXT_PUBLIC_SUPABASE_ANON_KEY/);
 });
 
 test("migration is additive and creates the complete autonomous evidence model", () => {
