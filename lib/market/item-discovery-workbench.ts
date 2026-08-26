@@ -1,6 +1,6 @@
 import { normalizeMarketConcept, type MarketOpportunity } from "./autonomous-intelligence";
 
-export const ITEM_DISCOVERY_WORKBENCH_VERSION = "gonggamline-item-discovery-workbench-v1" as const;
+export const ITEM_DISCOVERY_WORKBENCH_VERSION = "gonggamline-item-discovery-workbench-v2" as const;
 
 export type FinderSignalRow = Readonly<{
   concept: string;
@@ -33,6 +33,8 @@ export type ShoppingContentCard = Readonly<{
   sourceUrl: string | null;
   observedAt: string;
   channelTitle: string | null;
+  channelCountry: string | null;
+  marketZone: "DOMESTIC" | "OVERSEAS" | "UNKNOWN";
   thumbnailUrl: string | null;
   viewCount: number | null;
   contentVelocity: number | null;
@@ -41,6 +43,25 @@ export type ShoppingContentCard = Readonly<{
   verdict: "SHOPPING_CONTENT" | "PRODUCT_RELATED" | "REVIEW";
   extractedProduct: string;
   referenceOnly: true;
+}>;
+
+export type FinderContentCluster = Readonly<{
+  id: string;
+  label: string;
+  contentCount: number;
+  totalViews: number;
+  averageShoppingScore: number;
+  keywords: readonly string[];
+  marketZones: readonly string[];
+}>;
+
+export type FinderAlert = Readonly<{
+  id: string;
+  severity: "HIGH" | "MEDIUM" | "INFO";
+  kind: "MARKET_BREAKOUT" | "CONTENT_SURGE" | "EVIDENCE_GAP";
+  title: string;
+  detail: string;
+  keyword: string;
 }>;
 
 const numberOrNull = (value: unknown): number | null => {
@@ -78,6 +99,11 @@ export function extractProductPhrase(title: string, keyword: string): string {
   return `${keyword} 관련 상품`;
 }
 
+export function classifyContentMarket(channelCountry: string | null): ShoppingContentCard["marketZone"] {
+  if (!channelCountry) return "UNKNOWN";
+  return channelCountry.toUpperCase() === "KR" ? "DOMESTIC" : "OVERSEAS";
+}
+
 export function buildShoppingContentFeed(rows: readonly FinderSignalRow[], limit = 30): readonly ShoppingContentCard[] {
   const contentRows = rows.filter((row) => row.provider.includes("youtube") || row.provider.includes("dataforseo"));
   const cards = contentRows.flatMap((row, index): ShoppingContentCard[] => {
@@ -94,6 +120,8 @@ export function buildShoppingContentFeed(rows: readonly FinderSignalRow[], limit
       sourceUrl,
       observedAt: row.observedAt,
       channelTitle: stringOrNull(row.evidence.channelTitle, 300),
+      channelCountry: stringOrNull(row.evidence.channelCountry, 10)?.toUpperCase() ?? null,
+      marketZone: classifyContentMarket(stringOrNull(row.evidence.channelCountry, 10)),
       thumbnailUrl: stringOrNull(row.evidence.thumbnailUrl, 2_000),
       viewCount: numberOrNull(row.evidence.viewCount),
       contentVelocity: row.contentVelocity,
@@ -109,6 +137,38 @@ export function buildShoppingContentFeed(rows: readonly FinderSignalRow[], limit
     || Date.parse(right.observedAt) - Date.parse(left.observedAt)
     || left.id.localeCompare(right.id)).filter((item, index, all) => all.findIndex((candidate) => candidate.id === item.id) === index)
     .slice(0, Math.max(1, Math.min(100, limit))));
+}
+
+export function buildContentClusters(content: readonly ShoppingContentCard[], limit = 20): readonly FinderContentCluster[] {
+  const groups = new Map<string, ShoppingContentCard[]>();
+  for (const item of content) {
+    const key = normalizeMarketConcept(item.extractedProduct) || normalizeMarketConcept(item.keyword);
+    groups.set(key, [...(groups.get(key) ?? []), item]);
+  }
+  return Object.freeze([...groups.entries()].map(([id, items]) => Object.freeze({
+    id,
+    label: items[0]?.extractedProduct ?? id,
+    contentCount: items.length,
+    totalViews: items.reduce((sum, item) => sum + (item.viewCount ?? 0), 0),
+    averageShoppingScore: Math.round(items.reduce((sum, item) => sum + item.shoppingScore, 0) / Math.max(1, items.length)),
+    keywords: Object.freeze([...new Set(items.map((item) => item.keyword))].sort((a, b) => a.localeCompare(b, "ko"))),
+    marketZones: Object.freeze([...new Set(items.map((item) => item.marketZone))].sort()),
+  })).sort((a, b) => b.contentCount - a.contentCount || b.totalViews - a.totalViews || a.id.localeCompare(b.id))
+    .slice(0, Math.max(1, Math.min(100, limit))));
+}
+
+export function buildFinderAlerts(profiles: readonly Record<string, unknown>[], content: readonly ShoppingContentCard[]): readonly FinderAlert[] {
+  const alerts: FinderAlert[] = [];
+  for (const profile of profiles) {
+    const keyword = String(profile.keyword ?? "");
+    const state = String(profile.state ?? "");
+    const score = numberOrNull(profile.score) ?? 0;
+    if ((state === "BREAKOUT" || state === "RISING") && score >= 60) alerts.push({ id: `market:${keyword}`, severity: "HIGH", kind: "MARKET_BREAKOUT", title: `${keyword} 수요 상승`, detail: `시장점수 ${Math.round(score)}점 · 상품선정 검토 우선`, keyword });
+    const samples = content.filter((item) => item.keyword === keyword);
+    if (samples.some((item) => item.shoppingScore >= 70 && (item.contentVelocity ?? 0) >= 40)) alerts.push({ id: `content:${keyword}`, severity: "MEDIUM", kind: "CONTENT_SURGE", title: `${keyword} 쇼핑 콘텐츠 확산`, detail: "상품 관련 공개 콘텐츠의 반응 속도가 상승했습니다.", keyword });
+    if (samples.length === 0) alerts.push({ id: `gap:${keyword}`, severity: "INFO", kind: "EVIDENCE_GAP", title: `${keyword} 콘텐츠 근거 대기`, detail: "다음 YouTube·검색 수집에서 콘텐츠 근거를 보강합니다.", keyword });
+  }
+  return Object.freeze(alerts.slice(0, 30));
 }
 
 export function buildKeywordFinderProfiles(input: Readonly<{

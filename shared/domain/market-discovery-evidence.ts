@@ -40,6 +40,9 @@ export type MarketDiscoverySignal = Readonly<{
   contentVelocity: number | null;
   channelId?: string | null;
   channelTitle?: string | null;
+  channelCountry?: string | null;
+  description?: string | null;
+  tags?: readonly string[] | null;
   thumbnailUrl?: string | null;
   viewCount?: number | null;
   likeCount?: number | null;

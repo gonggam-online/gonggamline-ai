@@ -65,7 +65,8 @@ export default function MarketPage() {
 
   async function addKeyword(event: FormEvent) {
     event.preventDefault(); setError(""); setMessage("");
-    const response = await fetch("/api/market/keywords", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ keyword, priority: 70 }) });
+    const csrfToken = await getAdminCsrfToken("market-keyword-write");
+    const response = await fetch("/api/market/keywords", { method: "POST", headers: { "Content-Type": "application/json", "X-GonggamLine-CSRF": csrfToken }, body: JSON.stringify({ keyword, priority: 70 }) });
     const data = await response.json();
     if (!response.ok || !data.success) { setError(data.message || "저장 실패"); return; }
     setKeyword(""); setMessage("관찰 키워드를 등록했습니다."); await load();
