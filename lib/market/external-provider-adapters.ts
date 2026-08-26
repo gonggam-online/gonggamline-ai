@@ -1,5 +1,6 @@
 import type { MarketDiscoverySignal } from "../../shared/domain/market-discovery-evidence";
 import type { MarketObservationInput } from "../../types/market";
+import { resolveNaverShoppingCategory } from "./naver-shopping-category-policy";
 
 export type ExternalMarketProvider = "naver_api_hub" | "naver_shopping" | "youtube_data" | "dataforseo_naver";
 
@@ -34,7 +35,6 @@ function credentialsFromEnvironment(): ExternalProviderCredentials {
   return {
     naverClientId: process.env.NAVER_API_HUB_CLIENT_ID ?? process.env.NAVER_CLIENT_ID,
     naverClientSecret: process.env.NAVER_API_HUB_CLIENT_SECRET ?? process.env.NAVER_CLIENT_SECRET,
-    naverShoppingCategoryId: process.env.NAVER_API_HUB_SHOPPING_CATEGORY_ID,
     youtubeApiKey: process.env.YOUTUBE_DATA_API_KEY,
     dataForSeoLogin: process.env.DATAFORSEO_LOGIN,
     dataForSeoPassword: process.env.DATAFORSEO_PASSWORD,
@@ -177,7 +177,8 @@ export async function collectNaverApiHubTrends(
   const credentials = options.credentials ?? credentialsFromEnvironment();
   const clientId = required(credentials.naverClientId, "NAVER_CREDENTIALS_MISSING");
   const clientSecret = required(credentials.naverClientSecret, "NAVER_CREDENTIALS_MISSING");
-  const categoryId = credentials.naverShoppingCategoryId?.trim();
+  const verifiedCategory = resolveNaverShoppingCategory(query);
+  const categoryId = credentials.naverShoppingCategoryId?.trim() ?? verifiedCategory?.categoryCode;
   if (categoryId && !/^\d{8,12}$/.test(categoryId)) throw new Error("NAVER_SHOPPING_CATEGORY_INVALID");
   const request = options.request ?? fetch;
   const now = options.now ?? new Date();

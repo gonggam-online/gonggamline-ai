@@ -10,6 +10,11 @@ import {
   collectYouTubeVideoSignals,
 } from "../lib/market/external-provider-adapters.ts";
 import { collectConfiguredMarketObservations } from "../services/market-observation-collector.service.ts";
+import {
+  NAVER_SHOPPING_CATEGORY_POLICY_VERSION,
+  NAVER_SHOPPING_KEYWORD_CATEGORIES,
+  resolveNaverShoppingCategory,
+} from "../lib/market/naver-shopping-category-policy.ts";
 
 function response(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -68,6 +73,55 @@ test("NAVER API HUB optionally adds Shopping Insight only with an explicit categ
   assert.equal(result.requestCount, 2);
   assert.equal(result.discoverySignals[1]?.category, "50000004");
   assert.equal(result.discoverySignals[1]?.popularityScore, 80);
+});
+
+test("verified active keywords resolve to exact Naver Shopping category codes", () => {
+  assert.equal(NAVER_SHOPPING_CATEGORY_POLICY_VERSION, "gonggamline-naver-shopping-category-policy-2026-08-26");
+  assert.equal(NAVER_SHOPPING_KEYWORD_CATEGORIES.length, 26);
+  assert.deepEqual(
+    Object.fromEntries(NAVER_SHOPPING_KEYWORD_CATEGORIES.map(({ keyword, categoryCode }) => [keyword, categoryCode])),
+    {
+      "주방정리": "50000008", "틈새수납": "50000004", "케이블정리": "50000003", "욕실정리": "50000008",
+      "먼지제거": "50000008", "싱크대정리": "50000008", "차량정리": "50000008", "주방청소": "50000008",
+      "미끄럼방지": "50000008", "냉장고정리": "50000008", "다용도수납": "50000008", "차량용수납": "50000008",
+      "정리용품": "50000008", "소형조명": "50000004", "다용도걸이": "50000008", "차량청소": "50000008",
+      "여름쿨링": "50000007", "생활보호용품": "50000008", "겨울보온": "50000007", "소형생활용품": "50000008",
+      "무선청소기": "50000003", "장마용품": "50000008", "캠핑수납": "50000007", "여행정리": "50000001",
+      "휴대용보관": "50000008", "생활용품": "50000008",
+    },
+  );
+  assert.equal(resolveNaverShoppingCategory("  주방정리  ")?.categoryName, "생활/건강");
+  assert.equal(resolveNaverShoppingCategory("미등록 신규 키워드"), null);
+});
+
+test("NAVER API HUB automatically sends the keyword-specific verified Shopping Insight category", async () => {
+  const calls: Array<{ url: string; body: Record<string, unknown> }> = [];
+  const result = await collectNaverApiHubTrends("캠핑수납", {
+    credentials: { naverClientId: "client", naverClientSecret: "secret" },
+    now: new Date("2026-08-26T00:00:00.000Z"),
+    request: async (input, init) => {
+      calls.push({ url: String(input), body: JSON.parse(String(init?.body)) as Record<string, unknown> });
+      return response({ results: [{ data: [{ period: "2026-08-26", ratio: 55 }] }] });
+    },
+  });
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1]?.body.category, "50000007");
+  assert.equal(result.discoverySignals[1]?.category, "50000007");
+});
+
+test("unknown keywords keep Search Trend but skip guessed Shopping Insight", async () => {
+  const urls: string[] = [];
+  const result = await collectNaverApiHubTrends("미등록 신규 키워드", {
+    credentials: { naverClientId: "client", naverClientSecret: "secret" },
+    request: async (input) => {
+      urls.push(String(input));
+      return response({ results: [{ data: [{ period: "2026-08-26", ratio: 20 }] }] });
+    },
+  });
+  assert.equal(urls.length, 1);
+  assert.match(urls[0] ?? "", /search-trend/);
+  assert.equal(result.requestCount, 1);
+  assert.equal(result.discoverySignals.length, 1);
 });
 
 test("legacy Naver collector alias uses API HUB rather than the retired Developers endpoint", async () => {
