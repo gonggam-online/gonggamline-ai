@@ -25,17 +25,6 @@ type ListEnvelope = Readonly<{
   page: Readonly<{ nextCursor: string | null }>;
 }>;
 
-type MarketKeywordSuggestion = Readonly<{
-  id: number;
-  keyword: string;
-  category: string | null;
-  priority: number;
-  demand_score: number | null;
-  competition_score: number | null;
-  opportunity_score: number | null;
-  collection_status: string;
-}>;
-
 type ShadowReviewPacket = Readonly<{
   version: string;
   providerItemNumber: string;
@@ -134,7 +123,7 @@ async function parseError(response: Response): Promise<string> {
   return correlationId ? `${message} (추적 ID: ${correlationId})` : message;
 }
 
-export function ItemSelectionAdmin() {
+export function ItemSelectionAdmin({ initialKeyword = "" }: Readonly<{ initialKeyword?: string }>) {
   const [runs, setRuns] = useState<readonly ItemSelectionRunDtoV1[]>([]);
   const [selected, setSelected] = useState<ItemSelectionRunDtoV1 | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -147,8 +136,7 @@ export function ItemSelectionAdmin() {
   const [error, setError] = useState("");
   const [shadowPacket, setShadowPacket] = useState<ShadowReviewPacket | null>(null);
   const [shadowLoading, setShadowLoading] = useState(false);
-  const [keywordDraft, setKeywordDraft] = useState("");
-  const [keywordSuggestions, setKeywordSuggestions] = useState<readonly MarketKeywordSuggestion[]>([]);
+  const [keywordDraft, setKeywordDraft] = useState(initialKeyword);
 
   const loadRuns = useCallback(async (cursor?: string) => {
     setLoading(true);
@@ -171,20 +159,6 @@ export function ItemSelectionAdmin() {
   }, []);
 
   useEffect(() => { void loadRuns(); }, [loadRuns]);
-
-  useEffect(() => {
-    let active = true;
-    void fetch("/api/market/keywords", { cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) return;
-        const body = (await response.json()) as Readonly<{ success?: boolean; keywords?: readonly MarketKeywordSuggestion[] }>;
-        if (active && body.success && Array.isArray(body.keywords)) {
-          setKeywordSuggestions(body.keywords.filter((item) => item.collection_status === "active").slice(0, 8));
-        }
-      })
-      .catch(() => { /* keyword suggestions are optional and must not block evaluation */ });
-    return () => { active = false; };
-  }, []);
 
   async function openDetail(id: string): Promise<void> {
     setDetailLoading(true);
@@ -356,14 +330,7 @@ export function ItemSelectionAdmin() {
             <button type="submit" disabled={running}>{running ? "실행 중…" : "평가 실행"}</button>
             {(selected?.status === "FAILED" || selected?.status === "PARTIAL") ? <label className="item-selection-admin__retry"><input name="retrySelected" type="checkbox" disabled={running} />선택한 ‘{selected.keyword}’ 실행의 명시적 재시도로 연결</label> : null}
           </form>
-          {keywordSuggestions.length > 0 ? <div className="item-selection-admin__keyword-suggestions" aria-label="시장 키워드 추천">
-            <strong>시장 데이터 기반 추천 검색어</strong>
-            <div>{keywordSuggestions.map((suggestion) => <button key={suggestion.id} type="button" onClick={() => setKeywordDraft(suggestion.keyword)} disabled={running}>
-              <span>{suggestion.keyword}</span><small>{suggestion.opportunity_score !== null ? `기회 ${suggestion.opportunity_score}` : suggestion.demand_score !== null ? `수요 ${suggestion.demand_score}` : `우선순위 ${suggestion.priority}`}</small>
-            </button>)}</div>
-            <small>추천어를 선택해 입력을 채운 뒤 평가를 실행합니다. 운영 순위나 추천 판정은 자동 변경되지 않습니다.</small>
-          </div> : null}
-          <p className="item-selection-admin__notice">공개 상품·가격·재고·검색 순서만으로도 모든 검색 후보에 기회 점수와 순위를 부여합니다. 권리·완전 수익성 확인은 실제 구매·등록 전에 별도로 진행됩니다. <Link href="/discovery">시장 후보 발굴</Link> · <Link href="/sourcing">공급처·견적 비교</Link></p>
+          <p className="item-selection-admin__notice">공개 상품·가격·재고·검색 순서만으로도 모든 검색 후보에 기회 점수와 순위를 부여합니다. 권리·완전 수익성 확인은 실제 구매·등록 전에 별도로 진행됩니다. <Link href="/market">시장 데이터 기반 추천 검색어</Link> · <Link href="/discovery">시장 후보 발굴</Link> · <Link href="/sourcing">공급처·견적 비교</Link></p>
           <div className="item-selection-admin__live" role="status" aria-live="polite">{message}</div>
         </DashboardSection>
 

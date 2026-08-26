@@ -9,12 +9,20 @@ const page = readFileSync(path.join(root, "app/admin/item-selection/page.tsx"), 
 
 test("admin page composes the bounded Item Selection UI", () => {
   assert.match(page, /<ItemSelectionAdmin/);
+  assert.match(page, /initialKeyword/);
   assert.match(component, /\/api\/admin\/item-selection\/runs/);
   assert.match(component, /purpose=item-selection-create/);
   assert.match(component, /Idempotency-Key/);
   assert.match(component, /"X-GonggamLine-CSRF": csrf\.token/);
   assert.doesNotMatch(component, /X-CSRF-Token/);
   assert.doesNotMatch(component, /finalize/);
+});
+
+test("market keyword recommendations belong to engine 1 and arrive as bounded input", () => {
+  assert.doesNotMatch(component, /fetch\("\/api\/market\/keywords"/);
+  assert.doesNotMatch(component, /item-selection-admin__keyword-suggestions/);
+  assert.match(component, /href="\/market">시장 데이터 기반 추천 검색어/);
+  assert.match(page, /\.trim\(\)\.slice\(0, 100\)/);
 });
 
 test("CSRF denial is distinct from fresh-MFA authorization failure", () => {
