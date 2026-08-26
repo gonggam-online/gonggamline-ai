@@ -63,6 +63,7 @@ export type MarketProductCandidateInput = Readonly<{
   id: number;
   title: string;
   category?: string | null;
+  source?: string | null;
   opportunityScore?: number | null;
   confidence?: number | null;
 }>;
@@ -226,8 +227,10 @@ export function buildMarketItemRecommendations(
 ): readonly MarketItemRecommendation[] {
   const recommendations: MarketItemRecommendation[] = [];
   for (const opportunity of opportunities) {
+    if (opportunity.state === "DECLINING" || opportunity.state === "SATURATED") continue;
     const conceptTokens = normalizeMarketConcept(opportunity.concept).split(" ").filter((token) => token.length >= 2);
     const matching = products.filter((product) => {
+      if (normalizeMarketConcept(product.source ?? "").includes("demo")) return false;
       const title = normalizeMarketConcept(product.title);
       const compactTitle = title.replaceAll(" ", "");
       const compactConcept = opportunity.concept.replaceAll(" ", "");

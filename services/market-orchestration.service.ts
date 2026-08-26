@@ -199,7 +199,7 @@ export async function runDueCollectionJobs(limit = 20, collectorKey?: string, re
     }).eq("collector_key", job.collector_key);
     results.push(result);
   }
-  const intelligence = refreshIntelligence && results.length
+  const intelligence = refreshIntelligence
     ? await (await import("./autonomous-market-discovery.service")).rebuildAutonomousMarketIntelligence()
     : undefined;
   return intelligence ? { results, intelligence } : { results };
