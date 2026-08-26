@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 import type { MarketKeyword } from "../../types/market";
 
 type Alert = { id: number; signal_type: string; severity: string; title: string; detected_at: string };
@@ -69,6 +70,16 @@ export default function MarketPage() {
     await runAction("/api/market/jobs", { collectorKey: "demo-generator", keywordId, intervalMinutes: 720, priority: 60 }, "수집 스케줄을 등록했습니다.");
   }
 
+  const recommendedKeywords = keywords
+    .filter((item) => item.collection_status === "active")
+    .sort((left, right) =>
+      (right.opportunity_score ?? -1) - (left.opportunity_score ?? -1) ||
+      (right.demand_score ?? -1) - (left.demand_score ?? -1) ||
+      right.priority - left.priority ||
+      left.keyword.localeCompare(right.keyword, "ko"),
+    )
+    .slice(0, 8);
+
   return <main className="dashboard">
     <section className="hero market-hero"><div><p className="eyebrow">ENGINE 1 · MARKET INTELLIGENCE</p><h1>1. 시장정보·아이템 발굴</h1><p className="hero-description">수집·시계열·Feature Warehouse·다차원 기회점수·AI 판단·실매출 피드백을 하나의 데이터 자산으로 축적합니다.</p></div><div className="hero-actions"><button disabled={working} onClick={() => runAction("/api/market/jobs/run", { limit: 20 }, "실행 가능한 수집 작업을 처리했습니다.")}>스케줄 실행</button><button disabled={working} onClick={() => runAction("/api/market/analyze", {}, "전체 시장 분석을 완료했습니다.")}>전체 분석</button><button className="secondary-button" disabled={working} onClick={() => runAction("/api/market/demo-seed", { keyword: keyword || "생활용품" }, "DEMO 데이터로 전체 파이프라인을 검증했습니다.")}>DEMO 검증</button></div></section>
 
@@ -76,6 +87,14 @@ export default function MarketPage() {
     {message && <div className="notice success-notice">{message}</div>}{error && <div className="notice error-notice">{error}</div>}
 
     <section className="stat-grid market-stat-grid"><article><span>Feature 스냅샷</span><strong>{warehouse.featureSnapshots}</strong></article><article><span>운영 피드백</span><strong>{warehouse.feedbackEvents}</strong></article><article><span>S/A 등급</span><strong>{(warehouse.gradeCounts.S ?? 0) + (warehouse.gradeCounts.A ?? 0)}</strong></article><article><span>분석 상품</span><strong>{Object.values(warehouse.gradeCounts).reduce((sum, value) => sum + value, 0)}</strong></article></section>
+
+    <section className="panel market-keyword-recommendations" aria-labelledby="market-keyword-recommendations-title">
+      <div className="section-heading"><div><h2 id="market-keyword-recommendations-title">시장 데이터 기반 추천 검색어</h2><p>상시 수집한 수요·경쟁·기회점수에 따라 평가할 검색어를 정렬합니다.</p></div><Link className="button-link secondary-button" href="/admin/item-selection">2. 상품선정·수익성 열기</Link></div>
+      {recommendedKeywords.length ? <div className="market-keyword-recommendations__list">{recommendedKeywords.map((suggestion) => <Link key={suggestion.id} href={`/admin/item-selection?keyword=${encodeURIComponent(suggestion.keyword)}`}>
+        <span>{suggestion.keyword}</span><small>{suggestion.opportunity_score !== null ? `기회 ${suggestion.opportunity_score}` : suggestion.demand_score !== null ? `수요 ${suggestion.demand_score}` : `우선순위 ${suggestion.priority}`}</small>
+      </Link>)}</div> : <p className="empty-copy">활성 시장 키워드가 수집되면 추천 검색어가 표시됩니다.</p>}
+      <p className="panel-help">검색어를 선택하면 2번 엔진의 평가 입력에 전달됩니다. 추천 검색어의 생성·정렬은 1번 엔진이 담당하고, 상품 경쟁력·수익성 평가는 2번 엔진이 담당합니다.</p>
+    </section>
 
     <section className="ops-grid"><article className="panel"><h2>관찰 키워드 등록</h2><form className="inline-fields" onSubmit={addKeyword}><input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="예: 무선청소기"/><button disabled={working}>등록</button></form><p className="panel-help">등록된 키워드는 Collector 작업의 기준이 되며 모든 관측값은 표준 API `/api/market/observe`로 통합됩니다.</p></article><article className="panel"><h2>수집 안전 원칙</h2><div className="principle-grid"><span>공식 API 우선</span><span>공개 정보만</span><span>403/429 즉시 중단</span><span>저빈도·중복 최소화</span><span>원본 근거 보존</span><span>신뢰도 표시</span></div></article></section>
 
