@@ -8,7 +8,7 @@ test("engine 1 recommends market keywords and hands the selected term to engine 
   await page.route("**/api/admin/item-selection/runs?**", (route) => route.fulfill({ json: { data: [], page: { nextCursor: null } } }));
 
   await page.goto("/market");
-  await expect(page.getByRole("heading", { name: "틈새수납 세트" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "틈새수납 세트" }).first()).toBeVisible();
   const handoff = page.getByRole("link", { name: /경쟁력·수익성 검증/ });
   await expect(handoff).toHaveAttribute("href", "/admin/item-selection?keyword=%ED%8B%88%EC%83%88%EC%88%98%EB%82%A9");
   await handoff.click();
