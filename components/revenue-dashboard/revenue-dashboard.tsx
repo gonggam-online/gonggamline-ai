@@ -358,10 +358,10 @@ export function RevenueDashboard({
   return (
     <DashboardLayout className="revenue-dashboard">
       <DashboardHeader
-        title="Revenue Dashboard"
+        title="7-1. 상품 성과 Revenue Dashboard"
         titleId="revenue-dashboard-title"
-        eyebrow="Revenue operations"
-        description="AI Revenue Ranking Overview"
+        eyebrow="ENGINE 7-1 · PERFORMANCE DASHBOARD"
+        description="상품별 수익성, Revenue Score, 순위와 분석 상태를 조회합니다."
         actions={data ? (
           <div className="revenue-dashboard__timestamps">
             <span>Data generated <time dateTime={data.meta.generatedAt}>{generatedAt}</time></span>

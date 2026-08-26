@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("creative operator exposes private review handoff recovery", async ({ page }) => {
   await page.goto("/admin/listing/creative-dispatch");
-  await expect(page.getByRole("heading", { name: "전환 이미지 생성·비공개 검토" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "5-4. 이미지 생성·비공개 검토" })).toBeVisible();
   await expect(page.getByRole("textbox", { name: "External adapter packet JSON" })).toBeVisible();
   const recovery = page.getByRole("textbox", { name: "Prepared plan reference for review recovery" });
   await expect(recovery).toBeVisible();

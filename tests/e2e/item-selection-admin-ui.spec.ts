@@ -31,7 +31,7 @@ for (const viewport of [{ name: "desktop", width: 1280, height: 900 }, { name: "
       await route.fulfill({ status: 201, json: { data: detail } });
     });
     await page.goto("/admin/item-selection");
-    await expect(page.getByRole("heading", { name: "상품 선정 평가" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "2. 상품선정·수익성" })).toBeVisible();
     await page.getByRole("button", { name: /캠핑 테이블/ }).click();
     await expect(page.getByText("기회 순위 #1 · 12345")).toBeVisible();
     await expect(page.getByText("확인 필요").first()).toBeVisible();

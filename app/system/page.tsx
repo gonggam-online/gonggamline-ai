@@ -10,6 +10,7 @@ export default function SystemArchitecturePage() {
         <h1 style={{ fontSize: 36, margin: "10px 0" }}>엔진 중심 모듈 아키텍처</h1>
         <p>기존 기능을 중단하지 않고 Market·Discovery·Supplier·Procurement·Workflow·Bundle·Listing·Coupang·3PL·Learning 엔진으로 분리합니다.</p>
         <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
+          <Link href="/dashboard" style={linkStyle}>7대 엔진 전체보기</Link>
           <Link href="/os" style={linkStyle}>Company OS</Link>
           <Link href="/market" style={linkStyle}>시장 데이터</Link>
           <Link href="/discovery" style={linkStyle}>AI 상품추천</Link>

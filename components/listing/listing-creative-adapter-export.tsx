@@ -166,7 +166,7 @@ export function ListingCreativeAdapterExport() {
     <main className="mx-auto max-w-6xl space-y-8 p-6 text-slate-950">
       <header className="space-y-2">
         <p className="text-sm font-semibold text-indigo-700">Owner-controlled adapter</p>
-        <h1 className="text-3xl font-bold">External adapter packet Export</h1>
+        <h1 className="text-3xl font-bold">5-2. 외부 제작 Packet 내보내기</h1>
         <p className="max-w-3xl text-sm text-slate-600">
           WING에서 승인된 값을 외부 adapter가 만든 typed packet으로 검증하고, Production 입력에 필요한 전체 JSON을 복사하거나 파일로 내려받는 화면입니다.
           검증이 통과한 packet은 digest에 결속된 Supabase private 저장소에 암호화된 접근 경계로 저장되어, 작업이 중단되어도 digest로 복구할 수 있습니다.

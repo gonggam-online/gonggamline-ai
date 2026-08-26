@@ -165,7 +165,7 @@ export function ListingCreativeAdapterReprepare() {
     <main className="mx-auto max-w-6xl space-y-6 p-6 text-slate-950">
       <header className="space-y-2">
         <p className="text-sm font-semibold text-indigo-700">Owner-controlled adapter</p>
-        <h1 className="text-3xl font-bold">새 external adapter packet revision</h1>
+        <h1 className="text-3xl font-bold">5-3. 외부 제작 Packet 재준비</h1>
         <p className="max-w-3xl text-sm text-slate-600">
           현재 WING에서 확인한 packet을 새 revision으로 묶습니다. 등록 payload 준비에는 별도 content approval이 필요하지 않으며, 실제 WING 제출만 별도 live-write 승인을 요구합니다.
         </p>

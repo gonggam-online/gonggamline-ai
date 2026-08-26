@@ -3,8 +3,8 @@ import { RevenueDashboard } from "@/components/revenue-dashboard/revenue-dashboa
 import { parseDashboardLocation } from "@/lib/revenue/dashboard-ui-state";
 
 export const metadata: Metadata = {
-  title: "Revenue Dashboard",
-  description: "AI Revenue Ranking Overview",
+  title: "7-1. 상품 성과 Revenue Dashboard | 공감라인 AI",
+  description: "상품별 수익성, Revenue Score, 순위와 분석 상태를 조회합니다.",
 };
 
 type PageProps = {

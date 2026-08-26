@@ -198,7 +198,7 @@ export function ListingCreativeOperator() {
     <main className="mx-auto max-w-6xl space-y-8 p-6 text-slate-950">
       <header className="space-y-2">
         <p className="text-sm font-semibold text-indigo-700">Listing Creative Operator</p>
-        <h1 className="text-3xl font-bold">전환 이미지 생성·비공개 검토</h1>
+        <h1 className="text-3xl font-bold">5-4. 이미지 생성·비공개 검토</h1>
         <p className="max-w-3xl text-sm text-slate-600">
           PREPARE는 비용을 쓰지 않습니다. 유료 생성은 정확한 확인 문구를 입력한 뒤에만 실행되며,
           결과는 사람의 상품 일치 검토가 필요한 비공개 REVIEW_REQUIRED 상태로 멈춥니다.
