@@ -6,7 +6,10 @@ import { runDueCollectionJobs } from "../../../../../services/market-orchestrati
 
 export async function POST(request: NextRequest) {
   try {
-    const context = await requireAdminRequest(request, "mutation");
+    // Market collection is an authenticated research action. It does not
+    // publish, order, pay, or mutate Production commerce state, so the
+    // project's ID/password (AAL1) market-information policy applies.
+    const context = await requireAdminRequest(request, "read");
     requireExactAdminOrigin(request);
     requireJsonContentType(request);
     verifyAdminCsrfToken(request, "market-collection-run", context);
