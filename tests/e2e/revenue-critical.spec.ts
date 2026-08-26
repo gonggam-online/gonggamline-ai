@@ -18,11 +18,9 @@ test("product filters remain safe", async ({ page }) => {
 test("decision controls render without executing writes", async ({ page }) => {
   await page.goto("/discovery", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", {
-    name: "1-1. 시장 후보 발굴·의사결정",
+    name: "1. 시장정보·아이템 발굴",
     exact: true,
   })).toBeVisible();
-  await expect(page.getByRole("button", {
-    name: "AI 의사결정 실행",
-    exact: true,
-  })).toBeVisible();
+  await expect(page).toHaveURL(/\/market#priority$/);
+  await expect(page.getByRole("heading", { name: "판매 후보 우선순위" })).toBeVisible();
 });
