@@ -67,6 +67,32 @@ test("valid market demand remains actionable before an exact product match exist
   assert.match(items[0].title, /상품군 후보/);
 });
 
+test("demo products never become evidence-backed product recommendations", () => {
+  const digest = buildMarketTrendDigest([
+    { concept: "주방 정리", provider: "naver", observedAt: now.toISOString(), demandIndex: 75, evidenceId: "n1" },
+    { concept: "주방 정리", provider: "youtube", observedAt: now.toISOString(), demandIndex: 70, contentVelocity: 80, evidenceId: "y1" },
+  ], { now, expectedProviders: 2 });
+  const items = buildMarketItemRecommendations(digest.opportunities, [
+    { id: 1, title: "실리콘 주방 정리 트레이", source: "demo-generator", opportunityScore: 99, confidence: 99 },
+  ]);
+  assert.equal(items.length, 1);
+  assert.equal(items[0].form, "set");
+  assert.deepEqual(items[0].marketProductIds, []);
+  assert.ok(items[0].unresolved.includes("SOURCE_PRODUCT_MATCH"));
+});
+
+test("declining and saturated trends remain visible but never become item recommendations", () => {
+  const actionable = buildMarketTrendDigest([
+    { concept: "틈새 수납", provider: "naver", observedAt: now.toISOString(), demandIndex: 75, evidenceId: "n1" },
+    { concept: "틈새 수납", provider: "youtube", observedAt: now.toISOString(), demandIndex: 70, evidenceId: "y1" },
+  ], { now, expectedProviders: 2 }).opportunities[0];
+  const items = buildMarketItemRecommendations([
+    { ...actionable, concept: "하락 상품", state: "DECLINING", lane: "SATURATED_OR_DECLINING" },
+    { ...actionable, concept: "포화 상품", state: "SATURATED", lane: "SATURATED_OR_DECLINING" },
+  ], []);
+  assert.deepEqual(items, []);
+});
+
 test("runtime wiring continuously persists evidence, rebuilds intelligence and renders it in Engine 1", () => {
   const orchestration = readFileSync(new URL("../services/market-orchestration.service.ts", import.meta.url), "utf8");
   const persistence = readFileSync(new URL("../services/autonomous-market-discovery.service.ts", import.meta.url), "utf8");
@@ -77,6 +103,7 @@ test("runtime wiring continuously persists evidence, rebuilds intelligence and r
   const csrfRoute = readFileSync(new URL("../app/api/admin/auth/csrf/route.ts", import.meta.url), "utf8");
   assert.match(orchestration, /recordAutonomousCollectionEvidence/);
   assert.match(orchestration, /rebuildAutonomousMarketIntelligence/);
+  assert.doesNotMatch(orchestration, /refreshIntelligence && results\.length/);
   assert.match(page, /\/api\/market\/intelligence/);
   assert.match(page, /오늘의 고객 수요·구매 트렌드/);
   assert.match(page, /시장 트렌드 기반 추천 아이템/);
