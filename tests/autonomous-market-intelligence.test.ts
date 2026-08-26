@@ -54,6 +54,19 @@ test("observed products become ranked single and bundle research candidates", ()
   assert.ok(items.every((item) => item.unresolved.includes("UNIT_ECONOMICS")));
 });
 
+test("valid market demand remains actionable before an exact product match exists", () => {
+  const digest = buildMarketTrendDigest([
+    { concept: "틈새 수납", provider: "naver", observedAt: now.toISOString(), demandIndex: 75, evidenceId: "n1" },
+    { concept: "틈새 수납", provider: "youtube", observedAt: now.toISOString(), demandIndex: 70, contentVelocity: 80, evidenceId: "y1" },
+  ], { now, expectedProviders: 2 });
+  const items = buildMarketItemRecommendations(digest.opportunities, []);
+  assert.equal(items.length, 1);
+  assert.equal(items[0].form, "set");
+  assert.equal(items[0].marketProductIds.length, 0);
+  assert.ok(items[0].unresolved.includes("SOURCE_PRODUCT_MATCH"));
+  assert.match(items[0].title, /상품군 후보/);
+});
+
 test("runtime wiring continuously persists evidence, rebuilds intelligence and renders it in Engine 1", () => {
   const orchestration = readFileSync(new URL("../services/market-orchestration.service.ts", import.meta.url), "utf8");
   const persistence = readFileSync(new URL("../services/autonomous-market-discovery.service.ts", import.meta.url), "utf8");

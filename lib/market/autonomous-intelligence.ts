@@ -71,7 +71,7 @@ export type MarketItemRecommendation = Readonly<{
   candidateId: string;
   marketProductIds: readonly number[];
   title: string;
-  form: "single" | "bundle";
+  form: "single" | "set" | "bundle";
   lane: RecommendationLane;
   score: number;
   confidence: number;
@@ -234,6 +234,21 @@ export function buildMarketItemRecommendations(
       return compactTitle.includes(compactConcept) || conceptTokens.some((token) => title.includes(token));
     }).sort((left, right) => finite(right.opportunityScore) - finite(left.opportunityScore)
       || finite(right.confidence) - finite(left.confidence) || left.id - right.id).slice(0, 4);
+    if (matching.length === 0) {
+      recommendations.push(Object.freeze({
+        candidateId: `concept:${normalizeMarketConcept(opportunity.concept).replaceAll(" ", "-")}`,
+        marketProductIds: Object.freeze([]),
+        title: `${opportunity.concept} 상품군 후보`,
+        form: "set",
+        lane: opportunity.lane,
+        score: opportunity.score,
+        confidence: opportunity.confidence,
+        trendState: opportunity.state,
+        concept: opportunity.concept,
+        reasons: Object.freeze([...opportunity.reasons, "유효 수요 신호를 실제 판매상품 탐색 과제로 전환"]),
+        unresolved: Object.freeze(["SOURCE_PRODUCT_MATCH", "SUPPLIER_QUOTE", "UNIT_ECONOMICS", "RIGHTS", "FULFILLMENT_COST"]),
+      }));
+    }
     for (const product of matching) {
       const productScore = finite(product.opportunityScore, opportunity.score);
       const score = clamp(opportunity.score * .65 + productScore * .35);
