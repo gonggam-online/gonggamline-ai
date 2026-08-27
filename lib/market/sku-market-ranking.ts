@@ -86,6 +86,8 @@ export type SkuRankingPacket = Readonly<{
   verificationQueue: readonly SkuMarketRanking[];
   discoveryQueries: readonly string[];
   audit: Readonly<{
+    rawProductCandidates: number;
+    excludedNonSkuProducts: number;
     actualSkuProducts: number;
     highConfidenceProducts: number;
     sellReadyProducts: number;
@@ -112,6 +114,7 @@ const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(va
 const GENERIC_SOCIAL = new Set(["챌린지", "challenge", "드라마", "가수", "아이돌", "music", "dance", "campaign", "캠페인", "챗지피티", "chatgpt"]);
 const GENERIC_PRODUCT = new Set(["상품", "제품", "추천", "인기", "신상", "정품", "무료배송", "국내배송", "판매", "구매", "사용", "리뷰"]);
 const VARIANT_TOKENS = /(?:black|white|red|blue|green|pink|beige|gray|grey|블랙|화이트|검정|흰색|빨강|파랑|그린|핑크|베이지|그레이|\d+\s*(?:개|입|세트|팩|매|ml|l|g|kg|cm|mm))/giu;
+const NON_SKU_SOURCE = /(?:youtube|youtu\.be|tiktok|instagram|facebook|social[_ -]?content)/iu;
 
 function sharedTokenRatio(left: string, right: string): number {
   const a = tokens(left); const b = tokens(right);
@@ -188,6 +191,14 @@ function isFresh(product: SkuMarketProduct, asOf: string): boolean {
   return Number.isFinite(observed) && Date.parse(asOf) - observed <= 14 * 86_400_000;
 }
 
+function isActualSkuProduct(product: SkuMarketProduct): boolean {
+  const provenance = normalize(`${product.source} ${product.brand ?? ""} ${product.externalProductId}`);
+  if (provenance.includes("demo") || provenance.includes("공감데모") || provenance.includes("synthetic")) return false;
+  if (NON_SKU_SOURCE.test(`${product.source} ${product.url ?? ""}`)) return false;
+  if (!product.externalProductId || !product.title || finite(product.price) <= 0) return false;
+  return Boolean(product.vendorItemId || product.url || product.source);
+}
+
 function relevantTikTok(product: SkuMarketProduct, packet: ExternalMarketSignalPacket, asOf: string): boolean {
   if (packet.source !== "TIKTOK" || Date.parse(packet.validUntil) < Date.parse(asOf)) return false;
   const socialText = normalize(`${packet.keywordId} ${packet.productIdentity.title ?? ""}`);
@@ -223,7 +234,7 @@ export function buildSkuMarketRankings(input: Readonly<{
   limit?: number;
 }>): SkuRankingPacket {
   const asOf = (input.now ?? new Date()).toISOString();
-  const actualProducts = input.products.filter((product, index, all) => product.externalProductId && product.title && (product.url || product.source)
+  const actualProducts = input.products.filter((product, index, all) => isActualSkuProduct(product)
     && all.findIndex((candidate) => `${candidate.source}:${candidate.externalProductId}` === `${product.source}:${product.externalProductId}`) === index);
   const evaluated = actualProducts.map((product) => {
     const opportunityMatch = matchOpportunity(product, input.opportunities);
@@ -290,6 +301,8 @@ export function buildSkuMarketRankings(input: Readonly<{
     .map((item, index) => Object.freeze({ ...item, rank: index + 1 }));
   const discoveryQueries = Object.freeze([...new Set(verificationQueue.flatMap((item) => item.searchQueries))].slice(0, 12));
   const audit = Object.freeze({
+    rawProductCandidates: input.products.length,
+    excludedNonSkuProducts: Math.max(0, input.products.length - actualProducts.length),
     actualSkuProducts: actualProducts.length,
     highConfidenceProducts: rankings.length,
     sellReadyProducts: rankings.filter((item) => item.qualification === "SELL_READY").length,
