@@ -17,7 +17,8 @@ const product = (overrides: Partial<SkuMarketProduct> = {}): SkuMarketProduct =>
   id: 1, externalProductId: "95937719177", vendorItemId: "16350191034", title: "무타공 욕실 정리 선반 블랙 1개",
   source: "coupang_public", url: "https://www.coupang.com/vp/products/95937719177", brand: null, category: "욕실용품",
   price: 12900, reviewCount: 120, rank: 4, rocketType: "rocket", observedAt: "2026-08-27T00:00:00.000Z",
-  opportunityScore: 78, confidence: 75, ...overrides,
+  opportunityScore: 78, confidence: 75, isSoldOut: false, estimatedUnitsLow: 180, estimatedUnitsBase: 240,
+  estimatedUnitsHigh: 310, stockoutCount30d: 0, observationDays: 30, snapshotCount: 8, ...overrides,
 });
 
 const quote = (overrides: Partial<SkuSupplierQuote> = {}): SkuSupplierQuote => ({
@@ -41,6 +42,8 @@ test("actual Coupang SKU combines only product-relevant TikTok and fresh exact q
   assert.equal(result.rankings[0].estimatedProfitKrw, 5613.3);
   assert.deepEqual(result.rankings[0].missingEvidence, []);
   assert.equal(result.rankings[0].qualification, "SELL_READY");
+  assert.equal(result.rankings[0].availability, "IN_STOCK");
+  assert.equal(result.rankings[0].estimatedMonthlyRevenueKrw, 3_096_000);
   assert.equal(result.verificationQueue.length, 0);
 });
 
@@ -58,13 +61,13 @@ test("option and pack mismatch cannot become an identical product match", () => 
 test("stale quote and unrelated KK946 logistics are not copied to another SKU", () => {
   const stale = quote({ id: 10, supplierSku: "KK946-BLACK", productName: "KK946 파우치 블랙", validUntil: "2026-08-01", updatedAt: "2026-08-01T00:00:00Z" });
   const result = buildSkuMarketRankings({ opportunities: [opportunity()], products: [product()], packets: [], quotes: [stale], now: new Date("2026-08-27T00:00:00Z") });
-  assert.equal(result.rankings[0].supplierQuoteId, null);
-  assert.equal(result.rankings[0].skuLogisticsCostKrw, null);
-  assert.ok(result.rankings[0].missingEvidence.includes("FRESH_SUPPLIER_QUOTE"));
+  assert.equal(result.verificationQueue[0].supplierQuoteId, null);
+  assert.equal(result.verificationQueue[0].skuLogisticsCostKrw, null);
+  assert.ok(result.verificationQueue[0].missingEvidence.includes("FRESH_SUPPLIER_QUOTE"));
 });
 
 test("same input produces stable ranking and digest", () => {
-  const input = { opportunities: [opportunity()], products: [product(), product({ id: 2, externalProductId: "2", title: "욕실 정리 선반 블랙 2개", price: 14900 })], packets: [], quotes: [quote()] };
+  const input = { opportunities: [opportunity()], products: [product(), product({ id: 2, externalProductId: "2", source: "naver_official", url: "https://shopping.naver.com/product/2" })], packets: [], quotes: [quote()] };
   const first = buildSkuMarketRankings({ ...input, now: new Date("2026-08-27T00:00:00Z") });
   const second = buildSkuMarketRankings({ ...input, now: new Date("2026-08-27T00:00:00Z") });
   assert.deepEqual(first, second);
@@ -81,6 +84,42 @@ test("two independent providers can corroborate a fresh actual SKU without paddi
   assert.ok(result.rankings.every((item) => item.identityProviders.includes("naver_official")));
   assert.ok(result.rankings.every((item) => item.identityProviders.includes("dataforseo_naver")));
   assert.equal(result.audit.highConfidenceProducts, 2);
+});
+
+test("sold-out or unknown-stock products never enter the sell-now ranking", () => {
+  const inStock = product({ id: 41, externalProductId: "41", source: "coupang_public" });
+  const corroboration = product({ id: 42, externalProductId: "42", source: "naver_official", url: "https://shopping.naver.com/product/42" });
+  const soldOut = product({ id: 43, externalProductId: "43", title: "무타공 욕실 정리 선반 화이트 1개", isSoldOut: true });
+  const soldOutCorroboration = product({ id: 44, externalProductId: "44", title: "무타공 욕실 정리 선반 화이트 1개", source: "naver_official", url: "https://shopping.naver.com/product/44", isSoldOut: true });
+  const unknown = product({ id: 45, externalProductId: "45", title: "무타공 욕실 정리 선반 그레이 1개", isSoldOut: null });
+  const unknownCorroboration = product({ id: 46, externalProductId: "46", title: "무타공 욕실 정리 선반 그레이 1개", source: "naver_official", url: "https://shopping.naver.com/product/46", isSoldOut: null });
+  const result = buildSkuMarketRankings({ opportunities: [opportunity()], products: [inStock, corroboration, soldOut, soldOutCorroboration, unknown, unknownCorroboration], packets: [], quotes: [], now: new Date("2026-08-27T01:00:00Z") });
+  assert.equal(result.rankings.length, 2);
+  assert.ok(result.rankings.every((item) => item.availability === "IN_STOCK"));
+  assert.ok(result.verificationQueue.some((item) => item.missingEvidence.includes("CURRENTLY_SOLD_OUT")));
+  assert.ok(result.verificationQueue.some((item) => item.missingEvidence.includes("CURRENT_AVAILABILITY")));
+  assert.equal(result.audit.soldOutProducts, 2);
+  assert.equal(result.audit.unknownAvailabilityProducts, 2);
+});
+
+test("low-review high-sales opportunity outranks review-heavy weaker demand within the verified cohort", () => {
+  const efficient = product({ id: 51, externalProductId: "51", title: "무타공 욕실 정리 선반 블랙 1개", reviewCount: 25, estimatedUnitsBase: 600 });
+  const efficientMatch = product({ id: 52, externalProductId: "52", title: efficient.title, source: "naver_official", url: "https://shopping.naver.com/product/52", reviewCount: 25, estimatedUnitsBase: 600 });
+  const crowded = product({ id: 53, externalProductId: "53", title: "무타공 욕실 정리 선반 화이트 1개", reviewCount: 2_000, estimatedUnitsBase: 180 });
+  const crowdedMatch = product({ id: 54, externalProductId: "54", title: crowded.title, source: "naver_official", url: "https://shopping.naver.com/product/54", reviewCount: 2_000, estimatedUnitsBase: 180 });
+  const result = buildSkuMarketRankings({ opportunities: [opportunity()], products: [crowded, crowdedMatch, efficient, efficientMatch], packets: [], quotes: [], now: new Date("2026-08-27T01:00:00Z") });
+  assert.equal(result.rankings[0].title, efficient.title);
+  assert.equal(result.rankings[0].opportunityArchetype, "LOW_REVIEW_HIGH_SALES");
+  assert.ok(result.rankings[0].demandEfficiencyScore > result.rankings.at(-1)!.demandEfficiencyScore);
+});
+
+test("sales and revenue evidence are mandatory even when market rank and price exist", () => {
+  const noSales = product({ id: 61, externalProductId: "61", estimatedUnitsLow: null, estimatedUnitsBase: null, estimatedUnitsHigh: null });
+  const match = product({ id: 62, externalProductId: "62", source: "naver_official", url: "https://shopping.naver.com/product/62", estimatedUnitsLow: null, estimatedUnitsBase: null, estimatedUnitsHigh: null });
+  const result = buildSkuMarketRankings({ opportunities: [opportunity()], products: [noSales, match], packets: [], quotes: [], now: new Date("2026-08-27T01:00:00Z") });
+  assert.equal(result.rankings.length, 0);
+  assert.ok(result.verificationQueue.every((item) => item.missingEvidence.includes("ESTIMATED_SALES_EVIDENCE")));
+  assert.ok(result.verificationQueue.every((item) => item.missingEvidence.includes("ESTIMATED_REVENUE_EVIDENCE")));
 });
 
 test("unmatched actual products stay in the bounded verification queue", () => {

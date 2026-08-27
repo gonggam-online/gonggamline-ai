@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import type { MarketOpportunity } from "./autonomous-intelligence";
 import type { ExternalMarketSignalPacket } from "../../shared/contracts/external-market-signal-packet";
 
-export const SKU_MARKET_RANKING_VERSION = "gonggamline-sku-market-ranking-v2" as const;
+export const SKU_MARKET_RANKING_VERSION = "gonggamline-sku-market-ranking-v3" as const;
 
 export type SkuMatchStatus = "COUPANG_EXACT" | "EXACT_ID" | "BRAND_MODEL" | "TITLE_VARIANT" | "POSSIBLE_MATCH" | "NO_MATCH";
 
@@ -23,6 +23,13 @@ export type SkuMarketProduct = Readonly<{
   observedAt: string | null;
   opportunityScore: number | null;
   confidence: number | null;
+  isSoldOut: boolean | null;
+  estimatedUnitsLow: number | null;
+  estimatedUnitsBase: number | null;
+  estimatedUnitsHigh: number | null;
+  stockoutCount30d: number | null;
+  observationDays: number | null;
+  snapshotCount: number | null;
   searchKeywords?: readonly string[];
 }>;
 
@@ -64,6 +71,13 @@ export type SkuMarketRanking = Readonly<{
   economicsScore: number;
   priceKrw: number | null;
   reviewCount: number | null;
+  availability: "IN_STOCK" | "SOLD_OUT" | "UNKNOWN";
+  estimatedMonthlyUnits: number | null;
+  estimatedMonthlyRevenueKrw: number | null;
+  salesPerReview: number | null;
+  revenuePerReviewKrw: number | null;
+  demandEfficiencyScore: number;
+  opportunityArchetype: "LOW_REVIEW_HIGH_SALES" | "PROVEN_DEMAND" | "INSUFFICIENT_DEMAND_EVIDENCE";
   supplierQuoteId: number | null;
   supplierQuoteFresh: boolean;
   skuLogisticsCostKrw: number | null;
@@ -98,6 +112,10 @@ export type SkuRankingPacket = Readonly<{
     ignoredTikTokSignals: number;
     freshSupplierQuotes: number;
     skuLogisticsBindings: number;
+    inStockProducts: number;
+    soldOutProducts: number;
+    unknownAvailabilityProducts: number;
+    lowReviewHighSalesProducts: number;
   }>;
   digest: string;
 }>;
@@ -110,6 +128,22 @@ const compact = (value: string | null | undefined) => normalize(value).replaceAl
 const tokens = (value: string | null | undefined) => new Set(normalize(value).split(" ").filter((token) => token.length >= 2));
 const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value, (_, entry) => entry && typeof entry === "object" && !Array.isArray(entry)
   ? Object.fromEntries(Object.entries(entry).sort(([left], [right]) => left.localeCompare(right))) : entry)).digest("hex");
+
+function percentile(value: number, population: readonly number[], higherIsBetter = true): number {
+  if (!Number.isFinite(value) || population.length === 0) return 0;
+  const sorted = [...population].filter(Number.isFinite).sort((left, right) => left - right);
+  if (sorted.length === 0) return 0;
+  const lessOrEqual = sorted.filter((entry) => entry <= value).length;
+  const raw = lessOrEqual / sorted.length * 100;
+  return clamp(higherIsBetter ? raw : 100 - raw + 100 / sorted.length);
+}
+
+function median(values: readonly number[]): number | null {
+  const sorted = [...values].filter(Number.isFinite).sort((left, right) => left - right);
+  if (sorted.length === 0) return null;
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+}
 
 const GENERIC_SOCIAL = new Set(["챌린지", "challenge", "드라마", "가수", "아이돌", "music", "dance", "campaign", "캠페인", "챗지피티", "chatgpt"]);
 const GENERIC_PRODUCT = new Set(["상품", "제품", "추천", "인기", "신상", "정품", "무료배송", "국내배송", "판매", "구매", "사용", "리뷰"]);
@@ -247,6 +281,13 @@ export function buildSkuMarketRankings(input: Readonly<{
   const asOf = (input.now ?? new Date()).toISOString();
   const actualProducts = input.products.filter((product, index, all) => isActualSkuProduct(product)
     && all.findIndex((candidate) => `${candidate.source}:${candidate.externalProductId}` === `${product.source}:${product.externalProductId}`) === index);
+  const demandProducts = actualProducts.filter((product) => finite(product.estimatedUnitsBase) > 0 && finite(product.price) > 0);
+  const unitPopulation = demandProducts.map((product) => finite(product.estimatedUnitsBase));
+  const revenuePopulation = demandProducts.map((product) => finite(product.estimatedUnitsBase) * finite(product.price));
+  const reviewPopulation = demandProducts.map((product) => Math.max(0, finite(product.reviewCount)));
+  const medianUnits = median(unitPopulation);
+  const medianRevenue = median(revenuePopulation);
+  const medianReviews = median(reviewPopulation);
   const evaluated = actualProducts.map((product) => {
     const opportunityMatch = matchOpportunity(product, input.opportunities);
     const opportunity = opportunityMatch?.opportunity ?? null;
@@ -261,12 +302,25 @@ export function buildSkuMarketRankings(input: Readonly<{
     const quote = quoteFor(product, input.quotes, asOf);
     const skuLogistics = logisticsCost(quote);
     const price = finite(product.price, 0);
+    const estimatedUnits = finite(product.estimatedUnitsBase) > 0 ? finite(product.estimatedUnitsBase) : null;
+    const estimatedRevenue = estimatedUnits !== null && price > 0 ? Math.round(estimatedUnits * price) : null;
+    const reviews = Math.max(0, finite(product.reviewCount));
+    const salesPerReview = estimatedUnits !== null ? Math.round(estimatedUnits / Math.max(1, reviews) * 100) / 100 : null;
+    const revenuePerReview = estimatedRevenue !== null ? Math.round(estimatedRevenue / Math.max(1, reviews)) : null;
+    const demandEfficiencyScore = estimatedUnits !== null && estimatedRevenue !== null
+      ? clamp(percentile(reviews, reviewPopulation, false) * .25 + percentile(estimatedUnits, unitPopulation) * .4 + percentile(estimatedRevenue, revenuePopulation) * .35)
+      : 0;
+    const opportunityArchetype = estimatedUnits !== null && estimatedRevenue !== null
+      ? (medianReviews !== null && medianUnits !== null && medianRevenue !== null && reviews <= medianReviews && estimatedUnits >= medianUnits && estimatedRevenue >= medianRevenue
+        ? "LOW_REVIEW_HIGH_SALES" as const : "PROVEN_DEMAND" as const)
+      : "INSUFFICIENT_DEMAND_EVIDENCE" as const;
+    const availability = product.isSoldOut === false ? "IN_STOCK" as const : product.isSoldOut === true ? "SOLD_OUT" as const : "UNKNOWN" as const;
     const landed = quote ? quote.unitCost + (skuLogistics ?? 0) : 0;
     const marketplaceFee = quote && price > 0 ? price * quote.coupangFeeRate / 100 : 0;
     const returnAllowance = quote && price > 0 ? (landed + (skuLogistics ?? 0) * .5) * quote.expectedReturnRate / 100 : 0;
     const estimatedProfit = quote && price > 0 ? Math.round((price - landed - marketplaceFee - returnAllowance) * 100) / 100 : null;
     const economicsScore = estimatedProfit !== null && price > 0 ? clamp(estimatedProfit / price * 100) : 0;
-    const productEvidenceScore = clamp((price > 0 ? 30 : 0) + (finite(product.reviewCount) > 0 ? 25 : 0) + (finite(product.rank) > 0 ? 15 : 0) + (coupangExact ? 30 : bestCoupang === "EXACT_ID" ? 25 : bestCoupang === "BRAND_MODEL" ? 18 : bestCoupang === "TITLE_VARIANT" ? 12 : 0));
+    const productEvidenceScore = clamp((price > 0 ? 20 : 0) + (reviews > 0 ? 15 : 0) + (finite(product.rank) > 0 ? 10 : 0) + (estimatedUnits !== null ? 20 : 0) + (availability === "IN_STOCK" ? 15 : 0) + (coupangExact ? 20 : bestCoupang === "EXACT_ID" ? 18 : bestCoupang === "BRAND_MODEL" ? 14 : bestCoupang === "TITLE_VARIANT" ? 10 : 0));
     const identityProviders = [...new Set(actualProducts.filter((candidate) => sameIdentity(product, candidate)).map((candidate) => candidate.source))].sort();
     const packetIdentityProviders = input.packets.filter((packet) => new Set<SkuMatchStatus>(["EXACT_ID", "BRAND_MODEL", "TITLE_VARIANT"]).has(matchPacket(product, packet)))
       .flatMap((packet) => [packet.upstreamSource, packet.observedVia]).filter(Boolean);
@@ -280,17 +334,23 @@ export function buildSkuMarketRankings(input: Readonly<{
       ...(marketMatchScore < 45 ? ["MARKET_OPPORTUNITY_MATCH"] : []),
       ...(marketProviders.length < 2 ? ["INDEPENDENT_MARKET_SOURCES"] : []),
       ...(identityScore < 60 ? ["PRODUCT_IDENTITY_CORROBORATION"] : []),
+      ...(corroboratingProviders.length < 2 ? ["PRODUCT_LEVEL_CORROBORATION"] : []),
       ...(!fresh ? ["FRESH_PRODUCT_OBSERVATION"] : []),
+      ...(availability === "SOLD_OUT" ? ["CURRENTLY_SOLD_OUT"] : availability === "UNKNOWN" ? ["CURRENT_AVAILABILITY"] : []),
+      ...(estimatedUnits === null ? ["ESTIMATED_SALES_EVIDENCE"] : []),
+      ...(estimatedRevenue === null ? ["ESTIMATED_REVENUE_EVIDENCE"] : []),
       ...(!coupangExact && !new Set<SkuMatchStatus>(["EXACT_ID", "BRAND_MODEL", "TITLE_VARIANT"]).has(bestCoupang) ? ["COUPANG_IDENTICAL_PRODUCT_MATCH"] : []),
       ...(!quote ? ["FRESH_SUPPLIER_QUOTE"] : []), ...(!skuLogistics ? ["SKU_LOGISTICS_COST"] : []),
       ...(price <= 0 ? ["CURRENT_MARKET_PRICE"] : []), ...(relevant.length === 0 ? ["PRODUCT_RELEVANT_TIKTOK_SIGNAL"] : []),
     ];
     const marketScore = opportunity?.score ?? finite(product.opportunityScore);
-    const base = marketScore * .42 + productEvidenceScore * .25 + tiktokScore * .10 + economicsScore * .18 + identityScore * .05;
+    const base = marketScore * .25 + productEvidenceScore * .15 + demandEfficiencyScore * .30 + tiktokScore * .05 + economicsScore * .15 + identityScore * .10;
     const freshnessScore = fresh ? 100 : 0;
     const confidence = clamp((opportunity?.confidence ?? 0) * .45 + productEvidenceScore * .25 + identityScore * .20 + freshnessScore * .10);
     const score = clamp(base * (0.72 + confidence / 100 * .28));
-    const marketQualified = marketMatchScore >= 45 && marketProviders.length >= 2 && identityScore >= 60 && fresh && price > 0 && confidence >= 65;
+    const marketQualified = marketMatchScore >= 45 && marketProviders.length >= 2 && identityScore >= 60
+      && corroboratingProviders.length >= 2 && fresh && price > 0 && availability === "IN_STOCK"
+      && estimatedUnits !== null && estimatedRevenue !== null && confidence >= 65;
     const qualification = marketQualified && quote && skuLogistics !== null ? "SELL_READY" : marketQualified ? "HIGH_CONFIDENCE" : "VERIFY_NEXT";
     const queries = searchQueries(product);
     return {
@@ -298,10 +358,12 @@ export function buildSkuMarketRankings(input: Readonly<{
       source: product.source, sourceUrl: product.url, coupangMatch: bestCoupang,
       coupangProductId: coupangExact ? product.externalProductId : null, score, confidence, concept: opportunity?.concept ?? "자동 교차검증 중",
       marketScore, productEvidenceScore, tiktokScore, economicsScore, priceKrw: product.price,
-      reviewCount: product.reviewCount, supplierQuoteId: quote?.id ?? null, supplierQuoteFresh: Boolean(quote),
+      reviewCount: product.reviewCount, availability, estimatedMonthlyUnits: estimatedUnits,
+      estimatedMonthlyRevenueKrw: estimatedRevenue, salesPerReview, revenuePerReviewKrw: revenuePerReview,
+      demandEfficiencyScore, opportunityArchetype, supplierQuoteId: quote?.id ?? null, supplierQuoteFresh: Boolean(quote),
       skuLogisticsCostKrw: skuLogistics, estimatedProfitKrw: estimatedProfit, relevantTikTokSignals: relevant.length,
       ignoredTikTokSignals: Math.max(0, allTikTok.length - relevant.length), missingEvidence: Object.freeze(missing),
-      reasons: Object.freeze([opportunity ? `${opportunity.concept} 교차매칭 ${Math.round(marketMatchScore)}` : "시장 상품군 자동 재탐색 필요", `${marketProviders.length}개 독립 시장출처 · 실상품 근거 ${Math.round(productEvidenceScore)}`, relevant.length ? `상품 관련 TikTok ${relevant.length}건` : "비상품 TikTok 신호 제외", quote ? `최신 견적 #${quote.id} 결합` : "최신 SKU 견적 미확보"]),
+      reasons: Object.freeze([opportunity ? `${opportunity.concept} 교차매칭 ${Math.round(marketMatchScore)}` : "시장 상품군 자동 재탐색 필요", `${corroboratingProviders.length}개 상품단위 출처 · 실상품 근거 ${Math.round(productEvidenceScore)}`, opportunityArchetype === "LOW_REVIEW_HIGH_SALES" ? "동일 후보군 대비 리뷰는 적고 추정 판매량·매출은 높음" : estimatedUnits !== null ? `월 판매량 ${Math.round(estimatedUnits)}개 추정` : "판매량 근거 축적 필요", availability === "IN_STOCK" ? "현재 재고 있음" : availability === "SOLD_OUT" ? "현재 품절: 판매 후보에서 제외" : "현재 재고 상태 미확인", relevant.length ? `상품 관련 TikTok ${relevant.length}건` : "비상품 TikTok 신호 제외", quote ? `최신 견적 #${quote.id} 결합` : "최신 SKU 견적 미확보"]),
       qualification, marketMatchScore, marketProviders: Object.freeze([...marketProviders]), identityProviders: Object.freeze(corroboratingProviders), searchQueries: queries,
     } satisfies SkuMarketRanking;
   }).sort((a, b) => b.score - a.score || b.confidence - a.confidence || a.skuKey.localeCompare(b.skuKey));
@@ -329,6 +391,10 @@ export function buildSkuMarketRankings(input: Readonly<{
     ignoredTikTokSignals: evaluated.reduce((sum, item) => sum + item.ignoredTikTokSignals, 0),
     freshSupplierQuotes: evaluated.filter((item) => item.supplierQuoteFresh).length,
     skuLogisticsBindings: evaluated.filter((item) => item.skuLogisticsCostKrw !== null).length,
+    inStockProducts: evaluated.filter((item) => item.availability === "IN_STOCK").length,
+    soldOutProducts: evaluated.filter((item) => item.availability === "SOLD_OUT").length,
+    unknownAvailabilityProducts: evaluated.filter((item) => item.availability === "UNKNOWN").length,
+    lowReviewHighSalesProducts: evaluated.filter((item) => item.opportunityArchetype === "LOW_REVIEW_HIGH_SALES").length,
   });
   const payload = { version: SKU_MARKET_RANKING_VERSION, asOf, rankings, verificationQueue, discoveryQueries, audit } as const;
   return Object.freeze({ ...payload, digest: digest(payload) });

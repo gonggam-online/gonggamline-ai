@@ -468,3 +468,12 @@ the same official-provider queue. Naver Shopping and the bounded public
 Coupang-price lane turn those seeds into product observations; subsequent
 rebuilds automatically replace broad seeds with exact product-title queries.
 Single-source or weak opportunities never consume this seed budget.
+
+### 2026-08-27 availability and demand-efficiency hardening
+
+- 상품군 수준의 네이버·YouTube 트렌드 출처 수를 상품 동일성 증거로 재사용하지 않는다. 고신뢰 승격에는 동일 SKU를 가리키는 상품 단위 출처가 최소 2개 필요하다.
+- 최신 관측에서 `재고 있음`이 명시된 상품만 판매 검토 순위에 올린다. 품절은 모니터링 대상으로 내리고, 재고 미확인은 확인 전까지 승격하지 않는다.
+- 가격·리뷰·검색순위만으로 판매량을 단정하지 않는다. 시계열에서 산출된 월 추정 판매량과 월 추정 매출이 모두 있어야 고신뢰로 승격한다.
+- 동일 후보군 안에서 리뷰 수가 중앙값 이하이면서 추정 판매량과 추정 매출이 중앙값 이상인 SKU는 `LOW_REVIEW_HIGH_SALES` 기회로 표시한다. 판매량 근거가 없는 상품에는 이 표시를 생성하지 않는다.
+- 품절·단일 상품출처·판매량 근거 없음은 점수 감점만으로 우회할 수 없는 hard gate다. 고신뢰 결과가 0개일 때도 임의 상품으로 상위 10개를 채우지 않는다.
+- 검증 대기 SKU는 공식 수집기에 재검색어를 예약하고, 새 불변 관측이 쌓인 뒤 같은 결정론적 계약으로 재평가한다.

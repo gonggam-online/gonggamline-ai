@@ -267,7 +267,7 @@ export async function rebuildAutonomousMarketIntelligence(): Promise<Record<stri
     const [snapshotResult, productResult, packetResult, quoteResult] = await Promise.all([
       supabase.from("market_keyword_signal_snapshots").select("id,concept,provider,observed_at,demand_index,content_velocity,shopping_intent,competition_pressure,price_room,evidence_digest")
         .gte("observed_at", since).order("observed_at", { ascending: true }).limit(5_000),
-      supabase.from("market_products").select("id,external_product_id,vendor_item_id,product_url,title,category,source,brand,market_product_metrics(opportunity_score,confidence),market_snapshots(price,review_count,rank,rocket_type,observed_at,market_keywords(keyword))")
+      supabase.from("market_products").select("id,external_product_id,vendor_item_id,product_url,title,category,source,brand,market_product_metrics(opportunity_score,confidence,estimated_units_low,estimated_units_base,estimated_units_high,stockout_count_30d,observation_days,snapshot_count),market_snapshots(price,review_count,rank,rocket_type,is_sold_out,observed_at,market_keywords(keyword))")
         .order("last_seen_at", { ascending: false }).limit(500),
       supabase.from("external_market_signal_packets").select("packet").order("collected_at", { ascending: false }).limit(2_000),
       supabase.from("supplier_quotes").select("id,product_name,supplier_sku,unit_cost,moq,domestic_shipping_total,inspection_total,packaging_total,labeling_total,three_pl_inbound_total,three_pl_storage_per_unit,three_pl_outbound_per_unit,coupang_fee_rate,expected_return_rate,valid_until,status,updated_at")
@@ -303,8 +303,12 @@ export async function rebuildAutonomousMarketIntelligence(): Promise<Record<stri
         title: row.title, source: row.source ?? "unknown", url: row.product_url ?? null, brand: row.brand ?? null, category: row.category ?? null,
         price: numberOrNull(latest.price), reviewCount: numberOrNull(latest.review_count), rank: numberOrNull(latest.rank),
         rocketType: typeof latest.rocket_type === "string" ? latest.rocket_type : null,
+        isSoldOut: typeof latest.is_sold_out === "boolean" ? latest.is_sold_out : null,
         observedAt: typeof latest.observed_at === "string" ? latest.observed_at : null,
         opportunityScore: numberOrNull(metric.opportunity_score), confidence: numberOrNull(metric.confidence),
+        estimatedUnitsLow: numberOrNull(metric.estimated_units_low), estimatedUnitsBase: numberOrNull(metric.estimated_units_base),
+        estimatedUnitsHigh: numberOrNull(metric.estimated_units_high), stockoutCount30d: numberOrNull(metric.stockout_count_30d),
+        observationDays: numberOrNull(metric.observation_days), snapshotCount: numberOrNull(metric.snapshot_count),
         searchKeywords: productSearchKeywords(row),
       };
     });

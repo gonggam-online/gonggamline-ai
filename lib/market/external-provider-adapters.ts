@@ -311,6 +311,17 @@ function krwPriceFromText(value: unknown): number | null {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
+function explicitSoldOutState(record: Record<string, unknown>, priceRecord: Record<string, unknown> | null): boolean | null {
+  const explicit = [record.is_sold_out, record.sold_out, record.in_stock, record.available];
+  if (explicit[0] === true || explicit[1] === true || explicit[2] === false || explicit[3] === false) return true;
+  if (explicit[0] === false || explicit[1] === false || explicit[2] === true || explicit[3] === true) return false;
+  const searchable = [record.availability, record.stock_status, record.description, record.snippet, priceRecord?.status]
+    .filter((value): value is string => typeof value === "string").join(" ").normalize("NFC").toLocaleLowerCase("ko-KR");
+  if (/(?:품절|일시품절|재고\s*없음|판매\s*중지|sold\s*out|out\s*of\s*stock|unavailable)/iu.test(searchable)) return true;
+  if (/(?:재고\s*있음|구매\s*가능|판매\s*중|배송\s*가능|in\s*stock|available)/iu.test(searchable)) return false;
+  return null;
+}
+
 /**
  * Reads current public Coupang price snippets exposed by Google through the
  * approved bounded DataForSEO Live SERP API. This is a search observation,
@@ -391,7 +402,7 @@ export async function collectDataForSeoCoupangPrices(
         rating: typeof record.rating === "object" && record.rating !== null ? number((record.rating as Record<string, unknown>).value) : null,
         reviewCount: typeof record.rating === "object" && record.rating !== null ? number((record.rating as Record<string, unknown>).votes_count) : null,
         rocketType: null,
-        isSoldOut: null,
+        isSoldOut: explicitSoldOutState(record, priceRecord),
         deliveryDays: null,
         optionCount: null,
       },
