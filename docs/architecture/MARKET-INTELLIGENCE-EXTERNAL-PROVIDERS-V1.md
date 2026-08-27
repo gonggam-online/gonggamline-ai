@@ -91,3 +91,19 @@ source policy를 갱신하고 다시 승인한다.
 호출로 수행한다. 이 모드는 네이버, DataForSEO, YouTube의 due job을 각각
 정확히 1개만 실행하므로 유료·quota 호출 범위를 고정하며, 일반 예약 실행은
 기존처럼 한 번에 최대 20개 due job을 처리한다.
+
+## Tenbi / TikTok 사용자 보조 입력 (2026-08-27)
+
+Tenbi 계정 화면에는 외부 고객용 API/MCP나 쇼핑쇼츠 CSV 내보내기가 확인되지
+않았다. 따라서 내부 endpoint 추측, 로그인 세션 복제, 자동 crawler는 사용하지
+않는다. 운영자가 화면에서 확인한 표 또는 Tenbi가 향후 제공하는 CSV/TSV를
+`/market`의 사용자 보조 가져오기로 입력한다. 원천 플랫폼은 `upstreamSource`,
+관찰 경로는 `TENBI`로 분리해 YouTube/TikTok/Instagram 신호를 두 번 가중하지
+않는다.
+
+TikTok은 Creator Center가 공식 제공한 CSV/TSV만 같은 경로로 가져온다. 조회,
+좋아요, 댓글, 공유는 `socialMomentum` 증거이며 구매량으로 승격하지 않는다.
+두 입력 모두 원본 digest, 행 단위 오류 격리, packet digest, 반복 import 중복
+차단을 보존한다. API route는 관리자 세션, same-origin, JSON content type,
+목적별 CSRF, rate limit를 요구한다. 이 기능은 시장 관측을 추가할 뿐 주문,
+결제, 상품등록, 광고 또는 외부 계정 설정을 실행하지 않는다.
