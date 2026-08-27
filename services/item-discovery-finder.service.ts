@@ -56,7 +56,9 @@ export async function getItemDiscoveryFinder(): Promise<Record<string, unknown>>
       providerCoverage: [],
       recommendations: Array.isArray(intelligence.items) ? intelligence.items : [],
       skuRankings: Array.isArray(intelligence.skuRankings) ? intelligence.skuRankings : [],
+      skuVerificationQueue: Array.isArray(intelligence.skuVerificationQueue) ? intelligence.skuVerificationQueue : [],
       skuRankingAudit: record(intelligence.skuRankingAudit),
+      skuDiscoveryLoop: record(intelligence.skuDiscoveryLoop),
       collectorHealth: [],
       completedAt: intelligence.completedAt ?? null,
     });
@@ -161,7 +163,9 @@ export async function getItemDiscoveryFinder(): Promise<Record<string, unknown>>
     providerCoverage,
     recommendations: Array.isArray(intelligence.items) ? intelligence.items : [],
     skuRankings: Array.isArray(intelligence.skuRankings) ? intelligence.skuRankings : [],
+    skuVerificationQueue: Array.isArray(intelligence.skuVerificationQueue) ? intelligence.skuVerificationQueue : [],
     skuRankingAudit: record(intelligence.skuRankingAudit),
+    skuDiscoveryLoop: record(intelligence.skuDiscoveryLoop),
     collectorHealth: collectorResult.data ?? [],
     completedAt: intelligence.completedAt ?? null,
   });

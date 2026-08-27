@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import type { MarketOpportunity } from "./autonomous-intelligence";
 import type { ExternalMarketSignalPacket } from "../../shared/contracts/external-market-signal-packet";
 
-export const SKU_MARKET_RANKING_VERSION = "gonggamline-sku-market-ranking-v1" as const;
+export const SKU_MARKET_RANKING_VERSION = "gonggamline-sku-market-ranking-v2" as const;
 
 export type SkuMatchStatus = "COUPANG_EXACT" | "EXACT_ID" | "BRAND_MODEL" | "TITLE_VARIANT" | "POSSIBLE_MATCH" | "NO_MATCH";
 
@@ -23,6 +23,7 @@ export type SkuMarketProduct = Readonly<{
   observedAt: string | null;
   opportunityScore: number | null;
   confidence: number | null;
+  searchKeywords?: readonly string[];
 }>;
 
 export type SkuSupplierQuote = Readonly<{
@@ -71,14 +72,25 @@ export type SkuMarketRanking = Readonly<{
   ignoredTikTokSignals: number;
   missingEvidence: readonly string[];
   reasons: readonly string[];
+  qualification: "SELL_READY" | "HIGH_CONFIDENCE" | "VERIFY_NEXT";
+  marketMatchScore: number;
+  marketProviders: readonly string[];
+  identityProviders: readonly string[];
+  searchQueries: readonly string[];
 }>;
 
 export type SkuRankingPacket = Readonly<{
   version: typeof SKU_MARKET_RANKING_VERSION;
   asOf: string;
   rankings: readonly SkuMarketRanking[];
+  verificationQueue: readonly SkuMarketRanking[];
+  discoveryQueries: readonly string[];
   audit: Readonly<{
     actualSkuProducts: number;
+    highConfidenceProducts: number;
+    sellReadyProducts: number;
+    verificationQueueProducts: number;
+    scheduledSearchQueries: number;
     exactCoupangMatches: number;
     relevantTikTokSignals: number;
     ignoredTikTokSignals: number;
@@ -98,6 +110,7 @@ const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(va
   ? Object.fromEntries(Object.entries(entry).sort(([left], [right]) => left.localeCompare(right))) : entry)).digest("hex");
 
 const GENERIC_SOCIAL = new Set(["챌린지", "challenge", "드라마", "가수", "아이돌", "music", "dance", "campaign", "캠페인", "챗지피티", "chatgpt"]);
+const GENERIC_PRODUCT = new Set(["상품", "제품", "추천", "인기", "신상", "정품", "무료배송", "국내배송", "판매", "구매", "사용", "리뷰"]);
 const VARIANT_TOKENS = /(?:black|white|red|blue|green|pink|beige|gray|grey|블랙|화이트|검정|흰색|빨강|파랑|그린|핑크|베이지|그레이|\d+\s*(?:개|입|세트|팩|매|ml|l|g|kg|cm|mm))/giu;
 
 function sharedTokenRatio(left: string, right: string): number {
@@ -137,9 +150,42 @@ function matchPacket(product: SkuMarketProduct, packet: ExternalMarketSignalPack
   return "NO_MATCH";
 }
 
-function matchOpportunity(product: SkuMarketProduct, opportunities: readonly MarketOpportunity[]): MarketOpportunity | null {
-  return [...opportunities].map((opportunity) => ({ opportunity, ratio: sharedTokenRatio(product.title, opportunity.concept) }))
-    .filter(({ ratio }) => ratio >= .34).sort((a, b) => b.ratio - a.ratio || b.opportunity.score - a.opportunity.score || a.opportunity.concept.localeCompare(b.opportunity.concept, "ko"))[0]?.opportunity ?? null;
+function matchOpportunity(product: SkuMarketProduct, opportunities: readonly MarketOpportunity[]): Readonly<{ opportunity: MarketOpportunity; score: number }> | null {
+  const evidenceTexts = [product.title, product.category ?? "", ...(product.searchKeywords ?? [])].filter(Boolean);
+  return [...opportunities].map((opportunity) => {
+    const compactConcept = compact(opportunity.concept);
+    const ratio = Math.max(...evidenceTexts.map((value) => {
+      const compactValue = compact(value);
+      if (compactConcept && (compactValue.includes(compactConcept) || compactConcept.includes(compactValue))) return 1;
+      return sharedTokenRatio(value, opportunity.concept);
+    }), 0);
+    return { opportunity, score: clamp(ratio * 100) };
+  }).filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score || b.opportunity.score - a.opportunity.score || a.opportunity.concept.localeCompare(b.opportunity.concept, "ko"))[0] ?? null;
+}
+
+function searchQueries(product: SkuMarketProduct): readonly string[] {
+  const titleTokens = normalize(product.title).split(" ").filter((token) => token.length >= 2 && token.length <= 20 && !GENERIC_PRODUCT.has(token) && !/^\d+$/.test(token));
+  const core = titleTokens.slice(0, 5);
+  const queries = [
+    core.slice(0, 4).join(" "),
+    [normalize(product.brand), ...core.slice(0, 3)].filter(Boolean).join(" "),
+    [normalize(product.category), ...core.slice(0, 2)].filter(Boolean).join(" "),
+  ].map((value) => value.trim()).filter((value) => value.length >= 2 && value.length <= 60);
+  return Object.freeze([...new Set(queries)].slice(0, 3));
+}
+
+function sameIdentity(left: SkuMarketProduct, right: SkuMarketProduct): boolean {
+  if ([left.externalProductId, left.vendorItemId].filter(Boolean).some((id) => [right.externalProductId, right.vendorItemId].filter(Boolean).map(normalize).includes(normalize(id)))) return true;
+  if (!variantsCompatible(left.title, right.title)) return false;
+  const leftBrand = normalize(left.brand); const rightBrand = normalize(right.brand);
+  if (leftBrand && rightBrand && leftBrand !== rightBrand) return false;
+  return sharedTokenRatio(left.title, right.title) >= .72;
+}
+
+function isFresh(product: SkuMarketProduct, asOf: string): boolean {
+  const observed = Date.parse(product.observedAt ?? "");
+  return Number.isFinite(observed) && Date.parse(asOf) - observed <= 14 * 86_400_000;
 }
 
 function relevantTikTok(product: SkuMarketProduct, packet: ExternalMarketSignalPacket, asOf: string): boolean {
@@ -177,10 +223,12 @@ export function buildSkuMarketRankings(input: Readonly<{
   limit?: number;
 }>): SkuRankingPacket {
   const asOf = (input.now ?? new Date()).toISOString();
-  const actualProducts = input.products.filter((product) => product.externalProductId && product.title && (product.url || product.source));
-  const ranked = actualProducts.flatMap((product) => {
-    const opportunity = matchOpportunity(product, input.opportunities);
-    if (!opportunity) return [];
+  const actualProducts = input.products.filter((product, index, all) => product.externalProductId && product.title && (product.url || product.source)
+    && all.findIndex((candidate) => `${candidate.source}:${candidate.externalProductId}` === `${product.source}:${product.externalProductId}`) === index);
+  const evaluated = actualProducts.map((product) => {
+    const opportunityMatch = matchOpportunity(product, input.opportunities);
+    const opportunity = opportunityMatch?.opportunity ?? null;
+    const marketMatchScore = opportunityMatch?.score ?? 0;
     const coupangExact = isCoupang(product.source) || isCoupang(product.url);
     const coupangPackets = input.packets.filter((packet) => packet.source === "COUPANG" || isCoupang(packet.upstreamSource));
     const bestCoupang = coupangExact ? "COUPANG_EXACT" as const : coupangPackets.map((packet) => matchPacket(product, packet))
@@ -197,28 +245,62 @@ export function buildSkuMarketRankings(input: Readonly<{
     const estimatedProfit = quote && price > 0 ? Math.round((price - landed - marketplaceFee - returnAllowance) * 100) / 100 : null;
     const economicsScore = estimatedProfit !== null && price > 0 ? clamp(estimatedProfit / price * 100) : 0;
     const productEvidenceScore = clamp((price > 0 ? 30 : 0) + (finite(product.reviewCount) > 0 ? 25 : 0) + (finite(product.rank) > 0 ? 15 : 0) + (coupangExact ? 30 : bestCoupang === "EXACT_ID" ? 25 : bestCoupang === "BRAND_MODEL" ? 18 : bestCoupang === "TITLE_VARIANT" ? 12 : 0));
+    const identityProviders = [...new Set(actualProducts.filter((candidate) => sameIdentity(product, candidate)).map((candidate) => candidate.source))].sort();
+    const packetIdentityProviders = input.packets.filter((packet) => new Set<SkuMatchStatus>(["EXACT_ID", "BRAND_MODEL", "TITLE_VARIANT"]).has(matchPacket(product, packet)))
+      .flatMap((packet) => [packet.upstreamSource, packet.observedVia]).filter(Boolean);
+    const corroboratingProviders = [...new Set([...identityProviders, ...packetIdentityProviders])].sort();
+    const marketProviders = opportunity?.providers ?? [];
+    const fresh = isFresh(product, asOf);
+    const identityScore = coupangExact || bestCoupang === "EXACT_ID" ? 100
+      : bestCoupang === "BRAND_MODEL" ? 85 : bestCoupang === "TITLE_VARIANT" ? 72
+        : corroboratingProviders.length >= 2 ? 68 : bestCoupang === "POSSIBLE_MATCH" ? 45 : 30;
     const missing = [
+      ...(marketMatchScore < 45 ? ["MARKET_OPPORTUNITY_MATCH"] : []),
+      ...(marketProviders.length < 2 ? ["INDEPENDENT_MARKET_SOURCES"] : []),
+      ...(identityScore < 60 ? ["PRODUCT_IDENTITY_CORROBORATION"] : []),
+      ...(!fresh ? ["FRESH_PRODUCT_OBSERVATION"] : []),
       ...(!coupangExact && !new Set<SkuMatchStatus>(["EXACT_ID", "BRAND_MODEL", "TITLE_VARIANT"]).has(bestCoupang) ? ["COUPANG_IDENTICAL_PRODUCT_MATCH"] : []),
       ...(!quote ? ["FRESH_SUPPLIER_QUOTE"] : []), ...(!skuLogistics ? ["SKU_LOGISTICS_COST"] : []),
       ...(price <= 0 ? ["CURRENT_MARKET_PRICE"] : []), ...(relevant.length === 0 ? ["PRODUCT_RELEVANT_TIKTOK_SIGNAL"] : []),
     ];
-    const base = opportunity.score * .48 + productEvidenceScore * .24 + tiktokScore * .10 + economicsScore * .18;
-    const confidence = clamp(Math.min(100, opportunity.confidence * .55 + productEvidenceScore * .30 + (quote ? 10 : 0) + (relevant.length ? 5 : 0)));
+    const marketScore = opportunity?.score ?? finite(product.opportunityScore);
+    const base = marketScore * .42 + productEvidenceScore * .25 + tiktokScore * .10 + economicsScore * .18 + identityScore * .05;
+    const freshnessScore = fresh ? 100 : 0;
+    const confidence = clamp((opportunity?.confidence ?? 0) * .45 + productEvidenceScore * .25 + identityScore * .20 + freshnessScore * .10);
     const score = clamp(base * (0.72 + confidence / 100 * .28));
-    return [{
+    const marketQualified = marketMatchScore >= 45 && marketProviders.length >= 2 && identityScore >= 60 && fresh && price > 0 && confidence >= 65;
+    const qualification = marketQualified && quote && skuLogistics !== null ? "SELL_READY" : marketQualified ? "HIGH_CONFIDENCE" : "VERIFY_NEXT";
+    const queries = searchQueries(product);
+    return {
       rank: 0, skuKey: `${product.source}:${product.externalProductId}`, marketProductId: product.id, title: product.title,
       source: product.source, sourceUrl: product.url, coupangMatch: bestCoupang,
-      coupangProductId: coupangExact ? product.externalProductId : null, score, confidence, concept: opportunity.concept,
-      marketScore: opportunity.score, productEvidenceScore, tiktokScore, economicsScore, priceKrw: product.price,
+      coupangProductId: coupangExact ? product.externalProductId : null, score, confidence, concept: opportunity?.concept ?? "자동 교차검증 중",
+      marketScore, productEvidenceScore, tiktokScore, economicsScore, priceKrw: product.price,
       reviewCount: product.reviewCount, supplierQuoteId: quote?.id ?? null, supplierQuoteFresh: Boolean(quote),
       skuLogisticsCostKrw: skuLogistics, estimatedProfitKrw: estimatedProfit, relevantTikTokSignals: relevant.length,
       ignoredTikTokSignals: Math.max(0, allTikTok.length - relevant.length), missingEvidence: Object.freeze(missing),
-      reasons: Object.freeze([`${opportunity.concept} 시장점수 ${Math.round(opportunity.score)}`, `실상품 근거 ${Math.round(productEvidenceScore)}`, relevant.length ? `상품 관련 TikTok ${relevant.length}건` : "비상품 TikTok 신호 제외", quote ? `최신 견적 #${quote.id} 결합` : "최신 SKU 견적 미확보"]),
-    } satisfies SkuMarketRanking];
-  }).sort((a, b) => b.score - a.score || b.confidence - a.confidence || a.skuKey.localeCompare(b.skuKey))
-    .filter((item, index, all) => all.findIndex((candidate) => candidate.skuKey === item.skuKey) === index)
-    .slice(0, Math.max(1, Math.min(10, input.limit ?? 10))).map((item, index) => Object.freeze({ ...item, rank: index + 1 }));
-  const audit = Object.freeze({ actualSkuProducts: actualProducts.length, exactCoupangMatches: ranked.filter((item) => item.coupangMatch === "COUPANG_EXACT" || item.coupangMatch === "EXACT_ID").length, relevantTikTokSignals: ranked.reduce((sum, item) => sum + item.relevantTikTokSignals, 0), ignoredTikTokSignals: ranked.reduce((sum, item) => sum + item.ignoredTikTokSignals, 0), freshSupplierQuotes: ranked.filter((item) => item.supplierQuoteFresh).length, skuLogisticsBindings: ranked.filter((item) => item.skuLogisticsCostKrw !== null).length });
-  const payload = { version: SKU_MARKET_RANKING_VERSION, asOf, rankings: ranked, audit } as const;
+      reasons: Object.freeze([opportunity ? `${opportunity.concept} 교차매칭 ${Math.round(marketMatchScore)}` : "시장 상품군 자동 재탐색 필요", `${marketProviders.length}개 독립 시장출처 · 실상품 근거 ${Math.round(productEvidenceScore)}`, relevant.length ? `상품 관련 TikTok ${relevant.length}건` : "비상품 TikTok 신호 제외", quote ? `최신 견적 #${quote.id} 결합` : "최신 SKU 견적 미확보"]),
+      qualification, marketMatchScore, marketProviders: Object.freeze([...marketProviders]), identityProviders: Object.freeze(corroboratingProviders), searchQueries: queries,
+    } satisfies SkuMarketRanking;
+  }).sort((a, b) => b.score - a.score || b.confidence - a.confidence || a.skuKey.localeCompare(b.skuKey));
+  const limit = Math.max(1, Math.min(10, input.limit ?? 10));
+  const rankings = evaluated.filter((item) => item.qualification !== "VERIFY_NEXT").slice(0, limit)
+    .map((item, index) => Object.freeze({ ...item, rank: index + 1 }));
+  const verificationQueue = evaluated.filter((item) => item.qualification === "VERIFY_NEXT").slice(0, 10)
+    .map((item, index) => Object.freeze({ ...item, rank: index + 1 }));
+  const discoveryQueries = Object.freeze([...new Set(verificationQueue.flatMap((item) => item.searchQueries))].slice(0, 12));
+  const audit = Object.freeze({
+    actualSkuProducts: actualProducts.length,
+    highConfidenceProducts: rankings.length,
+    sellReadyProducts: rankings.filter((item) => item.qualification === "SELL_READY").length,
+    verificationQueueProducts: verificationQueue.length,
+    scheduledSearchQueries: discoveryQueries.length,
+    exactCoupangMatches: evaluated.filter((item) => item.coupangMatch === "COUPANG_EXACT" || item.coupangMatch === "EXACT_ID").length,
+    relevantTikTokSignals: evaluated.reduce((sum, item) => sum + item.relevantTikTokSignals, 0),
+    ignoredTikTokSignals: evaluated.reduce((sum, item) => sum + item.ignoredTikTokSignals, 0),
+    freshSupplierQuotes: evaluated.filter((item) => item.supplierQuoteFresh).length,
+    skuLogisticsBindings: evaluated.filter((item) => item.skuLogisticsCostKrw !== null).length,
+  });
+  const payload = { version: SKU_MARKET_RANKING_VERSION, asOf, rankings, verificationQueue, discoveryQueries, audit } as const;
   return Object.freeze({ ...payload, digest: digest(payload) });
 }

@@ -40,14 +40,19 @@ test("actual Coupang SKU combines only product-relevant TikTok and fresh exact q
   assert.equal(result.rankings[0].skuLogisticsCostKrw, 1500);
   assert.equal(result.rankings[0].estimatedProfitKrw, 5613.3);
   assert.deepEqual(result.rankings[0].missingEvidence, []);
+  assert.equal(result.rankings[0].qualification, "SELL_READY");
+  assert.equal(result.verificationQueue.length, 0);
 });
 
 test("option and pack mismatch cannot become an identical product match", () => {
   const packet = createExternalMarketSignalPacket({ source: "COUPANG", upstreamSource: "COUPANG", observedVia: "TENBI", collectedAt: "2026-08-27T00:00:00Z", validUntil: "2026-09-01T00:00:00Z", keywordId: "욕실 선반", productIdentity: { title: "무타공 욕실 정리 선반 화이트 3개", brand: null, model: null }, platformProductId: "different", sourceUrl: "https://coupang.com/x", categoryBinding: null, demand: {}, competition: {}, socialMomentum: {}, priceSnapshot: {}, reviewSnapshot: {}, rankingSnapshot: {}, rocketShare: null, supplierQuoteBinding: null, logisticsCostBinding: null, evidenceConfidence: 50, missingEvidence: [], provenance: {} });
   const nonCoupang = product({ source: "manual", url: "https://tenb.io/item/1" });
   const result = buildSkuMarketRankings({ opportunities: [opportunity()], products: [nonCoupang], packets: [packet], quotes: [], now: new Date("2026-08-27T00:30:00Z") });
-  assert.equal(result.rankings[0].coupangMatch, "NO_MATCH");
-  assert.ok(result.rankings[0].missingEvidence.includes("COUPANG_IDENTICAL_PRODUCT_MATCH"));
+  assert.equal(result.rankings.length, 0);
+  assert.equal(result.verificationQueue[0].coupangMatch, "NO_MATCH");
+  assert.ok(result.verificationQueue[0].missingEvidence.includes("PRODUCT_IDENTITY_CORROBORATION"));
+  assert.ok(result.verificationQueue[0].missingEvidence.includes("COUPANG_IDENTICAL_PRODUCT_MATCH"));
+  assert.ok(result.discoveryQueries.length > 0);
 });
 
 test("stale quote and unrelated KK946 logistics are not copied to another SKU", () => {
@@ -65,4 +70,26 @@ test("same input produces stable ranking and digest", () => {
   assert.deepEqual(first, second);
   assert.equal(first.digest, second.digest);
   assert.deepEqual(first.rankings.map((item) => item.rank), [1, 2]);
+});
+
+test("two independent providers can corroborate a fresh actual SKU without padding", () => {
+  const naver = product({ id: 11, externalProductId: "naver-11", vendorItemId: null, source: "naver_official", url: "https://shopping.naver.com/product/11", searchKeywords: ["욕실 정리 선반"] });
+  const dataForSeo = product({ id: 12, externalProductId: "dfs-12", vendorItemId: null, source: "dataforseo_naver", url: "https://shopping.naver.com/product/12", searchKeywords: ["욕실 정리 선반"] });
+  const result = buildSkuMarketRankings({ opportunities: [opportunity()], products: [naver, dataForSeo], packets: [], quotes: [], now: new Date("2026-08-27T01:00:00Z") });
+  assert.equal(result.rankings.length, 2);
+  assert.ok(result.rankings.every((item) => item.qualification === "HIGH_CONFIDENCE"));
+  assert.ok(result.rankings.every((item) => item.identityProviders.includes("naver_official")));
+  assert.ok(result.rankings.every((item) => item.identityProviders.includes("dataforseo_naver")));
+  assert.equal(result.audit.highConfidenceProducts, 2);
+});
+
+test("unmatched actual products stay in the bounded verification queue", () => {
+  const unmatched = product({ id: 21, externalProductId: "manual-21", vendorItemId: null, source: "tenbi_import", url: "https://tenb.io/item/21", title: "초경량 접이식 여행 파우치 네이비", category: "여행용품", searchKeywords: [] });
+  const result = buildSkuMarketRankings({ opportunities: [opportunity()], products: [unmatched], packets: [], quotes: [], now: new Date("2026-08-27T01:00:00Z") });
+  assert.equal(result.rankings.length, 0);
+  assert.equal(result.verificationQueue.length, 1);
+  assert.equal(result.verificationQueue[0].qualification, "VERIFY_NEXT");
+  assert.ok(result.verificationQueue[0].missingEvidence.includes("MARKET_OPPORTUNITY_MATCH"));
+  assert.ok(result.discoveryQueries.length >= 1);
+  assert.ok(result.discoveryQueries.every((query) => query.length <= 60));
 });
