@@ -20,6 +20,7 @@ export type AdminCsrfPurpose =
   | "market-collection-run"
   | "market-keyword-write"
   | "market-external-import"
+  | "supplier-public-discovery"
   | "listing-creative-dispatch-prepare"
   | "listing-creative-dispatch"
   | "listing-creative-adapter-export"

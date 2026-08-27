@@ -398,7 +398,10 @@ export function ItemSelectionAdmin({ initialKeyword = "" }: Readonly<{ initialKe
                     <h4>필수 게이트</h4>
                     <ul>{item.explainability.hardGates.map((gate) => <li key={gate.gate}>{gate.gate}: {GATE_STATUS_LABELS[gate.status] ?? gate.status} ({gate.reasonCode})</li>)}</ul>
                     {item.explainability.missingFacts.length > 0 ? <p className="item-selection-admin__notice">남은 근거: {item.explainability.missingFacts.join(", ")}</p> : null}
-                    {item.explainability.provider.productUrl ? <p><a href={item.explainability.provider.productUrl} target="_blank" rel="noreferrer">공급처 상품 원문 열기</a></p> : null}
+                    <p className="item-selection-admin__handoff-links">
+                      <Link href={`/sourcing?keyword=${encodeURIComponent(item.explainability.provider.name ?? item.providerItemNumber)}`}>이 상품의 공급처 후보 자동 탐색</Link>
+                      {item.explainability.provider.productUrl ? <a href={item.explainability.provider.productUrl} target="_blank" rel="noreferrer">현재 공급처 상품 원문 열기</a> : null}
+                    </p>
                   </> : <p className="item-selection-admin__notice">상세 근거를 사용할 수 없는 이전 실행입니다.</p>}
                   <details><summary>감사 식별자</summary><code>snapshot {item.snapshotSha256}</code><code>evidence {item.providerEvidenceSha256}</code></details>
                 </DashboardCard>
