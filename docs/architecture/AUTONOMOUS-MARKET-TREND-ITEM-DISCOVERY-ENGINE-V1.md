@@ -451,3 +451,10 @@ and promotes a candidate only when the high-confidence contract converges.
 SKU-specific logistics cost. Therefore high market confidence never implies
 purchase, listing, inventory, or other commerce authority. Provider failure
 leaves the product in the verification queue and does not create filler rows.
+
+The SKU boundary also excludes demo/synthetic provenance, social-video rows,
+and observations without a positive market price before either ranking or
+verification scheduling. Social content remains demand evidence only; it is
+never reclassified as a sellable SKU. This prevents test fixtures and shopping
+short titles from consuming the bounded provider budget or appearing as real
+products.

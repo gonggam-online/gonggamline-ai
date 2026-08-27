@@ -93,3 +93,18 @@ test("unmatched actual products stay in the bounded verification queue", () => {
   assert.ok(result.discoveryQueries.length >= 1);
   assert.ok(result.discoveryQueries.every((query) => query.length <= 60));
 });
+
+test("synthetic, demo, social-content, and price-less rows never enter SKU discovery", () => {
+  const candidates = [
+    product({ id: 31, externalProductId: "demo-31", brand: "공감데모", price: 12_900 }),
+    product({ id: 32, externalProductId: "social-32", source: "youtube_public", url: "https://youtube.com/shorts/32", price: 12_900 }),
+    product({ id: 33, externalProductId: "missing-price-33", price: null }),
+  ];
+  const result = buildSkuMarketRankings({ opportunities: [opportunity()], products: candidates, packets: [], quotes: [], now: new Date("2026-08-27T00:00:00Z") });
+  assert.equal(result.audit.rawProductCandidates, 3);
+  assert.equal(result.audit.excludedNonSkuProducts, 3);
+  assert.equal(result.audit.actualSkuProducts, 0);
+  assert.deepEqual(result.rankings, []);
+  assert.deepEqual(result.verificationQueue, []);
+  assert.deepEqual(result.discoveryQueries, []);
+});
