@@ -19,6 +19,8 @@ test("Engine 1 exposes separate recompute and refresh actions", () => {
   assert.match(page, /\/api\/market\/intelligence/);
   assert.match(page, /자동 교차검증 중/);
   assert.match(page, /부족한 후보로 숫자를 채우지 않습니다/);
+  assert.match(page, /item\.qualification === "SELL_READY" \|\| item\.qualification === "HIGH_CONFIDENCE"/);
+  assert.match(page, /item\.marketProviders\?\.length \?\? 0/);
 });
 
 test("rebuild schedules bounded official-provider SKU verification jobs", () => {
