@@ -1,20 +1,22 @@
 import "server-only";
 
-import { supabase } from "../lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ExternalMarketSignalPacket } from "../shared/contracts/external-market-signal-packet";
 import type { MarketObservationInput } from "../types/market";
 import { saveMarketObservation } from "./market-observation.service";
 
 type RejectedRow = Readonly<{ row: number; reason: string }>;
 
-export async function persistExternalMarketImport(input: Readonly<{
+export type ExternalMarketImportInput = Readonly<{
   source: "tenbi" | "tiktok";
   sourceDigest: string;
   packets: readonly ExternalMarketSignalPacket[];
   observations?: readonly MarketObservationInput[];
   rejected: readonly RejectedRow[];
-}>) {
-  const existing = await supabase
+}>;
+
+export async function persistExternalMarketImport(input: ExternalMarketImportInput, client: SupabaseClient) {
+  const existing = await client
     .from("external_market_import_history")
     .select("id")
     .eq("source_digest", input.sourceDigest)
@@ -38,16 +40,16 @@ export async function persistExternalMarketImport(input: Readonly<{
     output_digest: packet.outputDigest,
   }));
   if (packetRows.length) {
-    const packetWrite = await supabase
+    const packetWrite = await client
       .from("external_market_signal_packets")
       .upsert(packetRows, { onConflict: "output_digest", ignoreDuplicates: true });
     if (packetWrite.error) throw packetWrite.error;
   }
 
   const saved = [];
-  for (const observation of input.observations ?? []) saved.push(await saveMarketObservation(observation));
+  for (const observation of input.observations ?? []) saved.push(await saveMarketObservation(observation, client));
 
-  const history = await supabase.from("external_market_import_history").insert({
+  const history = await client.from("external_market_import_history").insert({
     source: input.source,
     source_digest: input.sourceDigest,
     accepted_count: Math.max(input.packets.length, input.observations?.length ?? 0),

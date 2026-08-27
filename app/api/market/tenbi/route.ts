@@ -3,7 +3,7 @@ import { AdminRequestGuardError, requireAdminRequest, requireExactAdminOrigin, r
 import { adminRateLimiter } from "../../../../lib/auth/admin-rate-limit.server";
 import { AdminCsrfError, verifyAdminCsrfToken } from "../../../../lib/auth/csrf.server";
 import { importTenbiRows, parseTenbiCsv } from "../../../../lib/market/tenbi-import";
-import { persistExternalMarketImport } from "../../../../services/external-market-import.service";
+import { persistGuardedExternalMarketImport } from "../../../../services/external-market-import.repository";
 export async function POST(request: NextRequest) {
   try {
     const context = await requireAdminRequest(request, "read");
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json() as { csv?: string; rows?: Record<string, unknown>[] };
     const result = importTenbiRows(body.rows ?? parseTenbiCsv(body.csv ?? ""));
     if (result.rows.length === 0) return NextResponse.json({ success: false, message: "유효한 Tenbi 행이 없습니다.", rejected: result.rejected }, { status: 400 });
-    const persisted = await persistExternalMarketImport({ source: "tenbi", sourceDigest: result.sourceDigest, packets: result.packets, observations: result.rows, rejected: result.rejected });
+    const persisted = await persistGuardedExternalMarketImport({ source: "tenbi", sourceDigest: result.sourceDigest, packets: result.packets, observations: result.rows, rejected: result.rejected }, context);
     return NextResponse.json({ success: true, sourceDigest: result.sourceDigest, ...persisted, rejected: result.rejected });
   } catch (error) {
     if (error instanceof AdminRequestGuardError || error instanceof AdminCsrfError) return NextResponse.json({ error: { code: error.code } }, { status: error.status });

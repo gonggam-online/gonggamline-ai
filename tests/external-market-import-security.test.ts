@@ -10,6 +10,7 @@ test("external market imports preserve authenticated same-origin CSRF and bounde
   assert.match(route, /requireExactAdminOrigin\(request\)/);
   assert.match(route, /requireJsonContentType\(request\)/);
   assert.match(route, /verifyAdminCsrfToken\(request, "market-external-import", context\)/);
+  assert.match(route, /persistGuardedExternalMarketImport/);
   assert.match(route, /5_000/);
   assert.doesNotMatch(route, /fetch\(|cookies\(|authorization|password/i);
 });
