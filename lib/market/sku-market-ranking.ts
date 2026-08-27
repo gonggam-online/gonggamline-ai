@@ -195,7 +195,7 @@ function isActualSkuProduct(product: SkuMarketProduct): boolean {
   const provenance = normalize(`${product.source} ${product.brand ?? ""} ${product.externalProductId}`);
   if (provenance.includes("demo") || provenance.includes("공감데모") || provenance.includes("synthetic")) return false;
   if (NON_SKU_SOURCE.test(`${product.source} ${product.url ?? ""}`)) return false;
-  if (!product.externalProductId || !product.title || finite(product.price) <= 0) return false;
+  if (!product.externalProductId || !product.title) return false;
   return Boolean(product.vendorItemId || product.url || product.source);
 }
 
