@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { DiscoveryPortfolioCandidate, DiscoveryPortfolioLane } from "../../lib/market/discovery-portfolio-ranking";
+import { ExternalImportPanel } from "../../components/market/external-import-panel";
 
 type Profile = { keyword: string; state: string; score: number; confidence: number; demand: number; momentum: number; shoppingIntent: number; competitionHeadroom: number; providers: string[] };
 type Content = { id: string; platform: string; keyword: string; title: string; sourceUrl: string | null; viewCount: number | null; shoppingScore: number };
@@ -44,6 +45,7 @@ export default function MarketPage() {
     const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" })); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `item-discovery-shortlist-${new Date().toISOString().slice(0, 10)}.csv`; anchor.click(); URL.revokeObjectURL(url);
   }
   return <main className="discovery-command">
+    <ExternalImportPanel />
     <section className="discovery-command__hero"><div><p className="eyebrow">ENGINE 1 · CONTINUOUS MARKET DISCOVERY</p><h1>1. 시장정보·아이템 발굴</h1><p>최신 시장 신호를 읽고, 판매 가능성이 높은 상품군을 점수화해 우선순위와 근거를 한 화면에서 결정합니다.</p></div><div className="discovery-command__hero-actions"><button onClick={() => void load()} disabled={loading}>{loading ? "갱신 중" : "최신 데이터 갱신"}</button><Link href="/admin/item-selection">2. 상품선정·수익성으로 이동</Link></div></section>
     <nav className="discovery-command__steps" aria-label="아이템 발굴 업무 순서"><a href="#trend"><b>1</b><span>시장 트렌드</span><small>무엇이 뜨는가</small></a><a href="#priority"><b>2</b><span>후보 우선순위</span><small>무엇을 팔 것인가</small></a><a href="#detail"><b>3</b><span>상세 근거</span><small>왜 유망한가</small></a><a href="#handoff"><b>4</b><span>검증·소싱</span><small>다음 실행은 무엇인가</small></a></nav>
     {error && <div className="notice error-notice">{error}</div>}

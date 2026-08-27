@@ -141,6 +141,11 @@
       "order": 27,
       "file": "027_autonomous_market_discovery_engine.sql",
       "sha256": "5bbe80f3379b94a06add97ae2228c22422c7607414e727c45642651d75d18f9f"
+    },
+    {
+      "order": 28,
+      "file": "028_external_market_signal_packets.sql",
+      "sha256": "81a6d50d8dee3d432138f38c358f87341089dde50237c56c92ab79106753b4a2"
     }
   ],
   "promotedSources": {
