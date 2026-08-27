@@ -1,8 +1,10 @@
 import { supabase } from "../lib/supabase";
 import { analyzeMarketProduct } from "./market-analysis.service";
 import { collectConfiguredMarketObservations } from "./market-observation-collector.service";
+import type { MarketObservationCollectorResult } from "./market-observation-collector.service";
 import { saveMarketObservation } from "./market-observation.service";
 import type { CollectorRunResult } from "../types/collector";
+import { collectDataForSeoCoupangPrices } from "../lib/market/external-provider-adapters";
 
 function nextRun(intervalMinutes: number) {
   return new Date(Date.now() + intervalMinutes * 60_000).toISOString();
@@ -48,7 +50,7 @@ export async function runDueCollectionJobs(limit = 20, collectorKey?: string, re
   const boundedLimit = Math.max(1, Math.min(10, Math.floor(limit)));
   let dueJobsQuery = supabase
     .from("market_collection_jobs")
-    .select("id,collector_key,market_keyword_id,interval_minutes,market_keywords(keyword)")
+    .select("id,collector_key,market_keyword_id,interval_minutes,market_keywords(keyword,category)")
     .eq("status", "active")
     .lte("next_run_at", now);
   if (collectorKey) dueJobsQuery = dueJobsQuery.eq("collector_key", collectorKey);
@@ -70,6 +72,7 @@ export async function runDueCollectionJobs(limit = 20, collectorKey?: string, re
     if (!claimedJob) continue;
     const keywordRelation = Array.isArray(job.market_keywords) ? job.market_keywords[0] : job.market_keywords;
     const keyword = keywordRelation?.keyword ?? "미지정";
+    const keywordCategory = keywordRelation?.category ?? null;
 
     let result: CollectorRunResult;
     if (job.collector_key === "demo-generator") {
@@ -103,12 +106,27 @@ export async function runDueCollectionJobs(limit = 20, collectorKey?: string, re
       try {
         const isNaver = job.collector_key === "naver-shopping-api";
         const isYoutube = job.collector_key === "youtube-public-signals";
-        const collected = await collectConfiguredMarketObservations({
-          collectorKey: isNaver ? "official-api-adapter" : "public-observation-adapter",
-          provider: isNaver ? "naver_api_hub" : isYoutube ? "youtube_data" : "dataforseo_naver",
-          keyword,
-          allowSignalOnly: isYoutube,
-        });
+        let collected: MarketObservationCollectorResult;
+        if (job.collector_key === "dataforseo-naver-serp" && keywordCategory === "SKU 자동 교차검증") {
+          const coupang = await collectDataForSeoCoupangPrices(keyword);
+          collected = Object.freeze({
+            observations: coupang.observations,
+            discoverySignals: Object.freeze([]),
+            endpoint: "native:dataforseo-coupang-price",
+            source: "coupang_public",
+            provider: "dataforseo_naver",
+            requestCount: coupang.requestCount,
+            quotaUnits: 0,
+            estimatedCostUsd: coupang.estimatedCostUsd,
+          });
+        } else {
+          collected = await collectConfiguredMarketObservations({
+            collectorKey: isNaver ? "official-api-adapter" : "public-observation-adapter",
+            provider: isNaver ? "naver_api_hub" : isYoutube ? "youtube_data" : "dataforseo_naver",
+            keyword,
+            allowSignalOnly: isYoutube,
+          });
+        }
         let saved = 0;
         let analyzed = 0;
         for (const observation of collected.observations) {

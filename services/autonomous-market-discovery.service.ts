@@ -206,6 +206,59 @@ function productMetric(row: ProductRow): Record<string, unknown> {
   return value && typeof value === "object" ? value : {};
 }
 
+function productSearchKeywords(row: ProductRow): readonly string[] {
+  const snapshots = Array.isArray(row.market_snapshots) ? row.market_snapshots : row.market_snapshots ? [row.market_snapshots] : [];
+  return Object.freeze([...new Set(snapshots.flatMap((snapshot) => {
+    const relation = snapshot.market_keywords;
+    const values = Array.isArray(relation) ? relation : relation ? [relation] : [];
+    return values.flatMap((value) => {
+      const keyword = typeof value === "object" && value !== null ? String((value as Record<string, unknown>).keyword ?? "").trim() : "";
+      return keyword.length >= 2 ? [keyword] : [];
+    });
+  }))].sort((left, right) => left.localeCompare(right, "ko")));
+}
+
+async function scheduleSkuDiscoveryQueries(queries: readonly string[], scheduledAt: string): Promise<Readonly<{ scheduled: readonly string[]; skippedFresh: readonly string[] }>> {
+  const supabase = getMarketRuntimeClient();
+  const scheduled: string[] = [];
+  const skippedFresh: string[] = [];
+  const freshnessCutoff = Date.parse(scheduledAt) - 18 * 3_600_000;
+  for (const query of queries.slice(0, 12)) {
+    const existing = await supabase.from("market_keywords").select("id,last_collected_at").eq("keyword", query).maybeSingle();
+    if (existing.error) throw new Error(existing.error.message);
+    const existingCollectedAt = Date.parse(String((existing.data as { last_collected_at?: unknown } | null)?.last_collected_at ?? ""));
+    if (Number.isFinite(existingCollectedAt) && existingCollectedAt >= freshnessCutoff) {
+      skippedFresh.push(query);
+      continue;
+    }
+    const keyword = await supabase.from("market_keywords").upsert({
+      keyword: query,
+      category: "SKU 자동 교차검증",
+      priority: 85,
+      collection_status: "active",
+      collection_interval_minutes: 720,
+      next_collection_at: scheduledAt,
+      discovery_lane: "EXPLORE",
+      updated_at: scheduledAt,
+    }, { onConflict: "keyword" }).select("id").single();
+    if (keyword.error) throw new Error(keyword.error.message);
+    for (const collectorKey of ["naver-shopping-api", "dataforseo-naver-serp", "youtube-public-signals"] as const) {
+      const job = await supabase.from("market_collection_jobs").upsert({
+        collector_key: collectorKey,
+        market_keyword_id: Number(keyword.data.id),
+        status: "active",
+        priority: 85,
+        interval_minutes: collectorKey === "dataforseo-naver-serp" ? 1440 : 720,
+        next_run_at: scheduledAt,
+        updated_at: scheduledAt,
+      }, { onConflict: "collector_key,market_keyword_id" });
+      if (job.error) throw new Error(job.error.message);
+    }
+    scheduled.push(query);
+  }
+  return Object.freeze({ scheduled: Object.freeze(scheduled), skippedFresh: Object.freeze(skippedFresh) });
+}
+
 export async function rebuildAutonomousMarketIntelligence(): Promise<Record<string, unknown>> {
   const supabase = getMarketRuntimeClient();
   const startedAt = new Date().toISOString();
@@ -214,7 +267,7 @@ export async function rebuildAutonomousMarketIntelligence(): Promise<Record<stri
     const [snapshotResult, productResult, packetResult, quoteResult] = await Promise.all([
       supabase.from("market_keyword_signal_snapshots").select("id,concept,provider,observed_at,demand_index,content_velocity,shopping_intent,competition_pressure,price_room,evidence_digest")
         .gte("observed_at", since).order("observed_at", { ascending: true }).limit(5_000),
-      supabase.from("market_products").select("id,external_product_id,vendor_item_id,product_url,title,category,source,brand,market_product_metrics(opportunity_score,confidence),market_snapshots(price,review_count,rank,rocket_type,observed_at)")
+      supabase.from("market_products").select("id,external_product_id,vendor_item_id,product_url,title,category,source,brand,market_product_metrics(opportunity_score,confidence),market_snapshots(price,review_count,rank,rocket_type,observed_at,market_keywords(keyword))")
         .order("last_seen_at", { ascending: false }).limit(500),
       supabase.from("external_market_signal_packets").select("packet").order("collected_at", { ascending: false }).limit(2_000),
       supabase.from("supplier_quotes").select("id,product_name,supplier_sku,unit_cost,moq,domestic_shipping_total,inspection_total,packaging_total,labeling_total,three_pl_inbound_total,three_pl_storage_per_unit,three_pl_outbound_per_unit,coupang_fee_rate,expected_return_rate,valid_until,status,updated_at")
@@ -252,6 +305,7 @@ export async function rebuildAutonomousMarketIntelligence(): Promise<Record<stri
         rocketType: typeof latest.rocket_type === "string" ? latest.rocket_type : null,
         observedAt: typeof latest.observed_at === "string" ? latest.observed_at : null,
         opportunityScore: numberOrNull(metric.opportunity_score), confidence: numberOrNull(metric.confidence),
+        searchKeywords: productSearchKeywords(row),
       };
     });
     const packets = (packetResult.data ?? []).map((row) => (row as { packet: ExternalMarketSignalPacket }).packet).filter(Boolean);
@@ -268,6 +322,7 @@ export async function rebuildAutonomousMarketIntelligence(): Promise<Record<stri
       };
     });
     const skuRanking = buildSkuMarketRankings({ opportunities: trend.opportunities, products: skuProducts, packets, quotes, now: new Date(startedAt), limit: 10 });
+    const skuDiscoveryLoop = await scheduleSkuDiscoveryQueries(skuRanking.discoveryQueries, startedAt);
     const keywordRows = await supabase.from("market_keywords").select("id,keyword,discovery_lane").limit(500);
     if (keywordRows.error) throw new Error(keywordRows.error.message);
     const keywordsByConcept = new Map((keywordRows.data ?? []).map((row) => [normalizeMarketConcept(String((row as { keyword?: unknown }).keyword ?? "")), row as { id: number; keyword: string; discovery_lane: string }]));
@@ -331,8 +386,10 @@ export async function rebuildAutonomousMarketIntelligence(): Promise<Record<stri
       trends: trend.opportunities,
       items,
       skuRankings: skuRanking.rankings,
+      skuVerificationQueue: skuRanking.verificationQueue,
       skuRankingAudit: skuRanking.audit,
       skuRankingDigest: skuRanking.digest,
+      skuDiscoveryLoop,
       discoveredKeywords,
       providerHealth,
     };

@@ -14,7 +14,23 @@ test("market intelligence rebuild is an authenticated CSRF-bound read workflow",
 });
 
 test("Engine 1 exposes separate recompute and refresh actions", () => {
-  assert.match(page, /실제 SKU 상위 10개 재산출/);
+  assert.match(page, /고신뢰 SKU 탐색·재산출/);
   assert.match(page, /저장 결과 새로고침/);
   assert.match(page, /\/api\/market\/intelligence/);
+  assert.match(page, /자동 교차검증 중/);
+  assert.match(page, /부족한 후보로 숫자를 채우지 않습니다/);
+});
+
+test("rebuild schedules bounded official-provider SKU verification jobs", () => {
+  const orchestration = readFileSync("services/autonomous-market-discovery.service.ts", "utf8");
+  assert.match(orchestration, /SKU 자동 교차검증/);
+  assert.match(orchestration, /queries\.slice\(0, 12\)/);
+  assert.match(orchestration, /naver-shopping-api/);
+  assert.match(orchestration, /dataforseo-naver-serp/);
+  assert.match(orchestration, /youtube-public-signals/);
+  assert.match(orchestration, /skuDiscoveryLoop/);
+  const runner = readFileSync("services/market-orchestration.service.ts", "utf8");
+  assert.match(runner, /keywordCategory === "SKU 자동 교차검증"/);
+  assert.match(runner, /collectDataForSeoCoupangPrices\(keyword\)/);
+  assert.match(runner, /source: "coupang_public"/);
 });

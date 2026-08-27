@@ -426,3 +426,28 @@ provider version or quota policy changes.
   <https://docs.dataforseo.com/v3/serp-se-type-live-advanced/>
 - DataForSEO Naver SERP overview:
   <https://docs.dataforseo.com/v3/serp-naver-overview/>
+
+## 2026-08-27 high-confidence SKU discovery amendment
+
+Production observation showed that a strict title-to-concept filter reduced 39
+real product rows to one result. Filling the remaining positions with weak
+matches would make the ranking look complete without improving the selling
+decision, so the runtime now separates two outputs:
+
+- `rankings`: only fresh, priced actual SKUs with a strong market-concept match,
+  at least two independent market-signal providers, and sufficient product
+  identity corroboration;
+- `verificationQueue`: real products that still need evidence, with bounded
+  product-specific search queries and explicit missing-evidence codes.
+
+Each rebuild schedules at most 12 verification queries across Naver API Hub,
+DataForSEO, and YouTube. For keywords categorized as `SKU 자동 교차검증`, the
+DataForSEO lane performs the existing bounded public Coupang-price observation
+instead of storing an unpriced generic search result. The hourly collector
+persists the resulting products and signals, rebuilds the immutable ranking,
+and promotes a candidate only when the high-confidence contract converges.
+
+`SELL_READY` additionally requires a fresh SKU-bound supplier quote and
+SKU-specific logistics cost. Therefore high market confidence never implies
+purchase, listing, inventory, or other commerce authority. Provider failure
+leaves the product in the verification queue and does not create filler rows.
