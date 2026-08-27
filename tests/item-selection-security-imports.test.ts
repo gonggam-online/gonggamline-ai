@@ -25,6 +25,7 @@ test("A08: the service-role constructor has only approved repository importers",
     .map((file) => path.relative(root, file).replaceAll("\\", "/"));
 
   assert.deepEqual(importers, [
+    "services/external-market-import.repository.ts",
     "services/listing-creative-asset.repository.ts",
     "services/listing-creative-adapter-recovery.repository.ts",
     "services/listing-creative-operator.repository.ts",

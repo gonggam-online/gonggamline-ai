@@ -1,16 +1,17 @@
 import { supabase } from "../lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { MarketObservationInput } from "../types/market";
 
-export async function saveMarketObservation(input: MarketObservationInput) {
+export async function saveMarketObservation(input: MarketObservationInput, client: SupabaseClient = supabase) {
   const observedAt = input.observedAt ?? new Date().toISOString();
-  const { data: keyword, error: keywordError } = await supabase
+  const { data: keyword, error: keywordError } = await client
     .from("market_keywords")
     .upsert({ keyword: input.keyword, updated_at: observedAt }, { onConflict: "keyword" })
     .select("id")
     .single();
   if (keywordError) throw new Error(keywordError.message);
 
-  const { data: product, error: productError } = await supabase
+  const { data: product, error: productError } = await client
     .from("market_products")
     .upsert({
       source: input.source,
@@ -29,7 +30,7 @@ export async function saveMarketObservation(input: MarketObservationInput) {
     .single();
   if (productError) throw new Error(productError.message);
 
-  const { error: snapshotError } = await supabase.from("market_snapshots").insert({
+  const { error: snapshotError } = await client.from("market_snapshots").insert({
     market_product_id: product.id,
     market_keyword_id: keyword.id,
     observed_at: observedAt,

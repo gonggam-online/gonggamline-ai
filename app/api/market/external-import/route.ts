@@ -10,7 +10,7 @@ import {
 import { AdminCsrfError, verifyAdminCsrfToken } from "../../../../lib/auth/csrf.server";
 import { parseTenbiCsv, importTenbiRows } from "../../../../lib/market/tenbi-import";
 import { importTikTokRows, parseTikTokCsv } from "../../../../lib/market/tiktok-import";
-import { persistExternalMarketImport } from "../../../../services/external-market-import.service";
+import { persistGuardedExternalMarketImport } from "../../../../services/external-market-import.repository";
 
 type ImportBody = Readonly<{
   source?: "tenbi" | "tiktok";
@@ -35,13 +35,13 @@ export async function POST(request: NextRequest) {
     if (body.source === "tenbi") {
       const result = importTenbiRows(rows);
       if (!result.rows.length) return NextResponse.json({ success: false, message: "유효한 Tenbi 행이 없습니다.", rejected: result.rejected }, { status: 400 });
-      const persisted = await persistExternalMarketImport({ source: "tenbi", sourceDigest: result.sourceDigest, packets: result.packets, observations: result.rows, rejected: result.rejected });
+      const persisted = await persistGuardedExternalMarketImport({ source: "tenbi", sourceDigest: result.sourceDigest, packets: result.packets, observations: result.rows, rejected: result.rejected }, context);
       return NextResponse.json({ success: true, source: body.source, sourceDigest: result.sourceDigest, ...persisted, rejected: result.rejected });
     }
 
     const result = importTikTokRows(rows);
     if (!result.packets.length) return NextResponse.json({ success: false, message: "유효한 TikTok 행이 없습니다.", rejected: result.rejected }, { status: 400 });
-    const persisted = await persistExternalMarketImport({ source: "tiktok", sourceDigest: result.sourceDigest, packets: result.packets, rejected: result.rejected });
+    const persisted = await persistGuardedExternalMarketImport({ source: "tiktok", sourceDigest: result.sourceDigest, packets: result.packets, rejected: result.rejected }, context);
     return NextResponse.json({ success: true, source: body.source, sourceDigest: result.sourceDigest, ...persisted, rejected: result.rejected });
   } catch (error) {
     if (error instanceof AdminRequestGuardError || error instanceof AdminCsrfError) {
