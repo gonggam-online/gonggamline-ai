@@ -11,6 +11,8 @@ import {
   type MarketTrendEvidence,
 } from "../lib/market/autonomous-intelligence";
 import type { MarketObservationCollectorResult } from "./market-observation-collector.service";
+import { buildSkuMarketRankings, type SkuMarketProduct, type SkuSupplierQuote } from "../lib/market/sku-market-ranking";
+import type { ExternalMarketSignalPacket } from "../shared/contracts/external-market-signal-packet";
 
 type SignalLike = Readonly<{
   sourceId: string;
@@ -49,11 +51,15 @@ type SignalSnapshotRow = {
 
 type ProductRow = {
   id: number | string;
+  external_product_id?: string | null;
+  vendor_item_id?: string | null;
+  product_url?: string | null;
   title: string;
   category: string | null;
   source: string | null;
   brand: string | null;
   market_product_metrics?: Record<string, unknown> | Record<string, unknown>[] | null;
+  market_snapshots?: Record<string, unknown> | Record<string, unknown>[] | null;
 };
 
 const numberOrNull = (value: unknown): number | null => {
@@ -205,14 +211,19 @@ export async function rebuildAutonomousMarketIntelligence(): Promise<Record<stri
   const startedAt = new Date().toISOString();
   try {
     const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
-    const [snapshotResult, productResult] = await Promise.all([
+    const [snapshotResult, productResult, packetResult, quoteResult] = await Promise.all([
       supabase.from("market_keyword_signal_snapshots").select("id,concept,provider,observed_at,demand_index,content_velocity,shopping_intent,competition_pressure,price_room,evidence_digest")
         .gte("observed_at", since).order("observed_at", { ascending: true }).limit(5_000),
-      supabase.from("market_products").select("id,title,category,source,brand,market_product_metrics(opportunity_score,confidence)")
+      supabase.from("market_products").select("id,external_product_id,vendor_item_id,product_url,title,category,source,brand,market_product_metrics(opportunity_score,confidence),market_snapshots(price,review_count,rank,rocket_type,observed_at)")
         .order("last_seen_at", { ascending: false }).limit(500),
+      supabase.from("external_market_signal_packets").select("packet").order("collected_at", { ascending: false }).limit(2_000),
+      supabase.from("supplier_quotes").select("id,product_name,supplier_sku,unit_cost,moq,domestic_shipping_total,inspection_total,packaging_total,labeling_total,three_pl_inbound_total,three_pl_storage_per_unit,three_pl_outbound_per_unit,coupang_fee_rate,expected_return_rate,valid_until,status,updated_at")
+        .in("status", ["received", "selected"]).order("updated_at", { ascending: false }).limit(500),
     ]);
     if (snapshotResult.error) throw new Error(snapshotResult.error.message);
     if (productResult.error) throw new Error(productResult.error.message);
+    if (packetResult.error) throw new Error(packetResult.error.message);
+    if (quoteResult.error) throw new Error(quoteResult.error.message);
     const evidence: MarketTrendEvidence[] = ((snapshotResult.data ?? []) as SignalSnapshotRow[]).map((row) => ({
       concept: row.concept,
       provider: row.provider,
@@ -230,6 +241,33 @@ export async function rebuildAutonomousMarketIntelligence(): Promise<Record<stri
       return { id: Number(row.id), title: row.title, category: row.category, source: row.source, brand: row.brand, opportunityScore: numberOrNull(metric.opportunity_score), confidence: numberOrNull(metric.confidence) };
     });
     const items = buildMarketItemRecommendations(trend.opportunities, products, 20);
+    const skuProducts: SkuMarketProduct[] = ((productResult.data ?? []) as ProductRow[]).map((row) => {
+      const metric = productMetric(row);
+      const snapshots = Array.isArray(row.market_snapshots) ? row.market_snapshots : row.market_snapshots ? [row.market_snapshots] : [];
+      const latest = [...snapshots].sort((left, right) => Date.parse(String(right.observed_at ?? "")) - Date.parse(String(left.observed_at ?? "")))[0] ?? {};
+      return {
+        id: Number(row.id), externalProductId: String(row.external_product_id ?? ""), vendorItemId: row.vendor_item_id ?? null,
+        title: row.title, source: row.source ?? "unknown", url: row.product_url ?? null, brand: row.brand ?? null, category: row.category ?? null,
+        price: numberOrNull(latest.price), reviewCount: numberOrNull(latest.review_count), rank: numberOrNull(latest.rank),
+        rocketType: typeof latest.rocket_type === "string" ? latest.rocket_type : null,
+        observedAt: typeof latest.observed_at === "string" ? latest.observed_at : null,
+        opportunityScore: numberOrNull(metric.opportunity_score), confidence: numberOrNull(metric.confidence),
+      };
+    });
+    const packets = (packetResult.data ?? []).map((row) => (row as { packet: ExternalMarketSignalPacket }).packet).filter(Boolean);
+    const quotes: SkuSupplierQuote[] = (quoteResult.data ?? []).map((row) => {
+      const item = row as Record<string, unknown>;
+      return {
+        id: Number(item.id), productName: String(item.product_name ?? ""), supplierSku: typeof item.supplier_sku === "string" ? item.supplier_sku : null,
+        unitCost: numberOrNull(item.unit_cost) ?? 0, moq: Math.max(1, numberOrNull(item.moq) ?? 1), domesticShippingTotal: numberOrNull(item.domestic_shipping_total) ?? 0,
+        inspectionTotal: numberOrNull(item.inspection_total) ?? 0, packagingTotal: numberOrNull(item.packaging_total) ?? 0,
+        labelingTotal: numberOrNull(item.labeling_total) ?? 0, threePlInboundTotal: numberOrNull(item.three_pl_inbound_total) ?? 0,
+        threePlStoragePerUnit: numberOrNull(item.three_pl_storage_per_unit) ?? 0, threePlOutboundPerUnit: numberOrNull(item.three_pl_outbound_per_unit) ?? 0,
+        coupangFeeRate: numberOrNull(item.coupang_fee_rate) ?? 10.8, expectedReturnRate: numberOrNull(item.expected_return_rate) ?? 3,
+        validUntil: typeof item.valid_until === "string" ? item.valid_until : null, status: String(item.status ?? "draft"), updatedAt: String(item.updated_at ?? startedAt),
+      };
+    });
+    const skuRanking = buildSkuMarketRankings({ opportunities: trend.opportunities, products: skuProducts, packets, quotes, now: new Date(startedAt), limit: 10 });
     const keywordRows = await supabase.from("market_keywords").select("id,keyword,discovery_lane").limit(500);
     if (keywordRows.error) throw new Error(keywordRows.error.message);
     const keywordsByConcept = new Map((keywordRows.data ?? []).map((row) => [normalizeMarketConcept(String((row as { keyword?: unknown }).keyword ?? "")), row as { id: number; keyword: string; discovery_lane: string }]));
@@ -292,6 +330,9 @@ export async function rebuildAutonomousMarketIntelligence(): Promise<Record<stri
       },
       trends: trend.opportunities,
       items,
+      skuRankings: skuRanking.rankings,
+      skuRankingAudit: skuRanking.audit,
+      skuRankingDigest: skuRanking.digest,
       discoveredKeywords,
       providerHealth,
     };
