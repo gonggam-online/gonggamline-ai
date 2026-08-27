@@ -109,3 +109,18 @@ test("synthetic, demo, and social-content rows never enter SKU discovery while a
   assert.ok(result.verificationQueue[0].missingEvidence.includes("CURRENT_MARKET_PRICE"));
   assert.ok(result.discoveryQueries.length > 0);
 });
+
+test("cross-provider opportunities seed product discovery when no actual SKU exists yet", () => {
+  const result = buildSkuMarketRankings({ opportunities: [opportunity("틈새 수납")], products: [], packets: [], quotes: [], now: new Date("2026-08-27T00:00:00Z") });
+  assert.equal(result.audit.actualSkuProducts, 0);
+  assert.deepEqual(result.rankings, []);
+  assert.deepEqual(result.verificationQueue, []);
+  assert.deepEqual(result.discoveryQueries, ["틈새 수납", "틈새 수납 인기상품"]);
+  assert.equal(result.audit.scheduledSearchQueries, 2);
+});
+
+test("single-source and low-confidence opportunities do not seed SKU searches", () => {
+  const weak = { ...opportunity("불확실 상품"), providers: ["youtube"], confidence: 40 };
+  const result = buildSkuMarketRankings({ opportunities: [weak], products: [], packets: [], quotes: [], now: new Date("2026-08-27T00:00:00Z") });
+  assert.deepEqual(result.discoveryQueries, []);
+});
