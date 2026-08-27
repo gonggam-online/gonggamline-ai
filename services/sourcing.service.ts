@@ -7,7 +7,7 @@ export async function getSourcingDashboard() {
   const [suppliersResult, quotesResult, singlesResult, bundlesResult] = await Promise.all([
     supabase.from("suppliers").select("*").order("reliability_score", { ascending: false }),
     supabase.from("supplier_quotes").select("*, suppliers(name,channel,reliability_score), sourcing_decisions(*)").order("created_at", { ascending: false }),
-    supabase.from("ai_product_recommendations").select("id,status,ai_score,market_products(title)").in("status", ["approved", "sourcing"]).order("ai_score", { ascending: false }),
+    supabase.from("ai_product_recommendations").select("id,status,ai_score,market_products(title,category,brand)").in("status", ["approved", "sourcing"]).order("ai_score", { ascending: false }),
     supabase.from("ai_bundle_recommendations").select("id,status,ai_score,bundle_name").in("status", ["approved", "sourcing"]).order("ai_score", { ascending: false }),
   ]);
   for (const result of [suppliersResult, quotesResult, singlesResult, bundlesResult]) if (result.error) throw new Error(result.error.message);

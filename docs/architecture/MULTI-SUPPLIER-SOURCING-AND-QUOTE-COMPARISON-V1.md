@@ -2,9 +2,28 @@
 
 ## Status
 
-Proposed Architecture Story. Runtime implementation, database migration,
-external supplier calls, secret configuration, paid requests, purchase writes,
-and production enablement are not authorized by this document.
+Approved read-only candidate-discovery slice implemented on 2026-08-27. The
+implementation uses one bounded, cost-capped DataForSEO Google result request
+to find public product pages on the approved supplier-domain allowlist. It does
+not scrape supplier sites, reuse a login session, persist a quote, or perform a
+purchase write. Verified quote comparison and every procurement action retain
+the separate gates defined below.
+
+Implementation contract:
+
+- version: `gonggamline-public-supplier-candidate-discovery-v1`;
+- Engine 1 and Engine 2 pass the selected product name through
+  `/sourcing?keyword=...`;
+- Engine 3 auto-runs only for that explicit handoff and caches the result in
+  the browser for 30 minutes to avoid repeated paid requests;
+- approved public domains: Dometopia, Domeggook, Ownerclan, Onchannel, and
+  EZmarket B2B;
+- results retain the original supplier product URL, public price/stock hints,
+  identity score, missing fields, and supplier priority;
+- HTTP, credential, allowlist, cost-ceiling, malformed-response, and empty
+  result states fail closed without inventing an offer;
+- no migration, supplier-site credential, order, inventory, listing, or
+  Production commerce write is part of this slice.
 
 ## Objective
 
