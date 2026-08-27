@@ -459,3 +459,12 @@ verification queue so the official providers can fill that exact gap, but it
 cannot enter the high-confidence ranking. This prevents test fixtures and
 shopping-short titles from consuming the provider budget without making a
 temporary price gap terminate discovery.
+
+When the sanitized product store has no eligible SKU yet, the loop must not
+dead-end. It now seeds the first collection cycle from the highest-scoring
+market opportunities that already have at least two independent providers and
+55 confidence. At most six deterministic concept and `인기상품` queries enter
+the same official-provider queue. Naver Shopping and the bounded public
+Coupang-price lane turn those seeds into product observations; subsequent
+rebuilds automatically replace broad seeds with exact product-title queries.
+Single-source or weak opportunities never consume this seed budget.

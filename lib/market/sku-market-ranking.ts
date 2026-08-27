@@ -178,6 +178,17 @@ function searchQueries(product: SkuMarketProduct): readonly string[] {
   return Object.freeze([...new Set(queries)].slice(0, 3));
 }
 
+function opportunitySeedQueries(opportunities: readonly MarketOpportunity[]): readonly string[] {
+  return Object.freeze([...new Set([...opportunities]
+    .filter((opportunity) => opportunity.providers.length >= 2 && opportunity.confidence >= 55)
+    .sort((left, right) => right.score - left.score || right.confidence - left.confidence || left.concept.localeCompare(right.concept, "ko"))
+    .flatMap((opportunity) => {
+      const concept = normalize(opportunity.concept);
+      if (concept.length < 2 || concept.length > 40) return [];
+      return [concept, `${concept} 인기상품`];
+    }))].slice(0, 6));
+}
+
 function sameIdentity(left: SkuMarketProduct, right: SkuMarketProduct): boolean {
   if ([left.externalProductId, left.vendorItemId].filter(Boolean).some((id) => [right.externalProductId, right.vendorItemId].filter(Boolean).map(normalize).includes(normalize(id)))) return true;
   if (!variantsCompatible(left.title, right.title)) return false;
@@ -299,7 +310,12 @@ export function buildSkuMarketRankings(input: Readonly<{
     .map((item, index) => Object.freeze({ ...item, rank: index + 1 }));
   const verificationQueue = evaluated.filter((item) => item.qualification === "VERIFY_NEXT").slice(0, 10)
     .map((item, index) => Object.freeze({ ...item, rank: index + 1 }));
-  const discoveryQueries = Object.freeze([...new Set(verificationQueue.flatMap((item) => item.searchQueries))].slice(0, 12));
+  // The first discovery cycle may legitimately have no persisted product rows yet.
+  // Seed that cycle from the strongest cross-provider market opportunities; later
+  // cycles replace these broad seeds with product-specific verification queries.
+  const verificationQueries = verificationQueue.flatMap((item) => item.searchQueries);
+  const seedQueries = opportunitySeedQueries(input.opportunities);
+  const discoveryQueries = Object.freeze([...new Set([...verificationQueries, ...seedQueries])].slice(0, 12));
   const audit = Object.freeze({
     rawProductCandidates: input.products.length,
     excludedNonSkuProducts: Math.max(0, input.products.length - actualProducts.length),
