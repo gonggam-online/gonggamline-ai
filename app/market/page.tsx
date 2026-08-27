@@ -23,6 +23,7 @@ export default function MarketPage() {
   const [selectedBatch, setSelectedBatch] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [rebuilding, setRebuilding] = useState(false);
   async function load() {
     setLoading(true); setError("");
     try {
@@ -34,6 +35,19 @@ export default function MarketPage() {
     finally { setLoading(false); }
   }
   useEffect(() => { void load(); }, []);
+  async function rebuild() {
+    setRebuilding(true); setError("");
+    try {
+      const csrfResponse = await fetch("/api/admin/auth/csrf?purpose=market-collection-run", { cache: "no-store" });
+      const csrf = await csrfResponse.json();
+      if (!csrfResponse.ok || !csrf.token) throw new Error("재산출 요청 인증에 실패했습니다.");
+      const response = await fetch("/api/market/intelligence", { method: "POST", headers: { "content-type": "application/json", "X-GonggamLine-CSRF": csrf.token }, body: "{}" });
+      const body = await response.json();
+      if (!response.ok || !body.success) throw new Error(body.message || "시장 인텔리전스 재산출에 실패했습니다.");
+      await load();
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "시장 인텔리전스 재산출 오류"); }
+    finally { setRebuilding(false); }
+  }
   const shown = useMemo(() => (data?.portfolio ?? []).filter((item) => lane === "ALL" || item.lane === lane), [data, lane]);
   const selected = data?.portfolio.find((item) => item.id === selectedId) ?? shown[0] ?? null;
   const profiles = (data?.finder.keywordProfiles ?? []).slice().sort((a, b) => b.score - a.score).slice(0, 12);
@@ -47,7 +61,7 @@ export default function MarketPage() {
   }
   return <main className="discovery-command">
     <ExternalImportPanel />
-    <section className="discovery-command__hero"><div><p className="eyebrow">ENGINE 1 · CONTINUOUS MARKET DISCOVERY</p><h1>1. 시장정보·아이템 발굴</h1><p>최신 시장 신호를 읽고, 판매 가능성이 높은 상품군을 점수화해 우선순위와 근거를 한 화면에서 결정합니다.</p></div><div className="discovery-command__hero-actions"><button onClick={() => void load()} disabled={loading}>{loading ? "갱신 중" : "최신 데이터 갱신"}</button><Link href="/admin/item-selection">2. 상품선정·수익성으로 이동</Link></div></section>
+    <section className="discovery-command__hero"><div><p className="eyebrow">ENGINE 1 · CONTINUOUS MARKET DISCOVERY</p><h1>1. 시장정보·아이템 발굴</h1><p>최신 시장 신호를 읽고, 판매 가능성이 높은 상품군을 점수화해 우선순위와 근거를 한 화면에서 결정합니다.</p></div><div className="discovery-command__hero-actions"><button onClick={() => void rebuild()} disabled={rebuilding || loading}>{rebuilding ? "상위 10개 재산출 중" : "실제 SKU 상위 10개 재산출"}</button><button onClick={() => void load()} disabled={loading}>{loading ? "갱신 중" : "저장 결과 새로고침"}</button><Link href="/admin/item-selection">2. 상품선정·수익성으로 이동</Link></div></section>
     <nav className="discovery-command__steps" aria-label="아이템 발굴 업무 순서"><a href="#trend"><b>1</b><span>시장 트렌드</span><small>무엇이 뜨는가</small></a><a href="#priority"><b>2</b><span>후보 우선순위</span><small>무엇을 팔 것인가</small></a><a href="#detail"><b>3</b><span>상세 근거</span><small>왜 유망한가</small></a><a href="#handoff"><b>4</b><span>검증·소싱</span><small>다음 실행은 무엇인가</small></a></nav>
     {error && <div className="notice error-notice">{error}</div>}
     <section className="discovery-command__metrics"><article><span>관찰 키워드</span><strong>{data?.finder.summary.trackedKeywords ?? 0}</strong><small>상시 수집 대상</small></article><article><span>상승 트렌드</span><strong>{data?.finder.summary.actionableCount ?? 0}</strong><small>판매기회 신호</small></article><article><span>판매 후보</span><strong>{data?.portfolio.length ?? 0}</strong><small>중복·데모 제외</small></article><article className="is-accent"><span>대량등록 검토군</span><strong>{scaleReady}</strong><small>후속 검증 우선</small></article><article><span>독립 데이터 출처</span><strong>{data?.finder.summary.providerCount ?? 0}</strong><small>{data?.finder.providerCoverage.join(" · ") || "수집 대기"}</small></article></section>
