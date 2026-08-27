@@ -22,9 +22,10 @@ test("Engine 1 exposes separate recompute and refresh actions", () => {
   assert.match(page, /시장매칭 45점 이상/);
   assert.match(page, /동일 SKU 상품출처 2개 이상/);
   assert.match(page, /14일 이내 관측/);
-  assert.match(page, /리뷰≤후보 중앙값/);
+  assert.match(page, /리뷰≤중앙값/);
+  assert.match(page, /쿠팡 판매기회/);
+  assert.match(page, /비교 가능한 쿠팡 SKU 3개/);
   assert.match(page, /supplier_quotes/);
-  assert.match(page, /upstreamSource 기준/);
   assert.match(page, /저장 결과 새로고침/);
   assert.match(page, /\/api\/market\/intelligence/);
   assert.match(page, /자동 교차검증 중/);

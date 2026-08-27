@@ -53,6 +53,12 @@ type SkuRanking = {
   salesPerReview?: number | null;
   revenuePerReviewKrw?: number | null;
   demandEfficiencyScore?: number;
+  coupangOpportunityScore?: number;
+  salesStrengthScore?: number;
+  reviewHeadroomScore?: number;
+  trendProofScore?: number;
+  evidenceReliabilityScore?: number;
+  comparisonCohortSize?: number;
   opportunityArchetype?:
     "LOW_REVIEW_HIGH_SALES" | "PROVEN_DEMAND" | "INSUFFICIENT_DEMAND_EVIDENCE";
   supplierQuoteFresh: boolean;
@@ -117,6 +123,9 @@ const evidenceLabel = (value: string) =>
     PRODUCT_LEVEL_CORROBORATION: "상품단위 복수출처",
     ESTIMATED_SALES_EVIDENCE: "추정 판매량",
     ESTIMATED_REVENUE_EVIDENCE: "추정 매출",
+    COMPARABLE_COUPANG_COHORT: "비교 가능한 쿠팡 SKU 3개",
+    TIME_SERIES_COVERAGE: "7일 이상 시계열",
+    COUPANG_OPPORTUNITY_SCORE: "쿠팡 판매기회 58점",
   })[value] ?? value;
 const highConfidenceCriteria = [
   {
@@ -142,15 +151,15 @@ const highConfidenceCriteria = [
   },
   {
     order: "04",
-    title: "실제 수요 효율",
-    gate: "월 추정 판매량·매출 근거 필수",
-    sources: "리뷰 증감 · 검색순위 이력 · 품절 이력 · 가격 시계열",
-    role: "리뷰 대비 판매량·매출 효율을 최종 점수에 30% 반영합니다.",
+    title: "쿠팡 판매기회",
+    gate: "판매기회 58점 이상 · 비교 가능한 SKU 3개 이상",
+    sources: "쿠팡 검색순위 · 리뷰 증감 · 품절 이력 · 가격 시계열",
+    role: "판매량·매출·리뷰 포화도·판매효율·시계열 신뢰도를 합산합니다.",
   },
   {
     order: "05",
     title: "저리뷰·고판매 기회",
-    gate: "리뷰≤후보 중앙값 · 판매량/매출≥후보 중앙값",
+    gate: "리뷰≤중앙값 · 판매량/매출≥중앙값 · 수요/효율 각 60점 이상",
     sources: "market_product_metrics · market_snapshots 시계열",
     role: "세 조건을 모두 만족할 때만 저리뷰·고판매 기회로 표시합니다.",
   },
@@ -163,12 +172,12 @@ const highConfidenceCriteria = [
   },
 ] as const;
 const rankingWeights = [
-  ["수요효율", "30%"],
-  ["시장성", "25%"],
-  ["상품근거", "15%"],
-  ["수익성", "15%"],
+  ["쿠팡 판매기회", "38%"],
+  ["시장성", "20%"],
+  ["수익성", "17%"],
+  ["상품근거", "12%"],
   ["상품식별", "10%"],
-  ["TikTok", "5%"],
+  ["TikTok", "3%"],
 ] as const;
 // 고신뢰 목록은 부족한 후보로 숫자를 채우지 않습니다.
 
@@ -498,9 +507,10 @@ export default function MarketPage() {
           <footer>
             <b>승격 원칙</b>
             <span>
-              시장매칭·동일상품·최신성·가격·재고·판매량·매출·신뢰도 65점을 모두
-              통과해야 고신뢰가 됩니다. 같은 원천이 Tenbi 등으로 재전달되면
-              upstreamSource 기준으로 한 번만 가중합니다.
+              시장매칭·동일상품·최신성·가격·재고·판매량·매출·비교 SKU 3개·7일
+              시계열·쿠팡 판매기회 58점·신뢰도 65점을 모두 통과해야 고신뢰가
+              됩니다. 같은 원천이 Tenbi 등으로 재전달되면 upstreamSource
+              기준으로 한 번만 가중합니다.
             </span>
           </footer>
         </div>
@@ -535,6 +545,13 @@ export default function MarketPage() {
                       ? `${item.estimatedMonthlyRevenueKrw.toLocaleString("ko-KR")}원 추정`
                       : "근거 없음"}{" "}
                     · 수요효율 {score(item.demandEfficiencyScore ?? 0)}
+                  </small>
+                  <small>
+                    쿠팡 판매기회 {score(item.coupangOpportunityScore ?? 0)} ·
+                    판매강도 {score(item.salesStrengthScore ?? 0)} · 리뷰
+                    진입여지 {score(item.reviewHeadroomScore ?? 0)} · 시계열
+                    근거 {score(item.trendProofScore ?? 0)} · 비교 SKU{" "}
+                    {item.comparisonCohortSize ?? 0}개
                   </small>
                   <small>
                     {item.supplierQuoteFresh
@@ -590,7 +607,8 @@ export default function MarketPage() {
                   </span>
                 </div>
                 <small>
-                  시장매칭 {score(item.marketMatchScore ?? 0)} · 신뢰도{" "}
+                  시장매칭 {score(item.marketMatchScore ?? 0)} · 쿠팡 판매기회{" "}
+                  {score(item.coupangOpportunityScore ?? 0)} · 신뢰도{" "}
                   {score(item.confidence)} · 부족{" "}
                   {item.missingEvidence
                     .slice(0, 5)
