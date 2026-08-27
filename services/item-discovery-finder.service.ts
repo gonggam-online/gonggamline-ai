@@ -55,6 +55,8 @@ export async function getItemDiscoveryFinder(): Promise<Record<string, unknown>>
       priceObservations: [],
       providerCoverage: [],
       recommendations: Array.isArray(intelligence.items) ? intelligence.items : [],
+      skuRankings: Array.isArray(intelligence.skuRankings) ? intelligence.skuRankings : [],
+      skuRankingAudit: record(intelligence.skuRankingAudit),
       collectorHealth: [],
       completedAt: intelligence.completedAt ?? null,
     });
@@ -158,6 +160,8 @@ export async function getItemDiscoveryFinder(): Promise<Record<string, unknown>>
     priceObservations: prices.slice(0, 100),
     providerCoverage,
     recommendations: Array.isArray(intelligence.items) ? intelligence.items : [],
+    skuRankings: Array.isArray(intelligence.skuRankings) ? intelligence.skuRankings : [],
+    skuRankingAudit: record(intelligence.skuRankingAudit),
     collectorHealth: collectorResult.data ?? [],
     completedAt: intelligence.completedAt ?? null,
   });
