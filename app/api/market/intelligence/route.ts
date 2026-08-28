@@ -5,8 +5,11 @@ import { AdminRequestGuardError, requireAdminRequest, requireExactAdminOrigin, r
 import { adminRateLimiter } from "../../../../lib/auth/admin-rate-limit.server";
 import { AdminCsrfError, verifyAdminCsrfToken } from "../../../../lib/auth/csrf.server";
 import { getLatestAutonomousMarketIntelligence, rebuildAutonomousMarketIntelligence } from "../../../../services/autonomous-market-discovery.service";
+import { runProviderVerificationJobs } from "../../../../services/market-orchestration.service";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function GET() {
   try {
@@ -24,7 +27,14 @@ export async function POST(request: NextRequest) {
     verifyAdminCsrfToken(request, "market-collection-run", context);
     const rate = adminRateLimiter.consume(context.administratorUserId, "mutation");
     if (!rate.allowed) return NextResponse.json({ success: false, message: "요청 한도를 초과했습니다." }, { status: 429 });
-    return NextResponse.json({ success: true, intelligence: await rebuildAutonomousMarketIntelligence() });
+    await rebuildAutonomousMarketIntelligence();
+    const collection = await runProviderVerificationJobs();
+    const intelligence = collection.intelligence ?? await getLatestAutonomousMarketIntelligence();
+    return NextResponse.json({
+      success: true,
+      intelligence,
+      collectionResults: collection.results,
+    });
   } catch (error) {
     if (error instanceof AdminRequestGuardError || error instanceof AdminCsrfError) {
       return NextResponse.json({ success: false, code: error.code }, { status: error.status });

@@ -170,8 +170,17 @@ test("actual Coupang SKU combines only product-relevant TikTok and fresh exact q
   assert.equal(selected.relevantTikTokSignals, 1);
   assert.equal(selected.ignoredTikTokSignals, 1);
   assert.equal(selected.supplierQuoteFresh, true);
+  assert.equal(selected.supplierUnitCostKrw, 4200);
+  assert.equal(selected.supplierInboundCostKrw, 300);
+  assert.equal(selected.inspectionPackagingCostKrw, 250);
+  assert.equal(selected.threePlCostKrw, 950);
   assert.equal(selected.skuLogisticsCostKrw, 1500);
+  assert.equal(selected.landedUnitCostKrw, 5700);
+  assert.equal(selected.coupangFeeKrw, 1393.2);
+  assert.equal(selected.returnAllowanceKrw, 193.5);
   assert.equal(selected.estimatedProfitKrw, 5613.3);
+  assert.equal(selected.estimatedMarginRate, 43.51);
+  assert.equal(selected.profitabilityStatus, "VERIFIED_QUOTE");
   assert.deepEqual(selected.missingEvidence, []);
   assert.equal(selected.qualification, "SELL_READY");
   assert.equal(selected.availability, "IN_STOCK");
@@ -179,6 +188,44 @@ test("actual Coupang SKU combines only product-relevant TikTok and fresh exact q
   assert.ok(selected.coupangOpportunityScore >= 58);
   assert.equal(selected.opportunityArchetype, "LOW_REVIEW_HIGH_SALES");
   assert.equal(result.verificationQueue.length, 1);
+  assert.ok(result.recommendations.some((item) => item.marketProductId === 101));
+});
+
+test("latest recommendations keep a real priced non-sold-out SKU visible without inventing profitability", () => {
+  const result = buildSkuMarketRankings({
+    opportunities: [opportunity()],
+    products: [
+      product({
+        estimatedUnitsBase: null,
+        estimatedUnitsLow: null,
+        estimatedUnitsHigh: null,
+        observationDays: 1,
+        snapshotCount: 1,
+        isSoldOut: null,
+      }),
+    ],
+    packets: [],
+    quotes: [],
+    now: new Date("2026-08-27T01:00:00Z"),
+  });
+  assert.equal(result.rankings.length, 0);
+  assert.equal(result.recommendations.length, 1);
+  assert.equal(result.recommendations[0].qualification, "VERIFY_NEXT");
+  assert.equal(result.recommendations[0].profitabilityStatus, "MISSING_SUPPLIER_QUOTE");
+  assert.equal(result.recommendations[0].estimatedProfitKrw, null);
+  assert.equal(result.audit.recommendationProducts, 1);
+});
+
+test("latest recommendations never pad the list with sold-out products", () => {
+  const result = buildSkuMarketRankings({
+    opportunities: [opportunity()],
+    products: [product({ isSoldOut: true })],
+    packets: [],
+    quotes: [],
+    now: new Date("2026-08-27T01:00:00Z"),
+  });
+  assert.deepEqual(result.recommendations, []);
+  assert.equal(result.audit.recommendationProducts, 0);
 });
 
 test("option and pack mismatch cannot become an identical product match", () => {

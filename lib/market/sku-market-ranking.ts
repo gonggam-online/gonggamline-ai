@@ -4,7 +4,7 @@ import type { MarketOpportunity } from "./autonomous-intelligence";
 import type { ExternalMarketSignalPacket } from "../../shared/contracts/external-market-signal-packet";
 
 export const SKU_MARKET_RANKING_VERSION =
-  "gonggamline-sku-market-ranking-v4" as const;
+  "gonggamline-sku-market-ranking-v5" as const;
 
 export type SkuMatchStatus =
   | "COUPANG_EXACT"
@@ -94,8 +94,21 @@ export type SkuMarketRanking = Readonly<{
     "LOW_REVIEW_HIGH_SALES" | "PROVEN_DEMAND" | "INSUFFICIENT_DEMAND_EVIDENCE";
   supplierQuoteId: number | null;
   supplierQuoteFresh: boolean;
+  supplierUnitCostKrw: number | null;
+  supplierInboundCostKrw: number | null;
+  inspectionPackagingCostKrw: number | null;
+  threePlCostKrw: number | null;
   skuLogisticsCostKrw: number | null;
+  landedUnitCostKrw: number | null;
+  coupangFeeRate: number | null;
+  coupangFeeKrw: number | null;
+  returnAllowanceKrw: number | null;
   estimatedProfitKrw: number | null;
+  estimatedMarginRate: number | null;
+  profitabilityStatus:
+    | "VERIFIED_QUOTE"
+    | "MISSING_SUPPLIER_QUOTE"
+    | "MISSING_MARKET_PRICE";
   relevantTikTokSignals: number;
   ignoredTikTokSignals: number;
   missingEvidence: readonly string[];
@@ -111,6 +124,7 @@ export type SkuRankingPacket = Readonly<{
   version: typeof SKU_MARKET_RANKING_VERSION;
   asOf: string;
   rankings: readonly SkuMarketRanking[];
+  recommendations: readonly SkuMarketRanking[];
   verificationQueue: readonly SkuMarketRanking[];
   discoveryQueries: readonly string[];
   audit: Readonly<{
@@ -119,6 +133,7 @@ export type SkuRankingPacket = Readonly<{
     deduplicatedSkuProducts: number;
     actualSkuProducts: number;
     highConfidenceProducts: number;
+    recommendationProducts: number;
     sellReadyProducts: number;
     verificationQueueProducts: number;
     scheduledSearchQueries: number;
@@ -519,18 +534,84 @@ function quoteFor(
   );
 }
 
-function logisticsCost(quote: SkuSupplierQuote | null): number | null {
-  if (!quote) return null;
-  const perUnit =
+function profitabilityBreakdown(
+  quote: SkuSupplierQuote | null,
+  price: number,
+) {
+  if (!quote)
+    return {
+      supplierUnitCostKrw: null,
+      supplierInboundCostKrw: null,
+      inspectionPackagingCostKrw: null,
+      threePlCostKrw: null,
+      skuLogisticsCostKrw: null,
+      landedUnitCostKrw: null,
+      coupangFeeRate: null,
+      coupangFeeKrw: null,
+      returnAllowanceKrw: null,
+      estimatedProfitKrw: null,
+      estimatedMarginRate: null,
+      profitabilityStatus: "MISSING_SUPPLIER_QUOTE" as const,
+    };
+  const perUnit = (value: number) => value / Math.max(1, quote.moq);
+  const supplierInboundCostKrw = perUnit(quote.domesticShippingTotal);
+  const inspectionPackagingCostKrw = perUnit(
+    quote.inspectionTotal + quote.packagingTotal + quote.labelingTotal,
+  );
+  const threePlCostKrw =
+    perUnit(quote.threePlInboundTotal) +
     quote.threePlStoragePerUnit +
-    quote.threePlOutboundPerUnit +
-    (quote.threePlInboundTotal +
-      quote.inspectionTotal +
-      quote.packagingTotal +
-      quote.labelingTotal +
-      quote.domesticShippingTotal) /
-      Math.max(1, quote.moq);
-  return perUnit > 0 ? Math.round(perUnit * 100) / 100 : null;
+    quote.threePlOutboundPerUnit;
+  const skuLogisticsCostKrw =
+    Math.round(
+      (supplierInboundCostKrw +
+        inspectionPackagingCostKrw +
+        threePlCostKrw) *
+        100,
+    ) / 100;
+  const landedUnitCostKrw =
+    Math.round((quote.unitCost + skuLogisticsCostKrw) * 100) / 100;
+  if (price <= 0)
+    return {
+      supplierUnitCostKrw: quote.unitCost,
+      supplierInboundCostKrw,
+      inspectionPackagingCostKrw,
+      threePlCostKrw,
+      skuLogisticsCostKrw,
+      landedUnitCostKrw,
+      coupangFeeRate: quote.coupangFeeRate,
+      coupangFeeKrw: null,
+      returnAllowanceKrw: null,
+      estimatedProfitKrw: null,
+      estimatedMarginRate: null,
+      profitabilityStatus: "MISSING_MARKET_PRICE" as const,
+    };
+  const coupangFeeKrw = (price * quote.coupangFeeRate) / 100;
+  const returnAllowanceKrw =
+    ((landedUnitCostKrw + skuLogisticsCostKrw * 0.5) *
+      quote.expectedReturnRate) /
+    100;
+  const estimatedProfitKrw =
+    Math.round(
+      (price - landedUnitCostKrw - coupangFeeKrw - returnAllowanceKrw) * 100,
+    ) / 100;
+  return {
+    supplierUnitCostKrw: quote.unitCost,
+    supplierInboundCostKrw:
+      Math.round(supplierInboundCostKrw * 100) / 100,
+    inspectionPackagingCostKrw:
+      Math.round(inspectionPackagingCostKrw * 100) / 100,
+    threePlCostKrw: Math.round(threePlCostKrw * 100) / 100,
+    skuLogisticsCostKrw,
+    landedUnitCostKrw,
+    coupangFeeRate: quote.coupangFeeRate,
+    coupangFeeKrw: Math.round(coupangFeeKrw * 100) / 100,
+    returnAllowanceKrw: Math.round(returnAllowanceKrw * 100) / 100,
+    estimatedProfitKrw,
+    estimatedMarginRate:
+      Math.round(((estimatedProfitKrw / price) * 100) * 100) / 100,
+    profitabilityStatus: "VERIFIED_QUOTE" as const,
+  };
 }
 
 export function buildSkuMarketRankings(
@@ -629,8 +710,9 @@ export function buildSkuMarketRankings(
           )
         : 0;
       const quote = quoteFor(product, input.quotes, asOf);
-      const skuLogistics = logisticsCost(quote);
       const price = finite(product.price, 0);
+      const profitability = profitabilityBreakdown(quote, price);
+      const skuLogistics = profitability.skuLogisticsCostKrw;
       const estimatedUnits =
         finite(product.estimatedUnitsBase) > 0
           ? finite(product.estimatedUnitsBase)
@@ -720,20 +802,7 @@ export function buildSkuMarketRankings(
           : product.isSoldOut === true
             ? ("SOLD_OUT" as const)
             : ("UNKNOWN" as const);
-      const landed = quote ? quote.unitCost + (skuLogistics ?? 0) : 0;
-      const marketplaceFee =
-        quote && price > 0 ? (price * quote.coupangFeeRate) / 100 : 0;
-      const returnAllowance =
-        quote && price > 0
-          ? ((landed + (skuLogistics ?? 0) * 0.5) * quote.expectedReturnRate) /
-            100
-          : 0;
-      const estimatedProfit =
-        quote && price > 0
-          ? Math.round(
-              (price - landed - marketplaceFee - returnAllowance) * 100,
-            ) / 100
-          : null;
+      const estimatedProfit = profitability.estimatedProfitKrw;
       const economicsScore =
         estimatedProfit !== null && price > 0
           ? clamp((estimatedProfit / price) * 100)
@@ -890,8 +959,7 @@ export function buildSkuMarketRankings(
         opportunityArchetype,
         supplierQuoteId: quote?.id ?? null,
         supplierQuoteFresh: Boolean(quote),
-        skuLogisticsCostKrw: skuLogistics,
-        estimatedProfitKrw: estimatedProfit,
+        ...profitability,
         relevantTikTokSignals: relevant.length,
         ignoredTikTokSignals: Math.max(0, allTikTok.length - relevant.length),
         missingEvidence: Object.freeze(missing),
@@ -934,6 +1002,20 @@ export function buildSkuMarketRankings(
     .filter((item) => item.qualification !== "VERIFY_NEXT")
     .slice(0, limit)
     .map((item, index) => Object.freeze({ ...item, rank: index + 1 }));
+  const recommendations = evaluated
+    .filter(
+      (item) =>
+        item.availability !== "SOLD_OUT" &&
+        Boolean(item.sourceUrl) &&
+        (item.priceKrw ?? 0) > 0 &&
+        item.confidence >= 35 &&
+        item.productEvidenceScore >= 35 &&
+        (item.marketMatchScore >= 25 ||
+          item.coupangMatch === "COUPANG_EXACT" ||
+          item.coupangMatch === "EXACT_ID"),
+    )
+    .slice(0, limit)
+    .map((item, index) => Object.freeze({ ...item, rank: index + 1 }));
   const verificationQueue = evaluated
     .filter((item) => item.qualification === "VERIFY_NEXT")
     .slice(0, 10)
@@ -960,6 +1042,7 @@ export function buildSkuMarketRankings(
     ),
     actualSkuProducts: actualProducts.length,
     highConfidenceProducts: rankings.length,
+    recommendationProducts: recommendations.length,
     sellReadyProducts: rankings.filter(
       (item) => item.qualification === "SELL_READY",
     ).length,
@@ -1000,6 +1083,7 @@ export function buildSkuMarketRankings(
     version: SKU_MARKET_RANKING_VERSION,
     asOf,
     rankings,
+    recommendations,
     verificationQueue,
     discoveryQueries,
     audit,

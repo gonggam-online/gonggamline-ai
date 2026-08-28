@@ -390,6 +390,7 @@ export async function rebuildAutonomousMarketIntelligence(): Promise<Record<stri
       trends: trend.opportunities,
       items,
       skuRankings: skuRanking.rankings,
+      skuRecommendations: skuRanking.recommendations,
       skuVerificationQueue: skuRanking.verificationQueue,
       skuRankingAudit: skuRanking.audit,
       skuRankingDigest: skuRanking.digest,
