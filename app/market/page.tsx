@@ -62,8 +62,21 @@ type SkuRanking = {
   opportunityArchetype?:
     "LOW_REVIEW_HIGH_SALES" | "PROVEN_DEMAND" | "INSUFFICIENT_DEMAND_EVIDENCE";
   supplierQuoteFresh: boolean;
+  supplierUnitCostKrw?: number | null;
+  supplierInboundCostKrw?: number | null;
+  inspectionPackagingCostKrw?: number | null;
+  threePlCostKrw?: number | null;
   skuLogisticsCostKrw: number | null;
+  landedUnitCostKrw?: number | null;
+  coupangFeeRate?: number | null;
+  coupangFeeKrw?: number | null;
+  returnAllowanceKrw?: number | null;
   estimatedProfitKrw: number | null;
+  estimatedMarginRate?: number | null;
+  profitabilityStatus?:
+    | "VERIFIED_QUOTE"
+    | "MISSING_SUPPLIER_QUOTE"
+    | "MISSING_MARKET_PRICE";
   relevantTikTokSignals: number;
   ignoredTikTokSignals: number;
   missingEvidence: string[];
@@ -86,6 +99,7 @@ type Finder = {
   providerCoverage: string[];
   collectorHealth: Collector[];
   skuRankings: SkuRanking[];
+  skuRecommendations: SkuRanking[];
   skuVerificationQueue: SkuRanking[];
   skuRankingAudit: Record<string, number>;
   skuDiscoveryLoop: { scheduled?: string[]; skippedFresh?: string[] };
@@ -127,6 +141,16 @@ const evidenceLabel = (value: string) =>
     TIME_SERIES_COVERAGE: "7일 이상 시계열",
     COUPANG_OPPORTUNITY_SCORE: "쿠팡 판매기회 58점",
   })[value] ?? value;
+const qualificationLabel = (value: SkuRanking["qualification"]) =>
+  value === "SELL_READY"
+    ? "판매 검토"
+    : value === "HIGH_CONFIDENCE"
+      ? "소싱 검증"
+      : "발굴 추천·추가검증";
+const won = (value: number | null | undefined) =>
+  value === null || value === undefined
+    ? "미확정"
+    : `${Math.round(value).toLocaleString("ko-KR")}원`;
 const highConfidenceCriteria = [
   {
     order: "01",
@@ -189,6 +213,7 @@ export default function MarketPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [rebuilding, setRebuilding] = useState(false);
+  const [collectionSummary, setCollectionSummary] = useState("");
   async function load() {
     setLoading(true);
     setError("");
@@ -219,6 +244,7 @@ export default function MarketPage() {
   async function rebuild() {
     setRebuilding(true);
     setError("");
+    setCollectionSummary("");
     try {
       const csrfResponse = await fetch(
         "/api/admin/auth/csrf?purpose=market-collection-run",
@@ -240,6 +266,18 @@ export default function MarketPage() {
         throw new Error(
           body.message || "시장 인텔리전스 재산출에 실패했습니다.",
         );
+      const results = Array.isArray(body.collectionResults)
+        ? body.collectionResults
+        : [];
+      const saved = results.reduce(
+        (sum: number, result: { saved?: number }) => sum + (result.saved ?? 0),
+        0,
+      );
+      setCollectionSummary(
+        results.length
+          ? `공식 공급자 ${results.length}개 수집 작업 · 신규 관측 ${saved}건 반영`
+          : "현재 시점에 실행할 수집 작업이 없어 저장된 최신 증거로 재산출했습니다.",
+      );
       await load();
     } catch (cause) {
       setError(
@@ -262,11 +300,7 @@ export default function MarketPage() {
     .slice()
     .sort((a, b) => b.score - a.score)
     .slice(0, 12);
-  const highConfidenceRankings = (data?.finder.skuRankings ?? []).filter(
-    (item) =>
-      item.qualification === "SELL_READY" ||
-      item.qualification === "HIGH_CONFIDENCE",
-  );
+  const latestRecommendations = data?.finder.skuRecommendations ?? [];
   const verificationQueue = data?.finder.skuVerificationQueue ?? [];
   const scaleReady =
     data?.portfolio.filter((item) => item.lane === "SCALE_READY").length ?? 0;
@@ -327,13 +361,18 @@ export default function MarketPage() {
             onClick={() => void rebuild()}
             disabled={rebuilding || loading}
           >
-            {rebuilding ? "고신뢰 SKU 탐색 중" : "고신뢰 SKU 탐색·재산출"}
+            {rebuilding ? "최신 상품 발굴 중" : "최신 상품 발굴"}
           </button>
           <button onClick={() => void load()} disabled={loading}>
             {loading ? "갱신 중" : "저장 결과 새로고침"}
           </button>
           <Link href="/admin/item-selection">2. 상품선정·수익성으로 이동</Link>
         </div>
+        {collectionSummary && (
+          <p className="discovery-command__collection-summary">
+            {collectionSummary}
+          </p>
+        )}
       </section>
       <nav
         className="discovery-command__steps"
@@ -344,20 +383,20 @@ export default function MarketPage() {
           <span>시장 트렌드</span>
           <small>무엇이 뜨는가</small>
         </a>
-        <a href="#priority">
+        <a href="#sku-ranking">
           <b>2</b>
-          <span>후보 우선순위</span>
+          <span>최신 추천상품</span>
+          <small>발굴·기본 수익성</small>
+        </a>
+        <a href="#priority">
+          <b>3</b>
+          <span>후보 포트폴리오</span>
           <small>무엇을 팔 것인가</small>
         </a>
         <a href="#detail">
-          <b>3</b>
-          <span>상세 근거</span>
-          <small>왜 유망한가</small>
-        </a>
-        <a href="#handoff">
           <b>4</b>
-          <span>검증·소싱</span>
-          <small>다음 실행은 무엇인가</small>
+          <span>상세 근거·소싱</span>
+          <small>왜 유망한가</small>
         </a>
       </nav>
       {error && <div className="notice error-notice">{error}</div>}
@@ -451,11 +490,12 @@ export default function MarketPage() {
       <section className="discovery-command__panel" id="sku-ranking">
         <header>
           <div>
-            <p className="eyebrow">HIGH-CONFIDENCE SKU · TOP 10</p>
-            <h2>지금 판매 검토할 고신뢰 실상품</h2>
+            <p className="eyebrow">LATEST RECOMMENDED SKU · TOP 10</p>
+            <h2>최신 추천상품과 기본 수익성</h2>
             <span>
-              현재 재고·상품단위 복수출처·추정 판매량과 매출까지 확인된 SKU만
-              표시합니다. 품절·재고 미확인 상품은 자동 검증군으로 내립니다.
+              품절은 제외하고 실제 상품·현재 관측가·시장근거가 있는 후보를
+              우선순위로 보여줍니다. 엄격한 고신뢰 기준 미달 후보는 ‘추가검증’으로
+              구분하며 구매·등록 승인을 뜻하지 않습니다.
             </span>
           </div>
           <small>
@@ -463,6 +503,7 @@ export default function MarketPage() {
             재고있음 {data?.finder.skuRankingAudit?.inStockProducts ?? 0} · 품절{" "}
             {data?.finder.skuRankingAudit?.soldOutProducts ?? 0} · 고신뢰{" "}
             {data?.finder.skuRankingAudit?.highConfidenceProducts ?? 0} ·
+            추천 {data?.finder.skuRankingAudit?.recommendationProducts ?? 0} ·
             저리뷰·고매출{" "}
             {data?.finder.skuRankingAudit?.lowReviewHighSalesProducts ?? 0}
           </small>
@@ -515,16 +556,14 @@ export default function MarketPage() {
           </footer>
         </div>
         <div className="sku-ranking-table">
-          {highConfidenceRankings.length ? (
-            highConfidenceRankings.map((item) => (
+          {latestRecommendations.length ? (
+            latestRecommendations.map((item) => (
               <article key={item.skuKey}>
                 <b>#{item.rank}</b>
                 <div>
                   <h3>{item.title}</h3>
                   <p>
-                    {item.qualification === "SELL_READY"
-                      ? "판매준비 후보"
-                      : "고신뢰 시장 후보"}{" "}
+                    {qualificationLabel(item.qualification)}{" "}
                     · {availabilityLabel(item.availability)} ·{" "}
                     {item.opportunityArchetype === "LOW_REVIEW_HIGH_SALES"
                       ? "저리뷰·고판매 기회"
@@ -553,11 +592,29 @@ export default function MarketPage() {
                     근거 {score(item.trendProofScore ?? 0)} · 비교 SKU{" "}
                     {item.comparisonCohortSize ?? 0}개
                   </small>
-                  <small>
-                    {item.supplierQuoteFresh
-                      ? `최신 견적 결합${item.skuLogisticsCostKrw !== null ? ` / SKU 물류 ${item.skuLogisticsCostKrw.toLocaleString("ko-KR")}원` : ""}${item.estimatedProfitKrw !== null ? ` / 예상 순익 ${item.estimatedProfitKrw.toLocaleString("ko-KR")}원` : ""}`
-                      : "견적·물류 검증 대기"}
-                  </small>
+                  <div className="sku-profitability" aria-label="기본 수익성 계산">
+                    <span><b>쿠팡 관측 판매가</b>{won(item.priceKrw)}</span>
+                    <span><b>공급 원가</b>{won(item.supplierUnitCostKrw)}</span>
+                    <span><b>공급처 배송</b>{won(item.supplierInboundCostKrw)}</span>
+                    <span><b>검수·포장·라벨</b>{won(item.inspectionPackagingCostKrw)}</span>
+                    <span><b>3PL 입고·보관·출고</b>{won(item.threePlCostKrw)}</span>
+                    <span><b>쿠팡 수수료</b>{won(item.coupangFeeKrw)}</span>
+                    <span><b>반품 충당</b>{won(item.returnAllowanceKrw)}</span>
+                    <span className="is-profit">
+                      <b>예상 단위 순이익</b>
+                      {won(item.estimatedProfitKrw)}
+                      {item.estimatedMarginRate !== null &&
+                      item.estimatedMarginRate !== undefined
+                        ? ` (${item.estimatedMarginRate.toFixed(1)}%)`
+                        : ""}
+                    </span>
+                  </div>
+                  {item.profitabilityStatus !== "VERIFIED_QUOTE" && (
+                    <p className="sku-profitability__notice">
+                      기본 수익성 미확정: 최신 공급견적·SKU별 물류비를 확보하면
+                      자동 계산합니다. 현재 관측 판매가만으로 수익을 추정하지 않습니다.
+                    </p>
+                  )}
                   {item.missingEvidence.length > 0 && (
                     <p className="sku-ranking-table__missing">
                       후속 확인:{" "}
@@ -570,21 +627,26 @@ export default function MarketPage() {
                   <small>신뢰도 {score(item.confidence)}</small>
                 </strong>
                 {item.sourceUrl && (
-                  <a href={item.sourceUrl} target="_blank" rel="noreferrer">
-                    원문 확인
-                  </a>
+                  <div className="sku-ranking-table__actions">
+                    <a href={item.sourceUrl} target="_blank" rel="noreferrer">
+                      원문 확인
+                    </a>
+                    <Link href={`/sourcing?keyword=${encodeURIComponent(item.title)}`}>
+                      공급처 찾기
+                    </Link>
+                  </div>
                 )}
               </article>
             ))
           ) : (
             <div className="empty-copy">
               <b>
-                현재 ‘재고 있음 + 복수 상품출처 + 판매량·매출 근거’를 모두
-                통과한 SKU가 없습니다.
+                현재 품절이 아니면서 실제 상품·가격·시장근거를 갖춘 추천 SKU가
+                없습니다.
               </b>
               <p>
-                품절 상품이나 근거 없는 후보로 순위를 채우지 않고, 아래 SKU의
-                재고와 상품단위 수요를 자동 재검증합니다.
+                저장된 후보를 억지로 채우지 않고, 아래 SKU의 재고와 상품단위
+                수요를 자동 재검증합니다.
               </p>
             </div>
           )}

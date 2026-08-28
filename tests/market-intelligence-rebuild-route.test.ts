@@ -14,10 +14,12 @@ test("market intelligence rebuild is an authenticated CSRF-bound read workflow",
     /verifyAdminCsrfToken\(request, "market-collection-run", context\)/,
   );
   assert.match(source, /rebuildAutonomousMarketIntelligence\(\)/);
+  assert.match(source, /runProviderVerificationJobs\(\)/);
+  assert.match(source, /collectionResults/);
 });
 
-test("Engine 1 exposes separate recompute and refresh actions", () => {
-  assert.match(page, /고신뢰 SKU 탐색·재산출/);
+test("Engine 1 exposes bounded live discovery, tiered recommendations and profitability", () => {
+  assert.match(page, /최신 상품 발굴/);
   assert.match(page, /고신뢰 선정 기준과 원천소스/);
   assert.match(page, /시장매칭 45점 이상/);
   assert.match(page, /동일 SKU 상품출처 2개 이상/);
@@ -30,10 +32,13 @@ test("Engine 1 exposes separate recompute and refresh actions", () => {
   assert.match(page, /\/api\/market\/intelligence/);
   assert.match(page, /자동 교차검증 중/);
   assert.match(page, /부족한 후보로 숫자를 채우지 않습니다/);
-  assert.match(
-    page,
-    /item\.qualification === "SELL_READY" \|\|\s+item\.qualification === "HIGH_CONFIDENCE"/,
-  );
+  assert.match(page, /skuRecommendations/);
+  assert.match(page, /발굴 추천·추가검증/);
+  assert.match(page, /쿠팡 관측 판매가/);
+  assert.match(page, /공급 원가/);
+  assert.match(page, /3PL 입고·보관·출고/);
+  assert.match(page, /예상 단위 순이익/);
+  assert.match(page, /현재 관측 판매가만으로 수익을 추정하지 않습니다/);
   assert.match(page, /item\.identityProviders\?\.length \?\? 0/);
   assert.match(page, /item\.estimatedMonthlyRevenueKrw/);
   assert.match(page, /availabilityLabel\(item\.availability\)/);
